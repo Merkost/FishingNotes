@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.joesemper.fishing.model.weather.entity.WeatherState
 import kotlinx.coroutines.*
 
-class WeatherViewModel<T : WeatherState>(private val interactor: IWeatherInteractor<WeatherState>) : ViewModel() {
+class WeatherViewModel(private val interactor: IWeatherInteractor<WeatherState>) : ViewModel() {
 
     private val _mutableLiveData: MutableLiveData<WeatherState> = MutableLiveData()
     private val liveDataForViewToObserve: LiveData<WeatherState> = _mutableLiveData
@@ -19,6 +19,7 @@ class WeatherViewModel<T : WeatherState>(private val interactor: IWeatherInterac
             })
 
     fun subscribe(): LiveData<WeatherState> {
+        getData(-33.852f, 151.211f)
         return liveDataForViewToObserve
     }
 

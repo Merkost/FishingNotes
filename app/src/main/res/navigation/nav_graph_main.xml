@@ -13,11 +13,18 @@
         <action
             android:id="@+id/action_mapFragment_to_weatherFragment"
             app:destination="@id/weatherFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_groupsFragment"
+            app:destination="@id/groupsFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/weatherFragment"
         android:name="com.joesemper.fishing.view.weather.WeatherFragment"
         android:label="WeatherFragment" />
+    <fragment
+        android:id="@+id/groupsFragment"
+        android:name="com.joesemper.fishing.view.groups.GroupsFragment"
+        android:label="GroupsFragment" />
 
 </navigation>

@@ -13,7 +13,7 @@ interface WeatherApiService {
             @Query("units") units: String? = "metric",
             @Query("exclude") exclude: String? = "minutely,current,alerts",
             @Query("lang") lang: String? = "ru",
-            @Query("appid") appid: String = "33da5092c9df576f30d4bfe2788922a4"
+            @Query("appid") appid: String = "b2f26c3643e28be455da04e60ed90e16"
     ): WeatherForecast
 
 }
