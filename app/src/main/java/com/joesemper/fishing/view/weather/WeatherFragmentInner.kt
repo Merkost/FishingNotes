@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.google.firebase.auth.FirebaseAuth
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.weather.entity.Daily
 
@@ -42,6 +43,8 @@ class WeatherFragmentInner: Fragment() {
 
     private fun renderData() {
         val weather = arguments?.getParcelable(WEATHER_ARG) as Daily? ?: return
+
+        val user = FirebaseAuth.getInstance().currentUser
 
         iv_weather_icon_main.setImageResource(getWeatherIconByName(weather.weather.first().icon))
         tv_weather_description.text = weather.weather.first().description

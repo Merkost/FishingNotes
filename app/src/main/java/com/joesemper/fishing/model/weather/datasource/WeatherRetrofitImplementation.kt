@@ -7,7 +7,7 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class WeatherRetrofitImplementation : WeatherDataSource<WeatherForecast> {
+class WeatherRetrofitImplementation : WeatherRepository {
 
     companion object {
         private const val BASE_WEATHER_URL = "https://api.openweathermap.org/data/2.5/"
