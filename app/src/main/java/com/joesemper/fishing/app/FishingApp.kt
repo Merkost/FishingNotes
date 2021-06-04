@@ -2,6 +2,7 @@ package com.joesemper.fishing.app
 
 import android.app.Application
 import com.joesemper.fishing.di.appModule
+import com.joesemper.fishing.di.groupsScreen
 import com.joesemper.fishing.di.splashScreen
 import com.joesemper.fishing.di.weatherScreen
 import org.koin.android.ext.koin.androidContext
@@ -16,7 +17,7 @@ class FishingApp : Application() {
         startKoin{
             androidLogger()
             androidContext(this@FishingApp)
-            modules(listOf(appModule, splashScreen, weatherScreen))
+            modules(listOf(appModule, splashScreen, weatherScreen, groupsScreen))
         }
     }
 }

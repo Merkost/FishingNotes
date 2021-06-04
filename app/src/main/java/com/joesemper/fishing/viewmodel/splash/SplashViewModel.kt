@@ -3,13 +3,12 @@ package com.joesemper.fishing.viewmodel.splash
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.joesemper.fishing.model.splash.datasource.UsersRepository
-import com.joesemper.fishing.model.splash.entity.SplashState
+import com.joesemper.fishing.model.repository.user.UsersRepository
 import kotlinx.coroutines.*
 
 class SplashViewModel(private val repository: UsersRepository) : ViewModel() {
 
-    private val mutableLiveData: MutableLiveData<SplashState> = MutableLiveData()
+    private val mutableLiveData: MutableLiveData<SplashViewState> = MutableLiveData()
 
     private val viewModelCoroutineScope = CoroutineScope(
         Dispatchers.Main
@@ -18,7 +17,7 @@ class SplashViewModel(private val repository: UsersRepository) : ViewModel() {
             handleError(throwable)
         })
 
-    fun subscribe(): LiveData<SplashState> = mutableLiveData
+    fun subscribe(): LiveData<SplashViewState> = mutableLiveData
 
     init {
         getCurrentUser()
@@ -30,12 +29,13 @@ class SplashViewModel(private val repository: UsersRepository) : ViewModel() {
         viewModelCoroutineScope.launch {
             val user = repository.getCurrentUser()
 
-            mutableLiveData.value = if (user != null) {
-                SplashState.Authorised
-            } else {
-                SplashState.NotAuthorised
+                mutableLiveData.value = if (user != null) {
+                    SplashViewState.Authorised
+                } else {
+                    SplashViewState.NotAuthorised
+                }
             }
-        }
+
     }
 
     override fun onCleared() {
@@ -44,7 +44,7 @@ class SplashViewModel(private val repository: UsersRepository) : ViewModel() {
     }
 
     private fun handleError(error: Throwable) {
-        mutableLiveData.postValue(SplashState.Error(error))
+        mutableLiveData.postValue(SplashViewState.Error(error))
     }
 
     private fun cancelJob() {

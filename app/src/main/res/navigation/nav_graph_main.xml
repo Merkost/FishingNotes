@@ -8,7 +8,7 @@
 
     <fragment
         android:id="@+id/mapFragment"
-        android:name="com.joesemper.fishing.view.map.MapFragment"
+        android:name="com.joesemper.fishing.view.fragments.MapFragment"
         android:label="MapFragment" >
         <action
             android:id="@+id/action_mapFragment_to_weatherFragment"
@@ -20,11 +20,11 @@
 
     <fragment
         android:id="@+id/weatherFragment"
-        android:name="com.joesemper.fishing.view.weather.WeatherFragment"
+        android:name="com.joesemper.fishing.view.fragments.WeatherFragment"
         android:label="WeatherFragment" />
     <fragment
         android:id="@+id/groupsFragment"
-        android:name="com.joesemper.fishing.view.groups.GroupsFragment"
+        android:name="com.joesemper.fishing.view.fragments.GroupsFragment"
         android:label="GroupsFragment" />
 
 </navigation>

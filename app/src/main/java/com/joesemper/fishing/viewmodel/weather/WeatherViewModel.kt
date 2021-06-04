@@ -3,13 +3,12 @@ package com.joesemper.fishing.viewmodel.weather
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.joesemper.fishing.model.weather.datasource.WeatherRepository
-import com.joesemper.fishing.model.weather.entity.WeatherState
+import com.joesemper.fishing.model.repository.weather.WeatherRepository
 import kotlinx.coroutines.*
 
 class WeatherViewModel(private val repository: WeatherRepository) : ViewModel() {
 
-    private var liveDataForViewToObserve: MutableLiveData<WeatherState> = MutableLiveData()
+    private var liveDataForViewToObserve: MutableLiveData<WeatherViewState> = MutableLiveData()
 
     private val viewModelCoroutineScope = CoroutineScope(
         Dispatchers.Main
@@ -22,17 +21,17 @@ class WeatherViewModel(private val repository: WeatherRepository) : ViewModel() 
         getData(-33.852f, 151.211f)
     }
 
-    fun subscribe(): LiveData<WeatherState> = liveDataForViewToObserve
+    fun subscribe(): LiveData<WeatherViewState> = liveDataForViewToObserve
 
     fun getData(lat: Float, lon: Float) {
-        liveDataForViewToObserve.value = WeatherState.Loading(null)
+        liveDataForViewToObserve.value = WeatherViewState.Loading(null)
         cancelJob()
         viewModelCoroutineScope.launch { loadForecast(lat, lon) }
     }
 
     private suspend fun loadForecast(lat: Float, lon: Float) =
         withContext(Dispatchers.IO) {
-            liveDataForViewToObserve.postValue(WeatherState.Success(repository.getData(lat, lon)))
+            liveDataForViewToObserve.postValue(WeatherViewState.Success(repository.getData(lat, lon)))
         }
 
     override fun onCleared() {
@@ -41,7 +40,7 @@ class WeatherViewModel(private val repository: WeatherRepository) : ViewModel() 
     }
 
     private fun handleError(error: Throwable) {
-        liveDataForViewToObserve.postValue(WeatherState.Error(error))
+        liveDataForViewToObserve.postValue(WeatherViewState.Error(error))
     }
 
     private fun cancelJob() {

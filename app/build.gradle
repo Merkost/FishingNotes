@@ -76,6 +76,9 @@ dependencies {
     implementation "org.koin:koin-android:2.0.1"
     implementation "org.koin:koin-android-viewmodel:2.0.1"
 
+    //Koil
+    implementation("io.coil-kt:coil:1.2.1")
+
     //Firebase
     implementation platform('com.google.firebase:firebase-bom:28.0.1')
     implementation 'com.google.firebase:firebase-core:19.0.0'
