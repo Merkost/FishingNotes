@@ -1,11 +1,12 @@
 package com.joesemper.fishing.di
 
-import com.joesemper.fishing.model.repository.db.CloudFireStoreDatabaseImpl
-import com.joesemper.fishing.model.repository.db.DatabaseProvider
+import android.content.Context
+import com.joesemper.fishing.model.auth.AuthManager
+import com.joesemper.fishing.model.auth.FirebaseAuthManagerImpl
+import com.joesemper.fishing.model.db.CloudFireStoreDatabaseImpl
+import com.joesemper.fishing.model.db.DatabaseProvider
 import com.joesemper.fishing.model.repository.groups.GroupsRepository
 import com.joesemper.fishing.model.repository.groups.GroupsRepositoryImpl
-import com.joesemper.fishing.model.repository.user.UsersRepository
-import com.joesemper.fishing.model.repository.user.UsersRepositoryImpl
 import com.joesemper.fishing.model.repository.weather.WeatherRepository
 import com.joesemper.fishing.model.repository.weather.WeatherRetrofitImplementation
 import com.joesemper.fishing.view.fragments.GroupsFragment
@@ -23,8 +24,8 @@ import org.koin.dsl.module
 
 val appModule = module {
     single<DatabaseProvider> { CloudFireStoreDatabaseImpl(androidContext()) }
+    single<AuthManager> { FirebaseAuthManagerImpl(androidContext()) }
     viewModel { MainViewModel(get()) }
-    single<UsersRepository> { UsersRepositoryImpl(get()) }
 }
 
 val splashScreen = module {

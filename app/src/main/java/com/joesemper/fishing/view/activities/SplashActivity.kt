@@ -6,9 +6,13 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.joesemper.fishing.model.entity.user.User
 import com.joesemper.fishing.utils.getLoginActivityIntent
 import com.joesemper.fishing.viewmodel.splash.SplashViewModel
 import com.joesemper.fishing.viewmodel.splash.SplashViewState
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import org.koin.android.scope.currentScope
 
 class SplashActivity : AppCompatActivity() {
@@ -23,12 +27,22 @@ class SplashActivity : AppCompatActivity() {
 
         val viewModel: SplashViewModel by currentScope.inject()
 
-        viewModel.subscribe().observe(this) { state ->
-            when (state) {
-                is SplashViewState.Authorised -> startMainActivity()
-                is SplashViewState.NotAuthorised -> startLoginActivity()
-                is SplashViewState.Error -> handleError(state.error)
+        lifecycleScope.launch {
+            viewModel.subscribe().collect { state->
+                when (state) {
+                    is SplashViewState.Success -> onSuccess(state.user)
+                    is SplashViewState.Loading -> {}
+                    is SplashViewState.Error -> handleError(state.error)
+                }
             }
+        }
+    }
+
+    private fun onSuccess(user: User?) {
+        if (user != null) {
+            startMainActivity()
+        } else {
+            startLoginActivity()
         }
     }
 

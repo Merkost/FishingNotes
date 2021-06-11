@@ -1,46 +1,51 @@
 package com.joesemper.fishing.viewmodel.main
 
 import androidx.lifecycle.LiveData
-import com.joesemper.fishing.model.repository.user.UsersRepository
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.joesemper.fishing.model.auth.AuthManager
+import com.joesemper.fishing.model.entity.user.User
 import com.joesemper.fishing.viewmodel.base.BaseViewModel
+import com.joesemper.fishing.viewmodel.splash.SplashViewState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class MainViewModel(private val repository: UsersRepository) : BaseViewModel<MainViewState>() {
+class MainViewModel(private val repository: AuthManager) : ViewModel() {
+
+    private val mutableStateFlow: MutableStateFlow<MainViewState> =
+        MutableStateFlow(MainViewState.Loading)
 
     init {
-        getCurrentUser()
+        loadCurrentUser()
     }
 
-    fun subscribe(): LiveData<MainViewState> = mutableLiveData
+    fun subscribe(): StateFlow<MainViewState> = mutableStateFlow
 
-    fun getCurrentUser() {
-        cancelJob()
-        viewModelCoroutineScope.launch {
-            loadUserFromRepository()
+    fun loadCurrentUser() {
+        viewModelScope.launch {
+            repository.user
+                .catch { error -> handleError(error) }
+                .collect { user -> onSuccess(user) }
         }
-
     }
 
     fun logOut() {
-        cancelJob()
-        viewModelCoroutineScope.launch {
+
+        viewModelScope.launch {
             repository.logoutCurrentUser()
         }
-        mutableLiveData.value = MainViewState.LoggedOut
+        mutableStateFlow.value = MainViewState.Success(null)
     }
 
-    private suspend fun loadUserFromRepository() {
-        val user = repository.getCurrentUser()
-        if (user != null) {
-            mutableLiveData.value = MainViewState.LoggedIn(user)
-        } else {
-            mutableLiveData.value = MainViewState.LoggedOut
-        }
-
+    private fun onSuccess(user: User?) {
+        mutableStateFlow.value = MainViewState.Success(user)
     }
 
-    override fun handleError(error: Throwable) {
-        mutableLiveData.postValue(MainViewState.Error(error))
+    private fun handleError(error: Throwable) {
+        mutableStateFlow.value = MainViewState.Error(error)
     }
 
 

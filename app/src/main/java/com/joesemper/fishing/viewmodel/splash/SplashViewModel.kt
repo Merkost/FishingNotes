@@ -1,53 +1,40 @@
 package com.joesemper.fishing.viewmodel.splash
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.joesemper.fishing.model.repository.user.UsersRepository
+import androidx.lifecycle.viewModelScope
+import com.joesemper.fishing.model.auth.AuthManager
+import com.joesemper.fishing.model.entity.user.User
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 
-class SplashViewModel(private val repository: UsersRepository) : ViewModel() {
+class SplashViewModel(private val repository: AuthManager) : ViewModel() {
 
-    private val mutableLiveData: MutableLiveData<SplashViewState> = MutableLiveData()
+    private val mutableStateFlow: MutableStateFlow<SplashViewState> =
+        MutableStateFlow(SplashViewState.Loading)
 
-    private val viewModelCoroutineScope = CoroutineScope(
-        Dispatchers.Main
-                + SupervisorJob()
-                + CoroutineExceptionHandler { _, throwable ->
-            handleError(throwable)
-        })
-
-    fun subscribe(): LiveData<SplashViewState> = mutableLiveData
+    fun subscribe(): StateFlow<SplashViewState> = mutableStateFlow
 
     init {
-        getCurrentUser()
+        loadCurrentUser()
     }
 
-    private fun getCurrentUser() {
-        cancelJob()
-
-        viewModelCoroutineScope.launch {
-            val user = repository.getCurrentUser()
-
-                mutableLiveData.value = if (user != null) {
-                    SplashViewState.Authorised
-                } else {
-                    SplashViewState.NotAuthorised
-                }
-            }
-
+    private fun loadCurrentUser() {
+        viewModelScope.launch {
+            repository.user
+                .catch { error -> handleError(error) }
+                .collect { user -> onSuccess(user) }
+        }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        cancelJob()
+    private fun onSuccess(user: User?) {
+        mutableStateFlow.value = SplashViewState.Success(user)
     }
 
     private fun handleError(error: Throwable) {
-        mutableLiveData.postValue(SplashViewState.Error(error))
+        mutableStateFlow.value = SplashViewState.Error(error)
     }
 
-    private fun cancelJob() {
-        viewModelCoroutineScope.coroutineContext.cancelChildren()
-    }
 }

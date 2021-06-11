@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.joesemper.fishing.R
@@ -15,6 +16,8 @@ import com.joesemper.fishing.view.fragments.dialog.UserBottomSheetDialogFragment
 import com.joesemper.fishing.viewmodel.main.MainViewModel
 import com.joesemper.fishing.viewmodel.main.MainViewState
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
 class MainActivity : AppCompatActivity(), LogoutListener {
@@ -32,11 +35,21 @@ class MainActivity : AppCompatActivity(), LogoutListener {
 
         initBottomNav()
 
-        viewModel.subscribe().observe(this) { viewState ->
-            when (viewState) {
-                is MainViewState.LoggedOut -> { startSplashActivity() }
-                is MainViewState.LoggedIn -> { currentUser = viewState.user }
+        lifecycleScope.launch {
+            viewModel.subscribe().collect { viewState ->
+                when (viewState) {
+                    is MainViewState.Success -> { onSuccess(viewState.user) }
+                }
             }
+        }
+
+    }
+
+    private fun onSuccess(user: User?) {
+        if (user != null) {
+            currentUser = user
+        } else {
+            startSplashActivity()
         }
     }
 
@@ -61,7 +74,7 @@ class MainActivity : AppCompatActivity(), LogoutListener {
 
     private fun initBottomNav() {
         val host: NavHostFragment = supportFragmentManager
-                .findFragmentById(R.id.fragmentContainerView) as NavHostFragment? ?: return
+            .findFragmentById(R.id.fragmentContainerView) as NavHostFragment? ?: return
         val navController = host.navController
 
         bottomNav.setupWithNavController(navController)
