@@ -4,25 +4,44 @@ import android.content.Context
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.joesemper.fishing.model.entity.user.User
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.runBlocking
+import kotlin.coroutines.suspendCoroutine
 
 class FirebaseAuthManagerImpl(private val context: Context) : AuthManager {
 
     private val fireBaseAuth = FirebaseAuth.getInstance()
 
-    private val currentUser: FirebaseUser?
-        get() = fireBaseAuth.currentUser
+    @ExperimentalCoroutinesApi
+    override val currentUser: Flow<User?>
+        get() = callbackFlow {
+            val authListener = FirebaseAuth.AuthStateListener {
+                runBlocking {
+                    send(it.currentUser?.run { mapFirebaseUserToUser(this) })
+                }
+            }
 
-    override val user: Flow<User?>
-        get() = flow {
-            emit(currentUser?.run { User(uid, displayName, isAnonymous, photoUrl.toString()) })
+            fireBaseAuth.addAuthStateListener(authListener)
+            awaitClose { fireBaseAuth.removeAuthStateListener(authListener) }
         }
-
-    override suspend fun getCurrentUser() = user
 
     override suspend fun logoutCurrentUser() {
         AuthUI.getInstance().signOut(context)
+    }
+
+    private fun mapFirebaseUserToUser(firebaseUser: FirebaseUser): User {
+        return with(firebaseUser) {
+            User(
+                uid,
+                displayName,
+                isAnonymous,
+                photoUrl.toString()
+            )
+        }
     }
 }

@@ -31,7 +31,7 @@ class GroupsFragment : Fragment(), LogoutListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initViewModel()
+//        initViewModel()
     }
 
 
@@ -52,9 +52,9 @@ class GroupsFragment : Fragment(), LogoutListener {
     }
 
     private fun initViewModel() {
-        val viewModel: GroupsViewModel by currentScope.inject()
-        currentViewModel = viewModel
-        viewModel.subscribe().observe(this as LifecycleOwner) { renderData(it) }
+//        val viewModel: GroupsViewModel by currentScope.inject()
+//        currentViewModel = viewModel
+//        viewModel.subscribe().observe(this as LifecycleOwner) { renderData(it) }
     }
 
     private fun renderData(state: GroupsViewState) {

@@ -5,10 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.model.auth.AuthManager
 import com.joesemper.fishing.model.entity.user.User
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.*
 
 class SplashViewModel(private val repository: AuthManager) : ViewModel() {
 
@@ -23,9 +20,9 @@ class SplashViewModel(private val repository: AuthManager) : ViewModel() {
 
     private fun loadCurrentUser() {
         viewModelScope.launch {
-            repository.user
+            repository.currentUser
                 .catch { error -> handleError(error) }
-                .collect { user -> onSuccess(user) }
+                .collectLatest { user -> onSuccess(user) }
         }
     }
 

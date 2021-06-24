@@ -1,16 +1,11 @@
 package com.joesemper.fishing.viewmodel.main
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.model.auth.AuthManager
 import com.joesemper.fishing.model.entity.user.User
-import com.joesemper.fishing.viewmodel.base.BaseViewModel
-import com.joesemper.fishing.viewmodel.splash.SplashViewState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class MainViewModel(private val repository: AuthManager) : ViewModel() {
@@ -26,18 +21,21 @@ class MainViewModel(private val repository: AuthManager) : ViewModel() {
 
     fun loadCurrentUser() {
         viewModelScope.launch {
-            repository.user
+            repository.currentUser
                 .catch { error -> handleError(error) }
-                .collect { user -> onSuccess(user) }
+                .collectLatest { user -> onSuccess(user) }
         }
     }
 
-    fun logOut() {
+    fun unsubscribe() {
+        viewModelScope.cancel()
+        mutableStateFlow.value = MainViewState.Loading
+    }
 
+    fun logOut() {
         viewModelScope.launch {
             repository.logoutCurrentUser()
         }
-        mutableStateFlow.value = MainViewState.Success(null)
     }
 
     private fun onSuccess(user: User?) {
