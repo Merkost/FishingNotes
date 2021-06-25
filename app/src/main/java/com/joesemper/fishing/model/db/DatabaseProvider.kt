@@ -1,11 +1,10 @@
 package com.joesemper.fishing.model.db
 
-import com.joesemper.fishing.model.entity.map.Marker
-import com.joesemper.fishing.model.entity.user.User
-import kotlinx.coroutines.flow.Flow
+import com.joesemper.fishing.model.entity.map.UserMarker
 import kotlinx.coroutines.flow.StateFlow
 
 interface DatabaseProvider {
-    suspend fun addMarker(marker: Marker)
-    suspend fun getAllUserMarkers(): StateFlow<List<Marker?>>
+    suspend fun addMarker(userMarker: UserMarker)
+    suspend fun deleteMarker(markerId: String)
+    suspend fun getAllUserMarkers(): StateFlow<List<UserMarker?>>
 }

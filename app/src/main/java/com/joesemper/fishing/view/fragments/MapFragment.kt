@@ -12,28 +12,22 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
-import com.google.android.gms.maps.*
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.firebase.auth.FirebaseAuth
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.entity.map.Marker
+import com.joesemper.fishing.model.entity.map.UserMarker
 import com.joesemper.fishing.utils.PermissionUtils.isPermissionGranted
 import com.joesemper.fishing.utils.PermissionUtils.requestPermission
-import com.joesemper.fishing.utils.createMarker
+import com.joesemper.fishing.utils.createUserMarker
 import com.joesemper.fishing.viewmodel.map.MapViewModel
 import com.joesemper.fishing.viewmodel.map.MapViewState
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_dialog.*
-import kotlinx.android.synthetic.main.fragment_map.*
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import org.koin.android.ext.android.getKoin
-import org.koin.android.ext.android.inject
-import org.koin.android.scope.currentScope
 import org.koin.core.qualifier.named
-import java.util.*
 
 class MapFragment : Fragment(), OnMapReadyCallback,
     ActivityCompat.OnRequestPermissionsResultCallback {
@@ -43,6 +37,8 @@ class MapFragment : Fragment(), OnMapReadyCallback,
 
     private var permissionDenied = false
     private lateinit var map: GoogleMap
+
+    private val currentMarkers = mutableListOf<Marker?>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -66,6 +62,7 @@ class MapFragment : Fragment(), OnMapReadyCallback,
         map = googleMap
         enableMyLocation()
         setOnMapClickListener()
+        setOnMarkersClickListener()
         subscribeOnViewModel()
     }
 
@@ -109,7 +106,15 @@ class MapFragment : Fragment(), OnMapReadyCallback,
 
     private fun setOnMapClickListener() {
         map.setOnMapLongClickListener { latLng ->
-            viewModel.addMarker(createMarker(latLng))
+            viewModel.addMarker(createUserMarker(latLng))
+        }
+    }
+
+    private fun setOnMarkersClickListener() {
+        map.setOnMarkerClickListener { marker ->
+            val mark = currentMarkers.first { it?.id == marker.id }
+            viewModel.deleteMarker(mark?.tag.toString())
+            true
         }
     }
 
@@ -121,7 +126,7 @@ class MapFragment : Fragment(), OnMapReadyCallback,
                         onLoading()
                     }
                     is MapViewState.Success -> {
-                        onSuccess(viewState.markers)
+                        onSuccess(viewState.userMarkers)
                     }
                 }
             }
@@ -132,13 +137,17 @@ class MapFragment : Fragment(), OnMapReadyCallback,
         Toast.makeText(context, "Loading!!!", Toast.LENGTH_SHORT).show()
     }
 
-    private fun onSuccess(markers: List<Marker?>) {
-        if (markers.isNotEmpty()) {
-            map.clear()
-            for (marker in markers) {
+    private fun onSuccess(userMarkers: List<UserMarker?>) {
+        map.clear()
+        currentMarkers.clear()
+        if (userMarkers.isNotEmpty()) {
+            for (marker in userMarkers) {
                 if (marker != null) {
                     val latLng = LatLng(marker.latitude, marker.longitude)
-                    map.addMarker(MarkerOptions().position(latLng).title("My Marker"))
+                    val mapMarker =
+                        map.addMarker(MarkerOptions().position(latLng).title("My Marker"))
+                    mapMarker?.tag = marker.id
+                    currentMarkers.add(mapMarker)
                 }
             }
         }

@@ -2,9 +2,7 @@ package com.joesemper.fishing.viewmodel.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.joesemper.fishing.model.auth.AuthManager
-import com.joesemper.fishing.model.entity.map.Marker
-import com.joesemper.fishing.model.entity.user.User
+import com.joesemper.fishing.model.entity.map.UserMarker
 import com.joesemper.fishing.model.repository.map.MapRepository
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
@@ -35,15 +33,20 @@ class MapViewModel(
         }
     }
 
-
-    fun addMarker(marker: Marker) {
+    fun addMarker(userMarker: UserMarker) {
         viewModelScope.launch {
-            mapRepository.addMarker(marker)
+            mapRepository.addMarker(userMarker)
         }
     }
 
-    private fun onSuccess(markers: List<Marker?>) {
-        mutableStateFlow.value = MapViewState.Success(markers)
+    fun deleteMarker(markerId: String) {
+        viewModelScope.launch {
+            mapRepository.deleteMarker(markerId)
+        }
+    }
+
+    private fun onSuccess(userMarkers: List<UserMarker?>) {
+        mutableStateFlow.value = MapViewState.Success(userMarkers)
     }
 
     private fun handleError(error: Throwable) {
