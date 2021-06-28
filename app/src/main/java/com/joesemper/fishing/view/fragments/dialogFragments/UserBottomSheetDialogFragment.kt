@@ -1,4 +1,4 @@
-package com.joesemper.fishing.view.fragments.dialog
+package com.joesemper.fishing.view.fragments.dialogFragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,13 +9,13 @@ import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.user.User
-import kotlinx.android.synthetic.main.fragment_bottom_sheet_dialog.*
+import kotlinx.android.synthetic.main.fragment_bottom_sheet_dialog_user.*
 
 class UserBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     companion object {
         const val ARG = "USER_ARG"
-        fun newInstance(user: User): UserBottomSheetDialogFragment {
+        fun newInstance(user: User): BottomSheetDialogFragment {
             val args = Bundle()
             args.putParcelable(ARG, user)
             val fragment = UserBottomSheetDialogFragment()
@@ -27,7 +27,7 @@ class UserBottomSheetDialogFragment : BottomSheetDialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_bottom_sheet_dialog, container, false)
+        return inflater.inflate(R.layout.fragment_bottom_sheet_dialog_user, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -45,6 +45,7 @@ class UserBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
         button_logout.setOnClickListener {
             (activity as LogoutListener).onLogout()
+            dismiss()
         }
 
     }

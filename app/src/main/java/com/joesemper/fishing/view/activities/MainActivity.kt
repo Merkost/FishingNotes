@@ -7,23 +7,18 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.user.User
-import com.joesemper.fishing.view.fragments.MapFragment
-import com.joesemper.fishing.view.fragments.dialog.LogoutListener
-import com.joesemper.fishing.view.fragments.dialog.UserBottomSheetDialogFragment
+import com.joesemper.fishing.view.fragments.dialogFragments.LogoutListener
+import com.joesemper.fishing.view.fragments.dialogFragments.UserBottomSheetDialogFragment
 import com.joesemper.fishing.viewmodel.main.MainViewModel
 import com.joesemper.fishing.viewmodel.main.MainViewState
-import com.joesemper.fishing.viewmodel.map.MapViewModel
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.getKoin
-import org.koin.android.ext.android.inject
 import org.koin.core.qualifier.named
 
 class MainActivity : AppCompatActivity(), LogoutListener {
@@ -45,7 +40,7 @@ class MainActivity : AppCompatActivity(), LogoutListener {
 
         initBottomNav()
 
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenStarted {
 
             viewModel.subscribe().collect { viewState ->
                 when (viewState) {
@@ -71,10 +66,7 @@ class MainActivity : AppCompatActivity(), LogoutListener {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.item_logout -> {
-                startBottomSheetDialogFragment()
-                true
-            }
+            R.id.item_logout -> { startBottomSheetDialogFragment() }
             else -> super.onOptionsItemSelected(item)
         }
     }

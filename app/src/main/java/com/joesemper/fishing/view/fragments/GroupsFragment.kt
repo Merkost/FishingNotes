@@ -6,15 +6,13 @@ import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LifecycleOwner
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.user.User
 import com.joesemper.fishing.viewmodel.groups.GroupsViewState
-import com.joesemper.fishing.view.fragments.dialog.LogoutListener
+import com.joesemper.fishing.view.fragments.dialogFragments.LogoutListener
 import com.joesemper.fishing.view.activities.SplashActivity
 import com.joesemper.fishing.viewmodel.groups.GroupsViewModel
 import kotlinx.android.synthetic.main.fragment_groups.*
-import org.koin.android.scope.currentScope
 
 class GroupsFragment : Fragment(), LogoutListener {
 

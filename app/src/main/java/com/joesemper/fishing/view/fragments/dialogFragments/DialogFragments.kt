@@ -1,4 +1,4 @@
-package com.joesemper.fishing.view.fragments.dialog
+package com.joesemper.fishing.view.fragments.dialogFragments
 
 import android.app.Dialog
 import android.os.Bundle
