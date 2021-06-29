@@ -25,6 +25,8 @@ import com.joesemper.fishing.utils.PermissionUtils.isPermissionGranted
 import com.joesemper.fishing.utils.PermissionUtils.requestPermission
 import com.joesemper.fishing.view.fragments.dialogFragments.AddMarkerBottomSheetDialogFragment
 import com.joesemper.fishing.view.fragments.dialogFragments.AddMarkerListener
+import com.joesemper.fishing.view.fragments.dialogFragments.DeleteMarkerListener
+import com.joesemper.fishing.view.fragments.dialogFragments.MarkerDetailsDialogFragment
 import com.joesemper.fishing.viewmodel.map.MapViewModel
 import com.joesemper.fishing.viewmodel.map.MapViewState
 import kotlinx.android.synthetic.main.fragment_map.*
@@ -33,7 +35,7 @@ import org.koin.android.ext.android.getKoin
 import org.koin.core.qualifier.named
 
 class MapFragment : Fragment(), OnMapReadyCallback,
-    ActivityCompat.OnRequestPermissionsResultCallback, AddMarkerListener {
+    ActivityCompat.OnRequestPermissionsResultCallback, AddMarkerListener, DeleteMarkerListener {
 
     private val viewModelScope = getKoin().getOrCreateScope("MapScope", named<MapFragment>())
     private val viewModel: MapViewModel = viewModelScope.get()
@@ -41,7 +43,7 @@ class MapFragment : Fragment(), OnMapReadyCallback,
     private var permissionDenied = false
     private lateinit var map: GoogleMap
 
-    private val currentMarkers = mutableListOf<Marker?>()
+    private val currentMarkers = mutableListOf<UserMarker?>()
 
     private var isPlaceSelectMode = false
     private var currentMapMarker: Marker? = null
@@ -74,6 +76,10 @@ class MapFragment : Fragment(), OnMapReadyCallback,
 
     override fun addMarker(marker: UserMarker) {
         viewModel.addMarker(marker)
+    }
+
+    override fun deleteMarker(marker: UserMarker) {
+        viewModel.deleteMarker(marker)
     }
 
     private fun enableMyLocation() {
@@ -115,8 +121,11 @@ class MapFragment : Fragment(), OnMapReadyCallback,
 
     private fun setOnMarkersClickListener() {
         map.setOnMarkerClickListener { marker ->
-            val mark = currentMarkers.first { it?.id == marker.id }
-            viewModel.deleteMarker(mark?.tag.toString())
+            val userMarker = currentMarkers.first { it?.id == marker.tag }
+            if (userMarker != null) {
+                MarkerDetailsDialogFragment.newInstance(userMarker)
+                    .show(childFragmentManager, "Markers")
+            }
             true
         }
     }
@@ -151,16 +160,15 @@ class MapFragment : Fragment(), OnMapReadyCallback,
     private fun addMarkersOnMap(userMarkers: List<UserMarker?>) {
         for (marker in userMarkers) {
             if (marker != null) {
-                val latLng = LatLng(marker.latitude, marker.longitude)
                 val mapMarker =
                     map.addMarker(
                         MarkerOptions()
-                            .position(latLng)
+                            .position(LatLng(marker.latitude, marker.longitude))
                             .title(marker.title)
                             .snippet(marker.description)
                     )
                 mapMarker?.tag = marker.id
-                currentMarkers.add(mapMarker)
+                currentMarkers.add(marker)
             }
         }
     }
@@ -181,7 +189,7 @@ class MapFragment : Fragment(), OnMapReadyCallback,
     }
 
     private fun showAddMarkerAlertDialog() {
-        val alertDialog = requireActivity().let {
+        requireActivity().let {
             val builder = AlertDialog.Builder(it)
             builder.apply {
                 setPositiveButton(R.string.ok) { _, _ ->
@@ -192,8 +200,7 @@ class MapFragment : Fragment(), OnMapReadyCallback,
                 setMessage("Select a place on the map")
             }
             builder.create()
-        }
-        alertDialog.show()
+        }.show()
     }
 
     private fun onNewMarkerPlaceSelected() {
@@ -202,8 +209,9 @@ class MapFragment : Fragment(), OnMapReadyCallback,
     }
 
     private fun startBottomSheetDialogAddMarker() {
-        val dialog = AddMarkerBottomSheetDialogFragment.newInstance(currentMapMarker!!.position)
-        dialog.show(childFragmentManager, "TAG")
+        AddMarkerBottomSheetDialogFragment
+            .newInstance(currentMapMarker!!.position)
+            .show(childFragmentManager, "TAG")
     }
 
     private fun toggleToPlaceSelectMode() {
@@ -228,8 +236,6 @@ class MapFragment : Fragment(), OnMapReadyCallback,
             currentMapMarker = map.addMarker(
                 MarkerOptions()
                     .position(latLng)
-                    .title("My Marker")
-                    .snippet("Snippet")
             )
         }
     }

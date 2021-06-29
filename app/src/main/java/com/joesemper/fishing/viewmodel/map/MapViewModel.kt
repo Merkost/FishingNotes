@@ -39,9 +39,9 @@ class MapViewModel(
         }
     }
 
-    fun deleteMarker(markerId: String) {
+    fun deleteMarker(userMarker: UserMarker) {
         viewModelScope.launch {
-            mapRepository.deleteMarker(markerId)
+            mapRepository.deleteMarker(userMarker.id)
         }
     }
 
