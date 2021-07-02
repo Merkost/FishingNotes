@@ -247,8 +247,6 @@ class MapFragment : Fragment(), OnMapReadyCallback,
     override fun onDestroy() {
         super.onDestroy()
         map.clear()
-        viewModel.unsubscribe()
-        viewModelScope.close()
     }
 
     companion object {
