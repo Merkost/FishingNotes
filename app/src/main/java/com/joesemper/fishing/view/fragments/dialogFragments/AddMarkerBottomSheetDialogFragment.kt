@@ -2,8 +2,6 @@ package com.joesemper.fishing.view.fragments.dialogFragments
 
 import android.app.Activity
 import android.content.Intent
-import android.database.Cursor
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -26,7 +24,6 @@ import com.joesemper.fishing.utils.getTimeStamp
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_dialog_add_marker.*
 import java.io.File
 import java.io.IOException
-import java.util.*
 
 class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
