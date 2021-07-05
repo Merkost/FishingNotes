@@ -1,23 +1,22 @@
 package com.joesemper.fishing.model.db
 
-import android.content.Context
+import androidx.core.net.toUri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObjects
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
+import com.joesemper.fishing.model.db.storage.Storage
 import com.joesemper.fishing.model.entity.map.UserMarker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
 
-class CloudFireStoreDatabaseImpl(private val context: Context) : DatabaseProvider {
+class CloudFireStoreDatabaseImpl(private val cloudStorage: Storage) : DatabaseProvider {
 
     private val db = Firebase.firestore
-
-    private val storage = Firebase.storage
 
     private val fireBaseAuth = FirebaseAuth.getInstance()
 
@@ -28,7 +27,16 @@ class CloudFireStoreDatabaseImpl(private val context: Context) : DatabaseProvide
         MutableStateFlow(mutableListOf(null))
 
     override suspend fun addMarker(userMarker: UserMarker) {
-        getUserMarkersCollection().document(userMarker.id).set(userMarker)
+        if (userMarker.photoUri.isNotBlank()) {
+            runCatching {
+                cloudStorage.uploadPhoto(userMarker.photoUri.toUri()).collect{
+                    userMarker.downloadPhotoLink = it
+                    getUserMarkersCollection().document(userMarker.id).set(userMarker)
+                }
+            }
+        } else {
+            getUserMarkersCollection().document(userMarker.id).set(userMarker)
+        }
     }
 
     override suspend fun getAllUserMarkers(): StateFlow<List<UserMarker?>> {
@@ -49,11 +57,11 @@ class CloudFireStoreDatabaseImpl(private val context: Context) : DatabaseProvide
                 }
             }
         }
-
     }
 
     private fun getUserMarkersCollection(): CollectionReference {
-        return db.collection(USERS_COLLECTION).document(currentUser?.uid!!).collection(MARKERS_COLLECTION)
+        return db.collection(USERS_COLLECTION).document(currentUser?.uid!!)
+            .collection(MARKERS_COLLECTION)
     }
 
     companion object {

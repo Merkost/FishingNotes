@@ -48,5 +48,15 @@
         android:textColor="@color/purple_500"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@+id/tv_marker_details_description"
-        app:layout_constraintTop_toBottomOf="@+id/tv_marker_details_description" />
+        app:layout_constraintTop_toBottomOf="@+id/iv_marker_details_photo" />
+
+    <ImageView
+        android:id="@+id/iv_marker_details_photo"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_marker_details_description"
+        app:srcCompat="@drawable/ic_fishing" />
 </androidx.constraintlayout.widget.ConstraintLayout>

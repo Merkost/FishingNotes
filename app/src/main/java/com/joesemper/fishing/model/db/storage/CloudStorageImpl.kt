@@ -1,11 +1,42 @@
 package com.joesemper.fishing.model.db.storage
 
+import android.net.Uri
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
+import com.joesemper.fishing.utils.getRandomString
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.launch
 
-class CloudStorageImpl: Storage {
+
+class CloudStorageImpl : Storage {
 
     private val storage = Firebase.storage
 
     private var storageRef = storage.reference
+
+    @ExperimentalCoroutinesApi
+    override suspend fun uploadPhoto(uri: Uri) = callbackFlow {
+        val riversRef = storageRef.child("markerImages/${getRandomString(15)}")
+        val uploadTask = riversRef.putFile(uri)
+
+        uploadTask.continueWithTask { task ->
+            if (!task.isSuccessful) {
+                task.exception?.let {
+                    throw it
+                }
+            }
+            riversRef.downloadUrl
+        }.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val downloadUri = task.result
+                trySend(downloadUri.toString())
+            }
+        }
+        awaitClose { uploadTask.cancel() }
+    }
+
 }
+

@@ -4,10 +4,11 @@ import com.google.android.gms.maps.model.LatLng
 import com.joesemper.fishing.model.entity.map.UserMarker
 import java.util.*
 
-fun createUserMarker(latLng: LatLng, title: String,  description: String?) = UserMarker(
-    id = UUID.randomUUID().toString(),
+fun createUserMarker(latLng: LatLng, title: String,  description: String?, photoUri: String?) = UserMarker(
+    id = getRandomString(10),
     latitude = latLng.latitude,
     longitude = latLng.longitude,
     title = title,
-    description = description
+    description = description,
+    photoUri = photoUri ?: ""
 )

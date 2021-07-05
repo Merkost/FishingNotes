@@ -4,6 +4,8 @@ import com.joesemper.fishing.model.auth.AuthManager
 import com.joesemper.fishing.model.auth.FirebaseAuthManagerImpl
 import com.joesemper.fishing.model.db.CloudFireStoreDatabaseImpl
 import com.joesemper.fishing.model.db.DatabaseProvider
+import com.joesemper.fishing.model.db.storage.CloudStorageImpl
+import com.joesemper.fishing.model.db.storage.Storage
 import com.joesemper.fishing.model.repository.groups.GroupsRepository
 import com.joesemper.fishing.model.repository.groups.GroupsRepositoryImpl
 import com.joesemper.fishing.model.repository.map.MapRepository
@@ -28,8 +30,9 @@ import org.koin.dsl.module
 
 
 val appModule = module {
-    single<DatabaseProvider> { CloudFireStoreDatabaseImpl(androidContext()) }
+    single<DatabaseProvider> { CloudFireStoreDatabaseImpl(get()) }
     single<AuthManager> { FirebaseAuthManagerImpl(androidContext()) }
+    single<Storage> { CloudStorageImpl() }
     single { Logger() }
 }
 

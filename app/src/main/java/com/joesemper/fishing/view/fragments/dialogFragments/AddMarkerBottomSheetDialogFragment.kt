@@ -39,7 +39,7 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 
     lateinit var currentPhotoPath: String
-    lateinit var currentPhotoUri: Uri
+    private var currentPhotoUri: Uri? = null
 
     private val registeredActivity =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -70,7 +70,7 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
             val title = et_add_marker_title.text.toString()
             val description = et_add_marker_description.text.toString()
             val latLng = arguments?.getParcelable<LatLng>(LAT_LNG)
-            val marker = createUserMarker(latLng!!, title, description)
+            val marker = createUserMarker(latLng!!, title, description, currentPhotoUri.toString())
             (parentFragment as AddMarkerListener).addMarker(marker)
             dismiss()
         }
@@ -98,6 +98,7 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
             val selectedImage: Uri? = result.data?.data
             if (selectedImage != null) {
                 iv_marker_photo.load(selectedImage)
+                currentPhotoUri = selectedImage
             }
         }
     }

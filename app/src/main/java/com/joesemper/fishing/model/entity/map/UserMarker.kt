@@ -9,5 +9,7 @@ data class UserMarker(
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
     val title: String = "My marker",
-    val description: String? = ""
+    val description: String? = "",
+    var photoUri: String = "",
+    var downloadPhotoLink: String = ""
 ): Parcelable

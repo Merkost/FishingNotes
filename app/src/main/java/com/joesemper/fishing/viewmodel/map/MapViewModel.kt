@@ -27,7 +27,7 @@ class MapViewModel(
         mutableStateFlow.value = MapViewState.Loading
     }
 
-    fun loadUsersMarkers() {
+    private fun loadUsersMarkers() {
         viewModelScope.launch {
             mapRepository.getAllUserMarkers()
                 .collect { markers -> onSuccess(markers) }

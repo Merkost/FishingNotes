@@ -140,12 +140,9 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         lifecycleScope.launchWhenStarted {
             viewModel.subscribe().collect { viewState ->
                 when (viewState) {
-                    is MapViewState.Loading -> {
-                        onLoading()
-                    }
-                    is MapViewState.Success -> {
-                        onSuccess(viewState.userMarkers)
-                    }
+                    is MapViewState.Loading -> { onLoading() }
+                    is MapViewState.Success -> { onSuccess(viewState.userMarkers) }
+                    is MapViewState.Error -> { onError(viewState.error)}
                 }
             }
         }
@@ -161,6 +158,11 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         if (userMarkers.isNotEmpty()) {
             addMarkersOnMap(userMarkers)
         }
+    }
+
+    private fun onError(error: Throwable) {
+        Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
+        logger.log(error.message)
     }
 
     private fun addMarkersOnMap(userMarkers: List<UserMarker?>) {
