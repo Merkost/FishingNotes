@@ -63,6 +63,7 @@ dependencies {
 
     //Maps
     implementation 'com.google.android.gms:play-services-maps:17.0.1'
+    implementation 'com.google.android.gms:play-services-location:18.0.0'
 
     //Navigation
     implementation "androidx.navigation:navigation-compose:2.4.0-alpha03"

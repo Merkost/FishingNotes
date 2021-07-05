@@ -2,6 +2,7 @@ package com.joesemper.fishing.view.fragments
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +14,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
@@ -38,6 +42,7 @@ import org.koin.androidx.scope.fragmentScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.scope.Scope
 
+
 class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     ActivityCompat.OnRequestPermissionsResultCallback, AddMarkerListener, DeleteMarkerListener {
 
@@ -49,10 +54,15 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     private var permissionDenied = false
     private lateinit var map: GoogleMap
 
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+
     private val currentMarkers = mutableListOf<UserMarker?>()
 
     private var isPlaceSelectMode = false
+
     private var currentMapMarker: Marker? = null
+    private var lastKnownLocation: Location? = null
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -68,6 +78,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     }
 
     private fun initMap() {
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
     }
@@ -78,6 +89,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         setOnMarkersClickListener()
         subscribeOnViewModel()
         setOnFabClickListener()
+        getDeviceLocation()
     }
 
     override fun addMarker(marker: UserMarker) {
@@ -140,9 +152,15 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         lifecycleScope.launchWhenStarted {
             viewModel.subscribe().collect { viewState ->
                 when (viewState) {
-                    is MapViewState.Loading -> { onLoading() }
-                    is MapViewState.Success -> { onSuccess(viewState.userMarkers) }
-                    is MapViewState.Error -> { onError(viewState.error)}
+                    is MapViewState.Loading -> {
+                        onLoading()
+                    }
+                    is MapViewState.Success -> {
+                        onSuccess(viewState.userMarkers)
+                    }
+                    is MapViewState.Error -> {
+                        onError(viewState.error)
+                    }
                 }
             }
         }
@@ -248,12 +266,38 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         }
     }
 
+    private fun getDeviceLocation() {
+        try {
+            if (!permissionDenied) {
+                val locationResult = fusedLocationProviderClient.lastLocation
+                locationResult.addOnCompleteListener(requireActivity()) { task ->
+                    if (task.isSuccessful) {
+                        lastKnownLocation = task.result
+                        if (lastKnownLocation != null) {
+                            map.moveCamera(
+                                CameraUpdateFactory.newLatLngZoom(
+                                    LatLng(
+                                        lastKnownLocation!!.latitude,
+                                        lastKnownLocation!!.longitude
+                                    ), DEFAULT_ZOOM.toFloat()
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        } catch (e: SecurityException) {
+            logger.log(e.message)
+        }
+    }
+
     private fun showToast(text: String) {
         Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
     }
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
+        private const val DEFAULT_ZOOM = 15
     }
 
 }

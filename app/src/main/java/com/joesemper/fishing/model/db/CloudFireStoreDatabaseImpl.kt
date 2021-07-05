@@ -27,9 +27,10 @@ class CloudFireStoreDatabaseImpl(private val cloudStorage: Storage) : DatabasePr
         MutableStateFlow(mutableListOf(null))
 
     override suspend fun addMarker(userMarker: UserMarker) {
-        if (userMarker.photoUri.isNotBlank()) {
+        if (userMarker.photoUri.isBlank()) {
             runCatching {
-                cloudStorage.uploadPhoto(userMarker.photoUri.toUri()).collect{
+                cloudStorage.uploadPhoto(userMarker.photoUri.toUri())
+                    .collect{
                     userMarker.downloadPhotoLink = it
                     getUserMarkersCollection().document(userMarker.id).set(userMarker)
                 }
@@ -45,8 +46,9 @@ class CloudFireStoreDatabaseImpl(private val cloudStorage: Storage) : DatabasePr
         return allUserMarkers
     }
 
-    override suspend fun deleteMarker(markerId: String) {
-        getUserMarkersCollection().document(markerId).delete()
+    override suspend fun deleteMarker(userMarker: UserMarker) {
+        cloudStorage.deletePhoto(userMarker.downloadPhotoLink)
+        getUserMarkersCollection().document(userMarker.id).delete()
     }
 
     private fun subscribeOnUserMarkersCollection() {

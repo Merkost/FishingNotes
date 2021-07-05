@@ -5,6 +5,6 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface MapRepository {
     suspend fun addMarker(userMarker: UserMarker)
-    suspend fun deleteMarker(markerId: String)
+    suspend fun deleteMarker(userMarker: UserMarker)
     suspend fun getAllUserMarkers(): StateFlow<List<UserMarker?>>
 }

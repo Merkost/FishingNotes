@@ -14,7 +14,6 @@ import kotlinx.coroutines.launch
 class CloudStorageImpl : Storage {
 
     private val storage = Firebase.storage
-
     private var storageRef = storage.reference
 
     @ExperimentalCoroutinesApi
@@ -37,6 +36,12 @@ class CloudStorageImpl : Storage {
         }
         awaitClose { uploadTask.cancel() }
     }
+
+    override suspend fun deletePhoto(url: String) {
+        val desertRef = storage.getReferenceFromUrl(url)
+        desertRef.delete()
+    }
+
 
 }
 

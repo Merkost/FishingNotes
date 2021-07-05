@@ -2,11 +2,11 @@ package com.joesemper.fishing.viewmodel.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.maps.MapView
 import com.joesemper.fishing.model.entity.map.UserMarker
 import com.joesemper.fishing.model.repository.map.MapRepository
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class MapViewModel(
@@ -42,7 +42,7 @@ class MapViewModel(
 
     fun deleteMarker(userMarker: UserMarker) {
         viewModelScope.launch {
-            mapRepository.deleteMarker(userMarker.id)
+            mapRepository.deleteMarker(userMarker)
         }
     }
 
