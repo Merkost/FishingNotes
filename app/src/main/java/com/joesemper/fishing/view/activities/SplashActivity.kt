@@ -8,14 +8,24 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.joesemper.fishing.model.entity.user.User
+import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.utils.getLoginActivityIntent
 import com.joesemper.fishing.viewmodel.splash.SplashViewModel
 import com.joesemper.fishing.viewmodel.splash.SplashViewState
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.koin.android.scope.currentScope
+import org.koin.android.ext.android.inject
+import org.koin.android.scope.AndroidScopeComponent
+import org.koin.androidx.scope.activityScope
+import org.koin.core.scope.Scope
 
-class SplashActivity : AppCompatActivity() {
+class SplashActivity : AppCompatActivity(), AndroidScopeComponent {
+
+    override val scope : Scope by activityScope()
+    private val viewModel: SplashViewModel by viewModel()
+
+    private val logger: Logger by inject()
 
     private val registeredActivity =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -25,7 +35,6 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val viewModel: SplashViewModel by currentScope.inject()
 
         lifecycleScope.launch {
             viewModel.subscribe().collect { state->
@@ -64,5 +73,6 @@ class SplashActivity : AppCompatActivity() {
 
     private fun handleError(error: Throwable) {
         Toast.makeText(this, error.message, Toast.LENGTH_SHORT).show()
+        logger.log(error.message)
     }
 }

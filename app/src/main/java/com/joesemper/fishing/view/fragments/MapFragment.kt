@@ -21,6 +21,7 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.map.UserMarker
+import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.utils.PermissionUtils.isPermissionGranted
 import com.joesemper.fishing.utils.PermissionUtils.requestPermission
 import com.joesemper.fishing.view.fragments.dialogFragments.AddMarkerBottomSheetDialogFragment
@@ -31,14 +32,19 @@ import com.joesemper.fishing.viewmodel.map.MapViewModel
 import com.joesemper.fishing.viewmodel.map.MapViewState
 import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.flow.collect
-import org.koin.android.ext.android.getKoin
-import org.koin.core.qualifier.named
+import org.koin.android.ext.android.inject
+import org.koin.android.scope.AndroidScopeComponent
+import org.koin.androidx.scope.fragmentScope
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.scope.Scope
 
-class MapFragment : Fragment(), OnMapReadyCallback,
+class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     ActivityCompat.OnRequestPermissionsResultCallback, AddMarkerListener, DeleteMarkerListener {
 
-    private val viewModelScope = getKoin().getOrCreateScope("MapScope", named<MapFragment>())
-    private val viewModel: MapViewModel = viewModelScope.get()
+    override val scope: Scope by fragmentScope()
+    private val viewModel: MapViewModel by viewModel()
+
+    private val logger: Logger by inject()
 
     private var permissionDenied = false
     private lateinit var map: GoogleMap
@@ -242,11 +248,6 @@ class MapFragment : Fragment(), OnMapReadyCallback,
 
     private fun showToast(text: String) {
         Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        map.clear()
     }
 
     companion object {

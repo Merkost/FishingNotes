@@ -5,28 +5,32 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.user.User
+import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.view.fragments.dialogFragments.LogoutListener
 import com.joesemper.fishing.view.fragments.dialogFragments.UserBottomSheetDialogFragment
 import com.joesemper.fishing.viewmodel.main.MainViewModel
 import com.joesemper.fishing.viewmodel.main.MainViewState
 import kotlinx.android.synthetic.main.activity_main.*
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
-import org.koin.android.ext.android.getKoin
-import org.koin.core.qualifier.named
+import org.koin.android.ext.android.inject
+import org.koin.android.scope.AndroidScopeComponent
+import org.koin.androidx.scope.activityScope
+import org.koin.core.scope.Scope
 
-class MainActivity : AppCompatActivity(), LogoutListener {
+class MainActivity : AppCompatActivity(), AndroidScopeComponent, LogoutListener {
 
-//    private val viewModel: MainViewModel by inject()
+    override val scope : Scope by activityScope()
+    private val viewModel: MainViewModel by viewModel()
 
-    private val viewModelScope = getKoin().getOrCreateScope("MainScope", named<MainActivity>())
-    private val viewModel: MainViewModel = viewModelScope.get()
+    private val logger: Logger by inject()
 
     private var currentUser: User? = null
 
@@ -39,16 +43,19 @@ class MainActivity : AppCompatActivity(), LogoutListener {
         setContentView(R.layout.activity_main)
 
         initBottomNav()
+        subscribeOnViewModel()
+    }
 
+    private fun subscribeOnViewModel() {
         lifecycleScope.launchWhenStarted {
-
             viewModel.subscribe().collect { viewState ->
                 when (viewState) {
                     is MainViewState.Success -> { onSuccess(viewState.user) }
+                    is MainViewState.Error -> { onError(viewState.error) }
+                    MainViewState.Loading -> { }
                 }
             }
         }
-
     }
 
     private fun onSuccess(user: User?) {
@@ -57,6 +64,11 @@ class MainActivity : AppCompatActivity(), LogoutListener {
         } else {
             startSplashActivity()
         }
+    }
+
+    private fun onError(error: Throwable) {
+        Toast.makeText(this, error.message, Toast.LENGTH_SHORT).show()
+        logger.log(error.message)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -94,12 +106,6 @@ class MainActivity : AppCompatActivity(), LogoutListener {
     private fun startSplashActivity() {
         startActivity(Intent(this, SplashActivity::class.java))
         finish()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.unsubscribe()
-        viewModelScope.close()
     }
 
 }

@@ -27,10 +27,6 @@ class MainViewModel(private val repository: AuthManager) : ViewModel() {
         }
     }
 
-    fun unsubscribe() {
-        viewModelScope.cancel()
-    }
-
     fun logOut() {
         viewModelScope.launch {
             repository.logoutCurrentUser()

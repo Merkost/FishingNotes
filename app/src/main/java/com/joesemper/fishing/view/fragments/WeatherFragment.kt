@@ -19,9 +19,16 @@ import com.joesemper.fishing.viewmodel.weather.WeatherViewState
 import com.joesemper.fishing.view.weather.utils.getDateByMilliseconds
 import com.joesemper.fishing.viewmodel.weather.WeatherViewModel
 import kotlinx.android.synthetic.main.fragment_weather.*
-import org.koin.android.scope.currentScope
+import org.koin.android.scope.AndroidScopeComponent
+import org.koin.androidx.scope.fragmentScope
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.scope.Scope
 
-class WeatherFragment : Fragment() {
+class WeatherFragment : Fragment(), AndroidScopeComponent {
+
+    override val scope: Scope by fragmentScope()
+    private val viewModel: WeatherViewModel by viewModel()
+
 
     private lateinit var currentWeather: WeatherForecast
     private lateinit var viewPager: ViewPager2
@@ -41,7 +48,6 @@ class WeatherFragment : Fragment() {
     }
 
     private fun initViewModel() {
-        val viewModel: WeatherViewModel by currentScope.inject()
         viewModel.subscribe().observe(this as LifecycleOwner) { renderData(it) }
     }
 

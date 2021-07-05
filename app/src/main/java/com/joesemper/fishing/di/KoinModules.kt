@@ -10,6 +10,7 @@ import com.joesemper.fishing.model.repository.map.MapRepository
 import com.joesemper.fishing.model.repository.map.MapRepositoryImpl
 import com.joesemper.fishing.model.repository.weather.WeatherRepository
 import com.joesemper.fishing.model.repository.weather.WeatherRetrofitImplementation
+import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.view.activities.MainActivity
 import com.joesemper.fishing.view.activities.SplashActivity
 import com.joesemper.fishing.view.fragments.GroupsFragment
@@ -21,7 +22,7 @@ import com.joesemper.fishing.viewmodel.map.MapViewModel
 import com.joesemper.fishing.viewmodel.splash.SplashViewModel
 import com.joesemper.fishing.viewmodel.weather.WeatherViewModel
 import org.koin.android.ext.koin.androidContext
-import org.koin.android.viewmodel.dsl.viewModel
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
@@ -29,6 +30,7 @@ import org.koin.dsl.module
 val appModule = module {
     single<DatabaseProvider> { CloudFireStoreDatabaseImpl(androidContext()) }
     single<AuthManager> { FirebaseAuthManagerImpl(androidContext()) }
+    single { Logger() }
 }
 
 val mainActivity = module {
