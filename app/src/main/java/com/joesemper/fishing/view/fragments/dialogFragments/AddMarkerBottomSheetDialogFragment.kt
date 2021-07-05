@@ -1,16 +1,29 @@
 package com.joesemper.fishing.view.fragments.dialogFragments
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
+import coil.load
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.map.UserMarker
 import com.joesemper.fishing.utils.createUserMarker
+import com.joesemper.fishing.utils.getTimeStamp
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_dialog_add_marker.*
+import java.io.File
+import java.io.IOException
 
 class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
@@ -25,6 +38,19 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
         }
     }
 
+    lateinit var currentPhotoPath: String
+    lateinit var currentPhotoUri: Uri
+
+    private val registeredActivity =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            onActivityResult(result)
+        }
+
+    private val registeredGalleryPhotoActivity =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            onGalleryPhotoResult(result)
+        }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -36,6 +62,7 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
         setOnApplyClickListener()
         setOnCloseClickListener()
+        setOnAddPhotoClickListener()
     }
 
     private fun setOnApplyClickListener() {
@@ -48,6 +75,67 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
             dismiss()
         }
 
+    }
+
+    private fun setOnAddPhotoClickListener() {
+        button_add_photo.setOnClickListener {
+            dispatchTakePictureIntent()
+        }
+        button_add_photo_from_gallery.setOnClickListener {
+            val pickPhoto = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            registeredGalleryPhotoActivity.launch(pickPhoto)
+        }
+    }
+
+    private fun onActivityResult(result: ActivityResult) {
+        if (result.resultCode == Activity.RESULT_OK) {
+            iv_marker_photo.load(currentPhotoUri)
+        }
+    }
+
+    private fun onGalleryPhotoResult(result: ActivityResult) {
+        if (result.resultCode == Activity.RESULT_OK) {
+            val selectedImage: Uri? = result.data?.data
+            if (selectedImage != null) {
+                iv_marker_photo.load(selectedImage)
+            }
+        }
+    }
+
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        val storageDir: File? =
+            requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "JPEG_${getTimeStamp()}_", /* prefix */
+            ".jpg", /* suffix */
+            storageDir /* directory */
+        ).apply {
+            currentPhotoPath = absolutePath
+        }
+    }
+
+    private fun dispatchTakePictureIntent() {
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+            takePictureIntent.resolveActivity(requireActivity().packageManager)?.also {
+                val photoFile: File? = try {
+                    createImageFile()
+                } catch (ex: IOException) {
+                    Toast.makeText(context, ex.message, Toast.LENGTH_SHORT).show()
+                    null
+                }
+                photoFile?.also { file ->
+                    currentPhotoUri = FileProvider.getUriForFile(
+                        requireContext(),
+                        "com.joesemper.fishing.fileprovider",
+                        file
+                    )
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, currentPhotoUri)
+                    registeredActivity.launch(takePictureIntent)
+                }
+            }
+        }
     }
 
     private fun setOnCloseClickListener() {

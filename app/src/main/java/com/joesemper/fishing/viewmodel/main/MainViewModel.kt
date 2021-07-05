@@ -19,7 +19,7 @@ class MainViewModel(private val repository: AuthManager) : ViewModel() {
 
     fun subscribe(): StateFlow<MainViewState> = mutableStateFlow
 
-    fun loadCurrentUser() {
+    private fun loadCurrentUser() {
         viewModelScope.launch {
             repository.currentUser
                 .catch { error -> handleError(error) }
@@ -29,7 +29,6 @@ class MainViewModel(private val repository: AuthManager) : ViewModel() {
 
     fun unsubscribe() {
         viewModelScope.cancel()
-        mutableStateFlow.value = MainViewState.Loading
     }
 
     fun logOut() {

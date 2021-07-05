@@ -7,6 +7,7 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObjects
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.joesemper.fishing.model.entity.map.UserMarker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +16,8 @@ import kotlinx.coroutines.runBlocking
 class CloudFireStoreDatabaseImpl(private val context: Context) : DatabaseProvider {
 
     private val db = Firebase.firestore
+
+    private val storage = Firebase.storage
 
     private val fireBaseAuth = FirebaseAuth.getInstance()
 

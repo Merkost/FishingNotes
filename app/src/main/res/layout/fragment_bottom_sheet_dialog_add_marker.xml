@@ -66,9 +66,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp"
         android:text="Apply"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/textInputLayout2"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout2" />
+        app:layout_constraintTop_toBottomOf="@+id/iv_marker_photo" />
 
     <ImageButton
         android:id="@+id/button_add_marker_close"
@@ -77,4 +79,33 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_baseline_close_24" />
+
+    <ImageView
+        android:id="@+id/iv_marker_photo"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout2"
+        app:srcCompat="@drawable/ic_fishing" />
+
+    <ImageButton
+        android:id="@+id/button_add_photo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/button_add_marker_apply"
+        app:layout_constraintStart_toStartOf="@+id/textInputLayout2"
+        app:layout_constraintTop_toTopOf="@+id/button_add_marker_apply"
+        app:srcCompat="@drawable/ic_baseline_add_a_photo_24" />
+
+    <ImageButton
+        android:id="@+id/button_add_photo_from_gallery"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        app:layout_constraintBottom_toBottomOf="@+id/button_add_photo"
+        app:layout_constraintStart_toEndOf="@+id/button_add_photo"
+        app:layout_constraintTop_toTopOf="@+id/button_add_photo"
+        app:srcCompat="@drawable/ic_baseline_add_photo_alternate_24" />
 </androidx.constraintlayout.widget.ConstraintLayout>

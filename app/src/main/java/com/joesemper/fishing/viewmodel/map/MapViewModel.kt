@@ -2,6 +2,7 @@ package com.joesemper.fishing.viewmodel.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.MapView
 import com.joesemper.fishing.model.entity.map.UserMarker
 import com.joesemper.fishing.model.repository.map.MapRepository
 import kotlinx.coroutines.cancel
@@ -21,9 +22,9 @@ class MapViewModel(
         loadUsersMarkers()
     }
 
-    fun unsubscribe() {
+    override fun onCleared() {
+        super.onCleared()
         mutableStateFlow.value = MapViewState.Loading
-        viewModelScope.cancel()
     }
 
     fun loadUsersMarkers() {
