@@ -93,6 +93,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore-ktx'
     implementation 'com.firebaseui:firebase-ui-auth:7.1.1'
     implementation 'com.google.firebase:firebase-storage-ktx'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
 
     //Test

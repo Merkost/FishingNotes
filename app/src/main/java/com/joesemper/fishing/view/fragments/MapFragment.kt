@@ -2,6 +2,7 @@ package com.joesemper.fishing.view.fragments
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -21,10 +22,16 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.transition.MaterialFadeThrough
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.map.UserMarker
+import com.joesemper.fishing.model.entity.weather.WeatherForecast
+import com.joesemper.fishing.model.repository.weather.WeatherRepository
+import com.joesemper.fishing.model.repository.weather.api.WeatherApiService
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.utils.PermissionUtils.isPermissionGranted
 import com.joesemper.fishing.utils.PermissionUtils.requestPermission
@@ -36,12 +43,14 @@ import com.joesemper.fishing.viewmodel.map.MapViewModel
 import com.joesemper.fishing.viewmodel.map.MapViewState
 import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.flow.collect
+import okhttp3.OkHttpClient
 import org.koin.android.ext.android.inject
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.scope.Scope
-
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     ActivityCompat.OnRequestPermissionsResultCallback, AddMarkerListener, DeleteMarkerListener {
@@ -63,6 +72,13 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     private var currentMapMarker: Marker? = null
     private var lastKnownLocation: Location? = null
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        enterTransition = MaterialFadeThrough()
+        returnTransition = MaterialFadeThrough()
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -74,17 +90,24 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initLocationProvider()
         initMap()
     }
 
+    private fun initLocationProvider() {
+        fusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(requireActivity())
+    }
+
     private fun initMap() {
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment?.getMapAsync(this)
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+        val geocoder = Geocoder(requireContext())
+        geocoder.getFromLocation(12.12, 12.12, 1).first().thoroughfare
         enableMyLocation()
         setOnMarkersClickListener()
         subscribeOnViewModel()
@@ -219,7 +242,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
             val builder = AlertDialog.Builder(it)
             builder.apply {
                 setPositiveButton(R.string.ok) { _, _ ->
-                    toggleToPlaceSelectMode()
+                    togglePlaceSelectMode()
                 }
                 setNegativeButton(R.string.fui_cancel) { _, _ -> }
                 setTitle("Add a marker")
@@ -231,7 +254,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
 
     private fun onNewMarkerPlaceSelected() {
         startBottomSheetDialogAddMarker()
-        toggleToNormalMode()
+        togglePlaceSelectMode()
     }
 
     private fun startBottomSheetDialogAddMarker() {
@@ -240,18 +263,19 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
             .show(childFragmentManager, "TAG")
     }
 
-    private fun toggleToPlaceSelectMode() {
-        isPlaceSelectMode = true
-        fab_add_marker.setImageResource(R.drawable.ic_baseline_check_24)
-        setOnMapClickListener()
-    }
+    private fun togglePlaceSelectMode() {
+        if (isPlaceSelectMode) {
+            isPlaceSelectMode = false
+            fab_add_marker.setImageResource(R.drawable.ic_baseline_add_location_24)
+            map.setOnMapClickListener { }
+            currentMapMarker?.remove()
+            currentMapMarker = null
+        } else {
+            isPlaceSelectMode = true
+            fab_add_marker.setImageResource(R.drawable.ic_baseline_check_24)
+            setOnMapClickListener()
+        }
 
-    private fun toggleToNormalMode() {
-        isPlaceSelectMode = false
-        fab_add_marker.setImageResource(R.drawable.ic_baseline_add_location_24)
-        map.setOnMapClickListener { }
-        currentMapMarker?.remove()
-        currentMapMarker = null
     }
 
     private fun setOnMapClickListener() {
@@ -267,28 +291,32 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     }
 
     private fun getDeviceLocation() {
+        if (permissionDenied) return
         try {
-            if (!permissionDenied) {
-                val locationResult = fusedLocationProviderClient.lastLocation
-                locationResult.addOnCompleteListener(requireActivity()) { task ->
-                    if (task.isSuccessful) {
-                        lastKnownLocation = task.result
-                        if (lastKnownLocation != null) {
-                            map.moveCamera(
-                                CameraUpdateFactory.newLatLngZoom(
-                                    LatLng(
-                                        lastKnownLocation!!.latitude,
-                                        lastKnownLocation!!.longitude
-                                    ), DEFAULT_ZOOM.toFloat()
-                                )
-                            )
-                        }
+            val locationResult = fusedLocationProviderClient.lastLocation
+            locationResult.addOnCompleteListener(requireActivity()) { task ->
+                if (task.isSuccessful) {
+                    lastKnownLocation = task.result
+                    if (lastKnownLocation != null) {
+                       moveCameraToLocation(lastKnownLocation!!)
                     }
                 }
             }
+
         } catch (e: SecurityException) {
             logger.log(e.message)
         }
+    }
+
+    private fun moveCameraToLocation(location: Location) {
+        map.moveCamera(
+            CameraUpdateFactory.newLatLngZoom(
+                LatLng(
+                    location.latitude,
+                    location.longitude
+                ), DEFAULT_ZOOM.toFloat()
+            )
+        )
     }
 
     private fun showToast(text: String) {

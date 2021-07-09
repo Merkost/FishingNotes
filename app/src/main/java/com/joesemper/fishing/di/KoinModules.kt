@@ -40,7 +40,6 @@ val mainActivity = module {
     scope(named<MainActivity>()) {
         viewModel { MainViewModel(get()) }
     }
-
 }
 
 val splashScreen = module {

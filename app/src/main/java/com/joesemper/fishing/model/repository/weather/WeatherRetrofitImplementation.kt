@@ -23,11 +23,11 @@ class WeatherRetrofitImplementation : WeatherRepository {
 
     private fun createRetrofit(): Retrofit {
         return Retrofit.Builder()
-                .baseUrl(BASE_WEATHER_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(CoroutineCallAdapterFactory())
-                .client(createOkHttpClient())
-                .build()
+            .baseUrl(BASE_WEATHER_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(CoroutineCallAdapterFactory())
+            .client(createOkHttpClient())
+            .build()
     }
 
     private fun createOkHttpClient(): OkHttpClient {

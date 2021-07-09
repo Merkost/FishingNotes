@@ -27,7 +27,7 @@ class CloudFireStoreDatabaseImpl(private val cloudStorage: Storage) : DatabasePr
         MutableStateFlow(mutableListOf(null))
 
     override suspend fun addMarker(userMarker: UserMarker) {
-        if (userMarker.photoUri.isBlank()) {
+        if (userMarker.photoUri.isNotBlank()) {
             runCatching {
                 cloudStorage.uploadPhoto(userMarker.photoUri.toUri())
                     .collect{

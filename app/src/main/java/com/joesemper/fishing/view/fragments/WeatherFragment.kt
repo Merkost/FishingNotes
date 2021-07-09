@@ -13,6 +13,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
+import com.google.android.material.transition.MaterialFadeThrough
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.viewmodel.weather.WeatherViewState
@@ -32,6 +33,13 @@ class WeatherFragment : Fragment(), AndroidScopeComponent {
 
     private lateinit var currentWeather: WeatherForecast
     private lateinit var viewPager: ViewPager2
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        enterTransition = MaterialFadeThrough()
+        returnTransition = MaterialFadeThrough()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

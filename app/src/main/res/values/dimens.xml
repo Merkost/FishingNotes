@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="simple_text_font_size">18sp</dimen>
+
+    <dimen name="constraint_layout_simple_padding">8dp</dimen>
+
+    <dimen name="simple_icon_width">24dp</dimen>
+    <dimen name="simple_icon_height">24dp</dimen>
+</resources>
