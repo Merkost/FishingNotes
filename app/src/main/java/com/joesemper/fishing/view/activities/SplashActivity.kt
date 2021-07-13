@@ -7,7 +7,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.joesemper.fishing.model.entity.user.User
+import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.utils.getLoginActivityIntent
 import com.joesemper.fishing.viewmodel.splash.SplashViewModel

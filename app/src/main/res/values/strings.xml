@@ -33,4 +33,9 @@
     <string name="publish_catch">Publish catch</string>
     <string name="create">Create</string>
     <string name="cancel">Cancel</string>
+    <string name="lure">Lure</string>
+    <string name="pictures">Pictures</string>
+    <string name="current">Current</string>
+    <string name="on_map">On map</string>
+    <string name="markers_list">Markers list</string>
 </resources>

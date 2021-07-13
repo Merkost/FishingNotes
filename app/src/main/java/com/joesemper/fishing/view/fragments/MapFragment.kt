@@ -22,38 +22,27 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.transition.MaterialFadeThrough
-import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.entity.map.UserMarker
-import com.joesemper.fishing.model.entity.weather.WeatherForecast
-import com.joesemper.fishing.model.repository.weather.WeatherRepository
-import com.joesemper.fishing.model.repository.weather.api.WeatherApiService
+import com.joesemper.fishing.model.entity.common.UserCatch
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.utils.PermissionUtils.isPermissionGranted
 import com.joesemper.fishing.utils.PermissionUtils.requestPermission
-import com.joesemper.fishing.view.fragments.dialogFragments.AddMarkerBottomSheetDialogFragment
-import com.joesemper.fishing.view.fragments.dialogFragments.AddMarkerListener
-import com.joesemper.fishing.view.fragments.dialogFragments.DeleteMarkerListener
-import com.joesemper.fishing.view.fragments.dialogFragments.MarkerDetailsDialogFragment
+import com.joesemper.fishing.view.fragments.dialogFragments.*
 import com.joesemper.fishing.viewmodel.map.MapViewModel
 import com.joesemper.fishing.viewmodel.map.MapViewState
 import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.flow.collect
-import okhttp3.OkHttpClient
 import org.koin.android.ext.android.inject
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.scope.Scope
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
-    ActivityCompat.OnRequestPermissionsResultCallback, AddMarkerListener, DeleteMarkerListener {
+    ActivityCompat.OnRequestPermissionsResultCallback, AddNewCatchListener, DeleteMarkerListener {
 
     override val scope: Scope by fragmentScope()
     private val viewModel: MapViewModel by viewModel()
@@ -65,7 +54,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
-    private val currentMarkers = mutableListOf<UserMarker?>()
+    private val currentMarkers = mutableListOf<UserCatch?>()
 
     private var isPlaceSelectMode = false
 
@@ -115,12 +104,12 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         getDeviceLocation()
     }
 
-    override fun addMarker(marker: UserMarker) {
-        viewModel.addMarker(marker)
+    override fun addNewCatch(aCatch: UserCatch) {
+        viewModel.addNewCatch(aCatch)
     }
 
-    override fun deleteMarker(marker: UserMarker) {
-        viewModel.deleteMarker(marker)
+    override fun deleteMarker(aCatch: UserCatch) {
+        viewModel.deleteMarker(aCatch)
     }
 
     private fun enableMyLocation() {
@@ -179,7 +168,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
                         onLoading()
                     }
                     is MapViewState.Success -> {
-                        onSuccess(viewState.userMarkers)
+                        onSuccess(viewState.userCatches)
                     }
                     is MapViewState.Error -> {
                         onError(viewState.error)
@@ -190,15 +179,16 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     }
 
     private fun onLoading() {
-        Toast.makeText(context, "Loading!!!", Toast.LENGTH_SHORT).show()
+        progressBar_map.visibility = View.VISIBLE
     }
 
-    private fun onSuccess(userMarkers: List<UserMarker?>) {
-        map.clear()
-        currentMarkers.clear()
-        if (userMarkers.isNotEmpty()) {
-            addMarkersOnMap(userMarkers)
-        }
+    private fun onSuccess(userCatches: List<UserCatch?>) {
+        progressBar_map.visibility = View.GONE
+//        map.clear()
+//        currentMarkers.clear()
+//        if (userCatches.isNotEmpty()) {
+//            addMarkersOnMap(userCatches)
+//        }
     }
 
     private fun onError(error: Throwable) {
@@ -206,20 +196,20 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         logger.log(error.message)
     }
 
-    private fun addMarkersOnMap(userMarkers: List<UserMarker?>) {
-        for (marker in userMarkers) {
-            if (marker != null) {
-                val mapMarker =
-                    map.addMarker(
-                        MarkerOptions()
-                            .position(LatLng(marker.latitude, marker.longitude))
-                            .title(marker.title)
-                            .snippet(marker.description)
-                    )
-                mapMarker?.tag = marker.id
-                currentMarkers.add(marker)
-            }
-        }
+    private fun addMarkersOnMap(userCatches: List<UserCatch?>) {
+//        for (marker in userCatches) {
+//            if (marker != null) {
+//                val mapMarker =
+//                    map.addMarker(
+//                        MarkerOptions()
+//                            .position(LatLng(marker.latitude, marker.longitude))
+//                            .title(marker.title)
+//                            .snippet(marker.description)
+//                    )
+//                mapMarker?.tag = marker.id
+//                currentMarkers.add(marker)
+//            }
+//        }
     }
 
     private fun setOnFabClickListener() {
@@ -298,7 +288,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
                 if (task.isSuccessful) {
                     lastKnownLocation = task.result
                     if (lastKnownLocation != null) {
-                       moveCameraToLocation(lastKnownLocation!!)
+                        moveCameraToLocation(lastKnownLocation!!)
                     }
                 }
             }

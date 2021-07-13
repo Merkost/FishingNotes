@@ -3,7 +3,7 @@ package com.joesemper.fishing.viewmodel.splash
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.model.auth.AuthManager
-import com.joesemper.fishing.model.entity.user.User
+import com.joesemper.fishing.model.entity.common.User
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 

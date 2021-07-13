@@ -1,4 +1,4 @@
-package com.joesemper.fishing.model.entity.user
+package com.joesemper.fishing.model.entity.common
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize

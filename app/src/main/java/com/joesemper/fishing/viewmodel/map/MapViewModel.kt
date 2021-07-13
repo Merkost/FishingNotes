@@ -2,7 +2,8 @@ package com.joesemper.fishing.viewmodel.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.joesemper.fishing.model.entity.map.UserMarker
+import com.joesemper.fishing.model.entity.common.UserCatch
+import com.joesemper.fishing.model.entity.states.AddNewCatchState
 import com.joesemper.fishing.model.repository.map.MapRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,23 +35,30 @@ class MapViewModel(
         }
     }
 
-    fun addMarker(userMarker: UserMarker) {
+    fun addNewCatch(userCatch: UserCatch) {
+        mutableStateFlow.value = MapViewState.Loading
         viewModelScope.launch {
-            mapRepository.addMarker(userMarker)
+            mapRepository.addNewCatch(userCatch).collect { addNewCatchState ->
+                when(addNewCatchState) {
+                    is AddNewCatchState.Success -> onSuccess(listOf())
+                    is AddNewCatchState.Loading -> mutableStateFlow.value = MapViewState.Loading
+                    is AddNewCatchState.Error -> onError(addNewCatchState.error)
+                }
+            }
         }
     }
 
-    fun deleteMarker(userMarker: UserMarker) {
+    fun deleteMarker(userCatch: UserCatch) {
         viewModelScope.launch {
-            mapRepository.deleteMarker(userMarker)
+            mapRepository.deleteMarker(userCatch)
         }
     }
 
-    private fun onSuccess(userMarkers: List<UserMarker?>) {
-        mutableStateFlow.value = MapViewState.Success(userMarkers)
+    private fun onSuccess(userCatches: List<UserCatch?>) {
+        mutableStateFlow.value = MapViewState.Success(userCatches)
     }
 
-    private fun handleError(error: Throwable) {
+    private fun onError(error: Throwable) {
         mutableStateFlow.value = MapViewState.Error(error)
     }
 }

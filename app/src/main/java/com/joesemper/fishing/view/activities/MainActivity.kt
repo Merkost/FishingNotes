@@ -11,7 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.entity.user.User
+import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.view.fragments.dialogFragments.LogoutListener
 import com.joesemper.fishing.view.fragments.dialogFragments.UserBottomSheetDialogFragment
@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity(), AndroidScopeComponent, LogoutListener 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        initToolbar()
         initBottomNav()
         subscribeOnViewModel()
     }
@@ -69,6 +70,10 @@ class MainActivity : AppCompatActivity(), AndroidScopeComponent, LogoutListener 
     private fun onError(error: Throwable) {
         Toast.makeText(this, error.message, Toast.LENGTH_SHORT).show()
         logger.log(error.message)
+    }
+
+    private fun initToolbar() {
+        setSupportActionBar(toolbar_main)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

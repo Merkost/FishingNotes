@@ -40,6 +40,11 @@ android {
             includeAndroidResources = true
         }
     }
+
+    buildFeatures {
+        viewBinding = true
+    }
+
 }
 
 dependencies {
@@ -79,9 +84,10 @@ dependencies {
     implementation "com.squareup.okhttp3:logging-interceptor:3.12.1"
 
     //Koin
-//    implementation "org.koin:koin-android:2.1.6"
-//    implementation "org.koin:koin-android-viewmodel:2.1.6"
     implementation "io.insert-koin:koin-android:3.1.2"
+
+    //BottomPicker
+    implementation 'gun0912.ted:tedbottompicker:2.0.1'
 
     //Сoil
     implementation("io.coil-kt:coil:1.2.1")

@@ -9,11 +9,11 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import coil.load
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.entity.map.UserMarker
+import com.joesemper.fishing.model.entity.common.UserCatch
 import kotlinx.android.synthetic.main.fragmet_dialog_marker_details.*
 
 interface DeleteMarkerListener {
-    fun deleteMarker(marker: UserMarker)
+    fun deleteMarker(aCatch: UserCatch)
 }
 
 class MarkerDetailsDialogFragment : DialogFragment() {
@@ -21,8 +21,8 @@ class MarkerDetailsDialogFragment : DialogFragment() {
     companion object {
         private const val MARKER = "MARKER"
 
-        fun newInstance(userMarker: UserMarker): DialogFragment {
-            val args = bundleOf(MARKER to userMarker)
+        fun newInstance(userCatch: UserCatch): DialogFragment {
+            val args = bundleOf(MARKER to userCatch)
             val fragment = MarkerDetailsDialogFragment()
             fragment.arguments = args
             return fragment
@@ -40,12 +40,12 @@ class MarkerDetailsDialogFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val userMarker = arguments?.getParcelable<UserMarker>(MARKER)
+        val userMarker = arguments?.getParcelable<UserCatch>(MARKER)
 
         if (userMarker != null) {
             setHeader(userMarker.title)
             setDescription(userMarker.description)
-            setImage(userMarker.downloadPhotoLink)
+//            setImage(userMarker.downloadPhotoLink)
             setOnDeleteButtonClickListener(userMarker)
         }
     }
@@ -64,9 +64,9 @@ class MarkerDetailsDialogFragment : DialogFragment() {
         }
     }
 
-    private fun setOnDeleteButtonClickListener(userMarker: UserMarker) {
+    private fun setOnDeleteButtonClickListener(userCatch: UserCatch) {
         button_delete_marker.setOnClickListener {
-            (parentFragment as DeleteMarkerListener).deleteMarker(userMarker)
+            (parentFragment as DeleteMarkerListener).deleteMarker(userCatch)
             dismiss()
         }
     }

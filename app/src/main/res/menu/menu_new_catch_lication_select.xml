@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/item_current"
+        android:title="@string/current" />
+
+    <item
+        android:id="@+id/item_on_map"
+        android:title="@string/on_map" />
+
+    <item
+        android:id="@+id/item_markers_list"
+        android:title="@string/markers_list" />
+</menu>

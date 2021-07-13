@@ -7,7 +7,7 @@ import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.entity.user.User
+import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.viewmodel.groups.GroupsViewState
 import com.joesemper.fishing.view.fragments.dialogFragments.LogoutListener
 import com.joesemper.fishing.view.activities.SplashActivity

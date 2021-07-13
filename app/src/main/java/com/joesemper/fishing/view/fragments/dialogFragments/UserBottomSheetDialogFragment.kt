@@ -8,7 +8,7 @@ import coil.load
 import coil.transform.CircleCropTransformation
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.entity.user.User
+import com.joesemper.fishing.model.entity.common.User
 import kotlinx.android.synthetic.main.fragment_bottom_sheet_dialog_user.*
 
 class UserBottomSheetDialogFragment : BottomSheetDialogFragment() {

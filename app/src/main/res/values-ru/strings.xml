@@ -34,4 +34,8 @@
     <string name="publish_catch">Опубликовать улов</string>
     <string name="create">Создать</string>
     <string name="cancel">Закрыть</string>
+    <string name="lure">Lure</string>
+    <string name="pictures">Pictures</string>
+    <string name="current">Current</string>
+    <string name="markers_list">Markers list</string>
 </resources>

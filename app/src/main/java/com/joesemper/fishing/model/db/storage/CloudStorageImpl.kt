@@ -2,10 +2,15 @@ package com.joesemper.fishing.model.db.storage
 
 import android.net.Uri
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
+import com.joesemper.fishing.utils.getNewPhotoId
 import com.joesemper.fishing.utils.getRandomString
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
@@ -18,7 +23,7 @@ class CloudStorageImpl : Storage {
 
     @ExperimentalCoroutinesApi
     override suspend fun uploadPhoto(uri: Uri) = callbackFlow {
-        val riversRef = storageRef.child("markerImages/${getRandomString(15)}")
+        val riversRef = storageRef.child("markerImages/${getNewPhotoId()}")
         val uploadTask = riversRef.putFile(uri)
 
         uploadTask.continueWithTask { task ->
@@ -35,6 +40,31 @@ class CloudStorageImpl : Storage {
             }
         }
         awaitClose { uploadTask.cancel() }
+    }
+
+    @ExperimentalCoroutinesApi
+    override suspend fun uploadPhotos(uris: List<Uri>) = callbackFlow {
+        val uploadTasks = mutableListOf<UploadTask>()
+        uris.forEach { photoUri ->
+            val riversRef = storageRef.child("markerImages/${getNewPhotoId()}")
+            val uploadTask = riversRef.putFile(photoUri)
+            uploadTasks.add(uploadTask)
+
+            uploadTask.continueWithTask { task ->
+                if (!task.isSuccessful) {
+                    task.exception?.let {
+                        throw it
+                    }
+                }
+                riversRef.downloadUrl
+            }.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val downloadUri = task.result
+                    trySend(downloadUri.toString())
+                }
+            }
+        }
+        awaitClose { uploadTasks.onEach { cancel() } }
     }
 
     override suspend fun deletePhoto(url: String) {

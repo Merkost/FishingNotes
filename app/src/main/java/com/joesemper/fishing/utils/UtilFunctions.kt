@@ -11,4 +11,10 @@ fun getRandomString(length: Int) : String {
         .joinToString("")
 }
 
+fun getNewCatchId() = getRandomString(10)
+fun getNewMarkerId() = getRandomString(15)
+fun getNewPhotoId() = getRandomString(12)
+
 fun getTimeStamp(): String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+
+fun Double.format(digits: Int) = "%.${digits}f".format(this)

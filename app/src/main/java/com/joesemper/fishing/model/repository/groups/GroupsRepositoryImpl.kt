@@ -2,9 +2,7 @@ package com.joesemper.fishing.model.repository.groups
 
 import androidx.lifecycle.LiveData
 import com.joesemper.fishing.model.db.DatabaseProvider
-import com.joesemper.fishing.model.entity.user.User
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.joesemper.fishing.model.entity.common.User
 
 class GroupsRepositoryImpl(private val provider: DatabaseProvider): GroupsRepository {
     override suspend fun getUserData(): User? {

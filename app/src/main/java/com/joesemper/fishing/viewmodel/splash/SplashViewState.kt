@@ -1,6 +1,6 @@
 package com.joesemper.fishing.viewmodel.splash
 
-import com.joesemper.fishing.model.entity.user.User
+import com.joesemper.fishing.model.entity.common.User
 
 sealed class SplashViewState {
     object Loading : SplashViewState()
