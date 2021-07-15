@@ -3,8 +3,8 @@ package com.joesemper.fishing
 import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.joesemper.fishing.model.auth.AuthManager
-import com.joesemper.fishing.model.entity.common.User
+import com.joesemper.fishing.data.auth.AuthManager
+import com.joesemper.fishing.model.common.User
 import com.joesemper.fishing.viewmodel.main.MainViewModel
 import com.joesemper.fishing.viewmodel.main.MainViewState
 import com.nhaarman.mockito_kotlin.times

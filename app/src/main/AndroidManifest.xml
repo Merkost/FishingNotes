@@ -28,9 +28,9 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".view.activities.MainActivity" />
+        <activity android:name=".presentation.MainActivity" />
 
-        <activity android:name=".view.activities.SplashActivity">
+        <activity android:name=".presentation.splash.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
