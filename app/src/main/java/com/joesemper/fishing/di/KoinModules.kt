@@ -4,8 +4,8 @@ import com.joesemper.fishing.data.auth.AuthManager
 import com.joesemper.fishing.data.auth.FirebaseAuthManagerImpl
 import com.joesemper.fishing.data.datasource.CloudFireStoreDatabaseImpl
 import com.joesemper.fishing.data.datasource.DatabaseProvider
-import com.joesemper.fishing.data.datasource.CloudStorageImpl
-import com.joesemper.fishing.data.datasource.Storage
+import com.joesemper.fishing.data.datasource.CloudPhotoStorageImpl
+import com.joesemper.fishing.data.datasource.PhotoStorage
 import com.joesemper.fishing.data.repository.groups.GroupsRepository
 import com.joesemper.fishing.data.repository.groups.GroupsRepositoryImpl
 import com.joesemper.fishing.data.repository.map.MapRepository
@@ -32,7 +32,7 @@ import org.koin.dsl.module
 val appModule = module {
     single<DatabaseProvider> { CloudFireStoreDatabaseImpl(get()) }
     single<AuthManager> { FirebaseAuthManagerImpl(androidContext()) }
-    single<Storage> { CloudStorageImpl() }
+    single<PhotoStorage> { CloudPhotoStorageImpl() }
     single { Logger() }
 }
 

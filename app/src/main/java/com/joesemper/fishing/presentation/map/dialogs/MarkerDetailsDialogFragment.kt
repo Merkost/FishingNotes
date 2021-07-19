@@ -9,7 +9,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import coil.load
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.common.UserCatch
+import com.joesemper.fishing.model.common.content.UserCatch
 import kotlinx.android.synthetic.main.fragmet_dialog_marker_details.*
 
 interface DeleteMarkerListener {

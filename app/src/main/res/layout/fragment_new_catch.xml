@@ -390,7 +390,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/guideline"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/textInputLayout_new_catch_bait"
-                app:srcCompat="@drawable/ic_fishing_hook" />
+                app:srcCompat="@drawable/ic_fishing_baits" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/textInputLayout_new_catch_lure"
@@ -467,11 +467,12 @@
                 android:id="@+id/iv_new_catch_place_icon"
                 style="@style/SimpleIcon"
                 android:layout_marginEnd="8dp"
-                app:layout_constraintBottom_toBottomOf="@+id/tv_new_catch_latitude_longitude"
+                android:layout_marginBottom="18dp"
+                app:layout_constraintBottom_toBottomOf="@+id/textInputLayout_new_catch__place_title"
                 app:layout_constraintEnd_toStartOf="@+id/guideline"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/tv_new_catch_latitude_header"
-                app:srcCompat="@drawable/ic_baseline_location_on_24" />
+                app:layout_constraintTop_toTopOf="@+id/textInputLayout_new_catch__place_title"
+                app:srcCompat="@drawable/ic_fish_on_map" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tv_new_catch_options_header"

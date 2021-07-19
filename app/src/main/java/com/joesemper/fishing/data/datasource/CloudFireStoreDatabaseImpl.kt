@@ -1,68 +1,79 @@
 package com.joesemper.fishing.data.datasource
 
 import android.util.Log
-import androidx.core.net.toUri
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
-import com.joesemper.fishing.model.common.MapMarker
-import com.joesemper.fishing.model.common.UserCatch
-import com.joesemper.fishing.model.common.UserMarker
-import com.joesemper.fishing.model.states.AddNewCatchState
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.joesemper.fishing.data.entity.RawUserCatch
+import com.joesemper.fishing.data.mappers.UserCatchMapper
+import com.joesemper.fishing.model.common.content.UserCatch
+import com.joesemper.fishing.model.common.content.MapMarker
+import com.joesemper.fishing.model.common.Progress
+import com.joesemper.fishing.utils.getCurrentUser
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 
 
-class CloudFireStoreDatabaseImpl(private val cloudStorage: Storage) : DatabaseProvider {
+class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : DatabaseProvider {
 
     private val db = Firebase.firestore
 
-    private val fireBaseAuth = FirebaseAuth.getInstance()
-
-    private val currentUser: FirebaseUser?
-        get() = fireBaseAuth.currentUser
-
-    private val addNewCatchState = MutableStateFlow<AddNewCatchState>(AddNewCatchState.Loading())
-
     @ExperimentalCoroutinesApi
-    override fun getAllUserMarkers() = callbackFlow {
-        val catchesCollection = getCatchesCollection()
-        val markersCollection = getMarkersCollection()
+    override fun getAllUserCatches() = channelFlow {
+        val listenerOne = getCatchesCollection()
+            .whereEqualTo("userId", getCurrentUser()!!.uid)
+            .addSnapshotListener { values, error ->
+                if (error != null) {
+                    Log.d("Fishing", "Catch snapshot listener", error)
+                    return@addSnapshotListener
+                }
 
-        val snapshotListenerUserCatches = catchesCollection
-            .whereEqualTo("userId", currentUser!!.uid)
-            .addSnapshotListener(getCatchSnapshotListener(this))
+                values?.forEach { documentSnapshot ->
+                    val userCatch = documentSnapshot.toObject<UserCatch>()
+                    trySend(userCatch)
+                }
+            }
 
-        val snapshotListenerPublicCatches = catchesCollection
+
+        val listenerTwo = getCatchesCollection()
             .whereEqualTo("isPublic", true)
-            .whereNotEqualTo("userId", currentUser!!.uid)
-            .addSnapshotListener(getCatchSnapshotListener(this))
+            .whereNotEqualTo("userId", getCurrentUser()!!.uid)
+            .addSnapshotListener { values, error ->
 
-        val snapshotListenerUserMarkers = markersCollection
-            .whereEqualTo("userId", currentUser!!.uid)
-            .addSnapshotListener(getMarkersSnapshotListener(this))
+                if (error != null) {
+                    Log.d("Fishing", "Catch snapshot listener", error)
+                    return@addSnapshotListener
+                }
 
-        val snapshotListenerPublicMarkers = markersCollection
-            .whereEqualTo("isPublic", true)
-            .whereNotEqualTo("userId", currentUser!!.uid)
-            .addSnapshotListener(getMarkersSnapshotListener(this))
+                values?.forEach { documentSnapshot ->
+                    val userCatch = documentSnapshot.toObject<UserCatch>()
+                    trySend(userCatch)
+                }
 
+            }
 
         awaitClose {
-            snapshotListenerUserCatches.remove()
-            snapshotListenerPublicCatches.remove()
-            snapshotListenerUserMarkers.remove()
-            snapshotListenerPublicMarkers.remove()
+
         }
+
     }
 
     @ExperimentalCoroutinesApi
-    private fun getCatchSnapshotListener(scope: ProducerScope<MapMarker>) =
+    override fun getMarker(markerId: String) = channelFlow {
+
+        val listener = getMarkersCollection().document(markerId)
+            .addSnapshotListener { value, error ->
+                trySend(value?.toObject<MapMarker>())
+            }
+
+        awaitClose { listener.remove() }
+    }
+
+    @ExperimentalCoroutinesApi
+    private fun getCatchSnapshotListener(scope: ProducerScope<UserCatch>) =
         EventListener<QuerySnapshot> { snapshots, error ->
             if (error != null) {
                 Log.d("Fishing", "Catch snapshot listener", error)
@@ -84,51 +95,54 @@ class CloudFireStoreDatabaseImpl(private val cloudStorage: Storage) : DatabasePr
             }
 
             snapshots?.forEach { documentSnapshot ->
-                val userMarker = documentSnapshot.toObject<UserMarker>()
+                val userMarker = documentSnapshot.toObject<MapMarker>()
                 scope.trySend(userMarker)
             }
         }
 
-    override suspend fun addNewCatch(userCatch: UserCatch): StateFlow<AddNewCatchState> {
-        addNewCatchState.value = AddNewCatchState.Loading()
+    @ExperimentalCoroutinesApi
+    override suspend fun addNewCatch(newCatch: RawUserCatch): StateFlow<Progress> {
+        val flow = MutableStateFlow<Progress>(Progress.Loading())
 
-        userCatch.userId = currentUser!!.uid
-        val photoUris = userCatch.photoUris
+        saveMarker(newCatch.marker)
 
-        if (photoUris.isNotEmpty()) {
-            val photoDownloadLinks = savePhotosToDb(photoUris)
-            userCatch.downloadPhotoLinks.addAll(photoDownloadLinks)
-        }
-        saveMarker(userCatch.marker)
-        userCatch.userMarkerId = userCatch.marker?.id
-        getCatchesCollection().document(userCatch.id).set(userCatch).addOnCompleteListener {
-            addNewCatchState.value = AddNewCatchState.Success
-        }
+        val photoDownloadLinks = savePhotos(newCatch.photos)
 
-        return addNewCatchState
+        val userCatch = UserCatchMapper().mapRawCatch(newCatch, photoDownloadLinks)
+
+        getCatchesCollection().document(userCatch.id).set(userCatch)
+            .addOnCompleteListener {
+                flow.tryEmit(Progress.Complete)
+            }
+
+        return flow
     }
 
-    private suspend fun savePhotosToDb(photoUris: List<String>): List<String> {
-        val downloadLinks = mutableListOf<String>()
-        val uris = photoUris.map { it.toUri() }
-        try {
-            cloudStorage.uploadPhotos(uris)
-                .take(photoUris.size)
-                .collect { downloadLink ->
-                    downloadLinks.add(downloadLink)
+    @ExperimentalCoroutinesApi
+    private suspend fun saveMarker(mapMarker: MapMarker?): String {
+        var markerId = ""
+        if (mapMarker != null) {
+            saveMarkerToDb(mapMarker)
+                .take(1)
+                .collect {
+                    markerId = it
                 }
-        } catch (e: Throwable) {
-            addNewCatchState.value = AddNewCatchState.Error(e)
         }
-        return downloadLinks
+        return markerId
     }
 
-    private fun saveMarker(userMarker: UserMarker?) {
-        if (userMarker != null) {
-            getMarkersCollection().document(userMarker.id).set(userMarker)
+    @ExperimentalCoroutinesApi
+    private fun saveMarkerToDb(mapMarker: MapMarker) = callbackFlow {
+        val documentRef = getMarkersCollection().document(mapMarker.id)
+        documentRef.set(mapMarker).addOnCompleteListener {
+            trySend(mapMarker.id)
         }
-
+        awaitClose {}
     }
+
+
+    private suspend fun savePhotos(photos: List<ByteArray>) =
+        cloudPhotoStorage.uploadPhotos(photos)
 
     override suspend fun deleteMarker(userCatch: UserCatch) {
 //        cloudStorage.deletePhoto(userCatch.downloadPhotoLink)

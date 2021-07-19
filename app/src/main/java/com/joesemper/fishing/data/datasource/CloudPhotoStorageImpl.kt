@@ -1,6 +1,5 @@
 package com.joesemper.fishing.data.datasource
 
-import android.net.Uri
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
@@ -9,40 +8,35 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.take
 
 
-class CloudStorageImpl : Storage {
+class CloudPhotoStorageImpl : PhotoStorage {
 
     private val storage = Firebase.storage
     private var storageRef = storage.reference
 
     @ExperimentalCoroutinesApi
-    override suspend fun uploadPhoto(uri: Uri) = callbackFlow {
-        val riversRef = storageRef.child("markerImages/${getNewPhotoId()}")
-        val uploadTask = riversRef.putFile(uri)
-
-        uploadTask.continueWithTask { task ->
-            if (!task.isSuccessful) {
-                task.exception?.let {
-                    throw it
+    override suspend fun uploadPhotos(photos: List<ByteArray>): List<String> {
+        val downloadLinks = mutableListOf<String>()
+        if (photos.isNotEmpty()) {
+            savePhotosToDb(photos)
+                .take(photos.size)
+                .collect { downloadLink ->
+                    downloadLinks.add(downloadLink)
                 }
-            }
-            riversRef.downloadUrl
-        }.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val downloadUri = task.result
-                trySend(downloadUri.toString())
-            }
         }
-        awaitClose { uploadTask.cancel() }
+        return downloadLinks
     }
 
+
     @ExperimentalCoroutinesApi
-    override suspend fun uploadPhotos(uris: List<Uri>) = callbackFlow {
+    private fun savePhotosToDb(photoByteArrays: List<ByteArray>) = callbackFlow {
         val uploadTasks = mutableListOf<UploadTask>()
-        uris.forEach { photoUri ->
+        photoByteArrays.forEach { photoByteArray ->
             val riversRef = storageRef.child("markerImages/${getNewPhotoId()}")
-            val uploadTask = riversRef.putFile(photoUri)
+            val uploadTask = riversRef.putBytes(photoByteArray)
             uploadTasks.add(uploadTask)
 
             uploadTask.continueWithTask { task ->

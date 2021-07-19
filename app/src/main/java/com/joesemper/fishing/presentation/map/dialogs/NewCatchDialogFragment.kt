@@ -1,16 +1,18 @@
 package com.joesemper.fishing.view.fragments.dialogFragments
 
-import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
 import android.app.TimePickerDialog
 import android.app.TimePickerDialog.OnTimeSetListener
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.os.bundleOf
@@ -19,13 +21,14 @@ import coil.load
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.joesemper.fishing.R
+import com.joesemper.fishing.data.entity.RawUserCatch
 import com.joesemper.fishing.databinding.FragmentNewCatchBinding
-import com.joesemper.fishing.model.common.UserCatch
-import com.joesemper.fishing.model.common.UserMarker
+import com.joesemper.fishing.model.common.content.MapMarker
 import com.joesemper.fishing.utils.format
-import com.joesemper.fishing.utils.getNewCatchId
+import com.joesemper.fishing.utils.getCurrentUser
 import com.joesemper.fishing.utils.getNewMarkerId
 import gun0912.tedbottompicker.TedBottomPicker
+import java.io.ByteArrayOutputStream
 import java.util.*
 
 
@@ -126,15 +129,13 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
                 .setSelectMaxCount(3)
                 .showMultiImage { uriList ->
                     currentPhotos = uriList
-                    if (uriList.isNotEmpty()) {
-                        if (uriList[0] != null) {
-                            binding.ivNewCatchImageFirst.load(uriList[0])
-                        }
-                        if (uriList[1] != null) {
-                            binding.ivNewCatchImageSecond.load(uriList[1])
-                        }
-                        if (uriList[2] != null) {
-                            binding.ivNewCatchImageThird.load(uriList[2])
+
+                    for(i in 0..uriList.size) {
+                        when (i) {
+                            0 -> binding.ivNewCatchImageFirst.load(uriList[i])
+                            1 -> binding.ivNewCatchImageSecond.load(uriList[i])
+                            2 -> binding.ivNewCatchImageThird.load(uriList[i])
+
                         }
                     }
 
@@ -246,9 +247,7 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
         popup.show()
     }
 
-    private fun createNewUserCatch(): UserCatch {
-        return UserCatch(
-            id = getNewCatchId(),
+    private fun createNewUserCatch() =  RawUserCatch(
             title = binding.etNewCatchTitle.text.toString(),
             description = binding.etNewCatchDescription.text.toString(),
             time = binding.tvNewCatchTime.text.toString(),
@@ -261,29 +260,48 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
             fishingLure = binding.etNewCatchLure.text.toString(),
             marker = createUserMarker(),
             isPublic = binding.switchPublishCatch.isChecked,
-            photoUris = currentPhotos.flatMap { uri ->
-                listOf(uri.toString())
-            }
+            photos = getPhotos()
         )
-    }
 
-    private fun createUserMarker(): UserMarker {
+    private fun createUserMarker(): MapMarker {
         val coordinates = currentCoordinates
         return if (coordinates != null) {
-            UserMarker(
+            MapMarker(
                 id = getNewMarkerId(),
                 latitude = coordinates.latitude,
                 longitude = coordinates.longitude,
                 title = binding.etNewCatchPlaceTitle.text.toString()
             )
         } else {
-            UserMarker()
+            MapMarker()
         }
 
+    }
+    private fun getPhotos():  List<ByteArray> {
+        if (currentPhotos.isEmpty()) {
+            return listOf()
+        }
+        val bitmaps = mutableListOf<ByteArray>()
+        for(i in 0..currentPhotos.size) {
+            when (i) {
+                0 -> bitmaps.add(getByteArrayFromImageVew(binding.ivNewCatchImageFirst))
+                1 -> bitmaps.add(getByteArrayFromImageVew(binding.ivNewCatchImageSecond))
+                2 -> bitmaps.add(getByteArrayFromImageVew(binding.ivNewCatchImageThird))
+
+            }
+        }
+        return bitmaps
+    }
+
+    private fun getByteArrayFromImageVew(view: ImageView): ByteArray {
+        val bitmap = (view.drawable as BitmapDrawable).bitmap
+        val baos = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        return baos.toByteArray()
     }
 
 }
 
 interface AddNewCatchListener {
-    fun addNewCatch(aCatch: UserCatch)
+    fun addNewCatch(newCatch: RawUserCatch)
 }

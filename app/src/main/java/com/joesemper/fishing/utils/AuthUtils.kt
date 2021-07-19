@@ -2,6 +2,7 @@ package com.joesemper.fishing.utils
 
 import android.content.Intent
 import com.firebase.ui.auth.AuthUI
+import com.google.firebase.auth.FirebaseAuth
 import com.joesemper.fishing.R
 
 fun getLoginActivityIntent(): Intent {
@@ -18,3 +19,6 @@ private fun getProvidersList() = arrayListOf(
     AuthUI.IdpConfig.GoogleBuilder().build(),
     AuthUI.IdpConfig.AnonymousBuilder().build()
 )
+
+fun getCurrentUser() = FirebaseAuth.getInstance().currentUser
+
