@@ -1,4 +1,4 @@
-package com.joesemper.fishing.view.fragments.dialogFragments
+package com.joesemper.fishing.presentation.map.dialogs
 
 import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
@@ -8,28 +8,27 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.text.InputType
 import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.Toast
-import androidx.appcompat.widget.PopupMenu
 import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import coil.load
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.joesemper.fishing.R
 import com.joesemper.fishing.data.entity.RawUserCatch
 import com.joesemper.fishing.databinding.FragmentNewCatchBinding
 import com.joesemper.fishing.model.common.content.MapMarker
 import com.joesemper.fishing.utils.format
-import com.joesemper.fishing.utils.getCurrentUser
 import com.joesemper.fishing.utils.getNewMarkerId
+import com.joesemper.fishing.utils.roundTo
 import gun0912.tedbottompicker.TedBottomPicker
 import java.io.ByteArrayOutputStream
 import java.util.*
+import kotlin.math.round
 
 
 class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
@@ -68,19 +67,20 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
         setOnApplyClickListener()
         setOnCloseClickListeners()
         setOnAddPhotoClickListener()
-        setOnSelectPlaceClickListener()
+        setOnIncrementDecrementClickListeners()
         initTimeAndDate()
     }
 
     private fun setCurrentCoordinates() {
+        binding.etNewCatchCoordinates.inputType = InputType.TYPE_NULL
         val coordinates = arguments?.getParcelable<LatLng>(LAT_LNG)
         if (coordinates != null) {
             currentCoordinates = coordinates
             val latitude = coordinates.latitude.format(3)
             val longitude = coordinates.longitude.format(3)
 
-            "Latitude: $latitude \nLongitude: $longitude"
-                .also { binding.tvNewCatchLatitudeLongitude.text = it }
+            "Lat: $latitude  Lon: $longitude"
+                .also { binding.etNewCatchCoordinates.setText(it) }
         }
     }
 
@@ -102,10 +102,10 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private fun setOnEditTimeAndDateClickListeners() {
         with(binding) {
-            tvNewCatchDate.setOnClickListener { setDate() }
-            tvNewCatchTime.setOnClickListener { setTime() }
-            buttonNewCatchEditDate.setOnClickListener { setDate() }
-            buttonNewCatchEditTime.setOnClickListener { setTime() }
+            textInputLayoutNewCatchDate.setEndIconOnClickListener { setDate() }
+            textInputLayoutNewCatchTime.setEndIconOnClickListener { setTime() }
+            etNewCatchDate.inputType = InputType.TYPE_NULL
+            etNewCatchTime.inputType = InputType.TYPE_NULL
         }
 
     }
@@ -129,23 +129,17 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
                 .setSelectMaxCount(3)
                 .showMultiImage { uriList ->
                     currentPhotos = uriList
+                    if (uriList.isNotEmpty()) {
+                        for (i in 0..uriList.size) {
+                            when (i) {
+                                0 -> binding.ivNewCatchImageFirst.load(uriList[i])
+                                1 -> binding.ivNewCatchImageSecond.load(uriList[i])
+                                2 -> binding.ivNewCatchImageThird.load(uriList[i])
 
-                    for(i in 0..uriList.size) {
-                        when (i) {
-                            0 -> binding.ivNewCatchImageFirst.load(uriList[i])
-                            1 -> binding.ivNewCatchImageSecond.load(uriList[i])
-                            2 -> binding.ivNewCatchImageThird.load(uriList[i])
-
+                            }
                         }
                     }
-
                 }
-        }
-    }
-
-    private fun setOnSelectPlaceClickListener() {
-        binding.buttonNewCatchPlaceSelect.setOnClickListener { view ->
-            showSelectPlaceMenu(view)
         }
     }
 
@@ -153,6 +147,25 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
         with(binding) {
             toolbarNewCatch.setNavigationOnClickListener { dismiss() }
             buttonNewCatchCancel.setOnClickListener { dismiss() }
+        }
+    }
+
+    private fun setOnIncrementDecrementClickListeners() {
+        with(binding) {
+            buttonPlusAmount.setOnClickListener {
+                etNewCatchAmount.setText((etNewCatchAmount.text.toString().toInt().plus(1)).toString())
+            }
+            buttonMinusAmount.setOnClickListener {
+                if (etNewCatchAmount.text.toString().toInt() <= 0) return@setOnClickListener
+                etNewCatchAmount.setText((etNewCatchAmount.text.toString().toInt().minus(1)).toString())
+            }
+            buttonPlusWeight.setOnClickListener {
+                etNewCatchWeight.setText((etNewCatchWeight.text.toString().toDouble().plus(0.1).roundTo(1)).toString())
+            }
+            buttonMinusWeight.setOnClickListener {
+                if (etNewCatchWeight.text.toString().toDouble() <= 0) return@setOnClickListener
+                etNewCatchWeight.setText((etNewCatchWeight.text.toString().toDouble().minus(0.1).roundTo(1)).toString())
+            }
         }
     }
 
@@ -181,18 +194,22 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     // установка начальных даты и времени
     private fun setInitialDate() {
-        binding.tvNewCatchDate.text = DateUtils.formatDateTime(
-            requireContext(),
-            dateAndTime.timeInMillis,
-            DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR
+        binding.etNewCatchDate.setText(
+            DateUtils.formatDateTime(
+                requireContext(),
+                dateAndTime.timeInMillis,
+                DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR
+            )
         )
     }
 
     private fun setInitialTime() {
-        binding.tvNewCatchTime.text = DateUtils.formatDateTime(
-            requireContext(),
-            dateAndTime.timeInMillis,
-            DateUtils.FORMAT_SHOW_TIME
+        binding.etNewCatchTime.setText(
+            DateUtils.formatDateTime(
+                requireContext(),
+                dateAndTime.timeInMillis,
+                DateUtils.FORMAT_SHOW_TIME
+            )
         )
     }
 
@@ -226,42 +243,21 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
         return isCorrect
     }
 
-    private fun showSelectPlaceMenu(v: View) {
-        val popup = PopupMenu(requireContext(), v)
-        popup.menuInflater.inflate(R.menu.menu_new_catch_lication_select, popup.menu)
-
-        popup.setOnMenuItemClickListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.item_current -> {
-                    Toast.makeText(requireContext(), "Current", Toast.LENGTH_SHORT).show()
-                }
-                R.id.item_on_map -> {
-                    Toast.makeText(requireContext(), "On Map", Toast.LENGTH_SHORT).show()
-                }
-                R.id.item_markers_list -> {
-                    Toast.makeText(requireContext(), "Markers list", Toast.LENGTH_SHORT).show()
-                }
-            }
-           true
-        }
-        popup.show()
-    }
-
-    private fun createNewUserCatch() =  RawUserCatch(
-            title = binding.etNewCatchTitle.text.toString(),
-            description = binding.etNewCatchDescription.text.toString(),
-            time = binding.tvNewCatchTime.text.toString(),
-            date = binding.tvNewCatchDate.text.toString(),
-            fishType = binding.etNewCatchKindOfFish.text.toString(),
-            fishAmount = binding.etNewCatchAmount.text.toString().toInt(),
-            fishWeight = binding.etNewCatchAmount.text.toString().toDouble(),
-            fishingRodType = binding.etNewCatchRod.text.toString(),
-            fishingBait = binding.etNewCatchBait.text.toString(),
-            fishingLure = binding.etNewCatchLure.text.toString(),
-            marker = createUserMarker(),
-            isPublic = binding.switchPublishCatch.isChecked,
-            photos = getPhotos()
-        )
+    private fun createNewUserCatch() = RawUserCatch(
+        title = binding.etNewCatchTitle.text.toString(),
+        description = binding.etNewCatchDescription.text.toString(),
+        time = binding.etNewCatchTime.text.toString(),
+        date = binding.etNewCatchDate.text.toString(),
+        fishType = binding.etNewCatchKindOfFish.text.toString(),
+        fishAmount = binding.etNewCatchAmount.text.toString().toInt(),
+        fishWeight = binding.etNewCatchAmount.text.toString().toDouble(),
+        fishingRodType = binding.etNewCatchRod.text.toString(),
+        fishingBait = binding.etNewCatchBait.text.toString(),
+        fishingLure = binding.etNewCatchLure.text.toString(),
+        marker = createUserMarker(),
+        isPublic = binding.switchPublishCatch.isChecked,
+        photos = getPhotos()
+    )
 
     private fun createUserMarker(): MapMarker {
         val coordinates = currentCoordinates
@@ -277,12 +273,13 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
         }
 
     }
-    private fun getPhotos():  List<ByteArray> {
+
+    private fun getPhotos(): List<ByteArray> {
         if (currentPhotos.isEmpty()) {
             return listOf()
         }
         val bitmaps = mutableListOf<ByteArray>()
-        for(i in 0..currentPhotos.size) {
+        for (i in 0..currentPhotos.size) {
             when (i) {
                 0 -> bitmaps.add(getByteArrayFromImageVew(binding.ivNewCatchImageFirst))
                 1 -> bitmaps.add(getByteArrayFromImageVew(binding.ivNewCatchImageSecond))

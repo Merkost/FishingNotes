@@ -1,4 +1,4 @@
-package com.joesemper.fishing.view.fragments.dialogFragments
+package com.joesemper.fishing.presentation.map.dialogs
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -19,10 +19,10 @@ interface DeleteMarkerListener {
 class MarkerDetailsDialogFragment : DialogFragment() {
 
     companion object {
-        private const val MARKER = "MARKER"
+        private const val MARKERS = "MARKERS"
 
-        fun newInstance(userCatch: UserCatch): DialogFragment {
-            val args = bundleOf(MARKER to userCatch)
+        fun newInstance(userCatches: List<UserCatch>): DialogFragment {
+            val args = bundleOf(MARKERS to userCatches)
             val fragment = MarkerDetailsDialogFragment()
             fragment.arguments = args
             return fragment
@@ -40,18 +40,18 @@ class MarkerDetailsDialogFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val userMarker = arguments?.getParcelable<UserCatch>(MARKER)
-
-        if (userMarker != null) {
-            setHeader(userMarker.title)
-            setDescription(userMarker.description)
-//            setImage(userMarker.downloadPhotoLink)
-            setOnDeleteButtonClickListener(userMarker)
-        }
+//        val userMarker = arguments?.getParcelable<UserCatch>(MARKER)
+//
+//        if (userMarker != null) {
+//            setHeader(userMarker.title)
+//            setDescription(userMarker.description)
+////            setImage(userMarker.downloadPhotoLink)
+//            setOnDeleteButtonClickListener(userMarker)
+//        }
     }
 
     private fun setHeader(header: String) {
-        tv_marker_deatails_header.text = header
+//        tv_marker_deatails_header.text = header
     }
 
     private fun setDescription(description: String?) {
@@ -65,10 +65,10 @@ class MarkerDetailsDialogFragment : DialogFragment() {
     }
 
     private fun setOnDeleteButtonClickListener(userCatch: UserCatch) {
-        button_delete_marker.setOnClickListener {
-            (parentFragment as DeleteMarkerListener).deleteMarker(userCatch)
-            dismiss()
-        }
+//        button_delete_marker.setOnClickListener {
+//            (parentFragment as DeleteMarkerListener).deleteMarker(userCatch)
+//            dismiss()
+//        }
     }
 
 }

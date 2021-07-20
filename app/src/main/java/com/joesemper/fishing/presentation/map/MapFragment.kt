@@ -31,10 +31,13 @@ import com.joesemper.fishing.data.entity.RawUserCatch
 import com.joesemper.fishing.model.common.content.MapMarker
 import com.joesemper.fishing.model.common.content.Content
 import com.joesemper.fishing.model.common.content.UserCatch
+import com.joesemper.fishing.presentation.map.dialogs.AddMarkerBottomSheetDialogFragment
+import com.joesemper.fishing.presentation.map.dialogs.AddNewCatchListener
+import com.joesemper.fishing.presentation.map.dialogs.DeleteMarkerListener
+import com.joesemper.fishing.presentation.map.dialogs.MarkerDetailsDialogFragment
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.utils.PermissionUtils.isPermissionGranted
 import com.joesemper.fishing.utils.PermissionUtils.requestPermission
-import com.joesemper.fishing.view.fragments.dialogFragments.*
 import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
@@ -156,14 +159,13 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     }
 
     private fun setOnMarkersClickListener() {
-//        map.setOnMarkerClickListener { marker ->
-//            val userMarker = currentMarkers.first { it?.id == marker.tag }
-//            if (userMarker != null) {
-//                MarkerDetailsDialogFragment.newInstance(userMarker)
-//                    .show(childFragmentManager, "Markers")
-//            }
-//            true
-//        }
+        map.setOnMarkerClickListener { marker ->
+//            val userMarker = mapMarkers.first { it.id == marker.tag }
+            val catches = userCatches.filter { it.userMarkerId == marker.tag }
+            MarkerDetailsDialogFragment.newInstance(catches)
+                .show(childFragmentManager, "Markers")
+            true
+        }
     }
 
     private fun subscribeOnViewModel() {

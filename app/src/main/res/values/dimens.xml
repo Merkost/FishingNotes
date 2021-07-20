@@ -4,6 +4,6 @@
 
     <dimen name="constraint_layout_simple_padding">8dp</dimen>
 
-    <dimen name="simple_icon_width">24dp</dimen>
-    <dimen name="simple_icon_height">24dp</dimen>
+    <dimen name="simple_icon_width">32dp</dimen>
+    <dimen name="simple_icon_height">32dp</dimen>
 </resources>

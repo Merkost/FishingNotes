@@ -23,40 +23,23 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
 
     @ExperimentalCoroutinesApi
     override fun getAllUserCatches() = channelFlow {
-        val listenerOne = getCatchesCollection()
-            .whereEqualTo("userId", getCurrentUser()!!.uid)
-            .addSnapshotListener { values, error ->
-                if (error != null) {
-                    Log.d("Fishing", "Catch snapshot listener", error)
-                    return@addSnapshotListener
-                }
-
-                values?.forEach { documentSnapshot ->
-                    val userCatch = documentSnapshot.toObject<UserCatch>()
-                    trySend(userCatch)
-                }
-            }
+        val listeners = mutableListOf<ListenerRegistration>()
+        listeners.add(
+            getCatchesCollection()
+                .whereEqualTo("userId", getCurrentUser()!!.uid)
+                .addSnapshotListener(getCatchSnapshotListener(this))
+        )
 
 
-        val listenerTwo = getCatchesCollection()
-            .whereEqualTo("isPublic", true)
-            .whereNotEqualTo("userId", getCurrentUser()!!.uid)
-            .addSnapshotListener { values, error ->
-
-                if (error != null) {
-                    Log.d("Fishing", "Catch snapshot listener", error)
-                    return@addSnapshotListener
-                }
-
-                values?.forEach { documentSnapshot ->
-                    val userCatch = documentSnapshot.toObject<UserCatch>()
-                    trySend(userCatch)
-                }
-
-            }
+        listeners.add(
+            getCatchesCollection()
+                .whereEqualTo("isPublic", true)
+                .whereNotEqualTo("userId", getCurrentUser()!!.uid)
+                .addSnapshotListener(getCatchSnapshotListener(this))
+        )
 
         awaitClose {
-
+            listeners.forEach { it.remove() }
         }
 
     }
@@ -80,9 +63,17 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
                 return@EventListener
             }
 
-            snapshots?.forEach { documentSnapshot ->
-                val userCatch = documentSnapshot.toObject<UserCatch>()
-                scope.trySend(userCatch)
+            for (dc in snapshots!!.documentChanges) {
+                when (dc.type) {
+                    DocumentChange.Type.ADDED -> {
+                        val userCatch = dc.document.toObject<UserCatch>()
+                        scope.trySend(userCatch)
+                    }
+                    DocumentChange.Type.MODIFIED -> {
+                    }
+                    DocumentChange.Type.REMOVED -> {
+                    }
+                }
             }
         }
 

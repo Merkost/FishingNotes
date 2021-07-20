@@ -30,5 +30,6 @@
     <style name="SimpleIcon">
         <item name="android:layout_width">@dimen/simple_icon_width</item>
         <item name="android:layout_height">@dimen/simple_icon_height</item>
+        <item name="tint">@color/colorPrimary</item>
     </style>
 </resources>
