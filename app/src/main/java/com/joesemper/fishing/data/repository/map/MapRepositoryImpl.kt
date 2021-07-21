@@ -20,6 +20,7 @@ class MapRepositoryImpl(private val provider: DatabaseProvider) : MapRepository 
     override fun getAllUserContent() = provider.getAllUserCatches().flatMapMerge { userCatch ->
 
         flow {
+            emit(userCatch as Content)
             val markerId = userCatch.userMarkerId
             if (!markers.contains(markerId) and markerId.isNotBlank()) {
                 try {

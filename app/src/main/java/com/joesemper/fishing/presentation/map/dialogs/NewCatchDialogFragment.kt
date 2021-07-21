@@ -47,7 +47,8 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private val dateAndTime = Calendar.getInstance()
 
     private var _binding: FragmentNewCatchBinding? = null
-    private val binding get() = _binding!!
+    private val binding
+        get() = _binding!!
 
     private var currentPhotos = mutableListOf<Uri>()
 
@@ -153,18 +154,26 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private fun setOnIncrementDecrementClickListeners() {
         with(binding) {
             buttonPlusAmount.setOnClickListener {
-                etNewCatchAmount.setText((etNewCatchAmount.text.toString().toInt().plus(1)).toString())
+                etNewCatchAmount.setText(
+                    (etNewCatchAmount.text.toString().toInt().plus(1)).toString()
+                )
             }
             buttonMinusAmount.setOnClickListener {
                 if (etNewCatchAmount.text.toString().toInt() <= 0) return@setOnClickListener
-                etNewCatchAmount.setText((etNewCatchAmount.text.toString().toInt().minus(1)).toString())
+                etNewCatchAmount.setText(
+                    (etNewCatchAmount.text.toString().toInt().minus(1)).toString()
+                )
             }
             buttonPlusWeight.setOnClickListener {
-                etNewCatchWeight.setText((etNewCatchWeight.text.toString().toDouble().plus(0.1).roundTo(1)).toString())
+                etNewCatchWeight.setText(
+                    (etNewCatchWeight.text.toString().toDouble().plus(0.1).roundTo(1)).toString()
+                )
             }
             buttonMinusWeight.setOnClickListener {
                 if (etNewCatchWeight.text.toString().toDouble() <= 0) return@setOnClickListener
-                etNewCatchWeight.setText((etNewCatchWeight.text.toString().toDouble().minus(0.1).roundTo(1)).toString())
+                etNewCatchWeight.setText(
+                    (etNewCatchWeight.text.toString().toDouble().minus(0.1).roundTo(1)).toString()
+                )
             }
         }
     }
