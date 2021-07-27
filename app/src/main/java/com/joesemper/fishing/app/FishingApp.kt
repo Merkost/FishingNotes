@@ -11,10 +11,21 @@ class FishingApp : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        startKoin{
+        startKoin {
             androidLogger()
             androidContext(this@FishingApp)
-            modules(listOf(appModule, splashScreen, mapScreen, weatherScreen, groupsScreen, mainActivity))
+            modules(
+                listOf(
+                    appModule,
+                    splashScreen,
+                    mapScreen,
+                    weatherScreen,
+                    groupsScreen,
+                    mainActivity,
+                    markerFragment,
+                    newCatchFragment
+                )
+            )
         }
     }
 }

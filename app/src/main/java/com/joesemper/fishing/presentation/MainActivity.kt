@@ -5,12 +5,15 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.joesemper.fishing.R
+import com.joesemper.fishing.databinding.ActivityMainBinding
+import com.joesemper.fishing.databinding.FragmentMarkerDetailsBinding
 import com.joesemper.fishing.model.common.User
 import com.joesemper.fishing.presentation.splash.SplashActivity
 import com.joesemper.fishing.utils.Logger
@@ -18,6 +21,7 @@ import com.joesemper.fishing.view.fragments.dialogFragments.LogoutListener
 import com.joesemper.fishing.presentation.main.dialogs.UserDialogFragment
 import com.joesemper.fishing.presentation.main.MainViewModel
 import com.joesemper.fishing.presentation.main.MainViewState
+import com.joesemper.fishing.utils.NavigationHolder
 import kotlinx.android.synthetic.main.activity_main.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import kotlinx.coroutines.flow.collect
@@ -26,7 +30,7 @@ import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.activityScope
 import org.koin.core.scope.Scope
 
-class MainActivity : AppCompatActivity(), AndroidScopeComponent, LogoutListener {
+class MainActivity : AppCompatActivity(), AndroidScopeComponent, LogoutListener, NavigationHolder {
 
     override val scope : Scope by activityScope()
     private val viewModel: MainViewModel by viewModel()
@@ -35,15 +39,29 @@ class MainActivity : AppCompatActivity(), AndroidScopeComponent, LogoutListener 
 
     private var currentUser: User? = null
 
+    private var _binding: ActivityMainBinding? = null
+    private val binding get() = _binding!!
+
     companion object {
         fun getStartIntent(context: Context) = Intent(context, MainActivity::class.java)
     }
 
+    override fun closeNav() {
+        binding.bottomNav.visibility = View.GONE
+    }
+
+    override fun showNav() {
+        binding.bottomNav.visibility = View.VISIBLE
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        _binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
-        initToolbar()
+//        initToolbar()
         initBottomNav()
         subscribeOnViewModel()
     }
@@ -73,21 +91,21 @@ class MainActivity : AppCompatActivity(), AndroidScopeComponent, LogoutListener 
         logger.log(error.message)
     }
 
-    private fun initToolbar() {
-        setSupportActionBar(toolbar_main)
-    }
+//    private fun initToolbar() {
+//        setSupportActionBar(toolbar_main)
+//    }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.item_logout -> { startBottomSheetDialogFragment() }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
+//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+//        menuInflater.inflate(R.menu.menu_main, menu)
+//        return true
+//    }
+//
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        return when (item.itemId) {
+//            R.id.item_logout -> { startBottomSheetDialogFragment() }
+//            else -> super.onOptionsItemSelected(item)
+//        }
+//    }
 
     override fun onLogout() {
         viewModel.logOut()

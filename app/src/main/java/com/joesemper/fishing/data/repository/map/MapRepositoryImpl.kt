@@ -3,10 +3,13 @@ package com.joesemper.fishing.data.repository.map
 import android.util.Log
 import com.joesemper.fishing.data.datasource.DatabaseProvider
 import com.joesemper.fishing.data.entity.RawUserCatch
+import com.joesemper.fishing.data.entity.RawMapMarker
 import com.joesemper.fishing.model.common.content.Content
+import com.joesemper.fishing.model.common.content.MapMarker
 import com.joesemper.fishing.model.common.content.UserCatch
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
@@ -35,7 +38,6 @@ class MapRepositoryImpl(private val provider: DatabaseProvider) : MapRepository 
         }
     }
 
-
-    override suspend fun addNewCatch(newCatch: RawUserCatch) = provider.addNewCatch(newCatch)
-    override suspend fun deleteMarker(userCatch: UserCatch) = provider.deleteMarker(userCatch)
+    override fun getAllUserMarkers(): Flow<MapMarker> = provider.getAllMarkers()
+    override suspend fun addNewMarker(newMarker: RawMapMarker) = provider.addNewMarker(newMarker)
 }

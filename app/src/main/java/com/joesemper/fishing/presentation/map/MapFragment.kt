@@ -25,16 +25,14 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.material.transition.MaterialFadeThrough
+import com.google.android.material.transition.MaterialSharedAxis
 import com.joesemper.fishing.R
-import com.joesemper.fishing.data.entity.RawUserCatch
-import com.joesemper.fishing.model.common.content.MapMarker
+import com.joesemper.fishing.data.entity.RawMapMarker
 import com.joesemper.fishing.model.common.content.Content
-import com.joesemper.fishing.model.common.content.UserCatch
-import com.joesemper.fishing.presentation.map.dialogs.AddMarkerBottomSheetDialogFragment
-import com.joesemper.fishing.presentation.map.dialogs.AddNewCatchListener
-import com.joesemper.fishing.presentation.map.dialogs.DeleteMarkerListener
-import com.joesemper.fishing.presentation.map.dialogs.MarkerDetailsDialogFragment
+import com.joesemper.fishing.model.common.content.UserMapMarker
+import com.joesemper.fishing.presentation.map.marker.MarkerDetailsDialogFragment
+import com.joesemper.fishing.presentation.map.marker.NewMarkerDialogFragment
+import com.joesemper.fishing.utils.AddNewMarkerListener
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.utils.PermissionUtils.isPermissionGranted
 import com.joesemper.fishing.utils.PermissionUtils.requestPermission
@@ -48,7 +46,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.scope.Scope
 
 class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
-    ActivityCompat.OnRequestPermissionsResultCallback, AddNewCatchListener, DeleteMarkerListener {
+    ActivityCompat.OnRequestPermissionsResultCallback, AddNewMarkerListener {
 
     override val scope: Scope by fragmentScope()
     private val viewModel: MapViewModel by viewModel()
@@ -61,9 +59,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
     private lateinit var currentContent: Flow<Content>
-
-    private val userCatches = mutableListOf<UserCatch>()
-    private val mapMarkers = mutableListOf<MapMarker>()
+    private val mapMarkers = mutableListOf<UserMapMarker>()
 
     private var isPlaceSelectMode = false
 
@@ -73,10 +69,13 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        enterTransition = MaterialFadeThrough()
-        returnTransition = MaterialFadeThrough()
+        setTransactions()
     }
 
+    private fun setTransactions() {
+        enterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true)
+        returnTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -102,6 +101,10 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         mapFragment?.getMapAsync(this)
     }
 
+    override fun addNewMapMarker(marker: RawMapMarker) {
+        viewModel.addNewMarker(marker)
+    }
+
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         val geocoder = Geocoder(requireContext())
@@ -111,14 +114,6 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         subscribeOnViewModel()
         setOnFabClickListener()
         getDeviceLocation()
-    }
-
-    override fun addNewCatch(newCatch: RawUserCatch) {
-        viewModel.addNewCatch(newCatch)
-    }
-
-    override fun deleteMarker(aCatch: UserCatch) {
-        viewModel.deleteMarker(aCatch)
     }
 
     private fun enableMyLocation() {
@@ -160,9 +155,8 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
 
     private fun setOnMarkersClickListener() {
         map.setOnMarkerClickListener { marker ->
-//            val userMarker = mapMarkers.first { it.id == marker.tag }
-            val catches = userCatches.filter { it.userMarkerId == marker.tag }
-            MarkerDetailsDialogFragment.newInstance(catches)
+            val userMarker = mapMarkers.first { it.id == marker.tag }
+            MarkerDetailsDialogFragment.newInstance(userMarker)
                 .show(childFragmentManager, "Markers")
             true
         }
@@ -192,18 +186,12 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
 
     private suspend fun onSuccess(content: Flow<Content>?) {
         progressBar_map.visibility = View.GONE
-
         try {
             if (content != null) {
                 currentContent = content
-
                 currentContent.collect { userContent ->
-
                     when (userContent) {
-                        is UserCatch -> {
-                            userCatches.add(userContent)
-                        }
-                        is MapMarker -> {
+                        is UserMapMarker -> {
                             mapMarkers.add(userContent)
                             addMarkerOnMap(userContent)
                         }
@@ -213,10 +201,14 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         } catch (e: Throwable) {
             Log.d("Fishing", e.message, e)
         }
-
     }
 
-    private fun addMarkerOnMap(marker: MapMarker) {
+    private fun onError(error: Throwable) {
+        Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
+        logger.log(error.message)
+    }
+
+    private fun addMarkerOnMap(marker: UserMapMarker) {
         val latLng = LatLng(marker.latitude, marker.longitude)
         val mapMarker = map.addMarker(
             MarkerOptions()
@@ -224,11 +216,6 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
                 .title(marker.title)
         )
         mapMarker?.tag = marker.id
-    }
-
-    private fun onError(error: Throwable) {
-        Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
-        logger.log(error.message)
     }
 
     private fun setOnFabClickListener() {
@@ -267,7 +254,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     }
 
     private fun startBottomSheetDialogAddMarker() {
-        AddMarkerBottomSheetDialogFragment
+        NewMarkerDialogFragment
             .newInstance(currentMapMarker!!.position)
             .show(childFragmentManager, "TAG")
     }
@@ -284,7 +271,6 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
             fab_add_marker.setImageResource(R.drawable.ic_baseline_check_24)
             setOnMapClickListener()
         }
-
     }
 
     private fun setOnMapClickListener() {
@@ -311,7 +297,6 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
                     }
                 }
             }
-
         } catch (e: SecurityException) {
             logger.log(e.message)
         }

@@ -1,7 +1,5 @@
 package com.joesemper.fishing.data.entity
 
-import com.joesemper.fishing.model.common.content.MapMarker
-
 data class RawUserCatch (
     val title: String = "My marker",
     val description: String? = "",
@@ -14,7 +12,7 @@ data class RawUserCatch (
     val fishingBait: String? = "",
     val fishingLure: String? = "",
     val userMarkerId: String? = "",
-    val marker: MapMarker = MapMarker(),
+    val markerId: String = "",
     val isPublic: Boolean = false,
     val includeWeather: Boolean = true,
     val photos: List<ByteArray> = listOf(),

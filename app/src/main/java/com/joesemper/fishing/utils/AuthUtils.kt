@@ -22,3 +22,6 @@ private fun getProvidersList() = arrayListOf(
 
 fun getCurrentUser() = FirebaseAuth.getInstance().currentUser
 
+fun getCurrentUserId() = getCurrentUser()?.uid ?: "Anonymous"
+
+

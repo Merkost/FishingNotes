@@ -12,7 +12,7 @@ import com.joesemper.fishing.model.common.content.UserCatch
 import kotlinx.android.extensions.LayoutContainer
 
 class UserCatchesRVAdapter(
-    private val data: List<UserCatch>
+    private val data: MutableList<UserCatch>
 ): RecyclerView.Adapter<UserCatchesRVAdapter.CatchesViewHolder>() {
 
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -20,9 +21,64 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="@drawable/ic_baseline_location_on_24"
-        app:subtitle="@string/description"
-        app:title="Marker" />
+        app:navigationIcon="@drawable/ic_baseline_close_24"
+        app:title="Marker"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="24dp">
+
+        <TextView
+            android:id="@+id/tv_title"
+            style="@style/TextAppearance.AppCompat.MainText"
+            android:layout_marginStart="8dp"
+            android:text="Title"
+            android:textSize="24sp"
+            app:layout_constraintStart_toEndOf="@+id/imageView2"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_description"
+            style="@style/TextAppearance.AppCompat.SecondaryText"
+            android:text="Description"
+            app:layout_constraintStart_toStartOf="@+id/tv_title"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title" />
+
+        <ImageView
+            android:id="@+id/imageView2"
+            style="@style/SimpleIcon"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_description"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_title"
+            app:srcCompat="@drawable/ic_baseline_location_on_24" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_add_new_catch"
+            style="@style/circleImageButton"
+            android:layout_marginTop="24dp"
+            app:icon="@drawable/ic_fish"
+            app:iconTint="@color/colorPrimary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_description" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_navigate"
+            style="@style/circleImageButton"
+            android:layout_marginStart="32dp"
+            app:icon="@drawable/ic_baseline_navigation_24"
+            app:layout_constraintStart_toEndOf="@+id/button_add_new_catch"
+            app:layout_constraintTop_toTopOf="@+id/button_add_new_catch" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout_marker"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_marker_description" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -33,19 +89,18 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tabLayout_marker"
+            <ProgressBar
+                android:id="@+id/progressBar_marker"
+                style="?android:attr/progressBarStyle"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tv_marker_description" />
+                android:layout_height="wrap_content" />
 
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/view_pager_marker"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:minHeight="400dp"/>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

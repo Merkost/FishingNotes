@@ -1,13 +1,11 @@
-package com.joesemper.fishing.presentation.map.dialogs
+package com.joesemper.fishing.presentation.map.marker
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.joesemper.fishing.databinding.FragmentCatchesInnerBinding
 import com.joesemper.fishing.databinding.FragmentNotesInnerBinding
-import com.joesemper.fishing.model.common.content.UserCatch
 
 class UserNotesInnerFragment: Fragment() {
 

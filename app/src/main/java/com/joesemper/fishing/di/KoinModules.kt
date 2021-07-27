@@ -10,6 +10,10 @@ import com.joesemper.fishing.data.repository.groups.GroupsRepository
 import com.joesemper.fishing.data.repository.groups.GroupsRepositoryImpl
 import com.joesemper.fishing.data.repository.map.MapRepository
 import com.joesemper.fishing.data.repository.map.MapRepositoryImpl
+import com.joesemper.fishing.data.repository.map.catches.CatchesRepository
+import com.joesemper.fishing.data.repository.map.catches.CatchesRepositoryImpl
+import com.joesemper.fishing.data.repository.map.marker.MarkerRepository
+import com.joesemper.fishing.data.repository.map.marker.MarkerRepositoryImpl
 import com.joesemper.fishing.data.repository.weather.WeatherRepository
 import com.joesemper.fishing.data.repository.weather.WeatherRetrofitImplementation
 import com.joesemper.fishing.utils.Logger
@@ -21,6 +25,10 @@ import com.joesemper.fishing.presentation.weather.WeatherFragment
 import com.joesemper.fishing.presentation.groups.GroupsViewModel
 import com.joesemper.fishing.presentation.main.MainViewModel
 import com.joesemper.fishing.presentation.map.MapViewModel
+import com.joesemper.fishing.presentation.map.catches.NewCatchFragment
+import com.joesemper.fishing.presentation.map.catches.NewCatchViewModel
+import com.joesemper.fishing.presentation.map.marker.MarkerDetailsDialogFragment
+import com.joesemper.fishing.presentation.map.marker.MarkerDetailsViewModel
 import com.joesemper.fishing.presentation.splash.SplashViewModel
 import com.joesemper.fishing.presentation.weather.WeatherViewModel
 import org.koin.android.ext.koin.androidContext
@@ -52,6 +60,20 @@ val mapScreen = module {
     scope(named<MapFragment>()) {
         viewModel { MapViewModel(get()) }
         scoped<MapRepository> { MapRepositoryImpl(get()) }
+    }
+}
+
+val markerFragment = module {
+    scope(named<MarkerDetailsDialogFragment>()) {
+        viewModel { MarkerDetailsViewModel(get()) }
+        scoped<MarkerRepository> { MarkerRepositoryImpl(get()) }
+    }
+}
+
+val newCatchFragment = module {
+    scope(named<NewCatchFragment>()) {
+        viewModel { NewCatchViewModel(get()) }
+        scoped<CatchesRepository> { CatchesRepositoryImpl(get()) }
     }
 }
 

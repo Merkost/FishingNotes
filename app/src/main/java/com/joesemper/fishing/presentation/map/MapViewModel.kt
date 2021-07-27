@@ -3,9 +3,9 @@ package com.joesemper.fishing.presentation.map
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.data.entity.RawUserCatch
+import com.joesemper.fishing.data.entity.RawMapMarker
 import com.joesemper.fishing.model.common.content.UserCatch
 import com.joesemper.fishing.data.repository.map.MapRepository
-import com.joesemper.fishing.model.common.content.MapMarker
 import com.joesemper.fishing.model.common.Progress
 import com.joesemper.fishing.model.common.content.Content
 import kotlinx.coroutines.flow.*
@@ -21,12 +21,19 @@ class MapViewModel(
     fun subscribe(): StateFlow<MapViewState> = viewStateFlow
 
     init {
-        loadContent()
+        loadMarkers()
     }
 
     override fun onCleared() {
         super.onCleared()
         viewStateFlow.value = MapViewState.Loading
+    }
+
+    private fun loadMarkers() {
+        viewModelScope.launch {
+            val markers = mapRepository.getAllUserMarkers()
+            viewStateFlow.value = MapViewState.Success(markers)
+        }
     }
 
     private fun loadContent() {
@@ -36,10 +43,9 @@ class MapViewModel(
         }
     }
 
-    fun addNewCatch(newCatch: RawUserCatch) {
-//        viewStateFlow.value = MapViewState.Loading
+    fun addNewMarker(newMarker: RawMapMarker) {
         viewModelScope.launch {
-            mapRepository.addNewCatch(newCatch).collect { progress ->
+            mapRepository.addNewMarker(newMarker).collect { progress ->
                 when(progress) {
                     is Progress.Complete -> { }
                     is Progress.Loading -> { }
@@ -47,20 +53,6 @@ class MapViewModel(
                 }
             }
         }
-    }
-
-//    suspend fun getMarker(markerId: String): MapMarker? {
-////        return mapRepository.getMarker(markerId)
-//    }
-
-    fun deleteMarker(userCatch: UserCatch) {
-        viewModelScope.launch {
-            mapRepository.deleteMarker(userCatch)
-        }
-    }
-
-    private fun onSuccess(userMarkers: Flow<Content>) {
-        viewStateFlow.value = MapViewState.Success(userMarkers)
     }
 
     private fun onError(error: Throwable) {

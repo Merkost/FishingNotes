@@ -1,4 +1,4 @@
-package com.joesemper.fishing.presentation.map.dialogs
+package com.joesemper.fishing.presentation.map.catches
 
 import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
@@ -13,38 +13,41 @@ import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
-import androidx.core.os.bundleOf
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import coil.load
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.joesemper.fishing.R
 import com.joesemper.fishing.data.entity.RawUserCatch
 import com.joesemper.fishing.databinding.FragmentNewCatchBinding
-import com.joesemper.fishing.model.common.content.MapMarker
+import com.joesemper.fishing.model.common.content.UserMapMarker
+import com.joesemper.fishing.utils.NavigationHolder
 import com.joesemper.fishing.utils.format
-import com.joesemper.fishing.utils.getNewMarkerId
 import com.joesemper.fishing.utils.roundTo
 import gun0912.tedbottompicker.TedBottomPicker
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.dialog_new_catch.*
+import kotlinx.android.synthetic.main.fragment_new_catch.*
+import org.koin.android.scope.AndroidScopeComponent
+import org.koin.androidx.scope.fragmentScope
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.scope.Scope
 import java.io.ByteArrayOutputStream
 import java.util.*
-import kotlin.math.round
 
+class NewCatchFragment : Fragment(), AndroidScopeComponent {
 
-class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
-
-    companion object {
-        private const val LAT_LNG = "LAT_LNG"
-
-        fun newInstance(latLng: LatLng): BottomSheetDialogFragment {
-            val args = bundleOf(LAT_LNG to latLng)
-            val fragment = AddMarkerBottomSheetDialogFragment()
-            fragment.arguments = args
-            return fragment
-        }
-    }
+    private val args: NewCatchFragmentArgs by navArgs()
 
     private val dateAndTime = Calendar.getInstance()
+
+    override val scope: Scope by fragmentScope()
+    private val viewModel: NewCatchViewModel by viewModel()
 
     private var _binding: FragmentNewCatchBinding? = null
     private val binding
@@ -52,7 +55,7 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private var currentPhotos = mutableListOf<Uri>()
 
-    private var currentCoordinates: LatLng? = null
+    private lateinit var marker: UserMapMarker
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -64,60 +67,49 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setCurrentCoordinates()
-        setOnApplyClickListener()
-        setOnCloseClickListeners()
+        setInitialData()
+        initViews()
+        setOnClickListeners()
+    }
+
+    private fun initViews() {
+        initToolbar()
+        initBottomDialog()
+    }
+
+    private fun setInitialData() {
+        marker = args.marker as UserMapMarker
+        setInitialPlaceData()
+        setInitialTimeAndDate()
+    }
+
+    private fun setOnClickListeners() {
         setOnAddPhotoClickListener()
         setOnIncrementDecrementClickListeners()
-        initTimeAndDate()
+        setOnCreateClickListener()
+        setOnCloseClickListeners()
     }
 
-    private fun setCurrentCoordinates() {
-        binding.etNewCatchCoordinates.inputType = InputType.TYPE_NULL
-        val coordinates = arguments?.getParcelable<LatLng>(LAT_LNG)
-        if (coordinates != null) {
-            currentCoordinates = coordinates
-            val latitude = coordinates.latitude.format(3)
-            val longitude = coordinates.longitude.format(3)
-
-            "Lat: $latitude  Lon: $longitude"
-                .also { binding.etNewCatchCoordinates.setText(it) }
-        }
+    private fun initToolbar() {
+        (requireActivity() as AppCompatActivity).setSupportActionBar(binding.toolbarNewCatch)
     }
 
-    private fun setOnApplyClickListener() {
-        binding.buttonNewCatchCreate.setOnClickListener {
-            if (isInputCorrect()) {
-                val catch = createNewUserCatch()
-                (parentFragment as AddNewCatchListener).addNewCatch(catch)
-                dismiss()
-            }
-        }
+    private fun initBottomDialog() {
+        (requireActivity() as NavigationHolder).closeNav()
+        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
-    private fun initTimeAndDate() {
+    private fun setInitialPlaceData() {
+        binding.etNewCatchPlaceTitle.setText(marker.title)
+        binding.etNewCatchPlaceTitle.inputType = InputType.TYPE_NULL
+        setCurrentCoordinates()
+    }
+
+    private fun setInitialTimeAndDate() {
         setInitialDate()
         setInitialTime()
         setOnEditTimeAndDateClickListeners()
-    }
-
-    private fun setOnEditTimeAndDateClickListeners() {
-        with(binding) {
-            textInputLayoutNewCatchDate.setEndIconOnClickListener { setDate() }
-            textInputLayoutNewCatchTime.setEndIconOnClickListener { setTime() }
-            etNewCatchDate.inputType = InputType.TYPE_NULL
-            etNewCatchTime.inputType = InputType.TYPE_NULL
-        }
-
-    }
-
-    private fun setInputListeners() {
-        binding.etNewCatchTitle.addTextChangedListener(
-
-        )
-        binding.etNewCatchKindOfFish.addTextChangedListener {
-
-        }
     }
 
     private fun setOnAddPhotoClickListener() {
@@ -136,18 +128,10 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
                                 0 -> binding.ivNewCatchImageFirst.load(uriList[i])
                                 1 -> binding.ivNewCatchImageSecond.load(uriList[i])
                                 2 -> binding.ivNewCatchImageThird.load(uriList[i])
-
                             }
                         }
                     }
                 }
-        }
-    }
-
-    private fun setOnCloseClickListeners() {
-        with(binding) {
-            toolbarNewCatch.setNavigationOnClickListener { dismiss() }
-            buttonNewCatchCancel.setOnClickListener { dismiss() }
         }
     }
 
@@ -178,7 +162,55 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
         }
     }
 
-    // отображаем диалоговое окно для выбора даты
+    private fun setOnCreateClickListener() {
+        val buttonCreate = bottomSheet.findViewById<Button>(R.id.button_new_catch_create)
+        buttonCreate.setOnClickListener {
+            viewModel.addNewCatch(createNewUserCatch())
+            findNavController().popBackStack()
+        }
+    }
+
+    private fun setOnCloseClickListeners() {
+        with(binding) {
+            toolbarNewCatch.setNavigationOnClickListener {
+                findNavController().popBackStack()
+            }
+        }
+        val buttonCancel = bottomSheet.findViewById<Button>(R.id.button_new_catch_cancel)
+        buttonCancel.setOnClickListener {
+            findNavController().popBackStack()
+        }
+    }
+
+    private fun setOnEditTimeAndDateClickListeners() {
+        with(binding) {
+            textInputLayoutNewCatchDate.setEndIconOnClickListener { setDate() }
+            textInputLayoutNewCatchTime.setEndIconOnClickListener { setTime() }
+            etNewCatchDate.inputType = InputType.TYPE_NULL
+            etNewCatchTime.inputType = InputType.TYPE_NULL
+        }
+
+    }
+
+    private fun setCurrentCoordinates() {
+        binding.etNewCatchCoordinates.inputType = InputType.TYPE_NULL
+
+        val latitude = marker.latitude.format(3)
+        val longitude = marker.longitude.format(3)
+
+        "Lat: $latitude  Lon: $longitude"
+            .also { binding.etNewCatchCoordinates.setText(it) }
+    }
+
+    private fun setInputListeners() {
+        binding.etNewCatchTitle.addTextChangedListener(
+
+        )
+        binding.etNewCatchKindOfFish.addTextChangedListener {
+
+        }
+    }
+
     private fun setDate() {
         DatePickerDialog(
             requireContext(),
@@ -190,7 +222,6 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
             .show()
     }
 
-    // отображаем диалоговое окно для выбора времени
     private fun setTime() {
         TimePickerDialog(
             requireContext(),
@@ -201,7 +232,6 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
             .show()
     }
 
-    // установка начальных даты и времени
     private fun setInitialDate() {
         binding.etNewCatchDate.setText(
             DateUtils.formatDateTime(
@@ -222,7 +252,6 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
         )
     }
 
-    // установка обработчика выбора времени
     private val timeSetListener =
         OnTimeSetListener { view, hourOfDay, minute ->
             dateAndTime.set(Calendar.HOUR_OF_DAY, hourOfDay)
@@ -230,7 +259,6 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
             setInitialTime()
         }
 
-    // установка обработчика выбора даты
     private val dateSetListener =
         OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
             dateAndTime.set(Calendar.YEAR, year)
@@ -263,25 +291,10 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
         fishingRodType = binding.etNewCatchRod.text.toString(),
         fishingBait = binding.etNewCatchBait.text.toString(),
         fishingLure = binding.etNewCatchLure.text.toString(),
-        marker = createUserMarker(),
+        markerId = marker.id,
         isPublic = binding.switchPublishCatch.isChecked,
         photos = getPhotos()
     )
-
-    private fun createUserMarker(): MapMarker {
-        val coordinates = currentCoordinates
-        return if (coordinates != null) {
-            MapMarker(
-                id = getNewMarkerId(),
-                latitude = coordinates.latitude,
-                longitude = coordinates.longitude,
-                title = binding.etNewCatchPlaceTitle.text.toString()
-            )
-        } else {
-            MapMarker()
-        }
-
-    }
 
     private fun getPhotos(): List<ByteArray> {
         if (currentPhotos.isEmpty()) {
@@ -306,8 +319,8 @@ class AddMarkerBottomSheetDialogFragment : BottomSheetDialogFragment() {
         return baos.toByteArray()
     }
 
-}
-
-interface AddNewCatchListener {
-    fun addNewCatch(newCatch: RawUserCatch)
+    override fun onDetach() {
+        super.onDetach()
+        (requireActivity() as NavigationHolder).showNav()
+    }
 }

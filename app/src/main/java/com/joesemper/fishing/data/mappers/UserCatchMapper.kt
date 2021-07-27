@@ -20,7 +20,7 @@ class UserCatchMapper {
         fishingRodType = newCatch.fishingRodType ?: "",
         fishingBait = newCatch.fishingBait ?: "",
         fishingLure = newCatch.fishingLure ?: "",
-        userMarkerId = newCatch.marker.id,
+        userMarkerId = newCatch.markerId,
         isPublic = newCatch.isPublic,
         downloadPhotoLinks = photoLinks
     )

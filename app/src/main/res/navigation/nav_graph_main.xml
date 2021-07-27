@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_mapFragment_to_groupsFragment"
             app:destination="@id/groupsFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_newCatchDialogFragment"
+            app:destination="@id/newCatchDialogFragment" />
     </fragment>
 
     <fragment
@@ -26,5 +29,13 @@
         android:id="@+id/groupsFragment"
         android:name="com.joesemper.fishing.presentation.groups.GroupsFragment"
         android:label="GroupsFragment" />
+    <fragment
+        android:id="@+id/newCatchDialogFragment"
+        android:name="com.joesemper.fishing.presentation.map.catches.NewCatchFragment"
+        android:label="NewCatchDialogFragment" >
+        <argument
+            android:name="marker"
+            app:argType="android.os.Parcelable"/>
+    </fragment>
 
 </navigation>

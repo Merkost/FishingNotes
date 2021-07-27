@@ -1,495 +1,457 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_new_catch"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:elevation="4dp"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="@drawable/ic_baseline_close_24"
-        app:title="New catch" />
-
-    <androidx.core.widget.NestedScrollView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar_new_catch">
+        android:fitsSystemWindows="true"
+        android:orientation="vertical">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_new_catch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:elevation="4dp"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
+            app:title="New catch" />
+
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingLeft="@dimen/constraint_layout_simple_padding"
-            android:paddingRight="32dp"
-            android:paddingBottom="@dimen/constraint_layout_simple_padding">
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar_new_catch">
 
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/guideline"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintGuide_begin="48dp" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="24dp">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayout_new_catch_title"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
-                app:helperText="@string/required"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toTopOf="parent">
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout_new_catch_title"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
+                    app:helperText="@string/required"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_new_catch_title"
-                    android:layout_width="match_parent"
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_new_catch_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/title" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout_new_catch_description"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_title">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_new_catch_description"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/description"
+                        android:lines="2"
+                        android:maxLines="2" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout_new_catch_date"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
+                    app:endIconDrawable="@drawable/ic_baseline_event_24"
+                    app:endIconMode="custom"
+                    app:endIconTint="@color/colorPrimary"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_description">
+
+                    <EditText
+                        android:id="@+id/et_new_catch_date"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/date"
+                        android:importantForAutofill="no"
+                        android:inputType="none" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout_new_catch_time"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
+                    app:endIconCheckable="true"
+                    app:endIconDrawable="@drawable/ic_baseline_access_time_24"
+                    app:endIconMode="custom"
+                    app:endIconTint="@color/colorPrimary"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_date">
+
+                    <EditText
+                        android:id="@+id/et_new_catch_time"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/time"
+                        android:importantForAutofill="no"
+                        android:inputType="none" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/tv_new_catch_pictures"
+                    style="@style/TextAppearance.AppCompat.SecondaryText.DividerHeader"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="24dp"
+                    android:text="@string/photos"
+                    app:layout_constraintStart_toEndOf="@+id/imageView3"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_time" />
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/iv_new_catch_image_first"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintDimensionRatio="4:3"
+                    app:layout_constraintEnd_toStartOf="@+id/iv_new_catch_image_second"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toStartOf="@+id/imageView3"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_new_catch_pictures"
+                    app:srcCompat="@drawable/ic_baseline_image_24" />
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/iv_new_catch_image_second"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/iv_new_catch_image_first"
+                    app:layout_constraintEnd_toStartOf="@+id/iv_new_catch_image_third"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/iv_new_catch_image_first"
+                    app:layout_constraintTop_toTopOf="@+id/iv_new_catch_image_first"
+                    app:srcCompat="@drawable/ic_baseline_image_24" />
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/iv_new_catch_image_third"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="8dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/iv_new_catch_image_first"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/iv_new_catch_image_second"
+                    app:layout_constraintTop_toTopOf="@+id/iv_new_catch_image_first"
+                    app:srcCompat="@drawable/ic_baseline_image_24" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_new_catch_add_images"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:hint="@string/title" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:text="@string/photos"
+                    app:icon="@drawable/ic_baseline_plus"
+                    app:layout_constraintEnd_toEndOf="@+id/iv_new_catch_image_third"
+                    app:layout_constraintTop_toBottomOf="@+id/iv_new_catch_image_first" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayout_new_catch_description"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_title">
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/tv_new_catch_catch_header"
+                    style="@style/TextAppearance.AppCompat.SecondaryText.DividerHeader"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/fish_catch"
+                    app:layout_constraintStart_toEndOf="@+id/imageView4"
+                    app:layout_constraintTop_toBottomOf="@+id/button_new_catch_add_images" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_new_catch_description"
-                    android:layout_width="match_parent"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout_new_catch_kind_of_fish"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
+                    app:helperText="@string/required"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_new_catch_catch_header">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_new_catch_kind_of_fish"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/kind_of_fish"
+                        android:singleLine="true" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout_new_catch_amount"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintEnd_toStartOf="@+id/textInputLayout_new_catch_weight"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_kind_of_fish"
+                    app:suffixText="@string/pc">
+
+                    <EditText
+                        android:id="@+id/et_new_catch_amount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/amount"
+                        android:importantForAutofill="no"
+                        android:inputType="numberDecimal"
+                        android:maxLines="1"
+                        android:text="@string/sample_amount" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout_new_catch_weight"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
                     android:layout_height="wrap_content"
-                    android:hint="@string/description"
-                    android:lines="2"
-                    android:maxLines="2" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/textInputLayout_new_catch_amount"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_kind_of_fish"
+                    app:suffixText="@string/kg">
 
-            <ImageView
-                android:id="@+id/iv_new_catch_clock_icon"
-                style="@style/SimpleIcon"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintBottom_toBottomOf="@+id/textInputLayout_new_catch_time"
-                app:layout_constraintEnd_toStartOf="@+id/guideline"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/textInputLayout_new_catch_time"
-                app:srcCompat="@drawable/ic_baseline_access_time_24" />
+                    <EditText
+                        android:id="@+id/et_new_catch_weight"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/weight"
+                        android:importantForAutofill="no"
+                        android:inputType="number"
+                        android:maxLines="1"
+                        android:text="@string/sample_weight" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayout_new_catch_date"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
-                app:endIconDrawable="@drawable/ic_baseline_edit_24"
-                app:endIconMode="custom"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_description">
-
-                <EditText
-                    android:id="@+id/et_new_catch_date"
-                    android:layout_width="match_parent"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_minus_amount"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:hint="@string/date"
-                    android:importantForAutofill="no"
-                    android:inputType="none" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginEnd="8dp"
+                    android:text="-"
+                    app:layout_constraintEnd_toStartOf="@+id/button_plus_amount"
+                    app:layout_constraintStart_toStartOf="@+id/textInputLayout_new_catch_amount"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_amount" />
 
-            <ImageView
-                android:id="@+id/iv_new_catch_date_icon"
-                style="@style/SimpleIcon"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintBottom_toBottomOf="@+id/textInputLayout_new_catch_date"
-                app:layout_constraintEnd_toStartOf="@+id/guideline"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/textInputLayout_new_catch_date"
-                app:srcCompat="@drawable/ic_baseline_event_24" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayout_new_catch_time"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
-                app:endIconCheckable="true"
-                app:endIconDrawable="@drawable/ic_baseline_edit_24"
-                app:endIconMode="custom"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_date">
-
-                <EditText
-                    android:id="@+id/et_new_catch_time"
-                    android:layout_width="match_parent"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_plus_amount"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:hint="@string/time"
-                    android:importantForAutofill="no"
-                    android:inputType="none" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginStart="8dp"
+                    android:text="+"
+                    app:layout_constraintEnd_toEndOf="@+id/textInputLayout_new_catch_amount"
+                    app:layout_constraintStart_toEndOf="@+id/button_minus_amount"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_amount" />
 
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/tv_new_catch_pictures"
-                style="@style/TextAppearance.AppCompat.SecondaryText.DividerHeader"
-                android:layout_marginTop="24dp"
-                android:text="@string/photos"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_time" />
-
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/iv_new_catch_image_first"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintDimensionRatio="4:3"
-                app:layout_constraintEnd_toStartOf="@+id/iv_new_catch_image_second"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/tv_new_catch_pictures"
-                app:srcCompat="@drawable/ic_baseline_image_24" />
-
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/iv_new_catch_image_second"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintBottom_toBottomOf="@+id/iv_new_catch_image_first"
-                app:layout_constraintEnd_toStartOf="@+id/iv_new_catch_image_third"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/iv_new_catch_image_first"
-                app:layout_constraintTop_toTopOf="@+id/iv_new_catch_image_first"
-                app:srcCompat="@drawable/ic_baseline_image_24" />
-
-            <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/iv_new_catch_image_third"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginStart="8dp"
-                app:layout_constraintBottom_toBottomOf="@+id/iv_new_catch_image_first"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/iv_new_catch_image_second"
-                app:layout_constraintTop_toTopOf="@+id/iv_new_catch_image_first"
-                app:srcCompat="@drawable/ic_baseline_image_24" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_new_catch_add_images"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/photos"
-                app:icon="@drawable/ic_baseline_plus"
-                app:layout_constraintEnd_toEndOf="@+id/iv_new_catch_image_third"
-                app:layout_constraintTop_toBottomOf="@+id/iv_new_catch_image_first" />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/tv_new_catch_catch_header"
-                style="@style/TextAppearance.AppCompat.SecondaryText.DividerHeader"
-                android:layout_marginTop="8dp"
-                android:text="@string/fish_catch"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/button_new_catch_add_images" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayout_new_catch_kind_of_fish"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
-                app:helperText="@string/required"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/tv_new_catch_catch_header">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_new_catch_kind_of_fish"
-                    android:layout_width="match_parent"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_plus_weight"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:hint="@string/kind_of_fish"
-                    android:singleLine="true" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginStart="8dp"
+                    android:text="+"
+                    app:layout_constraintEnd_toEndOf="@+id/textInputLayout_new_catch_weight"
+                    app:layout_constraintStart_toEndOf="@+id/button_minus_weight"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_weight" />
 
-            <ImageView
-                android:id="@+id/iv_new_catch_fish_icon"
-                style="@style/SimpleIcon"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintBottom_toBottomOf="@+id/textInputLayout_new_catch_kind_of_fish"
-                app:layout_constraintEnd_toStartOf="@+id/guideline"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/textInputLayout_new_catch_kind_of_fish"
-                app:layout_constraintVertical_bias="0.4"
-                app:srcCompat="@drawable/ic_fish" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayout_new_catch_amount"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintEnd_toStartOf="@+id/textInputLayout_new_catch_weight"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_kind_of_fish"
-                app:suffixText="@string/pc">
-
-                <EditText
-                    android:id="@+id/et_new_catch_amount"
-                    android:layout_width="match_parent"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_minus_weight"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:hint="@string/amount"
-                    android:importantForAutofill="no"
-                    android:inputType="numberDecimal"
-                    android:maxLines="1"
-                    android:text="@string/sample_amount" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginEnd="8dp"
+                    android:text="-"
+                    app:layout_constraintEnd_toStartOf="@+id/button_plus_weight"
+                    app:layout_constraintStart_toStartOf="@+id/textInputLayout_new_catch_weight"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_weight" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayout_new_catch_weight"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/textInputLayout_new_catch_amount"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_kind_of_fish"
-                app:suffixText="@string/kg">
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/tv_new_catch_fishing_method_header"
+                    style="@style/TextAppearance.AppCompat.SecondaryText.DividerHeader"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/fishing_method"
+                    app:layout_constraintStart_toEndOf="@+id/imageView5"
+                    app:layout_constraintTop_toBottomOf="@+id/button_minus_amount" />
 
-                <EditText
-                    android:id="@+id/et_new_catch_weight"
-                    android:layout_width="match_parent"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout_new_catch_rod"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_new_catch_fishing_method_header">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_new_catch_rod"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/fish_rod" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout_new_catch_bait"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_rod">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_new_catch_bait"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/bait" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout_new_catch_lure"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_bait">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_new_catch_lure"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/lure" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/tv_new_catch_place_header"
+                    style="@style/TextAppearance.AppCompat.SecondaryText.DividerHeader"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/place"
+                    app:layout_constraintStart_toEndOf="@+id/imageView6"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_lure" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout_new_catch_place_title"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_new_catch_place_header">
+
+                    <EditText
+                        android:id="@+id/et_new_catch_place_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/place_title"
+                        android:inputType="none"
+                        android:importantForAutofill="no" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayout_new_catch_coordinates"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_place_title">
+
+                    <EditText
+                        android:id="@+id/et_new_catch_coordinates"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/coordinates"
+                        android:importantForAutofill="no"
+                        android:inputType="none" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:id="@+id/tv_new_catch_options_header"
+                    style="@style/TextAppearance.AppCompat.SecondaryText.DividerHeader"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/options"
+                    app:layout_constraintStart_toEndOf="@+id/imageView7"
+                    app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_coordinates" />
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switch_new_catch_include_weather"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:hint="@string/weight"
-                    android:importantForAutofill="no"
-                    android:inputType="number"
-                    android:maxLines="1"
-                    android:text="@string/sample_weight" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginTop="8dp"
+                    android:text="@string/include_weather"
+                    android:textSize="18sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_new_catch_options_header" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_minus_amount"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="-"
-                app:layout_constraintEnd_toStartOf="@+id/button_plus_amount"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_amount" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_plus_amount"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="+"
-                app:layout_constraintEnd_toEndOf="@+id/textInputLayout_new_catch_amount"
-                app:layout_constraintStart_toEndOf="@+id/button_minus_amount"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_amount" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_plus_weight"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="+"
-                app:layout_constraintEnd_toEndOf="@+id/textInputLayout_new_catch_weight"
-                app:layout_constraintStart_toEndOf="@+id/button_minus_weight"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_weight" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_minus_weight"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="-"
-                app:layout_constraintEnd_toStartOf="@+id/button_plus_weight"
-                app:layout_constraintStart_toStartOf="@+id/textInputLayout_new_catch_weight"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_weight" />
-
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/tv_new_catch_fishing_method_header"
-                style="@style/TextAppearance.AppCompat.SecondaryText.DividerHeader"
-                android:text="@string/fishing_method"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/button_minus_amount" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayout_new_catch_rod"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
-                android:layout_marginTop="8dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/tv_new_catch_fishing_method_header">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_new_catch_rod"
-                    android:layout_width="match_parent"
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switch_publish_catch"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:hint="@string/fish_rod" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="64dp"
+                    android:text="@string/publish_catch"
+                    android:textSize="18sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/switch_new_catch_include_weather" />
 
-            <ImageView
-                android:id="@+id/iv_new_catch_rod_icon"
-                style="@style/SimpleIcon"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintBottom_toBottomOf="@+id/textInputLayout_new_catch_rod"
-                app:layout_constraintEnd_toStartOf="@+id/guideline"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/textInputLayout_new_catch_rod"
-                app:srcCompat="@drawable/ic_fishing_rod" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayout_new_catch_bait"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_rod">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_new_catch_bait"
-                    android:layout_width="match_parent"
+                <ImageView
+                    android:id="@+id/imageView3"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:hint="@string/bait" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    app:layout_constraintBottom_toBottomOf="@+id/tv_new_catch_pictures"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/tv_new_catch_pictures"
+                    app:srcCompat="@drawable/ic_baseline_image_24" />
 
-            <ImageView
-                android:id="@+id/iv_new_catch_hook_icon"
-                style="@style/SimpleIcon"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintBottom_toBottomOf="@+id/textInputLayout_new_catch_bait"
-                app:layout_constraintEnd_toStartOf="@+id/guideline"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/textInputLayout_new_catch_bait"
-                app:srcCompat="@drawable/ic_fishing_baits" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayout_new_catch_lure"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_bait">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_new_catch_lure"
-                    android:layout_width="match_parent"
+                <ImageView
+                    android:id="@+id/imageView4"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:hint="@string/lure" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/tv_new_catch_catch_header"
+                    app:srcCompat="@drawable/ic_fish"
+                    app:tint="@color/text_secondary_color" />
 
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/tv_new_catch_place_header"
-                style="@style/TextAppearance.AppCompat.SecondaryText.DividerHeader"
-                android:text="@string/place"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_lure" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayout_new_catch_place_title"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
-                android:layout_marginTop="8dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/tv_new_catch_place_header">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/et_new_catch_place_title"
-                    android:layout_width="match_parent"
+                <ImageView
+                    android:id="@+id/imageView5"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:hint="@string/place_title" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/tv_new_catch_fishing_method_header"
+                    app:srcCompat="@drawable/ic_fishing_rod"
+                    app:tint="@color/text_secondary_color" />
 
-            <ImageView
-                android:id="@+id/iv_new_catch_place_icon"
-                style="@style/SimpleIcon"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintBottom_toBottomOf="@+id/textInputLayout_new_catch_place_title"
-                app:layout_constraintEnd_toStartOf="@+id/guideline"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/textInputLayout_new_catch_place_title"
-                app:srcCompat="@drawable/ic_fish_on_map" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayout_new_catch_coordinates"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
-                app:endIconDrawable="@drawable/ic_baseline_edit_location_alt_24"
-                app:endIconMode="custom"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_place_title">
-
-                <EditText
-                    android:id="@+id/et_new_catch_coordinates"
-                    android:layout_width="match_parent"
+                <ImageView
+                    android:id="@+id/imageView6"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:hint="@string/coordinates"
-                    android:importantForAutofill="no"
-                    android:inputType="none" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/tv_new_catch_place_header"
+                    app:srcCompat="@drawable/ic_baseline_location_on_24" />
 
-            <ImageView
-                android:id="@+id/imageView6"
-                style="@style/SimpleIcon"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintBottom_toBottomOf="@+id/textInputLayout_new_catch_coordinates"
-                app:layout_constraintEnd_toStartOf="@+id/guideline"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/textInputLayout_new_catch_coordinates"
-                app:srcCompat="@drawable/ic_baseline_location_on_24" />
+                <ImageView
+                    android:id="@+id/imageView7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/tv_new_catch_options_header"
+                    app:srcCompat="@drawable/ic_baseline_settings_24" />
 
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/tv_new_catch_options_header"
-                style="@style/TextAppearance.AppCompat.SecondaryText.DividerHeader"
-                android:text="@string/options"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_coordinates" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/switch_new_catch_include_weather"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/include_weather"
-                android:textSize="18sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/tv_new_catch_options_header" />
+    <include
+        layout="@layout/dialog_new_catch"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/switch_publish_catch"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/publish_catch"
-                android:textSize="18sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toBottomOf="@+id/switch_new_catch_include_weather" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_new_catch_create"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                android:text="@string/create"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/switch_publish_catch" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/button_new_catch_cancel"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:text="@string/cancel"
-                app:layout_constraintEnd_toStartOf="@+id/button_new_catch_create"
-                app:layout_constraintTop_toTopOf="@+id/button_new_catch_create" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.core.widget.NestedScrollView>
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
