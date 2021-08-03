@@ -85,7 +85,9 @@ class UserCatchesInnerFragment : Fragment(), AndroidScopeComponent {
                     findNavController().navigate(action)
                 }
                 is CatchRecyclerViewItem.ItemUserCatch -> {
-                    Toast.makeText(context, item.catch.title, Toast.LENGTH_SHORT).show()
+                    val action =
+                        MapFragmentDirections.actionMapFragmentToUserCatchFragment(item.catch)
+                    findNavController().navigate(action)
                 }
             }
 

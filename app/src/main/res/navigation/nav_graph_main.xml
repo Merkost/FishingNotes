@@ -19,6 +19,9 @@
         <action
             android:id="@+id/action_mapFragment_to_newCatchDialogFragment"
             app:destination="@id/newCatchDialogFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_userCatchFragment"
+            app:destination="@id/userCatchFragment" />
     </fragment>
 
     <fragment
@@ -36,6 +39,14 @@
         <argument
             android:name="marker"
             app:argType="android.os.Parcelable"/>
+    </fragment>
+    <fragment
+        android:id="@+id/userCatchFragment"
+        android:name="com.joesemper.fishing.presentation.common.UserCatchFragment"
+        android:label="UserCatchFragment" >
+        <argument
+            android:name="userCatch"
+            app:argType="com.joesemper.fishing.model.common.content.UserCatch" />
     </fragment>
 
 </navigation>

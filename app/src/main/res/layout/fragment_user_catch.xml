@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar_catch"
@@ -13,232 +16,246 @@
         android:elevation="4dp"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_baseline_close_24"
         app:title="Catch" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_begin="48dp" />
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/tv_title"
-        style="@style/TextAppearance.AppCompat.MainText"
-        android:layout_marginTop="24dp"
-        app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar_catch"
-        tools:text="Title" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/tv_description"
-        style="@style/TextAppearance.AppCompat.SecondaryText"
-        app:layout_constraintStart_toStartOf="@+id/tv_title"
-        app:layout_constraintTop_toBottomOf="@+id/tv_title"
-        tools:text="No description" />
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/guideline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintGuide_begin="48dp" />
 
-    <TextView
-        android:id="@+id/tv_date_time"
-        style="@style/TextAppearance.AppCompat.MainText"
-        android:layout_marginTop="32dp"
-        app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/tv_place_description"
-        tools:text="Date Time" />
+            <TextView
+                android:id="@+id/tv_title"
+                style="@style/TextAppearance.AppCompat.MainText"
+                android:layout_marginTop="24dp"
+                android:textSize="24sp"
+                app:layout_constraintStart_toStartOf="@+id/guideline"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Title" />
 
-    <ImageView
-        android:id="@+id/imageView8"
-        style="@style/SimpleIcon"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_date_time"
-        app:layout_constraintEnd_toStartOf="@+id/guideline"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tv_date_time"
-        app:srcCompat="@drawable/ic_baseline_event_24" />
+            <TextView
+                android:id="@+id/tv_description"
+                style="@style/TextAppearance.AppCompat.SecondaryText"
+                app:layout_constraintStart_toStartOf="@+id/tv_title"
+                app:layout_constraintTop_toBottomOf="@+id/tv_title"
+                android:text="@string/no_description" />
 
-    <ImageView
-        android:id="@+id/imageView9"
-        style="@style/SimpleIcon"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_amount"
-        app:layout_constraintEnd_toStartOf="@+id/guideline"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tv_fish"
-        app:srcCompat="@drawable/ic_fish" />
+            <TextView
+                android:id="@+id/tv_date_time"
+                style="@style/TextAppearance.AppCompat.MainText"
+                android:layout_marginTop="32dp"
+                app:layout_constraintStart_toStartOf="@+id/guideline"
+                app:layout_constraintTop_toBottomOf="@+id/tv_place_description"
+                tools:text="Date Time" />
 
-    <TextView
-        android:id="@+id/tv_fish"
-        style="@style/TextAppearance.AppCompat.MainText"
-        android:layout_marginTop="32dp"
-        tools:text="Karas"
-        app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/tv_date_time" />
+            <ImageView
+                android:id="@+id/imageView8"
+                style="@style/SimpleIcon"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_date_time"
+                app:layout_constraintEnd_toStartOf="@+id/guideline"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tv_date_time"
+                app:srcCompat="@drawable/ic_baseline_event_24" />
 
-    <TextView
-        android:id="@+id/tv_amount"
-        style="@style/TextAppearance.AppCompat.SecondaryText"
-        tools:text="Amount: 10 PC"
-        app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/tv_fish" />
+            <ImageView
+                android:id="@+id/imageView9"
+                style="@style/SimpleIcon"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_amount"
+                app:layout_constraintEnd_toStartOf="@+id/guideline"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tv_fish"
+                app:srcCompat="@drawable/ic_fish" />
 
-    <TextView
-        android:id="@+id/tv_weight"
-        style="@style/TextAppearance.AppCompat.MainText"
-        android:layout_marginEnd="24dp"
-        tools:text="100 kg"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tv_fish" />
+            <TextView
+                android:id="@+id/tv_fish"
+                style="@style/TextAppearance.AppCompat.MainText"
+                android:layout_marginTop="32dp"
+                app:layout_constraintStart_toStartOf="@+id/guideline"
+                app:layout_constraintTop_toBottomOf="@+id/tv_date_time"
+                android:text="Karas" />
 
-    <TextView
-        android:id="@+id/tv_place_title"
-        style="@style/TextAppearance.AppCompat.MainText"
-        android:layout_marginTop="32dp"
-        tools:text="Palce"
-        app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/tv_description" />
+            <TextView
+                android:id="@+id/tv_amount"
+                style="@style/TextAppearance.AppCompat.SecondaryText"
+                app:layout_constraintStart_toStartOf="@+id/guideline"
+                app:layout_constraintTop_toBottomOf="@+id/tv_fish"
+                android:text="Amount: 10 PC" />
 
-    <TextView
-        android:id="@+id/tv_place_description"
-        style="@style/TextAppearance.AppCompat.SecondaryText"
-        android:text="No description"
-        app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/tv_place_title" />
+            <TextView
+                android:id="@+id/tv_weight"
+                style="@style/TextAppearance.AppCompat.MainText"
+                android:layout_marginEnd="24dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tv_fish"
+                tools:text="100 kg" />
 
-    <ImageView
-        android:id="@+id/imageView10"
-        style="@style/SimpleIcon"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_place_description"
-        app:layout_constraintEnd_toStartOf="@+id/guideline"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tv_place_title"
-        app:srcCompat="@drawable/ic_baseline_location_on_24" />
+            <TextView
+                android:id="@+id/tv_place_title"
+                style="@style/TextAppearance.AppCompat.MainText"
+                android:layout_marginTop="32dp"
+                app:layout_constraintStart_toStartOf="@+id/guideline"
+                app:layout_constraintTop_toBottomOf="@+id/tv_description"
+                android:text="Palce" />
 
-    <TextView
-        android:id="@+id/tv_rod"
-        style="@style/TextAppearance.AppCompat.MainText"
-        android:layout_marginTop="32dp"
-        app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/tv_amount"
-        tools:text="Fishing rod" />
+            <TextView
+                android:id="@+id/tv_place_description"
+                style="@style/TextAppearance.AppCompat.SecondaryText"
+                android:text="@string/no_description"
+                app:layout_constraintStart_toStartOf="@+id/guideline"
+                app:layout_constraintTop_toBottomOf="@+id/tv_place_title" />
 
-    <TextView
-        android:id="@+id/tv_lure"
-        style="@style/TextAppearance.AppCompat.SecondaryText"
-        android:text="No lure"
-        app:layout_constraintStart_toStartOf="@+id/tv_rod"
-        app:layout_constraintTop_toBottomOf="@+id/tv_rod" />
+            <ImageView
+                android:id="@+id/imageView10"
+                style="@style/SimpleIcon"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_place_description"
+                app:layout_constraintEnd_toStartOf="@+id/guideline"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tv_place_title"
+                app:srcCompat="@drawable/ic_baseline_location_on_24" />
 
-    <TextView
-        android:id="@+id/tv_bait"
-        style="@style/TextAppearance.AppCompat.MainText"
-        android:text="No bait"
-        app:layout_constraintEnd_toEndOf="@+id/tv_weight"
-        app:layout_constraintTop_toTopOf="@+id/tv_rod" />
+            <TextView
+                android:id="@+id/tv_rod"
+                style="@style/TextAppearance.AppCompat.MainText"
+                android:layout_marginTop="32dp"
+                app:layout_constraintStart_toStartOf="@+id/guideline"
+                app:layout_constraintTop_toBottomOf="@+id/tv_amount"
+                android:text="Fishing rod" />
 
-    <ImageView
-        android:id="@+id/imageView11"
-        style="@style/SimpleIcon"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_lure"
-        app:layout_constraintEnd_toStartOf="@+id/guideline"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tv_rod"
-        app:srcCompat="@drawable/ic_hook" />
+            <TextView
+                android:id="@+id/tv_lure"
+                style="@style/TextAppearance.AppCompat.SecondaryText"
+                android:text="No lure"
+                app:layout_constraintStart_toStartOf="@+id/tv_rod"
+                app:layout_constraintTop_toBottomOf="@+id/tv_rod" />
 
-    <TextView
-        android:id="@+id/textView5"
-        style="@style/TextAppearance.AppCompat.MainText"
-        android:layout_marginTop="32dp"
-        android:text="Weather"
-        app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/tv_lure" />
+            <TextView
+                android:id="@+id/tv_bait"
+                style="@style/TextAppearance.AppCompat.MainText"
+                android:text="No bait"
+                app:layout_constraintEnd_toEndOf="@+id/tv_weight"
+                app:layout_constraintTop_toTopOf="@+id/tv_rod" />
 
-    <ImageView
-        android:id="@+id/iv_weather"
-        style="@style/SimpleIcon"
-        android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/textView5"
-        app:srcCompat="@drawable/ic_weather_lightning" />
+            <ImageView
+                android:id="@+id/imageView11"
+                style="@style/SimpleIcon"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_lure"
+                app:layout_constraintEnd_toStartOf="@+id/guideline"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tv_rod"
+                app:srcCompat="@drawable/ic_hook" />
 
-    <ImageView
-        android:id="@+id/iv_wind"
-        style="@style/SimpleIcon"
-        android:layout_marginStart="32dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageView16"
-        app:layout_constraintTop_toTopOf="@+id/imageView16"
-        app:srcCompat="@drawable/ic_arrow_down" />
+            <TextView
+                android:id="@+id/textView5"
+                style="@style/TextAppearance.AppCompat.MainText"
+                android:layout_marginTop="32dp"
+                android:text="Weather"
+                app:layout_constraintStart_toStartOf="@+id/guideline"
+                app:layout_constraintTop_toBottomOf="@+id/tv_lure" />
 
-    <TextView
-        android:id="@+id/tw_weather"
-        style="@style/TextAppearance.AppCompat.SecondaryText"
-        android:layout_marginTop="2dp"
-        android:text="Storm"
-        app:layout_constraintEnd_toEndOf="@+id/iv_weather"
-        app:layout_constraintStart_toStartOf="@+id/iv_weather"
-        app:layout_constraintTop_toBottomOf="@+id/iv_weather" />
+            <ImageView
+                android:id="@+id/iv_weather"
+                style="@style/SimpleIcon"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/guideline"
+                app:layout_constraintTop_toBottomOf="@+id/textView5"
+                app:srcCompat="@drawable/ic_weather_lightning" />
 
-    <ImageView
-        android:id="@+id/imageView16"
-        style="@style/SimpleIcon"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="32dp"
-        app:layout_constraintEnd_toStartOf="@+id/iv_wind"
-        app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/tw_weather"
-        app:srcCompat="@drawable/ic_thermometer" />
+            <ImageView
+                android:id="@+id/iv_wind"
+                style="@style/SimpleIcon"
+                android:layout_marginStart="32dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/imageView16"
+                app:layout_constraintTop_toTopOf="@+id/imageView16"
+                app:srcCompat="@drawable/ic_arrow_down" />
 
-    <TextView
-        android:id="@+id/tv_temp"
-        style="@style/TextAppearance.AppCompat.SecondaryText"
-        android:text="Temperature: +10 C"
-        app:layout_constraintEnd_toEndOf="@+id/imageView16"
-        app:layout_constraintStart_toStartOf="@+id/imageView16"
-        app:layout_constraintTop_toBottomOf="@+id/imageView16" />
+            <TextView
+                android:id="@+id/tw_weather"
+                style="@style/TextAppearance.AppCompat.SecondaryText"
+                android:layout_marginTop="2dp"
+                android:text="Storm"
+                app:layout_constraintEnd_toEndOf="@+id/iv_weather"
+                app:layout_constraintStart_toStartOf="@+id/iv_weather"
+                app:layout_constraintTop_toBottomOf="@+id/iv_weather" />
 
-    <TextView
-        android:id="@+id/tv_wind"
-        style="@style/TextAppearance.AppCompat.SecondaryText"
-        android:text="Wind: 10 m/s"
-        app:layout_constraintEnd_toEndOf="@+id/iv_wind"
-        app:layout_constraintStart_toStartOf="@+id/iv_wind"
-        app:layout_constraintTop_toBottomOf="@+id/iv_wind" />
+            <ImageView
+                android:id="@+id/imageView16"
+                style="@style/SimpleIcon"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="32dp"
+                app:layout_constraintEnd_toStartOf="@+id/iv_wind"
+                app:layout_constraintStart_toStartOf="@+id/guideline"
+                app:layout_constraintTop_toBottomOf="@+id/tw_weather"
+                app:srcCompat="@drawable/ic_thermometer" />
 
-    <ImageView
-        android:id="@+id/imageView17"
-        style="@style/SimpleIcon"
-        android:layout_marginTop="24dp"
-        app:layout_constraintEnd_toEndOf="@+id/imageView16"
-        app:layout_constraintStart_toStartOf="@+id/imageView16"
-        app:layout_constraintTop_toBottomOf="@+id/tv_temp"
-        app:srcCompat="@drawable/ic_gauge" />
+            <TextView
+                android:id="@+id/tv_temp"
+                style="@style/TextAppearance.AppCompat.SecondaryText"
+                android:text="+10 C"
+                app:layout_constraintEnd_toEndOf="@+id/imageView16"
+                app:layout_constraintStart_toStartOf="@+id/imageView16"
+                app:layout_constraintTop_toBottomOf="@+id/imageView16" />
 
-    <TextView
-        android:id="@+id/tv_press"
-        style="@style/TextAppearance.AppCompat.SecondaryText"
-        android:text="Pressure: 1000 mm/ph"
-        app:layout_constraintEnd_toEndOf="@+id/imageView17"
-        app:layout_constraintStart_toStartOf="@+id/imageView17"
-        app:layout_constraintTop_toBottomOf="@+id/imageView17" />
+            <TextView
+                android:id="@+id/tv_wind"
+                style="@style/TextAppearance.AppCompat.SecondaryText"
+                android:text="10 m/s"
+                app:layout_constraintEnd_toEndOf="@+id/iv_wind"
+                app:layout_constraintStart_toStartOf="@+id/iv_wind"
+                app:layout_constraintTop_toBottomOf="@+id/iv_wind" />
 
-    <ImageView
-        android:id="@+id/iv_moon"
-        style="@style/SimpleIcon"
-        android:layout_marginTop="24dp"
-        app:layout_constraintEnd_toEndOf="@+id/iv_wind"
-        app:layout_constraintStart_toStartOf="@+id/iv_wind"
-        app:layout_constraintTop_toBottomOf="@+id/tv_wind"
-        app:srcCompat="@drawable/ic_moon_waning_crescent" />
+            <ImageView
+                android:id="@+id/imageView17"
+                style="@style/SimpleIcon"
+                android:layout_marginTop="24dp"
+                app:layout_constraintEnd_toEndOf="@+id/imageView16"
+                app:layout_constraintStart_toStartOf="@+id/imageView16"
+                app:layout_constraintTop_toBottomOf="@+id/tv_temp"
+                app:srcCompat="@drawable/ic_gauge" />
 
-    <TextView
-        android:id="@+id/tv_moon"
-        style="@style/TextAppearance.AppCompat.SecondaryText"
-        android:text="New moon"
-        app:layout_constraintEnd_toEndOf="@+id/iv_moon"
-        app:layout_constraintStart_toStartOf="@+id/iv_moon"
-        app:layout_constraintTop_toBottomOf="@+id/iv_moon" />
+            <TextView
+                android:id="@+id/tv_press"
+                style="@style/TextAppearance.AppCompat.SecondaryText"
+                android:layout_marginBottom="32dp"
+                android:text="1000 mm/ph"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/imageView17"
+                app:layout_constraintStart_toStartOf="@+id/imageView17"
+                app:layout_constraintTop_toBottomOf="@+id/imageView17" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <ImageView
+                android:id="@+id/iv_moon"
+                style="@style/SimpleIcon"
+                android:layout_marginTop="24dp"
+                app:layout_constraintEnd_toEndOf="@+id/iv_wind"
+                app:layout_constraintStart_toStartOf="@+id/iv_wind"
+                app:layout_constraintTop_toBottomOf="@+id/tv_wind"
+                app:srcCompat="@drawable/ic_moon_waning_crescent" />
+
+            <TextView
+                android:id="@+id/tv_moon"
+                style="@style/TextAppearance.AppCompat.SecondaryText"
+                android:text="New moon"
+                app:layout_constraintEnd_toEndOf="@+id/iv_moon"
+                app:layout_constraintStart_toStartOf="@+id/iv_moon"
+                app:layout_constraintTop_toBottomOf="@+id/iv_moon" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>
+
