@@ -7,6 +7,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <FrameLayout
+        android:id="@+id/loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/text_support_color"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|center_vertical" />
+    </FrameLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -120,62 +135,13 @@
                     app:layout_constraintStart_toEndOf="@+id/imageView3"
                     app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_catch_time" />
 
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/iv_new_catch_image_first"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    app:layout_constraintDimensionRatio="4:3"
-                    app:layout_constraintEnd_toStartOf="@+id/iv_new_catch_image_second"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toStartOf="@+id/imageView3"
-                    app:layout_constraintTop_toBottomOf="@+id/tv_new_catch_pictures"
-                    app:srcCompat="@drawable/ic_baseline_image_24" />
-
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/iv_new_catch_image_second"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/iv_new_catch_image_first"
-                    app:layout_constraintEnd_toStartOf="@+id/iv_new_catch_image_third"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/iv_new_catch_image_first"
-                    app:layout_constraintTop_toTopOf="@+id/iv_new_catch_image_first"
-                    app:srcCompat="@drawable/ic_baseline_image_24" />
-
-                <com.google.android.material.imageview.ShapeableImageView
-                    android:id="@+id/iv_new_catch_image_third"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_marginStart="8dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/iv_new_catch_image_first"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/iv_new_catch_image_second"
-                    app:layout_constraintTop_toTopOf="@+id/iv_new_catch_image_first"
-                    app:srcCompat="@drawable/ic_baseline_image_24" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/button_new_catch_add_images"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/photos"
-                    app:icon="@drawable/ic_baseline_plus"
-                    app:layout_constraintEnd_toEndOf="@+id/iv_new_catch_image_third"
-                    app:layout_constraintTop_toBottomOf="@+id/iv_new_catch_image_first" />
-
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/tv_new_catch_catch_header"
                     style="@style/TextAppearance.AppCompat.SecondaryText.DividerHeader"
                     android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
                     android:text="@string/fish_catch"
                     app:layout_constraintStart_toEndOf="@+id/imageView4"
-                    app:layout_constraintTop_toBottomOf="@+id/button_new_catch_add_images" />
+                    app:layout_constraintTop_toBottomOf="@+id/rv_photos" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/textInputLayout_new_catch_kind_of_fish"
@@ -446,8 +412,22 @@
                     app:layout_constraintTop_toTopOf="@+id/tv_new_catch_options_header"
                     app:srcCompat="@drawable/ic_baseline_settings_24" />
 
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_photos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_new_catch_pictures"
+                    tools:listitem="@layout/item_add_photo"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    android:orientation="horizontal"/>
+
             </androidx.constraintlayout.widget.ConstraintLayout>
+
         </androidx.core.widget.NestedScrollView>
+
     </LinearLayout>
 
     <include

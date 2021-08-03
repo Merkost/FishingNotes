@@ -1,4 +1,4 @@
-package com.joesemper.fishing.presentation.map.marker
+package com.joesemper.fishing.presentation.map.dialogs.create.marker
 
 import android.os.Bundle
 import android.text.InputType
@@ -10,7 +10,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.android.material.transition.MaterialFadeThrough
 import com.joesemper.fishing.data.entity.RawMapMarker
 import com.joesemper.fishing.databinding.FragmentNewMarkerBinding
 import com.joesemper.fishing.utils.AddNewMarkerListener

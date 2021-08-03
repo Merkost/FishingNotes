@@ -1,10 +1,8 @@
 package com.joesemper.fishing.data.repository.map.catches
 
-import com.joesemper.fishing.data.entity.RawUserCatch
-import com.joesemper.fishing.model.common.Progress
-import kotlinx.coroutines.flow.StateFlow
+import com.joesemper.fishing.model.common.content.UserCatch
+import kotlinx.coroutines.flow.Flow
 
 interface CatchesRepository {
-    suspend fun addNewCatch(newCatch: RawUserCatch): StateFlow<Progress>
-
+    fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>>
 }

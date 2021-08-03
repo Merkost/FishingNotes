@@ -30,7 +30,7 @@
     <style name="SimpleIcon">
         <item name="android:layout_width">@dimen/simple_icon_width</item>
         <item name="android:layout_height">@dimen/simple_icon_height</item>
-        <item name="tint">@color/colorPrimary</item>
+        <item name="tint">@color/textColorSecondary</item>
     </style>
 
     <style name="circleView" parent="">
@@ -39,8 +39,8 @@
     </style>
 
     <style name="circleImageButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="android:layout_width">64dp</item>
-        <item name="android:layout_height">64dp</item>
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
         <item name="android:insetLeft">0dp</item>
         <item name="android:insetTop">0dp</item>
         <item name="android:insetRight">0dp</item>
@@ -61,6 +61,16 @@
 
     <style name="Theme.MyApp.BottomSheetDialog" parent="Theme.Design.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/Widget.MyApp.BottomSheet.Modal</item>
+    </style>
+
+    <style name="OutlineChip" parent="Widget.MaterialComponents.Chip.Action">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="chipBackgroundColor">@color/white_transparent</item>
+        <item name="chipIconTint">@color/colorPrimary</item>
+        <item name="chipStrokeColor">@color/colorPrimary</item>
+        <item name="chipStrokeWidth">1dp</item>
     </style>
 
 

@@ -2,15 +2,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/groupsFragment"
-        android:title="@string/groups"
-        android:icon="@drawable/ic_baseline_people_24"
-        android:orderInCategory="10"/>
-
-    <item
         android:id="@+id/mapFragment"
         android:title="@string/map"
         android:icon="@drawable/ic_baseline_map_24"
+        android:orderInCategory="10"/>
+
+    <item
+        android:id="@+id/groupsFragment"
+        android:title="@string/groups"
+        android:icon="@drawable/ic_baseline_people_24"
         android:orderInCategory="20"/>
 
     <item

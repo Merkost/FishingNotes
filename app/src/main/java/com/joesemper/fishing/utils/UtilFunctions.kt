@@ -1,5 +1,9 @@
 package com.joesemper.fishing.utils
 
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.widget.ImageView
+import java.io.ByteArrayOutputStream
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -20,4 +24,11 @@ fun Double.format(digits: Int) = "%.${digits}f".format(this)
 fun Double.roundTo(numFractionDigits: Int): Double {
     val factor = 10.0.pow(numFractionDigits.toDouble())
     return (this * factor).roundToInt() / factor
+}
+
+fun getByteArrayFromImageVew(view: ImageView): ByteArray {
+    val bitmap = (view.drawable as BitmapDrawable).bitmap
+    val baos = ByteArrayOutputStream()
+    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+    return baos.toByteArray()
 }

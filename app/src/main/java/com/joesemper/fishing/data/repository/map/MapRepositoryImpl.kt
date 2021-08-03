@@ -18,25 +18,26 @@ class MapRepositoryImpl(private val provider: DatabaseProvider) : MapRepository 
 
     private val markers = mutableSetOf<String>()
 
-    @FlowPreview
-    @ExperimentalCoroutinesApi
-    override fun getAllUserContent() = provider.getAllUserCatches().flatMapMerge { userCatch ->
-
-        flow {
-            emit(userCatch as Content)
-            val markerId = userCatch.userMarkerId
-            if (!markers.contains(markerId) and markerId.isNotBlank()) {
-                try {
-                    markers.add(markerId)
-                    provider.getMarker(markerId).collect { marker ->
-                        emit(marker as Content)
-                    }
-                } catch (e: Throwable) {
-                    Log.d("Fishing", e.message, e)
-                }
-            }
-        }
-    }
+//    @FlowPreview
+//    @ExperimentalCoroutinesApi
+//    override fun getAllUserContent() = provider.getAllUserCatches()
+////        .flatMapMerge { userCatch ->
+////
+////        flow {
+////            emit(userCatch as Content)
+////            val markerId = userCatch.userMarkerId
+////            if (!markers.contains(markerId) and markerId.isNotBlank()) {
+////                try {
+////                    markers.add(markerId)
+////                    provider.getMarker(markerId).collect { marker ->
+////                        emit(marker as Content)
+////                    }
+////                } catch (e: Throwable) {
+////                    Log.d("Fishing", e.message, e)
+////                }
+////            }
+////        }
+////    }
 
     override fun getAllUserMarkers(): Flow<MapMarker> = provider.getAllMarkers()
     override suspend fun addNewMarker(newMarker: RawMapMarker) = provider.addNewMarker(newMarker)

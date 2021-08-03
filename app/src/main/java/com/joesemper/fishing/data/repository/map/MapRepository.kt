@@ -9,6 +9,6 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface MapRepository {
     suspend fun addNewMarker(newMarker: RawMapMarker): StateFlow<Progress>
-    fun getAllUserContent(): Flow<Content>
+//    fun getAllUserContent(): Flow<Content>
     fun getAllUserMarkers(): Flow<MapMarker>
 }

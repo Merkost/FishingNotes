@@ -41,4 +41,9 @@
     <string name="add">Add</string>
     <string name="coordinates">Coordinates</string>
     <string name="photos">Photos</string>
+    <string name="new_catch">New catch</string>
+    <string name="share">Share</string>
+    <string name="route">Route</string>
+    <string name="delete">Delete</string>
+    <string name="add_photo">Add photo</string>
 </resources>

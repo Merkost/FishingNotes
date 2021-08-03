@@ -1,4 +1,4 @@
-package com.joesemper.fishing.presentation.map.marker
+package com.joesemper.fishing.presentation.map.dialogs.marker.notes
 
 import android.os.Bundle
 import android.view.LayoutInflater

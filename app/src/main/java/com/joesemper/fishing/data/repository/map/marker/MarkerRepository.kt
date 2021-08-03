@@ -5,5 +5,4 @@ import kotlinx.coroutines.flow.Flow
 
 interface MarkerRepository {
     suspend fun deleteMarker(userCatch: UserCatch)
-    fun getCatchesByMarkerId(markerId: String): Flow<UserCatch>
 }

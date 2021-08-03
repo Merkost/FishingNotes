@@ -12,6 +12,8 @@ import com.joesemper.fishing.data.repository.map.MapRepository
 import com.joesemper.fishing.data.repository.map.MapRepositoryImpl
 import com.joesemper.fishing.data.repository.map.catches.CatchesRepository
 import com.joesemper.fishing.data.repository.map.catches.CatchesRepositoryImpl
+import com.joesemper.fishing.data.repository.map.catches.NewCatchRepository
+import com.joesemper.fishing.data.repository.map.catches.NewCatchRepositoryImpl
 import com.joesemper.fishing.data.repository.map.marker.MarkerRepository
 import com.joesemper.fishing.data.repository.map.marker.MarkerRepositoryImpl
 import com.joesemper.fishing.data.repository.weather.WeatherRepository
@@ -25,10 +27,12 @@ import com.joesemper.fishing.presentation.weather.WeatherFragment
 import com.joesemper.fishing.presentation.groups.GroupsViewModel
 import com.joesemper.fishing.presentation.main.MainViewModel
 import com.joesemper.fishing.presentation.map.MapViewModel
-import com.joesemper.fishing.presentation.map.catches.NewCatchFragment
-import com.joesemper.fishing.presentation.map.catches.NewCatchViewModel
-import com.joesemper.fishing.presentation.map.marker.MarkerDetailsDialogFragment
-import com.joesemper.fishing.presentation.map.marker.MarkerDetailsViewModel
+import com.joesemper.fishing.presentation.map.dialogs.create.catches.NewCatchFragment
+import com.joesemper.fishing.presentation.map.dialogs.create.catches.NewCatchViewModel
+import com.joesemper.fishing.presentation.map.dialogs.marker.catches.UserCatchesViewModel
+import com.joesemper.fishing.presentation.map.dialogs.marker.MarkerDetailsDialogFragment
+import com.joesemper.fishing.presentation.map.dialogs.marker.MarkerDetailsViewModel
+import com.joesemper.fishing.presentation.map.dialogs.marker.catches.UserCatchesInnerFragment
 import com.joesemper.fishing.presentation.splash.SplashViewModel
 import com.joesemper.fishing.presentation.weather.WeatherViewModel
 import org.koin.android.ext.koin.androidContext
@@ -73,6 +77,13 @@ val markerFragment = module {
 val newCatchFragment = module {
     scope(named<NewCatchFragment>()) {
         viewModel { NewCatchViewModel(get()) }
+        scoped<NewCatchRepository> { NewCatchRepositoryImpl(get()) }
+    }
+}
+
+val catchesInnerFragment = module {
+    scope(named<UserCatchesInnerFragment>()) {
+        viewModel { UserCatchesViewModel(get()) }
         scoped<CatchesRepository> { CatchesRepositoryImpl(get()) }
     }
 }

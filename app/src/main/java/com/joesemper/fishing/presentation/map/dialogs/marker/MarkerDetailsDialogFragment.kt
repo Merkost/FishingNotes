@@ -1,13 +1,14 @@
-package com.joesemper.fishing.presentation.map.marker
+package com.joesemper.fishing.presentation.map.dialogs.marker
 
+import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
@@ -18,13 +19,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.tabs.TabLayoutMediator
 import com.joesemper.fishing.databinding.FragmentMarkerDetailsBinding
-import com.joesemper.fishing.model.common.content.UserCatch
 import com.joesemper.fishing.model.common.content.UserMapMarker
 import com.joesemper.fishing.presentation.map.MapFragmentDirections
-import kotlinx.coroutines.flow.Flow
+import com.joesemper.fishing.presentation.map.dialogs.marker.catches.UserCatchesInnerFragment
+import com.joesemper.fishing.presentation.map.dialogs.marker.notes.UserNotesInnerFragment
 import kotlinx.coroutines.flow.collect
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
@@ -32,7 +35,8 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.scope.Scope
 import java.util.*
 
-class MarkerDetailsDialogFragment : BottomSheetDialogFragment(), AndroidScopeComponent {
+
+class MarkerDetailsDialogFragment() : BottomSheetDialogFragment(), AndroidScopeComponent {
 
     companion object {
         private const val MARKER = "MARKER"
@@ -55,6 +59,27 @@ class MarkerDetailsDialogFragment : BottomSheetDialogFragment(), AndroidScopeCom
 
     private lateinit var marker: UserMapMarker
 
+    private lateinit var screenSlidePageAdapter: ScreenSlidePageAdapter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        marker = arguments?.get(MARKER) as UserMapMarker
+    }
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val dialog = super.onCreateDialog(savedInstanceState)
+        dialog.setOnShowListener { dial ->
+            val d = dial as BottomSheetDialog
+            val bottomSheet =
+                d.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet) as FrameLayout
+            val behavior = BottomSheetBehavior.from(bottomSheet)
+            behavior.peekHeight = 1000
+            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            behavior.skipCollapsed = true
+        }
+        return dialog
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -67,12 +92,11 @@ class MarkerDetailsDialogFragment : BottomSheetDialogFragment(), AndroidScopeCom
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        marker = arguments?.get(MARKER) as UserMapMarker
-
+        initViewPager()
+        initTabs()
         setData()
         subscribeOnVewModel()
-        setOnNewCatchListener()
-
+        setOnClickListeners()
     }
 
     private fun setData() {
@@ -85,11 +109,10 @@ class MarkerDetailsDialogFragment : BottomSheetDialogFragment(), AndroidScopeCom
             viewModel.subscribe(marker.id).collect { viewState ->
                 when (viewState) {
                     is MarkerDetailsViewState.Loading -> {
+                        binding.progressBarMarker.visibility = View.GONE
                     }
                     is MarkerDetailsViewState.Success -> {
                         binding.progressBarMarker.visibility = View.GONE
-                        initViewPager(viewState.content)
-                        initTabs()
                     }
                     is MarkerDetailsViewState.Error -> {
                         val msg = viewState.error.message
@@ -100,10 +123,17 @@ class MarkerDetailsDialogFragment : BottomSheetDialogFragment(), AndroidScopeCom
         }
     }
 
-    private fun initViewPager(catches: Flow<UserCatch>) {
+    private fun setOnClickListeners() {
+        setOnNewCatchListener()
+        setOnRouteClickListener()
+        setOnShareClickListener()
+    }
+
+    private fun initViewPager() {
         val fragmentManager = childFragmentManager
+        screenSlidePageAdapter = ScreenSlidePageAdapter(fragmentManager, lifecycle)
         viewPager = binding.viewPagerMarker
-        viewPager.adapter = ScreenSlidePageAdapter(fragmentManager, lifecycle, catches)
+        viewPager.adapter = screenSlidePageAdapter
     }
 
     private fun initTabs() {
@@ -117,13 +147,33 @@ class MarkerDetailsDialogFragment : BottomSheetDialogFragment(), AndroidScopeCom
     }
 
     private fun setOnNewCatchListener() {
-        binding.buttonAddNewCatch.setOnClickListener {
+        binding.chipAddNewCatch.setOnClickListener {
             val action = MapFragmentDirections.actionMapFragmentToNewCatchDialogFragment(marker)
             findNavController().navigate(action)
         }
 
-        binding.buttonNavigate.setOnClickListener {
+    }
+
+    private fun setOnRouteClickListener() {
+        binding.chipRoute.setOnClickListener {
             startMapsActivityForNavigation()
+        }
+
+    }
+
+    private fun setOnShareClickListener() {
+        binding.chipShare.setOnClickListener {
+            val text =
+                "${marker.title}\nhttps://www.google.com/maps/search/?api=1&query=${marker.latitude},${marker.longitude}"
+
+            val sendIntent: Intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, text)
+                type = "text/plain"
+            }
+
+            val shareIntent = Intent.createChooser(sendIntent, null)
+            startActivity(shareIntent)
         }
     }
 
@@ -153,18 +203,19 @@ class MarkerDetailsDialogFragment : BottomSheetDialogFragment(), AndroidScopeCom
     private inner class ScreenSlidePageAdapter(
         fm: FragmentManager,
         lifecycle: Lifecycle,
-        val catches: Flow<UserCatch>
     ) : FragmentStateAdapter(fm, lifecycle) {
 
         val numOfTabs = 2
-
         override fun getItemCount(): Int = numOfTabs
+
+        val catchesFragment = UserCatchesInnerFragment.newInstance(marker)
+        val notesFragment = UserNotesInnerFragment.newInstance()
 
         override fun createFragment(position: Int): Fragment {
             return when (position) {
-                0 -> UserCatchesInnerFragment(catches)
-                1 -> UserNotesInnerFragment.newInstance()
-                else -> UserCatchesInnerFragment(catches)
+                0 -> catchesFragment
+                1 -> notesFragment
+                else -> catchesFragment
             }
 
         }

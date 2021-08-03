@@ -2,7 +2,6 @@ package com.joesemper.fishing.presentation.map
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -30,8 +29,8 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.data.entity.RawMapMarker
 import com.joesemper.fishing.model.common.content.Content
 import com.joesemper.fishing.model.common.content.UserMapMarker
-import com.joesemper.fishing.presentation.map.marker.MarkerDetailsDialogFragment
-import com.joesemper.fishing.presentation.map.marker.NewMarkerDialogFragment
+import com.joesemper.fishing.presentation.map.dialogs.marker.MarkerDetailsDialogFragment
+import com.joesemper.fishing.presentation.map.dialogs.create.marker.NewMarkerDialogFragment
 import com.joesemper.fishing.utils.AddNewMarkerListener
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.utils.PermissionUtils.isPermissionGranted
@@ -107,8 +106,8 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
-        val geocoder = Geocoder(requireContext())
-        geocoder.getFromLocation(12.12, 12.12, 1).first().thoroughfare
+//        val geocoder = Geocoder(requireContext())
+//        geocoder.getFromLocation(12.12, 12.12, 1).first().thoroughfare
         enableMyLocation()
         setOnMarkersClickListener()
         subscribeOnViewModel()

@@ -84,25 +84,32 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
     }
 
     @ExperimentalCoroutinesApi
-    private fun getCatchSnapshotListener(scope: ProducerScope<UserCatch>) =
+    private fun getCatchSnapshotListener(scope: ProducerScope<List<UserCatch>>) =
         EventListener<QuerySnapshot> { snapshots, error ->
             if (error != null) {
                 Log.d("Fishing", "Catch snapshot listener", error)
                 return@EventListener
             }
 
-            for (dc in snapshots!!.documentChanges) {
-                when (dc.type) {
-                    DocumentChange.Type.ADDED -> {
-                        val userCatch = dc.document.toObject<UserCatch>()
-                        scope.trySend(userCatch)
-                    }
-                    DocumentChange.Type.MODIFIED -> {
-                    }
-                    DocumentChange.Type.REMOVED -> {
-                    }
-                }
+            if (snapshots != null) {
+                val catches = snapshots.toObjects(UserCatch::class.java)
+                scope.trySend(catches)
+            } else {
+                scope.trySend(listOf())
             }
+
+//            for (dc in snapshots!!.documentChanges) {
+//                when (dc.type) {
+//                    DocumentChange.Type.ADDED -> {
+//                        val userCatch = dc.document.toObject<UserCatch>()
+//                        scope.trySend(userCatch)
+//                    }
+//                    DocumentChange.Type.MODIFIED -> {
+//                    }
+//                    DocumentChange.Type.REMOVED -> {
+//                    }
+//                }
+//            }
         }
 
     @ExperimentalCoroutinesApi

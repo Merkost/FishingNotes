@@ -31,7 +31,7 @@
         android:label="GroupsFragment" />
     <fragment
         android:id="@+id/newCatchDialogFragment"
-        android:name="com.joesemper.fishing.presentation.map.catches.NewCatchFragment"
+        android:name="com.joesemper.fishing.presentation.map.dialogs.create.catches.NewCatchFragment"
         android:label="NewCatchDialogFragment" >
         <argument
             android:name="marker"

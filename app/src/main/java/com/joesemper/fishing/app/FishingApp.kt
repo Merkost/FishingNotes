@@ -23,7 +23,8 @@ class FishingApp : Application() {
                     groupsScreen,
                     mainActivity,
                     markerFragment,
-                    newCatchFragment
+                    newCatchFragment,
+                    catchesInnerFragment
                 )
             )
         }

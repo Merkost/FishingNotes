@@ -36,12 +36,12 @@ class MapViewModel(
         }
     }
 
-    private fun loadContent() {
-        viewModelScope.launch {
-            val userContent = mapRepository.getAllUserContent()
-            viewStateFlow.value = MapViewState.Success(userContent)
-        }
-    }
+//    private fun loadContent() {
+//        viewModelScope.launch {
+//            val userContent = mapRepository.getAllUserContent()
+//            viewStateFlow.value = MapViewState.Success(userContent)
+//        }
+//    }
 
     fun addNewMarker(newMarker: RawMapMarker) {
         viewModelScope.launch {

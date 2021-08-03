@@ -1,4 +1,4 @@
-package com.joesemper.fishing.presentation.map.catches
+package com.joesemper.fishing.presentation.map.dialogs.create.catches
 
 import android.app.DatePickerDialog
 import android.app.DatePickerDialog.OnDateSetListener
@@ -10,22 +10,31 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
 import android.text.format.DateUtils
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import coil.load
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.transition.MaterialFadeThrough
+import com.google.android.material.transition.MaterialSharedAxis
 import com.joesemper.fishing.R
 import com.joesemper.fishing.data.entity.RawUserCatch
 import com.joesemper.fishing.databinding.FragmentNewCatchBinding
 import com.joesemper.fishing.model.common.content.UserMapMarker
+import com.joesemper.fishing.presentation.map.dialogs.create.catches.adapter.AddNewPhotosAdapter
+import com.joesemper.fishing.presentation.map.dialogs.create.catches.adapter.PhotosRecyclerViewItem
 import com.joesemper.fishing.utils.NavigationHolder
 import com.joesemper.fishing.utils.format
 import com.joesemper.fishing.utils.roundTo
@@ -33,6 +42,10 @@ import gun0912.tedbottompicker.TedBottomPicker
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.dialog_new_catch.*
 import kotlinx.android.synthetic.main.fragment_new_catch.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collect
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -40,7 +53,8 @@ import org.koin.core.scope.Scope
 import java.io.ByteArrayOutputStream
 import java.util.*
 
-class NewCatchFragment : Fragment(), AndroidScopeComponent {
+
+class NewCatchFragment() : Fragment(), AndroidScopeComponent {
 
     private val args: NewCatchFragmentArgs by navArgs()
 
@@ -53,9 +67,14 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     private val binding
         get() = _binding!!
 
-    private var currentPhotos = mutableListOf<Uri>()
-
     private lateinit var marker: UserMapMarker
+
+    private lateinit var adapter: AddNewPhotosAdapter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        marker = args.marker as UserMapMarker
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -67,9 +86,33 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+//        setTransactions()
+        subscribeOnViewModel()
         setInitialData()
         initViews()
         setOnClickListeners()
+        initRV()
+
+    }
+
+    private fun setTransactions() {
+        enterTransition = MaterialFadeThrough()
+        returnTransition = MaterialFadeThrough()
+    }
+
+    private fun subscribeOnViewModel() {
+        lifecycleScope.launchWhenStarted {
+            viewModel.subscribe().collect { state ->
+                when (state) {
+                    is NewCatchViewState.Loading -> binding.loading.visibility = View.VISIBLE
+                    is NewCatchViewState.Success -> binding.loading.visibility = View.GONE
+                    is NewCatchViewState.Error -> {
+                        binding.loading.visibility = View.GONE
+                        Toast.makeText(context, state.error.message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
     }
 
     private fun initViews() {
@@ -78,16 +121,47 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     }
 
     private fun setInitialData() {
-        marker = args.marker as UserMapMarker
-        setInitialPlaceData()
         setInitialTimeAndDate()
+        setInitialPlaceData()
     }
 
     private fun setOnClickListeners() {
-        setOnAddPhotoClickListener()
         setOnIncrementDecrementClickListeners()
         setOnCreateClickListener()
         setOnCloseClickListeners()
+    }
+
+    private val uris = mutableListOf<Uri>()
+
+    private fun initRV() {
+        val dividerItemDecoration = DividerItemDecoration(context, RecyclerView.HORIZONTAL)
+        dividerItemDecoration.setDrawable(
+            AppCompatResources.getDrawable(
+                requireContext(),
+                R.drawable.rv_dicoration_white
+            )!!
+        )
+        binding.rvPhotos.addItemDecoration(dividerItemDecoration)
+        adapter = AddNewPhotosAdapter { item ->
+            when (item) {
+                is PhotosRecyclerViewItem.ItemAddNewPhoto -> {
+                    getPhotoListener()
+                        .showMultiImage { photos ->
+                            photos.forEach { uri ->
+                                uris.add(uri)
+                                adapter.addItem(uri.toString())
+                            }
+                        }
+                }
+                is PhotosRecyclerViewItem.ItemPhoto -> {
+                    adapter.deleteItem(item)
+                }
+            }
+
+        }
+        binding.rvPhotos.layoutManager =
+            LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        binding.rvPhotos.adapter = adapter
     }
 
     private fun initToolbar() {
@@ -112,28 +186,14 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         setOnEditTimeAndDateClickListeners()
     }
 
-    private fun setOnAddPhotoClickListener() {
-        binding.buttonNewCatchAddImages.setOnClickListener {
-            TedBottomPicker.with(requireActivity())
-                .setPeekHeight(1600)
-                .showTitle(false)
-                .setCompleteButtonText("Done")
-                .setEmptySelectionText("No Select")
-                .setSelectMaxCount(3)
-                .showMultiImage { uriList ->
-                    currentPhotos = uriList
-                    if (uriList.isNotEmpty()) {
-                        for (i in 0..uriList.size) {
-                            when (i) {
-                                0 -> binding.ivNewCatchImageFirst.load(uriList[i])
-                                1 -> binding.ivNewCatchImageSecond.load(uriList[i])
-                                2 -> binding.ivNewCatchImageThird.load(uriList[i])
-                            }
-                        }
-                    }
-                }
-        }
-    }
+    private fun getPhotoListener() =
+        TedBottomPicker.with(requireActivity())
+            .setPeekHeight(1600)
+            .showTitle(false)
+            .setCompleteButtonText("Done")
+            .setEmptySelectionText("No Select")
+            .setSelectMaxCount(10)
+
 
     private fun setOnIncrementDecrementClickListeners() {
         with(binding) {
@@ -165,7 +225,8 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     private fun setOnCreateClickListener() {
         val buttonCreate = bottomSheet.findViewById<Button>(R.id.button_new_catch_create)
         buttonCreate.setOnClickListener {
-            viewModel.addNewCatch(createNewUserCatch())
+            val catch = createNewUserCatch()
+            viewModel.addNewCatch(catch)
             findNavController().popBackStack()
         }
     }
@@ -296,27 +357,28 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         photos = getPhotos()
     )
 
+
     private fun getPhotos(): List<ByteArray> {
-        if (currentPhotos.isEmpty()) {
-            return listOf()
-        }
-        val bitmaps = mutableListOf<ByteArray>()
-        for (i in 0..currentPhotos.size) {
-            when (i) {
-                0 -> bitmaps.add(getByteArrayFromImageVew(binding.ivNewCatchImageFirst))
-                1 -> bitmaps.add(getByteArrayFromImageVew(binding.ivNewCatchImageSecond))
-                2 -> bitmaps.add(getByteArrayFromImageVew(binding.ivNewCatchImageThird))
 
-            }
-        }
-        return bitmaps
-    }
-
-    private fun getByteArrayFromImageVew(view: ImageView): ByteArray {
-        val bitmap = (view.drawable as BitmapDrawable).bitmap
-        val baos = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-        return baos.toByteArray()
+        val result = mutableListOf<ByteArray>()
+        return result
+//        return coroutineScope {
+//            val job = launch {
+//                try {
+//                    uris.forEach {
+//                        val stream = requireActivity().contentResolver.openInputStream(it)
+//                        val bitmap = BitmapDrawable(resources, stream).bitmap
+//                        val baos = ByteArrayOutputStream()
+//                        bitmap.compress(Bitmap.CompressFormat.JPEG, 20, baos)
+//                        result.add(baos.toByteArray())
+//                    }
+//                } catch (e: Throwable) {
+//                    Log.d("F", e.message, e)
+//                }
+//            }
+//            job.join()
+//            result
+//        }
     }
 
     override fun onDetach() {
