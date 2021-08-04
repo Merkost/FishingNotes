@@ -1,11 +1,11 @@
 package com.joesemper.fishing.data.datasource
 
-import com.joesemper.fishing.data.entity.RawUserCatch
-import com.joesemper.fishing.data.entity.RawMapMarker
-import com.joesemper.fishing.model.common.content.UserMapMarker
-import com.joesemper.fishing.model.common.Progress
-import com.joesemper.fishing.model.common.content.MapMarker
-import com.joesemper.fishing.model.common.content.UserCatch
+import com.joesemper.fishing.data.entity.raw.RawUserCatch
+import com.joesemper.fishing.data.entity.raw.RawMapMarker
+import com.joesemper.fishing.data.entity.content.UserMapMarker
+import com.joesemper.fishing.data.entity.common.Progress
+import com.joesemper.fishing.data.entity.content.MapMarker
+import com.joesemper.fishing.data.entity.content.UserCatch
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 

@@ -1,12 +1,6 @@
 package com.joesemper.fishing.utils
 
-import com.joesemper.fishing.data.entity.RawMapMarker
-import com.joesemper.fishing.model.common.content.UserCatch
-
-
-interface OnCatchListItemClickListener {
-    fun onItemClick(catch: UserCatch)
-}
+import com.joesemper.fishing.data.entity.raw.RawMapMarker
 
 interface AddNewMarkerListener {
     fun addNewMapMarker(marker: RawMapMarker)

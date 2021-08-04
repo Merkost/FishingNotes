@@ -4,9 +4,9 @@ import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.joesemper.fishing.data.auth.AuthManager
-import com.joesemper.fishing.model.common.User
-import com.joesemper.fishing.viewmodel.main.MainViewModel
-import com.joesemper.fishing.viewmodel.main.MainViewState
+import com.joesemper.fishing.data.entity.common.User
+import com.joesemper.fishing.viewmodels.MainViewModel
+import com.joesemper.fishing.viewmodels.viewstates.MainViewState
 import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -1,7 +1,7 @@
 package com.joesemper.fishing.data.mappers
 
-import com.joesemper.fishing.data.entity.RawUserCatch
-import com.joesemper.fishing.model.common.content.UserCatch
+import com.joesemper.fishing.data.entity.raw.RawUserCatch
+import com.joesemper.fishing.data.entity.content.UserCatch
 import com.joesemper.fishing.utils.getCurrentUser
 import com.joesemper.fishing.utils.getNewCatchId
 

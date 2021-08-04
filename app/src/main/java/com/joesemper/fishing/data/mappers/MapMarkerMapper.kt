@@ -1,7 +1,7 @@
 package com.joesemper.fishing.data.mappers
 
-import com.joesemper.fishing.data.entity.RawMapMarker
-import com.joesemper.fishing.model.common.content.UserMapMarker
+import com.joesemper.fishing.data.entity.raw.RawMapMarker
+import com.joesemper.fishing.data.entity.content.UserMapMarker
 import com.joesemper.fishing.utils.getCurrentUserId
 import com.joesemper.fishing.utils.getNewMarkerId
 

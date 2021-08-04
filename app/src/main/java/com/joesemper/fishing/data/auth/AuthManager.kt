@@ -1,6 +1,6 @@
 package com.joesemper.fishing.data.auth
 
-import com.joesemper.fishing.model.common.User
+import com.joesemper.fishing.data.entity.common.User
 import kotlinx.coroutines.flow.Flow
 
 interface AuthManager {

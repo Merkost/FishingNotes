@@ -18,7 +18,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Fishing"
-        android:name=".app.FishingApp">
+        android:name=".FishingApp">
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -28,9 +28,9 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".presentation.MainActivity" />
+        <activity android:name=".MainActivity" />
 
-        <activity android:name=".presentation.splash.SplashActivity">
+        <activity android:name=".SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
