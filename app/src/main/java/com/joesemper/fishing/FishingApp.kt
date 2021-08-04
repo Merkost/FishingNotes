@@ -24,7 +24,9 @@ class FishingApp : Application() {
                     mainActivity,
                     markerFragment,
                     newCatchFragment,
-                    catchesInnerFragment
+                    catchesInnerFragment,
+                    userCatchFragment,
+                    userFragment
                 )
             )
         }

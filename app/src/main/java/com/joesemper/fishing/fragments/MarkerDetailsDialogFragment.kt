@@ -23,8 +23,8 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.tabs.TabLayoutMediator
-import com.joesemper.fishing.databinding.FragmentMarkerDetailsBinding
 import com.joesemper.fishing.data.entity.content.UserMapMarker
+import com.joesemper.fishing.databinding.FragmentMarkerDetailsBinding
 import com.joesemper.fishing.viewmodels.MarkerDetailsViewModel
 import com.joesemper.fishing.viewmodels.viewstates.MarkerDetailsViewState
 import kotlinx.coroutines.flow.collect

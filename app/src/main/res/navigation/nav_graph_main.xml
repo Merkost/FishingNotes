@@ -14,24 +14,20 @@
             android:id="@+id/action_mapFragment_to_weatherFragment"
             app:destination="@id/weatherFragment" />
         <action
-            android:id="@+id/action_mapFragment_to_groupsFragment"
-            app:destination="@id/groupsFragment" />
-        <action
             android:id="@+id/action_mapFragment_to_newCatchDialogFragment"
             app:destination="@id/newCatchDialogFragment" />
         <action
             android:id="@+id/action_mapFragment_to_userCatchFragment"
             app:destination="@id/userCatchFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_userFragment"
+            app:destination="@id/userFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/weatherFragment"
         android:name="com.joesemper.fishing.fragments.WeatherFragment"
         android:label="WeatherFragment" />
-    <fragment
-        android:id="@+id/groupsFragment"
-        android:name="com.joesemper.fishing.fragments.GroupsFragment"
-        android:label="GroupsFragment" />
     <fragment
         android:id="@+id/newCatchDialogFragment"
         android:name="com.joesemper.fishing.fragments.NewCatchFragment"
@@ -48,5 +44,9 @@
             android:name="userCatch"
             app:argType="com.joesemper.fishing.data.entity.content.UserCatch" />
     </fragment>
+    <fragment
+        android:id="@+id/userFragment"
+        android:name="com.joesemper.fishing.fragments.UserFragment"
+        android:label="UserFragment" />
 
 </navigation>

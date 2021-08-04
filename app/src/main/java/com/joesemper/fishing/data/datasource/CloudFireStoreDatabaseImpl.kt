@@ -75,7 +75,7 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
     }
 
     @ExperimentalCoroutinesApi
-    override fun getMarker(markerId: String) = channelFlow {
+    override fun getMapMarker(markerId: String) = channelFlow {
         val listener = getMapMarkersCollection().document(markerId)
             .addSnapshotListener { value, error ->
                 trySend(value?.toObject<UserMapMarker>())

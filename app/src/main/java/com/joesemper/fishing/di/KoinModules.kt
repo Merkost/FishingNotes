@@ -6,35 +6,12 @@ import com.joesemper.fishing.data.datasource.CloudFireStoreDatabaseImpl
 import com.joesemper.fishing.data.datasource.DatabaseProvider
 import com.joesemper.fishing.data.datasource.CloudPhotoStorageImpl
 import com.joesemper.fishing.data.datasource.PhotoStorage
-import com.joesemper.fishing.data.repository.GroupsRepository
-import com.joesemper.fishing.data.repository.GroupsRepositoryImpl
-import com.joesemper.fishing.data.repository.MapRepository
-import com.joesemper.fishing.data.repository.MapRepositoryImpl
-import com.joesemper.fishing.data.repository.CatchesRepository
-import com.joesemper.fishing.data.repository.CatchesRepositoryImpl
-import com.joesemper.fishing.data.repository.NewCatchRepository
-import com.joesemper.fishing.data.repository.NewCatchRepositoryImpl
-import com.joesemper.fishing.data.repository.MarkerRepository
-import com.joesemper.fishing.data.repository.MarkerRepositoryImpl
-import com.joesemper.fishing.data.repository.WeatherRepository
-import com.joesemper.fishing.data.repository.WeatherRetrofitImplementation
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.MainActivity
 import com.joesemper.fishing.SplashActivity
-import com.joesemper.fishing.fragments.GroupsFragment
-import com.joesemper.fishing.fragments.MapFragment
-import com.joesemper.fishing.fragments.WeatherFragment
-import com.joesemper.fishing.viewmodels.GroupsViewModel
-import com.joesemper.fishing.viewmodels.MainViewModel
-import com.joesemper.fishing.viewmodels.MapViewModel
-import com.joesemper.fishing.fragments.NewCatchFragment
-import com.joesemper.fishing.viewmodels.NewCatchViewModel
-import com.joesemper.fishing.viewmodels.UserCatchesViewModel
-import com.joesemper.fishing.fragments.MarkerDetailsDialogFragment
-import com.joesemper.fishing.viewmodels.MarkerDetailsViewModel
-import com.joesemper.fishing.fragments.UserCatchesInnerFragment
-import com.joesemper.fishing.viewmodels.SplashViewModel
-import com.joesemper.fishing.viewmodels.WeatherViewModel
+import com.joesemper.fishing.data.repository.*
+import com.joesemper.fishing.fragments.*
+import com.joesemper.fishing.viewmodels.*
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.qualifier.named
@@ -74,10 +51,24 @@ val markerFragment = module {
     }
 }
 
+val userFragment = module {
+    scope(named<UserFragment>()) {
+        viewModel { UserViewModel(get()) }
+        scoped<UserRepository> { UserRepositoryImpl(get()) }
+    }
+}
+
 val newCatchFragment = module {
     scope(named<NewCatchFragment>()) {
         viewModel { NewCatchViewModel(get()) }
         scoped<NewCatchRepository> { NewCatchRepositoryImpl(get()) }
+    }
+}
+
+val userCatchFragment = module {
+    scope(named<UserCatchFragment>()) {
+        viewModel { UserCatchViewModel(get()) }
+        scoped<UserCatchRepository> { UserCatchRepositoryImpl(get()) }
     }
 }
 

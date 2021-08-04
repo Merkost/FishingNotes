@@ -37,6 +37,7 @@
     <string name="lure">Подкормка</string>
     <string name="pictures">Фотографии</string>
     <string name="current">Current</string>
+    <string name="on_map">On map</string>
     <string name="markers_list">Markers list</string>
     <string name="add">Добавить</string>
     <string name="coordinates">Координаты</string>
@@ -44,7 +45,9 @@
     <string name="new_catch">Новый улов</string>
     <string name="share">Поделиться</string>
     <string name="route">Маршрут</string>
+    <string name="edit">Редактировать</string>
     <string name="delete">Удалить</string>
     <string name="add_photo">Добавить фото</string>
     <string name="no_description">Нет описания</string>
+    <string name="profile">Profile</string>
 </resources>

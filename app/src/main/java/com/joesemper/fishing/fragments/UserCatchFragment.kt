@@ -5,14 +5,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
-import com.joesemper.fishing.databinding.FragmentUserCatchBinding
 import com.joesemper.fishing.data.entity.content.UserCatch
+import com.joesemper.fishing.databinding.FragmentUserCatchBinding
 import com.joesemper.fishing.utils.NavigationHolder
+import com.joesemper.fishing.viewmodels.UserCatchViewModel
+import kotlinx.coroutines.flow.collect
+import org.koin.android.scope.AndroidScopeComponent
+import org.koin.androidx.scope.fragmentScope
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.scope.Scope
 
-class UserCatchFragment : Fragment() {
+class UserCatchFragment : Fragment(), AndroidScopeComponent {
 
     private val args: UserCatchFragmentArgs by navArgs()
+
+    override val scope: Scope by fragmentScope()
+    private val viewModel: UserCatchViewModel by viewModel()
 
     private var _binding: FragmentUserCatchBinding? = null
     private val binding
@@ -43,6 +53,15 @@ class UserCatchFragment : Fragment() {
     }
 
     private fun setInitialData() {
+        lifecycleScope.launchWhenStarted {
+            viewModel.getMapMarker(catch.userMarkerId).collect { marker ->
+                if (marker != null) {
+                    binding.tvPlaceTitle.text = marker.title
+                    binding.tvPlaceDescription.text = marker.description
+                }
+            }
+        }
+
         binding.tvTitle.text = catch.title
         if (catch.description.isNotBlank()) {
             binding.tvDescription.text = catch.description
