@@ -12,10 +12,10 @@
         android:id="@+id/toolbar_catch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:elevation="4dp"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
+        android:background="@color/white"
+        android:elevation="4dp"
         app:navigationIcon="@drawable/ic_baseline_close_24"
         app:title="Catch" />
 
