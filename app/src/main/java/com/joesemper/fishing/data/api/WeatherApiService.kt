@@ -8,8 +8,8 @@ interface WeatherApiService {
 
     @GET("onecall")
     suspend fun getWeather(
-            @Query("lat") latitude: Float,
-            @Query("lon") longitude: Float,
+            @Query("lat") latitude: Double,
+            @Query("lon") longitude: Double,
             @Query("units") units: String? = "metric",
             @Query("exclude") exclude: String? = "minutely,current,alerts",
             @Query("lang") lang: String? = "ru",

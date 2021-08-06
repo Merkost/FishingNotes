@@ -75,6 +75,26 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
     }
 
     @ExperimentalCoroutinesApi
+    override fun getAllUserMarkersList() = channelFlow {
+        val listeners = mutableListOf<ListenerRegistration>()
+        listeners.add(
+            getMapMarkersCollection()
+                .whereEqualTo("userId", getCurrentUserId())
+                .addSnapshotListener(getMarkersListSnapshotListener(this))
+        )
+        listeners.add(
+            getMapMarkersCollection()
+                .whereEqualTo("isPublic", true)
+                .whereNotEqualTo("userId", getCurrentUserId())
+                .addSnapshotListener(getMarkersListSnapshotListener(this))
+        )
+
+        awaitClose {
+            listeners.forEach { it.remove() }
+        }
+    }
+
+    @ExperimentalCoroutinesApi
     override fun getMapMarker(markerId: String) = channelFlow {
         val listener = getMapMarkersCollection().document(markerId)
             .addSnapshotListener { value, error ->
@@ -131,6 +151,20 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
                     DocumentChange.Type.REMOVED -> {
                     }
                 }
+            }
+        }
+
+    @ExperimentalCoroutinesApi
+    private fun getMarkersListSnapshotListener(scope: ProducerScope<List<UserMapMarker>>) =
+        EventListener<QuerySnapshot> { snapshots, error ->
+            if (error != null) {
+                Log.d("Fishing", "Marker snapshot listener", error)
+                return@EventListener
+            }
+
+            if (snapshots != null) {
+                val markers = snapshots.toObjects(UserMapMarker::class.java)
+                scope.trySend(markers)
             }
         }
 

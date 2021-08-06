@@ -2,13 +2,10 @@ package com.joesemper.fishing.di
 
 import com.joesemper.fishing.data.auth.AuthManager
 import com.joesemper.fishing.data.auth.FirebaseAuthManagerImpl
-import com.joesemper.fishing.data.datasource.CloudFireStoreDatabaseImpl
-import com.joesemper.fishing.data.datasource.DatabaseProvider
-import com.joesemper.fishing.data.datasource.CloudPhotoStorageImpl
-import com.joesemper.fishing.data.datasource.PhotoStorage
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.MainActivity
 import com.joesemper.fishing.SplashActivity
+import com.joesemper.fishing.data.datasource.*
 import com.joesemper.fishing.data.repository.*
 import com.joesemper.fishing.fragments.*
 import com.joesemper.fishing.viewmodels.*
@@ -89,7 +86,8 @@ val groupsScreen = module {
 val weatherScreen = module {
     scope(named<WeatherFragment>()) {
         viewModel { WeatherViewModel(get()) }
-        scoped<WeatherRepository> { WeatherRetrofitImplementation() }
+        scoped<WeatherProvider> { WeatherRetrofitImplementation() }
+        scoped<WeatherRepository> { WeatherRepositoryImpl(get(), get()) }
     }
 
 }

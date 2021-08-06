@@ -1,20 +1,23 @@
-package com.joesemper.fishing.data.repository
+package com.joesemper.fishing.data.datasource
 
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.joesemper.fishing.data.api.WeatherApiService
-import com.joesemper.fishing.data.entity.weather.WeatherForecast
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flow
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class WeatherRetrofitImplementation : WeatherRepository {
+class WeatherRetrofitImplementation : WeatherProvider {
 
     companion object {
         private const val BASE_WEATHER_URL = "https://api.openweathermap.org/data/2.5/"
     }
 
-    override suspend fun getData(lat: Float, lon: Float): WeatherForecast {
-        return getService().getWeather(latitude = lat, longitude = lon)
+    @ExperimentalCoroutinesApi
+    override fun getWeather(lat: Double, lon: Double) = flow {
+        val weather = getService().getWeather(latitude = lat, longitude = lon)
+        emit(weather)
     }
 
     private fun getService(): WeatherApiService {

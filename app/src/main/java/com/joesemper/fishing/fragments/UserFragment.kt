@@ -54,7 +54,6 @@ class UserFragment : Fragment(), AndroidScopeComponent {
                 } else {
                     startSplashActivity()
                 }
-
             }
         }
     }
@@ -64,7 +63,6 @@ class UserFragment : Fragment(), AndroidScopeComponent {
             lifecycleScope.launch{
                 viewModel.logoutCurrentUser()
             }
-
         }
     }
 
