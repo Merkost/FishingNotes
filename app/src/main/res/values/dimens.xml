@@ -6,4 +6,9 @@
 
     <dimen name="simple_icon_width">32dp</dimen>
     <dimen name="simple_icon_height">32dp</dimen>
+
+    <dimen name="splash_text_view">30sp</dimen>
+    <dimen name="splash_margin_top_text_view">32dp</dimen>
+    <dimen name="splash_image_view_wight">350dp</dimen>
+    <dimen name="splash_image_view_height">350dp</dimen>
 </resources>
