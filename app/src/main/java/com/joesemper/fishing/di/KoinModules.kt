@@ -1,5 +1,6 @@
 package com.joesemper.fishing.di
 
+import com.joesemper.fishing.LoginActivity
 import com.joesemper.fishing.data.auth.AuthManager
 import com.joesemper.fishing.data.auth.FirebaseAuthManagerImpl
 import com.joesemper.fishing.utils.Logger
@@ -31,6 +32,12 @@ val mainActivity = module {
 val splashScreen = module {
     scope(named<SplashActivity>()) {
         viewModel { SplashViewModel(get()) }
+    }
+}
+
+val loginScreen = module {
+    scope(named<LoginActivity>()) {
+        viewModel { LoginViewModel(get()) }
     }
 }
 

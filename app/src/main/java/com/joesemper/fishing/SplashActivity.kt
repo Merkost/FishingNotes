@@ -28,11 +28,6 @@ class SplashActivity : AppCompatActivity(), AndroidScopeComponent {
 
     private val logger: Logger by inject()
 
-    private val registeredActivity =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            onActivityResult(result)
-        }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -57,19 +52,13 @@ class SplashActivity : AppCompatActivity(), AndroidScopeComponent {
     }
 
     private fun startLoginActivity() {
-        registeredActivity.launch(getLoginActivityIntent())
+        startActivity(LoginActivity.getStartIntent(this))
+        finish()
     }
 
     private fun startMainActivity() {
         startActivity(MainActivity.getStartIntent(this))
         finish()
-    }
-
-    private fun onActivityResult(result: ActivityResult) {
-        if (result.resultCode == Activity.RESULT_OK) {
-            startMainActivity()
-            finish()
-        }
     }
 
     private fun handleError(error: Throwable) {
