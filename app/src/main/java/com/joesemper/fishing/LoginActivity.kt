@@ -79,11 +79,23 @@ class LoginActivity : AppCompatActivity(), AndroidScopeComponent {
     }
 
     private fun onLoading() {
-        vb.progressBar.visibility = View.VISIBLE
+        progressBar(true)
+        buttons(false)
+    }
+
+    private fun buttons(isClickable: Boolean) {
+        vb.googleSignInButton.isClickable = isClickable
+        vb.guestSignInButton.isClickable = isClickable
+    }
+
+    private fun progressBar(isVisible: Boolean) {
+        if (isVisible) vb.progressBar.visibility = View.VISIBLE
+        else vb.progressBar.visibility = View.INVISIBLE
     }
 
     private fun onSuccess(user: User?) {
-        vb.progressBar.visibility = View.INVISIBLE
+        progressBar(false)
+        buttons(true)
         if (user != null) {
             startMainActivity()
         }
@@ -95,7 +107,8 @@ class LoginActivity : AppCompatActivity(), AndroidScopeComponent {
     }
 
     private fun handleError(error: Throwable) {
-        vb.progressBar.visibility = View.INVISIBLE
+        progressBar(false)
+        buttons(true)
         Toast.makeText(this, error.message, Toast.LENGTH_SHORT).show()
         logger.log(error.message)
     }
