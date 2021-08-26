@@ -59,7 +59,7 @@ class LoginActivity : AppCompatActivity(), AndroidScopeComponent {
             viewModel.subscribe().collect { state->
                 when (state) {
                     is LoginViewState.Success -> onSuccess(state.user)
-                    is LoginViewState.Loading -> { }
+                    is LoginViewState.Loading -> onLoading()
                     is LoginViewState.Error -> handleError(state.error)
                 }
             }
@@ -67,12 +67,23 @@ class LoginActivity : AppCompatActivity(), AndroidScopeComponent {
 
         auth = FirebaseAuth.getInstance();
 
-        vb.googleSignInButton.setOnClickListener { startGoogleLogin() }
-        vb.guestSignInButton.setOnClickListener { startGuestLogin() }
+        vb.googleSignInButton.setOnClickListener {
+            startGoogleLogin()
+            onLoading()
+        }
+        vb.guestSignInButton.setOnClickListener {
+            startGuestLogin()
+            onLoading()
+        }
 
     }
 
+    private fun onLoading() {
+        vb.progressBar.visibility = View.VISIBLE
+    }
+
     private fun onSuccess(user: User?) {
+        vb.progressBar.visibility = View.INVISIBLE
         if (user != null) {
             startMainActivity()
         }
@@ -84,6 +95,7 @@ class LoginActivity : AppCompatActivity(), AndroidScopeComponent {
     }
 
     private fun handleError(error: Throwable) {
+        vb.progressBar.visibility = View.INVISIBLE
         Toast.makeText(this, error.message, Toast.LENGTH_SHORT).show()
         logger.log(error.message)
     }

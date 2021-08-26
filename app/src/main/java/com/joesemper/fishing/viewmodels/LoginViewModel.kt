@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 class LoginViewModel(private val repository: AuthManager) : ViewModel() {
 
     private val mutableStateFlow: MutableStateFlow<LoginViewState> =
-        MutableStateFlow(LoginViewState.Loading)
+        MutableStateFlow(LoginViewState.Success(null))
 
     fun subscribe(): StateFlow<LoginViewState> = mutableStateFlow
 
