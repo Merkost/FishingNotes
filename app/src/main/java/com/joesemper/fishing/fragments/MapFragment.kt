@@ -154,9 +154,11 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
 
     private fun setOnMarkersClickListener() {
         map.setOnMarkerClickListener { marker ->
-            val userMarker = mapMarkers.first { it.id == marker.tag }
-            MarkerDetailsDialogFragment.newInstance(userMarker)
-                .show(childFragmentManager, "Markers")
+            try {
+                val userMarker = mapMarkers.first { it.id == marker.tag }
+                MarkerDetailsDialogFragment.newInstance(userMarker)
+                    .show(childFragmentManager, "Markers")
+            } catch (e: Exception) { onError(Throwable(e)) }
             true
         }
     }
