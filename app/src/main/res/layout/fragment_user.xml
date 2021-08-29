@@ -3,7 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/figma_background">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/figma_primary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
+        app:title="User" />
 
     <TextView
         android:id="@+id/tv_username"
@@ -11,6 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="User"
+        android:textColor="@color/figma_primary"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -18,24 +31,81 @@
 
     <ImageView
         android:id="@+id/iv_user_pic"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         android:layout_marginTop="32dp"
         android:padding="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:srcCompat="@drawable/ic_fisher" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/button_logout"
-        android:layout_width="wrap_content"
+        android:id="@+id/button_friends"
+        android:layout_width="match_parent"
+        android:textColor="@color/figma_primary"
+        app:iconTint="@color/figma_primary"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="Logout"
+        android:layout_marginTop="50dp"
+        android:layout_marginHorizontal="80dp"
+        android:text="Friends"
+        android:textAlignment="textStart"
+        app:icon="@drawable/ic_friends"
+        app:iconSize="25dp"
+        app:iconPadding="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_username" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_edit"
+        android:layout_width="match_parent"
+        android:textColor="@color/figma_primary"
+        app:iconTint="@color/figma_primary"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginHorizontal="80dp"
+        android:text="Edit profile"
+        android:textAlignment="textStart"
+        app:icon="@drawable/ic_edit"
+        app:iconSize="23dp"
+        app:iconPadding="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_friends" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_settings"
+        android:layout_width="match_parent"
+        android:textColor="@color/figma_primary"
+        app:iconTint="@color/figma_primary"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:layout_marginHorizontal="80dp"
+        android:text="Settings"
+        android:textAlignment="textStart"
+        app:icon="@drawable/ic_settings"
+        app:iconSize="24dp"
+        app:iconPadding="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_edit" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_logout"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="80dp"
+        android:layout_marginTop="25dp"
+        android:text="@string/logout"
+        android:textColor="@color/figma_primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_settings" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

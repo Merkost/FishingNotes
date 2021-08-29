@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import coil.load
 import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
@@ -26,21 +28,38 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     override val scope: Scope by fragmentScope()
     private val viewModel: UserViewModel by viewModel()
 
-    private var _binding: FragmentUserBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var vb: FragmentUserBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentUserBinding.inflate(inflater, container, false)
-        return binding.root
+        vb = FragmentUserBinding.inflate(inflater, container, false)
+        return vb.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
         subscribeOnViewModel()
+        setButtonsClickListeners()
+        setToolbarBackButton()
+
         setOnLogoutButtonListener()
+    }
+
+    private fun setButtonsClickListeners() {
+        vb.buttonEdit.setOnClickListener { notReadyYetToast() }
+        vb.buttonFriends.setOnClickListener { notReadyYetToast() }
+        vb.buttonSettings.setOnClickListener { notReadyYetToast() }
+    }
+
+    private fun notReadyYetToast() {
+        Toast.makeText(context, "This feature is still in development. Please, try it later", Toast.LENGTH_LONG).show()
+    }
+
+    private fun setToolbarBackButton() {
+        vb.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
     }
 
     private fun subscribeOnViewModel() {
@@ -59,7 +78,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     }
 
     private fun setOnLogoutButtonListener() {
-        binding.buttonLogout.setOnClickListener {
+        vb.buttonLogout.setOnClickListener {
             lifecycleScope.launch{
                 viewModel.logoutCurrentUser()
             }
@@ -72,16 +91,16 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     }
 
     private fun doOnAnonymousUser(user: User) {
-        binding.ivUserPic.load(R.drawable.ic_fisher)
-        binding.tvUsername.text = "Guest"
-        binding.buttonLogout.text = "Login"
+        vb.ivUserPic.load(R.drawable.ic_fisher)
+        vb.tvUsername.text = "Guest"
+        vb.buttonLogout.text = "Login"
     }
 
     private fun doOnSimpleUser(user: User) {
-        binding.ivUserPic.load(user.userPic) {
+        vb.ivUserPic.load(user.userPic) {
             placeholder(R.drawable.ic_fisher)
             transformations(CircleCropTransformation())
         }
-       binding.tvUsername.text = user.userName
+       vb.tvUsername.text = user.userName
     }
 }
