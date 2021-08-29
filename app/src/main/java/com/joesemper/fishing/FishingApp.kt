@@ -18,6 +18,7 @@ class FishingApp : Application() {
                 listOf(
                     appModule,
                     splashScreen,
+                    loginScreen,
                     mapScreen,
                     weatherScreen,
                     groupsScreen,

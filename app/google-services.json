@@ -1,28 +1,44 @@
 {
   "project_info": {
-    "project_number": "628070073565",
-    "project_id": "fishing-314712",
-    "storage_bucket": "fishing-314712.appspot.com"
+    "project_number": "767301429798",
+    "project_id": "fishing-notes-6f0cb",
+    "storage_bucket": "fishing-notes-6f0cb.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:628070073565:android:18bbc13fd3bfee9a1c4734",
+        "mobilesdk_app_id": "1:767301429798:android:3524c5643c7025ea7a14e7",
         "android_client_info": {
           "package_name": "com.joesemper.fishing"
         }
       },
       "oauth_client": [
         {
-          "client_id": "628070073565-6es5usiomni8nbahkue8282u7qf66ajv.apps.googleusercontent.com",
+          "client_id": "767301429798-282i57h2qhip95p3umeqg9dm2143etv6.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.joesemper.fishing",
-            "certificate_hash": "b5b0153f6b2f7151d8048417aa1542c270f9b3c6"
+            "certificate_hash": "40a2189d1c48ac28379dec76ea16a80c52f2aaaa"
           }
         },
         {
-          "client_id": "628070073565-o7antc7gs4c6lbub4qns42b3cs8cnb02.apps.googleusercontent.com",
+          "client_id": "767301429798-9buaviu09dg1vj4fm98geamu7dmta990.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.joesemper.fishing",
+            "certificate_hash": "c1e2b37768b8c21bc2dc7313edb62e0438b4bcf3"
+          }
+        },
+        {
+          "client_id": "767301429798-tk3j5abkkkfp3drreun5kr8vq4moo3mt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.joesemper.fishing",
+            "certificate_hash": "686be155b7bf47f57f0fdd2d41155aba226b5595"
+          }
+        },
+        {
+          "client_id": "767301429798-u6f3m211birojthc39ldn0c9j8gs7227.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -35,7 +51,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "628070073565-o7antc7gs4c6lbub4qns42b3cs8cnb02.apps.googleusercontent.com",
+              "client_id": "767301429798-u6f3m211birojthc39ldn0c9j8gs7227.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
