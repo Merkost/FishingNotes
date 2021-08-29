@@ -49,5 +49,6 @@
     <string name="add_photo">Add photo</string>
     <string name="no_description">No description</string>
     <string name="profile">Profile</string>
+    <string name="logout">Logout</string>
     <string name="login_greeting">Let\'s get started</string>
 </resources>

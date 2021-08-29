@@ -20,6 +20,5 @@
         <item name="colorSecondary">@color/colorOnPrimary</item>
         <item name="colorOnSecondary">@color/colorOnPrimary</item>
         <item name="colorControlNormal">@color/colorOnPrimary</item>
-
     </style>
 </resources>
