@@ -21,6 +21,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -129,14 +130,6 @@ class NewCatchFragment() : Fragment(), AndroidScopeComponent {
     private val uris = mutableListOf<Uri>()
 
     private fun initRV() {
-        val dividerItemDecoration = DividerItemDecoration(context, RecyclerView.HORIZONTAL)
-        dividerItemDecoration.setDrawable(
-            AppCompatResources.getDrawable(
-                requireContext(),
-                R.drawable.rv_dicoration_white
-            )!!
-        )
-        binding.rvPhotos.addItemDecoration(dividerItemDecoration)
         adapter = AddNewPhotosAdapter { item ->
             when (item) {
                 is PhotosRecyclerViewItem.ItemAddNewPhoto -> {
@@ -155,7 +148,7 @@ class NewCatchFragment() : Fragment(), AndroidScopeComponent {
 
         }
         binding.rvPhotos.layoutManager =
-            LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            GridLayoutManager(context, 3)
         binding.rvPhotos.adapter = adapter
     }
 

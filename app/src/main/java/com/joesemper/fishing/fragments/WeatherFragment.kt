@@ -81,22 +81,30 @@ class WeatherFragment : Fragment(), AndroidScopeComponent {
     }
 
     private fun initLocationSelection() {
-        lifecycleScope.launchWhenStarted {
-            viewModel.getWeather(markers.first()).collect {
-                doOnSuccess(it)
-            }
-        }
-        val adapter = ArrayAdapter(requireContext(), R.layout.list_item, locations)
-        binding.location.setAdapter(adapter)
-        binding.location.setText(markers.first().title, false)
-        binding.location.setOnItemClickListener { parent, view, position, id ->
+        if (markers.isEmpty()) {
+            doOnError(Throwable("Не найдено добавленных мест. Погода по вашему местоположению!"))
+            val adapter = ArrayAdapter(requireContext(), R.layout.list_item, locations)
+            binding.location.setAdapter(adapter)
+            binding.location.setText("Нет добавленных мест", false)
+        } else {
             lifecycleScope.launchWhenStarted {
-                viewModel.getWeather(markers[position]).collect {
+                viewModel.getWeather(markers.first()).collect {
                     doOnSuccess(it)
+                }
+            }
+            val adapter = ArrayAdapter(requireContext(), R.layout.list_item, locations)
+            binding.location.setAdapter(adapter)
+            binding.location.setText(markers.first().title, false)
+            binding.location.setOnItemClickListener { parent, view, position, id ->
+                lifecycleScope.launchWhenStarted {
+                    viewModel.getWeather(markers[position]).collect {
+                        doOnSuccess(it)
+                    }
                 }
             }
         }
     }
+
 
     private fun renderData(weatherViewState: WeatherViewState) {
         when (weatherViewState) {
