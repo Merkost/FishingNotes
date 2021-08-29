@@ -29,13 +29,14 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.data.entity.raw.RawMapMarker
 import com.joesemper.fishing.data.entity.content.Content
 import com.joesemper.fishing.data.entity.content.UserMapMarker
+import com.joesemper.fishing.databinding.FragmentMapBinding
+import com.joesemper.fishing.databinding.FragmentWeatherBinding
 import com.joesemper.fishing.viewmodels.MapViewModel
 import com.joesemper.fishing.viewmodels.viewstates.MapViewState
 import com.joesemper.fishing.utils.AddNewMarkerListener
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.utils.PermissionUtils.isPermissionGranted
 import com.joesemper.fishing.utils.PermissionUtils.requestPermission
-import kotlinx.android.synthetic.main.fragment_map.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
@@ -51,8 +52,9 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     private val viewModel: MapViewModel by viewModel()
 
     private val logger: Logger by inject()
+    private lateinit var binding: FragmentMapBinding
 
-    private var permissionDenied = false
+            private var permissionDenied = false
     private lateinit var map: GoogleMap
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
@@ -80,8 +82,9 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_map, container, false)
+    ): View {
+        binding = FragmentMapBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -182,11 +185,11 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     }
 
     private fun onLoading() {
-        progressBar_map.visibility = View.VISIBLE
+        binding.progressBarMap.visibility = View.VISIBLE
     }
 
     private suspend fun onSuccess(content: Flow<Content>?) {
-        progressBar_map.visibility = View.GONE
+        binding.progressBarMap.visibility = View.GONE
         try {
             if (content != null) {
                 currentContent = content
@@ -220,7 +223,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     }
 
     private fun setOnFabClickListener() {
-        fab_add_marker.setOnClickListener {
+        binding.fabAddMarker.setOnClickListener {
             if (isPlaceSelectMode) {
                 if (currentMapMarker != null) {
                     onNewMarkerPlaceSelected()
@@ -263,13 +266,13 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     private fun togglePlaceSelectMode() {
         if (isPlaceSelectMode) {
             isPlaceSelectMode = false
-            fab_add_marker.setImageResource(R.drawable.ic_baseline_add_location_24)
+            binding.fabAddMarker.setImageResource(R.drawable.ic_baseline_add_location_24)
             map.setOnMapClickListener { }
             currentMapMarker?.remove()
             currentMapMarker = null
         } else {
             isPlaceSelectMode = true
-            fab_add_marker.setImageResource(R.drawable.ic_baseline_check_24)
+            binding.fabAddMarker.setImageResource(R.drawable.ic_baseline_check_24)
             setOnMapClickListener()
         }
     }

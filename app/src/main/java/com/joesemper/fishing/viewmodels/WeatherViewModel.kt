@@ -8,7 +8,10 @@ class WeatherViewModel(private val repository: WeatherRepository) : ViewModel() 
 
     fun getAllMarkers() = repository.getAllUserMarkersList()
 
-    fun getWeather(marker: UserMapMarker) =
+    fun getMarkerWeather(marker: UserMapMarker) =
         repository.getWeather(marker.latitude, marker.longitude)
+
+    fun getWeather(latitude: Double, longitude: Double) =
+        repository.getWeather(latitude, longitude)
 
 }

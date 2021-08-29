@@ -35,7 +35,7 @@ import org.koin.core.scope.Scope
 import java.util.*
 
 
-class MarkerDetailsDialogFragment() : BottomSheetDialogFragment(), AndroidScopeComponent {
+class MarkerDetailsDialogFragment : BottomSheetDialogFragment(), AndroidScopeComponent {
 
     companion object {
         private const val MARKER = "MARKER"
@@ -187,7 +187,7 @@ class MarkerDetailsDialogFragment() : BottomSheetDialogFragment(), AndroidScopeC
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
         intent.setPackage("com.google.android.apps.maps")
         try {
-            startActivity(intent);
+            startActivity(intent)
         } catch (e: ActivityNotFoundException) {
             try {
                 val unrestrictedIntent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))

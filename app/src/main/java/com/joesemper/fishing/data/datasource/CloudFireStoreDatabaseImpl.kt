@@ -54,6 +54,7 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
         }
     }
 
+
     @ExperimentalCoroutinesApi
     override fun getAllMarkers() = channelFlow<MapMarker> {
         val listeners = mutableListOf<ListenerRegistration>()
@@ -82,17 +83,19 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
                 .whereEqualTo("userId", getCurrentUserId())
                 .addSnapshotListener(getMarkersListSnapshotListener(this))
         )
-        listeners.add(
-            getMapMarkersCollection()
-                .whereEqualTo("isPublic", true)
-                .whereNotEqualTo("userId", getCurrentUserId())
-                .addSnapshotListener(getMarkersListSnapshotListener(this))
-        )
+
+//        listeners.add(
+//            getMapMarkersCollection()
+//                .whereEqualTo("isPublic", true)
+//                .whereNotEqualTo("userId", getCurrentUserId())
+//                .addSnapshotListener(getMarkersListSnapshotListener(this))
+//        )
 
         awaitClose {
             listeners.forEach { it.remove() }
         }
     }
+
 
     @ExperimentalCoroutinesApi
     override fun getMapMarker(markerId: String) = channelFlow {

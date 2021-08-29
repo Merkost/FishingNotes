@@ -65,7 +65,7 @@ class LoginActivity : AppCompatActivity(), AndroidScopeComponent {
             }
         }
 
-        auth = FirebaseAuth.getInstance();
+        auth = FirebaseAuth.getInstance()
 
         vb.googleSignInButton.setOnClickListener {
             startGoogleLogin()
@@ -124,7 +124,7 @@ class LoginActivity : AppCompatActivity(), AndroidScopeComponent {
             .requestEmail()
             .build()
         // Build a GoogleSignInClient with the options specified by gso.
-        googleSignInClient = GoogleSignIn.getClient(this, gso);
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
         val signInIntent: Intent = googleSignInClient.signInIntent
         registeredActivity.launch(signInIntent)
     }

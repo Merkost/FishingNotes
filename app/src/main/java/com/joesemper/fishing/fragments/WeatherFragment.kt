@@ -1,33 +1,38 @@
 package com.joesemper.fishing.fragments
 
+import android.annotation.SuppressLint
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.Task
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.android.material.transition.MaterialFadeThrough
 import com.joesemper.fishing.R
 import com.joesemper.fishing.data.entity.content.UserMapMarker
 import com.joesemper.fishing.data.entity.weather.WeatherForecast
-import com.joesemper.fishing.data.mappers.MapMarkerMapper
-import com.joesemper.fishing.databinding.FragmentUserBinding
 import com.joesemper.fishing.databinding.FragmentWeatherBinding
+import com.joesemper.fishing.utils.Logger
+import com.joesemper.fishing.view.weather.utils.getDateByMilliseconds
 import com.joesemper.fishing.viewmodels.WeatherViewModel
 import com.joesemper.fishing.viewmodels.viewstates.WeatherViewState
-import com.joesemper.fishing.view.weather.utils.getDateByMilliseconds
-import kotlinx.android.synthetic.main.fragment_weather.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collect
+import org.koin.android.ext.android.inject
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -37,9 +42,9 @@ class WeatherFragment : Fragment(), AndroidScopeComponent {
 
     override val scope: Scope by fragmentScope()
     private val viewModel: WeatherViewModel by viewModel()
+    private val logger: Logger by inject()
 
-    private var _binding: FragmentWeatherBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: FragmentWeatherBinding
 
     private lateinit var currentWeather: WeatherForecast
     private lateinit var viewPager: ViewPager2
@@ -48,6 +53,9 @@ class WeatherFragment : Fragment(), AndroidScopeComponent {
     private val locations: List<String>
         get() = markers.map { it.title }
 
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var lastKnownLocation: Location
+    private var permissionDenied = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,16 +69,18 @@ class WeatherFragment : Fragment(), AndroidScopeComponent {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentWeatherBinding.inflate(inflater, container, false)
+        binding = FragmentWeatherBinding.inflate(inflater, container, false)
         return binding.root
     }
 
+    @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         initViewModel()
     }
 
+    @ExperimentalCoroutinesApi
     private fun initViewModel() {
         lifecycleScope.launchWhenStarted {
             viewModel.getAllMarkers().collect { userMarkers ->
@@ -80,29 +90,82 @@ class WeatherFragment : Fragment(), AndroidScopeComponent {
         }
     }
 
+    @ExperimentalCoroutinesApi
+    @SuppressLint("MissingPermission")
     private fun initLocationSelection() {
         if (markers.isEmpty()) {
-            doOnError(Throwable("Не найдено добавленных мест. Погода по вашему местоположению!"))
             val adapter = ArrayAdapter(requireContext(), R.layout.list_item, locations)
             binding.location.setAdapter(adapter)
-            binding.location.setText("Нет добавленных мест", false)
+            binding.location.setText("Текущее местоположение", false)
+            initLocationProvider()
+            lifecycleScope.launchWhenStarted {
+                try {
+                    getCurrentLocation().collect { location ->
+                        val weather = viewModel.getWeather(location.latitude, location.longitude)
+                            .collect { doOnSuccess(it) }
+                    }
+                } catch (e: Throwable) {
+                    doOnError(e)
+                    TODO("COROUTINE CANCELED")
+                }
+            }
         } else {
             lifecycleScope.launchWhenStarted {
-                viewModel.getWeather(markers.first()).collect {
-                    doOnSuccess(it)
-                }
+                viewModel.getMarkerWeather(markers.first()).collect { doOnSuccess(it) }
             }
             val adapter = ArrayAdapter(requireContext(), R.layout.list_item, locations)
             binding.location.setAdapter(adapter)
             binding.location.setText(markers.first().title, false)
             binding.location.setOnItemClickListener { parent, view, position, id ->
                 lifecycleScope.launchWhenStarted {
-                    viewModel.getWeather(markers[position]).collect {
+                    viewModel.getMarkerWeather(markers[position]).collect {
                         doOnSuccess(it)
                     }
                 }
             }
         }
+    }
+
+
+//    @FlowPreview
+//    @ExperimentalCoroutinesApi
+//    fun getAllUserContent()
+//    = provider.getAllUserCatches()
+//        .flatMapMerge { userCatch ->
+//
+//        flow {
+//            emit(userCatch as Content)
+//            val markerId = userCatch.userMarkerId
+//            if (!markers.contains(markerId) and markerId.isNotBlank()) {
+//                try {
+//                    markers.add(markerId)
+//                    provider.getMarker(markerId).collect { marker ->
+//                        emit(marker as Content)
+//                    }
+//                } catch (e: Throwable) {
+//                    Log.d("Fishing", e.message, e)
+//                }
+//            }
+//        }
+//    }
+
+    @ExperimentalCoroutinesApi
+    @SuppressLint("MissingPermission")
+    fun getCurrentLocation() = channelFlow {
+        val listener: Task<Location>
+
+        val locationResult = fusedLocationProviderClient.lastLocation
+        listener = locationResult.addOnCompleteListener(requireActivity()) { task ->
+            if (task.isSuccessful) {
+                trySend(task.result)
+            }
+        }
+        awaitClose {}
+    }
+
+    private fun initLocationProvider() {
+        fusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(requireActivity())
     }
 
 
@@ -137,7 +200,7 @@ class WeatherFragment : Fragment(), AndroidScopeComponent {
     }
 
     private fun initTabs() {
-        TabLayoutMediator(tab_layout_weather, viewPager) { tab, position ->
+        TabLayoutMediator(binding.tabLayoutWeather, viewPager) { tab, position ->
             val dateInMilliseconds = currentWeather.daily[position].date
             tab.text = getDateByMilliseconds(dateInMilliseconds)
         }.attach()

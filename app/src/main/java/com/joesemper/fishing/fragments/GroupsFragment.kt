@@ -25,12 +25,6 @@ class GroupsFragment : Fragment(), LogoutListener {
         return inflater.inflate(R.layout.fragment_groups, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-//        initViewModel()
-    }
-
 
 //    override fun onOptionsItemSelected(item: MenuItem): Boolean {
 //        return when (item.itemId) {

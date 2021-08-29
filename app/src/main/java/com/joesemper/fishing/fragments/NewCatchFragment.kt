@@ -50,7 +50,7 @@ import org.koin.core.scope.Scope
 import java.util.*
 
 
-class NewCatchFragment() : Fragment(), AndroidScopeComponent {
+class NewCatchFragment : Fragment(), AndroidScopeComponent {
 
     private val args: NewCatchFragmentArgs by navArgs()
 
