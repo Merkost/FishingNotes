@@ -12,6 +12,7 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryDark</item>
         <!-- Customize your theme here. -->
+
     </style>
 
     <style name="MainActionBar" parent="Theme.Fishing">
@@ -21,4 +22,24 @@
         <item name="colorOnSecondary">@color/colorOnPrimary</item>
         <item name="colorControlNormal">@color/colorOnPrimary</item>
     </style>
+
+    <!-- Figma application theme. -->
+    <style name="Theme.Fishing.Figma">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/primaryFigmaColor</item>
+        <item name="colorPrimaryVariant">@color/primaryFigmaDarkColor</item>
+        <item name="colorOnPrimary">@color/primaryFigmaLightColor</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/secondaryFigmaColor</item>
+        <item name="colorSecondaryVariant">@color/secondaryFigmaDarkColor</item>
+        <item name="colorOnSecondary">@color/secondaryFigmaLightColor</item>
+        <!-- Text color. -->
+        <item name="android:textColorPrimary">@color/primaryFigmaTextColor</item>
+        <item name="android:textColorSecondary">@color/secondaryFigmaTextColor</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <!-- Customize your theme here. -->
+        ?<item name="colorOnBackgroundTint">@color/primaryFigmaBackgroundTint</item>
+    </style>
+
 </resources>
