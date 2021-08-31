@@ -8,7 +8,7 @@ import com.joesemper.fishing.viewmodels.viewstates.MainViewState
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class MainViewModel(private val repository: AuthManager) : ViewModel() {
+class MainViewModel : ViewModel() {
 
     private val mutableStateFlow: MutableStateFlow<MainViewState> =
         MutableStateFlow(MainViewState.Success)
