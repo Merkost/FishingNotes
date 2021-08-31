@@ -1,5 +1,6 @@
 package com.joesemper.fishing.viewmodels
 
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import com.joesemper.fishing.data.repository.UserRepository
 
