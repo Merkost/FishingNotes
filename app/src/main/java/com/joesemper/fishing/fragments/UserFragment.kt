@@ -5,26 +5,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import coil.annotation.ExperimentalCoilApi
-import coil.compose.ImagePainter.State.Empty.painter
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
-import com.joesemper.fishing.data.entity.common.User
 import com.joesemper.fishing.viewmodels.UserViewModel
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
@@ -36,7 +34,9 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     override val scope: Scope by fragmentScope()
     private val viewModel: UserViewModel by viewModel()
 
+
     @ExperimentalCoilApi
+    @ExperimentalMaterialApi
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -47,30 +47,77 @@ class UserFragment : Fragment(), AndroidScopeComponent {
         }
     }
 
-    @ExperimentalCoilApi
-    @Preview(showBackground = true)
-    @Composable
-    fun DefaultPreview() {
-        UserScreen()
-    }
+//    @ExperimentalCoilApi
+//    @Preview(showBackground = true)
+//    @Composable
+//    fun DefaultPreview() {
+//        UserScreen()
+//    }
 
+    @ExperimentalMaterialApi
     @ExperimentalCoilApi
     @Composable
     fun UserScreen() {
         MaterialTheme {
-            Column {
-                AppBar()
-                UserInfo()
-
-                Text("Hello Jetpack Compose!")
-            }
+            Scaffold(
+                topBar = { AppBar() },
+                content = {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        UserInfo()
+                        UserButtons()
+                    }
+                }
+            )
         }
     }
+
+    @ExperimentalMaterialApi
+    @Composable
+    fun UserButtons() {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 50.dp, bottom = 10.dp)
+                .padding(horizontal = 90.dp),
+            verticalArrangement = Arrangement.SpaceEvenly
+        ) {
+            ColumnButton(painterResource(R.drawable.ic_friends), getString(R.string.friends))
+            ColumnButton(painterResource(R.drawable.ic_edit), getString(R.string.edit_profile))
+            ColumnButton(painterResource(R.drawable.ic_settings), getString(R.string.settings))
+            Spacer(modifier = Modifier.size(15.dp))
+            OutlinedButton(onClick = { /*TODO*/ }) {
+                Text(getString(R.string.logout))
+            }
+
+        }
+
+
+    }
+
+    @Composable
+    fun ColumnButton(image: Painter, name: String) {
+        OutlinedButton(
+            onClick = { /*TODO*/ },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(image, name,
+                modifier = Modifier.size(25.dp))
+            Text(name)
+        }
+    }
+
 
     @ExperimentalCoilApi
     @Composable
     fun UserInfo(/*user: User*/) {
-        Column {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Image(
                 painter = rememberImagePainter(
                     data = /*when (user.isAnonymous) {
@@ -81,32 +128,36 @@ class UserFragment : Fragment(), AndroidScopeComponent {
                         transformations(CircleCropTransformation())
                     }),
                 contentDescription = null,
-                modifier = Modifier.size(128.dp))
+                modifier = Modifier
+                    .size(180.dp)
+                    .padding(top = 30.dp)
+            )
+            Text("User name", modifier = Modifier.padding(10.dp))
         }
     }
 
-@Composable
-fun AppBar() {
-    TopAppBar(
-        title = {
-            Text(text = "User")
-        },
-        navigationIcon = {
-            IconButton(onClick = { findNavController().popBackStack() }) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = getString(R.string.back)
-                )
-            }
-        },
-        backgroundColor = Color.Gray,
-        contentColor = Color.Black,
-        elevation = 2.dp
-    )
-}
+    @Composable
+    fun AppBar() {
+        TopAppBar(
+            title = {
+                Text(text = "User")
+            },
+            navigationIcon = {
+                IconButton(onClick = { findNavController().popBackStack() }) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = getString(R.string.back)
+                    )
+                }
+            },
+            backgroundColor = Color.Gray,
+            contentColor = Color.Black,
+            elevation = 2.dp
+        )
+    }
 
-override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    super.onViewCreated(view, savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
 
 //        subscribeOnViewModel()
@@ -114,7 +165,7 @@ override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 //        setToolbarBackButton()
 //
 //        setOnLogoutButtonListener()
-}
+    }
 
 //    private fun setButtonsClickListeners() {
 //        vb.buttonEdit.setOnClickListener { notReadyYetToast() }
