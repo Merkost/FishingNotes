@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.compose.material.Text
+import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -28,79 +30,82 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     override val scope: Scope by fragmentScope()
     private val viewModel: UserViewModel by viewModel()
 
-    private lateinit var vb: FragmentUserBinding
+    //private lateinit var vb: FragmentUserBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        vb = FragmentUserBinding.inflate(inflater, container, false)
-        return vb.root
+        return ComposeView(requireContext()).apply {
+            setContent {
+                Text("Hello Jetpack Compose!")
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
 
-        subscribeOnViewModel()
-        setButtonsClickListeners()
-        setToolbarBackButton()
-
-        setOnLogoutButtonListener()
+//        subscribeOnViewModel()
+//        setButtonsClickListeners()
+//        setToolbarBackButton()
+//
+//        setOnLogoutButtonListener()
     }
 
-    private fun setButtonsClickListeners() {
-        vb.buttonEdit.setOnClickListener { notReadyYetToast() }
-        vb.buttonFriends.setOnClickListener { notReadyYetToast() }
-        vb.buttonSettings.setOnClickListener { notReadyYetToast() }
-    }
-
-    private fun notReadyYetToast() {
-        Toast.makeText(context, "This feature is still in development. Please, try it later", Toast.LENGTH_LONG).show()
-    }
-
-    private fun setToolbarBackButton() {
-        vb.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
-    }
-
-    private fun subscribeOnViewModel() {
-        lifecycleScope.launchWhenStarted {
-            viewModel.getCurrentUser().collect { user ->
-                if (user != null) {
-                    when (user.isAnonymous) {
-                        true -> doOnAnonymousUser(user)
-                        false -> doOnSimpleUser(user)
-                    }
-                } else {
-                    startSplashActivity()
-                }
-            }
-        }
-    }
-
-    private fun setOnLogoutButtonListener() {
-        vb.buttonLogout.setOnClickListener {
-            lifecycleScope.launch{
-                viewModel.logoutCurrentUser()
-            }
-        }
-    }
-
-    private fun startSplashActivity() {
-        val intent = Intent(requireContext(), SplashActivity::class.java)
-        startActivity(intent)
-    }
-
-    private fun doOnAnonymousUser(user: User) {
-        vb.ivUserPic.load(R.drawable.ic_fisher)
-        vb.tvUsername.text = "Guest"
-        vb.buttonLogout.text = "Login"
-    }
-
-    private fun doOnSimpleUser(user: User) {
-        vb.ivUserPic.load(user.userPic) {
-            placeholder(R.drawable.ic_fisher)
-            transformations(CircleCropTransformation())
-        }
-       vb.tvUsername.text = user.userName
-    }
+//    private fun setButtonsClickListeners() {
+//        vb.buttonEdit.setOnClickListener { notReadyYetToast() }
+//        vb.buttonFriends.setOnClickListener { notReadyYetToast() }
+//        vb.buttonSettings.setOnClickListener { notReadyYetToast() }
+//    }
+//
+//    private fun notReadyYetToast() {
+//        Toast.makeText(context, "This feature is still in development. Please, try it later", Toast.LENGTH_LONG).show()
+//    }
+//
+//    private fun setToolbarBackButton() {
+//        vb.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
+//    }
+//
+//    private fun subscribeOnViewModel() {
+//        lifecycleScope.launchWhenStarted {
+//            viewModel.getCurrentUser().collect { user ->
+//                if (user != null) {
+//                    when (user.isAnonymous) {
+//                        true -> doOnAnonymousUser(user)
+//                        false -> doOnSimpleUser(user)
+//                    }
+//                } else {
+//                    startSplashActivity()
+//                }
+//            }
+//        }
+//    }
+//
+//    private fun setOnLogoutButtonListener() {
+//        vb.buttonLogout.setOnClickListener {
+//            lifecycleScope.launch{
+//                viewModel.logoutCurrentUser()
+//            }
+//        }
+//    }
+//
+//    private fun startSplashActivity() {
+//        val intent = Intent(requireContext(), SplashActivity::class.java)
+//        startActivity(intent)
+//    }
+//
+//    private fun doOnAnonymousUser(user: User) {
+//        vb.ivUserPic.load(R.drawable.ic_fisher)
+//        vb.tvUsername.text = "Guest"
+//        vb.buttonLogout.text = "Login"
+//    }
+//
+//    private fun doOnSimpleUser(user: User) {
+//        vb.ivUserPic.load(user.userPic) {
+//            placeholder(R.drawable.ic_fisher)
+//            transformations(CircleCropTransformation())
+//        }
+//       vb.tvUsername.text = user.userName
+//    }
 }

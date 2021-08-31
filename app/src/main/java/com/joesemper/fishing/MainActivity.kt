@@ -14,7 +14,6 @@ import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.utils.NavigationHolder
 import com.joesemper.fishing.viewmodels.MainViewModel
 import com.joesemper.fishing.viewmodels.viewstates.MainViewState
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
 import org.koin.android.scope.AndroidScopeComponent
@@ -79,7 +78,7 @@ class MainActivity : AppCompatActivity(), AndroidScopeComponent, NavigationHolde
             .findFragmentById(R.id.fragmentContainerView) as NavHostFragment? ?: return
         val navController = host.navController
 
-        bottomNav.setupWithNavController(navController)
+        binding.bottomNav.setupWithNavController(navController)
     }
 
 }

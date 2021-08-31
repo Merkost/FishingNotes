@@ -6,13 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
-import com.joesemper.fishing.R
 import com.joesemper.fishing.data.entity.weather.Daily
-
+import com.joesemper.fishing.databinding.FragmentWeatherInnerBinding
 import com.joesemper.fishing.view.weather.utils.getWeatherIconByName
-import kotlinx.android.synthetic.main.fragment_weather_inner.*
 
 class WeatherFragmentInner: Fragment() {
+
+    private lateinit var binding: FragmentWeatherInnerBinding
 
     companion object {
         private const val WEATHER_ARG = "WEATHER_ARG"
@@ -30,8 +30,9 @@ class WeatherFragmentInner: Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_weather_inner, container, false)
+    ): View {
+        binding = FragmentWeatherInnerBinding.inflate(layoutInflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -45,10 +46,10 @@ class WeatherFragmentInner: Fragment() {
 
         val user = FirebaseAuth.getInstance().currentUser
 
-        iv_weather_icon_main.setImageResource(getWeatherIconByName(weather.weather.first().icon))
-        tv_weather_description.text = weather.weather.first().description
-        tv_temperature.text = "Temperature: ${weather.temperature.max}°C"
-        tv_wind_speed.text = "Wind Speed: ${weather.windSpeed}m/s"
-        tv_pressure.text = "Pressure: ${weather.pressure}"
+        binding.ivWeatherIconMain.setImageResource(getWeatherIconByName(weather.weather.first().icon))
+        binding.tvWeatherDescription.text = weather.weather.first().description
+        binding.tvTemperature.text = "Temperature: ${weather.temperature.max}°C"
+        binding.tvWindSpeed.text = "Wind Speed: ${weather.windSpeed}m/s"
+        binding.tvPressure.text = "Pressure: ${weather.pressure}"
     }
 }

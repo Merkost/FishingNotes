@@ -11,18 +11,20 @@ import com.joesemper.fishing.data.entity.common.User
 import com.joesemper.fishing.viewmodels.GroupsViewModel
 import com.joesemper.fishing.viewmodels.viewstates.GroupsViewState
 import com.joesemper.fishing.SplashActivity
-import kotlinx.android.synthetic.main.fragment_groups.*
+import com.joesemper.fishing.databinding.FragmentGroupsBinding
 
 class GroupsFragment : Fragment(), LogoutListener {
 
     private lateinit var currentViewModel: GroupsViewModel
+    private lateinit var binding: FragmentGroupsBinding
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_groups, container, false)
+    ): View {
+        binding = FragmentGroupsBinding.inflate(layoutInflater, container, false)
+        return binding.root
     }
 
 
@@ -57,8 +59,8 @@ class GroupsFragment : Fragment(), LogoutListener {
     }
 
     private fun doOnSuccess(userData: User) {
-        tv_uid.text = userData.userId
-        tv_display_name.text = userData.userName
+        binding.tvUid.text = userData.userId
+        binding.tvDisplayName.text = userData.userName
     }
 
     private fun doOnLoading(progress: Int? = null) {
