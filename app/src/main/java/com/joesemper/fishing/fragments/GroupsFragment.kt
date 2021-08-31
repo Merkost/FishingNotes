@@ -6,7 +6,6 @@ import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.joesemper.fishing.R
 import com.joesemper.fishing.data.entity.common.User
 import com.joesemper.fishing.viewmodels.GroupsViewModel
 import com.joesemper.fishing.viewmodels.viewstates.GroupsViewState

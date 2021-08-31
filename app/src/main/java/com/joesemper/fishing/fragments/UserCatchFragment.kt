@@ -19,7 +19,7 @@ import org.koin.core.scope.Scope
 
 class UserCatchFragment : Fragment(), AndroidScopeComponent {
 
-    private val args: UserCatchFragmentArgs by navArgs()
+    private val args: com.joesemper.fishing.fragments.UserCatchFragmentArgs by navArgs()
 
     override val scope: Scope by fragmentScope()
     private val viewModel: UserCatchViewModel by viewModel()

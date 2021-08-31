@@ -1,16 +1,11 @@
 package com.joesemper.fishing
 
-import android.app.Activity
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.joesemper.fishing.data.entity.common.User
-import com.joesemper.fishing.MainActivity
 import com.joesemper.fishing.utils.Logger
-import com.joesemper.fishing.utils.getLoginActivityIntent
 import com.joesemper.fishing.viewmodels.SplashViewModel
 import com.joesemper.fishing.viewmodels.viewstates.SplashViewState
 import org.koin.androidx.viewmodel.ext.android.viewModel

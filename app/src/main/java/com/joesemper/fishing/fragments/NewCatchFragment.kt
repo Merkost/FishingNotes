@@ -14,29 +14,25 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.transition.MaterialFadeThrough
 import com.joesemper.fishing.R
-import com.joesemper.fishing.data.entity.raw.RawUserCatch
-import com.joesemper.fishing.databinding.FragmentNewCatchBinding
-import com.joesemper.fishing.data.entity.content.UserMapMarker
 import com.joesemper.fishing.adapters.AddNewPhotosAdapter
 import com.joesemper.fishing.adapters.PhotosRecyclerViewItem
-import com.joesemper.fishing.viewmodels.NewCatchViewModel
-import com.joesemper.fishing.viewmodels.viewstates.NewCatchViewState
+import com.joesemper.fishing.data.entity.content.UserMapMarker
+import com.joesemper.fishing.data.entity.raw.RawUserCatch
+import com.joesemper.fishing.databinding.FragmentNewCatchBinding
 import com.joesemper.fishing.utils.NavigationHolder
 import com.joesemper.fishing.utils.format
 import com.joesemper.fishing.utils.roundTo
+import com.joesemper.fishing.viewmodels.NewCatchViewModel
+import com.joesemper.fishing.viewmodels.viewstates.NewCatchViewState
 import gun0912.tedbottompicker.TedBottomPicker
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
@@ -49,7 +45,7 @@ import java.util.*
 
 class NewCatchFragment : Fragment(), AndroidScopeComponent {
 
-    private val args: NewCatchFragmentArgs by navArgs()
+    private val args: com.joesemper.fishing.fragments.NewCatchFragmentArgs by navArgs()
 
     private val dateAndTime = Calendar.getInstance()
 

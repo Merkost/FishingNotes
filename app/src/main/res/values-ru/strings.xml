@@ -53,6 +53,7 @@
     <string name="profile">Профиль</string>
 
     <!--  User scrreen  -->
+    <string name="back">Назад</string>
     <string name="user_photo">Фото пользователя</string>
     <string name="user">Пользователь</string>
     <string name="friends">Друзья</string>
