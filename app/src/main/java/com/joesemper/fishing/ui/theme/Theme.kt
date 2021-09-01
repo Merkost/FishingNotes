@@ -30,9 +30,9 @@ private val LightColorPalette = lightColors(
 
 private val FigmaColorPalette = lightColors(
     primary = primaryFigmaColor,
-    primaryVariant = primaryFigmaColor,
-    secondary = primaryFigmaColor,
-    secondaryVariant = primaryFigmaColor,
+    primaryVariant = primaryFigmaDarkColor,
+    secondary = secondaryFigmaColor,
+    secondaryVariant = secondaryFigmaDarkColor,
 )
 
 @Composable

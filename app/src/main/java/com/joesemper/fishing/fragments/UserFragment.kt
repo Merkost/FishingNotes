@@ -13,7 +13,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
@@ -21,7 +24,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -101,7 +103,8 @@ class UserFragment : Fragment(), AndroidScopeComponent {
             }
             Spacer(modifier = Modifier.size(15.dp))
             ColumnButton(painterResource(R.drawable.ic_settings), getString(R.string.settings)) {
-                notReadyYetToast()
+                val action = UserFragmentDirections.actionUserFragmentToSettingsFragment()
+                findNavController().navigate(action)
             }
             Spacer(modifier = Modifier.size(30.dp))
             OutlinedButton(onClick = {
@@ -120,7 +123,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     @Composable
     fun ColumnButton(image: Painter, name: String, click: () -> Unit) {
         OutlinedButton(
-            onClick = { click },
+            onClick = click,
             modifier = Modifier.fillMaxWidth(),
             content = {
                 Row(
@@ -205,7 +208,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     @Composable
     private fun UserName(user: User?) {
         Text(
-            text = when (user == null) {
+            text = when (user == null || user.isAnonymous) {
                 true -> stringResource(R.string.anonymous)
                 false -> user.userName
             }, style = MaterialTheme.typography.h6,

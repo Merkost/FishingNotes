@@ -9,12 +9,12 @@
     <color name="textColorSecondary">@color/text_secondary_color</color>
 
     <!--    Figma colors    -->
-    <color name="primaryFigmaColor">#576f31</color>
-    <color name="primaryFigmaLightColor">#859d5c</color>
-    <color name="primaryFigmaDarkColor">#2c4406</color>
-    <color name="secondaryFigmaColor">#fc7136</color>
-    <color name="secondaryFigmaLightColor">#ffa264</color>
-    <color name="secondaryFigmaDarkColor">#c24103</color>
+    <color name="primaryFigmaColor">#43a047</color>
+    <color name="primaryFigmaLightColor">#76d275</color>
+    <color name="primaryFigmaDarkColor">#00701a</color>
+    <color name="secondaryFigmaColor">#ff6d00</color>
+    <color name="secondaryFigmaLightColor">#ff9e40</color>
+    <color name="secondaryFigmaDarkColor">#c43c00</color>
     <color name="primaryFigmaTextColor">#000000</color>
     <color name="secondaryFigmaTextColor">#000000</color>
     <color name="primaryFigmaBackgroundTint">#FFF7E6</color>

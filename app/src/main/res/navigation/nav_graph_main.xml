@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<navigation
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_fraph_main"
@@ -9,7 +8,7 @@
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.joesemper.fishing.fragments.MapFragment"
-        android:label="MapFragment" >
+        android:label="MapFragment">
         <action
             android:id="@+id/action_mapFragment_to_weatherFragment"
             app:destination="@id/weatherFragment" />
@@ -31,15 +30,15 @@
     <fragment
         android:id="@+id/newCatchDialogFragment"
         android:name="com.joesemper.fishing.fragments.NewCatchFragment"
-        android:label="NewCatchDialogFragment" >
+        android:label="NewCatchDialogFragment">
         <argument
             android:name="marker"
-            app:argType="android.os.Parcelable"/>
+            app:argType="android.os.Parcelable" />
     </fragment>
     <fragment
         android:id="@+id/userCatchFragment"
         android:name="com.joesemper.fishing.fragments.UserCatchFragment"
-        android:label="UserCatchFragment" >
+        android:label="UserCatchFragment">
         <argument
             android:name="userCatch"
             app:argType="com.joesemper.fishing.data.entity.content.UserCatch" />
@@ -47,7 +46,7 @@
     <fragment
         android:id="@+id/userFragment"
         android:name="com.joesemper.fishing.fragments.UserFragment"
-        android:label="UserFragment" >
+        android:label="UserFragment">
         <action
             android:id="@+id/action_userFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
