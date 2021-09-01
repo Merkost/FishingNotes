@@ -73,9 +73,9 @@
         <item name="chipStrokeWidth">1dp</item>
     </style>
 
-
-
-
-
+    <style name="ThemeOverlay.AppCompat.ActionBar">
+        <item name="colorControlNormal">@color/white</item>
+        <item name="titleTextColor">@color/white</item>
+    </style>
 
 </resources>

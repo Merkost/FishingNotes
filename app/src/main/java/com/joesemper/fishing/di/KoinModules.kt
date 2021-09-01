@@ -1,11 +1,11 @@
 package com.joesemper.fishing.di
 
-import com.joesemper.fishing.LoginActivity
+import com.joesemper.fishing.ui.LoginActivity
 import com.joesemper.fishing.data.auth.AuthManager
 import com.joesemper.fishing.data.auth.FirebaseAuthManagerImpl
 import com.joesemper.fishing.utils.Logger
-import com.joesemper.fishing.MainActivity
-import com.joesemper.fishing.SplashActivity
+import com.joesemper.fishing.ui.MainActivity
+import com.joesemper.fishing.ui.SplashActivity
 import com.joesemper.fishing.data.datasource.*
 import com.joesemper.fishing.data.repository.*
 import com.joesemper.fishing.fragments.*

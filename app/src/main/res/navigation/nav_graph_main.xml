@@ -53,7 +53,7 @@
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.joesemper.fishing.SettingsFragment"
+        android:name="com.joesemper.fishing.ui.SettingsFragment"
         android:label="SettingsFragment" />
 
 </navigation>

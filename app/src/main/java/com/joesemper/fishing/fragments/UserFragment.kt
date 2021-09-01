@@ -1,6 +1,5 @@
 package com.joesemper.fishing.fragments
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,7 +15,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
@@ -31,9 +29,9 @@ import androidx.navigation.fragment.findNavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
-import com.joesemper.fishing.LoginActivity
 import com.joesemper.fishing.R
 import com.joesemper.fishing.data.entity.common.User
+import com.joesemper.fishing.ui.LoginActivity
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import com.joesemper.fishing.viewmodels.UserViewModel
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -48,7 +46,6 @@ class UserFragment : Fragment(), AndroidScopeComponent {
 
     override val scope: Scope by fragmentScope()
     private val viewModel: UserViewModel by viewModel()
-
 
     @InternalCoroutinesApi
     @ExperimentalCoilApi
@@ -79,7 +76,6 @@ class UserFragment : Fragment(), AndroidScopeComponent {
                 ) {
                     UserInfo()
                     UserButtons()
-
                 }
             })
     }
@@ -89,9 +85,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     fun UserButtons() {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 80.dp),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 80.dp),
             verticalArrangement = Arrangement.Bottom
         ) {
             ColumnButton(painterResource(R.drawable.ic_friends), getString(R.string.friends)) {
@@ -99,8 +93,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
             }
             Spacer(modifier = Modifier.size(15.dp))
             ColumnButton(painterResource(R.drawable.ic_edit), getString(R.string.edit_profile)) {
-                notReadyYetToast()
-            }
+                notReadyYetToast() }
             Spacer(modifier = Modifier.size(15.dp))
             ColumnButton(painterResource(R.drawable.ic_settings), getString(R.string.settings)) {
                 val action = UserFragmentDirections.actionUserFragmentToSettingsFragment()
@@ -113,9 +106,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
                         if (isLogout) startLoginActivity()
                     }
                 }
-            }) {
-                Text(getString(R.string.logout))
-            }
+            }) { Text(getString(R.string.logout)) }
             Spacer(modifier = Modifier.size(30.dp))
         }
     }
@@ -137,58 +128,13 @@ class UserFragment : Fragment(), AndroidScopeComponent {
             })
     }
 
-
-    @SuppressLint("CoroutineCreationDuringComposition")
     @ExperimentalCoilApi
     @Composable
     fun UserInfo() {
-        //var user: User? = null
         val user by viewModel.getCurrentUser().collectAsState(User())
-        if (user == null) {
-            startLoginActivity()
-        }
-
-//        LaunchedEffect(viewModel.getCurrentUser()) {
-//
-//        }
-
-        // Create a CoroutineScope that follows this composable's lifecycle
-        val composableScope = rememberCoroutineScope()
-
-//        composableScope.launch {
-//            viewModel.getCurrentUser().collect {
-//                user = it
-//            }
-//        }
-
-//        lifecycleScope.launch {
-//
-//        }
-//        val user = remember {
-//            viewModel.getCurrentUser()
-//        }
-//        val currentUser by user.collect {
-//
-//        }
-//        lifecycleScope.launchWhenStarted {
-//            viewModel.getCurrentUser().collect { user ->
-//                LocalContext.current.run {
-//                    UserInfo(user!!.userPic)
-//                }
-
-//Might Help - https://stackoverflow.com/questions/67380598/compose-use-flowt-collectasstate-render-listt-lazycolumn-progressive
-        //LaunchedEffect(coroutineContext })
-
-//        val lifecycleOwner = LocalLifecycleOwner.current
-//        val currentUserInner = remember(currentUserFlow, lifecycleOwner) {
-//            currentUserFlow.flowOn(lifecycleScope.coroutineContext)
-//        }
-//
-//        val currentUser by currentUserInner.collectAsState()
         Card(
             elevation = 10.dp,
-            modifier = Modifier
-                .padding(top = 50.dp).size(230.dp),
+            modifier = Modifier.padding(top = 50.dp).size(230.dp),
             shape = RoundedCornerShape(25.dp),
             backgroundColor = MaterialTheme.colors.surface
         ) {
@@ -197,9 +143,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Spacer(modifier = Modifier.size(30.dp))
-//            lifecycleScope.launchWhenStarted {
-//                viewModel.getCurrentUserComposable().collect { user ->
-                UserImage(user) /*?: UserImage(painterResource(R.drawable.ic_fisher))*/
+                UserImage(user)
                 UserName(user)
             }
         }
@@ -231,23 +175,18 @@ class UserFragment : Fragment(), AndroidScopeComponent {
                     })
             },
             contentDescription = stringResource(R.string.fisher),
-            modifier = Modifier
-                .size(120.dp)
+            modifier = Modifier.size(120.dp)
         )
     }
 
     @Composable
     fun AppBar() {
         TopAppBar(
-            title = {
-                Text(text = "User")
-            },
+            title = { Text(text = "User") },
             navigationIcon = {
                 IconButton(onClick = { findNavController().popBackStack() }) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = getString(R.string.back)
-                    )
+                    Icon( imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = getString(R.string.back))
                 }
             },
             elevation = 2.dp
@@ -258,12 +197,21 @@ class UserFragment : Fragment(), AndroidScopeComponent {
         Toast.makeText(
             context,
             "This feature is still in development. Please, try it later",
-            Toast.LENGTH_LONG
+            Toast.LENGTH_SHORT
         ).show()
     }
 
     private fun startLoginActivity() {
         val intent = Intent(requireContext(), LoginActivity::class.java)
         startActivity(intent)
+    }
+
+    private fun temp() {
+        TODO("deal with collecting flow")
+        // Create a CoroutineScope that follows this composable's lifecycle
+        // val composableScope = rememberCoroutineScope()
+
+        //Might Help - https://stackoverflow.com/questions/67380598/compose-use-flowt-collectasstate-render-listt-lazycolumn-progressive
+        //LaunchedEffect(coroutineContext })
     }
 }

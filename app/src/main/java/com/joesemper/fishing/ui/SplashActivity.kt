@@ -1,4 +1,4 @@
-package com.joesemper.fishing
+package com.joesemper.fishing.ui
 
 import android.os.Bundle
 import android.widget.Toast

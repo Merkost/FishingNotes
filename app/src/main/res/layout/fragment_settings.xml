@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-<!--    android:background="?colorOnBackgroundTint">-->
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar_settings"
@@ -14,12 +13,12 @@
         android:elevation="4dp"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"
+        app:titleTextColor="@color/white"
         android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
-        app:title="@string/settings"
-        app:titleTextColor="?colorOnError"/>
+        app:title="@string/settings" />
 
 </LinearLayout>

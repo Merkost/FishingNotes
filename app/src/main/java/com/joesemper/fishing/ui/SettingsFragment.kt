@@ -1,4 +1,4 @@
-package com.joesemper.fishing
+package com.joesemper.fishing.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceFragmentCompat
+import com.joesemper.fishing.R
 import com.joesemper.fishing.databinding.FragmentSettingsBinding
 import com.joesemper.fishing.utils.showToast
 

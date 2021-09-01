@@ -1,4 +1,4 @@
-package com.joesemper.fishing
+package com.joesemper.fishing.ui
 
 import android.content.Context
 import android.content.Intent
@@ -15,6 +15,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.joesemper.fishing.R
 import com.joesemper.fishing.data.entity.common.User
 import com.joesemper.fishing.databinding.ActivityLoginBinding
 import com.joesemper.fishing.utils.Logger
