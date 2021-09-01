@@ -53,12 +53,15 @@
     <string name="profile">Профиль</string>
 
     <!--  User scrreen  -->
+    <string name="back">Назад</string>
     <string name="user_photo">Фото пользователя</string>
     <string name="user">Пользователь</string>
     <string name="friends">Друзья</string>
     <string name="edit_profile">Редактировать профиль</string>
     <string name="settings">Настройки</string>
     <string name="logout">Выйти</string>
+    <string name="anonymous">Anonymous</string>
+    <string name="fisher">Fisher</string>
 
 
 </resources>

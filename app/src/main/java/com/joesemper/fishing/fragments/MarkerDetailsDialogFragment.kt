@@ -147,7 +147,10 @@ class MarkerDetailsDialogFragment : BottomSheetDialogFragment(), AndroidScopeCom
 
     private fun setOnNewCatchListener() {
         binding.chipAddNewCatch.setOnClickListener {
-            val action = MapFragmentDirections.actionMapFragmentToNewCatchDialogFragment(marker)
+            val action =
+                com.joesemper.fishing.fragments.MapFragmentDirections.actionMapFragmentToNewCatchDialogFragment(
+                    marker
+                )
             findNavController().navigate(action)
         }
 

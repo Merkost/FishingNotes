@@ -1,9 +1,12 @@
 package com.joesemper.fishing.data.auth
 
 import android.content.Context
+import android.provider.Settings.System.getString
+import androidx.compose.ui.res.stringResource
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.joesemper.fishing.R
 import com.joesemper.fishing.data.entity.common.User
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
@@ -27,18 +30,23 @@ class FirebaseAuthManagerImpl(private val context: Context) : AuthManager {
             awaitClose { fireBaseAuth.removeAuthStateListener(authListener) }
         }
 
-    override suspend fun logoutCurrentUser() {
-        AuthUI.getInstance().signOut(context)
+    @ExperimentalCoroutinesApi
+    override suspend fun logoutCurrentUser() = callbackFlow {
+        AuthUI.getInstance().signOut(context).addOnSuccessListener {
+            trySend(true)
+        }
+        awaitClose{}
     }
 
     private fun mapFirebaseUserToUser(firebaseUser: FirebaseUser): User {
         return with(firebaseUser) {
             User(
                 uid,
-                displayName,
+                displayName ?: "Anonymous",
                 isAnonymous,
                 photoUrl.toString()
             )
         }
+        TODO("change name")
     }
 }

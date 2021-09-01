@@ -69,22 +69,22 @@ class MainViewModelTest {
         }
     }
 
-    @Test
-    fun coroutines_stateFlowHasCorrectSuccessValue() {
-        testCoroutineRule.runBlockingTest {
-            val user = User(userId = "1", isAnonymous = true, userPic = "1")
-
-            Mockito.`when`(repository.currentUser).thenReturn(
-                flowOf(user)
-            )
-
-            val stateFlow = mainViewModel.subscribe()
-            val viewState = stateFlow.value
-            if (viewState is MainViewState.Success) {
-                assertEquals(MainViewState.Success(user).user, viewState.user)
-            }
-        }
-    }
+//    @Test
+//    fun coroutines_stateFlowHasCorrectSuccessValue() {
+//        testCoroutineRule.runBlockingTest {
+//            val user = User(userId = "1", isAnonymous = true, userPic = "1")
+//
+//            Mockito.`when`(repository.currentUser).thenReturn(
+//                flowOf(user)
+//            )
+//
+//            val stateFlow = mainViewModel.subscribe()
+//            val viewState = stateFlow.value
+//            if (viewState is MainViewState.Success) {
+//                assertEquals(MainViewState.Success(user) .user, viewState.user)
+//            }
+//        }
+//    }
 
     @Test
     fun coroutines_repositoryCurrentUserCalledOnce() {

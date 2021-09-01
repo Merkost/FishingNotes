@@ -9,7 +9,5 @@ class UserRepositoryImpl(private val authManager: AuthManager): UserRepository {
     override val currentUser: Flow<User?>
         get() = authManager.currentUser
 
-    override suspend fun logoutCurrentUser() {
-        authManager.logoutCurrentUser()
-    }
+    override suspend fun logoutCurrentUser() = authManager.logoutCurrentUser()
 }

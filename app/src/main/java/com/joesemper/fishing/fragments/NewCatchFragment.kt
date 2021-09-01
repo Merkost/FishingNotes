@@ -14,33 +14,26 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.transition.MaterialFadeThrough
 import com.joesemper.fishing.R
-import com.joesemper.fishing.data.entity.raw.RawUserCatch
-import com.joesemper.fishing.databinding.FragmentNewCatchBinding
-import com.joesemper.fishing.data.entity.content.UserMapMarker
 import com.joesemper.fishing.adapters.AddNewPhotosAdapter
 import com.joesemper.fishing.adapters.PhotosRecyclerViewItem
-import com.joesemper.fishing.viewmodels.NewCatchViewModel
-import com.joesemper.fishing.viewmodels.viewstates.NewCatchViewState
+import com.joesemper.fishing.data.entity.content.UserMapMarker
+import com.joesemper.fishing.data.entity.raw.RawUserCatch
+import com.joesemper.fishing.databinding.FragmentNewCatchBinding
 import com.joesemper.fishing.utils.NavigationHolder
 import com.joesemper.fishing.utils.format
 import com.joesemper.fishing.utils.roundTo
+import com.joesemper.fishing.viewmodels.NewCatchViewModel
+import com.joesemper.fishing.viewmodels.viewstates.NewCatchViewState
 import gun0912.tedbottompicker.TedBottomPicker
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.dialog_new_catch.*
-import kotlinx.android.synthetic.main.fragment_new_catch.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import org.koin.android.scope.AndroidScopeComponent
@@ -52,16 +45,14 @@ import java.util.*
 
 class NewCatchFragment : Fragment(), AndroidScopeComponent {
 
-    private val args: NewCatchFragmentArgs by navArgs()
+    private val args: com.joesemper.fishing.fragments.NewCatchFragmentArgs by navArgs()
 
     private val dateAndTime = Calendar.getInstance()
 
     override val scope: Scope by fragmentScope()
     private val viewModel: NewCatchViewModel by viewModel()
 
-    private var _binding: FragmentNewCatchBinding? = null
-    private val binding
-        get() = _binding!!
+    private lateinit var binding: FragmentNewCatchBinding
 
     private lateinit var marker: UserMapMarker
 
@@ -74,8 +65,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentNewCatchBinding.inflate(inflater, container, false)
+    ): View { binding = FragmentNewCatchBinding.inflate(layoutInflater, container, false)
         return binding.root
     }
 
@@ -158,7 +148,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 
     private fun initBottomDialog() {
         (requireActivity() as NavigationHolder).closeNav()
-        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+        val bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
@@ -211,7 +201,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     }
 
     private fun setOnCreateClickListener() {
-        val buttonCreate = bottomSheet.findViewById<Button>(R.id.button_new_catch_create)
+        val buttonCreate = binding.bottomSheet.findViewById<Button>(R.id.button_new_catch_create)
         buttonCreate.setOnClickListener {
             val catch = createNewUserCatch()
             viewModel.addNewCatch(catch)
@@ -225,7 +215,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 findNavController().popBackStack()
             }
         }
-        val buttonCancel = bottomSheet.findViewById<Button>(R.id.button_new_catch_cancel)
+        val buttonCancel = binding.bottomSheet.findViewById<Button>(R.id.button_new_catch_cancel)
         buttonCancel.setOnClickListener {
             findNavController().popBackStack()
         }

@@ -47,6 +47,7 @@
     <string name="no_description">No description</string>
 
     <!--  User screen  -->
+    <string name="back">Back</string>
     <string name="user_photo">User photo</string>
     <string name="user">User</string>
     <string name="friends">Friends</string>
@@ -58,6 +59,9 @@
     <string name="map">Map</string>
     <string name="weather">Weather</string>
     <string name="profile">profile</string>
+    <string name="anonymous">Anonymous</string>
+    <string name="fisher">Fisher</string>
+
     <!-- Preference Titles -->
     <string name="messages_header">Messages</string>
     <string name="sync_header">Sync</string>

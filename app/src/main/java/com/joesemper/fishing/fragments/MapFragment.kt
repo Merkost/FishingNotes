@@ -83,7 +83,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentMapBinding.inflate(inflater, container, false)
+        binding = FragmentMapBinding.inflate(layoutInflater, container, false)
         return binding.root
     }
 
@@ -258,8 +258,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     }
 
     private fun startBottomSheetDialogAddMarker() {
-        NewMarkerDialogFragment
-            .newInstance(currentMapMarker!!.position)
+        NewMarkerDialogFragment.newInstance(currentMapMarker!!.position)
             .show(childFragmentManager, "TAG")
     }
 
