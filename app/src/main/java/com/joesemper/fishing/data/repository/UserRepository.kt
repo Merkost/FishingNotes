@@ -5,5 +5,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {
     val currentUser: Flow<User?>
-    suspend fun logoutCurrentUser()
+    suspend fun logoutCurrentUser(): Flow<Boolean>
 }

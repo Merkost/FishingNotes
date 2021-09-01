@@ -1,4 +1,4 @@
-package com.merkost.composepractice.ui.theme
+package com.joesemper.fishing.ui.theme
 
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle

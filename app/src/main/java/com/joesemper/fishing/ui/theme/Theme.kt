@@ -1,7 +1,8 @@
-package com.merkost.composepractice.ui.theme
+package com.joesemper.fishing.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
@@ -27,6 +28,13 @@ private val LightColorPalette = lightColors(
     */
 )
 
+private val FigmaColorPalette = lightColors(
+    primary = primaryFigmaColor,
+    primaryVariant = primaryFigmaColor,
+    secondary = primaryFigmaColor,
+    secondaryVariant = primaryFigmaColor,
+)
+
 @Composable
 fun ComposePracticeTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable() () -> Unit) {
     val colors = if (darkTheme) {
@@ -40,5 +48,17 @@ fun ComposePracticeTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @C
             typography = Typography,
             shapes = Shapes,
             content = content
+    )
+}
+
+
+@Composable
+fun FigmaTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable() () -> Unit) {
+    val colors = FigmaColorPalette
+    MaterialTheme(
+        colors = colors,
+        typography = Typography,
+        shapes = Shapes,
+        content = content
     )
 }
