@@ -4,16 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.data.auth.AuthManager
 import com.joesemper.fishing.data.entity.common.User
-import com.joesemper.fishing.viewmodels.viewstates.SplashViewState
+import com.joesemper.fishing.viewmodels.viewstates.BaseViewState
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 class SplashViewModel(private val repository: AuthManager) : ViewModel() {
 
-    private val mutableStateFlow: MutableStateFlow<SplashViewState> =
-        MutableStateFlow(SplashViewState.Loading)
+    private val mutableStateFlow: MutableStateFlow<BaseViewState> =
+        MutableStateFlow(BaseViewState.Loading(null))
 
-    fun subscribe(): StateFlow<SplashViewState> = mutableStateFlow
+    fun subscribe(): StateFlow<BaseViewState> = mutableStateFlow
 
     init {
         loadCurrentUser()
@@ -28,11 +28,11 @@ class SplashViewModel(private val repository: AuthManager) : ViewModel() {
     }
 
     private fun onSuccess(user: User?) {
-        mutableStateFlow.value = SplashViewState.Success(user)
+        mutableStateFlow.value = BaseViewState.Success(user)
     }
 
     private fun handleError(error: Throwable) {
-        mutableStateFlow.value = SplashViewState.Error(error)
+        mutableStateFlow.value = BaseViewState.Error(error)
     }
 
 }

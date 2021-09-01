@@ -1,29 +1,24 @@
 package com.joesemper.fishing
 
-import android.app.Activity
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.joesemper.fishing.data.entity.common.User
-import com.joesemper.fishing.MainActivity
 import com.joesemper.fishing.utils.Logger
-import com.joesemper.fishing.utils.getLoginActivityIntent
 import com.joesemper.fishing.viewmodels.SplashViewModel
-import com.joesemper.fishing.viewmodels.viewstates.SplashViewState
-import org.koin.androidx.viewmodel.ext.android.viewModel
+import com.joesemper.fishing.viewmodels.viewstates.BaseViewState
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.activityScope
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.scope.Scope
 
 class SplashActivity : AppCompatActivity(), AndroidScopeComponent {
 
-    override val scope : Scope by activityScope()
+    override val scope: Scope by activityScope()
     private val viewModel: SplashViewModel by viewModel()
 
     private val logger: Logger by inject()
@@ -33,11 +28,11 @@ class SplashActivity : AppCompatActivity(), AndroidScopeComponent {
 
 
         lifecycleScope.launch {
-            viewModel.subscribe().collect { state->
+            viewModel.subscribe().collect { state ->
                 when (state) {
-                    is SplashViewState.Success -> onSuccess(state.user)
-                    is SplashViewState.Loading -> {}
-                    is SplashViewState.Error -> handleError(state.error)
+                    is BaseViewState.Success<*> -> onSuccess(state.data as User?)
+                    is BaseViewState.Loading -> { }
+                    is BaseViewState.Error -> handleError(state.error)
                 }
             }
         }

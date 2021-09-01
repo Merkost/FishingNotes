@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.data.auth.AuthManager
 import com.joesemper.fishing.data.entity.common.User
-import com.joesemper.fishing.viewmodels.viewstates.LoginViewState
+import com.joesemper.fishing.viewmodels.viewstates.BaseViewState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -13,10 +13,10 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel(private val repository: AuthManager) : ViewModel() {
 
-    private val mutableStateFlow: MutableStateFlow<LoginViewState> =
-        MutableStateFlow(LoginViewState.Success(null))
+    private val mutableStateFlow: MutableStateFlow<BaseViewState> =
+        MutableStateFlow(BaseViewState.Success(null))
 
-    fun subscribe(): StateFlow<LoginViewState> = mutableStateFlow
+    fun subscribe(): StateFlow<BaseViewState> = mutableStateFlow
 
     init {
         loadCurrentUser()
@@ -31,11 +31,11 @@ class LoginViewModel(private val repository: AuthManager) : ViewModel() {
     }
 
     private fun onSuccess(user: User?) {
-        mutableStateFlow.value = LoginViewState.Success(user)
+        mutableStateFlow.value = BaseViewState.Success(user)
     }
 
     private fun handleError(error: Throwable) {
-        mutableStateFlow.value = LoginViewState.Error(error)
+        mutableStateFlow.value = BaseViewState.Error(error)
     }
 
 }

@@ -6,7 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.joesemper.fishing.data.auth.AuthManager
 import com.joesemper.fishing.data.entity.common.User
 import com.joesemper.fishing.viewmodels.MainViewModel
-import com.joesemper.fishing.viewmodels.viewstates.MainViewState
+import com.joesemper.fishing.viewmodels.viewstates.BaseViewState
 import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -65,7 +65,7 @@ class MainViewModelTest {
 
             val stateFlow = mainViewModel.subscribe()
 
-            assertTrue(stateFlow.value is MainViewState.Success)
+            assertTrue(stateFlow.value is BaseViewState.Success<*>)
         }
     }
 
@@ -80,8 +80,8 @@ class MainViewModelTest {
 
             val stateFlow = mainViewModel.subscribe()
             val viewState = stateFlow.value
-            if (viewState is MainViewState.Success) {
-                assertEquals(MainViewState.Success(user).user, viewState.user)
+            if (viewState is BaseViewState.Success<*>) {
+                assertEquals(BaseViewState.Success(user), viewState)
             }
         }
     }
@@ -112,7 +112,7 @@ class MainViewModelTest {
 
             val stateFlow = mainViewModel.subscribe()
             val viewState = stateFlow.value
-            assertTrue(viewState is MainViewState.Error)
+            assertTrue(viewState is BaseViewState.Error)
         }
     }
 

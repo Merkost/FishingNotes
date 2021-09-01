@@ -13,7 +13,7 @@ import com.joesemper.fishing.databinding.ActivityMainBinding
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.utils.NavigationHolder
 import com.joesemper.fishing.viewmodels.MainViewModel
-import com.joesemper.fishing.viewmodels.viewstates.MainViewState
+import com.joesemper.fishing.viewmodels.viewstates.BaseViewState
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
@@ -24,7 +24,7 @@ import org.koin.core.scope.Scope
 
 class MainActivity : AppCompatActivity(), AndroidScopeComponent, NavigationHolder {
 
-    override val scope : Scope by activityScope()
+    override val scope: Scope by activityScope()
     private val viewModel: MainViewModel by viewModel()
 
     private val logger: Logger by inject()
@@ -57,9 +57,14 @@ class MainActivity : AppCompatActivity(), AndroidScopeComponent, NavigationHolde
         lifecycleScope.launchWhenStarted {
             viewModel.subscribe().collect { viewState ->
                 when (viewState) {
-                    is MainViewState.Success -> { onSuccess() }
-                    is MainViewState.Error -> { onError(viewState.error) }
-                    MainViewState.Loading -> { }
+                    is BaseViewState.Success<*> -> {
+                        onSuccess()
+                    }
+                    is BaseViewState.Error -> {
+                        onError(viewState.error)
+                    }
+                    is BaseViewState.Loading -> {
+                    }
                 }
             }
         }
