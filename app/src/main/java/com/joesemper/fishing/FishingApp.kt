@@ -21,7 +21,6 @@ class FishingApp : Application() {
                     loginScreen,
                     mapScreen,
                     weatherScreen,
-                    groupsScreen,
                     mainActivity,
                     markerFragment,
                     newCatchFragment,

@@ -20,12 +20,13 @@ val appModule = module {
     single<DatabaseProvider> { CloudFireStoreDatabaseImpl(get()) }
     single<AuthManager> { FirebaseAuthManagerImpl(androidContext()) }
     single<PhotoStorage> { CloudPhotoStorageImpl() }
+    single<UserContentRepository> {UserContentRepositoryImpl(get())}
     single { Logger() }
 }
 
 val mainActivity = module {
     scope(named<MainActivity>()) {
-        viewModel { MainViewModel(get()) }
+        viewModel { MainViewModel() }
     }
 }
 
@@ -44,14 +45,12 @@ val loginScreen = module {
 val mapScreen = module {
     scope(named<MapFragment>()) {
         viewModel { MapViewModel(get()) }
-        scoped<MapRepository> { MapRepositoryImpl(get()) }
     }
 }
 
 val markerFragment = module {
     scope(named<MarkerDetailsDialogFragment>()) {
         viewModel { MarkerDetailsViewModel(get()) }
-        scoped<MarkerRepository> { MarkerRepositoryImpl(get()) }
     }
 }
 
@@ -65,28 +64,18 @@ val userFragment = module {
 val newCatchFragment = module {
     scope(named<NewCatchFragment>()) {
         viewModel { NewCatchViewModel(get()) }
-        scoped<NewCatchRepository> { NewCatchRepositoryImpl(get()) }
     }
 }
 
 val userCatchFragment = module {
     scope(named<UserCatchFragment>()) {
         viewModel { UserCatchViewModel(get()) }
-        scoped<UserCatchRepository> { UserCatchRepositoryImpl(get()) }
     }
 }
 
 val catchesInnerFragment = module {
     scope(named<UserCatchesInnerFragment>()) {
         viewModel { UserCatchesViewModel(get()) }
-        scoped<CatchesRepository> { CatchesRepositoryImpl(get()) }
-    }
-}
-
-val groupsScreen = module {
-    scope(named<GroupsFragment>()) {
-        viewModel { GroupsViewModel(get()) }
-        scoped<GroupsRepository> { GroupsRepositoryImpl(get()) }
     }
 }
 
