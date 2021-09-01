@@ -5,13 +5,14 @@
     android:id="@+id/loginLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LoginActivity">
+    tools:context=".LoginActivity"
+    android:background="?colorOnPrimarySurface">
 
     <View
         android:id="@+id/view"
         android:layout_width="match_parent"
         android:layout_height="450dp"
-        android:background="@android:color/holo_blue_dark"
+        android:background="?colorPrimary"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.cardview.widget.CardView
@@ -22,6 +23,7 @@
         android:background="#d3d3d3"
         app:cardCornerRadius="30dp"
         app:cardElevation="30dp"
+        android:backgroundTint="?colorOnBackgroundTint"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="@+id/view"
         tools:layout_editor_absoluteX="30dp">

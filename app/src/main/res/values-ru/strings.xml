@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Дневник рыболова</string>
-    <string name="map">Карта</string>
-    <string name="weather">Погода</string>
     <string name="groups">Группы</string>
     <string name="logout_dialog_title">Выйти из аккаунта?</string>
     <string name="logout_dialog_message">All data will be saved</string>
     <string name="ok_button">OK</string>
     <string name="logout_dialog_cancel">Закрыть</string>
-    <string name="logout">Выйти</string>
     <string name="title">Заголовок</string>
     <string name="description">Описание</string>
     <string name="kind_of_fish">Вид рыбы</string>
@@ -49,5 +46,19 @@
     <string name="delete">Удалить</string>
     <string name="add_photo">Добавить фото</string>
     <string name="no_description">Нет описания</string>
-    <string name="profile">Profile</string>
+
+    <!--  Main navigation  -->
+    <string name="map">Карта</string>
+    <string name="weather">Погода</string>
+    <string name="profile">Профиль</string>
+
+    <!--  User scrreen  -->
+    <string name="user_photo">Фото пользователя</string>
+    <string name="user">Пользователь</string>
+    <string name="friends">Друзья</string>
+    <string name="edit_profile">Редактировать профиль</string>
+    <string name="settings">Настройки</string>
+    <string name="logout">Выйти</string>
+
+
 </resources>
