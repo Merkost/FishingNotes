@@ -148,7 +148,8 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 
     private fun initBottomDialog() {
         (requireActivity() as NavigationHolder).closeNav()
-        val bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
+        val bottomSheetBehavior = BottomSheetBehavior.from(
+            requireActivity().findViewById(R.id.bottomSheet))
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
@@ -201,7 +202,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     }
 
     private fun setOnCreateClickListener() {
-        val buttonCreate = binding.bottomSheet.findViewById<Button>(R.id.button_new_catch_create)
+        val buttonCreate = requireActivity().findViewById<Button>(R.id.button_new_catch_create)
         buttonCreate.setOnClickListener {
             val catch = createNewUserCatch()
             viewModel.addNewCatch(catch)
@@ -215,7 +216,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 findNavController().popBackStack()
             }
         }
-        val buttonCancel = binding.bottomSheet.findViewById<Button>(R.id.button_new_catch_cancel)
+        val buttonCancel = requireActivity().findViewById<Button>(R.id.button_new_catch_cancel)
         buttonCancel.setOnClickListener {
             findNavController().popBackStack()
         }
