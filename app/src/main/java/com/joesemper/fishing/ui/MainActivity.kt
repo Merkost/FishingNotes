@@ -14,7 +14,6 @@ import com.joesemper.fishing.databinding.ActivityMainBinding
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.utils.NavigationHolder
 import com.joesemper.fishing.viewmodels.MainViewModel
-import com.joesemper.fishing.viewmodels.viewstates.MainViewState
 import com.joesemper.fishing.viewmodels.viewstates.BaseViewState
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject

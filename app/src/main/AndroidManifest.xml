@@ -32,7 +32,7 @@
             android:value="@string/google_maps_key" />
 
         <activity android:name=".MainActivity" />
-        <activity android:name=".SplashActivity">
+        <activity android:name=".ui.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

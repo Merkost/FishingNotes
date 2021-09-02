@@ -1,9 +1,10 @@
-package com.joesemper.fishing
+package com.joesemper.fishing.ui
 
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.joesemper.fishing.MainActivity
 import com.joesemper.fishing.data.entity.common.User
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.viewmodels.SplashViewModel

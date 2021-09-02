@@ -15,6 +15,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.joesemper.fishing.MainActivity
 import com.joesemper.fishing.R
 import com.joesemper.fishing.data.entity.common.User
 import com.joesemper.fishing.databinding.ActivityLoginBinding
