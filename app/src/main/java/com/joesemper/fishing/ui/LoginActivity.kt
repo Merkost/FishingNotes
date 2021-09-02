@@ -2,12 +2,12 @@ package com.joesemper.fishing.ui
 
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -20,7 +20,7 @@ import com.joesemper.fishing.data.entity.common.User
 import com.joesemper.fishing.databinding.ActivityLoginBinding
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.viewmodels.LoginViewModel
-import com.joesemper.fishing.viewmodels.viewstates.LoginViewState
+import com.joesemper.fishing.viewmodels.viewstates.BaseViewState
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -35,7 +35,7 @@ class LoginActivity : AppCompatActivity(), AndroidScopeComponent {
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var auth: FirebaseAuth
 
-    override val scope : Scope by activityScope()
+    override val scope: Scope by activityScope()
     private val logger: Logger by inject()
     private val viewModel: LoginViewModel by viewModel()
 
@@ -54,11 +54,11 @@ class LoginActivity : AppCompatActivity(), AndroidScopeComponent {
         setContentView(vb.root)
 
         lifecycleScope.launch {
-            viewModel.subscribe().collect { state->
+            viewModel.subscribe().collect { state ->
                 when (state) {
-                    is LoginViewState.Success -> onSuccess(state.user)
-                    is LoginViewState.Loading -> onLoading()
-                    is LoginViewState.Error -> handleError(state.error)
+                    is BaseViewState.Success<*> -> onSuccess(state.data as User?)
+                    is BaseViewState.Loading -> onLoading()
+                    is BaseViewState.Error -> handleError(state.error)
                 }
             }
         }
@@ -84,8 +84,7 @@ class LoginActivity : AppCompatActivity(), AndroidScopeComponent {
         if (isLoading) {
             vb.progressBar.visibility = View.VISIBLE
             vb.warning.visibility = View.GONE
-        }
-        else {
+        } else {
             vb.progressBar.visibility = View.INVISIBLE
         }
         vb.googleSignInButton.isClickable = !isLoading
@@ -129,20 +128,20 @@ class LoginActivity : AppCompatActivity(), AndroidScopeComponent {
 
     private fun onActivityResult(result: ActivityResult) {
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            val exception = task.exception
-            if (task.isSuccessful) {
-                try {
-                    // Google Sign In was successful, authenticate with Firebase
-                    val account = task.getResult(ApiException::class.java)
-                    firebaseAuthWithGoogle(account.idToken!!)
-                } catch (e: ApiException) {
-                    // Google Sign In failed, update UI appropriately
-                    handleError(exception as Throwable)
-                }
-            } else {
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        val exception = task.exception
+        if (task.isSuccessful) {
+            try {
+                // Google Sign In was successful, authenticate with Firebase
+                val account = task.getResult(ApiException::class.java)
+                firebaseAuthWithGoogle(account.idToken!!)
+            } catch (e: ApiException) {
+                // Google Sign In failed, update UI appropriately
                 handleError(exception as Throwable)
             }
+        } else {
+            handleError(exception as Throwable)
+        }
     }
 
     private fun firebaseAuthWithGoogle(idToken: String) {

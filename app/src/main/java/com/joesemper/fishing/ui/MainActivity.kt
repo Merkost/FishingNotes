@@ -1,4 +1,4 @@
-package com.joesemper.fishing.ui
+package com.joesemper.fishing
 
 import android.content.Context
 import android.content.Intent
@@ -15,6 +15,7 @@ import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.utils.NavigationHolder
 import com.joesemper.fishing.viewmodels.MainViewModel
 import com.joesemper.fishing.viewmodels.viewstates.MainViewState
+import com.joesemper.fishing.viewmodels.viewstates.BaseViewState
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
 import org.koin.android.scope.AndroidScopeComponent
@@ -57,13 +58,13 @@ class MainActivity : AppCompatActivity(), AndroidScopeComponent, NavigationHolde
         lifecycleScope.launchWhenStarted {
             viewModel.subscribe().collect { viewState ->
                 when (viewState) {
-                    is MainViewState.Success -> {
+                    is BaseViewState.Success<*> -> {
                         onSuccess()
                     }
-                    is MainViewState.Error -> {
+                    is BaseViewState.Error -> {
                         onError(viewState.error)
                     }
-                    MainViewState.Loading -> {
+                    is BaseViewState.Loading -> {
                     }
                 }
             }
