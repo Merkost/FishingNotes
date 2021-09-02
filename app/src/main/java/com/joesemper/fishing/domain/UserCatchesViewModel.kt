@@ -1,0 +1,29 @@
+package com.joesemper.fishing.domain
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.joesemper.fishing.model.repository.UserContentRepository
+import com.joesemper.fishing.domain.viewstates.MarkerDetailsViewState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+
+class UserCatchesViewModel(private val repository: UserContentRepository): ViewModel() {
+
+    private val viewStateFlow: MutableStateFlow<MarkerDetailsViewState> =
+        MutableStateFlow(MarkerDetailsViewState.Loading)
+
+    fun subscribe(): StateFlow<MarkerDetailsViewState> {
+        return viewStateFlow
+    }
+
+    fun loadCatchesByMarkerId(markerId: String) {
+        viewModelScope.launch {
+            repository.getCatchesByMarkerId(markerId).collect { catches ->
+                viewStateFlow.value = MarkerDetailsViewState.Success(catches)
+            }
+        }
+
+    }
+}

@@ -5,10 +5,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.joesemper.fishing.MainActivity
-import com.joesemper.fishing.data.entity.common.User
+import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.utils.Logger
-import com.joesemper.fishing.viewmodels.SplashViewModel
-import com.joesemper.fishing.viewmodels.viewstates.BaseViewState
+import com.joesemper.fishing.domain.SplashViewModel
+import com.joesemper.fishing.domain.viewstates.BaseViewState
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject

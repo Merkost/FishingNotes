@@ -9,12 +9,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
-import com.joesemper.fishing.R
 import com.joesemper.fishing.databinding.ActivityMainBinding
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.utils.NavigationHolder
-import com.joesemper.fishing.viewmodels.MainViewModel
-import com.joesemper.fishing.viewmodels.viewstates.BaseViewState
+import com.joesemper.fishing.domain.MainViewModel
+import com.joesemper.fishing.domain.viewstates.BaseViewState
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
 import org.koin.android.scope.AndroidScopeComponent
