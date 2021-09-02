@@ -15,11 +15,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.joesemper.fishing.R
 import com.joesemper.fishing.databinding.FragmentCatchesInnerBinding
+import com.joesemper.fishing.domain.UserCatchesViewModel
+import com.joesemper.fishing.domain.viewstates.BaseViewState
+import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.adapters.CatchRecyclerViewItem
 import com.joesemper.fishing.ui.adapters.UserCatchesRVAdapter
-import com.joesemper.fishing.domain.viewstates.MarkerDetailsViewState
-import com.joesemper.fishing.domain.UserCatchesViewModel
 import kotlinx.coroutines.flow.collect
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
@@ -59,7 +60,7 @@ class UserCatchesInnerFragment : Fragment(), AndroidScopeComponent {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentCatchesInnerBinding.inflate(inflater, container, false)
         return binding.root
@@ -104,14 +105,14 @@ class UserCatchesInnerFragment : Fragment(), AndroidScopeComponent {
         lifecycleScope.launchWhenStarted {
             viewModel.subscribe().collect { viewState ->
                 when (viewState) {
-                    is MarkerDetailsViewState.Loading -> {
+                    is BaseViewState.Loading -> {
 
                     }
-                    is MarkerDetailsViewState.Success -> {
-                        val catches = viewState.content
-                        adapter.addData(catches)
+                    is BaseViewState.Success<*> -> {
+                        val catches = viewState.data
+                        adapter.addData(catches as List<UserCatch>)
                     }
-                    is MarkerDetailsViewState.Error -> {
+                    is BaseViewState.Error -> {
                         val msg = viewState.error.message
                         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                     }

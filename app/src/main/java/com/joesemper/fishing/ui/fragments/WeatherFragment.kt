@@ -21,13 +21,13 @@ import com.google.android.gms.tasks.Task
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.android.material.transition.MaterialFadeThrough
 import com.joesemper.fishing.R
+import com.joesemper.fishing.databinding.FragmentWeatherBinding
+import com.joesemper.fishing.domain.WeatherViewModel
+import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
-import com.joesemper.fishing.databinding.FragmentWeatherBinding
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.view.weather.utils.getDateByMilliseconds
-import com.joesemper.fishing.domain.WeatherViewModel
-import com.joesemper.fishing.domain.viewstates.WeatherViewState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.channelFlow
@@ -67,7 +67,7 @@ class WeatherFragment : Fragment(), AndroidScopeComponent {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         binding = FragmentWeatherBinding.inflate(inflater, container, false)
         return binding.root
@@ -169,11 +169,11 @@ class WeatherFragment : Fragment(), AndroidScopeComponent {
     }
 
 
-    private fun renderData(weatherViewState: WeatherViewState) {
+    private fun renderData(weatherViewState: BaseViewState) {
         when (weatherViewState) {
-            is WeatherViewState.Success -> doOnSuccess(weatherViewState.data)
-            is WeatherViewState.Loading -> doOnLoading()
-            is WeatherViewState.Error -> doOnError(weatherViewState.error)
+            is BaseViewState.Success<*> -> doOnSuccess(weatherViewState.data as WeatherForecast?)
+            is BaseViewState.Loading -> doOnLoading()
+            is BaseViewState.Error -> doOnError(weatherViewState.error)
         }
     }
 
@@ -208,7 +208,7 @@ class WeatherFragment : Fragment(), AndroidScopeComponent {
 
     private inner class ScreenSlidePageAdapter(
         fm: FragmentManager,
-        lifecycle: Lifecycle
+        lifecycle: Lifecycle,
     ) : FragmentStateAdapter(fm, lifecycle) {
 
         override fun getItemCount(): Int = currentWeather.daily.size

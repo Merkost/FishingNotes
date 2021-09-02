@@ -26,12 +26,12 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.transition.MaterialSharedAxis
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.entity.raw.RawMapMarker
-import com.joesemper.fishing.model.entity.content.Content
-import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.databinding.FragmentMapBinding
 import com.joesemper.fishing.domain.MapViewModel
-import com.joesemper.fishing.domain.viewstates.MapViewState
+import com.joesemper.fishing.domain.viewstates.BaseViewState
+import com.joesemper.fishing.model.entity.content.Content
+import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.utils.AddNewMarkerListener
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.utils.PermissionUtils.isPermissionGranted
@@ -53,7 +53,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     private val logger: Logger by inject()
     private lateinit var binding: FragmentMapBinding
 
-            private var permissionDenied = false
+    private var permissionDenied = false
     private lateinit var map: GoogleMap
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
@@ -80,7 +80,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         binding = FragmentMapBinding.inflate(layoutInflater, container, false)
         return binding.root
@@ -108,8 +108,6 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
-//        val geocoder = Geocoder(requireContext())
-//        geocoder.getFromLocation(12.12, 12.12, 1).first().thoroughfare
         enableMyLocation()
         setOnMarkersClickListener()
         subscribeOnViewModel()
@@ -137,7 +135,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
             return
@@ -160,7 +158,9 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
                 val userMarker = mapMarkers.first { it.id == marker.tag }
                 MarkerDetailsDialogFragment.newInstance(userMarker)
                     .show(childFragmentManager, "Markers")
-            } catch (e: Exception) { onError(Throwable(e)) }
+            } catch (e: Exception) {
+                onError(Throwable(e))
+            }
             true
         }
     }
@@ -169,13 +169,13 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         lifecycleScope.launchWhenStarted {
             viewModel.subscribe().collect { viewState ->
                 when (viewState) {
-                    is MapViewState.Loading -> {
+                    is BaseViewState.Loading -> {
                         onLoading()
                     }
-                    is MapViewState.Success -> {
-                        onSuccess(viewState.content)
+                    is BaseViewState.Success<*> -> {
+                        onSuccess(content = viewState.data as Flow<Content>?)
                     }
-                    is MapViewState.Error -> {
+                    is BaseViewState.Error -> {
                         onError(viewState.error)
                     }
                 }
