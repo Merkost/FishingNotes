@@ -23,10 +23,10 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.tabs.TabLayoutMediator
-import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.databinding.FragmentMarkerDetailsBinding
 import com.joesemper.fishing.domain.MarkerDetailsViewModel
-import com.joesemper.fishing.domain.viewstates.MarkerDetailsViewState
+import com.joesemper.fishing.domain.viewstates.BaseViewState
+import com.joesemper.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.flow.collect
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
@@ -82,7 +82,7 @@ class MarkerDetailsDialogFragment : BottomSheetDialogFragment(), AndroidScopeCom
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         _binding = FragmentMarkerDetailsBinding.inflate(inflater, container, false)
         return binding.root
@@ -107,13 +107,13 @@ class MarkerDetailsDialogFragment : BottomSheetDialogFragment(), AndroidScopeCom
         lifecycleScope.launchWhenStarted {
             viewModel.subscribe(marker.id).collect { viewState ->
                 when (viewState) {
-                    is MarkerDetailsViewState.Loading -> {
+                    is BaseViewState.Loading -> {
                         binding.progressBarMarker.visibility = View.GONE
                     }
-                    is MarkerDetailsViewState.Success -> {
+                    is BaseViewState.Success<*> -> {
                         binding.progressBarMarker.visibility = View.GONE
                     }
-                    is MarkerDetailsViewState.Error -> {
+                    is BaseViewState.Error -> {
                         val msg = viewState.error.message
                         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                     }

@@ -23,16 +23,16 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.transition.MaterialFadeThrough
 import com.joesemper.fishing.R
-import com.joesemper.fishing.ui.adapters.AddNewPhotosAdapter
-import com.joesemper.fishing.ui.adapters.PhotosRecyclerViewItem
+import com.joesemper.fishing.databinding.FragmentNewCatchBinding
+import com.joesemper.fishing.domain.NewCatchViewModel
+import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawUserCatch
-import com.joesemper.fishing.databinding.FragmentNewCatchBinding
+import com.joesemper.fishing.ui.adapters.AddNewPhotosAdapter
+import com.joesemper.fishing.ui.adapters.PhotosRecyclerViewItem
 import com.joesemper.fishing.utils.NavigationHolder
 import com.joesemper.fishing.utils.format
 import com.joesemper.fishing.utils.roundTo
-import com.joesemper.fishing.domain.NewCatchViewModel
-import com.joesemper.fishing.domain.viewstates.NewCatchViewState
 import gun0912.tedbottompicker.TedBottomPicker
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
@@ -64,8 +64,9 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View { binding = FragmentNewCatchBinding.inflate(layoutInflater, container, false)
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
+    ): View {
+        binding = FragmentNewCatchBinding.inflate(layoutInflater, container, false)
         return binding.root
     }
 
@@ -90,9 +91,9 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         lifecycleScope.launchWhenStarted {
             viewModel.subscribe().collect { state ->
                 when (state) {
-                    is NewCatchViewState.Loading -> binding.loading.visibility = View.VISIBLE
-                    is NewCatchViewState.Success -> binding.loading.visibility = View.GONE
-                    is NewCatchViewState.Error -> {
+                    is BaseViewState.Loading -> binding.loading.visibility = View.VISIBLE
+                    is BaseViewState.Success<*> -> binding.loading.visibility = View.GONE
+                    is BaseViewState.Error -> {
                         binding.loading.visibility = View.GONE
                         Toast.makeText(context, state.error.message, Toast.LENGTH_SHORT).show()
                     }
