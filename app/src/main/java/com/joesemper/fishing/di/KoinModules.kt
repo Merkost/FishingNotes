@@ -20,7 +20,7 @@ val appModule = module {
     single<DatabaseProvider> { CloudFireStoreDatabaseImpl(get()) }
     single<AuthManager> { FirebaseAuthManagerImpl(androidContext()) }
     single<PhotoStorage> { CloudPhotoStorageImpl() }
-    single<UserContentRepository> {UserContentRepositoryImpl(get())}
+    single<UserContentRepository> { UserContentRepositoryImpl(get()) }
     single { Logger() }
 }
 
@@ -85,7 +85,12 @@ val weatherScreen = module {
         scoped<WeatherProvider> { WeatherRetrofitImplementation() }
         scoped<WeatherRepository> { WeatherRepositoryImpl(get(), get()) }
     }
+}
 
+val notesFragment = module {
+    scope(named<NotesFragment>()) {
+        viewModel { NotesViewModel(get()) }
+    }
 }
 
 

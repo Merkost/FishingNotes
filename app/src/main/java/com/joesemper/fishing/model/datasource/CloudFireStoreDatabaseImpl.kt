@@ -26,7 +26,7 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
     private val db = Firebase.firestore
 
     @ExperimentalCoroutinesApi
-    override fun getAllUserCatches() = channelFlow {
+    override fun getAllUserCatchesList() = channelFlow {
         val listeners = mutableListOf<ListenerRegistration>()
         listeners.add(
             getCatchesCollection()

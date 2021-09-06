@@ -8,15 +8,21 @@
         android:orderInCategory="10"/>
 
     <item
+        android:id="@+id/notesFragment"
+        android:title="@string/notes"
+        android:icon="@drawable/ic_baseline_list_24"
+        android:orderInCategory="20"/>
+
+    <item
         android:id="@+id/weatherFragment"
         android:title="@string/weather"
         android:icon="@drawable/ic_baseline_cloud_24"
-        android:orderInCategory="20"/>
+        android:orderInCategory="30"/>
 
     <item
         android:id="@+id/userFragment"
         android:title="@string/profile"
         android:icon="@drawable/ic_baseline_person_24"
-        android:orderInCategory="30"/>
+        android:orderInCategory="40"/>
 
 </menu>

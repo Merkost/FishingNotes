@@ -58,7 +58,8 @@
     <!--  Main navigation  -->
     <string name="map">Map</string>
     <string name="weather">Weather</string>
-    <string name="profile">profile</string>
+    <string name="profile">Profile</string>
+    <string name="notes">Notes</string>
     <string name="anonymous">Anonymous</string>
     <string name="fisher">Fisher</string>
 
