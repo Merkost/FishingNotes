@@ -2,51 +2,64 @@ package com.joesemper.fishing.ui.fragments
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
-import android.net.Uri
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
-import coil.transform.CircleCropTransformation
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.transition.MaterialFadeThrough
 import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.adapters.AddNewPhotosAdapter
+import com.joesemper.fishing.model.entity.raw.RawUserCatch
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import com.joesemper.fishing.utils.NavigationHolder
 import com.joesemper.fishing.utils.showToast
 import gun0912.tedbottompicker.TedBottomPicker
-import kotlinx.coroutines.*
+import kotlinx.coroutines.InternalCoroutinesApi
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.scope.Scope
 import java.util.*
+import android.provider.MediaStore
+
+import android.graphics.Bitmap
+import android.net.Uri
+import java.lang.Exception
 
 
 class NewCatchFragment : Fragment(), AndroidScopeComponent {
@@ -60,11 +73,10 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 
     companion object {
         private const val ITEM_ADD_PHOTO = "ITEM_ADD_PHOTO"
+        private const val ITEM_PHOTO = "ITEM_PHOTO"
     }
 
     private lateinit var marker: UserMapMarker
-
-    private lateinit var adapter: AddNewPhotosAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,83 +106,200 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     @Composable
     fun NewCatchScreen() {
         Scaffold(
-            topBar = { AppBar() },
-            content = {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .verticalScroll(ScrollState(0), enabled = true),
-                ) {
-                    Spacer(modifier = Modifier.size(16.dp))
-                    TextField("Заголовок")
-                    Spacer(modifier = Modifier.size(8.dp))
-                    TextField("Описание")
-                    Spacer(modifier = Modifier.size(8.dp))
-                    //Выпадающий список мест
-                    //Place()
-                    Spacer(modifier = Modifier.size(8.dp))
-                    TextField("Рыба")
-                    Spacer(modifier = Modifier.size(8.dp))
-                    TextField("Вес")
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Date()
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Time()
-                    Spacer(modifier = Modifier.size(8.dp))
-                    TextField("Удочка")
-                    Spacer(modifier = Modifier.size(8.dp))
-                    TextField("Блесна")
-                    Spacer(modifier = Modifier.size(8.dp))
-                    TextField("Наживка")
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Text(text = "Фото", modifier = Modifier.align(Alignment.Start))
-                    Photos() {
+            topBar = { AppBar() }) {
+            val scrollState = rememberScrollState()
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(state = scrollState, enabled = true),
+            ) {
+                val name = rememberSaveable { mutableStateOf("") }
+                val description = rememberSaveable { mutableStateOf("") }
+                val fish = rememberSaveable { mutableStateOf("") }
+                val weight = rememberSaveable { mutableStateOf(0.0) }
+                val date = rememberSaveable { mutableStateOf(setInitialDate()) }
+                val time = rememberSaveable { mutableStateOf(setInitialTime()) }
+                val rod = rememberSaveable { mutableStateOf("") }
+                val bite = rememberSaveable { mutableStateOf("") }
+                val lure = rememberSaveable { mutableStateOf("") }
+                Spacer(modifier = Modifier.size(4.dp))
+                Column {
+                    MyRequiredTextField(name, "Заголовок", name.value.isBlank())
+                    Spacer(modifier = Modifier.size(2.dp))
+                    Text(text = " *Required", fontSize = 12.sp)
+                }
+                MyTextField(description, "Описание")
+                //Выпадающий список мест
+                Place("Место")
+                MyTextField(fish, "Рыба")
+                Weight(weight)
+                Date(date)
+                Time(time)
+                MyTextField(rod, "Удочка")
+                MyTextField(bite, "Блесна")
+                MyTextField(lure, "Наживка")
+                Text(text = "Фото", modifier = Modifier.align(Alignment.Start))
+                Photos({ clicked ->
+                    if (clicked == ITEM_ADD_PHOTO) {
                         getPhotoListener().showMultiImage { photos ->
                             photos.forEach { uri ->
                                 viewModel.addPhoto(uri.toString())
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.size(8.dp))
+                }, { deleted ->
+                    viewModel.deletePhoto(deleted)
+                })
+                //Spacer(modifier = Modifier.size(8.dp))
+                SaveButton(
+                    name.value, description.value, fish.value, weight.value, date.value,
+                    time.value, rod.value, bite.value, lure.value
+                )
+            }
+        }
+    }
 
-
+    @Composable
+    fun SaveButton(
+        name: String,
+        description: String,
+        fish: String,
+        weight: Double,
+        date: String,
+        time: String,
+        rod: String,
+        bite: String,
+        lure: String
+    ) {
+        Row(horizontalArrangement = Arrangement.End) {
+            OutlinedButton(onClick = { findNavController().popBackStack() }) {
+                Text(text = "Cancel")
+            }
+            Spacer(modifier = Modifier.size(10.dp))
+            OutlinedButton(onClick = {
+                if (true) {
+                    val catch = createNewUserCatch(
+                        name, description, fish, weight, date,
+                        time, rod, bite, lure
+                    )
+                    viewModel.addNewCatch(catch)
+                    findNavController().popBackStack()
                 }
-            })
+            }) {
+                Text(text = "Create")
+            }
+        }
+        Spacer(modifier = Modifier.size(6.dp))
+    }
+
+    @Composable
+    fun Place(label: String) {
+        OutlinedTextField(
+            value = marker.title, onValueChange = { }, readOnly = true,
+            label = { Text(text = label) }, modifier = Modifier.fillMaxWidth()
+        )
+    }
+
+    @Composable
+    fun Weight(weightState: MutableState<Double>) {
+        Column {
+            OutlinedTextField(
+                value = weightState.value.toString(),
+                onValueChange = { weightState.value = it.toDouble() },
+                label = { Text(text = "Вес (кг)") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true, readOnly = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                )
+            )
+            Spacer(modifier = Modifier.size(6.dp))
+            Row(Modifier.fillMaxWidth()) {
+                OutlinedButton(
+                    onClick = { if (weightState.value > 0) weightState.value -= 0.5 },
+                    Modifier
+                        .weight(1F)
+                        .fillMaxHeight()
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(Icons.Default.Clear, contentDescription = "Minus")
+                }
+                Spacer(modifier = Modifier.size(6.dp))
+                OutlinedButton(
+                    onClick = { weightState.value += 0.5 },
+                    Modifier
+                        .weight(1F)
+                        .fillMaxHeight()
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Plus")
+                }
+            }
+        }
     }
 
     @ExperimentalFoundationApi
     @Composable
-    fun Photos(clickedPhoto: (Int)->Unit) {
+    fun Photos(clickedPhoto: (String) -> Unit, deletedPhoto: (String) -> Unit) {
         val photos = remember { viewModel.images }
         LazyRow(/*cells = GridCells.Fixed(2), */modifier = Modifier.fillMaxSize()) {
             items(
                 items = photos,
                 itemContent = {
-                    PhotoItem(photo = it, selectedPhoto = clickedPhoto)
+                    PhotoItem(photo = it, selectedPhoto = clickedPhoto, deletedPhoto = deletedPhoto)
                 })
         }
-
     }
 
     @Composable
-    fun PhotoItem(photo: String, selectedPhoto: (Int) -> Unit) {
-        Card(modifier = Modifier
-            .size(150.dp)
-            .clickable { selectedPhoto(photo.length) }, elevation = 8.dp) {
-            if(photo == ITEM_ADD_PHOTO)
-                Image(painter = painterResource(R.drawable.ic_baseline_plus),
-                    contentDescription = ITEM_ADD_PHOTO,
-                    modifier = Modifier.size(10.dp))
-            else
-                Image(painter = rememberImagePainter(
-                    data = photo,
+    fun PhotoItem(photo: String, selectedPhoto: (String) -> Unit, deletedPhoto: (String) -> Unit) {
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .padding(4.dp)
+        ) {
+            if (photo == ITEM_ADD_PHOTO)
+                Card(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable { selectedPhoto(photo) }, elevation = 5.dp,
+                    backgroundColor = Color.LightGray
+                ) {
+                    Icon(
+                        Icons.Default.Add, contentDescription = ITEM_ADD_PHOTO, tint = Color.White,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .align(Alignment.Center)
+                    )
+                }
+            else {
+                Image(
+                    painter = rememberImagePainter(
+                        data = photo/*,
                     builder = {
                         transformations(CircleCropTransformation())
-                    }),
-                    contentDescription = ITEM_ADD_PHOTO,
-                    modifier = Modifier.size(10.dp))
+                    }*/
+                    ),
+                    contentDescription = ITEM_PHOTO,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Icon(
+                    Icons.Default.Close,
+                    tint = Color.White,
+                    contentDescription = "DELETE",
+                    modifier = Modifier
+                        .size(30.dp)
+                        .align(Alignment.TopEnd)
+                        .padding(3.dp)
+                        .clip(CircleShape)
+                        .clickable { deletedPhoto(photo) }
+                )
+            }
         }
     }
 
@@ -200,17 +329,31 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 //    }
 
     @Composable
-    fun TextField(label: String) {
-        var value by remember { mutableStateOf("") }
+    fun MyTextField(textState: MutableState<String>, label: String) {
         OutlinedTextField(
-            value = value, onValueChange = { value = it },
-            label = { Text(text = label) }, modifier = Modifier.fillMaxWidth()
+            value = textState.value,
+            onValueChange = { textState.value = it },
+            label = { Text(text = label) },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next
+            )
         )
     }
 
     @Composable
-    fun Time() {
-        val timeState = remember { mutableStateOf(setInitialTime()) }
+    fun MyRequiredTextField(textState: MutableState<String>, label: String, isError: Boolean) {
+        OutlinedTextField(
+            value = textState.value,
+            onValueChange = { textState.value = it },
+            label = { Text(text = label) },
+            modifier = Modifier.fillMaxWidth(),
+            isError = isError
+        )
+    }
+
+    @Composable
+    fun Time(timeState: MutableState<String>) {
         OutlinedTextField(value = timeState.value, onValueChange = {},
             label = { Text(text = "Время") }, readOnly = true, modifier = Modifier
                 .fillMaxWidth()
@@ -224,8 +367,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     }
 
     @Composable
-    fun Date() {
-        val dateState = remember { mutableStateOf(setInitialDate()) }
+    fun Date(dateState: MutableState<String>) {
         OutlinedTextField(value = dateState.value, onValueChange = {},
             label = { Text(text = "Дата") }, readOnly = true, modifier = Modifier
                 .fillMaxWidth()
@@ -253,13 +395,6 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
             elevation = 2.dp
         )
     }
-
-//    override fun onCreateView(
-//        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
-//    ): View {
-//        binding = FragmentNewCatchBinding.inflate(layoutInflater, container, false)
-//        return binding.root
-//    }
 
 //    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 //        super.onViewCreated(view, savedInstanceState)
@@ -293,22 +428,6 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 //        }
 //    }
 
-//    private fun initViews() {
-//        initToolbar()
-//        initBottomDialog()
-//    }
-//
-//    private fun setInitialData() {
-//        setInitialTimeAndDate()
-//        setInitialPlaceData()
-//    }
-//
-//    private fun setOnClickListeners() {
-//        setOnIncrementDecrementClickListeners()
-//        setOnCreateClickListener()
-//        setOnCloseClickListeners()
-//    }
-
 //    private fun initRV() {
 //        adapter = AddNewPhotosAdapter { item ->
 //            when (item) {
@@ -336,24 +455,18 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 //        (requireActivity() as AppCompatActivity).setSupportActionBar(binding.toolbarNewCatch)
 //    }
 
-    private fun initBottomDialog() {
-        (requireActivity() as NavigationHolder).closeNav()
-        val bottomSheetBehavior = BottomSheetBehavior.from(
-            requireActivity().findViewById(R.id.bottomSheet)
-        )
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-    }
+//    private fun initBottomDialog() {
+//        (requireActivity() as NavigationHolder).closeNav()
+//        val bottomSheetBehavior = BottomSheetBehavior.from(
+//            requireActivity().findViewById(R.id.bottomSheet)
+//        )
+//        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+//    }
 
 //    private fun setInitialPlaceData() {
 //        binding.etNewCatchPlaceTitle.setText(marker.title)
 //        binding.etNewCatchPlaceTitle.inputType = InputType.TYPE_NULL
 //        setCurrentCoordinates()
-//    }
-
-//    private fun setInitialTimeAndDate() {
-//        setInitialDate()
-//        setInitialTime()
-//        setOnEditTimeAndDateClickListeners()
 //    }
 
     private fun getPhotoListener() =
@@ -457,40 +570,49 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         )
 
 
-//    private fun isInputCorrect(): Boolean {
+//    private fun isInputCorrect(title: String, fish: String): Boolean {
 //        var isCorrect = true
 //        if (binding.etNewCatchTitle.text.isNullOrBlank()) {
 //            binding.textInputLayoutNewCatchTitle.error = "Enter title"
 //            isCorrect = false
 //        }
-//        if (binding.etNewCatchKindOfFish.text.isNullOrBlank()) {
-//            binding.textInputLayoutNewCatchKindOfFish.error = "Enter kind of fish"
+//        if (fish.isNullOrBlank()) {
+//            fish = "Enter kind of fish"
 //            isCorrect = false
 //        }
 //        return isCorrect
 //    }
 
-//    private fun createNewUserCatch() = RawUserCatch(
-//        title = binding.etNewCatchTitle.text.toString(),
-//        description = binding.etNewCatchDescription.text.toString(),
-//        time = binding.etNewCatchTime.text.toString(),
-//        date = binding.etNewCatchDate.text.toString(),
-//        fishType = binding.etNewCatchKindOfFish.text.toString(),
-//        fishAmount = binding.etNewCatchAmount.text.toString().toInt(),
-//        fishWeight = binding.etNewCatchAmount.text.toString().toDouble(),
-//        fishingRodType = binding.etNewCatchRod.text.toString(),
-//        fishingBait = binding.etNewCatchBait.text.toString(),
-//        fishingLure = binding.etNewCatchLure.text.toString(),
-//        markerId = marker.id,
-//        isPublic = binding.switchPublishCatch.isChecked,
-//        photos = getPhotos()
-//    )
+    private fun createNewUserCatch(
+        title: String, description: String, fish: String,
+        weight: Double, date: String, time: String,
+        rod: String, bite: String, lure: String
+    ) = RawUserCatch(
+        title = title,
+        description = description,
+        time = time,
+        date = date,
+        fishType = fish,
+//        fishAmount = fish.toInt(),
+        fishWeight = weight,
+        fishingRodType = rod,
+        fishingBait = bite,
+        fishingLure = lure,
+        markerId = marker.id,
+        isPublic = false,
+        photos = getPhotos()
+    )
 
 
     private fun getPhotos(): List<ByteArray> {
 
         val result = mutableListOf<ByteArray>()
         return result
+//        try {
+//            val bitmap = MediaStore.Images.Media.getBitmap(c.getContentResolver(), Uri.parse(paths))
+//        } catch (e: Exception) {
+//            //handle exception
+//        }
 //        return coroutineScope {
 //            val job = launch {
 //                try {

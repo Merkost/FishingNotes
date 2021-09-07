@@ -27,10 +27,9 @@ class NewCatchViewModel(private val repository: UserContentRepository) : ViewMod
         images.add(uri)
     }
 
-//    fun deletePhoto(item: ) {
-//        data.remove(item)
-//        notifyDataSetChanged()
-//    }
+    fun deletePhoto(uri: String) {
+        images.remove(uri)
+    }
 
     private val viewStateFlow: MutableStateFlow<BaseViewState> =
         MutableStateFlow(BaseViewState.Success(null))
