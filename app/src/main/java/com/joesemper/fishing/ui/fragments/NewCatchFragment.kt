@@ -9,7 +9,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -19,10 +21,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,11 +54,6 @@ import org.koin.androidx.scope.fragmentScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.scope.Scope
 import java.util.*
-import android.provider.MediaStore
-
-import android.graphics.Bitmap
-import android.net.Uri
-import java.lang.Exception
 
 
 class NewCatchFragment : Fragment(), AndroidScopeComponent {
@@ -119,7 +113,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 val name = rememberSaveable { mutableStateOf("") }
                 val description = rememberSaveable { mutableStateOf("") }
                 val fish = rememberSaveable { mutableStateOf("") }
-                val weight = rememberSaveable { mutableStateOf(0.0) }
+                val weight = rememberSaveable { mutableStateOf("0") }
                 val date = rememberSaveable { mutableStateOf(setInitialDate()) }
                 val time = rememberSaveable { mutableStateOf(setInitialTime()) }
                 val rod = rememberSaveable { mutableStateOf("") }
@@ -159,6 +153,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                     time.value, rod.value, bite.value, lure.value
                 )
             }
+
         }
     }
 
@@ -167,7 +162,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         name: String,
         description: String,
         fish: String,
-        weight: Double,
+        weight: String,
         date: String,
         time: String,
         rod: String,
@@ -180,12 +175,15 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
             }
             Spacer(modifier = Modifier.size(10.dp))
             OutlinedButton(onClick = {
-                if (true) {
+                if (isInputCorrect(name)) {
                     val catch = createNewUserCatch(
                         name, description, fish, weight, date,
                         time, rod, bite, lure
                     )
                     viewModel.addNewCatch(catch)
+//                    when(viewModel.subscribe().collectAsState()) { TODO
+//
+//                    }
                     findNavController().popBackStack()
                 }
             }) {
@@ -204,41 +202,55 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     }
 
     @Composable
-    fun Weight(weightState: MutableState<Double>) {
+    fun Weight(weightState: MutableState<String>) {
         Column {
             OutlinedTextField(
-                value = weightState.value.toString(),
-                onValueChange = { weightState.value = it.toDouble() },
+                value = weightState.value,
+                onValueChange = {
+                    if (it.isEmpty()) weightState.value = it
+                    else {
+                        weightState.value = when (it.toDoubleOrNull()) {
+                            null -> weightState.value //old value
+                            else -> it   //new value
+                        }
+                    }
+                },
                 label = { Text(text = "Вес (кг)") },
+                trailingIcon = {
+                    if (weightState.value.isNotBlank()) IconButton(
+                        content = { Icon(Icons.Default.Clear, contentDescription = "Minus") },
+                        onClick = { weightState.value = "" }
+                    )
+                },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true, readOnly = true,
+                singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Next
                 )
             )
-            Spacer(modifier = Modifier.size(6.dp))
-            Row(Modifier.fillMaxWidth()) {
-                OutlinedButton(
-                    onClick = { if (weightState.value > 0) weightState.value -= 0.5 },
-                    Modifier
-                        .weight(1F)
-                        .fillMaxHeight()
-                        .align(Alignment.CenterVertically)
-                ) {
-                    Icon(Icons.Default.Clear, contentDescription = "Minus")
-                }
-                Spacer(modifier = Modifier.size(6.dp))
-                OutlinedButton(
-                    onClick = { weightState.value += 0.5 },
-                    Modifier
-                        .weight(1F)
-                        .fillMaxHeight()
-                        .align(Alignment.CenterVertically)
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Plus")
-                }
-            }
+//            Spacer(modifier = Modifier.size(6.dp))
+//            Row(Modifier.fillMaxWidth()) {
+//                OutlinedButton(
+//                    onClick = { if (weightState.value.toDouble() > 0) weightState.value.toD -= 0.5 },
+//                    Modifier
+//                        .weight(1F)
+//                        .fillMaxHeight()
+//                        .align(Alignment.CenterVertically)
+//                ) {
+//                    Icon(Icons.Default.Clear, contentDescription = "Minus")
+//                }
+//                Spacer(modifier = Modifier.size(6.dp))
+//                OutlinedButton(
+//                    onClick = { weightState.value += 0.5 },
+//                    Modifier
+//                        .weight(1F)
+//                        .fillMaxHeight()
+//                        .align(Alignment.CenterVertically)
+//                ) {
+//                    Icon(Icons.Default.Add, contentDescription = "Plus")
+//                }
+//            }
         }
     }
 
@@ -570,22 +582,13 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         )
 
 
-//    private fun isInputCorrect(title: String, fish: String): Boolean {
-//        var isCorrect = true
-//        if (binding.etNewCatchTitle.text.isNullOrBlank()) {
-//            binding.textInputLayoutNewCatchTitle.error = "Enter title"
-//            isCorrect = false
-//        }
-//        if (fish.isNullOrBlank()) {
-//            fish = "Enter kind of fish"
-//            isCorrect = false
-//        }
-//        return isCorrect
-//    }
+    private fun isInputCorrect(title: String, fish: String): Boolean {
+        return title.isNotBlank()
+    }
 
     private fun createNewUserCatch(
         title: String, description: String, fish: String,
-        weight: Double, date: String, time: String,
+        weight: String, date: String, time: String,
         rod: String, bite: String, lure: String
     ) = RawUserCatch(
         title = title,
@@ -594,7 +597,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         date = date,
         fishType = fish,
 //        fishAmount = fish.toInt(),
-        fishWeight = weight,
+        fishWeight = weight.toDouble(),
         fishingRodType = rod,
         fishingBait = bite,
         fishingLure = lure,
