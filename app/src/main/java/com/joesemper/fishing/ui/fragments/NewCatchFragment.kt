@@ -2,6 +2,7 @@ package com.joesemper.fishing.ui.fragments
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.net.Uri
 import android.os.Bundle
 import android.text.format.DateUtils
 import android.view.LayoutInflater
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import coil.annotation.ExperimentalCoilApi
@@ -582,7 +584,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         )
 
 
-    private fun isInputCorrect(title: String, fish: String): Boolean {
+    private fun isInputCorrect(title: String): Boolean {
         return title.isNotBlank()
     }
 
@@ -610,7 +612,17 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     private fun getPhotos(): List<ByteArray> {
 
         val result = mutableListOf<ByteArray>()
+        val job = lifecycle.coroutineScope.launchWhenStarted {
+
+        }
+        viewModel.images.forEach {
+            if (it != ITEM_ADD_PHOTO) requireActivity().contentResolver.openInputStream(
+                Uri.parse(it))?.readBytes()?.let { it1 -> result.add(it1) }
+
+        }
+
         return result
+
 //        try {
 //            val bitmap = MediaStore.Images.Media.getBitmap(c.getContentResolver(), Uri.parse(paths))
 //        } catch (e: Exception) {
