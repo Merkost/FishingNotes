@@ -239,7 +239,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     }
 
     @Composable
-    fun FishAndWeight(weightState: MutableState<String>, fishState: MutableState<String>) {
+    fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<String>) {
         Column {
             Row(
                 modifier = Modifier.align(Alignment.Start),
