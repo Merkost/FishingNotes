@@ -96,6 +96,7 @@
     <string name="permission_denied_message">Не получено необходимое для работы разрешение. Пожалуйста, дайте разрешения приложению в настройках приложения.</string>
     <string name="goto_app_settings">Перейти в настройки</string>
     <string name="not_all_fields_are_filled">Не все поля были заполнены, пожалуйста, проверьте!</string>
+    <string name="navigate">Маршрут</string>
 
 
 </resources>

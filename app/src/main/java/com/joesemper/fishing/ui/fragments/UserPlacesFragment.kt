@@ -7,9 +7,11 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.joesemper.fishing.databinding.FragmentPlacesBinding
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.ui.adapters.CatchRecyclerViewItem
 import com.joesemper.fishing.ui.adapters.PlaceRecyclerViewItem
 import com.joesemper.fishing.ui.adapters.UserPlacesRVAdapter
 
@@ -60,10 +62,16 @@ class UserPlacesFragment : Fragment() {
         adapter = UserPlacesRVAdapter { item ->
             when (item) {
                 is PlaceRecyclerViewItem.ItemAddNewPlace -> {
-                    Toast.makeText(requireContext(), "Add new place\nWork in progress", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(),
+                        "Add new place\nWork in progress",
+                        Toast.LENGTH_SHORT).show()
                 }
                 is PlaceRecyclerViewItem.ItemUserPlace -> {
-                    Toast.makeText(requireContext(), "${item.place.title}\nWork in progress", Toast.LENGTH_SHORT).show()
+                    val action =
+                        NotesFragmentDirections.actionNotesFragmentToUserPlaceFragment(
+                            item.place
+                        )
+                    findNavController().navigate(action)
                 }
             }
 

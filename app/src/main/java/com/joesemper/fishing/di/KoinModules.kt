@@ -93,4 +93,8 @@ val notesFragment = module {
     }
 }
 
-
+val userPlaceFragment = module {
+    scope(named<UserPlaceFragment>()) {
+        viewModel { UserPlaceViewModel(get()) }
+    }
+}
