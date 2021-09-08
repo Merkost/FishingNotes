@@ -158,7 +158,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
             OutlinedButton(onClick = {
                 if (viewModel.createNewUserCatch(getPhotos()))
                     findNavController().popBackStack()
-                else showToast(requireContext(), stringResource(R.string.not_all_fields_are_filled))
+                else showToast(requireContext(), getString(R.string.not_all_fields_are_filled))
 
                 lifecycleScope.launchWhenCreated {
                     when (viewModel.subscribe().collect { }) {
