@@ -76,5 +76,18 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="permissions_required">Необходимы разрешения</string>
+    <string name="plus">+</string>
+    <string name="minus">-</string>
+    <string name="delete_photo">Delete photo</string>
+    <string name="add_photo_permission">Для загрузки фотографий приложению необходим доступ к памяти телефона</string>
+    <string name="deny">Отказать</string>
+    <string name="provide">Предоставить</string>
+    <string name="click_on_icon_to_change">Click on the icon to change!</string>
+    <string name="no_photo_selected">No photo selected</string>
+    <string name="permission_denied">Permission Denied</string>
+    <string name="permission_denied_message">Permission is denied, Please allow permissions from App Settings.</string>
+    <string name="goto_app_settings">App Settings</string>
+    <string name="not_all_fields_are_filled">Not all fields are filled in. Please, double check</string>
 
 </resources>

@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.joesemper.fishing.MainActivity
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.domain.SplashViewModel

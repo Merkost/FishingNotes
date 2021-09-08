@@ -30,7 +30,7 @@
     <string name="include_weather">Сохранить погоду</string>
     <string name="publish_catch">Опубликовать улов</string>
     <string name="create">Создать</string>
-    <string name="cancel">Закрыть</string>
+    <string name="cancel">Отменить</string>
     <string name="lure">Подкормка</string>
     <string name="pictures">Фотографии</string>
     <string name="current">Current</string>
@@ -61,7 +61,20 @@
     <string name="settings">Настройки</string>
     <string name="logout">Выйти</string>
     <string name="anonymous">Anonymous</string>
-    <string name="fisher">Fisher</string>
+    <string name="fisher">Рыбак</string>
+    <string name="permissions_required">Необходимы разрешения</string>
+    <string name="plus">+</string>
+    <string name="minus">-</string>
+    <string name="delete_photo">Удалить фото</string>
+    <string name="add_photo_permission">Для загрузки фотографий приложению необходим доступ к памяти телефона</string>
+    <string name="deny">Отказать</string>
+    <string name="provide">Предоставить</string>
+    <string name="click_on_icon_to_change">Нажмите на иконку для изменения!</string>
+    <string name="no_photo_selected">Фото не выбрано</string>
+    <string name="permission_denied">" В разрешении отказано"</string>
+    <string name="permission_denied_message">Не получено необходимое для работы разрешение. Пожалуйста, дайте разрешения приложению в настройках приложения.</string>
+    <string name="goto_app_settings">Перейти в настройки</string>
+    <string name="not_all_fields_are_filled">Не все поля были заполнены, пожалуйста, проверьте!</string>
 
 
 </resources>
