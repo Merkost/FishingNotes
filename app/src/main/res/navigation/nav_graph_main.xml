@@ -16,9 +16,6 @@
             android:id="@+id/action_mapFragment_to_newCatchDialogFragment"
             app:destination="@id/newCatchDialogFragment" />
         <action
-            android:id="@+id/action_mapFragment_to_userCatchFragment"
-            app:destination="@id/userCatchFragment" />
-        <action
             android:id="@+id/action_mapFragment_to_userFragment"
             app:destination="@id/userFragment" />
         <action
@@ -61,6 +58,14 @@
     <fragment
         android:id="@+id/notesFragment"
         android:name="com.joesemper.fishing.ui.fragments.NotesFragment"
-        android:label="NotesFragment" />
+        android:label="NotesFragment" >
+        <action
+            android:id="@+id/action_notesFragment_to_userCatchFragment"
+            app:destination="@id/userCatchFragment" />
+        <action
+            android:id="@+id/action_notesFragment_to_newCatchDialogFragment"
+            app:destination="@id/newCatchDialogFragment" />
+    </fragment>
+
 
 </navigation>
