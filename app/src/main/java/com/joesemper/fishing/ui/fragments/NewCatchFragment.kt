@@ -10,17 +10,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -31,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -47,10 +44,10 @@ import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawUserCatch
 import com.joesemper.fishing.ui.theme.FigmaTheme
+import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.utils.NavigationHolder
 import com.joesemper.fishing.utils.showToast
 import gun0912.tedbottompicker.TedBottomPicker
-import kotlinx.coroutines.InternalCoroutinesApi
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -79,10 +76,8 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         marker = args.marker as UserMapMarker
     }
 
-    @ExperimentalFoundationApi
-    @InternalCoroutinesApi
-    @ExperimentalCoilApi
     @ExperimentalMaterialApi
+    @ExperimentalCoilApi
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -95,8 +90,6 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         }
     }
 
-    @ExperimentalFoundationApi
-    @InternalCoroutinesApi
     @ExperimentalMaterialApi
     @ExperimentalCoilApi
     @Composable
@@ -104,6 +97,8 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         Scaffold(
             topBar = { AppBar() }) {
             val scrollState = rememberScrollState()
+            val scaffoldState = rememberBottomSheetScaffoldState()
+
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -112,82 +107,101 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                     .padding(horizontal = 16.dp)
                     .verticalScroll(state = scrollState, enabled = true),
             ) {
+                BottomSheet(scaffoldState)
                 val name = rememberSaveable { mutableStateOf("") }
                 val description = rememberSaveable { mutableStateOf("") }
-                val fish = rememberSaveable { mutableStateOf("") }
-                val weight = rememberSaveable { mutableStateOf("0") }
+                val fish = rememberSaveable { mutableStateOf("0") }
+                val weight = rememberSaveable { mutableStateOf("0.0") }
                 val date = rememberSaveable { mutableStateOf(setInitialDate()) }
                 val time = rememberSaveable { mutableStateOf(setInitialTime()) }
                 val rod = rememberSaveable { mutableStateOf("") }
                 val bite = rememberSaveable { mutableStateOf("") }
                 val lure = rememberSaveable { mutableStateOf("") }
-                Spacer(modifier = Modifier.size(4.dp))
-                Column {
-                    MyRequiredTextField(name, "Заголовок", name.value.isBlank())
-                    Spacer(modifier = Modifier.size(2.dp))
-                    Text(text = " *Required", fontSize = 12.sp)
-                }
+                Title(name)
                 MyTextField(description, "Описание")
                 //Выпадающий список мест
                 Place("Место")
-                MyTextField(fish, "Рыба")
-                Weight(weight)
-                Date(date)
-                Time(time)
-                MyTextField(rod, "Удочка")
-                MyTextField(bite, "Блесна")
-                MyTextField(lure, "Наживка")
-                Text(text = "Фото", modifier = Modifier.align(Alignment.Start))
-                Photos({ clicked ->
-                    if (clicked == ITEM_ADD_PHOTO) {
-                        getPhotoListener().showMultiImage { photos ->
-                            photos.forEach { uri ->
-                                viewModel.addPhoto(uri.toString())
-                            }
-                        }
-                    }
-                }, { deleted ->
-                    viewModel.deletePhoto(deleted)
-                })
-                //Spacer(modifier = Modifier.size(8.dp))
-                SaveButton(
-                    name.value, description.value, fish.value, weight.value, date.value,
-                    time.value, rod.value, bite.value, lure.value
-                )
+                DateAndTime(date, time)
+                Spacer(modifier = Modifier.size(4.dp))
+                FishAndWeight(fish, weight)
+
+                Spacer(modifier = Modifier.size(4.dp))
+                Fishing(rod, bite, lure)
+
+                Photos(
+                    { clicked -> /*TODO(Open photo in full screen)*/ },
+                    { deleted -> viewModel.deletePhoto(deleted) })
+
+//                SaveButton(
+//                    name.value, description.value, fish.value, weight.value, date.value,
+//                    time.value, rod.value, bite.value, lure.value
+//                )
             }
 
         }
     }
 
+    @ExperimentalMaterialApi
+    @Composable
+    private fun BottomSheet(scaffoldState: BottomSheetScaffoldState) {
+
+        BottomSheetScaffold(sheetContent = {
+
+            OutlinedButton(onClick = { findNavController().popBackStack() }) {
+                Text(text = "Cancel")
+            }
+        }
+        ){}
+    }
+
+    @Composable
+    fun Title(nameState: MutableState<String>) {
+        Spacer(modifier = Modifier.size(4.dp))
+        Column {
+            OutlinedTextField(
+                value = nameState.value,
+                onValueChange = { nameState.value = it },
+                label = { Text("Заголовок") },
+                modifier = Modifier.fillMaxWidth(),
+                isError = nameState.value.isBlank()
+            )
+            Spacer(modifier = Modifier.size(2.dp))
+            Text(text = " *Required", fontSize = 12.sp)
+        }
+    }
+
     @Composable
     fun SaveButton(
-        name: String,
-        description: String,
-        fish: String,
-        weight: String,
-        date: String,
-        time: String,
-        rod: String,
-        bite: String,
-        lure: String
-    ) {
-        Row(horizontalArrangement = Arrangement.End) {
+//        name: String,
+//        description: String,
+//        fish: String,
+//        weight: String,
+//        date: String,
+//        time: String,
+//        rod: String,
+//        bite: String,
+//        lure: String
+    ): @Composable() (ColumnScope.() -> Unit) = {
+        Row(
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             OutlinedButton(onClick = { findNavController().popBackStack() }) {
                 Text(text = "Cancel")
             }
             Spacer(modifier = Modifier.size(10.dp))
             OutlinedButton(onClick = {
-                if (isInputCorrect(name)) {
-                    val catch = createNewUserCatch(
-                        name, description, fish, weight, date,
-                        time, rod, bite, lure
-                    )
-                    viewModel.addNewCatch(catch)
-//                    when(viewModel.subscribe().collectAsState()) { TODO
-//
-//                    }
-                    findNavController().popBackStack()
-                }
+//                if (isInputCorrect(name)) {
+//                    /*val catch = createNewUserCatch(
+//                        name, description, fish, weight, date,
+//                        time, rod, bite, lure
+//                    )
+//                    viewModel.addNewCatch(catch)
+////                    when(viewModel.subscribe().collectAsState()) { TODO
+////
+////                    }
+//                    findNavController().popBackStack()*/
+//                }
             }) {
                 Text(text = "Create")
             }
@@ -204,115 +218,219 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     }
 
     @Composable
-    fun Weight(weightState: MutableState<String>) {
+    fun Fishing(rod: MutableState<String>, bite: MutableState<String>, lure: MutableState<String>) {
         Column {
-            OutlinedTextField(
-                value = weightState.value,
-                onValueChange = {
-                    if (it.isEmpty()) weightState.value = it
-                    else {
-                        weightState.value = when (it.toDoubleOrNull()) {
-                            null -> weightState.value //old value
-                            else -> it   //new value
-                        }
-                    }
-                },
-                label = { Text(text = "Вес (кг)") },
-                trailingIcon = {
-                    if (weightState.value.isNotBlank()) IconButton(
-                        content = { Icon(Icons.Default.Clear, contentDescription = "Minus") },
-                        onClick = { weightState.value = "" }
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Next
+            Row(
+                modifier = Modifier.align(Alignment.Start),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(Modifier.size(5.dp))
+                Icon(
+                    painterResource(R.drawable.ic_fishing_rod), "Удочка",
+                    modifier = Modifier.size(30.dp), tint = primaryFigmaColor
                 )
-            )
-//            Spacer(modifier = Modifier.size(6.dp))
-//            Row(Modifier.fillMaxWidth()) {
-//                OutlinedButton(
-//                    onClick = { if (weightState.value.toDouble() > 0) weightState.value.toD -= 0.5 },
-//                    Modifier
-//                        .weight(1F)
-//                        .fillMaxHeight()
-//                        .align(Alignment.CenterVertically)
-//                ) {
-//                    Icon(Icons.Default.Clear, contentDescription = "Minus")
-//                }
-//                Spacer(modifier = Modifier.size(6.dp))
-//                OutlinedButton(
-//                    onClick = { weightState.value += 0.5 },
-//                    Modifier
-//                        .weight(1F)
-//                        .fillMaxHeight()
-//                        .align(Alignment.CenterVertically)
-//                ) {
-//                    Icon(Icons.Default.Add, contentDescription = "Plus")
-//                }
-//            }
+                Spacer(Modifier.size(8.dp))
+                Text(stringResource(R.string.fishing_method))
+            }
+            MyTextField(rod, "Удочка")
+            MyTextField(bite, "Блесна")
+            MyTextField(lure, "Наживка")
         }
     }
 
-    @ExperimentalFoundationApi
     @Composable
-    fun Photos(clickedPhoto: (String) -> Unit, deletedPhoto: (String) -> Unit) {
+    fun FishAndWeight(weightState: MutableState<String>, fishState: MutableState<String>) {
+        Column {
+            Row(
+                modifier = Modifier.align(Alignment.Start),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painterResource(R.drawable.ic_fish),
+                    "Рыба",
+                    tint = primaryFigmaColor,
+                    modifier = Modifier.size(30.dp)
+                )
+                Spacer(Modifier.size(8.dp))
+                Text(stringResource(R.string.fish_catch))
+            }
+            Row {
+                Column(Modifier.weight(1F)) {
+                    OutlinedTextField(
+                        value = fishState.value,
+                        onValueChange = {
+                            if (it.isEmpty()) fishState.value = it
+                            else {
+                                fishState.value = when (it.toIntOrNull()) {
+                                    null -> fishState.value //old value
+                                    else -> it   //new value
+                                }
+                            }
+                        },
+                        isError = fishState.value.isEmpty(),
+                        label = { Text(text = "Кол-во рыбы") },
+                        trailingIcon = { Text("PC.") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next
+                        )
+                    )
+                    Spacer(modifier = Modifier.size(6.dp))
+                    Row(Modifier.fillMaxWidth()) {
+                        OutlinedButton(
+                            onClick = {
+                                if (fishState.value.toInt() >= 1 && fishState.value.isNotBlank())
+                                    fishState.value = ((fishState.value.toInt() - 1).toString())
+                            },
+                            Modifier.weight(1F).fillMaxHeight().align(Alignment.CenterVertically)
+                        ) { Text("-") }
+                        Spacer(modifier = Modifier.size(6.dp))
+                        OutlinedButton(
+                            onClick = {
+                                if (fishState.value.isEmpty()) fishState.value = 1.toString()
+                                else fishState.value = ((fishState.value.toInt() + 1).toString())
+                            },
+                            Modifier.weight(1F).fillMaxHeight().align(Alignment.CenterVertically)
+                        ) { Text("+") }
+                    }
+
+                }
+                Spacer(modifier = Modifier.size(6.dp))
+                Column(Modifier.weight(1F)) {
+                    OutlinedTextField(
+                        value = weightState.value,
+                        onValueChange = {
+                            if (it.isEmpty()) weightState.value = it
+                            else {
+                                weightState.value = when (it.toDoubleOrNull()) {
+                                    null -> weightState.value //old value
+                                    else -> it   //new value
+                                }
+                            }
+                        },
+                        label = { Text(text = "Вес") },
+                        trailingIcon = {
+                            Text("KG.")
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next
+                        )
+                    )
+                    Spacer(modifier = Modifier.size(6.dp))
+                    Row(Modifier.fillMaxWidth()) {
+                        OutlinedButton(
+                            onClick = {
+                                if (weightState.value.toDouble() >= 0.5 && weightState.value.isNotBlank())
+                                    weightState.value =
+                                        ((weightState.value.toDouble() - 0.5).toString())
+                            },
+                            Modifier.weight(1F).fillMaxHeight().align(Alignment.CenterVertically)
+                        ) { Text("_") }
+                        Spacer(modifier = Modifier.size(6.dp))
+                        OutlinedButton(
+                            onClick = {
+                                if (weightState.value.isEmpty()) weightState.value = 0.5f.toString()
+                                else weightState.value =
+                                    ((weightState.value.toDouble() + 0.5).toString())
+                            },
+                            Modifier.weight(1F).fillMaxHeight().align(Alignment.CenterVertically)
+                        ) { Text("+") }
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun Photos(
+        clickedPhoto: (String) -> Unit,
+        deletedPhoto: (String) -> Unit
+    ) {
         val photos = remember { viewModel.images }
-        LazyRow(/*cells = GridCells.Fixed(2), */modifier = Modifier.fillMaxSize()) {
-            items(
-                items = photos,
-                itemContent = {
-                    PhotoItem(photo = it, selectedPhoto = clickedPhoto, deletedPhoto = deletedPhoto)
-                })
+        Column {
+            Row(
+                modifier = Modifier.align(Alignment.Start),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(Modifier.size(5.dp))
+                Icon(
+                    painterResource(R.drawable.ic_baseline_image_24), "Фото",
+                    modifier = Modifier.size(30.dp), tint = primaryFigmaColor
+                )
+                Spacer(Modifier.size(8.dp))
+                Text(stringResource(R.string.photos))
+            }
+            LazyRow(/*cells = GridCells.Fixed(2), */modifier = Modifier.fillMaxSize()) {
+                item { ItemAddPhoto() }
+                items(
+                    items = photos,
+                    itemContent = {
+                        ItemPhoto(
+                            photo = it,
+                            clickedPhoto = clickedPhoto,
+                            deletedPhoto = deletedPhoto
+                        )
+                    })
+            }
         }
     }
 
     @Composable
-    fun PhotoItem(photo: String, selectedPhoto: (String) -> Unit, deletedPhoto: (String) -> Unit) {
+    fun ItemAddPhoto() {
+        Box(
+            modifier = Modifier.size(100.dp).padding(4.dp)
+        ) {
+            Card(
+                modifier = Modifier.fillMaxSize().clickable { addPhoto() }, elevation = 5.dp,
+                backgroundColor = Color.LightGray
+            ) {
+                Icon(
+                    painterResource(R.drawable.ic_baseline_add_photo_alternate_24), //Or we can use Icons.Default.Add
+                    contentDescription = ITEM_ADD_PHOTO,
+                    tint = Color.White,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .align(Alignment.Center)
+                )
+            }
+        }
+    }
+
+    @Composable
+    fun ItemPhoto(photo: String, clickedPhoto: (String) -> Unit, deletedPhoto: (String) -> Unit) {
         Box(
             modifier = Modifier
                 .size(100.dp)
                 .padding(4.dp)
         ) {
-            if (photo == ITEM_ADD_PHOTO)
-                Card(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable { selectedPhoto(photo) }, elevation = 5.dp,
-                    backgroundColor = Color.LightGray
-                ) {
-                    Icon(
-                        Icons.Default.Add, contentDescription = ITEM_ADD_PHOTO, tint = Color.White,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .align(Alignment.Center)
-                    )
-                }
-            else {
-                Image(
-                    painter = rememberImagePainter(
-                        data = photo/*,
-                    builder = {
-                        transformations(CircleCropTransformation())
-                    }*/
-                    ),
-                    contentDescription = ITEM_PHOTO,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxWidth()
-                )
+            Image(painter = rememberImagePainter(data = photo),
+                contentDescription = "ITEM_PHOTO",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxWidth().clickable { clickedPhoto(photo) })
+            Surface( //For making delete button background half transparent
+                color = Color.LightGray.copy(alpha = 0.2f),
+                modifier = Modifier.size(25.dp).align(Alignment.TopEnd).padding(3.dp)
+                    .clip(CircleShape)
+            ) {
                 Icon(
                     Icons.Default.Close,
                     tint = Color.White,
                     contentDescription = "DELETE",
                     modifier = Modifier
-                        .size(30.dp)
-                        .align(Alignment.TopEnd)
-                        .padding(3.dp)
-                        .clip(CircleShape)
-                        .clickable { deletedPhoto(photo) }
-                )
+                        .fillMaxSize().clickable { deletedPhoto(photo) })
+            }
+        }
+    }
+
+    private fun addPhoto() {
+        getPhotoListener().showMultiImage { photos ->
+            photos.forEach { uri ->
+                viewModel.addPhoto(uri.toString())
             }
         }
     }
@@ -356,40 +474,27 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     }
 
     @Composable
-    fun MyRequiredTextField(textState: MutableState<String>, label: String, isError: Boolean) {
-        OutlinedTextField(
-            value = textState.value,
-            onValueChange = { textState.value = it },
-            label = { Text(text = label) },
-            modifier = Modifier.fillMaxWidth(),
-            isError = isError
-        )
-    }
-
-    @Composable
-    fun Time(timeState: MutableState<String>) {
-        OutlinedTextField(value = timeState.value, onValueChange = {},
-            label = { Text(text = "Время") }, readOnly = true, modifier = Modifier
-                .fillMaxWidth()
-                .clickable { showToast(requireContext(), "Click on the icon to change!") },
-            trailingIcon = {
-                Image(painter = painterResource(R.drawable.ic_baseline_access_time_24),
-                    contentDescription = "Время", modifier = Modifier.clickable {
-                        setTime(timeState)
-                    })
-            })
-    }
-
-    @Composable
-    fun Date(dateState: MutableState<String>) {
+    fun DateAndTime(dateState: MutableState<String>, timeState: MutableState<String>) {
         OutlinedTextField(value = dateState.value, onValueChange = {},
             label = { Text(text = "Дата") }, readOnly = true, modifier = Modifier
                 .fillMaxWidth()
                 .clickable { showToast(requireContext(), "Click on the icon to change!") },
             trailingIcon = {
-                Image(painter = painterResource(R.drawable.ic_baseline_event_24),
-                    contentDescription = "Дата", modifier = Modifier.clickable {
-                        setDate(dateState)
+                Icon(painter = painterResource(R.drawable.ic_baseline_event_24),
+                    tint = primaryFigmaColor,
+                    contentDescription = "Дата",
+                    modifier = Modifier.clickable { setDate(dateState) })
+            })
+        OutlinedTextField(value = timeState.value, onValueChange = {},
+            label = { Text(text = "Время") }, readOnly = true, modifier = Modifier
+                .fillMaxWidth()
+                .clickable { showToast(requireContext(), "Click on the icon to change!") },
+            trailingIcon = {
+                Icon(painter = painterResource(R.drawable.ic_baseline_access_time_24),
+                    tint = primaryFigmaColor,
+                    contentDescription = "Время",
+                    modifier = Modifier.clickable {
+                        setTime(timeState)
                     })
             })
     }
@@ -490,37 +595,6 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
             .setCompleteButtonText("Done")
             .setEmptySelectionText("No Select")
             .setSelectMaxCount(10)
-//
-//    private fun setOnCreateClickListener() {
-//        val buttonCreate = requireActivity().findViewById<Button>(R.id.button_new_catch_create)
-//        buttonCreate.setOnClickListener {
-//            val catch = createNewUserCatch()
-//            viewModel.addNewCatch(catch)
-//            findNavController().popBackStack()
-//        }
-//    }
-
-//    private fun setOnCloseClickListeners() {
-//        with(binding) {
-//            toolbarNewCatch.setNavigationOnClickListener {
-//                findNavController().popBackStack()
-//            }
-//        }
-//        val buttonCancel = requireActivity().findViewById<Button>(R.id.button_new_catch_cancel)
-//        buttonCancel.setOnClickListener {
-//            findNavController().popBackStack()
-//        }
-//    }
-
-//    private fun setOnEditTimeAndDateClickListeners() {
-//        with(binding) {
-//            textInputLayoutNewCatchDate.setEndIconOnClickListener { setDate() }
-//            textInputLayoutNewCatchTime.setEndIconOnClickListener { setTime() }
-//            etNewCatchDate.inputType = InputType.TYPE_NULL
-//            etNewCatchTime.inputType = InputType.TYPE_NULL
-//        }
-//
-//    }
 
 //    private fun setCurrentCoordinates() {
 //        binding.etNewCatchCoordinates.inputType = InputType.TYPE_NULL
@@ -531,15 +605,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 //        "Lat: $latitude  Lon: $longitude"
 //            .also { binding.etNewCatchCoordinates.setText(it) }
 //    }
-//
-//    private fun setInputListeners() {
-//        binding.etNewCatchTitle.addTextChangedListener(
-//
-//        )
-//        binding.etNewCatchKindOfFish.addTextChangedListener {
-//
-//        }
-//    }
+
 
     private fun setTime(timeState: MutableState<String>) {
         TimePickerDialog(
@@ -615,10 +681,12 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         val job = lifecycle.coroutineScope.launchWhenStarted {
 
         }
-        viewModel.images.forEach {
-            if (it != ITEM_ADD_PHOTO) requireActivity().contentResolver.openInputStream(
-                Uri.parse(it))?.readBytes()?.let { it1 -> result.add(it1) }
 
+        /*TODO(URI TO BYTEARRAY IN COROUTINE SCOPE)*/
+        viewModel.images.forEach {
+            requireActivity().contentResolver.openInputStream(Uri.parse(it))
+                ?.readBytes()
+                ?.let { it1 -> result.add(it1) }
         }
 
         return result
