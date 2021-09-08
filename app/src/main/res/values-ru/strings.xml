@@ -78,6 +78,9 @@
     <string name="logout">Выйти</string>
     <string name="anonymous">Anonymous</string>
     <string name="fisher">Fisher</string>
+    <string name="places">Места</string>
+    <string name="catches">Уловы</string>
+    <string name="add_new_place">Новое место</string>
 
 
 </resources>

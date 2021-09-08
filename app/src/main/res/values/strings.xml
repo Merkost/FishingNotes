@@ -77,5 +77,8 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="places">Places</string>
+    <string name="catches">Catches</string>
+    <string name="add_new_place">Add new place</string>
 
 </resources>
