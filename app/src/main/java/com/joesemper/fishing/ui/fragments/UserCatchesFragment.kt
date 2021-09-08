@@ -72,11 +72,7 @@ class UserCatchesFragment : Fragment() {
                     ).show()
                 }
                 is CatchRecyclerViewItem.ItemUserCatch -> {
-                    Toast.makeText(
-                        requireContext(),
-                        "${item.catch.title}\nWork in progress",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    val catchFragment = UserCatchFragment.newInstance(item.catch)
                 }
             }
 
