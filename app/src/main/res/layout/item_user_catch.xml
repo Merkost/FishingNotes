@@ -1,63 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp">
+    android:elevation="8dp"
+    android:layout_margin="4dp">
 
-    <ImageView
-        android:id="@+id/iv_catch_item_photo"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginEnd="8dp"
-        android:tint="@color/text_support_color"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintDimensionRatio="1:1"
-        app:layout_constraintEnd_toStartOf="@+id/guideline5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_baseline_image_24" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="8dp">
 
-    <TextView
-        android:id="@+id/tv_catch_item_fish"
-        style="@style/TextAppearance.AppCompat.MainText"
-        android:text="Fish"
-        app:layout_constraintStart_toStartOf="@+id/tv_catch_item_time_date"
-        app:layout_constraintTop_toTopOf="@+id/iv_catch_item_photo" />
+        <ImageView
+            android:id="@+id/iv_catch_item_photo"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginEnd="8dp"
+            app:tint="@color/text_support_color"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toStartOf="@+id/guideline5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_baseline_image_24" />
 
-    <TextView
-        android:id="@+id/tv_catch_item_amount"
-        style="@style/TextAppearance.AppCompat.SecondaryText"
-        android:text="Amount"
-        app:layout_constraintStart_toStartOf="@+id/tv_catch_item_fish"
-        app:layout_constraintTop_toBottomOf="@+id/tv_catch_item_fish" />
+        <TextView
+            android:id="@+id/tv_catch_item_fish"
+            style="@style/TextAppearance.AppCompat.MainText"
+            android:text="Fish"
+            app:layout_constraintStart_toStartOf="@+id/tv_catch_item_time_date"
+            app:layout_constraintTop_toTopOf="@+id/iv_catch_item_photo" />
 
-    <TextView
-        android:id="@+id/tv_catch_item_weight"
-        style="@style/TextAppearance.AppCompat.MainText"
-        android:layout_marginEnd="8dp"
-        android:text="100 kg"
-        android:textColor="@color/colorPrimary"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_catch_item_amount"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tv_catch_item_fish" />
+        <TextView
+            android:id="@+id/tv_catch_item_amount"
+            style="@style/TextAppearance.AppCompat.SecondaryText"
+            android:text="Amount"
+            app:layout_constraintStart_toStartOf="@+id/tv_catch_item_fish"
+            app:layout_constraintTop_toBottomOf="@+id/tv_catch_item_fish" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.25" />
+        <TextView
+            android:id="@+id/tv_catch_item_weight"
+            style="@style/TextAppearance.AppCompat.MainText"
+            android:layout_marginEnd="8dp"
+            android:text="100 kg"
+            android:textColor="@color/text_main_color"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_catch_item_amount"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_catch_item_fish" />
 
-    <TextView
-        android:id="@+id/tv_catch_item_time_date"
-        style="@style/TextAppearance.AppCompat.MainText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Time and Date"
-        app:layout_constraintStart_toStartOf="@+id/guideline5"
-        app:layout_constraintTop_toBottomOf="@+id/tv_catch_item_amount" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.25" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/tv_catch_item_time_date"
+            style="@style/TextAppearance.AppCompat.MainText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Time and Date"
+            app:layout_constraintStart_toStartOf="@+id/guideline5"
+            app:layout_constraintTop_toBottomOf="@+id/tv_catch_item_amount" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

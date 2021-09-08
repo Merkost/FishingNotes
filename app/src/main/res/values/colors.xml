@@ -15,8 +15,8 @@
     <color name="secondaryFigmaColor">#ff6d00</color>
     <color name="secondaryFigmaLightColor">#ff9e40</color>
     <color name="secondaryFigmaDarkColor">#c43c00</color>
-    <color name="primaryFigmaTextColor">#000000</color>
-    <color name="secondaryFigmaTextColor">#000000</color>
+    <color name="primaryFigmaTextColor">#DE000000</color>
+    <color name="secondaryFigmaTextColor">#8A000000</color>
     <color name="primaryFigmaBackgroundTint">#FFF7E6</color>
 
     <color name="black">#FF000000</color>

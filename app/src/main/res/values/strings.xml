@@ -58,7 +58,8 @@
     <!--  Main navigation  -->
     <string name="map">Map</string>
     <string name="weather">Weather</string>
-    <string name="profile">profile</string>
+    <string name="profile">Profile</string>
+    <string name="notes">Notes</string>
     <string name="anonymous">Anonymous</string>
     <string name="fisher">Fisher</string>
 
@@ -76,6 +77,11 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
+
+    <string name="places">Places</string>
+    <string name="catches">Catches</string>
+    <string name="add_new_place">Add new place</string>
+
     <string name="permissions_required">Необходимы разрешения</string>
     <string name="plus">+</string>
     <string name="minus">-</string>
