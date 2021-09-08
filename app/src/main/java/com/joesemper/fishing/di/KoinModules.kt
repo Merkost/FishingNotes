@@ -1,6 +1,6 @@
 package com.joesemper.fishing.di
 
-import com.joesemper.fishing.MainActivity
+import com.joesemper.fishing.ui.MainActivity
 import com.joesemper.fishing.ui.SplashActivity
 import com.joesemper.fishing.ui.LoginActivity
 import com.joesemper.fishing.model.auth.AuthManager

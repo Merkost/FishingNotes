@@ -1,19 +1,31 @@
 package com.joesemper.fishing.ui.fragments
 
+import android.Manifest
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.DialogInterface
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.*
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -32,8 +44,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import coil.annotation.ExperimentalCoilApi
@@ -42,12 +57,12 @@ import com.google.android.material.transition.MaterialFadeThrough
 import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.model.entity.raw.RawUserCatch
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.utils.NavigationHolder
 import com.joesemper.fishing.utils.showToast
 import gun0912.tedbottompicker.TedBottomPicker
+import kotlinx.coroutines.flow.collect
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -65,23 +80,24 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     private val viewModel: NewCatchViewModel by viewModel()
 
     companion object {
+        private const val READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE = 111
         private const val ITEM_ADD_PHOTO = "ITEM_ADD_PHOTO"
         private const val ITEM_PHOTO = "ITEM_PHOTO"
     }
 
-    private lateinit var marker: UserMapMarker
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        (requireActivity() as NavigationHolder).closeNav()
-        marker = args.marker as UserMapMarker
+
+        viewModel.marker.value = args.marker as UserMapMarker
     }
 
+    @ExperimentalAnimationApi
     @ExperimentalMaterialApi
     @ExperimentalCoilApi
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
+        (requireActivity() as NavigationHolder).closeNav() //Hide bottom navBar
         return ComposeView(requireContext()).apply {
             setContent {
                 FigmaTheme {
@@ -91,6 +107,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         }
     }
 
+    @ExperimentalAnimationApi
     @ExperimentalMaterialApi
     @ExperimentalCoilApi
     @Composable
@@ -98,50 +115,29 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         BottomSheetScaffold(
             topBar = { AppBar() },
             sheetContent = { BottomSheet() },
-            sheetElevation = 8.dp) {
-
-
+            sheetElevation = 10.dp,
+            sheetGesturesEnabled = false,
+            sheetPeekHeight = 65.dp
+        ) {
             val scrollState = rememberScrollState()
-            val scaffoldState = rememberBottomSheetScaffoldState()
-
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(6.dp),
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth().padding(top = 4.dp)
                     .padding(horizontal = 16.dp)
                     .verticalScroll(state = scrollState, enabled = true),
             ) {
-                val name = rememberSaveable { mutableStateOf("") }
-                val description = rememberSaveable { mutableStateOf("") }
-                val fish = rememberSaveable { mutableStateOf("0") }
-                val weight = rememberSaveable { mutableStateOf("0.0") }
-                val date = rememberSaveable { mutableStateOf(setInitialDate()) }
-                val time = rememberSaveable { mutableStateOf(setInitialTime()) }
-                val rod = rememberSaveable { mutableStateOf("") }
-                val bite = rememberSaveable { mutableStateOf("") }
-                val lure = rememberSaveable { mutableStateOf("") }
-                Title(name)
-                MyTextField(description, "Описание")
-                //Выпадающий список мест
-                Place("Место")
-                DateAndTime(date, time)
-                Spacer(modifier = Modifier.size(4.dp))
-                FishAndWeight(fish, weight)
-
-                Spacer(modifier = Modifier.size(4.dp))
-                Fishing(rod, bite, lure)
-
+                Title(viewModel.title)
+                MyTextField(viewModel.description, stringResource(R.string.description))
+                Place(stringResource(R.string.place))  //Выпадающий список мест
+                DateAndTime(viewModel.date, viewModel.time)
+                FishAndWeight(viewModel.fishAmount, viewModel.weight)
+                Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
                 Photos(
                     { clicked -> /*TODO(Open photo in full screen)*/ },
                     { deleted -> viewModel.deletePhoto(deleted) })
-
-//                SaveButton(
-//                    name.value, description.value, fish.value, weight.value, date.value,
-//                    time.value, rod.value, bite.value, lure.value
-//                )
             }
-
         }
     }
 
@@ -151,68 +147,51 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         Row(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.height(55.dp).fillMaxWidth()
+            modifier = Modifier.height(65.dp).fillMaxWidth()
         ) {
             Spacer(modifier = Modifier.size(20.dp))
             OutlinedButton(
                 onClick = { findNavController().popBackStack() }) {
-                Text(text = "Cancel")
+                Text(text = stringResource(R.string.cancel))
             }
             Spacer(modifier = Modifier.size(20.dp))
             OutlinedButton(onClick = {
-//                if (isInputCorrect(name)) {
-//                    /*val catch = createNewUserCatch(
-//                        name, description, fish, weight, date,
-//                        time, rod, bite, lure
-//                    )
-//                    viewModel.addNewCatch(catch)
-////                    when(viewModel.subscribe().collectAsState()) { TODO
-////
-////                    }
-//                    findNavController().popBackStack()*/
-//                }
+                if (viewModel.createNewUserCatch(getPhotos()))
+                    findNavController().popBackStack()
+                else showToast(requireContext(), stringResource(R.string.not_all_fields_are_filled))
+
+                lifecycleScope.launchWhenCreated {
+                    when (viewModel.subscribe().collect { }) {
+                        //TODO(listen for the state)
+                    }
+                }
+
             }) {
-                Text(text = "Create")
+                Text(text = stringResource(R.string.create))
             }
             Spacer(modifier = Modifier.size(20.dp))
         }
     }
 
     @Composable
-    fun Title(nameState: MutableState<String>) {
-        Spacer(modifier = Modifier.size(4.dp))
+    fun Title(name: MutableState<String>) {
         Column {
             OutlinedTextField(
-                value = nameState.value,
-                onValueChange = { nameState.value = it },
-                label = { Text("Заголовок") },
+                value = name.value,
+                onValueChange = { name.value = it },
+                label = { Text(stringResource(R.string.title)) },
                 modifier = Modifier.fillMaxWidth(),
-                isError = nameState.value.isBlank()
+                isError = name.value.isBlank()
             )
             Spacer(modifier = Modifier.size(2.dp))
-            Text(text = " *Required", fontSize = 12.sp)
+            Text(stringResource(R.string.required), fontSize = 12.sp)
         }
-    }
-
-    @Composable
-    fun SaveButton(
-//        name: String,
-//        description: String,
-//        fish: String,
-//        weight: String,
-//        date: String,
-//        time: String,
-//        rod: String,
-//        bite: String,
-//        lure: String
-    ) {
-
     }
 
     @Composable
     fun Place(label: String) {
         OutlinedTextField(
-            value = marker.title, onValueChange = { }, readOnly = true,
+            value = viewModel.marker.value.title, onValueChange = { }, readOnly = true,
             label = { Text(text = label) }, modifier = Modifier.fillMaxWidth()
         )
     }
@@ -226,15 +205,15 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
             ) {
                 Spacer(Modifier.size(5.dp))
                 Icon(
-                    painterResource(R.drawable.ic_fishing_rod), "Удочка",
+                    painterResource(R.drawable.ic_fishing_rod), stringResource(R.string.fish_rod),
                     modifier = Modifier.size(30.dp), tint = primaryFigmaColor
                 )
                 Spacer(Modifier.size(8.dp))
                 Text(stringResource(R.string.fishing_method))
             }
-            MyTextField(rod, "Удочка")
-            MyTextField(bite, "Блесна")
-            MyTextField(lure, "Наживка")
+            MyTextField(rod, stringResource(R.string.fish_rod))
+            MyTextField(bite, stringResource(R.string.bait))
+            MyTextField(lure, stringResource(R.string.lure))
         }
     }
 
@@ -247,7 +226,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
             ) {
                 Icon(
                     painterResource(R.drawable.ic_fish),
-                    "Рыба",
+                    stringResource(R.string.fish_catch),
                     tint = primaryFigmaColor,
                     modifier = Modifier.size(30.dp)
                 )
@@ -268,8 +247,8 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                             }
                         },
                         isError = fishState.value.isEmpty(),
-                        label = { Text(text = "Кол-во рыбы") },
-                        trailingIcon = { Text("PC.") },
+                        label = { Text(text = stringResource(R.string.amount)) },
+                        trailingIcon = { Text(stringResource(R.string.pc)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
@@ -293,7 +272,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                                 else fishState.value = ((fishState.value.toInt() + 1).toString())
                             },
                             Modifier.weight(1F).fillMaxHeight().align(Alignment.CenterVertically)
-                        ) { Text("+") }
+                        ) { Text(stringResource(R.string.plus)) }
                     }
 
                 }
@@ -310,9 +289,9 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                                 }
                             }
                         },
-                        label = { Text(text = "Вес") },
+                        label = { Text(text = stringResource(R.string.weight)) },
                         trailingIcon = {
-                            Text("KG.")
+                            Text(stringResource(R.string.kg))
                         },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
@@ -330,7 +309,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                                         ((weightState.value.toDouble() - 0.5).toString())
                             },
                             Modifier.weight(1F).fillMaxHeight().align(Alignment.CenterVertically)
-                        ) { Text("_") }
+                        ) { Text(stringResource(R.string.minus)) }
                         Spacer(modifier = Modifier.size(6.dp))
                         OutlinedButton(
                             onClick = {
@@ -339,17 +318,18 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                                     ((weightState.value.toDouble() + 0.5).toString())
                             },
                             Modifier.weight(1F).fillMaxHeight().align(Alignment.CenterVertically)
-                        ) { Text("+") }
+                        ) { Text(stringResource(R.string.plus)) }
                     }
                 }
             }
         }
     }
 
+    @ExperimentalAnimationApi
     @Composable
     fun Photos(
-        clickedPhoto: (String) -> Unit,
-        deletedPhoto: (String) -> Unit
+        clickedPhoto: (Uri) -> Unit,
+        deletedPhoto: (Uri) -> Unit
     ) {
         val photos = remember { viewModel.images }
         Column {
@@ -359,26 +339,26 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
             ) {
                 Spacer(Modifier.size(5.dp))
                 Icon(
-                    painterResource(R.drawable.ic_baseline_image_24), "Фото",
-                    modifier = Modifier.size(30.dp), tint = primaryFigmaColor
+                    painterResource(R.drawable.ic_baseline_image_24),
+                    stringResource(R.string.photos),
+                    modifier = Modifier.size(30.dp),
+                    tint = primaryFigmaColor
                 )
                 Spacer(Modifier.size(8.dp))
                 Text(stringResource(R.string.photos))
             }
-            LazyRow(/*cells = GridCells.Fixed(2), */modifier = Modifier.fillMaxSize()) {
+            LazyRow(modifier = Modifier.fillMaxSize()) {
                 item { ItemAddPhoto() }
-                items(
-                    items = photos,
-                    itemContent = {
-                        ItemPhoto(
-                            photo = it,
-                            clickedPhoto = clickedPhoto,
-                            deletedPhoto = deletedPhoto
-                        )
-                    })
+                items(items = photos) {
+                    ItemPhoto(
+                        photo = it,
+                        clickedPhoto = clickedPhoto,
+                        deletedPhoto = deletedPhoto
+                    )
+                }
             }
         }
-        Spacer(modifier = Modifier.size(60.dp))
+        Spacer(modifier = Modifier.size(70.dp))
     }
 
     @Composable
@@ -387,32 +367,32 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
             modifier = Modifier.size(100.dp).padding(4.dp)
         ) {
             Card(
-                modifier = Modifier.fillMaxSize().clickable { addPhoto() }, elevation = 5.dp,
-                backgroundColor = Color.LightGray
+                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(5.dp))
+                    .clickable { addPhoto() }, elevation = 5.dp, backgroundColor = Color.LightGray
             ) {
                 Icon(
                     painterResource(R.drawable.ic_baseline_add_photo_alternate_24), //Or we can use Icons.Default.Add
                     contentDescription = ITEM_ADD_PHOTO,
                     tint = Color.White,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .align(Alignment.Center)
+                    modifier = Modifier.fillMaxSize().align(Alignment.Center)
                 )
             }
         }
     }
 
+    @ExperimentalAnimationApi
     @Composable
-    fun ItemPhoto(photo: String, clickedPhoto: (String) -> Unit, deletedPhoto: (String) -> Unit) {
+    fun ItemPhoto(photo: Uri, clickedPhoto: (Uri) -> Unit, deletedPhoto: (Uri) -> Unit) {
         Box(
             modifier = Modifier
                 .size(100.dp)
                 .padding(4.dp)
         ) {
             Image(painter = rememberImagePainter(data = photo),
-                contentDescription = "ITEM_PHOTO",
+                contentDescription = ITEM_PHOTO,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth().clickable { clickedPhoto(photo) })
+                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(5.dp))
+                    .clickable { clickedPhoto(photo) })
             Surface( //For making delete button background half transparent
                 color = Color.LightGray.copy(alpha = 0.2f),
                 modifier = Modifier.size(25.dp).align(Alignment.TopEnd).padding(3.dp)
@@ -421,51 +401,37 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 Icon(
                     Icons.Default.Close,
                     tint = Color.White,
-                    contentDescription = "DELETE",
-                    modifier = Modifier
-                        .fillMaxSize().clickable { deletedPhoto(photo) })
+                    contentDescription = stringResource(R.string.delete_photo),
+                    modifier = Modifier.fillMaxSize().clickable { deletedPhoto(photo) })
             }
         }
     }
 
     private fun addPhoto() {
-        getPhotoListener().showMultiImage { photos ->
-            photos.forEach { uri ->
-                viewModel.addPhoto(uri.toString())
+        if (isPermissionAllowed()) {
+            getPhotoListener().showMultiImage { photos ->
+                photos.forEach { uri ->
+                    viewModel.addPhoto(uri)
+                }
             }
+        } else {
+            AlertDialog.Builder(requireContext())
+                .setTitle(getString(R.string.permissions_required))
+                .setMessage(getString(R.string.add_photo_permission))
+                .setPositiveButton(getString(R.string.provide)) { _, _ ->
+                    askForPermission()
+                }
+                .setNegativeButton(getString(R.string.deny), null)
+                .show()
         }
     }
 
-//    @Composable
-//    private fun Place() {
-//        OutlinedTextField(
-//            value = marker.title,
-//            onValueChange = { }, //text -> if (text !== marker.title) onValueChange(text) },
-//            modifier = Modifier.fillMaxWidth(),
-//            label = marker.title
-//        )
-//        DropdownMenu(
-//            expanded = true, //suggestions.isNotEmpty(),
-//            onDismissRequest = {  },
-//            modifier = Modifier.fillMaxWidth(),
-//            // This line here will accomplish what you want
-//            properties = PopupProperties(focusable = false)
-//        ) {
-////            suggestions.forEach { label ->
-////                DropdownMenuItem(onClick = {
-////                    onOptionSelected(label)
-////                }) {
-////                    Text(text = label)
-////                }
-////            }
-//        }
-//    }
-
     @Composable
     fun MyTextField(textState: MutableState<String>, label: String) {
+        var text by rememberSaveable { textState }
         OutlinedTextField(
-            value = textState.value,
-            onValueChange = { textState.value = it },
+            value = text,
+            onValueChange = { text = it },
             label = { Text(text = label) },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
@@ -476,24 +442,42 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 
     @Composable
     fun DateAndTime(dateState: MutableState<String>, timeState: MutableState<String>) {
-        OutlinedTextField(value = dateState.value, onValueChange = {},
-            label = { Text(text = "Дата") }, readOnly = true, modifier = Modifier
+        dateState.value = setInitialDate()
+        OutlinedTextField(value = dateState.value,
+            onValueChange = {},
+            label = { Text(text = stringResource(R.string.date)) },
+            readOnly = true,
+            modifier = Modifier
                 .fillMaxWidth()
-                .clickable { showToast(requireContext(), "Click on the icon to change!") },
+                .clickable {
+                    showToast(
+                        requireContext(),
+                        getString(R.string.click_on_icon_to_change)
+                    )
+                },
             trailingIcon = {
                 Icon(painter = painterResource(R.drawable.ic_baseline_event_24),
                     tint = primaryFigmaColor,
-                    contentDescription = "Дата",
+                    contentDescription = stringResource(R.string.date),
                     modifier = Modifier.clickable { setDate(dateState) })
             })
-        OutlinedTextField(value = timeState.value, onValueChange = {},
-            label = { Text(text = "Время") }, readOnly = true, modifier = Modifier
+        timeState.value = setInitialTime()
+        OutlinedTextField(value = timeState.value,
+            onValueChange = {},
+            label = { Text(text = stringResource(R.string.time)) },
+            readOnly = true,
+            modifier = Modifier
                 .fillMaxWidth()
-                .clickable { showToast(requireContext(), "Click on the icon to change!") },
+                .clickable {
+                    showToast(
+                        requireContext(),
+                        getString(R.string.click_on_icon_to_change)
+                    )
+                },
             trailingIcon = {
                 Icon(painter = painterResource(R.drawable.ic_baseline_access_time_24),
                     tint = primaryFigmaColor,
-                    contentDescription = "Время",
+                    contentDescription = stringResource(R.string.time),
                     modifier = Modifier.clickable {
                         setTime(timeState)
                     })
@@ -503,7 +487,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     @Composable
     fun AppBar() {
         TopAppBar(
-            title = { Text(text = "New catch") },
+            title = { Text(text = stringResource(R.string.new_catch)) },
             navigationIcon = {
                 IconButton(onClick = { findNavController().popBackStack() }) {
                     Icon(
@@ -516,97 +500,34 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         )
     }
 
-//    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-//        super.onViewCreated(view, savedInstanceState)
-//
-////        setTransactions()
-//        subscribeOnViewModel()
-//        setInitialData()
-//        initViews()
-//        setOnClickListeners()
-//        initRV()
-//
-//    }
-
     private fun setTransactions() {
         enterTransition = MaterialFadeThrough()
         returnTransition = MaterialFadeThrough()
     }
 
-//    private fun subscribeOnViewModel() {
-//        lifecycleScope.launchWhenStarted {
-//            viewModel.subscribe().collect { state ->
-//                when (state) {
-//                    is BaseViewState.Loading -> binding.loading.visibility = View.VISIBLE
-//                    is BaseViewState.Success<*> -> binding.loading.visibility = View.GONE
-//                    is BaseViewState.Error -> {
-//                        binding.loading.visibility = View.GONE
-//                        Toast.makeText(context, state.error.message, Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//            }
-//        }
-//    }
+    private fun getPhotos(): List<ByteArray> {
 
-//    private fun initRV() {
-//        adapter = AddNewPhotosAdapter { item ->
-//            when (item) {
-//                is PhotosRecyclerViewItem.ItemAddNewPhoto -> {
-//                    getPhotoListener()
-//                        .showMultiImage { photos ->
-//                            photos.forEach { uri ->
-//                                uris.add(uri)
-//                                adapter.addItem(uri.toString())
-//                            }
-//                        }
-//                }
-//                is PhotosRecyclerViewItem.ItemPhoto -> {
-//                    adapter.deleteItem(item)
-//                }
-//            }
-//
-//        }
-//        binding.rvPhotos.layoutManager =
-//            GridLayoutManager(context, 3)
-//        binding.rvPhotos.adapter = adapter
-//    }
+        val result = mutableListOf<ByteArray>()
+        val job = lifecycle.coroutineScope.launchWhenStarted {
 
-//    private fun initToolbar() {
-//        (requireActivity() as AppCompatActivity).setSupportActionBar(binding.toolbarNewCatch)
-//    }
+        }
 
-//    private fun initBottomDialog() {
-//        (requireActivity() as NavigationHolder).closeNav()
-//        val bottomSheetBehavior = BottomSheetBehavior.from(
-//            requireActivity().findViewById(R.id.bottomSheet)
-//        )
-//        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-//    }
-
-//    private fun setInitialPlaceData() {
-//        binding.etNewCatchPlaceTitle.setText(marker.title)
-//        binding.etNewCatchPlaceTitle.inputType = InputType.TYPE_NULL
-//        setCurrentCoordinates()
-//    }
+        /*TODO(URI TO BYTEARRAY IN COROUTINE SCOPE)*/
+        viewModel.images.forEach {
+            requireActivity().contentResolver.openInputStream(it)
+                ?.readBytes()
+                ?.let { it1 -> result.add(it1) }
+        }
+        return result
+    }
 
     private fun getPhotoListener() =
         TedBottomPicker.with(requireActivity())
             .setPeekHeight(1600)
             .showTitle(false)
-            .setCompleteButtonText("Done")
-            .setEmptySelectionText("No Select")
+            .setCompleteButtonText(getString(R.string.done))
+            .setEmptySelectionText(getString(R.string.no_photo_selected))
             .setSelectMaxCount(10)
-
-//    private fun setCurrentCoordinates() {
-//        binding.etNewCatchCoordinates.inputType = InputType.TYPE_NULL
-//
-//        val latitude = marker.latitude.format(3)
-//        val longitude = marker.longitude.format(3)
-//
-//        "Lat: $latitude  Lon: $longitude"
-//            .also { binding.etNewCatchCoordinates.setText(it) }
-//    }
-
 
     private fun setTime(timeState: MutableState<String>) {
         TimePickerDialog(
@@ -650,48 +571,92 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
             DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR
         )
 
-
-    private fun isInputCorrect(title: String): Boolean {
-        return title.isNotBlank()
+    private fun askForPermission(): Boolean {
+        if (!isPermissionAllowed()) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    requireActivity(),
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+            ) {
+                showPermissionDeniedDialog()
+            } else {
+                ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                    READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE
+                )
+            }
+            return false
+        }
+        return true
     }
 
-    private fun createNewUserCatch(
-        title: String, description: String, fish: String,
-        weight: String, date: String, time: String,
-        rod: String, bite: String, lure: String
-    ) = RawUserCatch(
-        title = title,
-        description = description,
-        time = time,
-        date = date,
-        fishType = fish,
-//        fishAmount = fish.toInt(),
-        fishWeight = weight.toDouble(),
-        fishingRodType = rod,
-        fishingBait = bite,
-        fishingLure = lure,
-        markerId = marker.id,
-        isPublic = false,
-        photos = getPhotos()
-    )
+    private fun isPermissionAllowed(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+    }
 
-
-    private fun getPhotos(): List<ByteArray> {
-
-        val result = mutableListOf<ByteArray>()
-        val job = lifecycle.coroutineScope.launchWhenStarted {
-
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray,
+    ) {
+        when (requestCode) {
+            READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission is granted, you can perform your operation here
+                } else {
+                    // permission is denied, you can ask for permission again, if you want
+                    askForPermission()
+                }
+                return
+            }
         }
+    }
 
-        /*TODO(URI TO BYTEARRAY IN COROUTINE SCOPE)*/
-        viewModel.images.forEach {
-            requireActivity().contentResolver.openInputStream(Uri.parse(it))
-                ?.readBytes()
-                ?.let { it1 -> result.add(it1) }
-        }
+    private fun showPermissionDeniedDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle(getString(R.string.permission_denied))
+            .setMessage(getString(R.string.permission_denied_message))
+            .setPositiveButton(getString(R.string.goto_app_settings),
+                DialogInterface.OnClickListener { dialogInterface, i ->
+                    // send to app settings if permission is denied permanently
+                    val intent = Intent()
+                    intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                    val uri = Uri.fromParts("package", requireActivity().packageName, null)
+                    intent.data = uri
+                    startActivity(intent)
+                })
+            .setNegativeButton(getString(R.string.cancel), null)
+            .show()
+    }
 
-        return result
+    override fun onDetach() {
+        super.onDetach()
+        (requireActivity() as NavigationHolder).showNav()
+    }
 
+    fun commentary() {
+
+        TODO("Subscribe to ViewState")
+//    private fun subscribeOnViewModel() {
+//        lifecycleScope.launchWhenStarted {
+//            viewModel.subscribe().collect { state ->
+//                when (state) {
+//                    is BaseViewState.Loading -> binding.loading.visibility = View.VISIBLE
+//                    is BaseViewState.Success<*> -> binding.loading.visibility = View.GONE
+//                    is BaseViewState.Error -> {
+//                        binding.loading.visibility = View.GONE
+//                        Toast.makeText(context, state.error.message, Toast.LENGTH_SHORT).show()
+//                    }
+//                }
+//            }
+//        }
+//    }
+
+        //TODO("Photo convert from Uri to ByteArray in CoroutineScope")
 //        try {
 //            val bitmap = MediaStore.Images.Media.getBitmap(c.getContentResolver(), Uri.parse(paths))
 //        } catch (e: Exception) {
@@ -714,10 +679,37 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 //            job.join()
 //            result
 //        }
-    }
 
-    override fun onDetach() {
-        super.onDetach()
-        (requireActivity() as NavigationHolder).showNav()
+        //TODO("AutoCompleteTextView for places textField")
+        /*@Composable
+    private fun Place() {
+        OutlinedTextField(
+            value = viewModel.marker.value.title,
+            onValueChange = { }, //text -> if (text !== marker.title) onValueChange(text) },
+            modifier = Modifier.fillMaxWidth(),
+            label = "Marker title"
+        )
+        DropdownMenu(
+            expanded = true, //suggestions.isNotEmpty(),
+            onDismissRequest = {  },
+            modifier = Modifier.fillMaxWidth(),
+            // This line here will accomplish what you want
+            properties = PopupProperties(focusable = false)
+        ) {
+//            suggestions.forEach { label ->
+//                DropdownMenuItem(onClick = {
+//                    onOptionSelected(label)
+//                }) {
+//                    Text(text = label)
+//                }
+//            }
+        }
+    }*/
+
+//    private fun setInitialPlaceData() {
+//        binding.etNewCatchPlaceTitle.setText(marker.title)
+//        binding.etNewCatchPlaceTitle.inputType = InputType.TYPE_NULL
+//        setCurrentCoordinates()
+//    }
     }
 }
