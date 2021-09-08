@@ -73,6 +73,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        (requireActivity() as NavigationHolder).closeNav()
         marker = args.marker as UserMapMarker
     }
 
@@ -94,8 +95,12 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     @ExperimentalCoilApi
     @Composable
     fun NewCatchScreen() {
-        Scaffold(
-            topBar = { AppBar() }) {
+        BottomSheetScaffold(
+            topBar = { AppBar() },
+            sheetContent = { BottomSheet() },
+            sheetElevation = 8.dp) {
+
+
             val scrollState = rememberScrollState()
             val scaffoldState = rememberBottomSheetScaffoldState()
 
@@ -107,7 +112,6 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                     .padding(horizontal = 16.dp)
                     .verticalScroll(state = scrollState, enabled = true),
             ) {
-                BottomSheet(scaffoldState)
                 val name = rememberSaveable { mutableStateOf("") }
                 val description = rememberSaveable { mutableStateOf("") }
                 val fish = rememberSaveable { mutableStateOf("0") }
@@ -143,15 +147,35 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 
     @ExperimentalMaterialApi
     @Composable
-    private fun BottomSheet(scaffoldState: BottomSheetScaffoldState) {
-
-        BottomSheetScaffold(sheetContent = {
-
-            OutlinedButton(onClick = { findNavController().popBackStack() }) {
+    private fun BottomSheet() {
+        Row(
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.height(55.dp).fillMaxWidth()
+        ) {
+            Spacer(modifier = Modifier.size(20.dp))
+            OutlinedButton(
+                onClick = { findNavController().popBackStack() }) {
                 Text(text = "Cancel")
             }
+            Spacer(modifier = Modifier.size(20.dp))
+            OutlinedButton(onClick = {
+//                if (isInputCorrect(name)) {
+//                    /*val catch = createNewUserCatch(
+//                        name, description, fish, weight, date,
+//                        time, rod, bite, lure
+//                    )
+//                    viewModel.addNewCatch(catch)
+////                    when(viewModel.subscribe().collectAsState()) { TODO
+////
+////                    }
+//                    findNavController().popBackStack()*/
+//                }
+            }) {
+                Text(text = "Create")
+            }
+            Spacer(modifier = Modifier.size(20.dp))
         }
-        ){}
     }
 
     @Composable
@@ -181,32 +205,8 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 //        rod: String,
 //        bite: String,
 //        lure: String
-    ): @Composable() (ColumnScope.() -> Unit) = {
-        Row(
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OutlinedButton(onClick = { findNavController().popBackStack() }) {
-                Text(text = "Cancel")
-            }
-            Spacer(modifier = Modifier.size(10.dp))
-            OutlinedButton(onClick = {
-//                if (isInputCorrect(name)) {
-//                    /*val catch = createNewUserCatch(
-//                        name, description, fish, weight, date,
-//                        time, rod, bite, lure
-//                    )
-//                    viewModel.addNewCatch(catch)
-////                    when(viewModel.subscribe().collectAsState()) { TODO
-////
-////                    }
-//                    findNavController().popBackStack()*/
-//                }
-            }) {
-                Text(text = "Create")
-            }
-        }
-        Spacer(modifier = Modifier.size(6.dp))
+    ) {
+
     }
 
     @Composable
@@ -378,6 +378,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                     })
             }
         }
+        Spacer(modifier = Modifier.size(60.dp))
     }
 
     @Composable
