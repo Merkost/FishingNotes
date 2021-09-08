@@ -1,40 +1,67 @@
 package com.joesemper.fishing.ui.fragments
 
+import android.Manifest
 import android.app.DatePickerDialog
-import android.app.DatePickerDialog.OnDateSetListener
 import android.app.TimePickerDialog
-import android.app.TimePickerDialog.OnTimeSetListener
+import android.content.DialogInterface
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.text.InputType
+import android.provider.Settings
 import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.addTextChangedListener
+import androidx.appcompat.app.AlertDialog
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.GridLayoutManager
-import com.google.android.material.bottomsheet.BottomSheetBehavior
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberImagePainter
 import com.google.android.material.transition.MaterialFadeThrough
 import com.joesemper.fishing.R
-import com.joesemper.fishing.databinding.FragmentNewCatchBinding
 import com.joesemper.fishing.domain.NewCatchViewModel
-import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.model.entity.raw.RawUserCatch
-import com.joesemper.fishing.ui.adapters.AddNewPhotosAdapter
-import com.joesemper.fishing.ui.adapters.PhotosRecyclerViewItem
+import com.joesemper.fishing.ui.theme.FigmaTheme
+import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.utils.NavigationHolder
-import com.joesemper.fishing.utils.format
-import com.joesemper.fishing.utils.roundTo
+import com.joesemper.fishing.utils.showToast
 import gun0912.tedbottompicker.TedBottomPicker
-import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
@@ -52,34 +79,425 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     override val scope: Scope by fragmentScope()
     private val viewModel: NewCatchViewModel by viewModel()
 
-    private lateinit var binding: FragmentNewCatchBinding
-
-    private lateinit var marker: UserMapMarker
-
-    private lateinit var adapter: AddNewPhotosAdapter
+    companion object {
+        private const val READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE = 111
+        private const val ITEM_ADD_PHOTO = "ITEM_ADD_PHOTO"
+        private const val ITEM_PHOTO = "ITEM_PHOTO"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        marker = args.marker as UserMapMarker
+
+        viewModel.marker.value = args.marker as UserMapMarker
     }
 
+    @ExperimentalAnimationApi
+    @ExperimentalMaterialApi
+    @ExperimentalCoilApi
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        binding = FragmentNewCatchBinding.inflate(layoutInflater, container, false)
-        return binding.root
+        (requireActivity() as NavigationHolder).closeNav() //Hide bottom navBar
+        return ComposeView(requireContext()).apply {
+            setContent {
+                FigmaTheme {
+                    NewCatchScreen()
+                }
+            }
+        }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    @ExperimentalAnimationApi
+    @ExperimentalMaterialApi
+    @ExperimentalCoilApi
+    @Composable
+    fun NewCatchScreen() {
+        BottomSheetScaffold(
+            topBar = { AppBar() },
+            sheetContent = { BottomSheet() },
+            sheetElevation = 10.dp,
+            sheetGesturesEnabled = false,
+            sheetPeekHeight = 65.dp
+        ) {
+            val scrollState = rememberScrollState()
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier
+                    .fillMaxWidth().padding(top = 4.dp)
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(state = scrollState, enabled = true),
+            ) {
+                Title(viewModel.title)
+                MyTextField(viewModel.description, stringResource(R.string.description))
+                Place(stringResource(R.string.place))  //Выпадающий список мест
+                DateAndTime(viewModel.date, viewModel.time)
+                FishAndWeight(viewModel.fishAmount, viewModel.weight)
+                Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
+                Photos(
+                    { clicked -> /*TODO(Open photo in full screen)*/ },
+                    { deleted -> viewModel.deletePhoto(deleted) })
+            }
+        }
+    }
 
-//        setTransactions()
-        subscribeOnViewModel()
-        setInitialData()
-        initViews()
-        setOnClickListeners()
-        initRV()
+    @ExperimentalMaterialApi
+    @Composable
+    private fun BottomSheet() {
+        Row(
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.height(65.dp).fillMaxWidth()
+        ) {
+            Spacer(modifier = Modifier.size(20.dp))
+            OutlinedButton(
+                onClick = { findNavController().popBackStack() }) {
+                Text(text = stringResource(R.string.cancel))
+            }
+            Spacer(modifier = Modifier.size(20.dp))
+            OutlinedButton(onClick = {
+                if (viewModel.createNewUserCatch(getPhotos()))
+                    findNavController().popBackStack()
+                else showToast(requireContext(), stringResource(R.string.not_all_fields_are_filled))
 
+                lifecycleScope.launchWhenCreated {
+                    when (viewModel.subscribe().collect { }) {
+                        //TODO(listen for the state)
+                    }
+                }
+
+            }) {
+                Text(text = stringResource(R.string.create))
+            }
+            Spacer(modifier = Modifier.size(20.dp))
+        }
+    }
+
+    @Composable
+    fun Title(name: MutableState<String>) {
+        Column {
+            OutlinedTextField(
+                value = name.value,
+                onValueChange = { name.value = it },
+                label = { Text(stringResource(R.string.title)) },
+                modifier = Modifier.fillMaxWidth(),
+                isError = name.value.isBlank()
+            )
+            Spacer(modifier = Modifier.size(2.dp))
+            Text(stringResource(R.string.required), fontSize = 12.sp)
+        }
+    }
+
+    @Composable
+    fun Place(label: String) {
+        OutlinedTextField(
+            value = viewModel.marker.value.title, onValueChange = { }, readOnly = true,
+            label = { Text(text = label) }, modifier = Modifier.fillMaxWidth()
+        )
+    }
+
+    @Composable
+    fun Fishing(rod: MutableState<String>, bite: MutableState<String>, lure: MutableState<String>) {
+        Column {
+            Row(
+                modifier = Modifier.align(Alignment.Start),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(Modifier.size(5.dp))
+                Icon(
+                    painterResource(R.drawable.ic_fishing_rod), stringResource(R.string.fish_rod),
+                    modifier = Modifier.size(30.dp), tint = primaryFigmaColor
+                )
+                Spacer(Modifier.size(8.dp))
+                Text(stringResource(R.string.fishing_method))
+            }
+            MyTextField(rod, stringResource(R.string.fish_rod))
+            MyTextField(bite, stringResource(R.string.bait))
+            MyTextField(lure, stringResource(R.string.lure))
+        }
+    }
+
+    @Composable
+    fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<String>) {
+        Column {
+            Row(
+                modifier = Modifier.align(Alignment.Start),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painterResource(R.drawable.ic_fish),
+                    stringResource(R.string.fish_catch),
+                    tint = primaryFigmaColor,
+                    modifier = Modifier.size(30.dp)
+                )
+                Spacer(Modifier.size(8.dp))
+                Text(stringResource(R.string.fish_catch))
+            }
+            Row {
+                Column(Modifier.weight(1F)) {
+                    OutlinedTextField(
+                        value = fishState.value,
+                        onValueChange = {
+                            if (it.isEmpty()) fishState.value = it
+                            else {
+                                fishState.value = when (it.toIntOrNull()) {
+                                    null -> fishState.value //old value
+                                    else -> it   //new value
+                                }
+                            }
+                        },
+                        isError = fishState.value.isEmpty(),
+                        label = { Text(text = stringResource(R.string.amount)) },
+                        trailingIcon = { Text(stringResource(R.string.pc)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next
+                        )
+                    )
+                    Spacer(modifier = Modifier.size(6.dp))
+                    Row(Modifier.fillMaxWidth()) {
+                        OutlinedButton(
+                            onClick = {
+                                if (fishState.value.toInt() >= 1 && fishState.value.isNotBlank())
+                                    fishState.value = ((fishState.value.toInt() - 1).toString())
+                            },
+                            Modifier.weight(1F).fillMaxHeight().align(Alignment.CenterVertically)
+                        ) { Text("-") }
+                        Spacer(modifier = Modifier.size(6.dp))
+                        OutlinedButton(
+                            onClick = {
+                                if (fishState.value.isEmpty()) fishState.value = 1.toString()
+                                else fishState.value = ((fishState.value.toInt() + 1).toString())
+                            },
+                            Modifier.weight(1F).fillMaxHeight().align(Alignment.CenterVertically)
+                        ) { Text(stringResource(R.string.plus)) }
+                    }
+
+                }
+                Spacer(modifier = Modifier.size(6.dp))
+                Column(Modifier.weight(1F)) {
+                    OutlinedTextField(
+                        value = weightState.value,
+                        onValueChange = {
+                            if (it.isEmpty()) weightState.value = it
+                            else {
+                                weightState.value = when (it.toDoubleOrNull()) {
+                                    null -> weightState.value //old value
+                                    else -> it   //new value
+                                }
+                            }
+                        },
+                        label = { Text(text = stringResource(R.string.weight)) },
+                        trailingIcon = {
+                            Text(stringResource(R.string.kg))
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next
+                        )
+                    )
+                    Spacer(modifier = Modifier.size(6.dp))
+                    Row(Modifier.fillMaxWidth()) {
+                        OutlinedButton(
+                            onClick = {
+                                if (weightState.value.toDouble() >= 0.5 && weightState.value.isNotBlank())
+                                    weightState.value =
+                                        ((weightState.value.toDouble() - 0.5).toString())
+                            },
+                            Modifier.weight(1F).fillMaxHeight().align(Alignment.CenterVertically)
+                        ) { Text(stringResource(R.string.minus)) }
+                        Spacer(modifier = Modifier.size(6.dp))
+                        OutlinedButton(
+                            onClick = {
+                                if (weightState.value.isEmpty()) weightState.value = 0.5f.toString()
+                                else weightState.value =
+                                    ((weightState.value.toDouble() + 0.5).toString())
+                            },
+                            Modifier.weight(1F).fillMaxHeight().align(Alignment.CenterVertically)
+                        ) { Text(stringResource(R.string.plus)) }
+                    }
+                }
+            }
+        }
+    }
+
+    @ExperimentalAnimationApi
+    @Composable
+    fun Photos(
+        clickedPhoto: (Uri) -> Unit,
+        deletedPhoto: (Uri) -> Unit
+    ) {
+        val photos = remember { viewModel.images }
+        Column {
+            Row(
+                modifier = Modifier.align(Alignment.Start),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(Modifier.size(5.dp))
+                Icon(
+                    painterResource(R.drawable.ic_baseline_image_24),
+                    stringResource(R.string.photos),
+                    modifier = Modifier.size(30.dp),
+                    tint = primaryFigmaColor
+                )
+                Spacer(Modifier.size(8.dp))
+                Text(stringResource(R.string.photos))
+            }
+            LazyRow(modifier = Modifier.fillMaxSize()) {
+                item { ItemAddPhoto() }
+                items(items = photos) {
+                    ItemPhoto(
+                        photo = it,
+                        clickedPhoto = clickedPhoto,
+                        deletedPhoto = deletedPhoto
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.size(70.dp))
+    }
+
+    @Composable
+    fun ItemAddPhoto() {
+        Box(
+            modifier = Modifier.size(100.dp).padding(4.dp)
+        ) {
+            Card(
+                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(5.dp))
+                    .clickable { addPhoto() }, elevation = 5.dp, backgroundColor = Color.LightGray
+            ) {
+                Icon(
+                    painterResource(R.drawable.ic_baseline_add_photo_alternate_24), //Or we can use Icons.Default.Add
+                    contentDescription = ITEM_ADD_PHOTO,
+                    tint = Color.White,
+                    modifier = Modifier.fillMaxSize().align(Alignment.Center)
+                )
+            }
+        }
+    }
+
+    @ExperimentalAnimationApi
+    @Composable
+    fun ItemPhoto(photo: Uri, clickedPhoto: (Uri) -> Unit, deletedPhoto: (Uri) -> Unit) {
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .padding(4.dp)
+        ) {
+            Image(painter = rememberImagePainter(data = photo),
+                contentDescription = ITEM_PHOTO,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(5.dp))
+                    .clickable { clickedPhoto(photo) })
+            Surface( //For making delete button background half transparent
+                color = Color.LightGray.copy(alpha = 0.2f),
+                modifier = Modifier.size(25.dp).align(Alignment.TopEnd).padding(3.dp)
+                    .clip(CircleShape)
+            ) {
+                Icon(
+                    Icons.Default.Close,
+                    tint = Color.White,
+                    contentDescription = stringResource(R.string.delete_photo),
+                    modifier = Modifier.fillMaxSize().clickable { deletedPhoto(photo) })
+            }
+        }
+    }
+
+    private fun addPhoto() {
+        if (isPermissionAllowed()) {
+            getPhotoListener().showMultiImage { photos ->
+                photos.forEach { uri ->
+                    viewModel.addPhoto(uri)
+                }
+            }
+        } else {
+            AlertDialog.Builder(requireContext())
+                .setTitle(getString(R.string.permissions_required))
+                .setMessage(getString(R.string.add_photo_permission))
+                .setPositiveButton(getString(R.string.provide)) { _, _ ->
+                    askForPermission()
+                }
+                .setNegativeButton(getString(R.string.deny), null)
+                .show()
+        }
+    }
+
+    @Composable
+    fun MyTextField(textState: MutableState<String>, label: String) {
+        var text by rememberSaveable { textState }
+        OutlinedTextField(
+            value = text,
+            onValueChange = { text = it },
+            label = { Text(text = label) },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next
+            )
+        )
+    }
+
+    @Composable
+    fun DateAndTime(dateState: MutableState<String>, timeState: MutableState<String>) {
+        dateState.value = setInitialDate()
+        OutlinedTextField(value = dateState.value,
+            onValueChange = {},
+            label = { Text(text = stringResource(R.string.date)) },
+            readOnly = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    showToast(
+                        requireContext(),
+                        getString(R.string.click_on_icon_to_change)
+                    )
+                },
+            trailingIcon = {
+                Icon(painter = painterResource(R.drawable.ic_baseline_event_24),
+                    tint = primaryFigmaColor,
+                    contentDescription = stringResource(R.string.date),
+                    modifier = Modifier.clickable { setDate(dateState) })
+            })
+        timeState.value = setInitialTime()
+        OutlinedTextField(value = timeState.value,
+            onValueChange = {},
+            label = { Text(text = stringResource(R.string.time)) },
+            readOnly = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    showToast(
+                        requireContext(),
+                        getString(R.string.click_on_icon_to_change)
+                    )
+                },
+            trailingIcon = {
+                Icon(painter = painterResource(R.drawable.ic_baseline_access_time_24),
+                    tint = primaryFigmaColor,
+                    contentDescription = stringResource(R.string.time),
+                    modifier = Modifier.clickable {
+                        setTime(timeState)
+                    })
+            })
+    }
+
+    @Composable
+    fun AppBar() {
+        TopAppBar(
+            title = { Text(text = stringResource(R.string.new_catch)) },
+            navigationIcon = {
+                IconButton(onClick = { findNavController().popBackStack() }) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = getString(R.string.back)
+                    )
+                }
+            },
+            elevation = 2.dp
+        )
     }
 
     private fun setTransactions() {
@@ -87,261 +505,163 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         returnTransition = MaterialFadeThrough()
     }
 
-    private fun subscribeOnViewModel() {
-        lifecycleScope.launchWhenStarted {
-            viewModel.subscribe().collect { state ->
-                when (state) {
-                    is BaseViewState.Loading -> binding.loading.visibility = View.VISIBLE
-                    is BaseViewState.Success<*> -> binding.loading.visibility = View.GONE
-                    is BaseViewState.Error -> {
-                        binding.loading.visibility = View.GONE
-                        Toast.makeText(context, state.error.message, Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-        }
-    }
+    private fun getPhotos(): List<ByteArray> {
 
-    private fun initViews() {
-        initToolbar()
-        initBottomDialog()
-    }
-
-    private fun setInitialData() {
-        setInitialTimeAndDate()
-        setInitialPlaceData()
-    }
-
-    private fun setOnClickListeners() {
-        setOnIncrementDecrementClickListeners()
-        setOnCreateClickListener()
-        setOnCloseClickListeners()
-    }
-
-    private val uris = mutableListOf<Uri>()
-
-    private fun initRV() {
-        adapter = AddNewPhotosAdapter { item ->
-            when (item) {
-                is PhotosRecyclerViewItem.ItemAddNewPhoto -> {
-                    getPhotoListener()
-                        .showMultiImage { photos ->
-                            photos.forEach { uri ->
-                                uris.add(uri)
-                                adapter.addItem(uri.toString())
-                            }
-                        }
-                }
-                is PhotosRecyclerViewItem.ItemPhoto -> {
-                    adapter.deleteItem(item)
-                }
-            }
+        val result = mutableListOf<ByteArray>()
+        val job = lifecycle.coroutineScope.launchWhenStarted {
 
         }
-        binding.rvPhotos.layoutManager =
-            GridLayoutManager(context, 3)
-        binding.rvPhotos.adapter = adapter
-    }
 
-    private fun initToolbar() {
-        (requireActivity() as AppCompatActivity).setSupportActionBar(binding.toolbarNewCatch)
-    }
-
-    private fun initBottomDialog() {
-        (requireActivity() as NavigationHolder).closeNav()
-        val bottomSheetBehavior = BottomSheetBehavior.from(
-            requireActivity().findViewById(R.id.bottomSheet))
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-    }
-
-    private fun setInitialPlaceData() {
-        binding.etNewCatchPlaceTitle.setText(marker.title)
-        binding.etNewCatchPlaceTitle.inputType = InputType.TYPE_NULL
-        setCurrentCoordinates()
-    }
-
-    private fun setInitialTimeAndDate() {
-        setInitialDate()
-        setInitialTime()
-        setOnEditTimeAndDateClickListeners()
+        /*TODO(URI TO BYTEARRAY IN COROUTINE SCOPE)*/
+        viewModel.images.forEach {
+            requireActivity().contentResolver.openInputStream(it)
+                ?.readBytes()
+                ?.let { it1 -> result.add(it1) }
+        }
+        return result
     }
 
     private fun getPhotoListener() =
         TedBottomPicker.with(requireActivity())
             .setPeekHeight(1600)
             .showTitle(false)
-            .setCompleteButtonText("Done")
-            .setEmptySelectionText("No Select")
+            .setCompleteButtonText(getString(R.string.done))
+            .setEmptySelectionText(getString(R.string.no_photo_selected))
             .setSelectMaxCount(10)
 
-
-    private fun setOnIncrementDecrementClickListeners() {
-        with(binding) {
-            buttonPlusAmount.setOnClickListener {
-                etNewCatchAmount.setText(
-                    (etNewCatchAmount.text.toString().toInt().plus(1)).toString()
-                )
-            }
-            buttonMinusAmount.setOnClickListener {
-                if (etNewCatchAmount.text.toString().toInt() <= 0) return@setOnClickListener
-                etNewCatchAmount.setText(
-                    (etNewCatchAmount.text.toString().toInt().minus(1)).toString()
-                )
-            }
-            buttonPlusWeight.setOnClickListener {
-                etNewCatchWeight.setText(
-                    (etNewCatchWeight.text.toString().toDouble().plus(0.1).roundTo(1)).toString()
-                )
-            }
-            buttonMinusWeight.setOnClickListener {
-                if (etNewCatchWeight.text.toString().toDouble() <= 0) return@setOnClickListener
-                etNewCatchWeight.setText(
-                    (etNewCatchWeight.text.toString().toDouble().minus(0.1).roundTo(1)).toString()
-                )
-            }
-        }
+    private fun setTime(timeState: MutableState<String>) {
+        TimePickerDialog(
+            requireContext(),
+            TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
+                dateAndTime.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                dateAndTime.set(Calendar.MINUTE, minute)
+                timeState.value = setInitialTime()
+            },
+            dateAndTime.get(Calendar.HOUR_OF_DAY),
+            dateAndTime.get(Calendar.MINUTE), true
+        ).show()
     }
 
-    private fun setOnCreateClickListener() {
-        val buttonCreate = requireActivity().findViewById<Button>(R.id.button_new_catch_create)
-        buttonCreate.setOnClickListener {
-            val catch = createNewUserCatch()
-            viewModel.addNewCatch(catch)
-            findNavController().popBackStack()
-        }
-    }
-
-    private fun setOnCloseClickListeners() {
-        with(binding) {
-            toolbarNewCatch.setNavigationOnClickListener {
-                findNavController().popBackStack()
-            }
-        }
-        val buttonCancel = requireActivity().findViewById<Button>(R.id.button_new_catch_cancel)
-        buttonCancel.setOnClickListener {
-            findNavController().popBackStack()
-        }
-    }
-
-    private fun setOnEditTimeAndDateClickListeners() {
-        with(binding) {
-            textInputLayoutNewCatchDate.setEndIconOnClickListener { setDate() }
-            textInputLayoutNewCatchTime.setEndIconOnClickListener { setTime() }
-            etNewCatchDate.inputType = InputType.TYPE_NULL
-            etNewCatchTime.inputType = InputType.TYPE_NULL
-        }
-
-    }
-
-    private fun setCurrentCoordinates() {
-        binding.etNewCatchCoordinates.inputType = InputType.TYPE_NULL
-
-        val latitude = marker.latitude.format(3)
-        val longitude = marker.longitude.format(3)
-
-        "Lat: $latitude  Lon: $longitude"
-            .also { binding.etNewCatchCoordinates.setText(it) }
-    }
-
-    private fun setInputListeners() {
-        binding.etNewCatchTitle.addTextChangedListener(
-
+    private fun setInitialTime(): String =
+        DateUtils.formatDateTime(
+            requireContext(),
+            dateAndTime.timeInMillis,
+            DateUtils.FORMAT_SHOW_TIME
         )
-        binding.etNewCatchKindOfFish.addTextChangedListener {
 
-        }
-    }
-
-    private fun setDate() {
+    private fun setDate(dateState: MutableState<String>) {
         DatePickerDialog(
             requireContext(),
-            dateSetListener,
+            DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
+                dateAndTime.set(Calendar.YEAR, year)
+                dateAndTime.set(Calendar.MONTH, monthOfYear)
+                dateAndTime.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                dateState.value = setInitialDate()
+            },
             dateAndTime.get(Calendar.YEAR),
             dateAndTime.get(Calendar.MONTH),
             dateAndTime.get(Calendar.DAY_OF_MONTH)
-        )
-            .show()
+        ).show()
     }
 
-    private fun setTime() {
-        TimePickerDialog(
+    private fun setInitialDate() =
+        DateUtils.formatDateTime(
             requireContext(),
-            timeSetListener,
-            dateAndTime.get(Calendar.HOUR_OF_DAY),
-            dateAndTime.get(Calendar.MINUTE), true
+            dateAndTime.timeInMillis,
+            DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR
         )
+
+    private fun askForPermission(): Boolean {
+        if (!isPermissionAllowed()) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    requireActivity(),
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+            ) {
+                showPermissionDeniedDialog()
+            } else {
+                ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                    READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE
+                )
+            }
+            return false
+        }
+        return true
+    }
+
+    private fun isPermissionAllowed(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray,
+    ) {
+        when (requestCode) {
+            READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission is granted, you can perform your operation here
+                } else {
+                    // permission is denied, you can ask for permission again, if you want
+                    askForPermission()
+                }
+                return
+            }
+        }
+    }
+
+    private fun showPermissionDeniedDialog() {
+        AlertDialog.Builder(requireContext())
+            .setTitle(getString(R.string.permission_denied))
+            .setMessage(getString(R.string.permission_denied_message))
+            .setPositiveButton(getString(R.string.goto_app_settings),
+                DialogInterface.OnClickListener { dialogInterface, i ->
+                    // send to app settings if permission is denied permanently
+                    val intent = Intent()
+                    intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                    val uri = Uri.fromParts("package", requireActivity().packageName, null)
+                    intent.data = uri
+                    startActivity(intent)
+                })
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
 
-    private fun setInitialDate() {
-        binding.etNewCatchDate.setText(
-            DateUtils.formatDateTime(
-                requireContext(),
-                dateAndTime.timeInMillis,
-                DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR
-            )
-        )
+    override fun onDetach() {
+        super.onDetach()
+        (requireActivity() as NavigationHolder).showNav()
     }
 
-    private fun setInitialTime() {
-        binding.etNewCatchTime.setText(
-            DateUtils.formatDateTime(
-                requireContext(),
-                dateAndTime.timeInMillis,
-                DateUtils.FORMAT_SHOW_TIME
-            )
-        )
-    }
+    fun commentary() {
 
-    private val timeSetListener =
-        OnTimeSetListener { view, hourOfDay, minute ->
-            dateAndTime.set(Calendar.HOUR_OF_DAY, hourOfDay)
-            dateAndTime.set(Calendar.MINUTE, minute)
-            setInitialTime()
-        }
+        TODO("Subscribe to ViewState")
+//    private fun subscribeOnViewModel() {
+//        lifecycleScope.launchWhenStarted {
+//            viewModel.subscribe().collect { state ->
+//                when (state) {
+//                    is BaseViewState.Loading -> binding.loading.visibility = View.VISIBLE
+//                    is BaseViewState.Success<*> -> binding.loading.visibility = View.GONE
+//                    is BaseViewState.Error -> {
+//                        binding.loading.visibility = View.GONE
+//                        Toast.makeText(context, state.error.message, Toast.LENGTH_SHORT).show()
+//                    }
+//                }
+//            }
+//        }
+//    }
 
-    private val dateSetListener =
-        OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
-            dateAndTime.set(Calendar.YEAR, year)
-            dateAndTime.set(Calendar.MONTH, monthOfYear)
-            dateAndTime.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-            setInitialDate()
-        }
-
-    private fun isInputCorrect(): Boolean {
-        var isCorrect = true
-        if (binding.etNewCatchTitle.text.isNullOrBlank()) {
-            binding.textInputLayoutNewCatchTitle.error = "Enter title"
-            isCorrect = false
-        }
-        if (binding.etNewCatchKindOfFish.text.isNullOrBlank()) {
-            binding.textInputLayoutNewCatchKindOfFish.error = "Enter kind of fish"
-            isCorrect = false
-        }
-        return isCorrect
-    }
-
-    private fun createNewUserCatch() = RawUserCatch(
-        title = binding.etNewCatchTitle.text.toString(),
-        description = binding.etNewCatchDescription.text.toString(),
-        time = binding.etNewCatchTime.text.toString(),
-        date = binding.etNewCatchDate.text.toString(),
-        fishType = binding.etNewCatchKindOfFish.text.toString(),
-        fishAmount = binding.etNewCatchAmount.text.toString().toInt(),
-        fishWeight = binding.etNewCatchAmount.text.toString().toDouble(),
-        fishingRodType = binding.etNewCatchRod.text.toString(),
-        fishingBait = binding.etNewCatchBait.text.toString(),
-        fishingLure = binding.etNewCatchLure.text.toString(),
-        markerId = marker.id,
-        isPublic = binding.switchPublishCatch.isChecked,
-        photos = getPhotos()
-    )
-
-
-    private fun getPhotos(): List<ByteArray> {
-
-        val result = mutableListOf<ByteArray>()
-        return result
+        //TODO("Photo convert from Uri to ByteArray in CoroutineScope")
+//        try {
+//            val bitmap = MediaStore.Images.Media.getBitmap(c.getContentResolver(), Uri.parse(paths))
+//        } catch (e: Exception) {
+//            //handle exception
+//        }
 //        return coroutineScope {
 //            val job = launch {
 //                try {
@@ -359,10 +679,37 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 //            job.join()
 //            result
 //        }
-    }
 
-    override fun onDetach() {
-        super.onDetach()
-        (requireActivity() as NavigationHolder).showNav()
+        //TODO("AutoCompleteTextView for places textField")
+        /*@Composable
+    private fun Place() {
+        OutlinedTextField(
+            value = viewModel.marker.value.title,
+            onValueChange = { }, //text -> if (text !== marker.title) onValueChange(text) },
+            modifier = Modifier.fillMaxWidth(),
+            label = "Marker title"
+        )
+        DropdownMenu(
+            expanded = true, //suggestions.isNotEmpty(),
+            onDismissRequest = {  },
+            modifier = Modifier.fillMaxWidth(),
+            // This line here will accomplish what you want
+            properties = PopupProperties(focusable = false)
+        ) {
+//            suggestions.forEach { label ->
+//                DropdownMenuItem(onClick = {
+//                    onOptionSelected(label)
+//                }) {
+//                    Text(text = label)
+//                }
+//            }
+        }
+    }*/
+
+//    private fun setInitialPlaceData() {
+//        binding.etNewCatchPlaceTitle.setText(marker.title)
+//        binding.etNewCatchPlaceTitle.inputType = InputType.TYPE_NULL
+//        setCurrentCoordinates()
+//    }
     }
 }

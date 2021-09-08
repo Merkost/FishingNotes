@@ -1,4 +1,4 @@
-package com.joesemper.fishing
+package com.joesemper.fishing.ui
 
 import android.content.Context
 import android.content.Intent
@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.joesemper.fishing.R
 import com.joesemper.fishing.databinding.ActivityMainBinding
 import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.utils.NavigationHolder
