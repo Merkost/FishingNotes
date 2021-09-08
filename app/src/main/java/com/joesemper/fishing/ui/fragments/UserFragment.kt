@@ -141,7 +141,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().padding(10.dp)
             ) {
                 Spacer(modifier = Modifier.size(30.dp))
                 UserImage(user)

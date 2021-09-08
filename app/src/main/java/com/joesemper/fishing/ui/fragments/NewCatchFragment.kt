@@ -575,14 +575,14 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         if (!isPermissionAllowed()) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(
                     requireActivity(),
-                    Manifest.permission.READ_EXTERNAL_STORAGE
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
                 )
             ) {
                 showPermissionDeniedDialog()
             } else {
                 ActivityCompat.requestPermissions(
                     requireActivity(),
-                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE),
                     READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE
                 )
             }
@@ -593,6 +593,9 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 
     private fun isPermissionAllowed(): Boolean {
         return ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
             requireContext(),
             Manifest.permission.READ_EXTERNAL_STORAGE
         ) == PackageManager.PERMISSION_GRANTED
