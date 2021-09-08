@@ -89,7 +89,7 @@ class UserCatchesInnerFragment : Fragment(), AndroidScopeComponent {
                 }
                 is CatchRecyclerViewItem.ItemUserCatch -> {
                     val action =
-                        MapFragmentDirections.actionMapFragmentToUserCatchFragment(
+                        MapFragmentDirections.actionMapFragmentToNewCatchDialogFragment(
                             item.catch
                         )
                     findNavController().navigate(action)

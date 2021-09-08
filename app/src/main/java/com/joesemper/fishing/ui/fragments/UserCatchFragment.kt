@@ -64,9 +64,13 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
 
     private lateinit var catch: UserCatch
 
+    //while debugging
     val photos = listOf(
         R.drawable.ic_fish.toDrawable(),
         R.drawable.ic_fishing.toDrawable(),
+        R.drawable.ic_fisher.toDrawable(),
+        R.drawable.ic_fisher.toDrawable(),
+        R.drawable.ic_fisher.toDrawable(),
         R.drawable.ic_fisher.toDrawable()
     )
 
@@ -106,19 +110,18 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
         Scaffold(
             topBar = { AppBar() }
         ) {
-
             val scrollState = rememberScrollState()
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .fillMaxWidth().padding(top = 4.dp)
-                    .padding(horizontal = 16.dp)
+                    .padding(15.dp)
                     .verticalScroll(state = scrollState, enabled = true),
             ) {
                 Card(elevation = 4.dp) { Title(catch.title, catch.description, catch.userId) }
                 Photos(photos)
-                Card(elevation = 4.dp) { PlaceInfo() }
+                Card(elevation = 4.dp, modifier = Modifier.fillMaxWidth()) { PlaceInfo() }
                 if (!catch.fishWeight.isNaN()) {
                     MyTextField(
                         stringResource(R.string.weight) + stringResource(R.string.kg),
@@ -147,7 +150,7 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
 
     @Composable
     private fun PlaceInfo() {
-        Row(horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.padding(4.dp).fillMaxWidth()) {
             Column(verticalArrangement = Arrangement.Center) {
                 Image(
                     painterResource(R.drawable.ic_baseline_map_24),
@@ -162,8 +165,8 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
 
     @Composable
     private fun Title(title: String, description: String, userId: String) {
-        Column {
-            Row(horizontalArrangement = Arrangement.SpaceBetween) {
+        Column(modifier = Modifier.padding(4.dp)) {
+            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth().height(25.dp)) {
                 Text(
                     title,
                     fontWeight = FontWeight.Bold,
@@ -172,7 +175,7 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
                 UserProfile()
             }
             Text(description, modifier = Modifier.fillMaxWidth())
-            Row(horizontalArrangement = Arrangement.End, modifier = Modifier.height(10.dp)) {
+            Row(horizontalArrangement = Arrangement.End, modifier = Modifier.height(30.dp).fillMaxWidth()) {
                 Text("08.09.2021", modifier = Modifier.padding(end = 5.dp))
             }
         }
@@ -183,15 +186,16 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
         Row {
             Image(
                 painter = painterResource(R.drawable.ic_fisher),
-                contentDescription = stringResource(R.string.fisher)
+                contentDescription = stringResource(R.string.fisher),
+                Modifier.size(50.dp)
             )
             Column(verticalArrangement = Arrangement.SpaceBetween) {
                 Text(
                     stringResource(R.string.fisher),
                     fontWeight = FontWeight.Bold,
-                    fontSize = 8.sp
+                    fontSize = 18.sp
                 )
-                Text("@" + stringResource(R.string.fisher), fontSize = 5.sp)
+                Text("@" + stringResource(R.string.fisher), fontSize =10.sp)
             }
         }
     }
@@ -226,7 +230,6 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
                 }
             }
         }
-        Spacer(modifier = Modifier.size(70.dp))
     }
 
     @Composable
@@ -252,10 +255,10 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
         Card(elevation = 4.dp) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)
+                modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp).height(40.dp)
             ) {
-                Text(text, modifier = Modifier.padding(start = 5.dp))
-                Text(info, modifier = Modifier.padding(end = 5.dp))
+                Text(text, modifier = Modifier.padding(start = 5.dp).align(Alignment.CenterVertically))
+                Text(info, modifier = Modifier.padding(end = 5.dp).align(Alignment.CenterVertically))
             }
         }
     }
@@ -273,7 +276,7 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
                 })
             }, actions = {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(end = 3.dp),
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -283,15 +286,15 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
                                 requireContext(),
                                 "Not Yet Implemented"
                             )
-                        })
-                    Spacer(modifier = Modifier.size(2.dp))
+                        }.size(25.dp))
+                    Spacer(modifier = Modifier.size(15.dp))
                     Icon(Icons.Default.Delete, stringResource(R.string.edit),
                         modifier = Modifier.clickable {
                             showToast(
                                 requireContext(),
                                 "Not Yet Implemented"
                             )
-                        })
+                        }.size(25.dp))
                 }
             })
     }

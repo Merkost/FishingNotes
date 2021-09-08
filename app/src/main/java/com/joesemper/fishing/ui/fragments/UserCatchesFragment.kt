@@ -8,12 +8,14 @@ import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.joesemper.fishing.R
 import com.joesemper.fishing.databinding.FragmentCatchesBinding
 import com.joesemper.fishing.model.entity.content.UserCatch
+import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.adapters.CatchRecyclerViewItem
 import com.joesemper.fishing.ui.adapters.UserCatchesRVAdapter
 
@@ -65,14 +67,18 @@ class UserCatchesFragment : Fragment() {
         adapter = UserCatchesRVAdapter { item ->
             when (item) {
                 is CatchRecyclerViewItem.ItemAddNewCatch -> {
-                    Toast.makeText(
-                        requireContext(),
-                        "Add new catch\nWork in progress",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    val action =
+                        NotesFragmentDirections.actionNotesFragmentToNewCatchDialogFragment(
+                            UserMapMarker()
+                        )
+                    findNavController().navigate(action)
                 }
                 is CatchRecyclerViewItem.ItemUserCatch -> {
-                    val catchFragment = UserCatchFragment.newInstance(item.catch)
+                    val action =
+                    NotesFragmentDirections.actionNotesFragmentToUserCatchFragment(
+                        item.catch
+                    )
+                    findNavController().navigate(action)
                 }
             }
 
