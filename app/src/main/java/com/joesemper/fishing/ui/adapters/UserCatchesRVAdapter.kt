@@ -10,6 +10,7 @@ import com.joesemper.fishing.databinding.ItemUserCatchBinding
 import com.joesemper.fishing.model.entity.content.UserCatch
 
 class UserCatchesRVAdapter(
+    private val data: List<UserCatch>,
     private val onItemClicked: (CatchRecyclerViewItem) -> Unit
 ) : RecyclerView.Adapter<UserCatchesRVAdapter.CatchesViewHolder>() {
 
@@ -18,18 +19,7 @@ class UserCatchesRVAdapter(
         private const val ITEM_USER_CATCH = 1
     }
 
-    var data = mutableListOf<CatchRecyclerViewItem>(CatchRecyclerViewItem.ItemAddNewCatch)
-
-    fun addData(catches: List<UserCatch>) {
-        data.clear()
-        data.add(CatchRecyclerViewItem.ItemAddNewCatch)
-        catches.forEach{ userCatch ->
-            data.add(CatchRecyclerViewItem.ItemUserCatch(userCatch))
-        }
-        notifyDataSetChanged()
-    }
-
-    sealed class CatchesViewHolder(private val binding: ViewBinding) :
+    sealed class CatchesViewHolder(binding: ViewBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         class CatchViewHolder(private val binding: ItemUserCatchBinding) :
@@ -56,7 +46,7 @@ class UserCatchesRVAdapter(
             }
         }
 
-        class AddNewCatchViewHolder(private val binding: ItemAddNewUserCatchBinding) :
+        class AddNewCatchViewHolder(binding: ItemAddNewUserCatchBinding) :
             CatchesViewHolder(binding)
     }
 
@@ -85,14 +75,14 @@ class UserCatchesRVAdapter(
     override fun onBindViewHolder(holder: CatchesViewHolder, position: Int) {
         when (holder) {
             is CatchesViewHolder.CatchViewHolder -> {
-                val item = data[position]
+                val item = getItem(position)
                 holder.bind(item)
                 holder.itemView.setOnClickListener {
                     onItemClicked(item)
                 }
             }
             is CatchesViewHolder.AddNewCatchViewHolder -> {
-                val item = data[position]
+                val item = getItem(position)
                 holder.itemView.setOnClickListener {
                     onItemClicked(item)
                 }
@@ -107,7 +97,15 @@ class UserCatchesRVAdapter(
         }
     }
 
-    override fun getItemCount() = data.size
+    override fun getItemCount() = data.size + 1
+
+    private fun getItem(position: Int): CatchRecyclerViewItem {
+        return when (getItemViewType(position)) {
+            ITEM_ADD_NEW_CATCH -> CatchRecyclerViewItem.ItemAddNewCatch
+            ITEM_USER_CATCH -> CatchRecyclerViewItem.ItemUserCatch(data[position - 1])
+            else -> throw IllegalArgumentException("Invalid position")
+        }
+    }
 
 }
 
