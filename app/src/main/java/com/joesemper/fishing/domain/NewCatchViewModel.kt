@@ -1,6 +1,7 @@
 package com.joesemper.fishing.domain
 
 import android.net.Uri
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -18,19 +19,19 @@ import kotlinx.coroutines.launch
 
 class NewCatchViewModel(private val repository: UserContentRepository) : ViewModel() {
 
-    val marker = mutableStateOf(UserMapMarker())
+    val marker: MutableState<UserMapMarker> = mutableStateOf(UserMapMarker())
 
     val title = mutableStateOf("")
-    var description = mutableStateOf("")
-    var fishAmount = mutableStateOf("0")
-    var weight = mutableStateOf("0")
-    var date = mutableStateOf("")
-    var time = mutableStateOf("")
-    var rod = mutableStateOf("")
-    var bite = mutableStateOf("")
-    var lure = mutableStateOf("")
+    val description = mutableStateOf("")
+    val fishAmount = mutableStateOf("0")
+    val weight = mutableStateOf("0")
+    val date = mutableStateOf("")
+    val time = mutableStateOf("")
+    val rod = mutableStateOf("")
+    val bite = mutableStateOf("")
+    val lure = mutableStateOf("")
 
-    var images = mutableStateListOf<Uri>()
+    val images = mutableStateListOf<Uri>()
 
     fun addPhoto(uri: Uri) {
         images.add(uri)
@@ -46,6 +47,8 @@ class NewCatchViewModel(private val repository: UserContentRepository) : ViewMod
     fun subscribe(): StateFlow<BaseViewState> {
         return viewStateFlow
     }
+
+    fun getAllUserMarkersList() = repository.getAllUserMarkersList()
 
     private fun addNewCatch(newCatch: RawUserCatch) {
         viewStateFlow.value = BaseViewState.Loading(null)
@@ -84,7 +87,7 @@ class NewCatchViewModel(private val repository: UserContentRepository) : ViewMod
                 fishingRodType = rod.value,
                 fishingBait = bite.value,
                 fishingLure = lure.value,
-                markerId = marker.value.id,
+                markerId = marker.value!!.id,
                 isPublic = false,
                 photos = photos
             ))

@@ -13,7 +13,6 @@ import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
@@ -30,6 +29,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -44,6 +44,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.PopupProperties
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -130,7 +131,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
             ) {
                 Title(viewModel.title)
                 MyTextField(viewModel.description, stringResource(R.string.description))
-                Place(stringResource(R.string.place))  //Выпадающий список мест
+                Places(stringResource(R.string.place))  //Выпадающий список мест
                 DateAndTime(viewModel.date, viewModel.time)
                 FishAndWeight(viewModel.fishAmount, viewModel.weight)
                 Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
@@ -139,6 +140,69 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                     { deleted -> viewModel.deletePhoto(deleted) })
             }
         }
+    }
+
+    //TODO("AutoCompleteTextView for places textField")
+    @Composable
+    private fun Places(label: String) {
+        val marker by rememberSaveable { viewModel.marker }
+        var textFieldValue by rememberSaveable{ mutableStateOf(if(marker.title.isNotEmpty()) marker.title else "Выберите место") }
+        var isDropMenuOpen by rememberSaveable { mutableStateOf(false) }
+        val suggestions by viewModel.getAllUserMarkersList().collectAsState(listOf())
+        val dropMenuItems by rememberSaveable { mutableStateOf(suggestions) }
+        Row(modifier = Modifier.fillMaxWidth()) {
+            OutlinedTextField(
+                value = textFieldValue,
+                onValueChange = {
+                    textFieldValue = it
+                    if (suggestions.isNotEmpty()) {
+                        searchFor(textFieldValue, suggestions)
+                        isDropMenuOpen = true
+                    }
+                }, //text -> if (text !== marker.title) onValueChange(text) },
+                modifier = Modifier.clickable { isDropMenuOpen = true }.fillMaxWidth(),
+                label = { Text(text = label) },
+                trailingIcon = {
+                    Icon(Icons.Default.KeyboardArrowDown, "",
+                        modifier = Modifier.clickable {
+                            if (!isDropMenuOpen) isDropMenuOpen = true
+                        })
+                },
+            )
+            DropdownMenu(
+                expanded = isDropMenuOpen, //suggestions.isNotEmpty(),
+                onDismissRequest = { if (isDropMenuOpen) isDropMenuOpen = false },
+                // This line here will accomplish what you want
+                properties = PopupProperties(focusable = false)
+            ) {
+                suggestions.forEach { suggestion ->
+                    if (suggestion != marker) {
+                        DropdownMenuItem(
+                            onClick = {
+                                viewModel.marker.value.title = suggestion.title
+                                isDropMenuOpen = false
+                            }) {
+                            Text(text = suggestion.title)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun searchFor(what: String, where: List<UserMapMarker>) {
+//        where.forEach {
+//            if (it.title.startsWith(what))
+//        }
+            //.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER, { what }))
+    }
+
+    @Composable
+    fun Place(label: String) {
+        OutlinedTextField(
+            value = viewModel.marker.value.title, onValueChange = { }, readOnly = true,
+            label = { Text(text = label) }, modifier = Modifier.fillMaxWidth()
+        )
     }
 
     @ExperimentalMaterialApi
@@ -188,13 +252,6 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         }
     }
 
-    @Composable
-    fun Place(label: String) {
-        OutlinedTextField(
-            value = viewModel.marker.value.title, onValueChange = { }, readOnly = true,
-            label = { Text(text = label) }, modifier = Modifier.fillMaxWidth()
-        )
-    }
 
     @Composable
     fun Fishing(rod: MutableState<String>, bite: MutableState<String>, lure: MutableState<String>) {
@@ -582,7 +639,10 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
             } else {
                 ActivityCompat.requestPermissions(
                     requireActivity(),
-                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                    arrayOf(
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ),
                     READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE
                 )
             }
@@ -683,31 +743,6 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 //            result
 //        }
 
-        //TODO("AutoCompleteTextView for places textField")
-        /*@Composable
-    private fun Place() {
-        OutlinedTextField(
-            value = viewModel.marker.value.title,
-            onValueChange = { }, //text -> if (text !== marker.title) onValueChange(text) },
-            modifier = Modifier.fillMaxWidth(),
-            label = "Marker title"
-        )
-        DropdownMenu(
-            expanded = true, //suggestions.isNotEmpty(),
-            onDismissRequest = {  },
-            modifier = Modifier.fillMaxWidth(),
-            // This line here will accomplish what you want
-            properties = PopupProperties(focusable = false)
-        ) {
-//            suggestions.forEach { label ->
-//                DropdownMenuItem(onClick = {
-//                    onOptionSelected(label)
-//                }) {
-//                    Text(text = label)
-//                }
-//            }
-        }
-    }*/
 
 //    private fun setInitialPlaceData() {
 //        binding.etNewCatchPlaceTitle.setText(marker.title)
@@ -715,4 +750,6 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 //        setCurrentCoordinates()
 //    }
     }
+
+//    }
 }

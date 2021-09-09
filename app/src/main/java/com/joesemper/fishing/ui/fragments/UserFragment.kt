@@ -132,7 +132,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     @ExperimentalCoilApi
     @Composable
     fun UserInfo() {
-        val user by viewModel.getCurrentUser().collectAsState(User())
+        val user by viewModel.getCurrentUser().collectAsState(null)
         Card(
             elevation = 10.dp,
             modifier = Modifier.padding(top = 50.dp).size(230.dp),

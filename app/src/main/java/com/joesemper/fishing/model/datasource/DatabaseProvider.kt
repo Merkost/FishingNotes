@@ -15,7 +15,7 @@ interface DatabaseProvider {
     suspend fun deleteMarker(userCatch: UserCatch)
     fun getMapMarker(markerId: String): Flow<UserMapMarker?>
     fun getAllMarkers(): Flow<MapMarker>
-    fun getAllUserMarkersList(): Flow<List<MapMarker>>
+    fun getAllUserMarkersList(): Flow<List<UserMapMarker>>
     fun getAllUserCatchesList(): Flow<List<UserCatch>>
     fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>>
 }
