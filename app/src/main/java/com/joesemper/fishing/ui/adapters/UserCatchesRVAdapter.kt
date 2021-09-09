@@ -29,7 +29,7 @@ class UserCatchesRVAdapter(
                 val catch = (item as CatchRecyclerViewItem.ItemUserCatch).catch
                 with(binding) {
 
-                    tvCatchItemFish.text = catch.fishType
+                    tvCatchItemFish.text = catch.title
 
                     "Amount: ${catch.fishAmount}".also { tvCatchItemAmount.text = it }
 
@@ -39,7 +39,7 @@ class UserCatchesRVAdapter(
                         ivCatchItemPhoto.load(catch.downloadPhotoLinks.first())
                     }
 
-                    "${catch.date} ${catch.time}".also { tvCatchItemTimeDate.text = it }
+                    catch.time.also { tvCatchItemTimeDate.text = it }
                 }
 
 
