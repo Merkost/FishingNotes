@@ -22,7 +22,7 @@ class UserContentRepositoryImpl(private val dataProvider: DatabaseProvider) :
 
     override fun getAllUserMarkers(): Flow<MapMarker> = dataProvider.getAllMarkers()
 
-    override fun getAllUserMarkersList(): Flow<List<UserMapMarker>> =
+    override fun getAllUserMarkersList(): Flow<List<MapMarker>> =
         dataProvider.getAllUserMarkersList()
 
     override fun getAllUserCatchesList(): Flow<List<UserCatch>> =

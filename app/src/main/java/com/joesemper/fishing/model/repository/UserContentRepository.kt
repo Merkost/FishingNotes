@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 interface UserContentRepository {
     fun getMapMarker(markerId: String): Flow<UserMapMarker?>
     fun getAllUserMarkers(): Flow<MapMarker>
-    fun getAllUserMarkersList(): Flow<List<UserMapMarker>>
+    fun getAllUserMarkersList(): Flow<List<MapMarker>>
     fun getAllUserCatchesList(): Flow<List<UserCatch>>
     fun getAllUserContentList(): Flow<List<Content>>
     fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>>
