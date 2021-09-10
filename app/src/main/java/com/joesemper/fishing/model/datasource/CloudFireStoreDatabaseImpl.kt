@@ -7,11 +7,12 @@ import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.joesemper.fishing.model.entity.raw.RawUserCatch
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
-import com.joesemper.fishing.model.mappers.MapMarkerMapper
+import com.joesemper.fishing.model.mappers.Mapper
 import com.joesemper.fishing.model.mappers.UserCatchMapper
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.common.Progress
+import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.utils.getCurrentUser
 import com.joesemper.fishing.utils.getCurrentUserId
@@ -172,6 +173,20 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
         }
 
     @ExperimentalCoroutinesApi
+    override suspend fun addNewUser(user: User): StateFlow<Progress> {
+        val flow = MutableStateFlow<Progress>(Progress.Loading())
+        if (user.isAnonymous) {
+            flow.emit(Progress.Complete)
+        } else {
+            getUsersCollection().document(user.userId).set(user)
+                .addOnCompleteListener {
+                    flow.tryEmit(Progress.Complete)
+                }
+        }
+        return flow
+    }
+
+    @ExperimentalCoroutinesApi
     override suspend fun addNewCatch(newCatch: RawUserCatch): StateFlow<Progress> {
         val flow = MutableStateFlow<Progress>(Progress.Loading())
 
@@ -189,7 +204,7 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
     @ExperimentalCoroutinesApi
     override suspend fun addNewMarker(newMarker: RawMapMarker): StateFlow<Progress> {
         val flow = MutableStateFlow<Progress>(Progress.Loading())
-        val mapMarker = MapMarkerMapper().mapRawMapMarker(newMarker)
+        val mapMarker = Mapper().mapRawMapMarker(newMarker)
         try {
             saveMarker(mapMarker)
         } catch (error: Throwable) {
@@ -229,6 +244,10 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
     override suspend fun deleteMarker(userCatch: UserCatch) {
 //        cloudStorage.deletePhoto(userCatch.downloadPhotoLink)
 //        getUserMarkersCollection().document(userCatch.id).delete()
+    }
+
+    private fun getUsersCollection(): CollectionReference {
+        return db.collection(USERS_COLLECTION)
     }
 
     private fun getMapMarkersCollection(): CollectionReference {

@@ -6,4 +6,5 @@ import kotlinx.coroutines.flow.Flow
 interface AuthManager {
     val currentUser: Flow<User?>
     suspend fun logoutCurrentUser(): Flow<Boolean>
+
 }
