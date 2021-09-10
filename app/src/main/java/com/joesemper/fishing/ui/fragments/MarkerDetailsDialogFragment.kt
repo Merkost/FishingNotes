@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
@@ -23,6 +22,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.tabs.TabLayoutMediator
+import com.joesemper.fishing.R
 import com.joesemper.fishing.databinding.FragmentMarkerDetailsBinding
 import com.joesemper.fishing.domain.MarkerDetailsViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
@@ -66,14 +66,14 @@ class MarkerDetailsDialogFragment : BottomSheetDialogFragment(), AndroidScopeCom
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val dialog = super.onCreateDialog(savedInstanceState)
+        val dialog = BottomSheetDialog(requireContext(), R.style.Widget_MyApp_BottomSheet_Modal)
         dialog.setOnShowListener { dial ->
             val d = dial as BottomSheetDialog
             val bottomSheet =
-                d.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet) as FrameLayout
+                d.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)!!
             val behavior = BottomSheetBehavior.from(bottomSheet)
-            behavior.peekHeight = 1000
-            behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            behavior.peekHeight = 10
+            behavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
             behavior.skipCollapsed = true
         }
         return dialog

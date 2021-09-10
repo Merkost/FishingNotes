@@ -10,8 +10,8 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.databinding.FragmentNewMarkerBinding
+import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.utils.AddNewMarkerListener
 import com.joesemper.fishing.utils.format
 

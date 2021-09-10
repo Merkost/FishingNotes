@@ -432,7 +432,6 @@
     </LinearLayout>
 
     <include
-
         layout="@layout/dialog_new_catch"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 

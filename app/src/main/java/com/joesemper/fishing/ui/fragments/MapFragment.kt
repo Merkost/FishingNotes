@@ -2,6 +2,7 @@ package com.joesemper.fishing.ui.fragments
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -24,6 +25,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.transition.MaterialSharedAxis
 import com.joesemper.fishing.R
 import com.joesemper.fishing.databinding.FragmentMapBinding
@@ -108,11 +110,12 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
+
         enableMyLocation()
         setOnMarkersClickListener()
         subscribeOnViewModel()
         setOnFabClickListener()
-        getDeviceLocation()
+        moveCameraToCurrentLocation()
     }
 
     private fun enableMyLocation() {
@@ -222,18 +225,56 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     }
 
     private fun setOnFabClickListener() {
+        val bottomSheet = binding.standardBottomSheet
+        val bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+        bottomSheetBehavior.isHideable = true
+        bottomSheetBehavior.isFitToContents = true
+        bottomSheetBehavior.expandedOffset
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+
+
         binding.fabAddMarker.setOnClickListener {
-            if (isPlaceSelectMode) {
-                if (currentMapMarker != null) {
-                    onNewMarkerPlaceSelected()
-                } else {
-                    showToast("Select a place on the map!")
-                }
-            } else {
-                showAddMarkerAlertDialog()
+            binding.ivPointer.visibility = View.VISIBLE
+            moveCameraToCurrentLocation()
+
+            val geocoder = Geocoder(requireContext())
+
+            map.setOnCameraMoveStartedListener {
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
             }
 
+            map.setOnCameraMoveListener {
+
+//                val position = geocoder.getFromLocation(getCameraPosition().latitude, getCameraPosition().longitude, 1)
+//                binding.tvCoordinats.text = position.first().subAdminArea
+            }
+
+            map.setOnCameraIdleListener {
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+                val position = geocoder.getFromLocation(
+                    getCameraPosition().latitude,
+                    getCameraPosition().longitude,
+                    1
+                )
+                binding.tvCoordinates.text = position.first().subAdminArea
+            }
+
+
+//        if (isPlaceSelectMode) {
+//            if (currentMapMarker != null) {
+//                onNewMarkerPlaceSelected()
+//            } else {
+//                showToast("Select a place on the map!")
+//            }
+//        } else {
+//            showAddMarkerAlertDialog()
+//        }
+//
         }
+    }
+
+    private fun getCameraPosition(): LatLng {
+        return map.cameraPosition.target
     }
 
     private fun showAddMarkerAlertDialog() {
@@ -287,7 +328,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         }
     }
 
-    private fun getDeviceLocation() {
+    private fun moveCameraToCurrentLocation() {
         if (permissionDenied) return
         try {
             val locationResult = fusedLocationProviderClient.lastLocation
