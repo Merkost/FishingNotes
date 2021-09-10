@@ -4,38 +4,37 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.joesemper.fishing.R
 import com.joesemper.fishing.databinding.FragmentCatchesBinding
+import com.joesemper.fishing.domain.UserCatchesViewModel
+import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.adapters.CatchRecyclerViewItem
 import com.joesemper.fishing.ui.adapters.UserCatchesRVAdapter
+import kotlinx.coroutines.flow.collect
+import org.koin.android.scope.AndroidScopeComponent
+import org.koin.androidx.scope.fragmentScope
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.scope.Scope
 
-class UserCatchesFragment : Fragment() {
+class UserCatchesFragment : Fragment(), AndroidScopeComponent {
 
     companion object {
         private const val TAG = "CATCHES"
 
-        fun newInstance(data: List<UserCatch>): Fragment {
-            val args = bundleOf(TAG to data)
-            val fragment = UserCatchesFragment()
-            fragment.arguments = args
-            return fragment
+        fun newInstance(): Fragment {
+            return UserCatchesFragment()
         }
     }
 
+    override val scope: Scope by fragmentScope()
+    private val viewModel: UserCatchesViewModel by viewModel()
 
     private lateinit var binding: FragmentCatchesBinding
-
-    private val catches = mutableListOf<UserCatch>()
 
     private lateinit var adapter: UserCatchesRVAdapter
 
@@ -51,35 +50,39 @@ class UserCatchesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initData()
-        initRV()
-        addDataToRV()
+        subscribeOnViewModel()
     }
 
-    private fun initData() {
-        val data = arguments?.getParcelableArrayList<UserCatch>(TAG)
-        if (!data.isNullOrEmpty()) {
-            catches.addAll(data)
+    private fun subscribeOnViewModel() {
+        lifecycleScope.launchWhenStarted {
+            viewModel.subscribe().collect { viewState ->
+                when (viewState) {
+                    is BaseViewState.Loading -> onLoading()
+                    is BaseViewState.Success<*> -> onSuccess(viewState.data as List<UserCatch>)
+                    is BaseViewState.Error -> onError(viewState.error)
+                }
+
+            }
         }
     }
 
-    private fun initRV() {
-        adapter = UserCatchesRVAdapter { item ->
+    private fun onLoading() {
+
+    }
+
+    private fun onSuccess(catches: List<UserCatch>) {
+        initRV(catches)
+    }
+
+    private fun onError(error: Throwable) {
+
+    }
+
+    private fun initRV(data: List<UserCatch>) {
+        adapter = UserCatchesRVAdapter(data) { item ->
             when (item) {
-                is CatchRecyclerViewItem.ItemAddNewCatch -> {
-                    val action =
-                        NotesFragmentDirections.actionNotesFragmentToNewCatchDialogFragment(
-                            UserMapMarker()
-                        )
-                    findNavController().navigate(action)
-                }
-                is CatchRecyclerViewItem.ItemUserCatch -> {
-                    val action =
-                    NotesFragmentDirections.actionNotesFragmentToUserCatchFragment(
-                        item.catch
-                    )
-                    findNavController().navigate(action)
-                }
+                is CatchRecyclerViewItem.ItemAddNewCatch -> onAddNewCatchClick()
+                is CatchRecyclerViewItem.ItemUserCatch -> onCatchItemClick(item.catch)
             }
 
         }
@@ -87,7 +90,19 @@ class UserCatchesFragment : Fragment() {
         binding.rvCatches.adapter = adapter
     }
 
-    private fun addDataToRV() {
-        adapter.addData(catches)
+    private fun onAddNewCatchClick() {
+        val action =
+            NotesFragmentDirections.actionNotesFragmentToNewCatchDialogFragment(
+                UserMapMarker()
+            )
+        findNavController().navigate(action)
     }
+
+    private fun onCatchItemClick(catch: UserCatch) {
+        val action =
+            NotesFragmentDirections.actionNotesFragmentToUserCatchFragment(catch)
+        findNavController().navigate(action)
+    }
+
+
 }

@@ -5,28 +5,17 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.joesemper.fishing.databinding.ItemAddNewPlaceBinding
-import com.joesemper.fishing.databinding.ItemAddNewUserCatchBinding
 import com.joesemper.fishing.databinding.ItemUserPlaceBinding
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 
 class UserPlacesRVAdapter(
+    private val data: List<UserMapMarker>,
     private val onItemClicked: (PlaceRecyclerViewItem) -> Unit
 ) : RecyclerView.Adapter<UserPlacesRVAdapter.PlacesViewHolder>() {
 
     companion object {
         private const val ITEM_ADD_NEW_PLACE = 0
         private const val ITEM_USER_PLACE = 1
-    }
-
-    val data = mutableListOf<PlaceRecyclerViewItem>(PlaceRecyclerViewItem.ItemAddNewPlace)
-
-    fun addData(catches: List<UserMapMarker>) {
-        data.clear()
-        data.add(PlaceRecyclerViewItem.ItemAddNewPlace)
-        catches.forEach{ userPlace ->
-            data.add(PlaceRecyclerViewItem.ItemUserPlace(userPlace))
-        }
-        notifyDataSetChanged()
     }
 
     sealed class PlacesViewHolder(binding: ViewBinding) :
@@ -75,14 +64,14 @@ class UserPlacesRVAdapter(
     override fun onBindViewHolder(holder: PlacesViewHolder, position: Int) {
         when (holder) {
             is PlacesViewHolder.PlaceViewHolder -> {
-                val item = data[position]
+                val item = getItem(position)
                 holder.bind(item)
                 holder.itemView.setOnClickListener {
                     onItemClicked(item)
                 }
             }
             is PlacesViewHolder.AddNewCatchViewHolder -> {
-                val item = data[position]
+                val item = getItem(position)
                 holder.itemView.setOnClickListener {
                     onItemClicked(item)
                 }
@@ -97,7 +86,15 @@ class UserPlacesRVAdapter(
         }
     }
 
-    override fun getItemCount() = data.size
+    override fun getItemCount() = data.size + 1
+
+    private fun getItem(position: Int): PlaceRecyclerViewItem {
+        return when (getItemViewType(position)) {
+            ITEM_ADD_NEW_PLACE -> PlaceRecyclerViewItem.ItemAddNewPlace
+            ITEM_USER_PLACE -> PlaceRecyclerViewItem.ItemUserPlace(data[position - 1])
+            else -> throw IllegalArgumentException("Invalid position")
+        }
+    }
 }
 
 sealed class PlaceRecyclerViewItem {

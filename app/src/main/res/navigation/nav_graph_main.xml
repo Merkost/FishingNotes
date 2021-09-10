@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_fraph_main"
     app:startDestination="@id/mapFragment">
 
@@ -21,6 +20,9 @@
         <action
             android:id="@+id/action_mapFragment_to_notesFragment"
             app:destination="@id/notesFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_userCatchFragment"
+            app:destination="@id/userCatchFragment" />
     </fragment>
 
     <fragment
