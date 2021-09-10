@@ -12,9 +12,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
@@ -34,6 +36,7 @@ import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.ui.LoginActivity
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import com.joesemper.fishing.domain.UserViewModel
+import com.joesemper.fishing.model.entity.content.MapMarker
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -72,12 +75,55 @@ class UserFragment : Fragment(), AndroidScopeComponent {
             content = {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceAround,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    UserInfo()
+                    Card(
+                        elevation = 10.dp,
+                        modifier = Modifier.padding(50.dp).fillMaxWidth().height(220.dp),
+                        shape = RoundedCornerShape(25.dp),
+                        backgroundColor = MaterialTheme.colors.surface
+                    ) {
+                        Column() {
+                            UserInfo()
+                            UserStats()
+                        }
+
+                    }
                     UserButtons()
                 }
             })
+    }
+
+    @Composable
+    fun UserStats() {
+        Row(horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier.padding(5.dp).fillMaxWidth().height(50.dp)) {
+            PlacesNumber()
+            CatchesNumber()
+        }
+    }
+
+    @Composable
+    fun PlacesNumber() {
+        val userPlacesNum by viewModel.getUserPlaces().collectAsState(listOf())
+        Column(horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)) {
+            Icon(Icons.Default.Place, stringResource(R.string.place),
+                modifier = Modifier.size(25.dp))
+            Text(userPlacesNum.size.toString())
+        }
+    }
+
+    @Composable
+    fun CatchesNumber() {
+        val userCatchesNum by viewModel.getUserCatches().collectAsState(listOf())
+        Column(horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)) {
+            Icon(painterResource(R.drawable.ic_fishing), stringResource(R.string.place),
+                modifier = Modifier.size(25.dp))
+            Text(userCatchesNum.size.toString())
+        }
     }
 
     @ExperimentalMaterialApi
@@ -86,21 +132,22 @@ class UserFragment : Fragment(), AndroidScopeComponent {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize().padding(horizontal = 80.dp),
-            verticalArrangement = Arrangement.Bottom
+            verticalArrangement = Arrangement.spacedBy(15.dp, Alignment.Bottom)
         ) {
             ColumnButton(painterResource(R.drawable.ic_friends), getString(R.string.friends)) {
                 notReadyYetToast()
             }
-            Spacer(modifier = Modifier.size(15.dp))
+
             ColumnButton(painterResource(R.drawable.ic_edit), getString(R.string.edit_profile)) {
-                notReadyYetToast() }
-            Spacer(modifier = Modifier.size(15.dp))
+                notReadyYetToast()
+            }
+
             ColumnButton(painterResource(R.drawable.ic_settings), getString(R.string.settings)) {
                 val action =
                     UserFragmentDirections.actionUserFragmentToSettingsFragment()
                 findNavController().navigate(action)
             }
-            Spacer(modifier = Modifier.size(30.dp))
+            Spacer(modifier = Modifier.size(15.dp))
             OutlinedButton(onClick = {
                 lifecycleScope.launch {
                     viewModel.logoutCurrentUser().collect { isLogout ->
@@ -133,22 +180,15 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     @Composable
     fun UserInfo() {
         val user by viewModel.getCurrentUser().collectAsState(User())
-        Card(
-            elevation = 10.dp,
-            modifier = Modifier.padding(top = 50.dp).size(230.dp),
-            shape = RoundedCornerShape(25.dp),
-            backgroundColor = MaterialTheme.colors.surface
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth().padding(10.dp)
-            ) {
-                Spacer(modifier = Modifier.size(30.dp))
-                UserImage(user)
-                UserName(user)
-            }
+        Row(modifier = Modifier.fillMaxWidth().height(150.dp). padding(20.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically) {
+            //TODO: add number of places, catches and more
+            UserImage(user)
+            UserName(user)
         }
     }
+
 
     @Composable
     private fun UserName(user: User?) {
@@ -157,7 +197,6 @@ class UserFragment : Fragment(), AndroidScopeComponent {
                 true -> stringResource(R.string.anonymous)
                 false -> user.userName
             }, style = MaterialTheme.typography.h6,
-            modifier = Modifier.padding(vertical = 15.dp, horizontal = 20.dp),
             textAlign = TextAlign.Center
         )
     }
@@ -176,7 +215,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
                     })
             },
             contentDescription = stringResource(R.string.fisher),
-            modifier = Modifier.size(120.dp)
+            modifier = Modifier.size(150.dp)
         )
     }
 
@@ -186,8 +225,10 @@ class UserFragment : Fragment(), AndroidScopeComponent {
             title = { Text(text = "User") },
             navigationIcon = {
                 IconButton(onClick = { findNavController().popBackStack() }) {
-                    Icon( imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = getString(R.string.back))
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = getString(R.string.back)
+                    )
                 }
             },
             elevation = 2.dp
