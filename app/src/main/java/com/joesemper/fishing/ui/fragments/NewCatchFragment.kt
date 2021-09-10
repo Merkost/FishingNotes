@@ -149,14 +149,14 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         var textFieldValue by rememberSaveable{ mutableStateOf(if(marker.title.isNotEmpty()) marker.title else "Выберите место") }
         var isDropMenuOpen by rememberSaveable { mutableStateOf(false) }
         val suggestions by viewModel.getAllUserMarkersList().collectAsState(listOf())
-        val dropMenuItems by rememberSaveable { mutableStateOf(suggestions) }
+        val filteredList by rememberSaveable { mutableStateOf(suggestions.toMutableList()) }
         Row(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
                 value = textFieldValue,
                 onValueChange = {
                     textFieldValue = it
                     if (suggestions.isNotEmpty()) {
-                        searchFor(textFieldValue, suggestions)
+                        searchFor(textFieldValue, suggestions, filteredList)
                         isDropMenuOpen = true
                     }
                 }, //text -> if (text !== marker.title) onValueChange(text) },
@@ -175,26 +175,30 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 // This line here will accomplish what you want
                 properties = PopupProperties(focusable = false)
             ) {
-                suggestions.forEach { suggestion ->
-                    if (suggestion != marker) {
-                        DropdownMenuItem(
-                            onClick = {
-                                viewModel.marker.value.title = suggestion.title
-                                isDropMenuOpen = false
-                            }) {
-                            Text(text = suggestion.title)
-                        }
+                filteredList.forEach { suggestion ->
+                    DropdownMenuItem(
+                        onClick = {
+                            textFieldValue = suggestion.title
+                            isDropMenuOpen = false
+                        }) {
+                        Text(text = suggestion.title)
                     }
                 }
             }
         }
     }
 
-    private fun searchFor(what: String, where: List<UserMapMarker>) {
-//        where.forEach {
-//            if (it.title.startsWith(what))
-//        }
-            //.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER, { what }))
+    private fun searchFor(
+        what: String,
+        where: List<UserMapMarker>,
+        filteredList: MutableList<UserMapMarker>
+    ) {
+        filteredList.clear()
+        where.forEach {
+            if (it.title.contains(what)) {
+                filteredList.add(it)
+            }
+        }
     }
 
     @Composable

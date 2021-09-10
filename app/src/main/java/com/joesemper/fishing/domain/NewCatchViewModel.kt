@@ -48,7 +48,7 @@ class NewCatchViewModel(private val repository: UserContentRepository) : ViewMod
         return viewStateFlow
     }
 
-    fun getAllUserMarkersList() = repository.getAllUserMarkersList()
+    fun getAllUserMarkersList() = repository.getAllUserMarkersList() as UserMapMarker
 
     private fun addNewCatch(newCatch: RawUserCatch) {
         viewStateFlow.value = BaseViewState.Loading(null)
