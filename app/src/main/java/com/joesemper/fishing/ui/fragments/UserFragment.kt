@@ -6,6 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,7 +19,6 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
@@ -32,11 +34,10 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
+import com.joesemper.fishing.domain.UserViewModel
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.ui.LoginActivity
 import com.joesemper.fishing.ui.theme.FigmaTheme
-import com.joesemper.fishing.domain.UserViewModel
-import com.joesemper.fishing.model.entity.content.MapMarker
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -70,6 +71,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     @ExperimentalCoilApi
     @Composable
     fun UserScreen() {
+        val uiState = viewModel.uiState
         Scaffold(
             topBar = { AppBar() },
             content = {
@@ -97,8 +99,10 @@ class UserFragment : Fragment(), AndroidScopeComponent {
 
     @Composable
     fun UserStats() {
-        Row(horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.padding(5.dp).fillMaxWidth().height(50.dp)) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier.padding(5.dp).fillMaxWidth().height(50.dp)
+        ) {
             PlacesNumber()
             CatchesNumber()
         }
@@ -107,10 +111,14 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     @Composable
     fun PlacesNumber() {
         val userPlacesNum by viewModel.getUserPlaces().collectAsState(listOf())
-        Column(horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)) {
-            Icon(Icons.Default.Place, stringResource(R.string.place),
-                modifier = Modifier.size(25.dp))
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)
+        ) {
+            Icon(
+                Icons.Default.Place, stringResource(R.string.place),
+                modifier = Modifier.size(25.dp)
+            )
             Text(userPlacesNum.size.toString())
         }
     }
@@ -118,10 +126,14 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     @Composable
     fun CatchesNumber() {
         val userCatchesNum by viewModel.getUserCatches().collectAsState(listOf())
-        Column(horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)) {
-            Icon(painterResource(R.drawable.ic_fishing), stringResource(R.string.place),
-                modifier = Modifier.size(25.dp))
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)
+        ) {
+            Icon(
+                painterResource(R.drawable.ic_fishing), stringResource(R.string.place),
+                modifier = Modifier.size(25.dp)
+            )
             Text(userCatchesNum.size.toString())
         }
     }
@@ -179,44 +191,48 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     @ExperimentalCoilApi
     @Composable
     fun UserInfo() {
-        val user by viewModel.getCurrentUser().collectAsState(User())
-        Row(modifier = Modifier.fillMaxWidth().height(150.dp). padding(20.dp),
+        val user by viewModel.getCurrentUser().collectAsState(null)
+        Row(
+            modifier = Modifier.fillMaxWidth().height(150.dp).padding(20.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically) {
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             //TODO: add number of places, catches and more
-            UserImage(user)
-            UserName(user)
+            UserNameAndImage(user)
         }
-    }
-
-
-    @Composable
-    private fun UserName(user: User?) {
-        Text(
-            text = when (user == null || user.isAnonymous) {
-                true -> stringResource(R.string.anonymous)
-                false -> user.userName
-            }, style = MaterialTheme.typography.h6,
-            textAlign = TextAlign.Center
-        )
     }
 
     @ExperimentalCoilApi
     @Composable
-    fun UserImage(user: User?) {
-        Image(
-            painter = when (user == null) {
-                true -> painterResource(R.drawable.ic_fisher)
-                false -> if (user.userPic.isNullOrEmpty() or user.isAnonymous) painterResource(R.drawable.ic_fisher)
+    fun UserNameAndImage(user: User?) {
+        user?.let {
+            Image(
+                painter = if (user.userPic.isNullOrEmpty() or user.isAnonymous)
+                    painterResource(R.drawable.ic_fisher)
                 else rememberImagePainter(
                     data = user.userPic,
                     builder = {
                         transformations(CircleCropTransformation())
-                    })
-            },
-            contentDescription = stringResource(R.string.fisher),
-            modifier = Modifier.size(150.dp)
-        )
+                        crossfade(200)
+                    }
+                ),
+                contentDescription = stringResource(R.string.fisher),
+                modifier = Modifier.size(150.dp),
+            )
+        } ?: Surface(modifier = Modifier.size(150.dp)) {
+            CircularProgressIndicator()
+        }
+        Crossfade(user, animationSpec = tween(500)) { animatedUser ->
+            animatedUser?.let {
+                Text(
+                    text = when (animatedUser.isAnonymous) {
+                        true -> stringResource(R.string.anonymous)
+                        false -> animatedUser.userName
+                    }, style = MaterialTheme.typography.h6,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     }
 
     @Composable
