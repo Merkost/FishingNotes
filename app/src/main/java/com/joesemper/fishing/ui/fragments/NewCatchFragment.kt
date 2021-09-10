@@ -14,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -444,28 +445,31 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     @ExperimentalAnimationApi
     @Composable
     fun ItemPhoto(photo: Uri, clickedPhoto: (Uri) -> Unit, deletedPhoto: (Uri) -> Unit) {
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .padding(4.dp)
-        ) {
-            Image(painter = rememberImagePainter(data = photo),
-                contentDescription = ITEM_PHOTO,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(5.dp))
-                    .clickable { clickedPhoto(photo) })
-            Surface( //For making delete button background half transparent
-                color = Color.LightGray.copy(alpha = 0.2f),
-                modifier = Modifier.size(25.dp).align(Alignment.TopEnd).padding(3.dp)
-                    .clip(CircleShape)
+        Crossfade(photo) { pic ->
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .padding(4.dp)
             ) {
-                Icon(
-                    Icons.Default.Close,
-                    tint = Color.White,
-                    contentDescription = stringResource(R.string.delete_photo),
-                    modifier = Modifier.fillMaxSize().clickable { deletedPhoto(photo) })
+                Image(painter = rememberImagePainter(data = pic),
+                    contentDescription = ITEM_PHOTO,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(5.dp))
+                        .clickable { clickedPhoto(pic) })
+                Surface( //For making delete button background half transparent
+                    color = Color.LightGray.copy(alpha = 0.2f),
+                    modifier = Modifier.size(25.dp).align(Alignment.TopEnd).padding(3.dp)
+                        .clip(CircleShape)
+                ) {
+                    Icon(
+                        Icons.Default.Close,
+                        tint = Color.White,
+                        contentDescription = stringResource(R.string.delete_photo),
+                        modifier = Modifier.fillMaxSize().clickable { deletedPhoto(pic) })
+                }
             }
         }
+
     }
 
     private fun addPhoto() {

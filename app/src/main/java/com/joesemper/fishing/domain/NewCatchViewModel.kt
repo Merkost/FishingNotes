@@ -12,6 +12,7 @@ import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawUserCatch
 import com.joesemper.fishing.model.repository.UserContentRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -48,7 +49,7 @@ class NewCatchViewModel(private val repository: UserContentRepository) : ViewMod
         return viewStateFlow
     }
 
-    fun getAllUserMarkersList() = repository.getAllUserMarkersList() as UserMapMarker
+    fun getAllUserMarkersList() = repository.getAllUserMarkersList() as Flow<List<UserMapMarker>>
 
     private fun addNewCatch(newCatch: RawUserCatch) {
         viewStateFlow.value = BaseViewState.Loading(null)
