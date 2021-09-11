@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -43,7 +42,6 @@ import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import com.joesemper.fishing.ui.theme.primaryFigmaBackgroundTint
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
-import com.joesemper.fishing.ui.theme.primaryFigmaLightColor
 import com.joesemper.fishing.utils.NavigationHolder
 import com.joesemper.fishing.utils.showToast
 import org.koin.android.scope.AndroidScopeComponent
@@ -110,17 +108,9 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp).background(primaryFigmaBackgroundTint)
+                    .fillMaxWidth().background(primaryFigmaBackgroundTint)
             ) {
-//                Card(elevation = 4.dp) {
-//                    place.description?.let { it1 ->
-//                        Title(place.title,
-//                            it1, place.userId)
-//                    }
-//                }
-                //Title(place.title, place.description!!, place.userId)
-                Column {
+                Column {  //Creating a column to prevent a space between PlaceInfo and Buttons
                     PlaceInfo()
                     Buttons()
                 }
@@ -138,57 +128,50 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            MyButton(painterResource(R.drawable.ic_baseline_navigation_24),
-                stringResource(R.string.navigate)) {
-                showToast(requireContext(), "New Catch. Not Yet Implemented")
-            }
-            MyButton(painterResource(R.drawable.ic_baseline_share_24),
-                stringResource(R.string.share)) {
-                showToast(requireContext(), "New Catch. Not Yet Implemented")
-            }
-            MyButton(painterResource(R.drawable.ic_fish),
-                stringResource(R.string.new_catch)) {
-                showToast(requireContext(), "New Catch. Not Yet Implemented")
-            }
-
-
-
-
-            /*Button(modifier = Modifier
-                .fillMaxWidth(1.0F)
-                .height(55.dp),
-                onClick = {
-                    Toast.makeText(
-                        requireContext(),
-                        "New Catch. Not Yet Implemented",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }) {
+            Button(
+                modifier = Modifier.weight(1f).fillMaxSize(),
+                onClick = { }, border = BorderStroke(0.dp, color = Color.Transparent),
+                elevation = ButtonDefaults.elevation(0.dp)
+            ) {
                 Column() {
-                    Image(
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                    Icon(
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                            .size(30.dp).rotate(45f),
+                        painter = painterResource(R.drawable.ic_baseline_navigation_24),
+                        contentDescription = stringResource(R.string.navigate)
+                    )
+                    Text(fontSize = 10.sp, text = stringResource(R.string.navigate))
+                }
+            }
+            Button(
+                modifier = Modifier.weight(1f).fillMaxSize(),
+                onClick = { }, border = BorderStroke(0.dp, color = Color.Transparent),
+                elevation = ButtonDefaults.elevation(0.dp)
+            ) {
+                Column() {
+                    Icon(
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                            .size(30.dp),
+                        painter = painterResource(R.drawable.ic_baseline_share_24),
+                        contentDescription = stringResource(R.string.share)
+                    )
+                    Text(fontSize = 10.sp, text = stringResource(R.string.share))
+                }
+            }
+            Button(
+                modifier = Modifier.weight(1f).fillMaxSize(),
+                onClick = { }, border = BorderStroke(0.dp, color = Color.Transparent),
+                elevation = ButtonDefaults.elevation(0.dp)
+            ) {
+                Column() {
+                    Icon(
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                            .size(30.dp),
                         painter = painterResource(R.drawable.ic_fish),
                         contentDescription = stringResource(R.string.new_catch)
                     )
-                    Text(fontSize = 8.sp, text = stringResource(R.string.new_catch))
+                    Text(fontSize = 10.sp, text = stringResource(R.string.new_catch))
                 }
-            }*/
-
-        }
-    }
-    @Composable
-    fun MyButton(painter: Painter, text: String, onClick: () -> Unit) {
-
-        Button(modifier = Modifier.fillMaxHeight(),
-            onClick = onClick, border = BorderStroke(0.dp, color = Color.Transparent),
-            elevation = ButtonDefaults.elevation(0.dp)) {
-            Column() {
-                Image(
-                    modifier = Modifier.align(Alignment.CenterHorizontally).size(30.dp),
-                    painter = painter,
-                    contentDescription = text
-                )
-                Text(fontSize = 10.sp, text = text)
             }
         }
     }
@@ -238,15 +221,18 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     private fun PlaceInfo() {
         MyCard {
             Column(
-                verticalArrangement = Arrangement.SpaceEvenly,
+                verticalArrangement = Arrangement.Top,
                 modifier = Modifier.fillMaxWidth().padding(10.dp)
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(10.dp).height(50.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    modifier = Modifier.padding(10.dp).height(50.dp).fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(Icons.Default.Place, stringResource(R.string.place))
+                    Spacer(modifier = Modifier.width(150.dp))
                     UserProfile()
+
                     //Icon(Icons.Default.Check, stringResource(R.string.place))
                 }
                 Text("Точка 2", fontWeight = FontWeight.Bold)
@@ -307,11 +293,6 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)
-/*                .padding(
-                    start = 5.dp,
-                    top = 200.dp,
-                    end = 5.dp
-                )*/
         ) {
             items(items = catches) {
                 ItemCatch(
@@ -330,13 +311,14 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         Card(elevation = 0.dp) {
             Column(
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(14.dp)
             ) {
                 Text(
                     text = "Судак",
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
+                Spacer(modifier = Modifier.size(4.dp))
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
@@ -345,32 +327,30 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                 {
                     Box(
                         modifier = Modifier
-                            .size(100.dp)
-                            .padding(4.dp)
+                            .size(125.dp).weight(2f)
                     ) {
                         Image(painter = rememberImagePainter(R.drawable.ulov),
                             contentDescription = stringResource(R.string.catch_photo),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(5.dp))
+                                .height(height = 125.dp).fillMaxWidth()
                                 .clickable { /*clickedPhoto(photo)*/ })
                     }
-                    Column(
+                    Box(
                         modifier = Modifier
-                            .padding(4.dp)
+                            .size(125.dp).weight(2.35f)
                     ) {
                         Text(
                             text = "4.650 кг",
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
-                                .padding(start = 5.dp)
+                                .padding(start = 5.dp).align(Alignment.Center)
                         )
                         Text(
                             text = "22.08.2021",
-                            fontSize = 10.sp,
+                            fontSize = 12.sp,
                             modifier = Modifier
-                                .padding(start = 5.dp)
+                                .padding(start = 5.dp).align(Alignment.BottomEnd)
                         )
                     }
                 }
@@ -381,7 +361,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     @Composable
     fun AppBar() {
         TopAppBar(
-            title = { Text(text = stringResource(R.string.place)) },
+            title = { Text(text = "Catch") },
             navigationIcon = {
                 IconButton(onClick = { findNavController().popBackStack() }, content = {
                     Icon(
@@ -389,36 +369,32 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                         contentDescription = getString(R.string.back)
                     )
                 })
-            },
-            actions = {
+            }, actions = {
                 Row(
-                    modifier = Modifier
-                        .padding(end = 3.dp),
+                    modifier = Modifier.fillMaxWidth().padding(end = 3.dp),
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.Edit, stringResource(R.string.edit),
-                        modifier = Modifier
-                            .clickable {
-                                showToast(
-                                    requireContext(),
-                                    "Not Yet Implemented"
-                                )
-                            }
-                            .size(25.dp))
-                    Spacer(modifier = Modifier.size(15.dp))
-                    Icon(Icons.Default.Delete, stringResource(R.string.edit),
-                        modifier = Modifier
-                            .clickable {
-                                showToast(
-                                    requireContext(),
-                                    "Not Yet Implemented"
-                                )
-                            }
-                            .size(25.dp))
+                    IconButton(
+                        onClick = {
+                            showToast(
+                                requireContext(),
+                                "Not Yet Implemented"
+                            )
+                        },
+                        content = { Icon(Icons.Filled.Edit, stringResource(R.string.edit)) }
+                    )
+                    IconButton(
+                        onClick = {
+                            showToast(
+                                requireContext(),
+                                "Not Yet Implemented"
+                            )
+                        },
+                        content = { Icon(Icons.Filled.Delete, stringResource(R.string.edit)) }
+                    )
                 }
             })
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
