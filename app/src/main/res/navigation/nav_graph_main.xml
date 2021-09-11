@@ -76,6 +76,9 @@
         <argument
             android:name="userMapMarker"
             app:argType="com.joesemper.fishing.model.entity.content.UserMapMarker" />
+        <action
+        android:id="@+id/action_userPlaceFragment_to_newCatchDialogFragment"
+        app:destination="@id/newCatchDialogFragment" />
     </fragment>
 
 </navigation>

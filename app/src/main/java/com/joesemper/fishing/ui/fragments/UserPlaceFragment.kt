@@ -1,9 +1,13 @@
 package com.joesemper.fishing.ui.fragments
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -48,6 +52,7 @@ import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.scope.Scope
+import java.util.*
 
 class UserPlaceFragment : Fragment(), AndroidScopeComponent {
 
@@ -130,7 +135,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         ) {
             Button(
                 modifier = Modifier.weight(1f).fillMaxSize(),
-                onClick = { }, border = BorderStroke(0.dp, color = Color.Transparent),
+                onClick = { routeClicked() }, border = BorderStroke(0.dp, color = Color.Transparent),
                 elevation = ButtonDefaults.elevation(0.dp)
             ) {
                 Column() {
@@ -145,7 +150,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
             }
             Button(
                 modifier = Modifier.weight(1f).fillMaxSize(),
-                onClick = { }, border = BorderStroke(0.dp, color = Color.Transparent),
+                onClick = { shareClicked() }, border = BorderStroke(0.dp, color = Color.Transparent),
                 elevation = ButtonDefaults.elevation(0.dp)
             ) {
                 Column() {
@@ -160,7 +165,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
             }
             Button(
                 modifier = Modifier.weight(1f).fillMaxSize(),
-                onClick = { }, border = BorderStroke(0.dp, color = Color.Transparent),
+                onClick = { newCatchClicked() }, border = BorderStroke(0.dp, color = Color.Transparent),
                 elevation = ButtonDefaults.elevation(0.dp)
             ) {
                 Column() {
@@ -225,7 +230,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                 modifier = Modifier.fillMaxWidth().padding(10.dp)
             ) {
                 Row(
-                    modifier = Modifier.padding(10.dp).height(50.dp).fillMaxWidth(),
+                    modifier = Modifier.padding(horizontal = 10.dp).height(50.dp).fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -395,6 +400,52 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     )
                 }
             })
+    }
+
+    private fun newCatchClicked() {
+            val action =
+                UserPlaceFragmentDirections.actionUserPlaceFragmentToNewCatchDialogFragment(
+                    place
+                )
+            findNavController().navigate(action)
+    }
+
+    private fun routeClicked() {
+        val uri = String.format(
+            Locale.ENGLISH,
+            "http://maps.google.com/maps?daddr=%f,%f (%s)",
+            place.latitude,
+            place.longitude,
+            place.title
+        )
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+        intent.setPackage("com.google.android.apps.maps")
+        try {
+            startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            try {
+                val unrestrictedIntent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+                startActivity(unrestrictedIntent)
+            } catch (e: ActivityNotFoundException) {
+                Toast.makeText(context, "Please install a maps application", Toast.LENGTH_LONG)
+                    .show()
+            }
+        }
+    }
+
+    private fun shareClicked() {
+            val text =
+                "${place.title}\nhttps://www.google.com/maps/search/?api=1&query=${place.latitude}" +
+                        ",${place.longitude}"
+
+            val sendIntent: Intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, text)
+                type = "text/plain"
+            }
+
+            val shareIntent = Intent.createChooser(sendIntent, null)
+            startActivity(shareIntent)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
