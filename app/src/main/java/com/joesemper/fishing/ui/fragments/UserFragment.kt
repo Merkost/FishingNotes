@@ -192,10 +192,18 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     @Composable
     fun UserInfo() {
         val user by viewModel.getCurrentUser().collectAsState(null)
+
+        Card(
+            elevation = 10.dp,
+            modifier = Modifier.padding(top = 50.dp).size(230.dp),
+            shape = RoundedCornerShape(25.dp),
+            backgroundColor = MaterialTheme.colors.surface
+/*
         Row(
             modifier = Modifier.fillMaxWidth().height(150.dp).padding(20.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
+*/
         ) {
             //TODO: add number of places, catches and more
             UserNameAndImage(user)
