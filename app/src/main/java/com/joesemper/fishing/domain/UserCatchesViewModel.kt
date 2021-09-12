@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 class UserCatchesViewModel(private val repository: UserContentRepository) : ViewModel() {
 
-    private val viewStateFlow: MutableStateFlow<BaseViewState> =
+    val viewStateFlow: MutableStateFlow<BaseViewState> =
         MutableStateFlow(BaseViewState.Loading(null))
 
     init {
