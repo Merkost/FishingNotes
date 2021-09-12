@@ -19,6 +19,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.joesemper.fishing.databinding.FragmentPlacesBinding
+import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.ui.adapters.CatchRecyclerViewItem
+import com.joesemper.fishing.ui.adapters.PlaceRecyclerViewItem
 import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.UserPlacesViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState

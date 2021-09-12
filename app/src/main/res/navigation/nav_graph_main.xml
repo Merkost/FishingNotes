@@ -60,14 +60,27 @@
     <fragment
         android:id="@+id/notesFragment"
         android:name="com.joesemper.fishing.ui.fragments.NotesFragment"
-        android:label="NotesFragment" >
+        android:label="NotesFragment">
         <action
             android:id="@+id/action_notesFragment_to_userCatchFragment"
             app:destination="@id/userCatchFragment" />
         <action
             android:id="@+id/action_notesFragment_to_newCatchDialogFragment"
             app:destination="@id/newCatchDialogFragment" />
+        <action
+            android:id="@+id/action_notesFragment_to_userPlaceFragment"
+            app:destination="@id/userPlaceFragment" />
     </fragment>
-
+    <fragment
+        android:id="@+id/userPlaceFragment"
+        android:name="com.joesemper.fishing.ui.fragments.UserPlaceFragment"
+        android:label="UserPlaceFragment">
+        <argument
+            android:name="userMapMarker"
+            app:argType="com.joesemper.fishing.model.entity.content.UserMapMarker" />
+        <action
+        android:id="@+id/action_userPlaceFragment_to_newCatchDialogFragment"
+        app:destination="@id/newCatchDialogFragment" />
+    </fragment>
 
 </navigation>
