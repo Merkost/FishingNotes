@@ -5,13 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.model.auth.AuthManager
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.domain.viewstates.BaseViewState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
+import com.joesemper.fishing.model.entity.common.Progress
+import com.joesemper.fishing.model.repository.UserRepository
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class LoginViewModel(private val repository: AuthManager) : ViewModel() {
+class LoginViewModel(private val authManager: AuthManager, private val repository: UserRepository) : ViewModel() {
 
     private val mutableStateFlow: MutableStateFlow<BaseViewState> =
         MutableStateFlow(BaseViewState.Success(null))
@@ -24,14 +23,30 @@ class LoginViewModel(private val repository: AuthManager) : ViewModel() {
 
     private fun loadCurrentUser() {
         viewModelScope.launch {
-            repository.currentUser
+            authManager.currentUser
                 .catch { error -> handleError(error) }
-                .collectLatest { user -> onSuccess(user) }
+                .collectLatest { user -> user?.let { onSuccess(it) } }
         }
     }
 
-    private fun onSuccess(user: User?) {
-        mutableStateFlow.value = BaseViewState.Success(user)
+    private fun onSuccess(user: User) {
+        viewModelScope.launch {
+            repository.addNewUser(user).collect { progress ->
+                when (progress) {
+                    is Progress.Complete -> {
+                        mutableStateFlow.value = BaseViewState.Success(user)
+                    }
+                    is Progress.Loading -> {
+                        mutableStateFlow.value = BaseViewState.Loading(null)
+                    }
+                    is Progress.Error -> {
+                        mutableStateFlow.value =
+                            BaseViewState.Error(progress.error)
+                    }
+                }
+            }
+            //mutableStateFlow.value = BaseViewState.Success(user)
+        }
     }
 
     private fun handleError(error: Throwable) {

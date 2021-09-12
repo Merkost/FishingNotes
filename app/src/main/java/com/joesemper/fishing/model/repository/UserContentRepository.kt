@@ -19,7 +19,7 @@ interface UserContentRepository {
     fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>>
 
 
-    suspend fun addNewCatch(newCatch: RawUserCatch): StateFlow<Progress>
+    suspend fun addNewCatch(markerId: String, newCatch: RawUserCatch): StateFlow<Progress>
     suspend fun deleteMarker(userCatch: UserCatch)
     suspend fun addNewMarker(newMarker: RawMapMarker): StateFlow<Progress>
 }

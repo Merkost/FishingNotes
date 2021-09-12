@@ -5,7 +5,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.Progress
@@ -54,7 +53,7 @@ class NewCatchViewModel(private val repository: UserContentRepository) : ViewMod
     private fun addNewCatch(newCatch: RawUserCatch) {
         viewStateFlow.value = BaseViewState.Loading(null)
         viewModelScope.launch {
-            repository.addNewCatch(newCatch).collect { progress ->
+            repository.addNewCatch(marker.value.id, newCatch).collect { progress ->
                 when (progress) {
                     is Progress.Complete -> {
                         viewStateFlow.value = BaseViewState.Success(progress)

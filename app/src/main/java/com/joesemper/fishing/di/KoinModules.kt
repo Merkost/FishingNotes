@@ -38,7 +38,8 @@ val splashScreen = module {
 
 val loginScreen = module {
     scope(named<LoginActivity>()) {
-        viewModel { LoginViewModel(get()) }
+        viewModel { LoginViewModel(get(), get()) }
+        scoped<UserRepository> { UserRepositoryImpl(get(), get()) }
     }
 }
 
@@ -56,8 +57,8 @@ val markerFragment = module {
 
 val userFragment = module {
     scope(named<UserFragment>()) {
-        viewModel { UserViewModel(get(), get()) }
-        scoped<UserRepository> { UserRepositoryImpl(get()) }
+        viewModel { UserViewModel(get()) }
+        scoped<UserRepository> { UserRepositoryImpl(get(), get()) }
     }
 }
 

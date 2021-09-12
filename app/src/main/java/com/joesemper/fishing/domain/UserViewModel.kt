@@ -20,6 +20,20 @@ class UserViewModel(
 ) : ViewModel() {
 
 
+    /*init {
+        loadCurrentUser()
+    }
+
+    private fun loadCurrentUser() {
+        viewModelScope.launch {
+            repository.currentUser
+                .catch { error -> handleError(error) }
+                .collectLatest { user -> onSuccess(user) }
+        }
+    }*/
+
+    suspend fun logoutCurrentUser() = repository.logoutCurrentUser()
+
     private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
     val uiState: StateFlow<BaseViewState>
         get() = _uiState
@@ -31,5 +45,6 @@ class UserViewModel(
     fun getUserCatches() = repository.getAllUserCatchesList()
 
     suspend fun logoutCurrentUser() = userRepository.logoutCurrentUser()
+
 
 }
