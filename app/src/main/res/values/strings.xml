@@ -95,5 +95,6 @@
     <string name="permission_denied_message">Permission is denied, Please allow permissions from App Settings.</string>
     <string name="goto_app_settings">App Settings</string>
     <string name="not_all_fields_are_filled">Not all fields are filled in. Please, double check</string>
+    <string name="test_description">"Ловля судака, как и, впрочем, ловля любой рыбы, очень интересное и захватывающее занятие. Получите хороший и удачный улов. "</string>
 
 </resources>
