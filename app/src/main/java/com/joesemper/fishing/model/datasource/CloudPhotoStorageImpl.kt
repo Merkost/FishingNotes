@@ -22,12 +22,13 @@ class CloudPhotoStorageImpl : PhotoStorage {
         val downloadLinks = mutableListOf<String>()
         if (photos.isNotEmpty()) {
             savePhotosToDb(photos)
-                .take(photos.size)
+                .take(photos.size-1)
                 .collect { downloadLink ->
                     downloadLinks.add(downloadLink)
                 }
         }
         return downloadLinks
+
     }
 
 
@@ -49,6 +50,7 @@ class CloudPhotoStorageImpl : PhotoStorage {
             }.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val downloadUri = task.result
+                    //send(downloadUri.toString())
                     trySend(downloadUri.toString())
                 }
             }

@@ -1,19 +1,21 @@
 package com.joesemper.fishing.model.datasource
 
 import android.util.Log
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
-import com.joesemper.fishing.model.entity.raw.RawUserCatch
-import com.joesemper.fishing.model.entity.raw.RawMapMarker
-import com.joesemper.fishing.model.mappers.MapMarkerMapper
-import com.joesemper.fishing.model.mappers.UserCatchMapper
+import com.joesemper.fishing.model.entity.common.Progress
+import com.joesemper.fishing.model.entity.common.User
+import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.model.entity.common.Progress
-import com.joesemper.fishing.model.entity.content.MapMarker
-import com.joesemper.fishing.utils.getCurrentUser
+import com.joesemper.fishing.model.entity.raw.RawMapMarker
+import com.joesemper.fishing.model.entity.raw.RawUserCatch
+import com.joesemper.fishing.model.mappers.MapMarkerMapper
+import com.joesemper.fishing.model.mappers.UserCatchMapper
 import com.joesemper.fishing.utils.getCurrentUserId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ProducerScope
@@ -27,27 +29,67 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
 
     @ExperimentalCoroutinesApi
     override fun getAllUserCatchesList() = channelFlow {
-        val listeners = mutableListOf<ListenerRegistration>()
+        val listeners = mutableListOf<Task<QuerySnapshot>>()
         listeners.add(
-            getCatchesCollection()
-                .whereEqualTo("userId", getCurrentUser()!!.uid)
-                .addSnapshotListener(getCatchSnapshotListener(this))
+            getUsersCollection().get().addOnCompleteListener(getUserCatchesSuccessListener(this))
         )
         listeners.add(
-            getCatchesCollection()
-                .whereEqualTo("isPublic", true)
-                .whereNotEqualTo("userId", getCurrentUserId())
-                .addSnapshotListener(getCatchSnapshotListener(this))
+            getMapMarkersCollection().get()
+                //.whereNotEqualTo("userId", getCurrentUserId())
+                .addOnCompleteListener(getUserCatchesSuccessListener(this))
         )
         awaitClose {
-            listeners.forEach { it.remove() }
+            //listeners.forEach { it.remove() }
         }
     }
 
     @ExperimentalCoroutinesApi
+    private fun getUserCatchesSuccessListener(scope: ProducerScope<List<UserCatch>>) =
+        OnCompleteListener<QuerySnapshot> { task ->
+            //val catches = mutableListOf<UserCatch>()
+            if (task.isSuccessful) {
+                val catches = task.result.toObjects(UserCatch::class.java)
+                scope.trySend(catches)
+//                for (document in task.result) {
+//                    catches.add(document.toObject(UserCatch::class.java))
+//                    scope.trySend(catches)
+//                    document.data
+//                    Log.d(TAG, document.id + " => " + document.data)
+//                }
+            } else {
+                //Log.d(TAG, "Error getting documents: ", task.exception)
+                scope.trySend(listOf())
+            }
+
+
+//                Log.d("Fishing", "Catch snapshot listener", error)
+//                return@EventListener
+//            }
+//
+//            if (snapshots != null) {
+//                val catches = snapshots.toObjects(UserCatch::class.java)
+//                scope.trySend(catches)
+//            } else {
+//                scope.trySend(listOf())
+//            }
+//
+////            for (dc in snapshots!!.documentChanges) {
+////                when (dc.type) {
+////                    DocumentChange.Type.ADDED -> {
+////                        val userCatch = dc.document.toObject<UserCatch>()
+////                        scope.trySend(userCatch)
+////                    }
+////                    DocumentChange.Type.MODIFIED -> {
+////                    }
+////                    DocumentChange.Type.REMOVED -> {
+////                    }
+////                }
+////            }
+        }
+
+    @ExperimentalCoroutinesApi
     override fun getCatchesByMarkerId(markerId: String) = channelFlow {
-        val listener = getCatchesCollection()
-            .whereEqualTo("userMarkerId", markerId)
+        val listener = getUserCatchesCollection(markerId)
             .addSnapshotListener(getCatchSnapshotListener(this))
         awaitClose {
             listener.remove()
@@ -58,14 +100,14 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
     @ExperimentalCoroutinesApi
     override fun getAllMarkers() = channelFlow<MapMarker> {
         val listeners = mutableListOf<ListenerRegistration>()
+
+        //UserMarkers
         listeners.add(
-            getMapMarkersCollection()
-                .whereEqualTo("userId", getCurrentUserId())
-                .addSnapshotListener(getMarkersSnapshotListener(this))
+            getUserMapMarkersCollection().addSnapshotListener(getMarkersSnapshotListener(this))
         )
+        //AllPublicMarkers
         listeners.add(
             getMapMarkersCollection()
-                .whereEqualTo("isPublic", true)
                 .whereNotEqualTo("userId", getCurrentUserId())
                 .addSnapshotListener(getMarkersSnapshotListener(this))
         )
@@ -79,8 +121,7 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
     override fun getAllUserMarkersList() = channelFlow {
         val listeners = mutableListOf<ListenerRegistration>()
         listeners.add(
-            getMapMarkersCollection()
-                .whereEqualTo("userId", getCurrentUserId())
+            getUserMapMarkersCollection()
                 .addSnapshotListener(getMarkersListSnapshotListener(this))
         )
 
@@ -99,7 +140,7 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
 
     @ExperimentalCoroutinesApi
     override fun getMapMarker(markerId: String) = channelFlow {
-        val listener = getMapMarkersCollection().document(markerId)
+        val listener = getUserMapMarkersCollection().document(markerId)
             .addSnapshotListener { value, error ->
                 trySend(value?.toObject<UserMapMarker>())
             }
@@ -142,19 +183,21 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
                 Log.d("Fishing", "Marker snapshot listener", error)
                 return@EventListener
             }
-
-            for (dc in snapshots!!.documentChanges) {
-                when (dc.type) {
-                    DocumentChange.Type.ADDED -> {
-                        val mapMarker = dc.document.toObject<UserMapMarker>()
-                        scope.trySend(mapMarker)
-                    }
-                    DocumentChange.Type.MODIFIED -> {
-                    }
-                    DocumentChange.Type.REMOVED -> {
+            snapshots?.let { snapshot ->
+                for (dc in snapshot.documentChanges) {
+                    when (dc.type) {
+                        DocumentChange.Type.ADDED -> {
+                            val mapMarker = dc.document.toObject<UserMapMarker>()
+                            scope.trySend(mapMarker)
+                        }
+                        DocumentChange.Type.MODIFIED -> {
+                        }
+                        DocumentChange.Type.REMOVED -> {
+                        }
                     }
                 }
             }
+
         }
 
     @ExperimentalCoroutinesApi
@@ -172,14 +215,30 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
         }
 
     @ExperimentalCoroutinesApi
-    override suspend fun addNewCatch(newCatch: RawUserCatch): StateFlow<Progress> {
+    override suspend fun addNewUser(user: User): StateFlow<Progress> {
         val flow = MutableStateFlow<Progress>(Progress.Loading())
+        if (user.isAnonymous) {
+            flow.emit(Progress.Complete)
+        } else {
+            getUsersCollection().document(user.userId).set(user)
+                .addOnCompleteListener {
+                    flow.tryEmit(Progress.Complete)
+                }
+        }
+        return flow
+    }
 
+    @ExperimentalCoroutinesApi
+    override suspend fun addNewCatch(
+        markerId: String,
+        newCatch: RawUserCatch
+    ): StateFlow<Progress> {
+
+        val flow = MutableStateFlow<Progress>(Progress.Loading())
         val photoDownloadLinks = savePhotos(newCatch.photos)
-
         val userCatch = UserCatchMapper().mapRawCatch(newCatch, photoDownloadLinks)
 
-        getCatchesCollection().document(userCatch.id).set(userCatch)
+        getUserCatchesCollection(markerId).document(userCatch.id).set(userCatch)
             .addOnCompleteListener {
                 flow.tryEmit(Progress.Complete)
             }
@@ -214,7 +273,8 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
 
     @ExperimentalCoroutinesApi
     private fun saveMarkerToDb(userMapMarker: UserMapMarker) = callbackFlow {
-        val documentRef = getMapMarkersCollection().document(userMapMarker.id)
+        val documentRef = getUserMapMarkersCollection()
+            .document(userMapMarker.id)
         val task = documentRef.set(userMapMarker)
         task.addOnCompleteListener {
             trySend(userMapMarker.id)
@@ -231,16 +291,34 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
 //        getUserMarkersCollection().document(userCatch.id).delete()
     }
 
+    private fun getUsersCollection(): CollectionReference {
+        return db.collection(USERS_COLLECTION)
+    }
+
+    private fun getUserMapMarkersCollection(): CollectionReference {
+        return db.collection(USERS_COLLECTION).document(getCurrentUserId())
+            .collection(MARKERS_COLLECTION)
+    }
+
+    private fun getUserCatchesCollection(usermarkerId: String): CollectionReference {
+        return db.collection(USERS_COLLECTION).document(getCurrentUserId())
+            .collection(MARKERS_COLLECTION).document(usermarkerId)
+            .collection(CATCHES_COLLECTION)
+    }
+
     private fun getMapMarkersCollection(): CollectionReference {
         return db.collection(MARKERS_COLLECTION)
     }
 
-    private fun getCatchesCollection(): CollectionReference {
-        return db.collection(CATCHES_COLLECTION)
+    private fun getCatchesCollection(usermarkerId: String): CollectionReference {
+        return db.collection(MARKERS_COLLECTION).document(usermarkerId)
+            .collection(CATCHES_COLLECTION)
     }
 
     companion object {
         private const val USERS_COLLECTION = "users"
+        private const val USER_MARKERS_COLLECTION = "markers"
+        private const val USER_CATCHES_COLLECTION = "catches"
         private const val MARKERS_COLLECTION = "markers"
         private const val CATCHES_COLLECTION = "catches"
     }

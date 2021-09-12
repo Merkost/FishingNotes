@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class UserCatchesViewModel(private val repository: UserContentRepository) : ViewModel() {
+class UserPlacesViewModel(private val repository: UserContentRepository) : ViewModel() {
 
     val viewStateFlow: MutableStateFlow<BaseViewState> =
         MutableStateFlow(BaseViewState.Loading(null))
@@ -24,9 +24,10 @@ class UserCatchesViewModel(private val repository: UserContentRepository) : View
 
     private fun loadAllUserPlaces() {
         viewModelScope.launch {
-            repository.getAllUserCatchesList().collect { catches ->
-                viewStateFlow.value = BaseViewState.Success(catches)
+            repository.getAllUserMarkersList().collect { places ->
+                viewStateFlow.value = BaseViewState.Success(places)
             }
         }
     }
+
 }

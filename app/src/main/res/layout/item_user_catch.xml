@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:elevation="8dp"
@@ -30,7 +28,7 @@
             android:id="@+id/tv_catch_item_fish"
             style="@style/TextAppearance.AppCompat.MainText"
             android:text="Fish"
-            app:layout_constraintStart_toStartOf="@+id/tv_catch_item_time_date"
+            app:layout_constraintStart_toStartOf="@+id/guideline5"
             app:layout_constraintTop_toTopOf="@+id/iv_catch_item_photo" />
 
         <TextView
@@ -46,7 +44,6 @@
             android:layout_marginEnd="8dp"
             android:text="100 kg"
             android:textColor="@color/text_main_color"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_catch_item_amount"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/tv_catch_item_fish" />
 
@@ -59,13 +56,34 @@
 
         <TextView
             android:id="@+id/tv_catch_item_time_date"
-            style="@style/TextAppearance.AppCompat.MainText"
+            style="@style/TextAppearance.AppCompat.Small"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Time and Date"
+            android:text="Time"
+            android:textColor="@color/primaryFigmaColor"
+            app:layout_constraintBottom_toBottomOf="@+id/iv_catch_item_photo"
+            app:layout_constraintEnd_toEndOf="@+id/tv_catch_item_weight" />
+
+        <TextView
+            android:id="@+id/tv_place"
+            style="@style/TextAppearance.AppCompat.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Place"
+            android:textColor="@color/primaryFigmaColor"
+            app:layout_constraintBottom_toBottomOf="@+id/imageView12"
+            app:layout_constraintStart_toEndOf="@+id/imageView12"
+            app:layout_constraintTop_toTopOf="@+id/imageView12" />
+
+        <ImageView
+            android:id="@+id/imageView12"
+            style="@style/SimpleIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            app:tint="@color/secondaryFigmaColor"
+            app:layout_constraintBottom_toBottomOf="@+id/iv_catch_item_photo"
             app:layout_constraintStart_toStartOf="@+id/guideline5"
-            app:layout_constraintTop_toBottomOf="@+id/tv_catch_item_amount" />
+            app:srcCompat="@drawable/ic_baseline_location_on_24" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

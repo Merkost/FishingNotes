@@ -5,17 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.joesemper.fishing.R
 import com.joesemper.fishing.databinding.FragmentCatchesInnerBinding
-import com.joesemper.fishing.domain.UserCatchesViewModel
+import com.joesemper.fishing.domain.UserPlaceCatchesViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -41,7 +37,7 @@ class UserCatchesInnerFragment : Fragment(), AndroidScopeComponent {
     }
 
     override val scope: Scope by fragmentScope()
-    private val viewModel: UserCatchesViewModel by viewModel()
+    private val viewModel: UserPlaceCatchesViewModel by viewModel()
 
     private var _binding: FragmentCatchesInnerBinding? = null
     private val binding
@@ -69,16 +65,12 @@ class UserCatchesInnerFragment : Fragment(), AndroidScopeComponent {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initRV()
         subscribeOnVewModel()
     }
 
 
-    private fun initRV() {
-        val dividerItemDecoration = DividerItemDecoration(context, RecyclerView.VERTICAL)
-        dividerItemDecoration.setDrawable(getDrawable(requireContext(), R.drawable.rv_dicoration)!!)
-        binding.rvCatches.addItemDecoration(dividerItemDecoration)
-        adapter = UserCatchesRVAdapter { item ->
+    private fun initRV(data: List<UserCatch>) {
+        adapter = UserCatchesRVAdapter(data) { item ->
             when (item) {
                 is CatchRecyclerViewItem.ItemAddNewCatch -> {
                     val action =
@@ -89,7 +81,7 @@ class UserCatchesInnerFragment : Fragment(), AndroidScopeComponent {
                 }
                 is CatchRecyclerViewItem.ItemUserCatch -> {
                     val action =
-                        MapFragmentDirections.actionMapFragmentToNewCatchDialogFragment(
+                        MapFragmentDirections.actionMapFragmentToUserCatchFragment(
                             item.catch
                         )
                     findNavController().navigate(action)
@@ -109,8 +101,8 @@ class UserCatchesInnerFragment : Fragment(), AndroidScopeComponent {
 
                     }
                     is BaseViewState.Success<*> -> {
-                        val catches = viewState.data
-                        adapter.addData(catches as List<UserCatch>)
+                        val catches = viewState.data as List<UserCatch>
+                        initRV(catches)
                     }
                     is BaseViewState.Error -> {
                         val msg = viewState.error.message

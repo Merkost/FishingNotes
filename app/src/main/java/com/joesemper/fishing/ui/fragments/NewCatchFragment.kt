@@ -14,6 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -149,14 +150,14 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         var textFieldValue by rememberSaveable{ mutableStateOf(if(marker.title.isNotEmpty()) marker.title else "Выберите место") }
         var isDropMenuOpen by rememberSaveable { mutableStateOf(false) }
         val suggestions by viewModel.getAllUserMarkersList().collectAsState(listOf())
-        val dropMenuItems by rememberSaveable { mutableStateOf(suggestions) }
+        val filteredList by rememberSaveable { mutableStateOf(suggestions.toMutableList()) }
         Row(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
                 value = textFieldValue,
                 onValueChange = {
                     textFieldValue = it
                     if (suggestions.isNotEmpty()) {
-                        searchFor(textFieldValue, suggestions)
+                        searchFor(textFieldValue, suggestions, filteredList)
                         isDropMenuOpen = true
                     }
                 }, //text -> if (text !== marker.title) onValueChange(text) },
@@ -175,26 +176,30 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 // This line here will accomplish what you want
                 properties = PopupProperties(focusable = false)
             ) {
-                suggestions.forEach { suggestion ->
-                    if (suggestion != marker) {
-                        DropdownMenuItem(
-                            onClick = {
-                                viewModel.marker.value.title = suggestion.title
-                                isDropMenuOpen = false
-                            }) {
-                            Text(text = suggestion.title)
-                        }
+                filteredList.forEach { suggestion ->
+                    DropdownMenuItem(
+                        onClick = {
+                            textFieldValue = suggestion.title
+                            isDropMenuOpen = false
+                        }) {
+                        Text(text = suggestion.title)
                     }
                 }
             }
         }
     }
 
-    private fun searchFor(what: String, where: List<UserMapMarker>) {
-//        where.forEach {
-//            if (it.title.startsWith(what))
-//        }
-            //.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER, { what }))
+    private fun searchFor(
+        what: String,
+        where: List<UserMapMarker>,
+        filteredList: MutableList<UserMapMarker>
+    ) {
+        filteredList.clear()
+        where.forEach {
+            if (it.title.contains(what)) {
+                filteredList.add(it)
+            }
+        }
     }
 
     @Composable
@@ -440,28 +445,31 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     @ExperimentalAnimationApi
     @Composable
     fun ItemPhoto(photo: Uri, clickedPhoto: (Uri) -> Unit, deletedPhoto: (Uri) -> Unit) {
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .padding(4.dp)
-        ) {
-            Image(painter = rememberImagePainter(data = photo),
-                contentDescription = ITEM_PHOTO,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(5.dp))
-                    .clickable { clickedPhoto(photo) })
-            Surface( //For making delete button background half transparent
-                color = Color.LightGray.copy(alpha = 0.2f),
-                modifier = Modifier.size(25.dp).align(Alignment.TopEnd).padding(3.dp)
-                    .clip(CircleShape)
+        Crossfade(photo) { pic ->
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .padding(4.dp)
             ) {
-                Icon(
-                    Icons.Default.Close,
-                    tint = Color.White,
-                    contentDescription = stringResource(R.string.delete_photo),
-                    modifier = Modifier.fillMaxSize().clickable { deletedPhoto(photo) })
+                Image(painter = rememberImagePainter(data = pic),
+                    contentDescription = ITEM_PHOTO,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(5.dp))
+                        .clickable { clickedPhoto(pic) })
+                Surface( //For making delete button background half transparent
+                    color = Color.LightGray.copy(alpha = 0.2f),
+                    modifier = Modifier.size(25.dp).align(Alignment.TopEnd).padding(3.dp)
+                        .clip(CircleShape)
+                ) {
+                    Icon(
+                        Icons.Default.Close,
+                        tint = Color.White,
+                        contentDescription = stringResource(R.string.delete_photo),
+                        modifier = Modifier.fillMaxSize().clickable { deletedPhoto(pic) })
+                }
             }
         }
+
     }
 
     private fun addPhoto() {

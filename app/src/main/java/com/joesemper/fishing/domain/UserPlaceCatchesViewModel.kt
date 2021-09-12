@@ -6,22 +6,23 @@ import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.repository.UserContentRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class NotesViewModel(private val repository: UserContentRepository): ViewModel() {
+class UserPlaceCatchesViewModel(private val repository: UserContentRepository) : ViewModel() {
 
     private val viewStateFlow: MutableStateFlow<BaseViewState> =
-        MutableStateFlow(BaseViewState.Success(null))
+        MutableStateFlow(BaseViewState.Loading(null))
 
-    fun subscribe(): StateFlow<BaseViewState> = viewStateFlow
+    fun subscribe(): StateFlow<BaseViewState> {
+        return viewStateFlow
+    }
 
-    private fun loadUserContent() {
+    fun loadCatchesByMarkerId(markerId: String) {
         viewModelScope.launch {
-            repository.getAllUserContentList().collectLatest { userContent ->
-                viewStateFlow.value = BaseViewState.Success(userContent)
+            repository.getCatchesByMarkerId(markerId).collect { catches ->
+                viewStateFlow.value = BaseViewState.Success(catches)
             }
         }
     }
-
 }

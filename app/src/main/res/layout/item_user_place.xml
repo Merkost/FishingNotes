@@ -39,6 +39,26 @@
             android:text="@string/no_description"
             app:layout_constraintStart_toStartOf="@+id/tv_place_title"
             app:layout_constraintTop_toBottomOf="@+id/tv_place_title" />
+
+        <ImageView
+            android:id="@+id/iv_fish"
+            style="@style/SimpleIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_place_title"
+            app:srcCompat="@drawable/ic_fish" />
+
+        <TextView
+            android:id="@+id/tv_catches_count"
+            style="@style/TextAppearance.AppCompat.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_place_description"
+            app:layout_constraintEnd_toEndOf="@+id/iv_fish"
+            app:layout_constraintStart_toStartOf="@+id/iv_fish"
+            app:layout_constraintTop_toBottomOf="@+id/iv_fish" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>
