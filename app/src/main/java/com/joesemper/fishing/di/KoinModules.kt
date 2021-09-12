@@ -1,15 +1,15 @@
 package com.joesemper.fishing.di
 
-import com.joesemper.fishing.ui.MainActivity
-import com.joesemper.fishing.ui.SplashActivity
-import com.joesemper.fishing.ui.LoginActivity
+import com.joesemper.fishing.domain.*
 import com.joesemper.fishing.model.auth.AuthManager
 import com.joesemper.fishing.model.auth.FirebaseAuthManagerImpl
-import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.model.datasource.*
 import com.joesemper.fishing.model.repository.*
+import com.joesemper.fishing.ui.LoginActivity
+import com.joesemper.fishing.ui.MainActivity
+import com.joesemper.fishing.ui.SplashActivity
 import com.joesemper.fishing.ui.fragments.*
-import com.joesemper.fishing.domain.*
+import com.joesemper.fishing.utils.Logger
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.qualifier.named
@@ -56,7 +56,7 @@ val markerFragment = module {
 
 val userFragment = module {
     scope(named<UserFragment>()) {
-        viewModel { UserViewModel(get()) }
+        viewModel { UserViewModel(get(), get()) }
         scoped<UserRepository> { UserRepositoryImpl(get()) }
     }
 }
@@ -75,7 +75,7 @@ val userCatchFragment = module {
 
 val catchesInnerFragment = module {
     scope(named<UserCatchesInnerFragment>()) {
-        viewModel { UserCatchesViewModel(get()) }
+        viewModel { UserPlaceCatchesViewModel(get()) }
     }
 }
 
@@ -90,6 +90,18 @@ val weatherScreen = module {
 val notesFragment = module {
     scope(named<NotesFragment>()) {
         viewModel { NotesViewModel(get()) }
+    }
+}
+
+val catchesFragment = module {
+    scope(named<UserCatchesFragment>()) {
+        viewModel { UserCatchesViewModel(get()) }
+    }
+}
+
+val placesFragment = module {
+    scope(named<UserPlacesFragment>()) {
+        viewModel { UserPlacesViewModel(get()) }
     }
 }
 

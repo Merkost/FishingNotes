@@ -17,11 +17,8 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.databinding.FragmentNotesBinding
 import com.joesemper.fishing.domain.NotesViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
-import com.joesemper.fishing.model.entity.content.Content
-import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.utils.showToast
 import kotlinx.coroutines.flow.collect
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
@@ -68,7 +65,7 @@ class NotesFragment : Fragment(), AndroidScopeComponent {
             viewModel.subscribe().collect { viewState ->
                 when (viewState) {
                     is BaseViewState.Loading -> onLoading()
-                    is BaseViewState.Success<*> -> onSuccess(viewState.data as List<Content>)
+                    is BaseViewState.Success<*> -> onSuccess()
                     is BaseViewState.Error -> onError(viewState.error)
                 }
 
@@ -80,9 +77,8 @@ class NotesFragment : Fragment(), AndroidScopeComponent {
         showLoading()
     }
 
-    private fun onSuccess(content: List<Content>) {
+    private fun onSuccess() {
         initViews()
-        initData(content)
         hideLoading()
     }
 
@@ -94,15 +90,6 @@ class NotesFragment : Fragment(), AndroidScopeComponent {
     private fun initViews() {
         initViewPager()
         initTabs()
-    }
-
-    private fun initData(content: List<Content>) {
-        content.forEach { dataItem ->
-            when (dataItem) {
-                is UserMapMarker -> markers.add(dataItem)
-                is UserCatch -> catches.add(dataItem)
-            }
-        }
     }
 
     private fun initViewPager() {
@@ -143,8 +130,8 @@ class NotesFragment : Fragment(), AndroidScopeComponent {
         val numOfTabs = 2
         override fun getItemCount(): Int = numOfTabs
 
-        val placesFragment = UserPlacesFragment.newInstance(markers)
-        val catchesFragment = UserCatchesFragment.newInstance(catches)
+        val placesFragment = UserPlacesFragment.newInstance()
+        val catchesFragment = UserCatchesFragment.newInstance()
 
         override fun createFragment(position: Int): Fragment {
             return when (position) {
