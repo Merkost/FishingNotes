@@ -39,7 +39,7 @@ class UserContentRepositoryImpl(private val dataProvider: DatabaseProvider) :
         dataProvider.addNewMarker(newMarker)
 
     @ExperimentalCoroutinesApi
-    override fun getAllUserContentList() =
+    override fun getAllUserContentList(): Flow<List<Content>> =
         merge(
             dataProvider.getAllUserCatchesList(),
             dataProvider.getAllUserMarkersList()

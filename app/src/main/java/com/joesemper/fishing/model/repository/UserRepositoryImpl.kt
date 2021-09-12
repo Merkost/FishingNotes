@@ -6,6 +6,7 @@ import com.joesemper.fishing.model.auth.AuthManager
 import com.joesemper.fishing.model.datasource.DatabaseProvider
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.common.User
+import com.joesemper.fishing.model.entity.content.MapMarker
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 

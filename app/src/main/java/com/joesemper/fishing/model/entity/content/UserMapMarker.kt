@@ -9,7 +9,7 @@ class UserMapMarker(
     val userId: String = "",
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
-    val title: String = "My marker",
+    var title: String = "My marker",
     val description: String? = "",
     val isPublic: Boolean = false
 ) : Parcelable, MapMarker
