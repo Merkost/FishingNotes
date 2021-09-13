@@ -99,5 +99,6 @@
     <string name="marker_icon" translatable="false">marker icon</string>
     <string name="catch_photo" translatable="false">photo of the catch</string>
     <string name="test_description">"Ловля судака, как и, впрочем, ловля любой рыбы, очень интересное и захватывающее занятие. Получите хороший и удачный улов. "</string>
+    <string name="add_new_catch">Add new catch</string>
 
 </resources>

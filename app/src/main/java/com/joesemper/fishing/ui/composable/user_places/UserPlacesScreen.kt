@@ -84,10 +84,10 @@ fun ItemPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Unit) {
                     )
                 }
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxHeight()
                 ) {
                     Text(place.title, fontWeight = FontWeight.Bold)
-                    Text(if (place.description.isNullOrEmpty()) "Нет описания" else place.description)
+                    if (place.description.isNullOrEmpty()) Text("Нет описания") else Text(place.description)
                 }
             }
             Column(

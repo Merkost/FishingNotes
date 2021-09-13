@@ -58,11 +58,10 @@ fun ItemAddCatch(addCatch: () -> Unit) {
                         .size(50.dp),
                     tint = primaryFigmaColor
                 )
-                Text(stringResource(R.string.new_catch), modifier = Modifier.weight(1f))
+                Text(stringResource(R.string.add_new_catch), modifier = Modifier.weight(1f))
             }
         }
     }
-
 }
 
 @ExperimentalAnimationApi
@@ -112,8 +111,8 @@ fun ItemCatch(catch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxHeight()
             ) {
-                Text(text = "0.0 KG", fontWeight = FontWeight.Bold)
-                Text("14:06", color = primaryFigmaColor, fontSize = 12.sp)
+                Text(text = catch.fishWeight.toString() + " KG", fontWeight = FontWeight.Bold)
+                Text(catch.time, color = primaryFigmaColor, fontSize = 12.sp)
             }
         }
     }

@@ -33,11 +33,12 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
         listeners.add(
             getUsersCollection().get().addOnCompleteListener(getUserCatchesSuccessListener(this))
         )
+        /* TODO: Get user's public markers
         listeners.add(
-            getMapMarkersCollection().get()
-                //.whereNotEqualTo("userId", getCurrentUserId())
+            getMapMarkersCollection()
+                .whereEqualTo("userId", getCurrentUserId())
                 .addOnCompleteListener(getUserCatchesSuccessListener(this))
-        )
+        )*/
         awaitClose {
             //listeners.forEach { it.remove() }
         }
