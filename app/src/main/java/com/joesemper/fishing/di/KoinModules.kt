@@ -57,7 +57,7 @@ val markerFragment = module {
 
 val userFragment = module {
     scope(named<UserFragment>()) {
-        viewModel { UserViewModel(get()) }
+        viewModel { UserViewModel(get(), get()) }
         scoped<UserRepository> { UserRepositoryImpl(get(), get()) }
     }
 }

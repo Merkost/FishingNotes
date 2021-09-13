@@ -10,7 +10,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -19,15 +20,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.joesemper.fishing.databinding.FragmentPlacesBinding
-import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.adapters.CatchRecyclerViewItem
-import com.joesemper.fishing.ui.adapters.PlaceRecyclerViewItem
 import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.UserPlacesViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
-import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.adapters.UserPlacesRVAdapter
 import com.joesemper.fishing.ui.theme.FigmaTheme
@@ -83,7 +78,8 @@ class UserPlacesFragment : Fragment(), AndroidScopeComponent {
                         CircularProgressIndicator()
                     }
                 is BaseViewState.Success<*> -> UserPlaces(
-                    (uiState.value as BaseViewState.Success<*>).data as List<UserMapMarker>)
+                    (uiState.value as BaseViewState.Success<*>).data as List<UserMapMarker>
+                )
                 is BaseViewState.Error -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -122,7 +118,8 @@ class UserPlacesFragment : Fragment(), AndroidScopeComponent {
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.height(110.dp).fillMaxWidth().clickable { showToast(requireContext(), "Not yet implemented") }
+                modifier = Modifier.height(110.dp).fillMaxWidth()
+                    .clickable { onAddNewPlaceClick() }
                     .padding(5.dp)
             ) {
                 Column(verticalArrangement = Arrangement.Center) {
@@ -147,7 +144,8 @@ class UserPlacesFragment : Fragment(), AndroidScopeComponent {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.height(75.dp).fillMaxWidth().clickable { onPlaceItemClick(place) }
+                modifier = Modifier.height(75.dp).fillMaxWidth()
+                    .clickable { onPlaceItemClick(place) }
                     .padding(5.dp)
             ) {
                 Row(modifier = Modifier, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
@@ -181,19 +179,14 @@ class UserPlacesFragment : Fragment(), AndroidScopeComponent {
         }
     }
 
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-    }
-
     private fun onAddNewPlaceClick() {
         showToast(requireContext(), "Not yet implemented")
     }
 
     private fun onPlaceItemClick(place: UserMapMarker) {
-        /*val action =
+        val action =
             NotesFragmentDirections.actionNotesFragmentToUserPlaceFragment(place)
-        findNavController().navigate(action)*/
+        findNavController().navigate(action)
     }
 
 

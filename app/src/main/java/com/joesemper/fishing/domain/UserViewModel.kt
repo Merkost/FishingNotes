@@ -32,8 +32,6 @@ class UserViewModel(
         }
     }*/
 
-    suspend fun logoutCurrentUser() = repository.logoutCurrentUser()
-
     private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
     val uiState: StateFlow<BaseViewState>
         get() = _uiState

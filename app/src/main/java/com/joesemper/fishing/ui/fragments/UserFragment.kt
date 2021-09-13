@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -192,28 +191,29 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     @Composable
     fun UserInfo() {
         val user by viewModel.getCurrentUser().collectAsState(null)
+        //TODO: add number of places, catches and more
+        user?.let { nutNullUser ->
+            Crossfade(nutNullUser, animationSpec = tween(500)) { animatedUser ->
+                UserNameAndImage(animatedUser)
+            }
+        } ?: Row(
+            modifier = Modifier.fillMaxWidth().height(150.dp).padding(20.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CircularProgressIndicator()
+        }
+    }
 
-        Card(
-            elevation = 10.dp,
-            modifier = Modifier.padding(top = 50.dp).size(230.dp),
-            shape = RoundedCornerShape(25.dp),
-            backgroundColor = MaterialTheme.colors.surface
-/*
+
+    @ExperimentalCoilApi
+    @Composable
+    fun UserNameAndImage(user: User) {
         Row(
             modifier = Modifier.fillMaxWidth().height(150.dp).padding(20.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
-*/
         ) {
-            //TODO: add number of places, catches and more
-            UserNameAndImage(user)
-        }
-    }
-
-    @ExperimentalCoilApi
-    @Composable
-    fun UserNameAndImage(user: User?) {
-        user?.let {
             Image(
                 painter = if (user.userPic.isNullOrEmpty() or user.isAnonymous)
                     painterResource(R.drawable.ic_fisher)
@@ -221,25 +221,19 @@ class UserFragment : Fragment(), AndroidScopeComponent {
                     data = user.userPic,
                     builder = {
                         transformations(CircleCropTransformation())
-                        crossfade(200)
+                        //crossfade(500)
                     }
                 ),
                 contentDescription = stringResource(R.string.fisher),
                 modifier = Modifier.size(150.dp),
             )
-        } ?: Surface(modifier = Modifier.size(150.dp)) {
-            CircularProgressIndicator()
-        }
-        Crossfade(user, animationSpec = tween(500)) { animatedUser ->
-            animatedUser?.let {
-                Text(
-                    text = when (animatedUser.isAnonymous) {
-                        true -> stringResource(R.string.anonymous)
-                        false -> animatedUser.userName
-                    }, style = MaterialTheme.typography.h6,
-                    textAlign = TextAlign.Center
-                )
-            }
+            Text(
+                text = when (user.isAnonymous) {
+                    true -> stringResource(R.string.anonymous)
+                    false -> user.userName
+                }, style = MaterialTheme.typography.h6,
+                textAlign = TextAlign.Center
+            )
         }
     }
 
