@@ -97,5 +97,10 @@
     <string name="goto_app_settings">Перейти в настройки</string>
     <string name="not_all_fields_are_filled">Не все поля были заполнены, пожалуйста, проверьте!</string>
 
+    <string name="navigate">Маршрут</string>
+
+    <string name="test_description">"Ловля судака, как и, впрочем, ловля любой рыбы, очень интересное и захватывающее занятие. Получите хороший и удачный улов. "</string>
+
+
 
 </resources>

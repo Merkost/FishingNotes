@@ -45,6 +45,7 @@
     <string name="delete">Delete</string>
     <string name="add_photo">Add photo</string>
     <string name="no_description">No description</string>
+    <string name="navigate">Navigate</string>
 
     <!--  User screen  -->
     <string name="back">Back</string>
@@ -95,5 +96,8 @@
     <string name="permission_denied_message">Permission is denied, Please allow permissions from App Settings.</string>
     <string name="goto_app_settings">App Settings</string>
     <string name="not_all_fields_are_filled">Not all fields are filled in. Please, double check</string>
+    <string name="marker_icon" translatable="false">marker icon</string>
+    <string name="catch_photo" translatable="false">photo of the catch</string>
+    <string name="test_description">"Ловля судака, как и, впрочем, ловля любой рыбы, очень интересное и захватывающее занятие. Получите хороший и удачный улов. "</string>
 
 </resources>

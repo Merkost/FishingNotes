@@ -1,5 +1,6 @@
 package com.joesemper.fishing.model.mappers
 
+import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.utils.getCurrentUserId

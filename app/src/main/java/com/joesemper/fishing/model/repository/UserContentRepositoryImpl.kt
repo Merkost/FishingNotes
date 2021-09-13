@@ -2,7 +2,6 @@ package com.joesemper.fishing.model.repository
 
 import com.joesemper.fishing.model.datasource.DatabaseProvider
 import com.joesemper.fishing.model.entity.common.Progress
-import com.joesemper.fishing.model.entity.content.Content
 import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -31,8 +30,8 @@ class UserContentRepositoryImpl(private val dataProvider: DatabaseProvider) :
     override fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>> =
         dataProvider.getCatchesByMarkerId(markerId)
 
-    override suspend fun addNewCatch(newCatch: RawUserCatch): StateFlow<Progress> =
-        dataProvider.addNewCatch(newCatch)
+    override suspend fun addNewCatch(markerId: String, newCatch: RawUserCatch): StateFlow<Progress> =
+        dataProvider.addNewCatch(markerId, newCatch)
 
     override suspend fun deleteMarker(userCatch: UserCatch) = dataProvider.deleteMarker(userCatch)
 
@@ -40,7 +39,7 @@ class UserContentRepositoryImpl(private val dataProvider: DatabaseProvider) :
         dataProvider.addNewMarker(newMarker)
 
     @ExperimentalCoroutinesApi
-    override fun getAllUserContentList() =
+    override fun getAllUserContentList(): Flow<List<Content>> =
         merge(
             dataProvider.getAllUserCatchesList(),
             dataProvider.getAllUserMarkersList()

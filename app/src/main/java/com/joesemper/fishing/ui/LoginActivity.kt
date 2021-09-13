@@ -150,8 +150,6 @@ class LoginActivity : AppCompatActivity(), AndroidScopeComponent {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
-                    startMainActivity()
-                    finish()
                 } else {
                     // If sign in fails, display a message to the user.
                     handleError(task.exception as Throwable)
@@ -164,8 +162,6 @@ class LoginActivity : AppCompatActivity(), AndroidScopeComponent {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
-                    val user = auth.currentUser
-                    startMainActivity()
                 } else {
                     // If sign in fails, display a message to the user.
                     handleError(task.exception as Throwable)
