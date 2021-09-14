@@ -29,6 +29,8 @@ import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.adapters.UserCatchesRVAdapter
+import com.joesemper.fishing.ui.composable.user_catches.UserCatches
+import com.joesemper.fishing.ui.composable.user_catches.UserCatchesLoading
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
@@ -37,7 +39,7 @@ import org.koin.androidx.scope.fragmentScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.scope.Scope
 
-class UserCatchesFragment : Fragment(), AndroidScopeComponent {
+class UserCatchesFragment : Fragment() {
 
     companion object {
         private const val TAG = "CATCHES"
@@ -47,12 +49,8 @@ class UserCatchesFragment : Fragment(), AndroidScopeComponent {
         }
     }
 
-    override val scope: Scope by fragmentScope()
     private val viewModel: UserCatchesViewModel by viewModel()
 
-    private lateinit var binding: FragmentCatchesBinding
-
-    private lateinit var adapter: UserCatchesRVAdapter
 
     @ExperimentalAnimationApi
     override fun onCreateView(
@@ -76,14 +74,10 @@ class UserCatchesFragment : Fragment(), AndroidScopeComponent {
             val uiState = viewModel.viewStateFlow.collectAsState()
             when (uiState.value) {
                 is BaseViewState.Loading ->
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
+                    UserCatchesLoading { onAddNewCatchClick() }
                 is BaseViewState.Success<*> -> UserCatches(
-                    (uiState.value as BaseViewState.Success<*>).data as List<UserCatch>)
+                    (uiState.value as BaseViewState.Success<*>).data as List<UserCatch>,
+                    { onAddNewCatchClick() }, { catch -> onCatchItemClick(catch) })
                 is BaseViewState.Error -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -94,112 +88,6 @@ class UserCatchesFragment : Fragment(), AndroidScopeComponent {
                 }
             }
         }
-    }
-
-    @ExperimentalAnimationApi
-    @Composable
-    fun UserCatches(
-        catches: List<UserCatch>
-    ) {
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
-            item { ItemAddCatch {  onAddNewCatchClick() } }
-            items(items = catches) {
-                ItemCatch (
-                    catch = it
-                )
-            }
-        }
-    }
-
-    @Composable
-    fun MyCard(content: @Composable () -> Unit) {
-        Card(elevation = 8.dp, modifier = Modifier.fillMaxWidth().padding(4.dp), content = content)
-    }
-
-    @Composable
-    fun ItemAddCatch(addCatch: () -> Unit) {
-        MyCard {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.height(110.dp).fillMaxWidth().clickable { addCatch() }
-                    .padding(5.dp)
-            ) {
-                Column(verticalArrangement = Arrangement.Center) {
-                    Icon(
-                        painterResource(R.drawable.ic_add_catch),
-                        stringResource(R.string.new_catch),
-                        modifier = Modifier.weight(2f).align(Alignment.CenterHorizontally)
-                            .size(50.dp),
-                        tint = primaryFigmaColor
-                    )
-                    Text(stringResource(R.string.new_catch), modifier = Modifier.weight(1f))
-                }
-            }
-        }
-
-    }
-
-    @ExperimentalAnimationApi
-    @Composable
-    fun ItemCatch(catch: UserCatch) {
-        MyCard {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.height(75.dp).fillMaxWidth().clickable { onCatchItemClick(catch) }
-                    .padding(5.dp)
-            ) {
-                Row(modifier = Modifier, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-                    Box(modifier = Modifier.size(75.dp).padding(5.dp)) {
-                        Icon(
-                            painterResource(R.drawable.ic_no_photo_vector),
-                            stringResource(R.string.place),
-                            modifier = Modifier.padding(5.dp).fillMaxSize(),
-                            tint = secondaryFigmaColor
-                        )
-                    }
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(2.dp)
-                    ) {
-                        Column {
-                            Text(catch.title, fontWeight = Bold)
-                            Text(stringResource(R.string.amount) + ": " + catch.fishAmount)
-                        }
-                        Row (verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                painterResource(R.drawable.ic_baseline_location_on_24),
-                                stringResource(R.string.place),
-                                modifier = Modifier.size(20.dp),
-                                tint = secondaryFigmaColor
-                            )
-                            Text("Place", color = primaryFigmaColor, fontSize = 12.sp)
-                        }
-
-                    }
-                }
-                Column(
-                    verticalArrangement = Arrangement.SpaceBetween,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxHeight()
-                ) {
-                    Text(text = "0.0 KG", fontWeight = Bold)
-                    Text("14:06", color = primaryFigmaColor, fontSize = 12.sp)
-                }
-            }
-        }
-    }
-
-    private fun onLoading() {
-
-    }
-
-    private fun onSuccess(catches: List<UserCatch>) {
-
-    }
-
-    private fun onError(error: Throwable) {
-
     }
 
     private fun onAddNewCatchClick() {
@@ -215,6 +103,4 @@ class UserCatchesFragment : Fragment(), AndroidScopeComponent {
             NotesFragmentDirections.actionNotesFragmentToUserCatchFragment(catch)
         findNavController().navigate(action)
     }
-
-
 }
