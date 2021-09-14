@@ -8,11 +8,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -20,12 +22,12 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
@@ -39,10 +41,15 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
+import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.UserPlaceViewModel
+import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.ui.composable.MyCardNoPadding
+import com.joesemper.fishing.ui.composable.UserProfile
+import com.joesemper.fishing.ui.composable.user_catches.ItemCatchLoading
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import com.joesemper.fishing.ui.theme.primaryFigmaBackgroundTint
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
@@ -61,21 +68,11 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     override val scope: Scope by fragmentScope()
     private val viewModel: UserPlaceViewModel by viewModel()
 
-    private val catches: List<UserCatch> =
-        listOf(
-            UserCatch(),
-            UserCatch(),
-            UserCatch(),
-            UserCatch(),
-            UserCatch(),
-            UserCatch(),
-            UserCatch()
-        ) // для теста
-
     private lateinit var place: UserMapMarker
 
     companion object {
         private const val TAG = "PLACE"
+        val loadingCatches = listOf(UserCatch(), UserCatch(),UserCatch(),)
     }
 
     fun newInstance(place: UserMapMarker): Fragment {
@@ -90,6 +87,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         place = args.userMapMarker
     }
 
+    @ExperimentalAnimationApi
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -104,11 +102,13 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         }
     }
 
+    @ExperimentalAnimationApi
     @Composable
     fun UserPlaceScreen() {
         Scaffold(
             topBar = { AppBar() }
         ) {
+            val userCatches by viewModel.getCatchesByMarkerId(place.id).collectAsState(null)
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -119,7 +119,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     PlaceInfo()
                     Buttons()
                 }
-                Catches(catches)
+                Catches(userCatches)
             }
 
         }
@@ -181,50 +181,12 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         }
     }
 
-    @Composable
-    fun MyCard(content: @Composable () -> Unit) {
-        Card(
-            elevation = 4.dp, shape = MaterialTheme.shapes.large,
-            modifier = Modifier.fillMaxWidth(), content = content
-        )
-    }
-
-    /*@Composable
-    private fun Title(title: String, description: String, userId: String) {
-        Column(modifier = Modifier.padding(4.dp)) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
-            {
-                Image(
-                    painter = painterResource(R.drawable.ic_fish_on_map_red),
-                    contentDescription = stringResource(R.string.marker_icon),
-                    Modifier
-                        .size(50.dp)
-                        .padding(start = 15.dp)
-                )
-                //UserProfile(userId)
-            }
-            Text(
-                title,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(start = 5.dp)
-            )
-            Text(
-                description,
-                modifier = Modifier
-                    .padding(start = 5.dp)
-                    .fillMaxWidth()
-            )
-        }
-    }*/
-
+    @ExperimentalAnimationApi
     @Composable
     private fun PlaceInfo() {
-        MyCard {
+        MyCardNoPadding {
+            val user by viewModel.getCurrentUser().collectAsState(null)
+
             Column(
                 verticalArrangement = Arrangement.Top,
                 modifier = Modifier.fillMaxWidth().padding(10.dp)
@@ -236,75 +198,38 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                 ) {
                     Icon(Icons.Default.Place, stringResource(R.string.place))
                     Spacer(modifier = Modifier.width(150.dp))
-                    UserProfile()
-
-                    //Icon(Icons.Default.Check, stringResource(R.string.place))
+                    UserProfile(user)
                 }
-                Text("Точка 2", fontWeight = FontWeight.Bold)
-                Text("Описание точки")
+                Text(place.title, fontWeight = FontWeight.Bold)
+                Text(place.description ?: "Нет описания")
                 Spacer(modifier = Modifier.size(8.dp))
+
             }
+
         }
     }
 
-    @Composable
-    private fun UserProfile() {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Image(
-                painter = painterResource(R.drawable.ic_fisher),
-                contentDescription = stringResource(R.string.fisher),
-                Modifier.fillMaxHeight().padding(10.dp)
-            )
-            Column(verticalArrangement = Arrangement.Center) {
-                Text(
-                    stringResource(R.string.fisher),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = MaterialTheme.typography.button.fontSize
-                )
-                Text(
-                    "@" + stringResource(R.string.fisher),
-                    fontSize = MaterialTheme.typography.caption.fontSize
-                )
-            }
-        }
-    }
 
-/*  @Composable
-  private fun UserProfile(userId: String) {
-      // TODO получить имя и фото по userId
-      Row {
-          Image(
-              painter = painterResource(R.drawable.ic_fisher),
-              contentDescription = stringResource(R.string.fisher),
-              Modifier.size(50.dp)
-          )
-          Spacer(Modifier.size(2.dp))
-          Column(verticalArrangement = Arrangement.SpaceBetween) {
-              Text(
-                  stringResource(R.string.fisher),
-                  fontWeight = FontWeight.Bold,
-                  fontSize = 18.sp
-              )
-              Text("@" + stringResource(R.string.fisher), fontSize = 10.sp)
-          }
-      }
-  }*/
 
-    @ExperimentalCoilApi
+    @ExperimentalAnimationApi
     @Composable
     fun Catches(
-        catches: List<UserCatch>,
+        catches: List<UserCatch>?,
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(items = catches) {
-                ItemCatch(
-                    catch = it
-                )
+        catches?.let { userCatches ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(items = userCatches) {
+                    ItemCatch(
+                        catch = it
+                    )
+                }
             }
-        }
+        } ?:
+        CircularProgressIndicator()
+
     }
 
     @ExperimentalCoilApi
@@ -319,7 +244,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     .padding(14.dp)
             ) {
                 Text(
-                    text = "Судак",
+                    text = catch.title,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
@@ -346,13 +271,13 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                             .size(125.dp).weight(2.35f)
                     ) {
                         Text(
-                            text = "4.650 кг",
+                            text = catch.fishWeight.toString() + " " + getString(R.string.kg),
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
                                 .padding(start = 5.dp).align(Alignment.Center)
                         )
                         Text(
-                            text = "22.08.2021",
+                            text = catch.date.toString(),
                             fontSize = 12.sp,
                             modifier = Modifier
                                 .padding(start = 5.dp).align(Alignment.BottomEnd)
