@@ -124,7 +124,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
 
     @Composable
     fun CatchesNumber() {
-        val userCatchesNum by viewModel.getUserCatches().collectAsState(listOf())
+        val userCatchesNum by viewModel.userCatches
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)
@@ -133,7 +133,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
                 painterResource(R.drawable.ic_fishing), stringResource(R.string.place),
                 modifier = Modifier.size(25.dp)
             )
-            Text(userCatchesNum.size.toString())
+            Text(userCatchesNum.toString())
         }
     }
 
