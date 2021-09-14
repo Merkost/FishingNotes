@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.domain.viewstates.BaseViewState
+import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.repository.UserContentRepository
 import com.joesemper.fishing.model.repository.UserRepository
 import com.joesemper.fishing.utils.getCurrentUser
@@ -19,11 +20,13 @@ class UserViewModel(
     private val repository: UserContentRepository
 ) : ViewModel() {
 
+    val userCatches = mutableStateOf(0)
 
-    /*init {
-        loadCurrentUser()
+    init {
+        getUserCatches()
     }
 
+    /*
     private fun loadCurrentUser() {
         viewModelScope.launch {
             repository.currentUser
@@ -40,7 +43,13 @@ class UserViewModel(
 
     fun getUserPlaces() = repository.getAllUserMarkersList()
 
-    fun getUserCatches() = repository.getAllUserCatchesList()
+    fun getUserCatches() {
+        viewModelScope.launch {
+            repository.getAllUserCatchesList().collect { catches ->
+                userCatches.value = catches.size
+            }
+        }
+    }
 
     suspend fun logoutCurrentUser() = userRepository.logoutCurrentUser()
 

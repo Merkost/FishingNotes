@@ -30,7 +30,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -147,12 +147,20 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     @Composable
     private fun Places(label: String) {
         val marker by rememberSaveable { viewModel.marker }
-        var textFieldValue by rememberSaveable{ mutableStateOf(if(marker.title.isNotEmpty()) marker.title else "Выберите место") }
-        var isDropMenuOpen by rememberSaveable { mutableStateOf(false) }
+        val isMarkerNull = marker.id.isEmpty()
+        var textFieldValue by rememberSaveable {
+            mutableStateOf(
+                if (marker.id.isNotEmpty()) marker.title else ""
+            )
+        }
+        var isDropMenuOpen by rememberSaveable { mutableStateOf(isMarkerNull) }
         val suggestions by viewModel.getAllUserMarkersList().collectAsState(listOf())
         val filteredList by rememberSaveable { mutableStateOf(suggestions.toMutableList()) }
+        if (textFieldValue == "") searchFor("", suggestions, filteredList)
         Row(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
+                readOnly = !isMarkerNull,
+                singleLine = true,
                 value = textFieldValue,
                 onValueChange = {
                     textFieldValue = it
@@ -160,21 +168,24 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                         searchFor(textFieldValue, suggestions, filteredList)
                         isDropMenuOpen = true
                     }
-                }, //text -> if (text !== marker.title) onValueChange(text) },
-                modifier = Modifier.clickable { isDropMenuOpen = true }.fillMaxWidth(),
+                },
+                modifier = Modifier.fillMaxWidth(),
                 label = { Text(text = label) },
                 trailingIcon = {
-                    Icon(Icons.Default.KeyboardArrowDown, "",
-                        modifier = Modifier.clickable {
-                            if (!isDropMenuOpen) isDropMenuOpen = true
-                        })
+                    if (isMarkerNull) {
+                        if (textFieldValue.isNotEmpty()) {
+                            Icon(Icons.Default.Close, "", modifier = Modifier.clickable { textFieldValue = ""; isDropMenuOpen = true }, tint = primaryFigmaColor) }
+                    }
+                    else Icon(Icons.Default.Lock, "", tint = primaryFigmaColor)
                 },
+                isError = !isThatPlaceInList(textFieldValue, suggestions)
             )
+
             DropdownMenu(
                 expanded = isDropMenuOpen, //suggestions.isNotEmpty(),
                 onDismissRequest = { if (isDropMenuOpen) isDropMenuOpen = false },
                 // This line here will accomplish what you want
-                properties = PopupProperties(focusable = false)
+                properties = PopupProperties(focusable = false),
             ) {
                 filteredList.forEach { suggestion ->
                     DropdownMenuItem(
@@ -187,6 +198,13 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 }
             }
         }
+    }
+
+    private fun isThatPlaceInList(textFieldValue: String, suggestions: List<UserMapMarker>): Boolean {
+        suggestions.forEach {
+            if (it.title == textFieldValue) return true
+        }
+        return false
     }
 
     private fun searchFor(
@@ -250,7 +268,11 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 onValueChange = { name.value = it },
                 label = { Text(stringResource(R.string.title)) },
                 modifier = Modifier.fillMaxWidth(),
-                isError = name.value.isBlank()
+                isError = name.value.isBlank(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                )
             )
             Spacer(modifier = Modifier.size(2.dp))
             Text(stringResource(R.string.required), fontSize = 12.sp)
@@ -501,7 +523,8 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Next
-            )
+            ),
+            singleLine = true
         )
     }
 
