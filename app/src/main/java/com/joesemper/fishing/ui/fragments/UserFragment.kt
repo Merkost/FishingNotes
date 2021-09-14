@@ -81,7 +81,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
                 ) {
                     Card(
                         elevation = 10.dp,
-                        modifier = Modifier.padding(50.dp).fillMaxWidth().height(220.dp),
+                        modifier = Modifier.padding(25.dp),
                         shape = RoundedCornerShape(25.dp),
                         backgroundColor = MaterialTheme.colors.surface
                     ) {
@@ -211,7 +211,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     fun UserNameAndImage(user: User) {
         Row(
             modifier = Modifier.fillMaxWidth().height(150.dp).padding(20.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
@@ -225,7 +225,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
                     }
                 ),
                 contentDescription = stringResource(R.string.fisher),
-                modifier = Modifier.size(150.dp),
+                modifier = Modifier.size(125.dp),
             )
             Text(
                 text = when (user.isAnonymous) {
