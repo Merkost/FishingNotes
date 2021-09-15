@@ -346,7 +346,7 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (requireActivity() as NavigationHolder).closeNav()
+        (requireActivity() as NavigationHolder).hideNav()
     }
 
     override fun onDetach() {
