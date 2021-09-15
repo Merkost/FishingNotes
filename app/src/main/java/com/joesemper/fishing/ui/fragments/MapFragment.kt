@@ -2,10 +2,13 @@ package com.joesemper.fishing.ui.fragments
 
 import android.Manifest
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context.INPUT_METHOD_SERVICE
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,6 +22,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -47,6 +51,7 @@ import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.scope.Scope
+import java.util.*
 
 
 class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
@@ -72,6 +77,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
 
     private lateinit var addMarkerBottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
     private lateinit var buttonsCreateCancelBehavior: BottomSheetBehavior<ConstraintLayout>
+    private lateinit var placeDialogBehavior: BottomSheetBehavior<ConstraintLayout>
 
     private lateinit var geocoder: Geocoder
 
@@ -138,6 +144,13 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
             isHideable = true
             hide()
         }
+
+        val placeDialog = binding.dialogPlace.bottomSheetPlace
+        placeDialogBehavior = BottomSheetBehavior.from(placeDialog)
+        placeDialogBehavior.apply {
+            isHideable = true
+            hide()
+        }
     }
 
     private fun initLocationProvider() {
@@ -160,10 +173,8 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
-
         subscribeOnPlaceSelectMode()
         enableMyLocation()
-        setOnMarkersClickListener()
         subscribeOnViewModel()
         setOnFabClickListener()
         moveCameraToCurrentLocation()
@@ -207,16 +218,54 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     }
 
     private fun setOnMarkersClickListener() {
+        map.setOnMapClickListener {
+            placeDialogBehavior.hide()
+        }
+
         map.setOnMarkerClickListener { marker ->
             try {
                 val userMarker = mapMarkers.first { it.id == marker.tag }
-                MarkerDetailsDialogFragment.newInstance(userMarker)
-                    .show(childFragmentManager, "Markers")
+
+                with(binding.dialogPlace) {
+
+                    bottomSheetPlace.setOnClickListener {
+                        val action =
+                            MapFragmentDirections.actionMapFragmentToUserPlaceFragment(userMarker)
+                        findNavController().navigate(action)
+                    }
+
+                    tvPlaceTitle.text = userMarker.title
+                    tvPlaceDescription.text = userMarker.description
+
+                    chipAddNewCatch.setOnClickListener {
+                        val action =
+                            MapFragmentDirections.actionMapFragmentToNewCatchDialogFragment(
+                                userMarker
+                            )
+                        findNavController().navigate(action)
+                    }
+
+                    chipRoute.setOnClickListener {
+                        startMapsActivityForNavigation(userMarker)
+                    }
+
+                    chipDetails.setOnClickListener {
+                        val action =
+                            MapFragmentDirections.actionMapFragmentToUserPlaceFragment(userMarker)
+                        findNavController().navigate(action)
+                    }
+                }
+                placeDialogBehavior.expand()
+
             } catch (e: Exception) {
                 onError(Throwable(e))
             }
             true
         }
+    }
+
+    private fun removeMarkerClickListener() {
+        map.setOnMarkerClickListener { true }
     }
 
     private fun subscribeOnViewModel() {
@@ -287,6 +336,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     }
 
     private fun onPlaceSelectMode() {
+        removeMarkerClickListener()
         hideNavigation()
         moveCameraToCurrentLocation()
         setViewsVisibilityOnPlaceSelectMode()
@@ -307,12 +357,14 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         addMarkerBottomSheetBehavior.halfExpand()
         buttonsCreateCancelBehavior.expand()
 
+
+
         map.setOnCameraMoveStartedListener {
             onCameraMoveStartViewsBehaviour()
         }
 
         map.setOnCameraIdleListener {
-            onCameraStopViewBehaviour()
+            onCameraStopViewsBehaviour()
         }
     }
 
@@ -323,7 +375,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         binding.tvLocation.text = getString(R.string.calculating)
     }
 
-    private fun onCameraStopViewBehaviour() {
+    private fun onCameraStopViewsBehaviour() {
         addMarkerBottomSheetBehavior.setPeekHeight(235, true)
         addMarkerBottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
         buttonsCreateCancelBehavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -358,6 +410,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     }
 
     private fun onSimpleMode() {
+        setOnMarkersClickListener()
         showNavigation()
         setViewsVisibilityOnSimpleMode()
         setViewsBehaviourOnSimpleMode()
@@ -438,9 +491,32 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         private const val DEFAULT_ZOOM = 15
     }
 
-    fun hideKeyboard(activity: Activity) {
+    private fun hideKeyboard(activity: Activity) {
         val imm = activity.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
+    }
+
+    private fun startMapsActivityForNavigation(mapMarker: UserMapMarker) {
+        val uri = String.format(
+            Locale.ENGLISH,
+            "http://maps.google.com/maps?daddr=%f,%f (%s)",
+            mapMarker.latitude,
+            mapMarker.longitude,
+            mapMarker.title
+        )
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+        intent.setPackage("com.google.android.apps.maps")
+        try {
+            startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            try {
+                val unrestrictedIntent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+                startActivity(unrestrictedIntent)
+            } catch (e: ActivityNotFoundException) {
+                Toast.makeText(context, "Please install a maps application", Toast.LENGTH_LONG)
+                    .show()
+            }
+        }
     }
 
 }

@@ -103,6 +103,7 @@
     <string name="location">Location:</string>
     <string name="calculating">Calculating…</string>
     <string name="new_place">New place</string>
+    <string name="details">Details</string>
 
 
 </resources>

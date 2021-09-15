@@ -23,6 +23,9 @@
         <action
             android:id="@+id/action_mapFragment_to_userCatchFragment"
             app:destination="@id/userCatchFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_userPlaceFragment"
+            app:destination="@id/userPlaceFragment" />
     </fragment>
 
     <fragment

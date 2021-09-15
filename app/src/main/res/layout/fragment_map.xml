@@ -150,7 +150,12 @@
 
     <include
         android:id="@+id/dialog_create_new_place"
-        layout="@layout/dialog_new_catch" />
+        layout="@layout/dialog_new_catch"
+        tools:visibility="gone" />
+
+    <include
+        android:id="@+id/dialog_place"
+        layout="@layout/dialog_place_on_map" />
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
