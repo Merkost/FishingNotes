@@ -71,7 +71,7 @@ class NewCatchViewModel(private val repository: UserContentRepository) : ViewMod
     }
 
     private fun isInputCorrect(): Boolean {
-        return title.value.isNotBlank()
+        return title.value.isNotBlank() && marker.value.title.isNotEmpty()
     }
 
     fun createNewUserCatch(photos: List<ByteArray>): Boolean {
