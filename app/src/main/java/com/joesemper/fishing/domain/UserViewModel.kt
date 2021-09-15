@@ -20,7 +20,7 @@ class UserViewModel(
     private val repository: UserContentRepository
 ) : ViewModel() {
 
-    val userCatches = mutableStateOf(0)
+    //val userCatches = mutableStateOf<Int>()
 
     init {
         getUserCatches()
@@ -43,13 +43,8 @@ class UserViewModel(
 
     fun getUserPlaces() = repository.getAllUserMarkersList()
 
-    fun getUserCatches() {
-        viewModelScope.launch {
-            repository.getAllUserCatchesList().collect { catches ->
-                userCatches.value = catches.size
-            }
-        }
-    }
+    fun getUserCatches() = repository.getAllUserCatchesList()
+
 
     suspend fun logoutCurrentUser() = userRepository.logoutCurrentUser()
 
