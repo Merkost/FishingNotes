@@ -97,7 +97,8 @@ val notesFragment = module {
 }
 val userPlaceFragment = module {
     scope(named<UserPlaceFragment>()) {
-        viewModel { UserPlaceViewModel(get()) }
+        viewModel { UserPlaceViewModel(get(), get()) }
+        scoped<UserRepository> { UserRepositoryImpl(get(), get()) }
     }
 }
 val catchesFragment = module {
