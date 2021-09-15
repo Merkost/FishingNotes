@@ -2,6 +2,7 @@ package com.joesemper.fishing.model.datasource
 
 import android.util.Log
 import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
@@ -29,9 +30,11 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
 
     @ExperimentalCoroutinesApi
     override fun getAllUserCatchesList() = channelFlow {
+        //val snapshot = await firestore.collection('events').get()
         val listeners = mutableListOf<Task<QuerySnapshot>>()
         listeners.add(
-            getUsersCollection().get().addOnCompleteListener(getUserCatchesSuccessListener(this))
+            getUserMapMarkersCollection().get()
+                .addOnSuccessListener(getUserCatchesSuccessListener(this))
         )
         /* TODO: Get user's public markers
         listeners.add(
@@ -45,22 +48,35 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
     }
 
     @ExperimentalCoroutinesApi
-    private fun getUserCatchesSuccessListener(scope: ProducerScope<List<UserCatch>>) =
-        OnCompleteListener<QuerySnapshot> { task ->
-            //val catches = mutableListOf<UserCatch>()
-            if (task.isSuccessful) {
-                val catches = task.result.toObjects(UserCatch::class.java)
-                scope.trySend(catches)
+    private fun getUserCatchesSuccessListener(scope: ProducerScope<List<UserCatch>>): OnSuccessListener<in QuerySnapshot> =
+        OnSuccessListener<QuerySnapshot> { task ->
+            val catches = mutableListOf<UserCatch>()
+            task.documents.forEach { doc ->
+                doc.reference.collection(CATCHES_COLLECTION).addSnapshotListener(
+                    EventListener<QuerySnapshot> { snapshots, error ->
+                        snapshots?.toObjects(UserCatch::class.java)?.forEach {
+                            catches.add(it)
+                        }
+                })
+            }
+            scope.trySend(catches)
+        }
+
+   // val markers = task.toObjects(UserCatch::class.java)
+    //val catches = mutableListOf<UserCatch>()
+//            if (task.isSuccessful) {
+//                val catches = task.result.toObjects(UserCatch::class.java)
+    //scope.trySend(catches)
 //                for (document in task.result) {
 //                    catches.add(document.toObject(UserCatch::class.java))
 //                    scope.trySend(catches)
 //                    document.data
 //                    Log.d(TAG, document.id + " => " + document.data)
 //                }
-            } else {
-                //Log.d(TAG, "Error getting documents: ", task.exception)
-                scope.trySend(listOf())
-            }
+//            } else {
+//                //Log.d(TAG, "Error getting documents: ", task.exception)
+//                scope.trySend(listOf())
+//            }
 
 
 //                Log.d("Fishing", "Catch snapshot listener", error)
@@ -86,7 +102,7 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
 ////                    }
 ////                }
 ////            }
-        }
+
 
     @ExperimentalCoroutinesApi
     override fun getCatchesByMarkerId(markerId: String) = channelFlow {
