@@ -16,7 +16,6 @@ interface UserContentRepository {
     fun getAllUserMarkers(): Flow<MapMarker>
     fun getAllUserMarkersList(): Flow<List<MapMarker>>
     fun getAllUserCatchesList(): Flow<List<UserCatch>>
-    fun getAllUserContentList(): Flow<List<Content>>
     fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>>
 
 

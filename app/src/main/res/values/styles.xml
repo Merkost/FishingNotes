@@ -78,4 +78,10 @@
         <item name="titleTextColor">@color/white</item>
     </style>
 
+    <style name="MyTransparentBottomSheetDialogTheme" parent="Widget.MaterialComponents.BottomSheet">
+        <!--        <item name="android:background">@android:color/transparent</item>-->
+        <!--        <item name="android:colorBackground">@android:color/transparent</item>-->
+        <!--        <item name="behavior_hideable">true</item>-->
+    </style>
+
 </resources>

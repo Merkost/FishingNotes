@@ -8,11 +8,8 @@ import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.model.entity.raw.RawUserCatch
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.merge
 
 class UserContentRepositoryImpl(private val dataProvider: DatabaseProvider) :
     UserContentRepository {
@@ -41,10 +38,4 @@ class UserContentRepositoryImpl(private val dataProvider: DatabaseProvider) :
     override suspend fun addNewMarker(newMarker: RawMapMarker): StateFlow<Progress> =
         dataProvider.addNewMarker(newMarker)
 
-    @ExperimentalCoroutinesApi
-    override fun getAllUserContentList(): Flow<List<Content>> =
-        merge(
-            dataProvider.getAllUserCatchesList(),
-            dataProvider.getAllUserMarkersList()
-        )
 }
