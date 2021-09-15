@@ -11,10 +11,10 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.joesemper.fishing.R
 import com.joesemper.fishing.databinding.ActivityMainBinding
-import com.joesemper.fishing.utils.Logger
-import com.joesemper.fishing.utils.NavigationHolder
 import com.joesemper.fishing.domain.MainViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
+import com.joesemper.fishing.utils.Logger
+import com.joesemper.fishing.utils.NavigationHolder
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
 import org.koin.android.scope.AndroidScopeComponent
@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity(), AndroidScopeComponent, NavigationHolde
         fun getStartIntent(context: Context) = Intent(context, MainActivity::class.java)
     }
 
-    override fun closeNav() {
+    override fun hideNav() {
         binding.bottomNav.visibility = View.GONE
     }
 

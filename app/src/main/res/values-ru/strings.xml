@@ -100,7 +100,9 @@
     <string name="navigate">Маршрут</string>
 
     <string name="test_description">"Ловля судака, как и, впрочем, ловля любой рыбы, очень интересное и захватывающее занятие. Получите хороший и удачный улов. "</string>
-
+    <string name="location">Location:</string>
+    <string name="calculating">Calculating…</string>
+    <string name="new_place">New place</string>
 
 
 </resources>

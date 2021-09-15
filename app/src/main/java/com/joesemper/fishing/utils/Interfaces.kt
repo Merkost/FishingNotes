@@ -7,6 +7,6 @@ interface AddNewMarkerListener {
 }
 
 interface NavigationHolder {
-    fun closeNav()
+    fun hideNav()
     fun showNav()
 }

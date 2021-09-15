@@ -99,7 +99,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        (requireActivity() as NavigationHolder).closeNav() //Hide bottom navBar
+        (requireActivity() as NavigationHolder).hideNav() //Hide bottom navBar
         return ComposeView(requireContext()).apply {
             setContent {
                 FigmaTheme {
@@ -126,7 +126,8 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(6.dp),
                 modifier = Modifier
-                    .fillMaxWidth().padding(top = 4.dp)
+                    .fillMaxWidth()
+                    .padding(top = 4.dp)
                     .padding(horizontal = 16.dp)
                     .verticalScroll(state = scrollState, enabled = true),
             ) {
@@ -161,7 +162,9 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                         isDropMenuOpen = true
                     }
                 }, //text -> if (text !== marker.title) onValueChange(text) },
-                modifier = Modifier.clickable { isDropMenuOpen = true }.fillMaxWidth(),
+                modifier = Modifier
+                    .clickable { isDropMenuOpen = true }
+                    .fillMaxWidth(),
                 label = { Text(text = label) },
                 trailingIcon = {
                     Icon(Icons.Default.KeyboardArrowDown, "",
@@ -216,7 +219,9 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         Row(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.height(65.dp).fillMaxWidth()
+            modifier = Modifier
+                .height(65.dp)
+                .fillMaxWidth()
         ) {
             Spacer(modifier = Modifier.size(20.dp))
             OutlinedButton(
@@ -325,7 +330,10 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                                 if (fishState.value.toInt() >= 1 && fishState.value.isNotBlank())
                                     fishState.value = ((fishState.value.toInt() - 1).toString())
                             },
-                            Modifier.weight(1F).fillMaxHeight().align(Alignment.CenterVertically)
+                            Modifier
+                                .weight(1F)
+                                .fillMaxHeight()
+                                .align(Alignment.CenterVertically)
                         ) { Text("-") }
                         Spacer(modifier = Modifier.size(6.dp))
                         OutlinedButton(
@@ -333,7 +341,10 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                                 if (fishState.value.isEmpty()) fishState.value = 1.toString()
                                 else fishState.value = ((fishState.value.toInt() + 1).toString())
                             },
-                            Modifier.weight(1F).fillMaxHeight().align(Alignment.CenterVertically)
+                            Modifier
+                                .weight(1F)
+                                .fillMaxHeight()
+                                .align(Alignment.CenterVertically)
                         ) { Text(stringResource(R.string.plus)) }
                     }
 
@@ -370,7 +381,10 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                                     weightState.value =
                                         ((weightState.value.toDouble() - 0.5).toString())
                             },
-                            Modifier.weight(1F).fillMaxHeight().align(Alignment.CenterVertically)
+                            Modifier
+                                .weight(1F)
+                                .fillMaxHeight()
+                                .align(Alignment.CenterVertically)
                         ) { Text(stringResource(R.string.minus)) }
                         Spacer(modifier = Modifier.size(6.dp))
                         OutlinedButton(
@@ -379,7 +393,10 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                                 else weightState.value =
                                     ((weightState.value.toDouble() + 0.5).toString())
                             },
-                            Modifier.weight(1F).fillMaxHeight().align(Alignment.CenterVertically)
+                            Modifier
+                                .weight(1F)
+                                .fillMaxHeight()
+                                .align(Alignment.CenterVertically)
                         ) { Text(stringResource(R.string.plus)) }
                     }
                 }
@@ -426,17 +443,23 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     @Composable
     fun ItemAddPhoto() {
         Box(
-            modifier = Modifier.size(100.dp).padding(4.dp)
+            modifier = Modifier
+                .size(100.dp)
+                .padding(4.dp)
         ) {
             Card(
-                modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(5.dp))
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(5.dp))
                     .clickable { addPhoto() }, elevation = 5.dp, backgroundColor = Color.LightGray
             ) {
                 Icon(
                     painterResource(R.drawable.ic_baseline_add_photo_alternate_24), //Or we can use Icons.Default.Add
                     contentDescription = ITEM_ADD_PHOTO,
                     tint = Color.White,
-                    modifier = Modifier.fillMaxSize().align(Alignment.Center)
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .align(Alignment.Center)
                 )
             }
         }
@@ -454,18 +477,25 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 Image(painter = rememberImagePainter(data = pic),
                     contentDescription = ITEM_PHOTO,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(5.dp))
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(5.dp))
                         .clickable { clickedPhoto(pic) })
                 Surface( //For making delete button background half transparent
                     color = Color.LightGray.copy(alpha = 0.2f),
-                    modifier = Modifier.size(25.dp).align(Alignment.TopEnd).padding(3.dp)
+                    modifier = Modifier
+                        .size(25.dp)
+                        .align(Alignment.TopEnd)
+                        .padding(3.dp)
                         .clip(CircleShape)
                 ) {
                     Icon(
                         Icons.Default.Close,
                         tint = Color.White,
                         contentDescription = stringResource(R.string.delete_photo),
-                        modifier = Modifier.fillMaxSize().clickable { deletedPhoto(pic) })
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable { deletedPhoto(pic) })
                 }
             }
         }

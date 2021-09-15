@@ -104,7 +104,8 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = Modifier
-                    .fillMaxWidth().background(primaryFigmaBackgroundTint)
+                    .fillMaxWidth()
+                    .background(primaryFigmaBackgroundTint)
                     .verticalScroll(state = scrollState, enabled = true),
             ) {
                 Title(catch.title, catch.description, catch.userId)
@@ -138,10 +139,15 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
         MyCard {
             Column(
                 verticalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth().padding(10.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(10.dp).height(50.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .height(50.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Icon(Icons.Default.Place, stringResource(R.string.place))
@@ -165,7 +171,9 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth().size(50.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .size(50.dp)
                 ) {
                     Text(
                         title,
@@ -195,7 +203,9 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
             Image(
                 painter = painterResource(R.drawable.ic_fisher),
                 contentDescription = stringResource(R.string.fisher),
-                Modifier.fillMaxHeight().padding(10.dp)
+                Modifier
+                    .fillMaxHeight()
+                    .padding(10.dp)
             )
             Column(verticalArrangement = Arrangement.Center) {
                 Text(
@@ -255,7 +265,9 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
             Image(painter = rememberImagePainter(data = photo),
                 contentDescription = ITEM_PHOTO,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(5.dp))
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(5.dp))
                     .clickable { /*clickedPhoto(photo)*/ })
         }
     }
@@ -265,16 +277,22 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
         MyCard {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 4.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
                     .height(40.dp)
             ) {
                 Text(
                     text,
-                    modifier = Modifier.padding(start = 5.dp).align(Alignment.CenterVertically)
+                    modifier = Modifier
+                        .padding(start = 5.dp)
+                        .align(Alignment.CenterVertically)
                 )
                 Text(
                     info,
-                    modifier = Modifier.padding(end = 5.dp).align(Alignment.CenterVertically)
+                    modifier = Modifier
+                        .padding(end = 5.dp)
+                        .align(Alignment.CenterVertically)
                 )
             }
         }
@@ -293,7 +311,9 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
                 })
             }, actions = {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(end = 3.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 3.dp),
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -321,7 +341,7 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (requireActivity() as NavigationHolder).closeNav()
+        (requireActivity() as NavigationHolder).hideNav()
         //setInitialData()
     }
 

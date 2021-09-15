@@ -8,11 +8,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.compose.foundation.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -22,10 +24,8 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
@@ -113,7 +113,8 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier
-                    .fillMaxWidth().background(primaryFigmaBackgroundTint)
+                    .fillMaxWidth()
+                    .background(primaryFigmaBackgroundTint)
             ) {
                 Column {  //Creating a column to prevent a space between PlaceInfo and Buttons
                     PlaceInfo()
@@ -129,19 +130,25 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     fun Buttons() {
         Row(
             modifier = Modifier
-                .fillMaxWidth().height(60.dp).background(primaryFigmaColor),
+                .fillMaxWidth()
+                .height(60.dp)
+                .background(primaryFigmaColor),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Button(
-                modifier = Modifier.weight(1f).fillMaxSize(),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize(),
                 onClick = { routeClicked() }, border = BorderStroke(0.dp, color = Color.Transparent),
                 elevation = ButtonDefaults.elevation(0.dp)
             ) {
                 Column() {
                     Icon(
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                            .size(30.dp).rotate(45f),
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .size(30.dp)
+                            .rotate(45f),
                         painter = painterResource(R.drawable.ic_baseline_navigation_24),
                         contentDescription = stringResource(R.string.navigate)
                     )
@@ -149,13 +156,16 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                 }
             }
             Button(
-                modifier = Modifier.weight(1f).fillMaxSize(),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize(),
                 onClick = { shareClicked() }, border = BorderStroke(0.dp, color = Color.Transparent),
                 elevation = ButtonDefaults.elevation(0.dp)
             ) {
                 Column() {
                     Icon(
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
                             .size(30.dp),
                         painter = painterResource(R.drawable.ic_baseline_share_24),
                         contentDescription = stringResource(R.string.share)
@@ -164,13 +174,16 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                 }
             }
             Button(
-                modifier = Modifier.weight(1f).fillMaxSize(),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize(),
                 onClick = { newCatchClicked() }, border = BorderStroke(0.dp, color = Color.Transparent),
                 elevation = ButtonDefaults.elevation(0.dp)
             ) {
                 Column() {
                     Icon(
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
                             .size(30.dp),
                         painter = painterResource(R.drawable.ic_fish),
                         contentDescription = stringResource(R.string.new_catch)
@@ -227,10 +240,15 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         MyCard {
             Column(
                 verticalArrangement = Arrangement.Top,
-                modifier = Modifier.fillMaxWidth().padding(10.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 10.dp).height(50.dp).fillMaxWidth(),
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp)
+                        .height(50.dp)
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -253,7 +271,9 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
             Image(
                 painter = painterResource(R.drawable.ic_fisher),
                 contentDescription = stringResource(R.string.fisher),
-                Modifier.fillMaxHeight().padding(10.dp)
+                Modifier
+                    .fillMaxHeight()
+                    .padding(10.dp)
             )
             Column(verticalArrangement = Arrangement.Center) {
                 Text(
@@ -332,30 +352,35 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                 {
                     Box(
                         modifier = Modifier
-                            .size(125.dp).weight(2f)
+                            .size(125.dp)
+                            .weight(2f)
                     ) {
                         Image(painter = rememberImagePainter(R.drawable.ulov),
                             contentDescription = stringResource(R.string.catch_photo),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
-                                .height(height = 125.dp).fillMaxWidth()
+                                .height(height = 125.dp)
+                                .fillMaxWidth()
                                 .clickable { /*clickedPhoto(photo)*/ })
                     }
                     Box(
                         modifier = Modifier
-                            .size(125.dp).weight(2.35f)
+                            .size(125.dp)
+                            .weight(2.35f)
                     ) {
                         Text(
                             text = "4.650 кг",
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
-                                .padding(start = 5.dp).align(Alignment.Center)
+                                .padding(start = 5.dp)
+                                .align(Alignment.Center)
                         )
                         Text(
                             text = "22.08.2021",
                             fontSize = 12.sp,
                             modifier = Modifier
-                                .padding(start = 5.dp).align(Alignment.BottomEnd)
+                                .padding(start = 5.dp)
+                                .align(Alignment.BottomEnd)
                         )
                     }
                 }
@@ -376,7 +401,9 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                 })
             }, actions = {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(end = 3.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 3.dp),
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -450,7 +477,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (requireActivity() as NavigationHolder).closeNav()
+        (requireActivity() as NavigationHolder).hideNav()
         //setInitialData()
     }
 
