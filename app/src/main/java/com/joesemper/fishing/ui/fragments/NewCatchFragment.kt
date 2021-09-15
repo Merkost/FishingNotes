@@ -176,7 +176,12 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                         if (textFieldValue.isNotEmpty()) {
                             Icon(Icons.Default.Close, "", modifier = Modifier.clickable { textFieldValue = ""; isDropMenuOpen = true }, tint = primaryFigmaColor) }
                     }
-                    else Icon(Icons.Default.Lock, "", tint = primaryFigmaColor)
+                    else Icon(Icons.Default.Lock, stringResource(R.string.locked), tint = primaryFigmaColor, modifier = Modifier.clickable { showToast(
+                        requireContext(),
+                        getString(R.string.Another_place_in_new_catch)
+                    )
+
+                    })
                 },
                 isError = !isThatPlaceInList(textFieldValue, suggestions)
             )
