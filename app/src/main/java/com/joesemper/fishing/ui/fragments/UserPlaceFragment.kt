@@ -8,9 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,9 +19,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -41,15 +38,12 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
-import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.UserPlaceViewModel
-import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.composable.MyCardNoPadding
 import com.joesemper.fishing.ui.composable.UserProfile
-import com.joesemper.fishing.ui.composable.user_catches.ItemCatchLoading
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import com.joesemper.fishing.ui.theme.primaryFigmaBackgroundTint
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
@@ -72,7 +66,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
 
     companion object {
         private const val TAG = "PLACE"
-        val loadingCatches = listOf(UserCatch(), UserCatch(),UserCatch(),)
+        val loadingCatches = listOf(UserCatch(), UserCatch(), UserCatch())
     }
 
     fun newInstance(place: UserMapMarker): Fragment {
@@ -105,8 +99,9 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     @ExperimentalAnimationApi
     @Composable
     fun UserPlaceScreen() {
+        val dialogOnDelete = rememberSaveable { mutableStateOf(false) }
         Scaffold(
-            topBar = { AppBar() }
+            topBar = { AppBar(dialogOnDelete) }
         ) {
             val userCatches by viewModel.getCatchesByMarkerId(place.id).collectAsState(null)
             Column(
@@ -126,6 +121,24 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     }
 
     @Composable
+    fun DeleteDialog(dialogOnDelete: MutableState<Boolean>) {
+        AlertDialog(
+            title = {Text("Удаление точки")},
+            text = {Text("Вы уверены, что хотите удалить данную точку?")},
+            onDismissRequest = { dialogOnDelete.value = false },
+            confirmButton = {
+                OutlinedButton(
+                    onClick = { viewModel.deletePlace(place); findNavController().popBackStack() },
+                    content = { Text(getString(R.string.Yes)) })
+            }, dismissButton = {
+                OutlinedButton(
+                    onClick = { dialogOnDelete.value = false },
+                    content = { Text(getString(R.string.No)) })
+            }
+        )
+    }
+
+    @Composable
     fun Buttons() {
         Row(
             modifier = Modifier
@@ -135,7 +148,8 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         ) {
             Button(
                 modifier = Modifier.weight(1f).fillMaxSize(),
-                onClick = { routeClicked() }, border = BorderStroke(0.dp, color = Color.Transparent),
+                onClick = { routeClicked() },
+                border = BorderStroke(0.dp, color = Color.Transparent),
                 elevation = ButtonDefaults.elevation(0.dp)
             ) {
                 Column() {
@@ -150,7 +164,8 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
             }
             Button(
                 modifier = Modifier.weight(1f).fillMaxSize(),
-                onClick = { shareClicked() }, border = BorderStroke(0.dp, color = Color.Transparent),
+                onClick = { shareClicked() },
+                border = BorderStroke(0.dp, color = Color.Transparent),
                 elevation = ButtonDefaults.elevation(0.dp)
             ) {
                 Column() {
@@ -165,7 +180,8 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
             }
             Button(
                 modifier = Modifier.weight(1f).fillMaxSize(),
-                onClick = { newCatchClicked() }, border = BorderStroke(0.dp, color = Color.Transparent),
+                onClick = { newCatchClicked() },
+                border = BorderStroke(0.dp, color = Color.Transparent),
                 elevation = ButtonDefaults.elevation(0.dp)
             ) {
                 Column() {
@@ -210,7 +226,6 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     }
 
 
-
     @ExperimentalAnimationApi
     @Composable
     fun Catches(
@@ -227,8 +242,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     )
                 }
             }
-        } ?:
-        CircularProgressIndicator()
+        } ?: CircularProgressIndicator()
 
     }
 
@@ -289,7 +303,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     }
 
     @Composable
-    fun AppBar() {
+    fun AppBar(dialogOnDelete: MutableState<Boolean>) {
         TopAppBar(
             title = { Text(text = "Catch") },
             navigationIcon = {
@@ -316,23 +330,21 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     )
                     IconButton(
                         onClick = {
-                            showToast(
-                                requireContext(),
-                                "Not Yet Implemented"
-                            )
+                            dialogOnDelete.value = true
                         },
                         content = { Icon(Icons.Filled.Delete, stringResource(R.string.edit)) }
                     )
                 }
             })
+        if (dialogOnDelete.value) DeleteDialog(dialogOnDelete)
     }
 
     private fun newCatchClicked() {
-            val action =
-                UserPlaceFragmentDirections.actionUserPlaceFragmentToNewCatchDialogFragment(
-                    place
-                )
-            findNavController().navigate(action)
+        val action =
+            UserPlaceFragmentDirections.actionUserPlaceFragmentToNewCatchDialogFragment(
+                place
+            )
+        findNavController().navigate(action)
     }
 
     private fun routeClicked() {
@@ -359,18 +371,18 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     }
 
     private fun shareClicked() {
-            val text =
-                "${place.title}\nhttps://www.google.com/maps/search/?api=1&query=${place.latitude}" +
-                        ",${place.longitude}"
+        val text =
+            "${place.title}\nhttps://www.google.com/maps/search/?api=1&query=${place.latitude}" +
+                    ",${place.longitude}"
 
-            val sendIntent: Intent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, text)
-                type = "text/plain"
-            }
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, text)
+            type = "text/plain"
+        }
 
-            val shareIntent = Intent.createChooser(sendIntent, null)
-            startActivity(shareIntent)
+        val shareIntent = Intent.createChooser(sendIntent, null)
+        startActivity(shareIntent)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
