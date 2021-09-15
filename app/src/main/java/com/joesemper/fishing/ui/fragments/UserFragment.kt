@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -20,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
@@ -40,6 +42,7 @@ import com.joesemper.fishing.ui.theme.FigmaTheme
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import me.vponomarenko.compose.shimmer.shimmer
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -81,7 +84,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
                 ) {
                     Card(
                         elevation = 10.dp,
-                        modifier = Modifier.padding(50.dp).fillMaxWidth().height(220.dp),
+                        modifier = Modifier.padding(25.dp),
                         shape = RoundedCornerShape(25.dp),
                         backgroundColor = MaterialTheme.colors.surface
                     ) {
@@ -109,31 +112,56 @@ class UserFragment : Fragment(), AndroidScopeComponent {
 
     @Composable
     fun PlacesNumber() {
-        val userPlacesNum by viewModel.getUserPlaces().collectAsState(listOf())
-        Column(
+        val userPlacesNum by viewModel.getUserPlaces().collectAsState(null)
+        userPlacesNum?.let {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)
+            ) {
+                Icon(
+                    Icons.Default.Place, stringResource(R.string.place),
+                    modifier = Modifier.size(25.dp)
+                )
+                Text(it.size.toString())
+            }
+        }  ?: Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)
         ) {
             Icon(
                 Icons.Default.Place, stringResource(R.string.place),
-                modifier = Modifier.size(25.dp)
+                modifier = Modifier.size(25.dp).shimmer(),
+                tint = Color.LightGray
             )
-            Text(userPlacesNum.size.toString())
+            Text("0", color = Color.LightGray, modifier = Modifier.background(Color.LightGray).shimmer())
         }
+
     }
 
     @Composable
     fun CatchesNumber() {
-        val userCatchesNum by viewModel.userCatches
-        Column(
+        val userCatchesNum by viewModel.getUserCatches().collectAsState(null)
+        userCatchesNum?.let {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)
+            ) {
+                Icon(
+                    painterResource(R.drawable.ic_fishing), stringResource(R.string.place),
+                    modifier = Modifier.size(25.dp)
+                )
+                Text(it.size.toString())
+            }
+        } ?: Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)
         ) {
             Icon(
                 painterResource(R.drawable.ic_fishing), stringResource(R.string.place),
-                modifier = Modifier.size(25.dp)
+                modifier = Modifier.size(25.dp).shimmer(),
+                tint = Color.LightGray
             )
-            Text(userCatchesNum.toString())
+            Text("0", color = Color.LightGray, modifier = Modifier.background(Color.LightGray).shimmer())
         }
     }
 
@@ -149,11 +177,17 @@ class UserFragment : Fragment(), AndroidScopeComponent {
                 notReadyYetToast()
             }
 
-            ColumnButton(painterResource(R.drawable.ic_edit), getString(R.string.edit_profile)) {
+            ColumnButton(
+                painterResource(R.drawable.ic_edit),
+                getString(R.string.edit_profile)
+            ) {
                 notReadyYetToast()
             }
 
-            ColumnButton(painterResource(R.drawable.ic_settings), getString(R.string.settings)) {
+            ColumnButton(
+                painterResource(R.drawable.ic_settings),
+                getString(R.string.settings)
+            ) {
                 val action =
                     UserFragmentDirections.actionUserFragmentToSettingsFragment()
                 findNavController().navigate(action)
@@ -191,7 +225,6 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     @Composable
     fun UserInfo() {
         val user by viewModel.getCurrentUser().collectAsState(null)
-        //TODO: add number of places, catches and more
         user?.let { nutNullUser ->
             Crossfade(nutNullUser, animationSpec = tween(500)) { animatedUser ->
                 UserNameAndImage(animatedUser)
@@ -211,7 +244,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     fun UserNameAndImage(user: User) {
         Row(
             modifier = Modifier.fillMaxWidth().height(150.dp).padding(20.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
@@ -225,7 +258,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
                     }
                 ),
                 contentDescription = stringResource(R.string.fisher),
-                modifier = Modifier.size(150.dp),
+                modifier = Modifier.size(125.dp),
             )
             Text(
                 text = when (user.isAnonymous) {
