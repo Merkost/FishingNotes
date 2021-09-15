@@ -8,24 +8,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
@@ -43,6 +42,8 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.UserPlaceViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.ui.composable.MyCardNoPadding
+import com.joesemper.fishing.ui.composable.UserProfile
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import com.joesemper.fishing.ui.theme.primaryFigmaBackgroundTint
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
@@ -61,21 +62,11 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     override val scope: Scope by fragmentScope()
     private val viewModel: UserPlaceViewModel by viewModel()
 
-    private val catches: List<UserCatch> =
-        listOf(
-            UserCatch(),
-            UserCatch(),
-            UserCatch(),
-            UserCatch(),
-            UserCatch(),
-            UserCatch(),
-            UserCatch()
-        ) // для теста
-
     private lateinit var place: UserMapMarker
 
     companion object {
         private const val TAG = "PLACE"
+        val loadingCatches = listOf(UserCatch(), UserCatch(), UserCatch())
     }
 
     fun newInstance(place: UserMapMarker): Fragment {
@@ -90,6 +81,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         place = args.userMapMarker
     }
 
+    @ExperimentalAnimationApi
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -104,11 +96,14 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         }
     }
 
+    @ExperimentalAnimationApi
     @Composable
     fun UserPlaceScreen() {
+        val dialogOnDelete = rememberSaveable { mutableStateOf(false) }
         Scaffold(
-            topBar = { AppBar() }
+            topBar = { AppBar(dialogOnDelete) }
         ) {
+            val userCatches by viewModel.getCatchesByMarkerId(place.id).collectAsState(null)
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -119,10 +114,28 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     PlaceInfo()
                     Buttons()
                 }
-                Catches(catches)
+                Catches(userCatches)
             }
 
         }
+    }
+
+    @Composable
+    fun DeleteDialog(dialogOnDelete: MutableState<Boolean>) {
+        AlertDialog(
+            title = {Text("Удаление точки")},
+            text = {Text("Вы уверены, что хотите удалить данную точку?")},
+            onDismissRequest = { dialogOnDelete.value = false },
+            confirmButton = {
+                OutlinedButton(
+                    onClick = { viewModel.deletePlace(place); findNavController().popBackStack() },
+                    content = { Text(getString(R.string.Yes)) })
+            }, dismissButton = {
+                OutlinedButton(
+                    onClick = { dialogOnDelete.value = false },
+                    content = { Text(getString(R.string.No)) })
+            }
+        )
     }
 
     @Composable
@@ -135,7 +148,8 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         ) {
             Button(
                 modifier = Modifier.weight(1f).fillMaxSize(),
-                onClick = { routeClicked() }, border = BorderStroke(0.dp, color = Color.Transparent),
+                onClick = { routeClicked() },
+                border = BorderStroke(0.dp, color = Color.Transparent),
                 elevation = ButtonDefaults.elevation(0.dp)
             ) {
                 Column() {
@@ -150,7 +164,8 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
             }
             Button(
                 modifier = Modifier.weight(1f).fillMaxSize(),
-                onClick = { shareClicked() }, border = BorderStroke(0.dp, color = Color.Transparent),
+                onClick = { shareClicked() },
+                border = BorderStroke(0.dp, color = Color.Transparent),
                 elevation = ButtonDefaults.elevation(0.dp)
             ) {
                 Column() {
@@ -165,7 +180,8 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
             }
             Button(
                 modifier = Modifier.weight(1f).fillMaxSize(),
-                onClick = { newCatchClicked() }, border = BorderStroke(0.dp, color = Color.Transparent),
+                onClick = { newCatchClicked() },
+                border = BorderStroke(0.dp, color = Color.Transparent),
                 elevation = ButtonDefaults.elevation(0.dp)
             ) {
                 Column() {
@@ -181,50 +197,12 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         }
     }
 
-    @Composable
-    fun MyCard(content: @Composable () -> Unit) {
-        Card(
-            elevation = 4.dp, shape = MaterialTheme.shapes.large,
-            modifier = Modifier.fillMaxWidth(), content = content
-        )
-    }
-
-    /*@Composable
-    private fun Title(title: String, description: String, userId: String) {
-        Column(modifier = Modifier.padding(4.dp)) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
-            {
-                Image(
-                    painter = painterResource(R.drawable.ic_fish_on_map_red),
-                    contentDescription = stringResource(R.string.marker_icon),
-                    Modifier
-                        .size(50.dp)
-                        .padding(start = 15.dp)
-                )
-                //UserProfile(userId)
-            }
-            Text(
-                title,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(start = 5.dp)
-            )
-            Text(
-                description,
-                modifier = Modifier
-                    .padding(start = 5.dp)
-                    .fillMaxWidth()
-            )
-        }
-    }*/
-
+    @ExperimentalAnimationApi
     @Composable
     private fun PlaceInfo() {
-        MyCard {
+        MyCardNoPadding {
+            val user by viewModel.getCurrentUser().collectAsState(null)
+
             Column(
                 verticalArrangement = Arrangement.Top,
                 modifier = Modifier.fillMaxWidth().padding(10.dp)
@@ -236,75 +214,36 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                 ) {
                     Icon(Icons.Default.Place, stringResource(R.string.place))
                     Spacer(modifier = Modifier.width(150.dp))
-                    UserProfile()
-
-                    //Icon(Icons.Default.Check, stringResource(R.string.place))
+                    UserProfile(user)
                 }
-                Text("Точка 2", fontWeight = FontWeight.Bold)
-                Text("Описание точки")
+                Text(place.title, fontWeight = FontWeight.Bold)
+                Text(place.description ?: "Нет описания")
                 Spacer(modifier = Modifier.size(8.dp))
+
             }
+
         }
     }
 
-    @Composable
-    private fun UserProfile() {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Image(
-                painter = painterResource(R.drawable.ic_fisher),
-                contentDescription = stringResource(R.string.fisher),
-                Modifier.fillMaxHeight().padding(10.dp)
-            )
-            Column(verticalArrangement = Arrangement.Center) {
-                Text(
-                    stringResource(R.string.fisher),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = MaterialTheme.typography.button.fontSize
-                )
-                Text(
-                    "@" + stringResource(R.string.fisher),
-                    fontSize = MaterialTheme.typography.caption.fontSize
-                )
-            }
-        }
-    }
 
-/*  @Composable
-  private fun UserProfile(userId: String) {
-      // TODO получить имя и фото по userId
-      Row {
-          Image(
-              painter = painterResource(R.drawable.ic_fisher),
-              contentDescription = stringResource(R.string.fisher),
-              Modifier.size(50.dp)
-          )
-          Spacer(Modifier.size(2.dp))
-          Column(verticalArrangement = Arrangement.SpaceBetween) {
-              Text(
-                  stringResource(R.string.fisher),
-                  fontWeight = FontWeight.Bold,
-                  fontSize = 18.sp
-              )
-              Text("@" + stringResource(R.string.fisher), fontSize = 10.sp)
-          }
-      }
-  }*/
-
-    @ExperimentalCoilApi
+    @ExperimentalAnimationApi
     @Composable
     fun Catches(
-        catches: List<UserCatch>,
+        catches: List<UserCatch>?,
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(items = catches) {
-                ItemCatch(
-                    catch = it
-                )
+        catches?.let { userCatches ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize(), verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(items = userCatches) {
+                    ItemCatch(
+                        catch = it
+                    )
+                }
             }
-        }
+        } ?: CircularProgressIndicator()
+
     }
 
     @ExperimentalCoilApi
@@ -319,7 +258,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     .padding(14.dp)
             ) {
                 Text(
-                    text = "Судак",
+                    text = catch.title,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
@@ -346,13 +285,13 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                             .size(125.dp).weight(2.35f)
                     ) {
                         Text(
-                            text = "4.650 кг",
+                            text = catch.fishWeight.toString() + " " + getString(R.string.kg),
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
                                 .padding(start = 5.dp).align(Alignment.Center)
                         )
                         Text(
-                            text = "22.08.2021",
+                            text = catch.date.toString(),
                             fontSize = 12.sp,
                             modifier = Modifier
                                 .padding(start = 5.dp).align(Alignment.BottomEnd)
@@ -364,7 +303,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     }
 
     @Composable
-    fun AppBar() {
+    fun AppBar(dialogOnDelete: MutableState<Boolean>) {
         TopAppBar(
             title = { Text(text = "Catch") },
             navigationIcon = {
@@ -391,23 +330,21 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     )
                     IconButton(
                         onClick = {
-                            showToast(
-                                requireContext(),
-                                "Not Yet Implemented"
-                            )
+                            dialogOnDelete.value = true
                         },
                         content = { Icon(Icons.Filled.Delete, stringResource(R.string.edit)) }
                     )
                 }
             })
+        if (dialogOnDelete.value) DeleteDialog(dialogOnDelete)
     }
 
     private fun newCatchClicked() {
-            val action =
-                UserPlaceFragmentDirections.actionUserPlaceFragmentToNewCatchDialogFragment(
-                    place
-                )
-            findNavController().navigate(action)
+        val action =
+            UserPlaceFragmentDirections.actionUserPlaceFragmentToNewCatchDialogFragment(
+                place
+            )
+        findNavController().navigate(action)
     }
 
     private fun routeClicked() {
@@ -434,18 +371,18 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     }
 
     private fun shareClicked() {
-            val text =
-                "${place.title}\nhttps://www.google.com/maps/search/?api=1&query=${place.latitude}" +
-                        ",${place.longitude}"
+        val text =
+            "${place.title}\nhttps://www.google.com/maps/search/?api=1&query=${place.latitude}" +
+                    ",${place.longitude}"
 
-            val sendIntent: Intent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, text)
-                type = "text/plain"
-            }
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, text)
+            type = "text/plain"
+        }
 
-            val shareIntent = Intent.createChooser(sendIntent, null)
-            startActivity(shareIntent)
+        val shareIntent = Intent.createChooser(sendIntent, null)
+        startActivity(shareIntent)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
