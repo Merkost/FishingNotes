@@ -22,9 +22,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -44,6 +43,7 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.UserPlaceViewModel
+import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.composable.MyCardNoPadding
@@ -59,7 +59,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.scope.Scope
 import java.util.*
 
-@ExperimentalMaterialApi
+
 class UserPlaceFragment : Fragment(), AndroidScopeComponent {
 
     private val args: UserPlaceFragmentArgs by navArgs()
@@ -68,8 +68,6 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     private val viewModel: UserPlaceViewModel by viewModel()
 
     private lateinit var place: UserMapMarker
-
-    private var isEdit: Boolean = false
 
     companion object {
         private const val TAG = "PLACE"
@@ -107,15 +105,18 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     @ExperimentalAnimationApi
     @Composable
     fun UserPlaceScreen() {
-        if (isEdit) {
-            BottomSheetScaffold(
-                topBar = { AppBar() },
-                sheetContent = { BottomSheet() },
-                sheetElevation = 10.dp,
-                sheetGesturesEnabled = false,
-                sheetPeekHeight = 65.dp
+        val isEdit = rememberSaveable { mutableStateOf(false) }
+        val user by viewModel.getCurrentUser().collectAsState(null)
+        BottomSheetScaffold(
 
-            ) {
+            topBar = { AppBar(isEdit) },
+            sheetContent = { BottomSheet(isEdit) },
+            sheetElevation = 10.dp,
+            sheetGesturesEnabled = false,
+            sheetPeekHeight = if (isEdit.value) 65.dp else 0.dp,
+
+        ) {
+            if (isEdit.value) {
                 val userCatches by viewModel.getCatchesByMarkerId(place.id).collectAsState(null)
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -130,11 +131,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     }
                     Catches(userCatches)
                 }
-            }
-        } else {
-            Scaffold(
-                topBar = { AppBar() }
-            ) {
+            } else {
                 val userCatches by viewModel.getCatchesByMarkerId(place.id).collectAsState(null)
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -144,7 +141,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                         .background(primaryFigmaBackgroundTint)
                 ) {
                     Column {  //Creating a column to prevent a space between PlaceInfo and Buttons
-                        PlaceInfo()
+                        PlaceInfo(user)
                         Buttons()
                     }
                     Catches(userCatches)
@@ -226,9 +223,9 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
 
     @ExperimentalAnimationApi
     @Composable
-    private fun PlaceInfo() {
+    private fun PlaceInfo(user: User?) {
         MyCardNoPadding {
-            val user by viewModel.getCurrentUser().collectAsState(null)
+
             Column(
                 verticalArrangement = Arrangement.Top,
                 modifier = Modifier
@@ -366,11 +363,11 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     }
 
     @Composable
-    fun AppBar() {
+    fun AppBar(isEdit: MutableState<Boolean>) {
         TopAppBar(
             title = { Text(text = stringResource(R.string.place)) },
             navigationIcon = {
-                IconButton(onClick = { findNavController().popBackStack() }, content = {
+                IconButton(onClick = { if (!isEdit.value) findNavController().popBackStack() else isEdit.value = false }, content = {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = getString(R.string.back)
@@ -382,12 +379,16 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
+                    if (!isEdit.value) IconButton(
                         onClick = {
                             editPlace()
                         },
-                        content = { Icon(Icons.Filled.Edit, stringResource(R.string.edit)) }
-                    )
+                        content = {
+                            Icon(
+                                Icons.Filled.Edit,
+                                stringResource(R.string.edit),
+                                modifier = Modifier.clickable { isEdit.value = true })
+                        })
                     IconButton(
                         onClick = {
                             showToast(
@@ -402,13 +403,13 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     }
 
     private fun editPlace() {
-        isEdit = true
+        //isEdit = true
         // TODO Redraw the screen
     }
 
     @ExperimentalMaterialApi
     @Composable
-    private fun BottomSheet() {
+    private fun BottomSheet(isEdit: MutableState<Boolean>) {
         Row(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically,
@@ -418,7 +419,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         ) {
             Spacer(modifier = Modifier.size(20.dp))
             OutlinedButton(
-                onClick = { findNavController().popBackStack() }) {
+                onClick = { if (isEdit.value) isEdit.value = false  else findNavController().popBackStack() }) {
                 Text(text = stringResource(R.string.cancel))
             }
             Spacer(modifier = Modifier.size(20.dp))
@@ -481,7 +482,6 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         (requireActivity() as NavigationHolder).closeNav()
-        //setInitialData()
     }
 
     override fun onDetach() {
