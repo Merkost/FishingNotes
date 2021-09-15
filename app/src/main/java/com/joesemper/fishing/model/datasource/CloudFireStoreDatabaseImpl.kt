@@ -275,6 +275,7 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
         return flow
     }
 
+
     @ExperimentalCoroutinesApi
     private suspend fun saveMarker(userMapMarker: UserMapMarker?): String {
         var markerId = ""
@@ -303,10 +304,14 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
     private suspend fun savePhotos(photos: List<ByteArray>) =
         cloudPhotoStorage.uploadPhotos(photos)
 
-    override suspend fun deleteMarker(userCatch: UserCatch) {
-//        cloudStorage.deletePhoto(userCatch.downloadPhotoLink)
-//        getUserMarkersCollection().document(userCatch.id).delete()
+    override suspend fun deleteMarker(userMapMarker: UserMapMarker) {
+        getUserMapMarkersCollection().document(userMapMarker.id).delete()
     }
+
+    override suspend fun deleteCatch(userCatch: UserCatch) {
+        getUserCatchesCollection(userCatch.userMarkerId).document(userCatch.id).delete()
+    }
+
 
     private fun getUsersCollection(): CollectionReference {
         return db.collection(USERS_COLLECTION)
