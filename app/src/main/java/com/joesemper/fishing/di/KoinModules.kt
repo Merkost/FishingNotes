@@ -71,7 +71,8 @@ val newCatchFragment = module {
 
 val userCatchFragment = module {
     scope(named<UserCatchFragment>()) {
-        viewModel { UserCatchViewModel(get()) }
+        viewModel { UserCatchViewModel(get(),get()) }
+        scoped<UserRepository> { UserRepositoryImpl(get(), get()) }
     }
 }
 
