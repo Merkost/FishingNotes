@@ -32,6 +32,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -115,7 +116,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
             sheetGesturesEnabled = false,
             sheetPeekHeight = if (isEdit.value) 65.dp else 0.dp,
 
-        ) {
+            ) {
             if (isEdit.value) {
                 val userCatches by viewModel.getCatchesByMarkerId(place.id).collectAsState(null)
                 Column(
@@ -275,8 +276,23 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     Spacer(modifier = Modifier.width(150.dp))
                     UserProfile(user)
                 }
-                TextField(value = place.title, onValueChange = { place.title = it })
-                TextField(value = place.description ?: "Нет описания", onValueChange = {})
+
+                val titleTemp = remember {
+                    mutableStateOf(place.title)
+                }
+                val descriptionTemp = remember {
+                    mutableStateOf(place.description)
+                }
+                OutlinedTextField(
+                    value = titleTemp.value,
+                    onValueChange = { titleTemp.value = it },
+                    label = { Text(stringResource(R.string.place)) }
+                )
+                OutlinedTextField(
+                    value = descriptionTemp.value ?: "",
+                    onValueChange = { descriptionTemp.value = it },
+                    label = { Text(stringResource(R.string.description)) },
+                )
                 Spacer(modifier = Modifier.size(8.dp))
             }
         }
@@ -367,7 +383,9 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         TopAppBar(
             title = { Text(text = stringResource(R.string.place)) },
             navigationIcon = {
-                IconButton(onClick = { if (!isEdit.value) findNavController().popBackStack() else isEdit.value = false }, content = {
+                IconButton(onClick = {
+                    if (!isEdit.value) findNavController().popBackStack() else isEdit.value = false
+                }, content = {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = getString(R.string.back)
@@ -419,13 +437,15 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         ) {
             Spacer(modifier = Modifier.size(20.dp))
             OutlinedButton(
-                onClick = { if (isEdit.value) isEdit.value = false  else findNavController().popBackStack() }) {
+                onClick = {
+                    if (isEdit.value) isEdit.value = false else findNavController().popBackStack()
+                }) {
                 Text(text = stringResource(R.string.cancel))
             }
             Spacer(modifier = Modifier.size(20.dp))
             OutlinedButton(
                 onClick = {
-                    //TODO (Saving changes)
+                    // place.title = titleTemp.value
                 }) {
                 Text(text = stringResource(R.string.save))
             }
