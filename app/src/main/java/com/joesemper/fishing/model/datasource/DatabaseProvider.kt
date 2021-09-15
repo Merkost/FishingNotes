@@ -14,7 +14,8 @@ interface DatabaseProvider {
     suspend fun addNewUser(user: User): StateFlow<Progress>
     suspend fun addNewCatch(markerId: String, newCatch: RawUserCatch): StateFlow<Progress>
     suspend fun addNewMarker(newMarker: RawMapMarker): StateFlow<Progress>
-    suspend fun deleteMarker(userCatch: UserCatch)
+    suspend fun deleteMarker(userMapMarker: UserMapMarker)
+    suspend fun deleteCatch(userCatch: UserCatch)
     fun getMapMarker(markerId: String): Flow<UserMapMarker?>
     fun getAllMarkers(): Flow<MapMarker>
     fun getAllUserMarkersList(): Flow<List<MapMarker>>
