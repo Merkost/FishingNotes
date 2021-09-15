@@ -22,6 +22,7 @@ val appModule = module {
     single<PhotoStorage> { CloudPhotoStorageImpl() }
     single<UserContentRepository> { UserContentRepositoryImpl(get()) }
     single { Logger() }
+
 }
 
 val mainActivity = module {
@@ -64,7 +65,8 @@ val newCatchFragment = module {
 
 val userCatchFragment = module {
     scope(named<UserCatchFragment>()) {
-        viewModel { UserCatchViewModel(get()) }
+        viewModel { UserCatchViewModel(get(),get()) }
+        scoped<UserRepository> { UserRepositoryImpl(get(), get()) }
     }
 }
 
@@ -83,17 +85,14 @@ val notesFragment = module {
 }
 val userPlaceFragment = module {
     scope(named<UserPlaceFragment>()) {
-        viewModel { UserPlaceViewModel(get()) }
+        viewModel { UserPlaceViewModel(get(), get()) }
+        scoped<UserRepository> { UserRepositoryImpl(get(), get()) }
     }
 }
 val catchesFragment = module {
-    scope(named<UserCatchesFragment>()) {
         viewModel { UserCatchesViewModel(get()) }
-    }
 }
 
 val placesFragment = module {
-    scope(named<UserPlacesFragment>()) {
-        viewModel { UserPlacesViewModel(get()) }
-    }
+    viewModel { UserPlacesViewModel(get()) }
 }

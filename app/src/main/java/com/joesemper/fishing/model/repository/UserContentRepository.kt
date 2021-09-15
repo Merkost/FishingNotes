@@ -1,6 +1,8 @@
 package com.joesemper.fishing.model.repository
 
 import com.joesemper.fishing.model.entity.common.Progress
+import com.joesemper.fishing.model.entity.common.User
+import com.joesemper.fishing.model.entity.content.Content
 import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -18,6 +20,7 @@ interface UserContentRepository {
 
 
     suspend fun addNewCatch(markerId: String, newCatch: RawUserCatch): StateFlow<Progress>
-    suspend fun deleteMarker(userCatch: UserCatch)
+    suspend fun deleteMarker(userMapMarker: UserMapMarker)
+    suspend fun deleteCatch(userCatch: UserCatch)
     suspend fun addNewMarker(newMarker: RawMapMarker): StateFlow<Progress>
 }

@@ -2,6 +2,7 @@ package com.joesemper.fishing.model.repository
 
 import com.joesemper.fishing.model.datasource.DatabaseProvider
 import com.joesemper.fishing.model.entity.common.Progress
+import com.joesemper.fishing.model.entity.content.Content
 import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -30,7 +31,9 @@ class UserContentRepositoryImpl(private val dataProvider: DatabaseProvider) :
     override suspend fun addNewCatch(markerId: String, newCatch: RawUserCatch): StateFlow<Progress> =
         dataProvider.addNewCatch(markerId, newCatch)
 
-    override suspend fun deleteMarker(userCatch: UserCatch) = dataProvider.deleteMarker(userCatch)
+    override suspend fun deleteCatch(userCatch: UserCatch) = dataProvider.deleteCatch(userCatch)
+
+    override suspend fun deleteMarker(userMapMarker: UserMapMarker) = dataProvider.deleteMarker(userMapMarker)
 
     override suspend fun addNewMarker(newMarker: RawMapMarker): StateFlow<Progress> =
         dataProvider.addNewMarker(newMarker)
