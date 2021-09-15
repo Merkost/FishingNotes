@@ -8,10 +8,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -41,15 +42,12 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
-import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.UserPlaceViewModel
-import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.composable.MyCardNoPadding
 import com.joesemper.fishing.ui.composable.UserProfile
-import com.joesemper.fishing.ui.composable.user_catches.ItemCatchLoading
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import com.joesemper.fishing.ui.theme.primaryFigmaBackgroundTint
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
@@ -61,6 +59,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.scope.Scope
 import java.util.*
 
+@ExperimentalMaterialApi
 class UserPlaceFragment : Fragment(), AndroidScopeComponent {
 
     private val args: UserPlaceFragmentArgs by navArgs()
@@ -70,9 +69,10 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
 
     private lateinit var place: UserMapMarker
 
+    private var isEdit: Boolean = false
+
     companion object {
         private const val TAG = "PLACE"
-        val loadingCatches = listOf(UserCatch(), UserCatch(),UserCatch(),)
     }
 
     fun newInstance(place: UserMapMarker): Fragment {
@@ -87,6 +87,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         place = args.userMapMarker
     }
 
+    @ExperimentalMaterialApi
     @ExperimentalAnimationApi
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -102,26 +103,53 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         }
     }
 
+    @ExperimentalMaterialApi
     @ExperimentalAnimationApi
     @Composable
     fun UserPlaceScreen() {
-        Scaffold(
-            topBar = { AppBar() }
-        ) {
-            val userCatches by viewModel.getCatchesByMarkerId(place.id).collectAsState(null)
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier
-                    .fillMaxWidth().background(primaryFigmaBackgroundTint)
-            ) {
-                Column {  //Creating a column to prevent a space between PlaceInfo and Buttons
-                    PlaceInfo()
-                    Buttons()
-                }
-                Catches(userCatches)
-            }
+        if (isEdit) {
+            BottomSheetScaffold(
+                topBar = { AppBar() },
+                sheetContent = { BottomSheet() },
+                sheetElevation = 10.dp,
+                sheetGesturesEnabled = false,
+                sheetPeekHeight = 65.dp
 
+            ) {
+                val userCatches by viewModel.getCatchesByMarkerId(place.id).collectAsState(null)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(primaryFigmaBackgroundTint)
+                ) {
+                    Column {  //Creating a column to prevent a space between PlaceInfo and Buttons
+                        EditPlaceInfo()
+                        Buttons()
+                    }
+                    Catches(userCatches)
+                }
+            }
+        } else {
+            Scaffold(
+                topBar = { AppBar() }
+            ) {
+                val userCatches by viewModel.getCatchesByMarkerId(place.id).collectAsState(null)
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(primaryFigmaBackgroundTint)
+                ) {
+                    Column {  //Creating a column to prevent a space between PlaceInfo and Buttons
+                        PlaceInfo()
+                        Buttons()
+                    }
+                    Catches(userCatches)
+                }
+            }
         }
     }
 
@@ -129,19 +157,26 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     fun Buttons() {
         Row(
             modifier = Modifier
-                .fillMaxWidth().height(60.dp).background(primaryFigmaColor),
+                .fillMaxWidth()
+                .height(60.dp)
+                .background(primaryFigmaColor),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Button(
-                modifier = Modifier.weight(1f).fillMaxSize(),
-                onClick = { routeClicked() }, border = BorderStroke(0.dp, color = Color.Transparent),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize(),
+                onClick = { routeClicked() },
+                border = BorderStroke(0.dp, color = Color.Transparent),
                 elevation = ButtonDefaults.elevation(0.dp)
             ) {
                 Column() {
                     Icon(
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                            .size(30.dp).rotate(45f),
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .size(30.dp)
+                            .rotate(45f),
                         painter = painterResource(R.drawable.ic_baseline_navigation_24),
                         contentDescription = stringResource(R.string.navigate)
                     )
@@ -149,13 +184,17 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                 }
             }
             Button(
-                modifier = Modifier.weight(1f).fillMaxSize(),
-                onClick = { shareClicked() }, border = BorderStroke(0.dp, color = Color.Transparent),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize(),
+                onClick = { shareClicked() },
+                border = BorderStroke(0.dp, color = Color.Transparent),
                 elevation = ButtonDefaults.elevation(0.dp)
             ) {
                 Column() {
                     Icon(
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
                             .size(30.dp),
                         painter = painterResource(R.drawable.ic_baseline_share_24),
                         contentDescription = stringResource(R.string.share)
@@ -164,13 +203,17 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                 }
             }
             Button(
-                modifier = Modifier.weight(1f).fillMaxSize(),
-                onClick = { newCatchClicked() }, border = BorderStroke(0.dp, color = Color.Transparent),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize(),
+                onClick = { newCatchClicked() },
+                border = BorderStroke(0.dp, color = Color.Transparent),
                 elevation = ButtonDefaults.elevation(0.dp)
             ) {
                 Column() {
                     Icon(
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
                             .size(30.dp),
                         painter = painterResource(R.drawable.ic_fish),
                         contentDescription = stringResource(R.string.new_catch)
@@ -186,13 +229,17 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     private fun PlaceInfo() {
         MyCardNoPadding {
             val user by viewModel.getCurrentUser().collectAsState(null)
-
             Column(
                 verticalArrangement = Arrangement.Top,
-                modifier = Modifier.fillMaxWidth().padding(10.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 10.dp).height(50.dp).fillMaxWidth(),
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp)
+                        .height(50.dp)
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -203,13 +250,40 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                 Text(place.title, fontWeight = FontWeight.Bold)
                 Text(place.description ?: "Нет описания")
                 Spacer(modifier = Modifier.size(8.dp))
-
             }
-
         }
     }
 
+    @ExperimentalAnimationApi
+    @Composable
+    private fun EditPlaceInfo() {
+        MyCardNoPadding {
+            val user by viewModel.getCurrentUser().collectAsState(null)
 
+            Column(
+                verticalArrangement = Arrangement.Top,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp)
+                        .height(50.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Default.Place, stringResource(R.string.place))
+                    Spacer(modifier = Modifier.width(150.dp))
+                    UserProfile(user)
+                }
+                TextField(value = place.title, onValueChange = { place.title = it })
+                TextField(value = place.description ?: "Нет описания", onValueChange = {})
+                Spacer(modifier = Modifier.size(8.dp))
+            }
+        }
+    }
 
     @ExperimentalAnimationApi
     @Composable
@@ -227,9 +301,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     )
                 }
             }
-        } ?:
-        CircularProgressIndicator()
-
+        } ?: CircularProgressIndicator()
     }
 
     @ExperimentalCoilApi
@@ -257,30 +329,35 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                 {
                     Box(
                         modifier = Modifier
-                            .size(125.dp).weight(2f)
+                            .size(125.dp)
+                            .weight(2f)
                     ) {
                         Image(painter = rememberImagePainter(R.drawable.ulov),
                             contentDescription = stringResource(R.string.catch_photo),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
-                                .height(height = 125.dp).fillMaxWidth()
+                                .height(height = 125.dp)
+                                .fillMaxWidth()
                                 .clickable { /*clickedPhoto(photo)*/ })
                     }
                     Box(
                         modifier = Modifier
-                            .size(125.dp).weight(2.35f)
+                            .size(125.dp)
+                            .weight(2.35f)
                     ) {
                         Text(
                             text = catch.fishWeight.toString() + " " + getString(R.string.kg),
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
-                                .padding(start = 5.dp).align(Alignment.Center)
+                                .padding(start = 5.dp)
+                                .align(Alignment.Center)
                         )
                         Text(
                             text = catch.date.toString(),
                             fontSize = 12.sp,
                             modifier = Modifier
-                                .padding(start = 5.dp).align(Alignment.BottomEnd)
+                                .padding(start = 5.dp)
+                                .align(Alignment.BottomEnd)
                         )
                     }
                 }
@@ -291,7 +368,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     @Composable
     fun AppBar() {
         TopAppBar(
-            title = { Text(text = "Catch") },
+            title = { Text(text = stringResource(R.string.place)) },
             navigationIcon = {
                 IconButton(onClick = { findNavController().popBackStack() }, content = {
                     Icon(
@@ -301,16 +378,13 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                 })
             }, actions = {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(end = 3.dp),
+                    modifier = Modifier.padding(end = 3.dp),
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
                         onClick = {
-                            showToast(
-                                requireContext(),
-                                "Not Yet Implemented"
-                            )
+                            editPlace()
                         },
                         content = { Icon(Icons.Filled.Edit, stringResource(R.string.edit)) }
                     )
@@ -321,18 +395,49 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                                 "Not Yet Implemented"
                             )
                         },
-                        content = { Icon(Icons.Filled.Delete, stringResource(R.string.edit)) }
+                        content = { Icon(Icons.Filled.Delete, stringResource(R.string.delete)) }
                     )
                 }
             })
     }
 
+    private fun editPlace() {
+        isEdit = true
+        // TODO Redraw the screen
+    }
+
+    @ExperimentalMaterialApi
+    @Composable
+    private fun BottomSheet() {
+        Row(
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .height(65.dp)
+                .fillMaxWidth()
+        ) {
+            Spacer(modifier = Modifier.size(20.dp))
+            OutlinedButton(
+                onClick = { findNavController().popBackStack() }) {
+                Text(text = stringResource(R.string.cancel))
+            }
+            Spacer(modifier = Modifier.size(20.dp))
+            OutlinedButton(
+                onClick = {
+                    //TODO (Saving changes)
+                }) {
+                Text(text = stringResource(R.string.save))
+            }
+            Spacer(modifier = Modifier.size(20.dp))
+        }
+    }
+
     private fun newCatchClicked() {
-            val action =
-                UserPlaceFragmentDirections.actionUserPlaceFragmentToNewCatchDialogFragment(
-                    place
-                )
-            findNavController().navigate(action)
+        val action =
+            UserPlaceFragmentDirections.actionUserPlaceFragmentToNewCatchDialogFragment(
+                place
+            )
+        findNavController().navigate(action)
     }
 
     private fun routeClicked() {
@@ -359,18 +464,18 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     }
 
     private fun shareClicked() {
-            val text =
-                "${place.title}\nhttps://www.google.com/maps/search/?api=1&query=${place.latitude}" +
-                        ",${place.longitude}"
+        val text =
+            "${place.title}\nhttps://www.google.com/maps/search/?api=1&query=${place.latitude}" +
+                    ",${place.longitude}"
 
-            val sendIntent: Intent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, text)
-                type = "text/plain"
-            }
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, text)
+            type = "text/plain"
+        }
 
-            val shareIntent = Intent.createChooser(sendIntent, null)
-            startActivity(shareIntent)
+        val shareIntent = Intent.createChooser(sendIntent, null)
+        startActivity(shareIntent)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
