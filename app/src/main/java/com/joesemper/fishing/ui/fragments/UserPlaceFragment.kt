@@ -18,10 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -32,7 +29,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,22 +64,13 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     override val scope: Scope by fragmentScope()
     private val viewModel: UserPlaceViewModel by viewModel()
 
-    private lateinit var place: UserMapMarker
-
     companion object {
         private const val TAG = "PLACE"
     }
 
-    fun newInstance(place: UserMapMarker): Fragment {
-        val args = bundleOf(TAG to place)
-        val fragment = UserPlaceFragment()
-        fragment.arguments = args
-        return fragment
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        place = args.userMapMarker
+        viewModel.marker.value = args.userMapMarker
     }
 
     @ExperimentalMaterialApi
@@ -108,17 +95,11 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     fun UserPlaceScreen() {
         val isEdit = rememberSaveable { mutableStateOf(false) }
         val user by viewModel.getCurrentUser().collectAsState(null)
-        BottomSheetScaffold(
-
+        Scaffold(
             topBar = { AppBar(isEdit) },
-            sheetContent = { BottomSheet(isEdit) },
-            sheetElevation = 10.dp,
-            sheetGesturesEnabled = false,
-            sheetPeekHeight = if (isEdit.value) 65.dp else 0.dp,
-
-            ) {
+        ) {
             if (isEdit.value) {
-                val userCatches by viewModel.getCatchesByMarkerId(place.id).collectAsState(null)
+                val userCatches by viewModel.getCatchesByMarkerId(viewModel.id).collectAsState(null)
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -126,14 +107,14 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                         .fillMaxWidth()
                         .background(primaryFigmaBackgroundTint)
                 ) {
-                    Column {  //Creating a column to prevent a space between PlaceInfo and Buttons
+                    Column {
                         EditPlaceInfo()
                         Buttons()
                     }
                     Catches(userCatches)
                 }
             } else {
-                val userCatches by viewModel.getCatchesByMarkerId(place.id).collectAsState(null)
+                val userCatches by viewModel.getCatchesByMarkerId(viewModel.id).collectAsState(null)
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -141,7 +122,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                         .fillMaxWidth()
                         .background(primaryFigmaBackgroundTint)
                 ) {
-                    Column {  //Creating a column to prevent a space between PlaceInfo and Buttons
+                    Column {
                         PlaceInfo(user)
                         Buttons()
                     }
@@ -245,8 +226,8 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     Spacer(modifier = Modifier.width(150.dp))
                     UserProfile(user)
                 }
-                Text(place.title, fontWeight = FontWeight.Bold)
-                Text(place.description ?: "Нет описания")
+                Text(viewModel.title, fontWeight = FontWeight.Bold)
+                Text(viewModel.description ?: "Нет описания")
                 Spacer(modifier = Modifier.size(8.dp))
             }
         }
@@ -277,26 +258,24 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     UserProfile(user)
                 }
 
-                val titleTemp = remember {
-                    mutableStateOf(place.title)
+                viewModel.titleTemp = rememberSaveable {
+                    mutableStateOf(viewModel.title)
                 }
-                val descriptionTemp = remember {
-                    mutableStateOf(place.description)
+                viewModel.descriptionTemp = rememberSaveable {
+                    mutableStateOf(viewModel.description ?: "")
                 }
                 OutlinedTextField(
-                    value = titleTemp.value,
-                    onValueChange = { titleTemp.value = it },
-                    label = { Text(stringResource(R.string.place)) }
+                    value = viewModel.titleTemp.value,
+                    onValueChange = { viewModel.titleTemp.value = it },
+                    label = { Text(stringResource(R.string.place)) },
+                    singleLine = true
                 )
                 OutlinedTextField(
-                    value = descriptionTemp.value ?: "",
-                    onValueChange = { descriptionTemp.value = it },
+                    value = viewModel.descriptionTemp.value ?: "",
+                    onValueChange = { viewModel.descriptionTemp.value = it },
                     label = { Text(stringResource(R.string.description)) },
                 )
                 Spacer(modifier = Modifier.size(8.dp))
-
-                place.title = titleTemp.value
-                place.description = descriptionTemp.value
             }
         }
     }
@@ -324,7 +303,6 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     @Composable
     fun ItemCatch(
         catch: UserCatch,
-        // TODO получить описание, вес и фото UserCatch
     ) {
         Card(elevation = 0.dp) {
             Column(
@@ -387,7 +365,11 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
             title = { Text(text = stringResource(R.string.place)) },
             navigationIcon = {
                 IconButton(onClick = {
-                    if (!isEdit.value) findNavController().popBackStack() else isEdit.value = false
+                    if (!isEdit.value) findNavController().popBackStack()
+                    else {
+                        isEdit.value = false
+                        findNavController().popBackStack()
+                    }
                 }, content = {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
@@ -410,6 +392,18 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                                 stringResource(R.string.edit),
                                 modifier = Modifier.clickable { isEdit.value = true })
                         })
+                    if (isEdit.value) IconButton(
+                        onClick = {
+                            editPlace()
+                        },
+                        content = {
+                            Icon(
+                                Icons.Filled.Done,
+                                stringResource(R.string.save),
+                                modifier = Modifier.clickable {
+                                    viewModel.save()
+                                })
+                        })
                     IconButton(
                         onClick = {
                             showToast(
@@ -428,38 +422,10 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         // TODO Redraw the screen
     }
 
-    @ExperimentalMaterialApi
-    @Composable
-    private fun BottomSheet(isEdit: MutableState<Boolean>) {
-        Row(
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .height(65.dp)
-                .fillMaxWidth()
-        ) {
-            Spacer(modifier = Modifier.size(20.dp))
-            OutlinedButton(
-                onClick = {
-                    if (isEdit.value) isEdit.value = false else findNavController().popBackStack()
-                }) {
-                Text(text = stringResource(R.string.cancel))
-            }
-            Spacer(modifier = Modifier.size(20.dp))
-            OutlinedButton(
-                onClick = {
-                    // place.title = titleTemp.value
-                }) {
-                Text(text = stringResource(R.string.save))
-            }
-            Spacer(modifier = Modifier.size(20.dp))
-        }
-    }
-
     private fun newCatchClicked() {
         val action =
             UserPlaceFragmentDirections.actionUserPlaceFragmentToNewCatchDialogFragment(
-                place
+                viewModel.marker.value
             )
         findNavController().navigate(action)
     }
@@ -468,9 +434,9 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         val uri = String.format(
             Locale.ENGLISH,
             "http://maps.google.com/maps?daddr=%f,%f (%s)",
-            place.latitude,
-            place.longitude,
-            place.title
+            viewModel.latitude,
+            viewModel.longitude,
+            viewModel.title
         )
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
         intent.setPackage("com.google.android.apps.maps")
@@ -489,9 +455,8 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
 
     private fun shareClicked() {
         val text =
-            "${place.title}\nhttps://www.google.com/maps/search/?api=1&query=${place.latitude}" +
-                    ",${place.longitude}"
-
+            "${viewModel.title}\nhttps://www.google.com/maps/search/?api=1&query=${viewModel.latitude}" +
+                    ",${viewModel.longitude}"
         val sendIntent: Intent = Intent().apply {
             action = Intent.ACTION_SEND
             putExtra(Intent.EXTRA_TEXT, text)
@@ -504,7 +469,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        (requireActivity() as NavigationHolder).closeNav()
+        (requireActivity() as NavigationHolder).hideNav()
     }
 
     override fun onDetach() {
