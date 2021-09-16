@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -72,13 +73,13 @@ class UserPlacesFragment : Fragment() {
     @Composable
     fun UserPlacesScreen() {
         Scaffold() {
-            val uiState = viewModel.viewStateFlow.collectAsState()
+            val uiState by viewModel.uiState.collectAsState()
             Crossfade(uiState, animationSpec = tween(500)) { animatedUiState ->
-                when (animatedUiState.value) {
+                when (animatedUiState) {
                     is BaseViewState.Loading ->
                         UserPlacesLoading { onAddNewPlaceClick() }
                     is BaseViewState.Success<*> -> UserPlaces(
-                        (animatedUiState.value as BaseViewState.Success<*>).data as List<UserMapMarker>, {
+                        (animatedUiState as BaseViewState.Success<*>).data as List<UserMapMarker>, {
                             onAddNewPlaceClick()
                         }, { userMarker ->
                             onPlaceItemClick(userMarker)
