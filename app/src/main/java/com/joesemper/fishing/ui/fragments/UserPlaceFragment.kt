@@ -294,6 +294,9 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     label = { Text(stringResource(R.string.description)) },
                 )
                 Spacer(modifier = Modifier.size(8.dp))
+
+                place.title = titleTemp.value
+                place.description = descriptionTemp.value
             }
         }
     }
