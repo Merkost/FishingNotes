@@ -51,12 +51,6 @@ val mapScreen = module {
     }
 }
 
-val markerFragment = module {
-    scope(named<MarkerDetailsDialogFragment>()) {
-        viewModel { MarkerDetailsViewModel(get()) }
-    }
-}
-
 val userFragment = module {
     scope(named<UserFragment>()) {
         viewModel { UserViewModel(get(), get()) }
@@ -72,13 +66,8 @@ val newCatchFragment = module {
 
 val userCatchFragment = module {
     scope(named<UserCatchFragment>()) {
-        viewModel { UserCatchViewModel(get()) }
-    }
-}
-
-val catchesInnerFragment = module {
-    scope(named<UserCatchesInnerFragment>()) {
-        viewModel { UserPlaceCatchesViewModel(get()) }
+        viewModel { UserCatchViewModel(get(),get()) }
+        scoped<UserRepository> { UserRepositoryImpl(get(), get()) }
     }
 }
 

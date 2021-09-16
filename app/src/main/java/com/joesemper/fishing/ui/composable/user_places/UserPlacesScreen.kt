@@ -74,7 +74,7 @@ fun ItemPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Unit) {
                 .clickable { userPlaceClicked(place) }
                 .padding(5.dp)
         ) {
-            Row(modifier = Modifier, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+            Row(modifier = Modifier, horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
                 Box(modifier = Modifier.size(50.dp).padding(5.dp)) {
                     Icon(
                         painterResource(R.drawable.ic_baseline_location_on_24),
@@ -84,7 +84,7 @@ fun ItemPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Unit) {
                     )
                 }
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxHeight()
+                    modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically)
                 ) {
                     Text(place.title, fontWeight = FontWeight.Bold)
                     if (place.description.isNullOrEmpty()) Text("Нет описания") else Text(place.description!!)
