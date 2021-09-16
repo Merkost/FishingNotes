@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -147,8 +148,9 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     //TODO("AutoCompleteTextView for places textField")
     @Composable
     private fun Places(label: String) {
+        val isMarkerNull = viewModel.marker.value.id.isEmpty()
         val marker by rememberSaveable { viewModel.marker }
-        val isMarkerNull = marker.id.isEmpty()
+
         var textFieldValue by rememberSaveable {
             mutableStateOf(
                 if (marker.id.isNotEmpty()) marker.title else ""
@@ -184,12 +186,15 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 
                     })
                 },
-                isError = !isThatPlaceInList(textFieldValue, suggestions)
+                isError = !isThatPlaceInList(textFieldValue, suggestions),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                )
             )
 
             DropdownMenu(
                 expanded = isDropMenuOpen, //suggestions.isNotEmpty(),
-                onDismissRequest = { if (isDropMenuOpen) isDropMenuOpen = false },
+                onDismissRequest = { if (textFieldValue.isNotEmpty()) if (isDropMenuOpen) isDropMenuOpen = false },
                 // This line here will accomplish what you want
                 properties = PopupProperties(focusable = false),
             ) {
@@ -197,6 +202,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                     DropdownMenuItem(
                         onClick = {
                             textFieldValue = suggestion.title
+                            viewModel.marker.value = suggestion
                             isDropMenuOpen = false
                         }) {
                         Text(text = suggestion.title)
