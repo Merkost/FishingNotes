@@ -52,6 +52,7 @@ import org.koin.androidx.scope.fragmentScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.scope.Scope
 import java.util.*
+import kotlin.concurrent.schedule
 
 
 class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
@@ -115,15 +116,11 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     }
 
     private fun setBottomDialogOnFocusListeners() {
-        binding.etNewMarkerDescription.setOnFocusChangeListener { v, hasFocus ->
-            if (hasFocus) {
-                addMarkerBottomSheetBehavior.expand()
-            }
+        binding.etNewMarkerDescription.setOnClickListener {
+            addMarkerBottomSheetBehavior.expand()
         }
-        binding.etNewMarkerTitle.setOnFocusChangeListener { v, hasFocus ->
-            if (hasFocus) {
-                addMarkerBottomSheetBehavior.expand()
-            }
+        binding.etNewMarkerTitle.setOnClickListener {
+            addMarkerBottomSheetBehavior.expand()
         }
     }
 
@@ -133,9 +130,8 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         val bottomSheet = binding.bottomSheetAddMarker
         addMarkerBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         addMarkerBottomSheetBehavior.apply {
-            isHideable = true
+//            isHideable = true
             halfExpandedRatio = 0.4f
-            hide()
         }
 
         val buttons = binding.dialogCreateNewPlace.bottomSheet
@@ -336,12 +332,15 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     }
 
     private fun onPlaceSelectMode() {
-        removeMarkerClickListener()
-        hideNavigation()
         moveCameraToCurrentLocation()
-        setViewsVisibilityOnPlaceSelectMode()
-        setViewsBehaviourOnPlaceSelectMode()
-        setOnNewPlaceDialogButtonsListener()
+        removeMarkerClickListener()
+        map.setOnCameraIdleListener {
+            hideNavigation()
+            setViewsVisibilityOnPlaceSelectMode()
+            setViewsBehaviourOnPlaceSelectMode()
+            setOnNewPlaceDialogButtonsListener()
+        }
+
     }
 
     private fun setViewsVisibilityOnPlaceSelectMode() {
@@ -352,39 +351,51 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     }
 
     private fun setViewsBehaviourOnPlaceSelectMode() {
-        addMarkerBottomSheetBehavior.isHideable = false
+//        addMarkerBottomSheetBehavior.isHideable = false
         addMarkerBottomSheetBehavior.setPeekHeight(235, true)
         addMarkerBottomSheetBehavior.halfExpand()
         buttonsCreateCancelBehavior.expand()
 
-
+        val timerTask = Timer().schedule(3000) {
+            onCameraStopViewsBehaviour()
+        }
 
         map.setOnCameraMoveStartedListener {
             onCameraMoveStartViewsBehaviour()
+            timerTask.cancel()
         }
 
         map.setOnCameraIdleListener {
-            onCameraStopViewsBehaviour()
+            setPointerLocation()
+            timerTask.run()
         }
     }
 
     private fun onCameraMoveStartViewsBehaviour() {
         addMarkerBottomSheetBehavior.setPeekHeight(50, true)
-        addMarkerBottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-        buttonsCreateCancelBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        addMarkerBottomSheetBehavior.collapse()
+        buttonsCreateCancelBehavior.hide()
         binding.tvLocation.text = getString(R.string.calculating)
+    }
+
+    private fun setPointerLocation() {
+        try {
+            val position = geocoder.getFromLocation(
+                getCameraPosition().latitude,
+                getCameraPosition().longitude,
+                1
+            )
+            binding.tvLocation.text = position.first().subAdminArea
+        } catch (e: Throwable) {
+            binding.tvLocation.text = getString(R.string.failed_to_determine)
+            onError(e)
+        }
     }
 
     private fun onCameraStopViewsBehaviour() {
         addMarkerBottomSheetBehavior.setPeekHeight(235, true)
-        addMarkerBottomSheetBehavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
-        buttonsCreateCancelBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-        val position = geocoder.getFromLocation(
-            getCameraPosition().latitude,
-            getCameraPosition().longitude,
-            1
-        )
-        binding.tvLocation.text = position.first().subAdminArea
+        addMarkerBottomSheetBehavior.halfExpand()
+        buttonsCreateCancelBehavior.expand()
     }
 
     private fun setOnNewPlaceDialogButtonsListener() {
@@ -424,9 +435,10 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     }
 
     private fun setViewsBehaviourOnSimpleMode() {
-        //        addMarkerBottomSheetBehavior.skipCollapsed = true
-        addMarkerBottomSheetBehavior.isHideable = true
-        addMarkerBottomSheetBehavior.hide()
+        addMarkerBottomSheetBehavior.skipCollapsed = true
+//        addMarkerBottomSheetBehavior.isHideable = true
+        addMarkerBottomSheetBehavior.setPeekHeight(0, true)
+        addMarkerBottomSheetBehavior.collapse()
         buttonsCreateCancelBehavior.hide()
 
         map.setOnCameraMoveStartedListener { }
@@ -472,14 +484,13 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     }
 
     private fun moveCameraToLocation(location: Location) {
-        map.moveCamera(
-            CameraUpdateFactory.newLatLngZoom(
-                LatLng(
-                    location.latitude,
-                    location.longitude
-                ), DEFAULT_ZOOM.toFloat()
-            )
+        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+            LatLng(
+                location.latitude,
+                location.longitude
+            ), DEFAULT_ZOOM.toFloat()
         )
+        map.animateCamera(cameraUpdate)
     }
 
     private fun showToast(text: String) {

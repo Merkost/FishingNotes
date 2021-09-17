@@ -40,9 +40,10 @@
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.485"
+            app:layout_constraintVertical_bias="0.475"
             app:srcCompat="@drawable/ic_baseline_location_on_24"
             app:tint="@color/secondaryFigmaColor" />
 
@@ -90,7 +91,8 @@
         android:layout_gravity="bottom"
         android:background="@color/white"
         android:visibility="visible"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+        tools:visibility="visible">
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textInputLayout_new_place_title"
@@ -155,7 +157,8 @@
 
     <include
         android:id="@+id/dialog_place"
-        layout="@layout/dialog_place_on_map" />
+        layout="@layout/dialog_place_on_map"
+        tools:visibility="gone" />
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
