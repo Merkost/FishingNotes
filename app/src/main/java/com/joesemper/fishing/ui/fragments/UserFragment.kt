@@ -16,9 +16,8 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -124,7 +123,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
                 )
                 Text(it.size.toString())
             }
-        }  ?: Column(
+        } ?: Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)
         ) {
@@ -133,7 +132,11 @@ class UserFragment : Fragment(), AndroidScopeComponent {
                 modifier = Modifier.size(25.dp).shimmer(),
                 tint = Color.LightGray
             )
-            Text("0", color = Color.LightGray, modifier = Modifier.background(Color.LightGray).shimmer())
+            Text(
+                "0",
+                color = Color.LightGray,
+                modifier = Modifier.background(Color.LightGray).shimmer()
+            )
         }
 
     }
@@ -161,13 +164,18 @@ class UserFragment : Fragment(), AndroidScopeComponent {
                 modifier = Modifier.size(25.dp).shimmer(),
                 tint = Color.LightGray
             )
-            Text("0", color = Color.LightGray, modifier = Modifier.background(Color.LightGray).shimmer())
+            Text(
+                "0",
+                color = Color.LightGray,
+                modifier = Modifier.background(Color.LightGray).shimmer()
+            )
         }
     }
 
     @ExperimentalMaterialApi
     @Composable
     fun UserButtons() {
+        val dialogOnLogout = rememberSaveable { mutableStateOf(false) }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize().padding(horizontal = 80.dp),
@@ -194,14 +202,35 @@ class UserFragment : Fragment(), AndroidScopeComponent {
             }
             Spacer(modifier = Modifier.size(15.dp))
             OutlinedButton(onClick = {
-                lifecycleScope.launch {
-                    viewModel.logoutCurrentUser().collect { isLogout ->
-                        if (isLogout) startLoginActivity()
-                    }
-                }
+                dialogOnLogout.value = true
             }) { Text(getString(R.string.logout)) }
             Spacer(modifier = Modifier.size(30.dp))
+            if (dialogOnLogout.value) LogoutDialog(dialogOnLogout)
         }
+    }
+
+    @Composable
+    fun LogoutDialog(dialogOnLogout: MutableState<Boolean>) {
+        AlertDialog(
+            title = { Text("Выход из аккаунта") },
+            text = { Text("Вы уверены, что хотите выйти из своего аккаунта? \nВаши данные будут сохранены") },
+            onDismissRequest = { dialogOnLogout.value = false },
+            confirmButton = {
+                OutlinedButton(
+                    onClick = {
+                        lifecycleScope.launch {
+                            viewModel.logoutCurrentUser().collect { isLogout ->
+                                if (isLogout) startLoginActivity()
+                            }
+                        }
+                    },
+                    content = { Text(getString(R.string.Yes)) })
+            }, dismissButton = {
+                OutlinedButton(
+                    onClick = { dialogOnLogout.value = false },
+                    content = { Text(getString(R.string.No)) })
+            }
+        )
     }
 
     @Composable

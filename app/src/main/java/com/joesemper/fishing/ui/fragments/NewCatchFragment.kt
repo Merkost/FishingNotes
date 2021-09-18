@@ -78,6 +78,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     private val args: NewCatchFragmentArgs by navArgs()
 
     private val dateAndTime = Calendar.getInstance()
+    private var isNull: Boolean = true
 
     override val scope: Scope by fragmentScope()
     private val viewModel: NewCatchViewModel by viewModel()
@@ -92,6 +93,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         super.onCreate(savedInstanceState)
 
         viewModel.marker.value = args.marker as UserMapMarker
+        isNull = viewModel.marker.value.id.isEmpty()
     }
 
     @ExperimentalAnimationApi
@@ -162,7 +164,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         if (textFieldValue == "") searchFor("", suggestions, filteredList)
         Row(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
-                readOnly = !isMarkerNull,
+                readOnly = !isNull,
                 singleLine = true,
                 value = textFieldValue,
                 onValueChange = {
@@ -175,7 +177,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text(text = label) },
                 trailingIcon = {
-                    if (isMarkerNull) {
+                    if (isNull) {
                         if (textFieldValue.isNotEmpty()) {
                             Icon(Icons.Default.Close, "", modifier = Modifier.clickable { textFieldValue = ""; isDropMenuOpen = true }, tint = primaryFigmaColor) }
                     }
