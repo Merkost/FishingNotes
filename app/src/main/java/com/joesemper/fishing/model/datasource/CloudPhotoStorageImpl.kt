@@ -22,7 +22,7 @@ class CloudPhotoStorageImpl : PhotoStorage {
         val downloadLinks = mutableListOf<String>()
         if (photos.isNotEmpty()) {
             savePhotosToDb(photos)
-                .take(photos.size-1)
+                .take(photos.size)
                 .collect { downloadLink ->
                     downloadLinks.add(downloadLink)
                 }
