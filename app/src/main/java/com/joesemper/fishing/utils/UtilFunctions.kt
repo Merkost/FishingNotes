@@ -51,6 +51,10 @@ fun BottomSheetBehavior<ConstraintLayout>.hide() {
     this.state = BottomSheetBehavior.STATE_HIDDEN
 }
 
+fun BottomSheetBehavior<ConstraintLayout>.collapse() {
+    this.state = BottomSheetBehavior.STATE_COLLAPSED
+}
+
 fun getByteArrayFromImageVew(view: ImageView): ByteArray {
     val bitmap = (view.drawable as BitmapDrawable).bitmap
     val baos = ByteArrayOutputStream()

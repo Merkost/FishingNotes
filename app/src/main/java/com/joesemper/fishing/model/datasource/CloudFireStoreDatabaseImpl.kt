@@ -64,13 +64,15 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
                 }
                 scope.trySend(catches)
             }
+
+
         }
 
-    // val markers = task.toObjects(UserCatch::class.java)
-    //val catches = mutableListOf<UserCatch>()
+// val markers = task.toObjects(UserCatch::class.java)
+//val catches = mutableListOf<UserCatch>()
 //            if (task.isSuccessful) {
 //                val catches = task.result.toObjects(UserCatch::class.java)
-    //scope.trySend(catches)
+//scope.trySend(catches)
 //                for (document in task.result) {
 //                    catches.add(document.toObject(UserCatch::class.java))
 //                    scope.trySend(catches)
@@ -124,7 +126,11 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
 
         //UserMarkers
         listeners.add(
-            getUserMapMarkersCollection().addSnapshotListener(getMarkersSnapshotListener(this))
+            getUserMapMarkersCollection().addSnapshotListener(
+                getMarkersSnapshotListener(
+                    this
+                )
+            )
         )
         //AllPublicMarkers
         listeners.add(
