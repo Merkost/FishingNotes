@@ -1,5 +1,6 @@
 package com.joesemper.fishing.di
 
+import androidx.compose.material.ExperimentalMaterialApi
 import com.joesemper.fishing.domain.*
 import com.joesemper.fishing.model.auth.AuthManager
 import com.joesemper.fishing.model.auth.FirebaseAuthManagerImpl
@@ -83,6 +84,7 @@ val notesFragment = module {
         viewModel { NotesViewModel(get()) }
     }
 }
+
 val userPlaceFragment = module {
     scope(named<UserPlaceFragment>()) {
         viewModel { UserPlaceViewModel(get(), get()) }

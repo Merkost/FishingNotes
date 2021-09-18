@@ -82,6 +82,7 @@
     <string name="places">Places</string>
     <string name="catches">Catches</string>
     <string name="add_new_place">Add new place</string>
+    <string name="save">Save</string>
 
     <string name="permissions_required">Необходимы разрешения</string>
     <string name="plus">+</string>
@@ -110,5 +111,6 @@
     <string name="Another_place_in_new_catch">Начните добавлять улов с экрана уловов, чтобы выбрать другое место!</string>
     <string name="locked">Locked</string>
     <string name="failed_to_determine">Failed to determine</string>
+
 
 </resources>

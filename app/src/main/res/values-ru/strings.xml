@@ -106,6 +106,7 @@
     <string name="details">Details</string>
     <string name="add_new_catch">Add new catch</string>
     <string name="Choose_a_place">Выберите место</string>
+    <string name="save">Сохранить</string>
     <string name="Yes">Yes</string>
     <string name="No">No</string>
     <string name="Another_place_in_new_catch">Начните добавлять улов с экрана уловов, чтобы выбрать другое место!</string>
