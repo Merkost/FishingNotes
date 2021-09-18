@@ -112,6 +112,7 @@
     <string name="Another_place_in_new_catch">Начните добавлять улов с экрана уловов, чтобы выбрать другое место!</string>
     <string name="locked">Locked</string>
     <string name="failed_to_determine">Failed to determine</string>
+    <string name="fish_species">Вид рыбы</string>
 
 
 </resources>

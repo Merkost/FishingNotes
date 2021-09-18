@@ -19,9 +19,6 @@ class UserPlaceViewModel(
     var titleTemp = mutableStateOf("")
     var descriptionTemp = mutableStateOf("")
 
-    val id = marker.value.id
-    val latitude = marker.value.latitude
-    val longitude = marker.value.longitude
     var title = marker.value.title
     var description = marker.value.description
 

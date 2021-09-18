@@ -24,7 +24,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -127,15 +126,15 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
             val scrollState = rememberScrollState()
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(30.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp)
                     .padding(horizontal = 16.dp)
                     .verticalScroll(state = scrollState, enabled = true),
             ) {
-                Title(viewModel.title)
-                MyTextField(viewModel.description, stringResource(R.string.description))
+                FishSpeciesAndDescription()
+
                 Places(stringResource(R.string.place))  //Выпадающий список мест
                 DateAndTime(viewModel.date, viewModel.time)
                 FishAndWeight(viewModel.fishAmount, viewModel.weight)
@@ -144,6 +143,14 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                     { clicked -> /*TODO(Open photo in full screen)*/ },
                     { deleted -> viewModel.deletePhoto(deleted) })
             }
+        }
+    }
+
+    @Composable
+    fun FishSpeciesAndDescription() {
+        Column (verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            FishSpecies(viewModel.title)
+            MyTextField(viewModel.description, stringResource(R.string.description))
         }
     }
 
@@ -277,12 +284,12 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     }
 
     @Composable
-    fun Title(name: MutableState<String>) {
+    fun FishSpecies(name: MutableState<String>) {
         Column {
             OutlinedTextField(
                 value = name.value,
                 onValueChange = { name.value = it },
-                label = { Text(stringResource(R.string.title)) },
+                label = { Text(stringResource(R.string.fish_species)) },
                 modifier = Modifier.fillMaxWidth(),
                 isError = name.value.isBlank(),
                 singleLine = true,
@@ -311,9 +318,12 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 Spacer(Modifier.size(8.dp))
                 Text(stringResource(R.string.fishing_method))
             }
-            MyTextField(rod, stringResource(R.string.fish_rod))
-            MyTextField(bite, stringResource(R.string.bait))
-            MyTextField(lure, stringResource(R.string.lure))
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                MyTextField(rod, stringResource(R.string.fish_rod))
+                MyTextField(bite, stringResource(R.string.bait))
+                MyTextField(lure, stringResource(R.string.lure))
+            }
+
         }
     }
 
@@ -571,6 +581,9 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 
     @Composable
     fun DateAndTime(dateState: MutableState<String>, timeState: MutableState<String>) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+
+
         dateState.value = setInitialDate()
         OutlinedTextField(value = dateState.value,
             onValueChange = {},
@@ -611,6 +624,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                         setTime(timeState)
                     })
             })
+        }
     }
 
     @Composable

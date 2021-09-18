@@ -70,7 +70,9 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.marker.value = args.userMapMarker
+
+        val mark = args.userMapMarker
+        viewModel.marker.value = mark
     }
 
     @ExperimentalMaterialApi
@@ -99,7 +101,8 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
             topBar = { AppBar(isEdit) },
         ) {
             if (isEdit.value) {
-                val userCatches by viewModel.getCatchesByMarkerId(viewModel.id).collectAsState(null)
+                val userCatches by viewModel.getCatchesByMarkerId(viewModel.marker.value.id).collectAsState(
+                    listOf())
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -114,7 +117,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     Catches(userCatches)
                 }
             } else {
-                val userCatches by viewModel.getCatchesByMarkerId(viewModel.id).collectAsState(null)
+                val userCatches by viewModel.getCatchesByMarkerId(viewModel.marker.value.id).collectAsState(listOf())
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -434,8 +437,8 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         val uri = String.format(
             Locale.ENGLISH,
             "http://maps.google.com/maps?daddr=%f,%f (%s)",
-            viewModel.latitude,
-            viewModel.longitude,
+            viewModel.marker.value.latitude,
+            viewModel.marker.value.longitude,
             viewModel.title
         )
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
@@ -455,8 +458,8 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
 
     private fun shareClicked() {
         val text =
-            "${viewModel.title}\nhttps://www.google.com/maps/search/?api=1&query=${viewModel.latitude}" +
-                    ",${viewModel.longitude}"
+            "${viewModel.title}\nhttps://www.google.com/maps/search/?api=1&query=${viewModel.marker.value.latitude}" +
+                    ",${viewModel.marker.value.longitude}"
         val sendIntent: Intent = Intent().apply {
             action = Intent.ACTION_SEND
             putExtra(Intent.EXTRA_TEXT, text)
