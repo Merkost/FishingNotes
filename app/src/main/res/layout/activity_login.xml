@@ -15,6 +15,8 @@
         android:background="?colorPrimary"
         app:layout_constraintTop_toTopOf="parent" />
 
+
+
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView2"
         android:layout_width="match_parent"
@@ -28,18 +30,38 @@
         app:layout_constraintTop_toTopOf="@+id/view"
         tools:layout_editor_absoluteX="30dp">
 
+        <RelativeLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/progressAnimationView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:cropToPadding="true"
+                app:lottie_autoPlay="false"
+                app:lottie_fileName="confetti.json" />
+        </RelativeLayout>
+
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="50dp"
             android:orientation="vertical">
 
-            <ImageView
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:layout_gravity="center"
-                android:layout_marginTop="20dp"
-                android:src="@mipmap/ic_launcher" />
+
+
+                <ImageView
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
+                    android:src="@mipmap/ic_launcher" />
+
 
             <TextView
                 android:layout_width="match_parent"
@@ -153,6 +175,7 @@
                         android:src="@drawable/ic_guest" />
 
                 </LinearLayout>
+
 
             </androidx.cardview.widget.CardView>
 
