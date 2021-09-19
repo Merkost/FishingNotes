@@ -26,6 +26,8 @@ import me.vponomarenko.compose.shimmer.shimmer
 val places = listOf(
     UserMapMarker(),
     UserMapMarker(),
+    UserMapMarker(),
+    UserMapMarker(),
     UserMapMarker()
 )
 

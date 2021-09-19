@@ -28,6 +28,8 @@ import me.vponomarenko.compose.shimmer.shimmer
 val catches = listOf(
     UserCatch(),
     UserCatch(),
+    UserCatch(),
+    UserCatch(),
     UserCatch()
 )
 

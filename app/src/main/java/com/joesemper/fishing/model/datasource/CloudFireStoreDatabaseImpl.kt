@@ -1,7 +1,6 @@
 package com.joesemper.fishing.model.datasource
 
 import android.util.Log
-import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.*
@@ -48,25 +47,32 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
     }
 
     @ExperimentalCoroutinesApi
-    private fun getUserCatchesSuccessListener(scope: ProducerScope<List<UserCatch>>): OnSuccessListener<in QuerySnapshot> =
+    private suspend fun getUserCatchesSuccessListener(scope: ProducerScope<List<UserCatch>>): OnSuccessListener<in QuerySnapshot> =
         OnSuccessListener<QuerySnapshot> { task ->
-            val catches = mutableListOf<UserCatch>()
-            task.documents.forEach { doc ->
-                doc.reference.collection(CATCHES_COLLECTION).addSnapshotListener(
-                    EventListener<QuerySnapshot> { snapshots, error ->
-                        snapshots?.toObjects(UserCatch::class.java)?.forEach {
-                            catches.add(it)
-                        }
-                })
+            scope.launch {
+                val catches = mutableListOf<UserCatch>()
+                task.documents.forEach { doc ->
+                    async {
+                        doc.reference.collection(CATCHES_COLLECTION).addSnapshotListener(
+                            EventListener<QuerySnapshot> { snapshots, error ->
+                                snapshots?.toObjects(UserCatch::class.java)?.forEach {
+                                    catches.add(it)
+                                }
+                            }
+                        )
+                    }.await()
+                }
+                scope.trySend(catches)
             }
-            scope.trySend(catches)
+
+
         }
 
-   // val markers = task.toObjects(UserCatch::class.java)
-    //val catches = mutableListOf<UserCatch>()
+// val markers = task.toObjects(UserCatch::class.java)
+//val catches = mutableListOf<UserCatch>()
 //            if (task.isSuccessful) {
 //                val catches = task.result.toObjects(UserCatch::class.java)
-    //scope.trySend(catches)
+//scope.trySend(catches)
 //                for (document in task.result) {
 //                    catches.add(document.toObject(UserCatch::class.java))
 //                    scope.trySend(catches)
@@ -120,7 +126,11 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
 
         //UserMarkers
         listeners.add(
-            getUserMapMarkersCollection().addSnapshotListener(getMarkersSnapshotListener(this))
+            getUserMapMarkersCollection().addSnapshotListener(
+                getMarkersSnapshotListener(
+                    this
+                )
+            )
         )
         //AllPublicMarkers
         listeners.add(

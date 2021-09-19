@@ -12,24 +12,21 @@ import kotlinx.coroutines.launch
 
 class UserCatchesViewModel(private val repository: UserContentRepository) : ViewModel() {
 
-    val viewStateFlow: MutableStateFlow<BaseViewState> =
-        MutableStateFlow(BaseViewState.Loading(null))
+    private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Loading(null))
+    val uiState: StateFlow<BaseViewState>
+        get() = _uiState
 
     init {
         loadAllUserCatches()
     }
 
-    fun subscribe(): StateFlow<BaseViewState> {
-        return viewStateFlow
-    }
-
     private fun loadAllUserCatches() {
         val start = System.currentTimeMillis()
         viewModelScope.launch {
-            //for loading animation
-            if (System.currentTimeMillis() - start < 1500) delay(1500)
             repository.getAllUserCatchesList().collect { catches ->
-                viewStateFlow.value = BaseViewState.Success(catches)
+                //for loading animation
+                if (System.currentTimeMillis() - start < 1500) delay(1500)
+                _uiState.value = BaseViewState.Success(catches)
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.joesemper.fishing.di
 
+import androidx.compose.material.ExperimentalMaterialApi
 import com.joesemper.fishing.domain.*
 import com.joesemper.fishing.model.auth.AuthManager
 import com.joesemper.fishing.model.auth.FirebaseAuthManagerImpl
@@ -50,12 +51,6 @@ val mapScreen = module {
     }
 }
 
-val markerFragment = module {
-    scope(named<MarkerDetailsDialogFragment>()) {
-        viewModel { MarkerDetailsViewModel(get()) }
-    }
-}
-
 val userFragment = module {
     scope(named<UserFragment>()) {
         viewModel { UserViewModel(get(), get()) }
@@ -71,13 +66,8 @@ val newCatchFragment = module {
 
 val userCatchFragment = module {
     scope(named<UserCatchFragment>()) {
-        viewModel { UserCatchViewModel(get()) }
-    }
-}
-
-val catchesInnerFragment = module {
-    scope(named<UserCatchesInnerFragment>()) {
-        viewModel { UserPlaceCatchesViewModel(get()) }
+        viewModel { UserCatchViewModel(get(),get()) }
+        scoped<UserRepository> { UserRepositoryImpl(get(), get()) }
     }
 }
 
@@ -94,6 +84,7 @@ val notesFragment = module {
         viewModel { NotesViewModel(get()) }
     }
 }
+
 val userPlaceFragment = module {
     scope(named<UserPlaceFragment>()) {
         viewModel { UserPlaceViewModel(get(), get()) }

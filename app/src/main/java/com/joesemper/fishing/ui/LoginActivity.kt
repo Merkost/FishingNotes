@@ -28,6 +28,8 @@ import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.activityScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.scope.Scope
+import java.util.*
+import kotlin.concurrent.schedule
 
 class LoginActivity : AppCompatActivity(), AndroidScopeComponent {
 
@@ -93,8 +95,12 @@ class LoginActivity : AppCompatActivity(), AndroidScopeComponent {
 
     private fun onSuccess(user: User?) {
         setViews(false)
+
         if (user != null) {
-            startMainActivity()
+            vb.progressAnimationView.playAnimation()
+            Timer().schedule(2000) {
+                startMainActivity()
+            }
         }
     }
 

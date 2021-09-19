@@ -16,11 +16,11 @@ interface UserContentRepository {
     fun getAllUserMarkers(): Flow<MapMarker>
     fun getAllUserMarkersList(): Flow<List<MapMarker>>
     fun getAllUserCatchesList(): Flow<List<UserCatch>>
-    fun getAllUserContentList(): Flow<List<Content>>
     fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>>
 
 
     suspend fun addNewCatch(markerId: String, newCatch: RawUserCatch): StateFlow<Progress>
     suspend fun deleteMarker(userMapMarker: UserMapMarker)
+    suspend fun deleteCatch(userCatch: UserCatch)
     suspend fun addNewMarker(newMarker: RawMapMarker): StateFlow<Progress>
 }
