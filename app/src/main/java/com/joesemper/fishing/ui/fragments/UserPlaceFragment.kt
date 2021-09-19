@@ -115,6 +115,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     Buttons()
                 }
                 Catches(userCatches)
+                //if (dialogOnDelete.value) DeleteDialog(dialogOnDelete)
             }
 
         }
@@ -321,10 +322,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                 ) {
                     IconButton(
                         onClick = {
-                            showToast(
-                                requireContext(),
-                                "Not Yet Implemented"
-                            )
+                            dialogOnDelete.value = true
                         },
                         content = { Icon(Icons.Filled.Edit, stringResource(R.string.edit)) }
                     )
