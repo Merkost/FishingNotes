@@ -131,7 +131,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         addMarkerBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         addMarkerBottomSheetBehavior.apply {
 //            isHideable = true
-            halfExpandedRatio = 0.4f
+            halfExpandedRatio = 0.2f
         }
 
         val buttons = binding.dialogCreateNewPlace.bottomSheet
@@ -357,22 +357,26 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         buttonsCreateCancelBehavior.expand()
 
         val timerTask = Timer().schedule(3000) {
-            onCameraStopViewsBehaviour()
+
         }
 
         map.setOnCameraMoveStartedListener {
             onCameraMoveStartViewsBehaviour()
-            timerTask.cancel()
+            //timerTask.cancel()
         }
 
         map.setOnCameraIdleListener {
+            onCameraStopViewsBehaviour()
             setPointerLocation()
-            timerTask.run()
+            //timerTask.run()
         }
     }
 
     private fun onCameraMoveStartViewsBehaviour() {
         addMarkerBottomSheetBehavior.setPeekHeight(50, true)
+        binding.ivPointer.pauseAnimation()
+        binding.ivPointer.setMinAndMaxFrame(0,20)
+        binding.ivPointer.playAnimation()
         addMarkerBottomSheetBehavior.collapse()
         buttonsCreateCancelBehavior.hide()
         binding.tvLocation.text = getString(R.string.calculating)
@@ -394,6 +398,9 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
 
     private fun onCameraStopViewsBehaviour() {
         addMarkerBottomSheetBehavior.setPeekHeight(235, true)
+        binding.ivPointer.pauseAnimation()
+        binding.ivPointer.setMinAndMaxFrame(50,82)
+        binding.ivPointer.playAnimation()
         addMarkerBottomSheetBehavior.halfExpand()
         buttonsCreateCancelBehavior.expand()
     }

@@ -33,10 +33,10 @@
             app:srcCompat="@drawable/ic_baseline_add_location_24"
             tools:ignore="SpeakableTextPresentCheck" />
 
-        <ImageView
-            android:id="@+id/iv_pointer"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/ivPointer"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -44,8 +44,10 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.475"
-            app:srcCompat="@drawable/ic_baseline_location_on_24"
-            app:tint="@color/secondaryFigmaColor" />
+            android:cropToPadding="true"
+            app:lottie_autoPlay="false"
+            app:lottie_loop="false"
+            app:lottie_fileName="another_marker.json" />
 
         <TextView
             android:id="@+id/tv_location_title"
