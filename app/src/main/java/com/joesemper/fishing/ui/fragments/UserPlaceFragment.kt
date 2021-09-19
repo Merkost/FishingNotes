@@ -365,6 +365,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
 
     @Composable
     fun AppBar(isEdit: MutableState<Boolean>) {
+        val dialogOnDelete = rememberSaveable { mutableStateOf(false) }
         TopAppBar(
             title = { Text(text = stringResource(R.string.place)) },
             navigationIcon = {
@@ -416,6 +417,25 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     )
                 }
             })
+        if (dialogOnDelete.value) DeleteDialog(dialogOnDelete)
+    }
+
+    @Composable
+    fun DeleteDialog(dialogOnDelete: MutableState<Boolean>) {
+        AlertDialog(
+            title = {Text("Удаление точки")},
+            text = {Text("Вы уверены, что хотите удалить данную точку?")},
+            onDismissRequest = { dialogOnDelete.value = false },
+            confirmButton = {
+                OutlinedButton(
+                    onClick = { viewModel.deletePlace(viewModel.marker.value); findNavController().popBackStack() },
+                    content = { Text(getString(R.string.Yes)) })
+            }, dismissButton = {
+                OutlinedButton(
+                    onClick = { dialogOnDelete.value = false },
+                    content = { Text(getString(R.string.No)) })
+            }
+        )
     }
 
     private fun editPlace() {

@@ -98,7 +98,7 @@ class LoginActivity : AppCompatActivity(), AndroidScopeComponent {
 
         if (user != null) {
             vb.progressAnimationView.playAnimation()
-            Timer().schedule(2000) {
+            Timer().schedule(2250) {
                 startMainActivity()
             }
         }

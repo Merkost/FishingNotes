@@ -213,7 +213,7 @@ class UserFragment : Fragment(), AndroidScopeComponent {
     fun LogoutDialog(dialogOnLogout: MutableState<Boolean>) {
         AlertDialog(
             title = { Text("Выход из аккаунта") },
-            text = { Text("Вы уверены, что хотите выйти из своего аккаунта? \nВаши данные будут сохранены") },
+            text = { Text("Вы уверены, что хотите выйти из своего аккаунта?") },
             onDismissRequest = { dialogOnLogout.value = false },
             confirmButton = {
                 OutlinedButton(
