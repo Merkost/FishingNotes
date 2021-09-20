@@ -131,7 +131,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         addMarkerBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         addMarkerBottomSheetBehavior.apply {
 //            isHideable = true
-            halfExpandedRatio = 0.2f
+            halfExpandedRatio = 0.25f
         }
 
         val buttons = binding.dialogCreateNewPlace.bottomSheet

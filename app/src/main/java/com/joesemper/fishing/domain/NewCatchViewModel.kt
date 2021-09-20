@@ -51,7 +51,7 @@ class NewCatchViewModel(private val repository: UserContentRepository) : ViewMod
     fun getAllUserMarkersList() = repository.getAllUserMarkersList() as Flow<List<UserMapMarker>>
 
     private fun addNewCatch(newCatch: RawUserCatch) {
-        viewStateFlow.value = BaseViewState.Loading(null)
+        viewStateFlow.value = BaseViewState.Loading(0)
         viewModelScope.launch {
             repository.addNewCatch(marker.value.id, newCatch).collect { progress ->
                 when (progress) {
@@ -59,7 +59,7 @@ class NewCatchViewModel(private val repository: UserContentRepository) : ViewMod
                         viewStateFlow.value = BaseViewState.Success(progress)
                     }
                     is Progress.Loading -> {
-                        viewStateFlow.value = BaseViewState.Loading(null)
+                        viewStateFlow.value = BaseViewState.Loading(progress.percents)
                     }
                     is Progress.Error -> {
                         viewStateFlow.value =

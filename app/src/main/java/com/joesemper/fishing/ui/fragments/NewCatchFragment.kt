@@ -13,6 +13,7 @@ import android.text.format.DateUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -58,6 +59,7 @@ import coil.compose.rememberImagePainter
 import com.google.android.material.transition.MaterialFadeThrough
 import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.NewCatchViewModel
+import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
@@ -148,7 +150,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 
     @Composable
     fun FishSpeciesAndDescription() {
-        Column (verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             FishSpecies(viewModel.title)
             MyTextField(viewModel.description, stringResource(R.string.description))
         }
@@ -186,14 +188,26 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 trailingIcon = {
                     if (isNull) {
                         if (textFieldValue.isNotEmpty()) {
-                            Icon(Icons.Default.Close, "", modifier = Modifier.clickable { textFieldValue = ""; isDropMenuOpen = true }, tint = primaryFigmaColor) }
-                    }
-                    else Icon(Icons.Default.Lock, stringResource(R.string.locked), tint = primaryFigmaColor, modifier = Modifier.clickable { showToast(
-                        requireContext(),
-                        getString(R.string.Another_place_in_new_catch)
-                    )
+                            Icon(
+                                Icons.Default.Close,
+                                "",
+                                modifier = Modifier.clickable {
+                                    textFieldValue = ""; isDropMenuOpen = true
+                                },
+                                tint = primaryFigmaColor
+                            )
+                        }
+                    } else Icon(
+                        Icons.Default.Lock,
+                        stringResource(R.string.locked),
+                        tint = primaryFigmaColor,
+                        modifier = Modifier.clickable {
+                            showToast(
+                                requireContext(),
+                                getString(R.string.Another_place_in_new_catch)
+                            )
 
-                    })
+                        })
                 },
                 isError = !isThatPlaceInList(textFieldValue, suggestions),
                 keyboardOptions = KeyboardOptions(
@@ -203,7 +217,9 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 
             DropdownMenu(
                 expanded = isDropMenuOpen, //suggestions.isNotEmpty(),
-                onDismissRequest = { if (textFieldValue.isNotEmpty()) if (isDropMenuOpen) isDropMenuOpen = false },
+                onDismissRequest = {
+                    if (textFieldValue.isNotEmpty()) if (isDropMenuOpen) isDropMenuOpen = false
+                },
                 // This line here will accomplish what you want
                 properties = PopupProperties(focusable = false),
             ) {
@@ -221,7 +237,10 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         }
     }
 
-    private fun isThatPlaceInList(textFieldValue: String, suggestions: List<UserMapMarker>): Boolean {
+    private fun isThatPlaceInList(
+        textFieldValue: String,
+        suggestions: List<UserMapMarker>
+    ): Boolean {
         suggestions.forEach {
             if (it.title == textFieldValue) return true
         }
@@ -267,11 +286,31 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
             Spacer(modifier = Modifier.size(20.dp))
             OutlinedButton(onClick = {
                 if (viewModel.createNewUserCatch(getPhotos()))
-                    findNavController().popBackStack()
+//                    findNavController().popBackStack()
                 else showToast(requireContext(), getString(R.string.not_all_fields_are_filled))
 
                 lifecycleScope.launchWhenCreated {
-                    when (viewModel.subscribe().collect { }) {
+                    when (viewModel.subscribe().collect { state ->
+                        when (state) {
+                            is BaseViewState.Success<*> -> {
+                                findNavController().popBackStack()
+                            }
+                            is BaseViewState.Loading -> {
+                                Toast.makeText(
+                                    requireContext(),
+                                    state.progress.toString(),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                            is BaseViewState.Error -> {
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Error: ${state.error.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    }) {
                         //TODO(listen for the state)
                     }
                 }
@@ -584,46 +623,46 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
 
 
-        dateState.value = setInitialDate()
-        OutlinedTextField(value = dateState.value,
-            onValueChange = {},
-            label = { Text(text = stringResource(R.string.date)) },
-            readOnly = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    showToast(
-                        requireContext(),
-                        getString(R.string.click_on_icon_to_change)
-                    )
-                },
-            trailingIcon = {
-                Icon(painter = painterResource(R.drawable.ic_baseline_event_24),
-                    tint = primaryFigmaColor,
-                    contentDescription = stringResource(R.string.date),
-                    modifier = Modifier.clickable { setDate(dateState) })
-            })
-        timeState.value = setInitialTime()
-        OutlinedTextField(value = timeState.value,
-            onValueChange = {},
-            label = { Text(text = stringResource(R.string.time)) },
-            readOnly = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    showToast(
-                        requireContext(),
-                        getString(R.string.click_on_icon_to_change)
-                    )
-                },
-            trailingIcon = {
-                Icon(painter = painterResource(R.drawable.ic_baseline_access_time_24),
-                    tint = primaryFigmaColor,
-                    contentDescription = stringResource(R.string.time),
-                    modifier = Modifier.clickable {
-                        setTime(timeState)
-                    })
-            })
+            dateState.value = setInitialDate()
+            OutlinedTextField(value = dateState.value,
+                onValueChange = {},
+                label = { Text(text = stringResource(R.string.date)) },
+                readOnly = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        showToast(
+                            requireContext(),
+                            getString(R.string.click_on_icon_to_change)
+                        )
+                    },
+                trailingIcon = {
+                    Icon(painter = painterResource(R.drawable.ic_baseline_event_24),
+                        tint = primaryFigmaColor,
+                        contentDescription = stringResource(R.string.date),
+                        modifier = Modifier.clickable { setDate(dateState) })
+                })
+            timeState.value = setInitialTime()
+            OutlinedTextField(value = timeState.value,
+                onValueChange = {},
+                label = { Text(text = stringResource(R.string.time)) },
+                readOnly = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        showToast(
+                            requireContext(),
+                            getString(R.string.click_on_icon_to_change)
+                        )
+                    },
+                trailingIcon = {
+                    Icon(painter = painterResource(R.drawable.ic_baseline_access_time_24),
+                        tint = primaryFigmaColor,
+                        contentDescription = stringResource(R.string.time),
+                        modifier = Modifier.clickable {
+                            setTime(timeState)
+                        })
+                })
         }
     }
 
@@ -657,6 +696,11 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 
         /*TODO(URI TO BYTEARRAY IN COROUTINE SCOPE)*/
         viewModel.images.forEach {
+//            val baos = ByteArrayOutputStream()
+//            val inputStream = requireActivity().contentResolver.openInputStream(it)
+//            val bmp = BitmapFactory.decodeStream(inputStream)
+//            bmp.compress(Bitmap.CompressFormat.JPEG, 50, baos)
+//            result.add(baos.toByteArray())
             requireActivity().contentResolver.openInputStream(it)
                 ?.readBytes()
                 ?.let { it1 -> result.add(it1) }

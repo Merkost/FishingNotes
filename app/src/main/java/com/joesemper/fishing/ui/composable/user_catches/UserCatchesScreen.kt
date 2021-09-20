@@ -1,16 +1,15 @@
 package com.joesemper.fishing.ui.composable.user_catches
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,14 +46,19 @@ fun ItemAddCatch(addCatch: () -> Unit) {
         Row(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.height(110.dp).fillMaxWidth().clickable { addCatch() }
+            modifier = Modifier
+                .height(110.dp)
+                .fillMaxWidth()
+                .clickable { addCatch() }
                 .padding(5.dp)
         ) {
             Column(verticalArrangement = Arrangement.Center) {
                 Icon(
                     painterResource(R.drawable.ic_add_catch),
                     stringResource(R.string.new_catch),
-                    modifier = Modifier.weight(2f).align(Alignment.CenterHorizontally)
+                    modifier = Modifier
+                        .weight(2f)
+                        .align(Alignment.CenterHorizontally)
                         .size(50.dp),
                     tint = primaryFigmaColor
                 )
@@ -67,22 +71,37 @@ fun ItemAddCatch(addCatch: () -> Unit) {
 @ExperimentalAnimationApi
 @Composable
 fun ItemCatch(catch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
+
+    val photo = if (catch.downloadPhotoLinks.isEmpty()) {
+        "https://www.industrialempathy.com/img/remote/ZiClJf-1920w.jpg"
+    } else {
+        catch.downloadPhotoLinks.first()
+    }
+
     MyCard {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.height(75.dp).fillMaxWidth().clickable { userCatchClicked(catch) }
+            modifier = Modifier
+                .height(75.dp)
+                .fillMaxWidth()
+                .clickable { userCatchClicked(catch) }
                 .padding(5.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxHeight(),
                 horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.Start)
             ) {
-                Box(modifier = Modifier.size(75.dp).padding(5.dp)) {
+                Box(modifier = Modifier
+                    .size(75.dp)
+                    .padding(5.dp)) {
                     Icon(
+//                        painter = rememberImagePainter(photo),
                         painterResource(R.drawable.ic_no_photo_vector),
                         stringResource(R.string.place),
-                        modifier = Modifier.fillMaxSize().align(Alignment.Center),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .align(Alignment.Center),
                         tint = secondaryFigmaColor
                     )
                 }

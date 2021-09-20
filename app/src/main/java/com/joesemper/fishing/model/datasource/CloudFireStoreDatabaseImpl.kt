@@ -261,8 +261,8 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
         newCatch: RawUserCatch
     ): StateFlow<Progress> {
 
-        val flow = MutableStateFlow<Progress>(Progress.Loading())
-        val photoDownloadLinks = savePhotos(newCatch.photos)
+        val flow = MutableStateFlow<Progress>(Progress.Loading(0))
+        val photoDownloadLinks = savePhotos(newCatch.photos, flow)
         val userCatch = UserCatchMapper().mapRawCatch(newCatch, photoDownloadLinks)
 
         getUserCatchesCollection(markerId).document(userCatch.id).set(userCatch)
@@ -311,8 +311,11 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
     }
 
 
-    private suspend fun savePhotos(photos: List<ByteArray>) =
-        cloudPhotoStorage.uploadPhotos(photos)
+    private suspend fun savePhotos(
+        photos: List<ByteArray>,
+        progressFlow: MutableStateFlow<Progress>
+    ) =
+        cloudPhotoStorage.uploadPhotos(photos, progressFlow)
 
     override suspend fun deleteMarker(userMapMarker: UserMapMarker) {
         getUserMapMarkersCollection().document(userMapMarker.id).delete()
