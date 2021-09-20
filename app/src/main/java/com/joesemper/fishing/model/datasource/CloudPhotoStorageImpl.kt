@@ -23,10 +23,9 @@ class CloudPhotoStorageImpl : PhotoStorage {
         photos: List<ByteArray>,
         progressFlow: MutableStateFlow<Progress>
     ): List<String> {
-        val progressPoint = 100 / photos.size
-
         val downloadLinks = mutableListOf<String>()
         if (photos.isNotEmpty()) {
+            val progressPoint = 100 / photos.size
             savePhotosToDb(photos)
                 .take(photos.size)
                 .collect { downloadLink ->

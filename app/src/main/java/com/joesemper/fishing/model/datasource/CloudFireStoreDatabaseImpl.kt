@@ -7,6 +7,7 @@ import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
+import com.joesemper.fishing.domain.viewstates.ContentState
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.MapMarker
@@ -26,6 +27,63 @@ import kotlinx.coroutines.flow.*
 class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : DatabaseProvider {
 
     private val db = Firebase.firestore
+
+    @ExperimentalCoroutinesApi
+    override fun getAllUserCatchesState() = channelFlow {
+        val listeners = mutableListOf<Task<QuerySnapshot>>()
+        listeners.add(
+            getUserMapMarkersCollection().get()
+                .addOnSuccessListener(getUserCatchesStateListener(this))
+        )
+        awaitClose { }
+    }
+
+    @ExperimentalCoroutinesApi
+    private suspend fun getUserCatchesStateListener(scope: ProducerScope<ContentState>): OnSuccessListener<in QuerySnapshot> =
+        OnSuccessListener<QuerySnapshot> { task ->
+            scope.launch {
+                getCatchesStateFromDoc(task.documents).collect {
+                    scope.trySend(it)
+                }
+            }
+        }
+
+    @ExperimentalCoroutinesApi
+    private fun getCatchesStateFromDoc(docs: List<DocumentSnapshot>) = callbackFlow {
+
+        docs.forEach { doc ->
+            doc.reference.collection(CATCHES_COLLECTION)
+                .addSnapshotListener { snapshots, error ->
+                    if (snapshots != null) {
+                        val addedCatches = mutableListOf<UserCatch>()
+                        val removedCatches = mutableListOf<UserCatch>()
+
+                        for (dc in snapshots.documentChanges) {
+                            when (dc.type) {
+                                DocumentChange.Type.ADDED -> {
+                                    val userCatch = dc.document.toObject<UserCatch>()
+                                    addedCatches.add(userCatch)
+                                }
+                                DocumentChange.Type.MODIFIED -> {
+                                }
+                                DocumentChange.Type.REMOVED -> {
+                                    val userCatch = dc.document.toObject<UserCatch>()
+                                    removedCatches.add(userCatch)
+                                }
+                            }
+//                            val catches = snapshots.toObjects(UserCatch::class.java)
+                        }
+                        if (addedCatches.isNotEmpty()) {
+                            trySend(ContentState.Added(addedCatches))
+                        }
+                        if (removedCatches.isNotEmpty()) {
+                            trySend(ContentState.Deleted(removedCatches))
+                        }
+                    }
+                }
+        }
+        awaitClose { }
+    }
 
     @ExperimentalCoroutinesApi
     override fun getAllUserCatchesList() = channelFlow {
@@ -50,23 +108,34 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
     private suspend fun getUserCatchesSuccessListener(scope: ProducerScope<List<UserCatch>>): OnSuccessListener<in QuerySnapshot> =
         OnSuccessListener<QuerySnapshot> { task ->
             scope.launch {
-                val catches = mutableListOf<UserCatch>()
-                task.documents.forEach { doc ->
-                    async {
-                        doc.reference.collection(CATCHES_COLLECTION).addSnapshotListener(
-                            EventListener<QuerySnapshot> { snapshots, error ->
-                                snapshots?.toObjects(UserCatch::class.java)?.forEach {
-                                    catches.add(it)
-                                }
-                            }
-                        )
-                    }.await()
+                val result = mutableListOf<UserCatch>()
+
+                getCatchesFromDoc(task.documents).take(task.documents.size).onCompletion {
+                    scope.trySend(result)
+                }.collect {
+                    result.addAll(it)
                 }
-                scope.trySend(catches)
             }
-
-
         }
+
+    @ExperimentalCoroutinesApi
+    private fun getCatchesFromDoc(docs: List<DocumentSnapshot>) = callbackFlow {
+
+        docs.forEach { doc ->
+            doc.reference.collection(CATCHES_COLLECTION)
+                .addSnapshotListener { snapshots, error ->
+                    if (snapshots != null) {
+                        val catches = snapshots.toObjects(UserCatch::class.java)
+                        trySend(catches)
+                    } else {
+                        trySend(listOf<UserCatch>())
+                    }
+
+                }
+        }
+        awaitClose { }
+    }
+
 
 // val markers = task.toObjects(UserCatch::class.java)
 //val catches = mutableListOf<UserCatch>()

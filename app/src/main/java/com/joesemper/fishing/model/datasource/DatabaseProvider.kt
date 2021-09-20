@@ -1,12 +1,13 @@
 package com.joesemper.fishing.model.datasource
 
-import com.joesemper.fishing.model.entity.raw.RawUserCatch
-import com.joesemper.fishing.model.entity.raw.RawMapMarker
-import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.domain.viewstates.ContentState
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.model.entity.content.UserCatch
+import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.model.entity.raw.RawMapMarker
+import com.joesemper.fishing.model.entity.raw.RawUserCatch
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -20,5 +21,6 @@ interface DatabaseProvider {
     fun getAllMarkers(): Flow<MapMarker>
     fun getAllUserMarkersList(): Flow<List<MapMarker>>
     fun getAllUserCatchesList(): Flow<List<UserCatch>>
+    fun getAllUserCatchesState(): Flow<ContentState>
     fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>>
 }
