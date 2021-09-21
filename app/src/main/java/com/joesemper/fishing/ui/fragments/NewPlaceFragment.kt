@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.joesemper.fishing.R
 import com.joesemper.fishing.databinding.FragmentNewPlaceBinding
 import com.joesemper.fishing.domain.NewPlaceViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
@@ -45,11 +46,17 @@ class NewPlaceFragment : Fragment(), AndroidScopeComponent {
 
     private fun initViews() {
         hideNavigation()
+        initToolbar()
         initTitle()
         initLoadingLayout()
         setOnFabClickListener()
     }
 
+    private fun initToolbar() {
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+    }
 
     private fun hideNavigation() {
         val navigationHolder = activity as NavigationHolder
@@ -72,10 +79,21 @@ class NewPlaceFragment : Fragment(), AndroidScopeComponent {
 
     private fun setOnFabClickListener() {
         binding.floatingActionButton.setOnClickListener {
-            binding.floatingActionButton.shrink()
-            subscribeOnViewModel()
-            saveNewPlace()
+
+            if (checkInput()) {
+                binding.floatingActionButton.shrink()
+                subscribeOnViewModel()
+                saveNewPlace()
+            }
         }
+    }
+
+    private fun checkInput(): Boolean {
+        if (binding.etTitle.text.toString().isBlank()) {
+            binding.textInputLayoutTitle.error = getString(R.string.enter_title)
+            return false
+        }
+        return true
     }
 
     private fun subscribeOnViewModel() {
@@ -96,7 +114,6 @@ class NewPlaceFragment : Fragment(), AndroidScopeComponent {
     }
 
     private fun onSuccess() {
-        showNavigation()
         findNavController().popBackStack()
     }
 
@@ -113,6 +130,11 @@ class NewPlaceFragment : Fragment(), AndroidScopeComponent {
                 longitude = args.coordinats.longitude
             )
         )
+    }
+
+    override fun onDestroyView() {
+        showNavigation()
+        super.onDestroyView()
     }
 
 

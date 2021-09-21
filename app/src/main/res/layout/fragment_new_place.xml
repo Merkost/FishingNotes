@@ -16,9 +16,10 @@
             android:layout_height="wrap_content"
             style="@style/ThemeOverlay.AppCompat.ActionBar.Dialog"
             app:title="New place"
+            android:elevation="6dp"
+            android:colorControlNormal="@color/primaryFigmaTextColor"
             app:navigationIcon="@drawable/ic_baseline_close_24"
             android:minHeight="?attr/actionBarSize"
-            android:theme="?attr/actionBarTheme"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

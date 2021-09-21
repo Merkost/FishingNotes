@@ -114,6 +114,9 @@
     <string name="fish_species">Вид рыбы</string>
     <string name="apply">Apply</string>
     <string name="saving">Saving</string>
+    <string name="Try_again">Try again</string>
+    <string name="Cancel">Cancel</string>
+    <string name="enter_title">Введите название места</string>
 
 
 </resources>
