@@ -7,9 +7,8 @@ import com.joesemper.fishing.model.repository.UserContentRepository
 import com.joesemper.fishing.model.repository.UserRepository
 import kotlinx.coroutines.launch
 
-class UserCatchViewModel(private val repository: UserContentRepository, private val userRepository: UserRepository): ViewModel() {
-
-    fun getMapMarker(markerId: String) = repository.getMapMarker(markerId)
+class UserCatchViewModel(private val repository: UserContentRepository,
+                         private val userRepository: UserRepository): ViewModel() {
 
     fun deleteCatch(catch: UserCatch) {
         viewModelScope.launch {
@@ -18,6 +17,8 @@ class UserCatchViewModel(private val repository: UserContentRepository, private 
     }
 
     fun getCurrentUser() = userRepository.currentUser
+
+    fun getMapMarker(markerId: String) = repository.getMapMarker(markerId)
 
     //    private fun setInitialData() {
 //        lifecycleScope.launchWhenStarted {

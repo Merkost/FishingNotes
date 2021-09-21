@@ -1,20 +1,30 @@
 package com.joesemper.fishing.ui.composable.user_catches
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberImagePainter
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.ui.composable.MyCard
@@ -71,13 +81,6 @@ fun ItemAddCatch(addCatch: () -> Unit) {
 @ExperimentalAnimationApi
 @Composable
 fun ItemCatch(catch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
-
-    val photo = if (catch.downloadPhotoLinks.isEmpty()) {
-        "https://www.industrialempathy.com/img/remote/ZiClJf-1920w.jpg"
-    } else {
-        catch.downloadPhotoLinks.first()
-    }
-
     MyCard {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -92,25 +95,53 @@ fun ItemCatch(catch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
                 modifier = Modifier.fillMaxHeight(),
                 horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.Start)
             ) {
-                Box(modifier = Modifier
-                    .size(75.dp)
-                    .padding(5.dp)) {
-                    Icon(
+                Box(
+                    modifier = Modifier
+                        .size(75.dp)
+                        .padding(5.dp)
+                ) {
+                    if (catch.downloadPhotoLinks.isNullOrEmpty()) {
+                        Icon(
 //                        painter = rememberImagePainter(photo),
-                        painterResource(R.drawable.ic_no_photo_vector),
-                        stringResource(R.string.place),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .align(Alignment.Center),
-                        tint = secondaryFigmaColor
-                    )
+                            painterResource(R.drawable.ic_no_photo_vector),
+                            stringResource(R.string.place),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .align(Alignment.Center),
+                            tint = secondaryFigmaColor
+                        )
+                    } else {
+                        Image(
+                            painter = rememberImagePainter(catch.downloadPhotoLinks[0]),
+                            stringResource(R.string.place),
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .align(Alignment.Center)
+                                .clip(RoundedCornerShape(2.dp))
+                        )
+                        Surface( //For making delete button background half transparent
+                            color = Color.LightGray.copy(alpha = 0.5f),
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(2.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                        ) {
+                            Text("x" + catch.downloadPhotoLinks.size, fontSize = 10.sp)
+                        }
+
+                    }
+
                 }
                 Column(
                     verticalArrangement = Arrangement.SpaceBetween,
                     horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxHeight()
                 ) {
-                        Text(catch.title, fontWeight = FontWeight.Bold, modifier = Modifier.height(18.dp))
-                        Text(stringResource(R.string.amount) + ": " + catch.fishAmount, modifier = Modifier.height(18.dp))
+                    Text(catch.title, fontWeight = FontWeight.Bold)
+                    Text(
+                        stringResource(R.string.amount) + ": " + catch.fishAmount,
+                        fontSize = 12.sp
+                    )
                     Row(
                         verticalAlignment = Alignment.Bottom,
                         horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.Start)

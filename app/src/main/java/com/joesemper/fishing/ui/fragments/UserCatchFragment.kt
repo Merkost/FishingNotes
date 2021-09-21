@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -15,14 +16,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
@@ -38,6 +37,8 @@ import coil.compose.rememberImagePainter
 import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.UserCatchViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
+import com.joesemper.fishing.ui.composable.UserProfile
+import com.joesemper.fishing.ui.composable.PlaceInfo
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import com.joesemper.fishing.ui.theme.primaryFigmaBackgroundTint
 import com.joesemper.fishing.utils.NavigationHolder
@@ -112,8 +113,10 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
                     .verticalScroll(state = scrollState, enabled = true),
             ) {
                 Title(catch.title, catch.description, catch.userId, catch.date)
-                Photos(photos)
-                PlaceInfo()
+                Photos()
+                val user by viewModel.getCurrentUser().collectAsState(null)
+                val mapMarker by viewModel.getMapMarker(catch.userMarkerId).collectAsState(null)
+                mapMarker?.let { it1 -> PlaceInfo(user, it1) }
                 MyTextField(
                     stringResource(R.string.weight),
                     catch.fishWeight.toString() + " " + stringResource(R.string.kg)
@@ -137,7 +140,7 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
         )
     }
 
-    @Composable
+    /*@Composable
     private fun PlaceInfo() {
         MyCard {
             Column(
@@ -162,7 +165,7 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
                 Spacer(modifier = Modifier.size(8.dp))
             }
         }
-    }
+    }*/
 
     @Composable
     private fun Title(title: String, description: String, userId: String, date: String) {
@@ -183,7 +186,8 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.align(Alignment.CenterVertically)
                     )
-                    UserProfile()
+                    val user by viewModel.getCurrentUser().collectAsState(null)
+                    UserProfile(user)
                     Spacer(modifier = Modifier.size(5.dp))
                 }
                 Text(
@@ -200,7 +204,7 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
         }
     }
 
-    @Composable
+    /*@Composable
     private fun UserProfile() {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
@@ -222,19 +226,49 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
                 )
             }
         }
-    }
+    }*/
 
     @Composable
     fun Photos(
-        photos: List<Drawable>
         //clickedPhoto: SnapshotStateList<Painter>
     ) {
         LazyRow(modifier = Modifier.fillMaxSize()) {
             item { Spacer(modifier = Modifier.size(4.dp)) }
-            items(items = photos) {
-                ItemPhoto(
-                    photo = it,
-                    //clickedPhoto = clickedPhoto
+            if (catch.downloadPhotoLinks.isNullOrEmpty()) {
+                item { ItemNoPhoto() }
+            } else {
+                items(items = catch.downloadPhotoLinks) {
+                    ItemPhoto(
+                        photo = it,
+                        //clickedPhoto = clickedPhoto
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun ItemNoPhoto() {
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .padding(4.dp)
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(5.dp))
+                    .clickable { showToast(requireContext(),
+                        "На этот улов не были добавлены фото, к сожалению.") },
+                elevation = 5.dp, backgroundColor = Color.LightGray
+            ) {
+                Icon(
+                    painterResource(R.drawable.ic_no_photo_vector), //Or we can use Icons.Default.Add
+                    contentDescription = "NO_PHOTOS",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .align(Alignment.Center)
                 )
             }
         }
@@ -242,7 +276,7 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
 
     @Composable
     fun ItemPhoto(
-        photo: Drawable,
+        photo: String,
         //clickedPhoto: (Painter) -> Unit
     ) {
         Box(

@@ -71,7 +71,7 @@ class UserCatchesFragment : Fragment() {
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(text = "An error ocurred fetching the catches.")
+                            Text(text = "An error occurred fetching the catches.")
                         }
                     }
                 }
