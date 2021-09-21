@@ -50,11 +50,11 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
 
     @ExperimentalCoroutinesApi
     private fun getCatchesStateFromDoc(docs: List<DocumentSnapshot>) = callbackFlow {
-
         docs.forEach { doc ->
             doc.reference.collection(CATCHES_COLLECTION)
                 .addSnapshotListener { snapshots, error ->
                     if (snapshots != null) {
+
                         val addedCatches = mutableListOf<UserCatch>()
                         val removedCatches = mutableListOf<UserCatch>()
 
@@ -71,7 +71,6 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
                                     removedCatches.add(userCatch)
                                 }
                             }
-//                            val catches = snapshots.toObjects(UserCatch::class.java)
                         }
                         if (addedCatches.isNotEmpty()) {
                             trySend(ContentState.Added(addedCatches))

@@ -23,6 +23,7 @@ class FishingApp : Application() {
                     weatherScreen,
                     mainActivity,
                     newCatchFragment,
+                    newPlaceFragment,
                     userCatchFragment,
                     userFragment,
                     notesFragment,

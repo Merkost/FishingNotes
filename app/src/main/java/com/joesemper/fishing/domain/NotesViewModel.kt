@@ -12,13 +12,4 @@ class NotesViewModel(private val repository: UserContentRepository): ViewModel()
         MutableStateFlow(BaseViewState.Success(null))
 
     fun subscribe(): StateFlow<BaseViewState> = viewStateFlow
-
-    private fun loadUserContent() {
-//        viewModelScope.launch {
-//            repository.getAllUserContentList().collectLatest { userContent ->
-//                viewStateFlow.value = BaseViewState.Success(userContent)
-//            }
-//        }
-    }
-
 }
