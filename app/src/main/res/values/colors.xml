@@ -23,6 +23,7 @@
     <color name="light_red">#FF7E7E</color>
     <color name="dark_brown">#211408</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="whiteHalfTransparent">#66FFFFFF</color>
     <color name="white_transparent">#00FFFFFF</color>
     <color name="light_blue">#D3DAFF</color>
 

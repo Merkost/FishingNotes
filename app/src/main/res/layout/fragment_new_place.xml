@@ -14,10 +14,11 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            style="@style/ThemeOverlay.AppCompat.ActionBar.Dialog"
+            style="@style/ThemeOverlay.AppCompat.ActionBar"
             app:title="New place"
+            android:background="?attr/colorPrimary"
+            android:theme="?attr/actionBarTheme"
             android:elevation="6dp"
-            android:colorControlNormal="@color/primaryFigmaTextColor"
             app:navigationIcon="@drawable/ic_baseline_close_24"
             android:minHeight="?attr/actionBarSize"
             app:layout_constraintEnd_toEndOf="parent"
@@ -90,6 +91,7 @@
                 app:layout_constraintEnd_toEndOf="@+id/progressBar"
                 app:layout_constraintStart_toStartOf="@+id/progressBar" />
         </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton

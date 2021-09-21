@@ -30,7 +30,7 @@
     <string name="include_weather">Сохранить погоду</string>
     <string name="publish_catch">Опубликовать улов</string>
     <string name="create">Создать</string>
-    <string name="cancel">Отменить</string>
+    <string name="cancel">Отмена</string>
     <string name="lure">Подкормка</string>
     <string name="pictures">Фотографии</string>
     <string name="current">Current</string>
@@ -122,6 +122,7 @@
     <string name="map_delete_confirmation">Вы уверены, что хотите удалить данную точку?</string>
     <string name="catch_deletion">Удаление улова</string>
     <string name="catch_delete_confirmantion">Вы уверены, что хотите удалить данный улов?</string>
+    <string name="map_types">Map types</string>
 
 
 </resources>

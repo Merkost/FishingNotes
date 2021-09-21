@@ -30,6 +30,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.joesemper.fishing.R
 import com.joesemper.fishing.databinding.FragmentMapBinding
 import com.joesemper.fishing.domain.MapViewModel
@@ -128,6 +129,7 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         subscribeOnPlaceSelectMode()
         enableMyLocation()
         subscribeOnViewModel()
+        setOnLayersClickListener()
         setOnFabClickListener()
         moveCameraToCurrentLocation()
     }
@@ -173,6 +175,12 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
 
     private fun removeMarkerClickListener() {
         map.setOnMarkerClickListener { true }
+    }
+
+    private fun setOnLayersClickListener() {
+        binding.buttonLayers.setOnClickListener {
+            onSelectMapType()
+        }
     }
 
     private fun setOnFabClickListener() {
@@ -422,6 +430,38 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         } else {
             permissionDenied = true
         }
+    }
+
+    private fun onSelectMapType() {
+        val singleItems = arrayOf("Normal", "Satellite", "Hybrid", "Terrain")
+        val checkedItem = when (map.mapType) {
+            GoogleMap.MAP_TYPE_NORMAL -> 0
+            GoogleMap.MAP_TYPE_SATELLITE -> 1
+            GoogleMap.MAP_TYPE_HYBRID -> 2
+            GoogleMap.MAP_TYPE_TERRAIN -> 3
+            else -> 1
+        }
+
+        var selected = checkedItem
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.map_types))
+            .setPositiveButton(getString(R.string.ok)) { dialog, which ->
+                when (selected) {
+                    0 -> map.mapType = GoogleMap.MAP_TYPE_NORMAL
+                    1 -> map.mapType = GoogleMap.MAP_TYPE_SATELLITE
+                    2 -> map.mapType = GoogleMap.MAP_TYPE_HYBRID
+                    3 -> map.mapType = GoogleMap.MAP_TYPE_TERRAIN
+                }
+            }
+            .setNegativeButton(getString(R.string.cancel)) { dialog, which ->
+                dialog.cancel()
+            }
+            .setSingleChoiceItems(singleItems, checkedItem) { dialog, which ->
+                selected = which
+            }
+            .show()
+
     }
 
     private fun startMapsActivityForNavigation(mapMarker: UserMapMarker) {
