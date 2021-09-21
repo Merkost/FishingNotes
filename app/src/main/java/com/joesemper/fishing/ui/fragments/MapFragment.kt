@@ -1,9 +1,7 @@
 package com.joesemper.fishing.ui.fragments
 
 import android.Manifest
-import android.app.Activity
 import android.content.ActivityNotFoundException
-import android.content.Context.INPUT_METHOD_SERVICE
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
@@ -14,7 +12,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -30,19 +27,21 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.transition.MaterialSharedAxis
 import com.joesemper.fishing.R
 import com.joesemper.fishing.databinding.FragmentMapBinding
 import com.joesemper.fishing.domain.MapViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.Content
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.model.entity.raw.RawMapMarker
-import com.joesemper.fishing.utils.*
+import com.joesemper.fishing.utils.Logger
 import com.joesemper.fishing.utils.PermissionUtils.isPermissionGranted
 import com.joesemper.fishing.utils.PermissionUtils.requestPermission
+import com.joesemper.fishing.utils.expand
+import com.joesemper.fishing.utils.hide
+import com.joesemper.fishing.utils.show
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
@@ -52,11 +51,15 @@ import org.koin.androidx.scope.fragmentScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.scope.Scope
 import java.util.*
-import kotlin.concurrent.schedule
 
 
 class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     ActivityCompat.OnRequestPermissionsResultCallback {
+
+    companion object {
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1
+        private const val DEFAULT_ZOOM = 15
+    }
 
     override val scope: Scope by fragmentScope()
     private val viewModel: MapViewModel by viewModel()
@@ -76,22 +79,9 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
 
     private var lastKnownLocation: Location? = null
 
-    private lateinit var addMarkerBottomSheetBehavior: BottomSheetBehavior<ConstraintLayout>
-    private lateinit var buttonsCreateCancelBehavior: BottomSheetBehavior<ConstraintLayout>
     private lateinit var placeDialogBehavior: BottomSheetBehavior<ConstraintLayout>
 
     private lateinit var geocoder: Geocoder
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setTransactions()
-    }
-
-    private fun setTransactions() {
-        enterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true)
-        returnTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -104,43 +94,13 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initAddNewMarkerDialog()
+        initBottomDialogBehaviour()
         initLocationProvider()
         initMap()
         initGeocoder()
     }
 
-    private fun initAddNewMarkerDialog() {
-        setBottomDialogOnFocusListeners()
-        initBottomDialogBehaviour()
-    }
-
-    private fun setBottomDialogOnFocusListeners() {
-        binding.etNewMarkerDescription.setOnClickListener {
-            addMarkerBottomSheetBehavior.expand()
-        }
-        binding.etNewMarkerTitle.setOnClickListener {
-            addMarkerBottomSheetBehavior.expand()
-        }
-    }
-
     private fun initBottomDialogBehaviour() {
-        binding.bottomSheetAddMarker.setOnClickListener { }
-
-        val bottomSheet = binding.bottomSheetAddMarker
-        addMarkerBottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
-        addMarkerBottomSheetBehavior.apply {
-//            isHideable = true
-            halfExpandedRatio = 0.25f
-        }
-
-        val buttons = binding.dialogCreateNewPlace.bottomSheet
-        buttonsCreateCancelBehavior = BottomSheetBehavior.from(buttons)
-        buttonsCreateCancelBehavior.apply {
-            isHideable = true
-            hide()
-        }
-
         val placeDialog = binding.dialogPlace.bottomSheetPlace
         placeDialogBehavior = BottomSheetBehavior.from(placeDialog)
         placeDialogBehavior.apply {
@@ -163,10 +123,6 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         geocoder = Geocoder(requireContext())
     }
 
-    private fun addNewMapMarker(marker: RawMapMarker) {
-        viewModel.addNewMarker(marker)
-    }
-
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
         subscribeOnPlaceSelectMode()
@@ -174,6 +130,17 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         subscribeOnViewModel()
         setOnFabClickListener()
         moveCameraToCurrentLocation()
+    }
+
+    private fun subscribeOnPlaceSelectMode() {
+        lifecycleScope.launchWhenStarted {
+            placeSelectMode.collect { isPlaceSelectMode ->
+                when (isPlaceSelectMode) {
+                    true -> onPlaceSelectMode()
+                    false -> onSimpleMode()
+                }
+            }
+        }
     }
 
     private fun enableMyLocation() {
@@ -193,75 +160,28 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         }
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray,
-    ) {
-        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
-            return
-        }
-        if (isPermissionGranted(
-                permissions,
-                grantResults,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            )
-        ) {
-            enableMyLocation()
-        } else {
-            permissionDenied = true
-        }
-    }
-
     private fun setOnMarkersClickListener() {
         map.setOnMapClickListener {
             placeDialogBehavior.hide()
         }
 
         map.setOnMarkerClickListener { marker ->
-            try {
-                val userMarker = mapMarkers.first { it.id == marker.tag }
-
-                with(binding.dialogPlace) {
-
-                    bottomSheetPlace.setOnClickListener {
-                        val action =
-                            MapFragmentDirections.actionMapFragmentToUserPlaceFragment(userMarker)
-                        findNavController().navigate(action)
-                    }
-
-                    tvPlaceTitle.text = userMarker.title
-                    tvPlaceDescription.text = userMarker.description
-
-                    chipAddNewCatch.setOnClickListener {
-                        val action =
-                            MapFragmentDirections.actionMapFragmentToNewCatchDialogFragment(
-                                userMarker
-                            )
-                        findNavController().navigate(action)
-                    }
-
-                    chipRoute.setOnClickListener {
-                        startMapsActivityForNavigation(userMarker)
-                    }
-
-                    chipDetails.setOnClickListener {
-                        val action =
-                            MapFragmentDirections.actionMapFragmentToUserPlaceFragment(userMarker)
-                        findNavController().navigate(action)
-                    }
-                }
-                placeDialogBehavior.expand()
-
-            } catch (e: Exception) {
-                onError(Throwable(e))
-            }
+            onMapMarkerClicked(marker)
             true
         }
     }
 
     private fun removeMarkerClickListener() {
         map.setOnMarkerClickListener { true }
+    }
+
+    private fun setOnFabClickListener() {
+        binding.fabAddMarker.setOnClickListener {
+            if (placeSelectMode.value) {
+                navigateToNewPlaceFragment()
+            }
+            placeSelectMode.value = !placeSelectMode.value
+        }
     }
 
     private fun subscribeOnViewModel() {
@@ -320,65 +240,38 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         mapMarker?.tag = marker.id
     }
 
-    private fun subscribeOnPlaceSelectMode() {
-        lifecycleScope.launchWhenStarted {
-            placeSelectMode.collect { isPlaceSelectMode ->
-                when (isPlaceSelectMode) {
-                    true -> onPlaceSelectMode()
-                    false -> onSimpleMode()
-                }
-            }
-        }
-    }
-
     private fun onPlaceSelectMode() {
-        moveCameraToCurrentLocation()
         removeMarkerClickListener()
+        moveCameraToCurrentLocation()
         map.setOnCameraIdleListener {
-            hideNavigation()
             setViewsVisibilityOnPlaceSelectMode()
             setViewsBehaviourOnPlaceSelectMode()
-            setOnNewPlaceDialogButtonsListener()
         }
-
     }
 
     private fun setViewsVisibilityOnPlaceSelectMode() {
-        binding.fabAddMarker.hide()
+        binding.fabAddMarker.setImageResource(R.drawable.ic_baseline_check_24)
         binding.tvLocationTitle.show()
         binding.tvLocation.show()
         binding.ivPointer.show()
     }
 
     private fun setViewsBehaviourOnPlaceSelectMode() {
-//        addMarkerBottomSheetBehavior.isHideable = false
-        addMarkerBottomSheetBehavior.setPeekHeight(235, true)
-        addMarkerBottomSheetBehavior.halfExpand()
-        buttonsCreateCancelBehavior.expand()
-
-        val timerTask = Timer().schedule(3000) {
-
-        }
-
         map.setOnCameraMoveStartedListener {
             onCameraMoveStartViewsBehaviour()
-            //timerTask.cancel()
         }
 
         map.setOnCameraIdleListener {
             onCameraStopViewsBehaviour()
             setPointerLocation()
-            //timerTask.run()
         }
     }
 
     private fun onCameraMoveStartViewsBehaviour() {
-        addMarkerBottomSheetBehavior.setPeekHeight(50, true)
         binding.ivPointer.pauseAnimation()
-        binding.ivPointer.setMinAndMaxFrame(0,20)
+        binding.ivPointer.setMinAndMaxFrame(0, 20)
         binding.ivPointer.playAnimation()
-        addMarkerBottomSheetBehavior.collapse()
-        buttonsCreateCancelBehavior.hide()
+
         binding.tvLocation.text = getString(R.string.calculating)
     }
 
@@ -389,7 +282,14 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
                 getCameraPosition().longitude,
                 1
             )
-            binding.tvLocation.text = position.first().subAdminArea
+
+            if (position.first().subAdminArea.isNullOrBlank()) {
+                binding.tvLocation.text = position.first().adminArea
+            } else {
+                binding.tvLocation.text = position.first().subAdminArea
+            }
+
+
         } catch (e: Throwable) {
             binding.tvLocation.text = getString(R.string.failed_to_determine)
             onError(e)
@@ -397,80 +297,40 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
     }
 
     private fun onCameraStopViewsBehaviour() {
-        addMarkerBottomSheetBehavior.setPeekHeight(235, true)
         binding.ivPointer.pauseAnimation()
-        binding.ivPointer.setMinAndMaxFrame(50,82)
+        binding.ivPointer.setMinAndMaxFrame(50, 82)
         binding.ivPointer.playAnimation()
-        addMarkerBottomSheetBehavior.halfExpand()
-        buttonsCreateCancelBehavior.expand()
-    }
-
-    private fun setOnNewPlaceDialogButtonsListener() {
-        binding.dialogCreateNewPlace.buttonNewCatchCreate.setOnClickListener {
-            val title = binding.etNewMarkerTitle.text.toString()
-            val description = binding.etNewMarkerDescription.text.toString()
-            val lat = map.cameraPosition.target.latitude
-            val lon = map.cameraPosition.target.longitude
-            addNewMapMarker(
-                RawMapMarker(
-                    title = title,
-                    description = description,
-                    latitude = lat,
-                    longitude = lon
-                )
-            )
-            placeSelectMode.value = false
-        }
-
-        binding.dialogCreateNewPlace.buttonNewCatchCancel.setOnClickListener {
-            placeSelectMode.value = false
-        }
     }
 
     private fun onSimpleMode() {
         setOnMarkersClickListener()
-        showNavigation()
         setViewsVisibilityOnSimpleMode()
         setViewsBehaviourOnSimpleMode()
     }
 
     private fun setViewsVisibilityOnSimpleMode() {
-        binding.fabAddMarker.show()
         binding.tvLocationTitle.hide()
         binding.tvLocation.hide()
         binding.ivPointer.hide()
     }
 
     private fun setViewsBehaviourOnSimpleMode() {
-        addMarkerBottomSheetBehavior.skipCollapsed = true
-//        addMarkerBottomSheetBehavior.isHideable = true
-        addMarkerBottomSheetBehavior.setPeekHeight(0, true)
-        addMarkerBottomSheetBehavior.collapse()
-        buttonsCreateCancelBehavior.hide()
-
         map.setOnCameraMoveStartedListener { }
 
         map.setOnCameraIdleListener { }
     }
 
-    private fun setOnFabClickListener() {
-        binding.fabAddMarker.setOnClickListener {
-            placeSelectMode.value = true
-        }
+    private fun navigateToNewPlaceFragment() {
+        val title = binding.tvLocation.text.toString()
+        val coordinates = getCameraPosition()
+
+        val action =
+            MapFragmentDirections.actionMapFragmentToNewPlaceFragment(coordinates, title)
+        findNavController().navigate(action)
     }
 
     private fun getCameraPosition(): LatLng {
         return map.cameraPosition.target
-    }
-
-    private fun hideNavigation() {
-        val activity = requireActivity() as NavigationHolder
-        activity.hideNav()
-    }
-
-    private fun showNavigation() {
-        val activity = requireActivity() as NavigationHolder
-        activity.showNav()
     }
 
     private fun moveCameraToCurrentLocation() {
@@ -504,14 +364,64 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
         Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
     }
 
-    companion object {
-        private const val LOCATION_PERMISSION_REQUEST_CODE = 1
-        private const val DEFAULT_ZOOM = 15
+    private fun onMapMarkerClicked(marker: Marker) {
+        try {
+            val userMarker = mapMarkers.first { it.id == marker.tag }
+
+            with(binding.dialogPlace) {
+
+                bottomSheetPlace.setOnClickListener {
+                    val action =
+                        MapFragmentDirections.actionMapFragmentToUserPlaceFragment(userMarker)
+                    findNavController().navigate(action)
+                }
+
+                tvPlaceTitle.text = userMarker.title
+                tvPlaceDescription.text = userMarker.description
+
+                chipAddNewCatch.setOnClickListener {
+                    val action =
+                        MapFragmentDirections.actionMapFragmentToNewCatchDialogFragment(
+                            userMarker
+                        )
+                    findNavController().navigate(action)
+                }
+
+                chipRoute.setOnClickListener {
+                    startMapsActivityForNavigation(userMarker)
+                }
+
+                chipDetails.setOnClickListener {
+                    val action =
+                        MapFragmentDirections.actionMapFragmentToUserPlaceFragment(userMarker)
+                    findNavController().navigate(action)
+                }
+            }
+            placeDialogBehavior.expand()
+
+        } catch (e: Exception) {
+            onError(Throwable(e))
+        }
     }
 
-    private fun hideKeyboard(activity: Activity) {
-        val imm = activity.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray,
+    ) {
+        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
+            return
+        }
+        if (isPermissionGranted(
+                permissions,
+                grantResults,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        ) {
+            enableMyLocation()
+        } else {
+            permissionDenied = true
+        }
     }
 
     private fun startMapsActivityForNavigation(mapMarker: UserMapMarker) {

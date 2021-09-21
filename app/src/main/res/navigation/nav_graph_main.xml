@@ -26,6 +26,9 @@
         <action
             android:id="@+id/action_mapFragment_to_userPlaceFragment"
             app:destination="@id/userPlaceFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_newPlaceFragment"
+            app:destination="@id/newPlaceFragment" />
     </fragment>
 
     <fragment
@@ -82,8 +85,19 @@
             android:name="userMapMarker"
             app:argType="com.joesemper.fishing.model.entity.content.UserMapMarker" />
         <action
-        android:id="@+id/action_userPlaceFragment_to_newCatchDialogFragment"
-        app:destination="@id/newCatchDialogFragment" />
+            android:id="@+id/action_userPlaceFragment_to_newCatchDialogFragment"
+            app:destination="@id/newCatchDialogFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/newPlaceFragment"
+        android:name="com.joesemper.fishing.ui.fragments.NewPlaceFragment"
+        android:label="NewPlaceFragment">
+        <argument
+            android:name="coordinats"
+            app:argType="com.google.android.gms.maps.model.LatLng" />
+        <argument
+            android:name="title"
+            app:argType="string" />
     </fragment>
 
 </navigation>

@@ -100,21 +100,21 @@
     <string name="navigate">Маршрут</string>
 
     <string name="test_description">"Ловля судака, как и, впрочем, ловля любой рыбы, очень интересное и захватывающее занятие. Получите хороший и удачный улов. "</string>
-    <string name="location">Location:</string>
-    <string name="calculating">Calculating…</string>
-    <string name="new_place">New place</string>
-    <string name="details">Details</string>
-    <string name="add_new_catch">Add new catch</string>
+    <string name="location">Местоположение:</string>
+    <string name="calculating">Вычисляем…</string>
+    <string name="new_place">Новое место</string>
+    <string name="details">Подробнее</string>
+    <string name="add_new_catch">Новый улов</string>
     <string name="Choose_a_place">Выберите место</string>
     <string name="save">Сохранить</string>
-    <string name="Yes">Yes</string>
-    <string name="No">No</string>
+    <string name="Yes">Да</string>
+    <string name="No">Нет</string>
     <string name="Another_place_in_new_catch">Начните добавлять улов с экрана уловов, чтобы выбрать другое место!</string>
     <string name="locked">Locked</string>
-    <string name="failed_to_determine">Failed to determine</string>
+    <string name="failed_to_determine">Не удалось определить</string>
     <string name="fish_species">Вид рыбы</string>
-    <string name="Try_again">Повторить</string>
-    <string name="Cancel">Отменить</string>
+    <string name="apply">Сохранить</string>
+    <string name="saving">Сохраняем</string>
 
 
 </resources>

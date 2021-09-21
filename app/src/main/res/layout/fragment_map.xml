@@ -3,6 +3,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:fitsSystemWindows="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -35,8 +36,9 @@
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/ivPointer"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="100dp"
+            android:cropToPadding="true"
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -44,10 +46,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.446"
-            android:cropToPadding="true"
             app:lottie_autoPlay="false"
-            app:lottie_loop="false"
-            app:lottie_fileName="another_marker.json" />
+            app:lottie_fileName="another_marker.json"
+            app:lottie_loop="false" />
 
         <TextView
             android:id="@+id/tv_location_title"
@@ -85,77 +86,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/bottom_sheet_add_marker"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="bottom"
-        android:background="@color/white"
-        android:visibility="visible"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-        tools:visibility="visible">
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_new_place_title"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_new_place_title">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_new_marker_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/place_title" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_new_place_description"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Simple"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginEnd="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout_new_place_title">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/et_new_marker_description"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/description" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <ImageView
-            android:id="@+id/iv_handle"
-            android:layout_width="100dp"
-            android:layout_height="4dp"
-            android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_bottom_sheet_handle" />
-
-        <TextView
-            android:id="@+id/tv_new_place_title"
-            style="@style/TextAppearance.AppCompat.MainText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/new_place"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/iv_handle" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <include
-        android:id="@+id/dialog_create_new_place"
-        layout="@layout/dialog_new_catch"
-        tools:visibility="gone" />
 
     <include
         android:id="@+id/dialog_place"

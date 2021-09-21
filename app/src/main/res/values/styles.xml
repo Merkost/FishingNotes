@@ -78,6 +78,13 @@
         <item name="titleTextColor">@color/white</item>
     </style>
 
+    <style name="ThemeOverlay.AppCompat.ActionBar.Dialog">
+        <item name="colorControlNormal">@color/primaryFigmaTextColor</item>
+        <item name="titleTextColor">@color/primaryFigmaTextColor</item>
+        <item name="android:background">@color/white</item>
+    </style>
+
+
     <style name="MyTransparentBottomSheetDialogTheme" parent="Widget.MaterialComponents.BottomSheet">
         <!--        <item name="android:background">@android:color/transparent</item>-->
         <!--        <item name="android:colorBackground">@android:color/transparent</item>-->
