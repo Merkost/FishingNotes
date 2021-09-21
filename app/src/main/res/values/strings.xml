@@ -112,6 +112,8 @@
     <string name="locked">Locked</string>
     <string name="failed_to_determine">Failed to determine</string>
     <string name="fish_species">Вид рыбы</string>
+    <string name="Try_again">Повторить</string>
+    <string name="Cancel">Отменить</string>
 
 
 </resources>

@@ -19,6 +19,10 @@ import kotlinx.coroutines.launch
 
 class NewCatchViewModel(private val repository: UserContentRepository) : ViewModel() {
 
+    private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
+    val uiState: StateFlow<BaseViewState>
+        get() = _uiState
+
     val marker: MutableState<UserMapMarker> = mutableStateOf(UserMapMarker())
 
     val title = mutableStateOf("")
@@ -41,28 +45,28 @@ class NewCatchViewModel(private val repository: UserContentRepository) : ViewMod
         images.remove(uri)
     }
 
-    private val viewStateFlow: MutableStateFlow<BaseViewState> =
-        MutableStateFlow(BaseViewState.Success(null))
-
-    fun subscribe(): StateFlow<BaseViewState> {
-        return viewStateFlow
-    }
+//    private val viewStateFlow: MutableStateFlow<BaseViewState> =
+//        MutableStateFlow(BaseViewState.Success(null))
+//
+//    fun subscribe(): StateFlow<BaseViewState> {
+//        return viewStateFlow
+//    }
 
     fun getAllUserMarkersList() = repository.getAllUserMarkersList() as Flow<List<UserMapMarker>>
 
     private fun addNewCatch(newCatch: RawUserCatch) {
-        viewStateFlow.value = BaseViewState.Loading(0)
+        _uiState.value = BaseViewState.Loading(0)
         viewModelScope.launch {
             repository.addNewCatch(marker.value.id, newCatch).collect { progress ->
                 when (progress) {
                     is Progress.Complete -> {
-                        viewStateFlow.value = BaseViewState.Success(progress)
+                        _uiState.value = BaseViewState.Success(progress)
                     }
                     is Progress.Loading -> {
-                        viewStateFlow.value = BaseViewState.Loading(progress.percents)
+                        _uiState.value = BaseViewState.Loading(progress.percents)
                     }
                     is Progress.Error -> {
-                        viewStateFlow.value =
+                        _uiState.value =
                             BaseViewState.Error(progress.error)
                     }
                 }
@@ -70,7 +74,7 @@ class NewCatchViewModel(private val repository: UserContentRepository) : ViewMod
         }
     }
 
-    private fun isInputCorrect(): Boolean {
+    fun isInputCorrect(): Boolean {
         return title.value.isNotBlank() && marker.value.title.isNotEmpty()
     }
 
@@ -87,7 +91,7 @@ class NewCatchViewModel(private val repository: UserContentRepository) : ViewMod
                 fishingRodType = rod.value,
                 fishingBait = bite.value,
                 fishingLure = lure.value,
-                markerId = marker.value!!.id,
+                markerId = marker.value.id,
                 isPublic = false,
                 photos = photos
             ))

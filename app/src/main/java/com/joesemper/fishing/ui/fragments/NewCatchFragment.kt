@@ -29,9 +29,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -51,7 +49,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.coroutineScope
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import coil.annotation.ExperimentalCoilApi
@@ -66,7 +63,6 @@ import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.utils.NavigationHolder
 import com.joesemper.fishing.utils.showToast
 import gun0912.tedbottompicker.TedBottomPicker
-import kotlinx.coroutines.flow.collect
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -118,13 +114,10 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     @ExperimentalCoilApi
     @Composable
     fun NewCatchScreen() {
-        BottomSheetScaffold(
-            topBar = { AppBar() },
-            sheetContent = { BottomSheet() },
-            sheetElevation = 10.dp,
-            sheetGesturesEnabled = false,
-            sheetPeekHeight = 65.dp
+        Scaffold(
+            topBar = { AppBar() }
         ) {
+            SubscribeToProgress()
             val scrollState = rememberScrollState()
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -144,6 +137,40 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 Photos(
                     { clicked -> /*TODO(Open photo in full screen)*/ },
                     { deleted -> viewModel.deletePhoto(deleted) })
+            }
+        }
+    }
+
+    @Composable
+    fun SubscribeToProgress() {
+        val errorDialog = rememberSaveable { mutableStateOf(false) }
+        val loadingDialog = rememberSaveable { mutableStateOf(false) }
+        val loadingValue = rememberSaveable { mutableStateOf(0) }
+
+        val uiState by viewModel.uiState.collectAsState()
+        when (uiState) {
+            is BaseViewState.Success<*> -> {
+                if ((uiState as BaseViewState.Success<*>).data != null) {
+                    Toast.makeText(
+                        requireContext(),
+                        "Ваш улов успешно добавлен!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    findNavController().popBackStack()
+                }
+            }
+            is BaseViewState.Loading -> {
+                LoadingDialog(loadingDialog, loadingValue)
+                loadingValue.value = (uiState as BaseViewState.Loading).progress ?: 0
+            }
+            is BaseViewState.Error -> {
+                ErrorDialog(errorDialog)
+                errorDialog.value = true
+                Toast.makeText(
+                    requireContext(),
+                    "Error: ${(uiState as BaseViewState.Error).error.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -268,7 +295,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         )
     }
 
-    @ExperimentalMaterialApi
+    /*@ExperimentalMaterialApi
     @Composable
     private fun BottomSheet() {
         Row(
@@ -284,43 +311,12 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 Text(text = stringResource(R.string.cancel))
             }
             Spacer(modifier = Modifier.size(20.dp))
-            OutlinedButton(onClick = {
-                if (viewModel.createNewUserCatch(getPhotos()))
-//                    findNavController().popBackStack()
-                else showToast(requireContext(), getString(R.string.not_all_fields_are_filled))
-
-                lifecycleScope.launchWhenCreated {
-                    when (viewModel.subscribe().collect { state ->
-                        when (state) {
-                            is BaseViewState.Success<*> -> {
-                                findNavController().popBackStack()
-                            }
-                            is BaseViewState.Loading -> {
-                                Toast.makeText(
-                                    requireContext(),
-                                    state.progress.toString(),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                            is BaseViewState.Error -> {
-                                Toast.makeText(
-                                    requireContext(),
-                                    "Error: ${state.error.message}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                    }) {
-                        //TODO(listen for the state)
-                    }
-                }
-
-            }) {
+            OutlinedButton() {
                 Text(text = stringResource(R.string.create))
             }
             Spacer(modifier = Modifier.size(20.dp))
         }
-    }
+    }*/
 
     @Composable
     fun FishSpecies(name: MutableState<String>) {
@@ -678,7 +674,62 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                     )
                 }
             },
+            actions = {
+                Row(
+                    modifier = Modifier.padding(end = 3.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    IconButton(
+                        onClick = {
+                            if (viewModel.isInputCorrect()) viewModel.createNewUserCatch(getPhotos())
+                            else showToast(
+                                requireContext(),
+                                getString(R.string.not_all_fields_are_filled)
+                            )
+                        },
+                        content = { Icon(Icons.Filled.Done, stringResource(R.string.done)) }
+                    )
+                }
+            },
             elevation = 2.dp
+        )
+    }
+
+    @Composable
+    fun ErrorDialog(errorDialog: MutableState<Boolean>) {
+        AlertDialog(
+            title = { Text("Произошла ошибка!") },
+            text = { Text("Не удалось загрузить фотографии. Проверьте интернет соединение и попробуйте еще раз.") },
+            onDismissRequest = { errorDialog.value = false },
+            confirmButton = {
+                OutlinedButton(
+                    onClick = { viewModel.createNewUserCatch(getPhotos()) },
+                    content = { Text(getString(R.string.Try_again)) })
+            }, dismissButton = {
+                OutlinedButton(
+                    onClick = { errorDialog.value = false },
+                    content = { Text(getString(R.string.Cancel)) })
+            }
+        )
+    }
+
+    @Composable
+    fun LoadingDialog(loadingDialog: MutableState<Boolean>, loadingValue: MutableState<Int>) {
+        AlertDialog(
+            title = { Text("Загрузка фотографий!") },
+            text = { Text("Пожалуйста, подождите, пока ваши фотографии полностью загрузятся. Текущий прогресс: " + loadingValue.value + "%") },
+            onDismissRequest = { },
+            confirmButton = {
+                OutlinedButton(
+                    onClick = { },
+                    content = { Text(getString(R.string.Try_again)) })
+            }, dismissButton = {
+                OutlinedButton(
+                    onClick = { },
+                    content = { Text(getString(R.string.Cancel)) })
+            }
         )
     }
 
