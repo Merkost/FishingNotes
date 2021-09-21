@@ -120,6 +120,7 @@
     <string name="map_delete_confirmation">Are you sure you want to delete this point?</string>
     <string name="catch_deletion">Catch deletion</string>
     <string name="catch_delete_confirmantion">Are you sure you want to delete this catch?</string>
+    <string name="enter_title">Pick some name for the place</string>
 
 
 </resources>
