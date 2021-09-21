@@ -6,7 +6,7 @@
     <string name="logout_dialog_message">All data will be saved</string>
     <string name="ok_button">OK</string>
     <string name="logout_dialog_cancel">Закрыть</string>
-    <string name="title">Заголовок</string>
+    <string name="title">Название</string>
     <string name="description">Описание</string>
     <string name="kind_of_fish">Вид рыбы</string>
     <string name="bait">Наживка</string>
@@ -115,6 +115,7 @@
     <string name="fish_species">Вид рыбы</string>
     <string name="apply">Сохранить</string>
     <string name="saving">Сохраняем</string>
+    <string name="enter_title">Введите название места</string>
     <string name="Cancel">Отменить</string>
     <string name="Try_again">Попробовать еще раз</string>
     <string name="map_deletion">Удаление точки</string>
