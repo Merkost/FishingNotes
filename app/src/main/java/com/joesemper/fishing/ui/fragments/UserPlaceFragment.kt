@@ -32,7 +32,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -44,12 +43,12 @@ import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.composable.MyCardNoPadding
+import com.joesemper.fishing.ui.composable.PlaceInfo
 import com.joesemper.fishing.ui.composable.UserProfile
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import com.joesemper.fishing.ui.theme.primaryFigmaBackgroundTint
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.utils.NavigationHolder
-import com.joesemper.fishing.utils.showToast
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -100,38 +99,24 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
         Scaffold(
             topBar = { AppBar(isEdit) },
         ) {
-            if (isEdit.value) {
-                val userCatches by viewModel.getCatchesByMarkerId(viewModel.marker.value.id).collectAsState(
-                    listOf())
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(primaryFigmaBackgroundTint)
-                ) {
-                    Column {
-                        EditPlaceInfo()
-                        Buttons()
-                    }
+            val userCatches by viewModel.getCatchesByMarkerId(viewModel.marker.value.id)
+                .collectAsState(listOf())
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(primaryFigmaBackgroundTint)
+            ) {
+                if (isEdit.value) {
+                    EditPlaceInfo(user, viewModel.marker.value)
+                    Buttons()
+                    Catches(userCatches)
+                } else {
+                    PlaceInfo(user, viewModel.marker.value)
+                    Buttons()
                     Catches(userCatches)
                 }
-            } else {
-                val userCatches by viewModel.getCatchesByMarkerId(viewModel.marker.value.id).collectAsState(listOf())
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(primaryFigmaBackgroundTint)
-                ) {
-                    Column {
-                        PlaceInfo(user)
-                        Buttons()
-                    }
-                    Catches(userCatches)
-                }
-                Catches(userCatches)
             }
         }
     }
@@ -209,40 +194,8 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
 
     @ExperimentalAnimationApi
     @Composable
-    private fun PlaceInfo(user: User?) {
+    private fun EditPlaceInfo(user: User?, place: UserMapMarker) {
         MyCardNoPadding {
-
-            Column(
-                verticalArrangement = Arrangement.Top,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(horizontal = 10.dp)
-                        .height(50.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.Default.Place, stringResource(R.string.place))
-                    Spacer(modifier = Modifier.width(150.dp))
-                    UserProfile(user)
-                }
-                Text(viewModel.title, fontWeight = FontWeight.Bold)
-                Text(viewModel.description ?: "Нет описания")
-                Spacer(modifier = Modifier.size(8.dp))
-            }
-        }
-    }
-
-    @ExperimentalAnimationApi
-    @Composable
-    private fun EditPlaceInfo() {
-        MyCardNoPadding {
-            val user by viewModel.getCurrentUser().collectAsState(null)
-
             Column(
                 verticalArrangement = Arrangement.Top,
                 modifier = Modifier
@@ -263,10 +216,10 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                 }
 
                 viewModel.titleTemp = rememberSaveable {
-                    mutableStateOf(viewModel.title)
+                    mutableStateOf(place.title)
                 }
                 viewModel.descriptionTemp = rememberSaveable {
-                    mutableStateOf(viewModel.description ?: "")
+                    mutableStateOf(place.description ?: "")
                 }
                 OutlinedTextField(
                     value = viewModel.titleTemp.value,
@@ -330,7 +283,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                             .size(125.dp)
                             .weight(2f)
                     ) {
-                        Image(painter = rememberImagePainter(R.drawable.ulov),
+                        Image(painter = rememberImagePainter(data = catch.downloadPhotoLinks[0]),
                             contentDescription = stringResource(R.string.catch_photo),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
@@ -351,7 +304,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                                 .align(Alignment.Center)
                         )
                         Text(
-                            text = catch.date.toString(),
+                            text = catch.date,
                             fontSize = 12.sp,
                             modifier = Modifier
                                 .padding(start = 5.dp)
@@ -370,11 +323,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
             title = { Text(text = stringResource(R.string.place)) },
             navigationIcon = {
                 IconButton(onClick = {
-                    if (!isEdit.value) findNavController().popBackStack()
-                    else {
-                        isEdit.value = false
-                        findNavController().popBackStack()
-                    }
+                    findNavController().popBackStack()
                 }, content = {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
@@ -387,34 +336,41 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (!isEdit.value) IconButton(
-                        onClick = {
-                            editPlace()
-                        },
-                        content = {
-                            Icon(
-                                Icons.Filled.Edit,
-                                stringResource(R.string.edit),
-                                modifier = Modifier.clickable { isEdit.value = true })
-                        })
-                    if (isEdit.value) IconButton(
-                        onClick = {
-                            editPlace()
-                        },
-                        content = {
-                            Icon(
-                                Icons.Filled.Done,
-                                stringResource(R.string.save),
-                                modifier = Modifier.clickable {
-                                    viewModel.save()
-                                })
-                        })
-                    IconButton(
-                        onClick = {
-                            dialogOnDelete.value = true
-                        },
-                        content = { Icon(Icons.Filled.Delete, stringResource(R.string.delete)) }
-                    )
+                    if (!isEdit.value) {
+                        IconButton(
+                            onClick = {
+                                isEdit.value = true
+                            },
+                            content = {
+                                Icon(
+                                    Icons.Filled.Edit,
+                                    stringResource(R.string.edit),
+                                    modifier = Modifier.clickable { isEdit.value = true })
+                            })
+                        IconButton(
+                            onClick = { dialogOnDelete.value = true },
+                            content = { Icon(Icons.Filled.Delete, stringResource(R.string.delete)) }
+                        )
+                    }
+                    else {
+                        IconButton(
+                            onClick = { viewModel.save() },
+                            content = {
+                                Icon(
+                                    Icons.Filled.Done,
+                                    stringResource(R.string.save))
+                            })
+                        IconButton(
+                            onClick = {
+                                isEdit.value = false
+                            },
+                            content = {
+                                Icon(
+                                    Icons.Filled.Close,
+                                    stringResource(R.string.cancel))
+                            })
+                    }
+
                 }
             })
         if (dialogOnDelete.value) DeleteDialog(dialogOnDelete)
@@ -423,8 +379,8 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     @Composable
     fun DeleteDialog(dialogOnDelete: MutableState<Boolean>) {
         AlertDialog(
-            title = {Text("Удаление точки")},
-            text = {Text("Вы уверены, что хотите удалить данную точку?")},
+            title = { Text("Удаление точки") },
+            text = { Text("Вы уверены, что хотите удалить данную точку?") },
             onDismissRequest = { dialogOnDelete.value = false },
             confirmButton = {
                 OutlinedButton(
@@ -436,11 +392,6 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     content = { Text(getString(R.string.No)) })
             }
         )
-    }
-
-    private fun editPlace() {
-        //isEdit = true
-        // TODO Redraw the screen
     }
 
     private fun newCatchClicked() {
