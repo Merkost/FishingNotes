@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalSavedStateRegistryOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -56,16 +57,6 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
     private val viewModel: UserCatchViewModel by viewModel()
 
     private lateinit var catch: UserCatch
-
-    //while debugging
-    val photos = listOf(
-        R.drawable.ic_fish.toDrawable(),
-        R.drawable.ic_fishing.toDrawable(),
-        R.drawable.ic_fisher.toDrawable(),
-        R.drawable.ic_fisher.toDrawable(),
-        R.drawable.ic_fisher.toDrawable(),
-        R.drawable.ic_fisher.toDrawable()
-    )
 
     companion object {
         private const val TAG = "CATCH"
@@ -235,7 +226,7 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
         LazyRow(modifier = Modifier.fillMaxSize()) {
             item { Spacer(modifier = Modifier.size(4.dp)) }
             if (catch.downloadPhotoLinks.isNullOrEmpty()) {
-                item { ItemNoPhoto() }
+                item { Text("No photos here", modifier = Modifier.padding(horizontal = 11.dp)) }
             } else {
                 items(items = catch.downloadPhotoLinks) {
                     ItemPhoto(
@@ -249,7 +240,10 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
 
     @Composable
     fun ItemNoPhoto() {
-        Box(
+
+
+
+        /*Box(
             modifier = Modifier
                 .size(100.dp)
                 .padding(4.dp)
@@ -271,7 +265,7 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
                         .align(Alignment.Center)
                 )
             }
-        }
+        }*/
     }
 
     @Composable
@@ -363,8 +357,8 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
     @Composable
     fun DeleteDialog(dialogOnDelete: MutableState<Boolean>) {
         AlertDialog(
-            title = { Text("Удаление улова") },
-            text = { Text("Вы уверены, что хотите удалить данный улов?") },
+            title = { Text(stringResource(R.string.catch_deletion)) },
+            text = { Text(stringResource(R.string.catch_delete_confirmantion)) },
             onDismissRequest = { dialogOnDelete.value = false },
             confirmButton = {
                 OutlinedButton(

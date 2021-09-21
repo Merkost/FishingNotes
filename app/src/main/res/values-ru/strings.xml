@@ -115,6 +115,12 @@
     <string name="fish_species">Вид рыбы</string>
     <string name="apply">Сохранить</string>
     <string name="saving">Сохраняем</string>
+    <string name="Cancel">Отменить</string>
+    <string name="Try_again">Попробовать еще раз</string>
+    <string name="map_deletion">Удаление точки</string>
+    <string name="map_delete_confirmation">Вы уверены, что хотите удалить данную точку?</string>
+    <string name="catch_deletion">Удаление улова</string>
+    <string name="catch_delete_confirmantion">Вы уверены, что хотите удалить данный улов?</string>
 
 
 </resources>

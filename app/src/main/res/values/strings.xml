@@ -84,13 +84,13 @@
     <string name="add_new_place">Add new place</string>
     <string name="save">Save</string>
 
-    <string name="permissions_required">Необходимы разрешения</string>
+    <string name="permissions_required">Permissions required</string>
     <string name="plus">+</string>
     <string name="minus">-</string>
     <string name="delete_photo">Delete photo</string>
     <string name="add_photo_permission">Для загрузки фотографий приложению необходим доступ к памяти телефона</string>
-    <string name="deny">Отказать</string>
-    <string name="provide">Предоставить</string>
+    <string name="deny">Deny</string>
+    <string name="provide">Provide</string>
     <string name="click_on_icon_to_change">Click on the icon to change!</string>
     <string name="no_photo_selected">No photo selected</string>
     <string name="permission_denied">Permission Denied</string>
@@ -105,7 +105,7 @@
     <string name="new_place">New place</string>
     <string name="details">Details</string>
     <string name="add_new_catch">Add new catch</string>
-    <string name="Choose_a_place">Выберите место</string>
+    <string name="Choose_a_place">Choose a place</string>
     <string name="Yes">Yes</string>
     <string name="No">No</string>
     <string name="Another_place_in_new_catch">Начните добавлять улов с экрана уловов, чтобы выбрать другое место!</string>
@@ -114,6 +114,12 @@
     <string name="fish_species">Вид рыбы</string>
     <string name="apply">Apply</string>
     <string name="saving">Saving</string>
+    <string name="Cancel">Cancel</string>
+    <string name="Try_again">Try again</string>
+    <string name="map_deletion">Place deletion</string>
+    <string name="map_delete_confirmation">Are you sure you want to delete this point?</string>
+    <string name="catch_deletion">Catch deletion</string>
+    <string name="catch_delete_confirmantion">Are you sure you want to delete this catch?</string>
 
 
 </resources>

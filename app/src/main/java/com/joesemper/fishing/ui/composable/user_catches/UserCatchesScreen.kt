@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -93,12 +94,11 @@ fun ItemCatch(catch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
         ) {
             Row(
                 modifier = Modifier.fillMaxHeight(),
-                horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.Start)
+                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start)
             ) {
                 Box(
                     modifier = Modifier
-                        .size(75.dp)
-                        .padding(5.dp)
+                        .fillMaxHeight().width(80.dp)
                 ) {
                     if (catch.downloadPhotoLinks.isNullOrEmpty()) {
                         Icon(
@@ -112,7 +112,11 @@ fun ItemCatch(catch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
                         )
                     } else {
                         Image(
-                            painter = rememberImagePainter(catch.downloadPhotoLinks[0]),
+                            painter = rememberImagePainter(catch.downloadPhotoLinks[0],
+                                builder = {
+                                    crossfade(true)
+                                    placeholder(R.drawable.ic_baseline_image_24)
+                                }),
                             stringResource(R.string.place),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
@@ -120,16 +124,20 @@ fun ItemCatch(catch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
                                 .align(Alignment.Center)
                                 .clip(RoundedCornerShape(2.dp))
                         )
-                        Surface( //For making delete button background half transparent
-                            color = Color.LightGray.copy(alpha = 0.5f),
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(2.dp)
-                                .clip(RoundedCornerShape(2.dp))
-                        ) {
-                            Text("x" + catch.downloadPhotoLinks.size, fontSize = 10.sp)
+                        if (catch.downloadPhotoLinks.size > 1) {
+                            Surface( //For making delete button background half transparent
+                                color = Color.White.copy(alpha = 1f),
+                                modifier = Modifier
+                                    .align(Alignment.BottomStart)
+                                    .padding(2.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                            ) {
+                                Text(
+                                    "x" + catch.downloadPhotoLinks.size, fontSize = 10.sp,
+                                    modifier = Modifier.padding(1.dp)
+                                )
+                            }
                         }
-
                     }
 
                 }

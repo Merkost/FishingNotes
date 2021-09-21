@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -24,6 +25,7 @@ import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 
 @Composable
 fun MyCardNoPadding(content: @Composable () -> Unit) {
@@ -92,22 +94,22 @@ fun PlaceInfo(user: User?, place: UserMapMarker) {
             verticalArrangement = Arrangement.Top,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp)
+                .padding(10.dp).padding(horizontal = 5.dp)
         ) {
             Row(
                 modifier = Modifier
                     .padding(horizontal = 10.dp)
                     .height(50.dp)
                     .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Default.Place, stringResource(R.string.place))
+                Icon(Icons.Default.Place, stringResource(R.string.place), tint = secondaryFigmaColor)
                 Spacer(modifier = Modifier.width(150.dp))
                 UserProfile(user)
             }
             Text(place.title, fontWeight = FontWeight.Bold)
-            Text(place.description ?: "Нет описания")
+            if (!place.description.isNullOrEmpty()) Text(place.description!!)
             Spacer(modifier = Modifier.size(8.dp))
         }
     }
