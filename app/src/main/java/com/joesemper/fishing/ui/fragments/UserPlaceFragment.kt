@@ -262,7 +262,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     fun ItemCatch(
         catch: UserCatch,
     ) {
-        Card(elevation = 0.dp) {
+        Card(elevation = 0.dp, modifier = Modifier.clickable { onCatchItemClick(catch) }) {
             Column(
                 modifier = Modifier
                     .padding(14.dp)
@@ -454,6 +454,12 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
     override fun onDetach() {
         super.onDetach()
         (requireActivity() as NavigationHolder).showNav()
+    }
+
+    private fun onCatchItemClick(catch: UserCatch) {
+        val action =
+            UserPlaceFragmentDirections.actionUserPlaceFragmentToUserCatchFragment(catch)
+        findNavController().navigate(action)
     }
 }
 

@@ -87,6 +87,9 @@
         <action
             android:id="@+id/action_userPlaceFragment_to_newCatchDialogFragment"
             app:destination="@id/newCatchDialogFragment" />
+        <action
+            android:id="@+id/action_userPlaceFragment_to_userCatchFragment"
+            app:destination="@id/userCatchFragment" />
     </fragment>
     <fragment
         android:id="@+id/newPlaceFragment"
