@@ -111,7 +111,7 @@
     <string name="Another_place_in_new_catch">Начните добавлять улов с экрана уловов, чтобы выбрать другое место!</string>
     <string name="locked">Locked</string>
     <string name="failed_to_determine">Failed to determine</string>
-    <string name="fish_species">Вид рыбы</string>
+    <string name="fish_species">Fish species</string>
     <string name="apply">Apply</string>
     <string name="saving">Saving</string>
     <string name="Cancel">Cancel</string>
@@ -124,6 +124,7 @@
     <string name="map_types">Map types</string>
     <string name="not_specified">Not specified</string>
     <string name="catch_description">Catch description</string>
+    <string name="note">Note</string>
 
 
 </resources>

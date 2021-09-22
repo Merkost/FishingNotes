@@ -125,8 +125,8 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(30.dp),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp)
+                    .fillMaxSize()
+                    .padding(top = 12.dp)
                     .padding(horizontal = 16.dp)
                     .verticalScroll(state = scrollState, enabled = true),
             ) {
@@ -289,7 +289,6 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                     }
                 }
             }
-            MyTextField(viewModel.description, stringResource(R.string.description))
         }
     }
 
@@ -362,8 +361,11 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 )
             )
             Spacer(modifier = Modifier.size(2.dp))
-            Text(stringResource(R.string.required), fontSize = 12.sp, modifier = Modifier.align(
-                Alignment.End))
+            Text(
+                stringResource(R.string.required), fontSize = 12.sp, modifier = Modifier.align(
+                    Alignment.End
+                )
+            )
         }
     }
 
@@ -416,7 +418,9 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 Text(stringResource(R.string.fish_catch))
             }
             FishSpecies(viewModel.title)
-            Spacer(modifier = Modifier.size(4.dp))
+
+            MyTextField(viewModel.description, stringResource(R.string.note))
+            Spacer(modifier = Modifier.size(2.dp))
             Row {
                 Column(Modifier.weight(1F)) {
                     OutlinedTextField(
@@ -520,6 +524,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                     }
                 }
             }
+
         }
     }
 
@@ -555,6 +560,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                     )
                 }
             }
+            Spacer(modifier = Modifier.size(12.dp))
         }
     }
 
