@@ -362,7 +362,8 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 )
             )
             Spacer(modifier = Modifier.size(2.dp))
-            Text(stringResource(R.string.required), fontSize = 12.sp)
+            Text(stringResource(R.string.required), fontSize = 12.sp, modifier = Modifier.align(
+                Alignment.End))
         }
     }
 
@@ -415,6 +416,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 Text(stringResource(R.string.fish_catch))
             }
             FishSpecies(viewModel.title)
+            Spacer(modifier = Modifier.size(4.dp))
             Row {
                 Column(Modifier.weight(1F)) {
                     OutlinedTextField(
