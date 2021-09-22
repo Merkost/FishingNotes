@@ -126,16 +126,17 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 verticalArrangement = Arrangement.spacedBy(30.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp)
+                    .padding(vertical = 12.dp)
                     .padding(horizontal = 16.dp)
                     .verticalScroll(state = scrollState, enabled = true),
             ) {
-                FishSpeciesAndDescription()
-
                 Places(stringResource(R.string.place))  //Выпадающий список мест
-                DateAndTime(viewModel.date, viewModel.time)
+                //FishSpeciesAndDescription()
+
                 FishAndWeight(viewModel.fishAmount, viewModel.weight)
+
                 Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
+                DateAndTime(viewModel.date, viewModel.time)
                 Photos(
                     { clicked -> /*TODO(Open photo in full screen)*/ },
                     { deleted -> viewModel.deletePhoto(deleted) })
@@ -199,7 +200,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         val suggestions by viewModel.getAllUserMarkersList().collectAsState(listOf())
         val filteredList by rememberSaveable { mutableStateOf(suggestions.toMutableList()) }
         if (textFieldValue == "") searchFor("", suggestions, filteredList)
-        Column {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(
                 modifier = Modifier.align(Alignment.Start),
                 verticalAlignment = Alignment.CenterVertically
@@ -288,6 +289,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                     }
                 }
             }
+            MyTextField(viewModel.description, stringResource(R.string.description))
         }
     }
 
@@ -360,7 +362,8 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 )
             )
             Spacer(modifier = Modifier.size(2.dp))
-            Text(stringResource(R.string.required), fontSize = 12.sp)
+            Text(stringResource(R.string.required), fontSize = 12.sp, modifier = Modifier.align(
+                Alignment.End))
         }
     }
 
@@ -398,6 +401,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     @Composable
     fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<String>) {
         Column {
+
             Row(
                 modifier = Modifier.align(Alignment.Start),
                 verticalAlignment = Alignment.CenterVertically
@@ -411,6 +415,8 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 Spacer(Modifier.size(8.dp))
                 Text(stringResource(R.string.fish_catch))
             }
+            FishSpecies(viewModel.title)
+            Spacer(modifier = Modifier.size(4.dp))
             Row {
                 Column(Modifier.weight(1F)) {
                     OutlinedTextField(

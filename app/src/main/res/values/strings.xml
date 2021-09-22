@@ -123,6 +123,7 @@
     <string name="enter_title">Pick some name for the place</string>
     <string name="map_types">Map types</string>
     <string name="not_specified">Not specified</string>
+    <string name="catch_description">Catch description</string>
 
 
 </resources>
