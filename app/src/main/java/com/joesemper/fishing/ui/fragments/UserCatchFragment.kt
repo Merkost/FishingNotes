@@ -38,6 +38,8 @@ import coil.compose.rememberImagePainter
 import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.UserCatchViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
+import com.joesemper.fishing.ui.composable.CatchInfo
+import com.joesemper.fishing.ui.composable.MyCardNoPadding
 import com.joesemper.fishing.ui.composable.UserProfile
 import com.joesemper.fishing.ui.composable.PlaceInfo
 import com.joesemper.fishing.ui.theme.FigmaTheme
@@ -99,125 +101,36 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .background(primaryFigmaBackgroundTint)
                     .verticalScroll(state = scrollState, enabled = true),
             ) {
-                Title(catch.title, catch.description, catch.userId, catch.date)
-                Photos()
                 val user by viewModel.getCurrentUser().collectAsState(null)
+                CatchInfo(catch, user)
+                Photos()
                 val mapMarker by viewModel.getMapMarker(catch.userMarkerId).collectAsState(null)
                 mapMarker?.let { it1 -> PlaceInfo(user, it1) }
                 MyTextField(
                     stringResource(R.string.weight),
                     catch.fishWeight.toString() + " " + stringResource(R.string.kg)
                 )
-                MyTextField(stringResource(R.string.date), catch.date)
-                MyTextField(stringResource(R.string.time), catch.time)
-                MyTextField(stringResource(R.string.fish_rod), catch.fishingRodType)
-                MyTextField(stringResource(R.string.bait), catch.fishingBait)
-                MyTextField(stringResource(R.string.lure), catch.fishingLure)
+                MyTextField(
+                    stringResource(R.string.amount),
+                    catch.fishAmount.toString() + " " + stringResource(R.string.pc)
+                )
+                /*MyTextField(stringResource(R.string.date), catch.date)
+                MyTextField(stringResource(R.string.time), catch.time)*/
+                MyTextField(stringResource(R.string.fish_rod), if (!catch.fishingRodType.isEmpty())
+                    catch.fishingRodType else getString(R.string.not_specified))
+                MyTextField(stringResource(R.string.bait), if (!catch.fishingBait.isEmpty())
+                    catch.fishingBait else getString(R.string.not_specified))
+                MyTextField(stringResource(R.string.lure), if (!catch.fishingLure.isEmpty())
+                    catch.fishingLure else getString(R.string.not_specified))
                 Spacer(Modifier.size(5.dp))
             }
 
         }
     }
-
-    @Composable
-    fun MyCard(content: @Composable () -> Unit) {
-        Card(
-            elevation = 4.dp, shape = MaterialTheme.shapes.large,
-            modifier = Modifier.fillMaxWidth(), content = content
-        )
-    }
-
-    /*@Composable
-    private fun PlaceInfo() {
-        MyCard {
-            Column(
-                verticalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                        .height(50.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Icon(Icons.Default.Place, stringResource(R.string.place))
-                    UserProfile()
-                    //Icon(Icons.Default.Check, stringResource(R.string.place))
-                }
-                Text("Точка 2", fontWeight = FontWeight.Bold)
-                Text("Описание точки")
-                Spacer(modifier = Modifier.size(8.dp))
-            }
-        }
-    }*/
-
-    @Composable
-    private fun Title(title: String, description: String, userId: String, date: String) {
-        MyCard {
-            Column(
-                modifier = Modifier.padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .size(50.dp)
-                ) {
-                    Text(
-                        title,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    )
-                    val user by viewModel.getCurrentUser().collectAsState(null)
-                    UserProfile(user)
-                    Spacer(modifier = Modifier.size(5.dp))
-                }
-                Text(
-                    description, modifier = Modifier.fillMaxWidth(),
-                    fontSize = MaterialTheme.typography.button.fontSize
-                )
-                Row(
-                    horizontalArrangement = Arrangement.End,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(date, fontSize = MaterialTheme.typography.caption.fontSize)
-                }
-            }
-        }
-    }
-
-    /*@Composable
-    private fun UserProfile() {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Image(
-                painter = painterResource(R.drawable.ic_fisher),
-                contentDescription = stringResource(R.string.fisher),
-                Modifier
-                    .fillMaxHeight()
-                    .padding(10.dp)
-            )
-            Column(verticalArrangement = Arrangement.Center) {
-                Text(
-                    stringResource(R.string.fisher),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = MaterialTheme.typography.button.fontSize
-                )
-                Text(
-                    "@" + stringResource(R.string.fisher),
-                    fontSize = MaterialTheme.typography.caption.fontSize
-                )
-            }
-        }
-    }*/
 
     @Composable
     fun Photos(
@@ -290,7 +203,7 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
 
     @Composable
     private fun MyTextField(text: String, info: String) {
-        MyCard {
+        MyCardNoPadding {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
