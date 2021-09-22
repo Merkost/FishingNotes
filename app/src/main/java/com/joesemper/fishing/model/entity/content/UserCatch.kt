@@ -12,7 +12,7 @@ data class UserCatch(
     val date: String = "",
     val time: String = "",
     val fishType: String = "",
-    val fishAmount: Int= 0,
+    val fishAmount: Int = 0,
     val fishWeight: Double = 0.0,
     val fishingRodType: String = "",
     val fishingBait: String = "",

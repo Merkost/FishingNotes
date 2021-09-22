@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -15,16 +16,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalSavedStateRegistryOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +38,10 @@ import coil.compose.rememberImagePainter
 import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.UserCatchViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
+import com.joesemper.fishing.ui.composable.CatchInfo
+import com.joesemper.fishing.ui.composable.MyCardNoPadding
+import com.joesemper.fishing.ui.composable.UserProfile
+import com.joesemper.fishing.ui.composable.PlaceInfo
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import com.joesemper.fishing.ui.theme.primaryFigmaBackgroundTint
 import com.joesemper.fishing.utils.NavigationHolder
@@ -55,16 +59,6 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
     private val viewModel: UserCatchViewModel by viewModel()
 
     private lateinit var catch: UserCatch
-
-    //while debugging
-    val photos = listOf(
-        R.drawable.ic_fish.toDrawable(),
-        R.drawable.ic_fishing.toDrawable(),
-        R.drawable.ic_fisher.toDrawable(),
-        R.drawable.ic_fisher.toDrawable(),
-        R.drawable.ic_fisher.toDrawable(),
-        R.drawable.ic_fisher.toDrawable()
-    )
 
     companion object {
         private const val TAG = "CATCH"
@@ -107,22 +101,31 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .background(primaryFigmaBackgroundTint)
                     .verticalScroll(state = scrollState, enabled = true),
             ) {
-                Title(catch.title, catch.description, catch.userId, catch.date)
-                Photos(photos)
-                PlaceInfo()
+                val user by viewModel.getCurrentUser().collectAsState(null)
+                CatchInfo(catch, user)
+                Photos()
+                val mapMarker by viewModel.getMapMarker(catch.userMarkerId).collectAsState(null)
+                mapMarker?.let { it1 -> PlaceInfo(user, it1) }
                 MyTextField(
                     stringResource(R.string.weight),
                     catch.fishWeight.toString() + " " + stringResource(R.string.kg)
                 )
-                MyTextField(stringResource(R.string.date), catch.date)
-                MyTextField(stringResource(R.string.time), catch.time)
-                MyTextField(stringResource(R.string.fish_rod), catch.fishingRodType)
-                MyTextField(stringResource(R.string.bait), catch.fishingBait)
-                MyTextField(stringResource(R.string.lure), catch.fishingLure)
+                MyTextField(
+                    stringResource(R.string.amount),
+                    catch.fishAmount.toString() + " " + stringResource(R.string.pc)
+                )
+                /*MyTextField(stringResource(R.string.date), catch.date)
+                MyTextField(stringResource(R.string.time), catch.time)*/
+                MyTextField(stringResource(R.string.fish_rod), if (!catch.fishingRodType.isEmpty())
+                    catch.fishingRodType else getString(R.string.not_specified))
+                MyTextField(stringResource(R.string.bait), if (!catch.fishingBait.isEmpty())
+                    catch.fishingBait else getString(R.string.not_specified))
+                MyTextField(stringResource(R.string.lure), if (!catch.fishingLure.isEmpty())
+                    catch.fishingLure else getString(R.string.not_specified))
                 Spacer(Modifier.size(5.dp))
             }
 
@@ -130,119 +133,57 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
     }
 
     @Composable
-    fun MyCard(content: @Composable () -> Unit) {
-        Card(
-            elevation = 4.dp, shape = MaterialTheme.shapes.large,
-            modifier = Modifier.fillMaxWidth(), content = content
-        )
-    }
-
-    @Composable
-    private fun PlaceInfo() {
-        MyCard {
-            Column(
-                verticalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                        .height(50.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Icon(Icons.Default.Place, stringResource(R.string.place))
-                    UserProfile()
-                    //Icon(Icons.Default.Check, stringResource(R.string.place))
-                }
-                Text("Точка 2", fontWeight = FontWeight.Bold)
-                Text("Описание точки")
-                Spacer(modifier = Modifier.size(8.dp))
-            }
-        }
-    }
-
-    @Composable
-    private fun Title(title: String, description: String, userId: String, date: String) {
-        MyCard {
-            Column(
-                modifier = Modifier.padding(10.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .size(50.dp)
-                ) {
-                    Text(
-                        title,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.align(Alignment.CenterVertically)
-                    )
-                    UserProfile()
-                    Spacer(modifier = Modifier.size(5.dp))
-                }
-                Text(
-                    description, modifier = Modifier.fillMaxWidth(),
-                    fontSize = MaterialTheme.typography.button.fontSize
-                )
-                Row(
-                    horizontalArrangement = Arrangement.End,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(date, fontSize = MaterialTheme.typography.caption.fontSize)
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun UserProfile() {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Image(
-                painter = painterResource(R.drawable.ic_fisher),
-                contentDescription = stringResource(R.string.fisher),
-                Modifier
-                    .fillMaxHeight()
-                    .padding(10.dp)
-            )
-            Column(verticalArrangement = Arrangement.Center) {
-                Text(
-                    stringResource(R.string.fisher),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = MaterialTheme.typography.button.fontSize
-                )
-                Text(
-                    "@" + stringResource(R.string.fisher),
-                    fontSize = MaterialTheme.typography.caption.fontSize
-                )
-            }
-        }
-    }
-
-    @Composable
     fun Photos(
-        photos: List<Drawable>
         //clickedPhoto: SnapshotStateList<Painter>
     ) {
         LazyRow(modifier = Modifier.fillMaxSize()) {
             item { Spacer(modifier = Modifier.size(4.dp)) }
-            items(items = photos) {
-                ItemPhoto(
-                    photo = it,
-                    //clickedPhoto = clickedPhoto
-                )
+            if (catch.downloadPhotoLinks.isNullOrEmpty()) {
+                item { Text("No photos here", modifier = Modifier.padding(horizontal = 11.dp)) }
+            } else {
+                items(items = catch.downloadPhotoLinks) {
+                    ItemPhoto(
+                        photo = it,
+                        //clickedPhoto = clickedPhoto
+                    )
+                }
             }
         }
     }
 
     @Composable
+    fun ItemNoPhoto() {
+
+
+
+        /*Box(
+            modifier = Modifier
+                .size(100.dp)
+                .padding(4.dp)
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(5.dp))
+                    .clickable { showToast(requireContext(),
+                        "На этот улов не были добавлены фото, к сожалению.") },
+                elevation = 5.dp, backgroundColor = Color.LightGray
+            ) {
+                Icon(
+                    painterResource(R.drawable.ic_no_photo_vector), //Or we can use Icons.Default.Add
+                    contentDescription = "NO_PHOTOS",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .align(Alignment.Center)
+                )
+            }
+        }*/
+    }
+
+    @Composable
     fun ItemPhoto(
-        photo: Drawable,
+        photo: String,
         //clickedPhoto: (Painter) -> Unit
     ) {
         Box(
@@ -262,7 +203,7 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
 
     @Composable
     private fun MyTextField(text: String, info: String) {
-        MyCard {
+        MyCardNoPadding {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
@@ -329,8 +270,8 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
     @Composable
     fun DeleteDialog(dialogOnDelete: MutableState<Boolean>) {
         AlertDialog(
-            title = { Text("Удаление улова") },
-            text = { Text("Вы уверены, что хотите удалить данный улов?") },
+            title = { Text(stringResource(R.string.catch_deletion)) },
+            text = { Text(stringResource(R.string.catch_delete_confirmantion)) },
             onDismissRequest = { dialogOnDelete.value = false },
             confirmButton = {
                 OutlinedButton(

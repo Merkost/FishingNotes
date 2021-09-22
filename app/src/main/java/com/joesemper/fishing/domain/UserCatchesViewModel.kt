@@ -3,8 +3,8 @@ package com.joesemper.fishing.domain
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.domain.viewstates.BaseViewState
+import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.repository.UserContentRepository
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -16,17 +16,22 @@ class UserCatchesViewModel(private val repository: UserContentRepository) : View
     val uiState: StateFlow<BaseViewState>
         get() = _uiState
 
+    private val currentContent = mutableListOf<UserCatch>()
+
     init {
         loadAllUserCatches()
     }
 
     private fun loadAllUserCatches() {
-        val start = System.currentTimeMillis()
         viewModelScope.launch {
-            repository.getAllUserCatchesList().collect { catches ->
-                //for loading animation
-                if (System.currentTimeMillis() - start < 1500) delay(1500)
-                _uiState.value = BaseViewState.Success(catches)
+            repository.getAllUserCatchesState().collect { contentState ->
+
+                currentContent.apply {
+                    addAll(contentState.added)
+                    removeAll(contentState.deleted)
+                }
+
+                _uiState.value = BaseViewState.Success(currentContent)
             }
         }
     }
