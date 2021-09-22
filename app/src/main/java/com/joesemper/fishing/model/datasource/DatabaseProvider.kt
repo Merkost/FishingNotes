@@ -1,6 +1,6 @@
 package com.joesemper.fishing.model.datasource
 
-import com.joesemper.fishing.domain.viewstates.ContentState
+import com.joesemper.fishing.model.entity.common.CatchesContentState
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.MapMarker
@@ -21,6 +21,6 @@ interface DatabaseProvider {
     fun getAllMarkers(): Flow<MapMarker>
     fun getAllUserMarkersList(): Flow<List<MapMarker>>
     fun getAllUserCatchesList(): Flow<List<UserCatch>>
-    fun getAllUserCatchesState(): Flow<ContentState>
+    fun getAllUserCatchesState(): Flow<CatchesContentState>
     fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>>
 }

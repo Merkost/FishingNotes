@@ -1,7 +1,7 @@
 package com.joesemper.fishing.model.repository
 
-import com.joesemper.fishing.domain.viewstates.ContentState
 import com.joesemper.fishing.model.datasource.DatabaseProvider
+import com.joesemper.fishing.model.entity.common.CatchesContentState
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.model.entity.content.UserCatch
@@ -25,7 +25,7 @@ class UserContentRepositoryImpl(private val dataProvider: DatabaseProvider) :
     override fun getAllUserCatchesList(): Flow<List<UserCatch>> =
         dataProvider.getAllUserCatchesList()
 
-    override fun getAllUserCatchesState(): Flow<ContentState> =
+    override fun getAllUserCatchesState(): Flow<CatchesContentState> =
         dataProvider.getAllUserCatchesState()
 
     override fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>> =

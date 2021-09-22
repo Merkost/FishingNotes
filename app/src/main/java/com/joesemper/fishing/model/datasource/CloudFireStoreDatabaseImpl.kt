@@ -7,7 +7,7 @@ import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
-import com.joesemper.fishing.domain.viewstates.ContentState
+import com.joesemper.fishing.model.entity.common.CatchesContentState
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.MapMarker
@@ -39,7 +39,7 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
     }
 
     @ExperimentalCoroutinesApi
-    private suspend fun getUserCatchesStateListener(scope: ProducerScope<ContentState>): OnSuccessListener<in QuerySnapshot> =
+    private suspend fun getUserCatchesStateListener(scope: ProducerScope<CatchesContentState>): OnSuccessListener<in QuerySnapshot> =
         OnSuccessListener<QuerySnapshot> { task ->
             scope.launch {
                 getCatchesStateFromDoc(task.documents).collect {
@@ -55,29 +55,24 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
                 .addSnapshotListener { snapshots, error ->
                     if (snapshots != null) {
 
-                        val addedCatches = mutableListOf<UserCatch>()
-                        val removedCatches = mutableListOf<UserCatch>()
+                        val result = CatchesContentState()
 
                         for (dc in snapshots.documentChanges) {
                             when (dc.type) {
                                 DocumentChange.Type.ADDED -> {
                                     val userCatch = dc.document.toObject<UserCatch>()
-                                    addedCatches.add(userCatch)
+                                    result.added.add(userCatch)
                                 }
                                 DocumentChange.Type.MODIFIED -> {
                                 }
                                 DocumentChange.Type.REMOVED -> {
                                     val userCatch = dc.document.toObject<UserCatch>()
-                                    removedCatches.add(userCatch)
+                                    result.deleted.add(userCatch)
                                 }
                             }
                         }
-                        if (addedCatches.isNotEmpty()) {
-                            trySend(ContentState.Added(addedCatches))
-                        }
-                        if (removedCatches.isNotEmpty()) {
-                            trySend(ContentState.Deleted(removedCatches))
-                        }
+
+                        trySend(result)
                     }
                 }
         }
