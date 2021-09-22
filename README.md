@@ -22,3 +22,8 @@ Main features:
 -   Detailed weather forecast for a day and for a week
 -   Cloud storege of user data
 
+Screenshots
+-----------
+<img src="screenshots/login.png" width="200" /> <img src="screenshots/map.png" width="200" /> <img src="screenshots/all_places.png" width="200" />
+<img src="screenshots/new_catch.png" width="200" /> <img src="screenshots/profile.png" width="200" /> <img src="screenshots/all_catches.png" width="200" />
+<img src="screenshots/new_place.png" width="200" />
