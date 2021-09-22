@@ -124,6 +124,7 @@
     <string name="catch_delete_confirmantion">Вы уверены, что хотите удалить данный улов?</string>
     <string name="map_types">Map types</string>
     <string name="not_specified">Not specified</string>
+    <string name="catch_description">Catch description</string>
 
 
 </resources>
