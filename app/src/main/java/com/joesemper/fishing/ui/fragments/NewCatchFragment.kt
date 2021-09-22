@@ -35,6 +35,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
@@ -186,15 +188,14 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     //TODO("AutoCompleteTextView for places textField")
     @Composable
     private fun Places(label: String) {
-        val isMarkerNull = viewModel.marker.value.id.isEmpty()
-        val marker by rememberSaveable { viewModel.marker }
 
+        val marker by rememberSaveable { viewModel.marker }
         var textFieldValue by rememberSaveable {
             mutableStateOf(
                 if (marker.id.isNotEmpty()) marker.title else ""
             )
         }
-        var isDropMenuOpen by rememberSaveable { mutableStateOf(isMarkerNull) }
+        var isDropMenuOpen by rememberSaveable { mutableStateOf(false) }
         val suggestions by viewModel.getAllUserMarkersList().collectAsState(listOf())
         val filteredList by rememberSaveable { mutableStateOf(suggestions.toMutableList()) }
         if (textFieldValue == "") searchFor("", suggestions, filteredList)
@@ -210,7 +211,9 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                         isDropMenuOpen = true
                     }
                 },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().onFocusChanged {
+                    isDropMenuOpen = it.isFocused
+                },
                 label = { Text(text = label) },
                 trailingIcon = {
                     if (isNull) {
@@ -220,6 +223,15 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                                 "",
                                 modifier = Modifier.clickable {
                                     textFieldValue = ""; isDropMenuOpen = true
+                                },
+                                tint = primaryFigmaColor
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.KeyboardArrowDown,
+                                "",
+                                modifier = Modifier.clickable {
+                                    if (!isDropMenuOpen) isDropMenuOpen = true
                                 },
                                 tint = primaryFigmaColor
                             )
@@ -245,7 +257,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
             DropdownMenu(
                 expanded = isDropMenuOpen, //suggestions.isNotEmpty(),
                 onDismissRequest = {
-                    if (textFieldValue.isNotEmpty()) if (isDropMenuOpen) isDropMenuOpen = false
+                    if (isDropMenuOpen) isDropMenuOpen = false
                 },
                 // This line here will accomplish what you want
                 properties = PopupProperties(focusable = false),
@@ -281,7 +293,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     ) {
         filteredList.clear()
         where.forEach {
-            if (it.title.contains(what)) {
+            if (it.title.contains(what, ignoreCase = true)) {
                 filteredList.add(it)
             }
         }
