@@ -95,6 +95,9 @@ dependencies {
     //BottomPicker
     implementation 'gun0912.ted:tedbottompicker:2.0.1'
 
+    //Compressor
+    implementation 'id.zelory:compressor:3.0.1'
+
     //Сoil
     implementation("io.coil-kt:coil:1.3.2")
 

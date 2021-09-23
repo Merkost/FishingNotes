@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.io.File
 
 class NewCatchViewModel(private val repository: UserContentRepository) : ViewModel() {
 
@@ -78,17 +79,18 @@ class NewCatchViewModel(private val repository: UserContentRepository) : ViewMod
         return title.value.isNotBlank() && marker.value.title.isNotEmpty()
     }
 
-    fun createNewUserCatch(photos: List<ByteArray>): Boolean {
+    fun createNewUserCatch(photos: List<File>): Boolean {
         if (isInputCorrect()) {
-            addNewCatch(RawUserCatch(
-                title = title.value,
-                description = description.value,
-                time = time.value,
-                date = date.value,
-                //fishType = fish,
-                fishAmount = fishAmount.value.toInt(),
-                fishWeight = weight.value.toDouble(),
-                fishingRodType = rod.value,
+            addNewCatch(
+                RawUserCatch(
+                    title = title.value,
+                    description = description.value,
+                    time = time.value,
+                    date = date.value,
+                    //fishType = fish,
+                    fishAmount = fishAmount.value.toInt(),
+                    fishWeight = weight.value.toDouble(),
+                    fishingRodType = rod.value,
                 fishingBait = bite.value,
                 fishingLure = lure.value,
                 markerId = marker.value.id,
