@@ -61,13 +61,6 @@ class NewCatchViewModel(
         images.remove(uri)
     }
 
-//    private val viewStateFlow: MutableStateFlow<BaseViewState> =
-//        MutableStateFlow(BaseViewState.Success(null))
-//
-//    fun subscribe(): StateFlow<BaseViewState> {
-//        return viewStateFlow
-//    }
-
     fun getAllUserMarkersList() = repository.getAllUserMarkersList() as Flow<List<UserMapMarker>>
 
     private fun addNewCatch(newCatch: RawUserCatch) {

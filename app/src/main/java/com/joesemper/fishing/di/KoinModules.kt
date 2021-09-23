@@ -1,10 +1,10 @@
 package com.joesemper.fishing.di
 
 import com.joesemper.fishing.domain.*
-import com.joesemper.fishing.model.auth.AuthManager
-import com.joesemper.fishing.model.auth.FirebaseAuthManagerImpl
 import com.joesemper.fishing.model.datasource.*
-import com.joesemper.fishing.model.repository.*
+import com.joesemper.fishing.model.repository.UserContentRepository
+import com.joesemper.fishing.model.repository.UserRepository
+import com.joesemper.fishing.model.repository.WeatherRepository
 import com.joesemper.fishing.ui.LoginActivity
 import com.joesemper.fishing.ui.MainActivity
 import com.joesemper.fishing.ui.SplashActivity
@@ -17,10 +17,10 @@ import org.koin.dsl.module
 
 
 val appModule = module {
-    single<DatabaseProvider> { CloudFireStoreDatabaseImpl(get()) }
-    single<AuthManager> { FirebaseAuthManagerImpl(androidContext()) }
-    single<PhotoStorage> { CloudPhotoStorageImpl() }
-    single<UserContentRepository> { UserContentRepositoryImpl(get()) }
+    single<UserRepository> { FirebaseUserRepositoryImpl(androidContext()) }
+    single<UserContentRepository> { CloudFireStoreDatabase(get()) }
+    single<PhotoStorage> { CloudPhotoStorage() }
+    single<WeatherRepository> { WeatherRepositoryRetrofitImpl() }
     single { Logger() }
 
 }
@@ -39,8 +39,7 @@ val splashScreen = module {
 
 val loginScreen = module {
     scope(named<LoginActivity>()) {
-        viewModel { LoginViewModel(get(), get()) }
-        scoped<UserRepository> { UserRepositoryImpl(get(), get()) }
+        viewModel { LoginViewModel(get()) }
     }
 }
 
@@ -53,13 +52,12 @@ val mapScreen = module {
 val userFragment = module {
     scope(named<UserFragment>()) {
         viewModel { UserViewModel(get(), get()) }
-        scoped<UserRepository> { UserRepositoryImpl(get(), get()) }
     }
 }
 
 val newCatchFragment = module {
     scope(named<NewCatchFragment>()) {
-        viewModel { NewCatchViewModel(get()) }
+        viewModel { NewCatchViewModel(get(), get()) }
     }
 }
 
@@ -72,15 +70,12 @@ val newPlaceFragment = module {
 val userCatchFragment = module {
     scope(named<UserCatchFragment>()) {
         viewModel { UserCatchViewModel(get(), get()) }
-        scoped<UserRepository> { UserRepositoryImpl(get(), get()) }
     }
 }
 
 val weatherScreen = module {
     scope(named<WeatherFragment>()) {
-        viewModel { WeatherViewModel(get()) }
-        scoped<WeatherProvider> { WeatherRetrofitImplementation() }
-        scoped<WeatherRepository> { WeatherRepositoryImpl(get(), get()) }
+        viewModel { WeatherViewModel(get(), get()) }
     }
 }
 
@@ -93,11 +88,10 @@ val notesFragment = module {
 val userPlaceFragment = module {
     scope(named<UserPlaceFragment>()) {
         viewModel { UserPlaceViewModel(get(), get()) }
-        scoped<UserRepository> { UserRepositoryImpl(get(), get()) }
     }
 }
 val catchesFragment = module {
-        viewModel { UserCatchesViewModel(get()) }
+    viewModel { UserCatchesViewModel(get()) }
 }
 
 val placesFragment = module {

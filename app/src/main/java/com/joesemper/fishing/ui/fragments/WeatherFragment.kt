@@ -27,7 +27,7 @@ import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.utils.Logger
-import com.joesemper.fishing.view.weather.utils.getDateByMilliseconds
+import com.joesemper.fishing.utils.getDateByMilliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.channelFlow

@@ -9,7 +9,6 @@ import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.joesemper.fishing.model.entity.common.CatchesContentState
 import com.joesemper.fishing.model.entity.common.Progress
-import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -17,6 +16,7 @@ import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.model.entity.raw.RawUserCatch
 import com.joesemper.fishing.model.mappers.MapMarkerMapper
 import com.joesemper.fishing.model.mappers.UserCatchMapper
+import com.joesemper.fishing.model.repository.UserContentRepository
 import com.joesemper.fishing.utils.getCurrentUserId
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ProducerScope
@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.*
 import java.io.File
 
 
-class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : DatabaseProvider {
+class CloudFireStoreDatabase(private val cloudPhotoStorage: PhotoStorage) : UserContentRepository {
 
     private val db = Firebase.firestore
 
@@ -185,7 +185,7 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
 
 
     @ExperimentalCoroutinesApi
-    override fun getAllMarkers() = channelFlow<MapMarker> {
+    override fun getAllUserMarkers() = channelFlow<MapMarker> {
         val listeners = mutableListOf<ListenerRegistration>()
 
         //UserMarkers
@@ -305,19 +305,6 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
             }
         }
 
-    @ExperimentalCoroutinesApi
-    override suspend fun addNewUser(user: User): StateFlow<Progress> {
-        val flow = MutableStateFlow<Progress>(Progress.Loading())
-        if (user.isAnonymous) {
-            flow.emit(Progress.Complete)
-        } else {
-            getUsersCollection().document(user.userId).set(user)
-                .addOnCompleteListener {
-                    flow.tryEmit(Progress.Complete)
-                }
-        }
-        return flow
-    }
 
     @ExperimentalCoroutinesApi
     override suspend fun addNewCatch(
@@ -388,7 +375,6 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
     override suspend fun deleteCatch(userCatch: UserCatch) {
         getUserCatchesCollection(userCatch.userMarkerId).document(userCatch.id).delete()
     }
-
 
     private fun getUsersCollection(): CollectionReference {
         return db.collection(USERS_COLLECTION)

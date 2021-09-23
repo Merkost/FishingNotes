@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.take
 import java.io.File
 
-class CloudPhotoStorageImpl : PhotoStorage {
+class CloudPhotoStorage : PhotoStorage {
 
     private val storage = Firebase.storage
     private var storageRef = storage.reference
