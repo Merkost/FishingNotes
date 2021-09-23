@@ -461,7 +461,6 @@ class MapFragment : Fragment(), AndroidScopeComponent, OnMapReadyCallback,
                 selected = which
             }
             .show()
-
     }
 
     private fun startMapsActivityForNavigation(mapMarker: UserMapMarker) {
