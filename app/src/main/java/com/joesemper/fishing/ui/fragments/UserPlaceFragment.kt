@@ -42,9 +42,9 @@ import com.joesemper.fishing.domain.UserPlaceViewModel
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.composable.MyCardNoPadding
-import com.joesemper.fishing.ui.composable.PlaceInfo
-import com.joesemper.fishing.ui.composable.UserProfile
+import com.joesemper.fishing.compose.ui.home.MyCardNoPadding
+import com.joesemper.fishing.compose.ui.home.PlaceInfo
+import com.joesemper.fishing.compose.ui.home.UserProfile
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import com.joesemper.fishing.ui.theme.primaryFigmaBackgroundTint
 import com.joesemper.fishing.ui.theme.primaryFigmaColor

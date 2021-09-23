@@ -1,3 +1,5 @@
+import com.joesemper.fishing.buildsrc.Libs
+
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
@@ -31,6 +33,9 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion Libs.AndroidX.Compose.version
     }
     kotlinOptions {
         jvmTarget = '1.8'
@@ -106,6 +111,44 @@ dependencies {
     implementation 'com.firebaseui:firebase-ui-auth:7.1.1'
     implementation 'com.google.firebase:firebase-storage-ktx'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+
+    implementation Libs.Kotlin.stdlib
+    implementation Libs.Coroutines.android
+
+    implementation Libs.Coroutines.core
+
+    implementation Libs.AndroidX.coreKtx
+    implementation Libs.AndroidX.Activity.activityCompose
+    implementation Libs.AndroidX.Lifecycle.viewModelCompose
+    implementation Libs.AndroidX.Navigation.navigationCompose
+    implementation Libs.AndroidX.ConstraintLayout.constraintLayoutCompose
+
+    implementation Libs.AndroidX.Compose.runtime
+    implementation Libs.AndroidX.Compose.foundation
+    implementation Libs.AndroidX.Compose.layout
+    implementation Libs.AndroidX.Compose.ui
+    implementation Libs.AndroidX.Compose.uiUtil
+    implementation Libs.AndroidX.Compose.material
+    implementation Libs.AndroidX.Compose.animation
+    implementation Libs.AndroidX.Compose.iconsExtended
+    implementation Libs.AndroidX.Compose.tooling
+
+    implementation Libs.Accompanist.insets
+    implementation Libs.Accompanist.systemuicontroller
+    implementation Libs.Accompanist.flowlayouts
+    implementation Libs.Accompanist.pager
+    implementation Libs.Accompanist.pagerindicators
+
+    implementation Libs.Coil.coilCompose
+
+    androidTestImplementation Libs.JUnit.junit
+    androidTestImplementation Libs.AndroidX.Test.core
+    androidTestImplementation Libs.AndroidX.Test.runner
+    androidTestImplementation Libs.AndroidX.Test.espressoCore
+    androidTestImplementation Libs.AndroidX.Test.rules
+    androidTestImplementation Libs.AndroidX.Test.Ext.junit
+    androidTestImplementation Libs.Coroutines.test
+    androidTestImplementation Libs.AndroidX.Compose.uiTest
 
     //Jetpack Compose
     // Integration with activities

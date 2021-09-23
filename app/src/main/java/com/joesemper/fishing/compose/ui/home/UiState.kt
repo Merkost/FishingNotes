@@ -1,4 +1,4 @@
-package com.joesemper.fishing.ui.composable
+package com.joesemper.fishing.compose.ui.home
 
 sealed class UiState {
     object InProgress : UiState()

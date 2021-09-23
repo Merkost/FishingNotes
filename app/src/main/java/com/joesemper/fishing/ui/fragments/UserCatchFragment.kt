@@ -1,11 +1,9 @@
 package com.joesemper.fishing.ui.fragments
 
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -21,15 +19,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalSavedStateRegistryOwner
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.drawable.toDrawable
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -38,10 +31,9 @@ import coil.compose.rememberImagePainter
 import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.UserCatchViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
-import com.joesemper.fishing.ui.composable.CatchInfo
-import com.joesemper.fishing.ui.composable.MyCardNoPadding
-import com.joesemper.fishing.ui.composable.UserProfile
-import com.joesemper.fishing.ui.composable.PlaceInfo
+import com.joesemper.fishing.compose.ui.home.CatchInfo
+import com.joesemper.fishing.compose.ui.home.MyCardNoPadding
+import com.joesemper.fishing.compose.ui.home.PlaceInfo
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import com.joesemper.fishing.ui.theme.primaryFigmaBackgroundTint
 import com.joesemper.fishing.utils.NavigationHolder

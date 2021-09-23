@@ -23,8 +23,8 @@ import com.joesemper.fishing.domain.UserPlacesViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.adapters.UserPlacesRVAdapter
-import com.joesemper.fishing.ui.composable.user_places.UserPlaces
-import com.joesemper.fishing.ui.composable.user_places.UserPlacesLoading
+import com.joesemper.fishing.compose.ui.home.user_places.UserPlaces
+import com.joesemper.fishing.compose.ui.home.user_places.UserPlacesLoading
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import com.joesemper.fishing.utils.showToast
 import org.koin.androidx.viewmodel.ext.android.viewModel
