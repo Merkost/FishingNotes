@@ -28,6 +28,8 @@ class WeatherRetrofitImplementation : WeatherProvider {
     ): WeatherForecast =
         getService().getHistoricalWeather(latitude = lat, longitude = lon, dt = date)
 
+    override suspend fun getWeatherForecast(lat: Double, lon: Double) =
+        getService().getWeather(latitude = lat, longitude = lon)
 
     private fun getService(): WeatherApiService {
         return createRetrofit().create(WeatherApiService::class.java)

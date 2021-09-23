@@ -10,6 +10,7 @@ import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawUserCatch
+import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.repository.UserContentRepository
 import com.joesemper.fishing.model.repository.WeatherRepository
 import kotlinx.coroutines.flow.Flow
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.File
 
 class NewCatchViewModel(
@@ -42,6 +44,14 @@ class NewCatchViewModel(
 
     val images = mutableStateListOf<Uri>()
 
+    val weather: MutableState<WeatherForecast>
+        get() {
+            return runBlocking {
+                marker.value.run {
+                    mutableStateOf(weatherRepository.getWeatherForecast(latitude, longitude))
+                }
+            }
+        }
 
     fun addPhoto(uri: Uri) {
         images.add(uri)

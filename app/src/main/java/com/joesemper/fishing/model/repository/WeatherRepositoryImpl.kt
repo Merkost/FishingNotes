@@ -18,4 +18,7 @@ class WeatherRepositoryImpl(
         lon: Double,
         date: Long
     ): WeatherForecast = weatherProvider.getHistoricalWeather(lat, lon, date)
+
+    override suspend fun getWeatherForecast(lat: Double, lon: Double): WeatherForecast =
+        weatherProvider.getWeatherForecast(lat, lon)
 }
