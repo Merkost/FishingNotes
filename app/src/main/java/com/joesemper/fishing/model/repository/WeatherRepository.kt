@@ -6,5 +6,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface WeatherRepository {
     fun getWeather(lat: Double, lon: Double): Flow<WeatherForecast>
+    suspend fun getHistoricalWeather(lat: Double, lon: Double, date: Long): WeatherForecast
     fun getAllUserMarkersList(): Flow<List<MapMarker>>
 }

@@ -11,6 +11,7 @@ import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawUserCatch
 import com.joesemper.fishing.model.repository.UserContentRepository
+import com.joesemper.fishing.model.repository.WeatherRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +19,10 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.io.File
 
-class NewCatchViewModel(private val repository: UserContentRepository) : ViewModel() {
+class NewCatchViewModel(
+    private val repository: UserContentRepository,
+    private val weatherRepository: WeatherRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
     val uiState: StateFlow<BaseViewState>
@@ -37,6 +41,7 @@ class NewCatchViewModel(private val repository: UserContentRepository) : ViewMod
     val lure = mutableStateOf("")
 
     val images = mutableStateListOf<Uri>()
+
 
     fun addPhoto(uri: Uri) {
         images.add(uri)
@@ -91,12 +96,13 @@ class NewCatchViewModel(private val repository: UserContentRepository) : ViewMod
                     fishAmount = fishAmount.value.toInt(),
                     fishWeight = weight.value.toDouble(),
                     fishingRodType = rod.value,
-                fishingBait = bite.value,
-                fishingLure = lure.value,
-                markerId = marker.value.id,
-                isPublic = false,
-                photos = photos
-            ))
+                    fishingBait = bite.value,
+                    fishingLure = lure.value,
+                    markerId = marker.value.id,
+                    isPublic = false,
+                    photos = photos
+                )
+            )
             return true
         } else return false
 

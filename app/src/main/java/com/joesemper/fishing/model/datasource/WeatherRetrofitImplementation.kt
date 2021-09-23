@@ -2,6 +2,7 @@ package com.joesemper.fishing.model.datasource
 
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.joesemper.fishing.model.api.WeatherApiService
+import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import okhttp3.OkHttpClient
@@ -19,6 +20,14 @@ class WeatherRetrofitImplementation : WeatherProvider {
         val weather = getService().getWeather(latitude = lat, longitude = lon)
         emit(weather)
     }
+
+    override suspend fun getHistoricalWeather(
+        lat: Double,
+        lon: Double,
+        date: Long
+    ): WeatherForecast =
+        getService().getHistoricalWeather(latitude = lat, longitude = lon, dt = date)
+
 
     private fun getService(): WeatherApiService {
         return createRetrofit().create(WeatherApiService::class.java)

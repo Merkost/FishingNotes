@@ -2,7 +2,6 @@ package com.joesemper.fishing.domain
 
 import androidx.lifecycle.ViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
-import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.repository.UserContentRepository
 import com.joesemper.fishing.model.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,20 +12,9 @@ class UserViewModel(
     private val repository: UserContentRepository
 ) : ViewModel() {
 
-    //val userCatches = mutableStateOf<Int>()
-
     init {
         getUserCatches()
     }
-
-    /*
-    private fun loadCurrentUser() {
-        viewModelScope.launch {
-            repository.currentUser
-                .catch { error -> handleError(error) }
-                .collectLatest { user -> onSuccess(user) }
-        }
-    }*/
 
     private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
     val uiState: StateFlow<BaseViewState>

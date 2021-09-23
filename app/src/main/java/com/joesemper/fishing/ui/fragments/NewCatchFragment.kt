@@ -947,31 +947,6 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 //        }
 //    }
 
-        //TODO("Photo convert from Uri to ByteArray in CoroutineScope")
-//        try {
-//            val bitmap = MediaStore.Images.Media.getBitmap(c.getContentResolver(), Uri.parse(paths))
-//        } catch (e: Exception) {
-//            //handle exception
-//        }
-//        return coroutineScope {
-//            val job = launch {
-//                try {
-//                    uris.forEach {
-//                        val stream = requireActivity().contentResolver.openInputStream(it)
-//                        val bitmap = BitmapDrawable(resources, stream).bitmap
-//                        val baos = ByteArrayOutputStream()
-//                        bitmap.compress(Bitmap.CompressFormat.JPEG, 20, baos)
-//                        result.add(baos.toByteArray())
-//                    }
-//                } catch (e: Throwable) {
-//                    Log.d("F", e.message, e)
-//                }
-//            }
-//            job.join()
-//            result
-//        }
-
-
 //    private fun setInitialPlaceData() {
 //        binding.etNewCatchPlaceTitle.setText(marker.title)
 //        binding.etNewCatchPlaceTitle.inputType = InputType.TYPE_NULL

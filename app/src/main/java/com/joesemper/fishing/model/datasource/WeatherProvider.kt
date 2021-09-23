@@ -5,4 +5,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface WeatherProvider {
     fun getWeather(lat: Double, lon: Double): Flow<WeatherForecast>
+    suspend fun getHistoricalWeather(lat: Double, lon: Double, date: Long): WeatherForecast
 }
