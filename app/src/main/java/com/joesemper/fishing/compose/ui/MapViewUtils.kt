@@ -96,12 +96,13 @@ fun MapViewContainer(
 
     when {
         permissionState.hasPermission -> {
-            val locationResult = fusedLocationProviderClient.lastLocation
-            locationResult.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    lastKnownLocation.value = LatLng(task.result.latitude, task.result.longitude)
-                }
-            }
+            lastKnownLocation.value = LatLng(55.755825, 37.617298) //for testing
+//            val locationResult = fusedLocationProviderClient.lastLocation
+//            locationResult.addOnCompleteListener { task ->
+//                if (task.isSuccessful) {
+//                    lastKnownLocation.value = LatLng(task.result.latitude, task.result.longitude)
+//                }
+//            }
         }
     }
 
