@@ -113,10 +113,10 @@ fun MapViewContainer(
         permissionState.launchPermissionRequest()
     }
 
-    var zoom by rememberSaveable(map) { mutableStateOf(InitialZoom) }
+    /*var zoom by rememberSaveable(map) { mutableStateOf(InitialZoom) }
     ZoomControls(zoom) {
         zoom = it.coerceIn(MinZoom, MaxZoom)
-    }
+    }*/
 
     val coroutineScope = rememberCoroutineScope()
     AndroidView({ map }) { mapView ->
