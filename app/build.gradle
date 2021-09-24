@@ -62,6 +62,8 @@ android {
 dependencies {
     //implementation "com.github.ben-manes:gradle-versions-plugin:0.39.0"
 
+    implementation "com.google.accompanist:accompanist-permissions:0.18.0"
+
     //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.5.21"
     implementation 'androidx.core:core-ktx:1.5.0'

@@ -19,6 +19,7 @@ import coil.annotation.ExperimentalCoilApi
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.FishingNotesBottomBar
 import com.joesemper.fishing.compose.ui.home.HomeSections
@@ -27,6 +28,7 @@ import com.joesemper.fishing.compose.ui.rememberAppStateHolder
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import kotlinx.coroutines.InternalCoroutinesApi
 
+@ExperimentalPermissionsApi
 @ExperimentalAnimationApi
 @ExperimentalPagerApi
 @ExperimentalMaterialApi
@@ -70,6 +72,7 @@ fun FishingNotesApp() {
     }
 }
 
+@ExperimentalPermissionsApi
 @ExperimentalCoilApi
 @ExperimentalPagerApi
 @ExperimentalAnimationApi

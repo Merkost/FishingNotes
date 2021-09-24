@@ -1,5 +1,6 @@
 package com.joesemper.fishing.compose.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.annotation.FloatRange
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.android.gms.location.LocationServices
 import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.MapView
@@ -33,10 +37,10 @@ import kotlinx.coroutines.launch
  * Remembers a MapView and gives it the lifecycle of the current LifecycleOwner
  */
 @Composable
-fun rememberMapViewWithLifecycle(): com.google.android.libraries.maps.MapView {
+fun rememberMapViewWithLifecycle(): MapView {
     val context = LocalContext.current
     val mapView = remember {
-        com.google.android.libraries.maps.MapView(context).apply {
+        MapView(context).apply {
             id = R.id.map
         }
     }
@@ -54,7 +58,7 @@ fun rememberMapViewWithLifecycle(): com.google.android.libraries.maps.MapView {
     return mapView
 }
 
-private fun getMapLifecycleObserver(mapView: com.google.android.libraries.maps.MapView): LifecycleEventObserver =
+private fun getMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
     LifecycleEventObserver { _, event ->
         when (event) {
             Lifecycle.Event.ON_CREATE -> mapView.onCreate(Bundle())
@@ -67,6 +71,8 @@ private fun getMapLifecycleObserver(mapView: com.google.android.libraries.maps.M
         }
     }
 
+@SuppressLint("MissingPermission")
+@ExperimentalPermissionsApi
 @Composable
 fun MapViewContainer(
     map: MapView,
@@ -77,10 +83,33 @@ fun MapViewContainer(
         LatLng(latitude.toDouble(), longitude.toDouble())
     }
 
+    val context = LocalContext.current
+
+    val fusedLocationProviderClient =
+        LocationServices.getFusedLocationProviderClient(context)
+    val lastKnownLocation = remember {
+        mutableStateOf(LatLng(0.0, 0.0))
+    }
+
+
+    val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
+
+    when {
+        permissionState.hasPermission -> {
+            val locationResult = fusedLocationProviderClient.lastLocation
+            locationResult.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    lastKnownLocation.value = LatLng(task.result.latitude, task.result.longitude)
+                }
+            }
+        }
+    }
+
     LaunchedEffect(map) {
         val googleMap = map.awaitMap()
         googleMap.addMarker { position(cameraPosition) }
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(cameraPosition))
+        permissionState.launchPermissionRequest()
     }
 
     var zoom by rememberSaveable(map) { mutableStateOf(InitialZoom) }
@@ -92,22 +121,24 @@ fun MapViewContainer(
     AndroidView({ map }) { mapView ->
         // Reading zoom so that AndroidView recomposes when it changes. The getMapAsync lambda
         // is stored for later, Compose doesn't recognize state reads
-        val mapZoom = zoom
+//        val mapZoom = zoom
         coroutineScope.launch {
             val googleMap = mapView.awaitMap()
-            googleMap.setZoom(mapZoom)
+//            googleMap.setZoom(mapZoom)
             // Move camera to the same place to trigger the zoom update
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(cameraPosition))
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(lastKnownLocation.value))
         }
     }
-}
 
-fun GoogleMap.setZoom(
-    @FloatRange(from = MinZoom.toDouble(), to = MaxZoom.toDouble()) zoom: Float
-) {
-    resetMinMaxZoomPreference()
-    setMinZoomPreference(zoom)
-    setMaxZoomPreference(zoom)
+
+
+    fun GoogleMap.setZoom(
+        @FloatRange(from = MinZoom.toDouble(), to = MaxZoom.toDouble()) zoom: Float
+    ) {
+        resetMinMaxZoomPreference()
+        setMinZoomPreference(zoom)
+        setMaxZoomPreference(zoom)
+    }
 }
 
 @Composable
@@ -120,6 +151,7 @@ private fun ZoomControls(
         ZoomButton("+", onClick = { onZoomChanged(zoom * 1.2f) })
     }
 }
+
 
 @Composable
 private fun ZoomButton(text: String, onClick: () -> Unit) {

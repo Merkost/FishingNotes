@@ -1,11 +1,5 @@
 package com.joesemper.fishing.compose.ui.home
 
-import androidx.compose.material.*
-import androidx.compose.material.icons.outlined.*
-import coil.annotation.ExperimentalCoilApi
-import com.joesemper.fishing.R
-import com.joesemper.fishing.ui.theme.FigmaTheme
-import kotlinx.coroutines.InternalCoroutinesApi
 import androidx.annotation.FloatRange
 import androidx.annotation.StringRes
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -15,15 +9,15 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.VerifiedUser
+import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,11 +30,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.MeasureResult
-import androidx.compose.ui.layout.MeasureScope
-import androidx.compose.ui.layout.Placeable
-import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,10 +41,15 @@ import androidx.core.os.ConfigurationCompat
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-
+import coil.annotation.ExperimentalCoilApi
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.joesemper.fishing.R
+import com.joesemper.fishing.ui.theme.FigmaTheme
+import kotlinx.coroutines.InternalCoroutinesApi
 
+@ExperimentalPermissionsApi
 @ExperimentalAnimationApi
 @ExperimentalPagerApi
 @ExperimentalCoilApi

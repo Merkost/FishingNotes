@@ -3,32 +3,19 @@ package com.joesemper.fishing.ui
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.joesemper.fishing.R
-import com.joesemper.fishing.databinding.ActivityMainBinding
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.domain.MainViewModel
-import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.utils.Logger
-import com.joesemper.fishing.utils.NavigationHolder
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.inject
-import org.koin.android.scope.AndroidScopeComponent
-import org.koin.androidx.scope.activityScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.core.scope.Scope
 
 class MainActivity : ComponentActivity() {
 
@@ -52,6 +39,7 @@ class MainActivity : ComponentActivity() {
 //        binding.bottomNav.visibility = View.VISIBLE
 //    }
 
+    @ExperimentalPermissionsApi
     @ExperimentalPagerApi
     @ExperimentalAnimationApi
     @InternalCoroutinesApi
