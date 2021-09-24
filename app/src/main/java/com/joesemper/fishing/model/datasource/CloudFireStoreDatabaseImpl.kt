@@ -104,7 +104,8 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
             scope.launch {
                 val result = mutableListOf<UserCatch>()
 
-                getCatchesFromDoc(task.documents).take(task.documents.size).onCompletion {
+                if (task.documents.size > 0)
+                    getCatchesFromDoc(task.documents).take(task.documents.size).onCompletion {
                     scope.trySend(result)
                 }.collect {
                     result.addAll(it)

@@ -17,15 +17,19 @@ import androidx.compose.ui.unit.dp
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.compose.ui.home.MyCard
+import com.joesemper.fishing.domain.UserPlacesViewModel
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
+import org.koin.android.compat.ScopeCompat.getViewModel
+import org.koin.core.Koin
+import org.koin.core.context.GlobalContext.get
 
 @ExperimentalAnimationApi
 @Composable
 fun UserPlaces(
     places: List<UserMapMarker>,
     addNewPlaceClicked: () -> Unit,
-    userPlaceClicked: (UserMapMarker) -> Unit
+    userPlaceClicked: (UserMapMarker) -> Unit,
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item { ItemAddPlace { addNewPlaceClicked() } }

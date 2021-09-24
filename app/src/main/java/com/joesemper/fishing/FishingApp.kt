@@ -26,7 +26,7 @@ class FishingApp : Application() {
                     newPlaceFragment,
                     userCatchFragment,
                     userFragment,
-                    notesFragment,
+//                    notesFragment,
                     userPlaceFragment,
                     placesFragment,
                     catchesFragment

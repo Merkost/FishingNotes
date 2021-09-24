@@ -57,7 +57,7 @@ fun FishingNotesApp() {
             ) { innerPaddingModifier ->
                 NavHost(
                     navController = appStateHolder.navController,
-                    startDestination = MainDestinations.HOME_ROUTE,
+                    startDestination = MainDestinations.MAP_ROUTE,
                     modifier = Modifier.padding(innerPaddingModifier)
                 ) {
                     fishingNotesNavGraph(
@@ -80,7 +80,7 @@ private fun NavGraphBuilder.fishingNotesNavGraph(
     upPress: () -> Unit
 ) {
     navigation(
-        route = MainDestinations.HOME_ROUTE,
+        route = MainDestinations.MAP_ROUTE,
         startDestination = HomeSections.MAP.route
     ) {
         addHomeGraph(onSnackSelected)

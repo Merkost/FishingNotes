@@ -1,6 +1,7 @@
 package com.joesemper.fishing.domain
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.repository.UserContentRepository
@@ -30,5 +31,7 @@ class UserPlacesViewModel(private val repository: UserContentRepository) : ViewM
             }
         }
     }
+
+
 
 }

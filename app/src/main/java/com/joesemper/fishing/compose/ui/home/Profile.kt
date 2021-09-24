@@ -1,6 +1,9 @@
 package com.joesemper.fishing.compose.ui.home
 
-import android.content.res.Configuration
+import android.content.Context
+import android.content.Intent
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,28 +18,39 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.google.accompanist.insets.statusBarsHeight
 import com.joesemper.fishing.R
+import com.joesemper.fishing.domain.UserViewModel
 import com.joesemper.fishing.model.entity.common.User
+import com.joesemper.fishing.model.entity.content.MapMarker
+import com.joesemper.fishing.model.entity.content.UserCatch
+import com.joesemper.fishing.ui.LoginActivity
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import me.vponomarenko.compose.shimmer.shimmer
+import org.koin.androidx.compose.getViewModel
 
 @InternalCoroutinesApi
 @ExperimentalMaterialApi
 @ExperimentalCoilApi
 @Composable
 fun Profile(modifier: Modifier = Modifier) {
-    //val viewModel = getViewModel<UserViewModel>()
-    //val uiState = viewModel.uiState
+    val viewModel = getViewModel<UserViewModel>()
+
+
+    val uiState = viewModel.uiState
     Scaffold(
         topBar = { AppBar() },
         content = {
@@ -52,8 +66,12 @@ fun Profile(modifier: Modifier = Modifier) {
                     backgroundColor = MaterialTheme.colors.surface
                 ) {
                     Column() {
-                        UserInfo()
-                        UserStats()
+                        val user by viewModel.getCurrentUser().collectAsState(null)
+                        UserInfo(user)
+
+                        val userPlacesNum by viewModel.getUserPlaces().collectAsState(null)
+                        val userCatchesNum by viewModel.getUserCatches().collectAsState(null)
+                        UserStats(userPlacesNum, userCatchesNum)
                     }
 
                 }
@@ -63,20 +81,20 @@ fun Profile(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun UserStats() {
+fun UserStats(userPlacesNum: List<MapMarker>?, userCatchesNum: List<UserCatch>?) {
     Row(
         horizontalArrangement = Arrangement.SpaceEvenly,
         modifier = Modifier.padding(5.dp).fillMaxWidth().height(50.dp)
     ) {
-        PlacesNumber()
-        CatchesNumber()
+        PlacesNumber(userPlacesNum)
+        CatchesNumber(userCatchesNum)
     }
 }
 
 @Composable
-fun PlacesNumber() {
+fun PlacesNumber(userPlacesNum: List<MapMarker>?) {
     //val userPlacesNum by viewModel.getUserPlaces().collectAsState(null)
-    /*userPlacesNum?.let {
+    userPlacesNum?.let {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)
@@ -85,9 +103,9 @@ fun PlacesNumber() {
                 Icons.Default.Place, stringResource(R.string.place),
                 modifier = Modifier.size(25.dp)
             )
-            //Text(it.size.toString())
+            Text(it.size.toString())
         }
-    } ?: */Column(
+    } ?: Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)
     ) {
@@ -106,9 +124,9 @@ fun PlacesNumber() {
 }
 
 @Composable
-fun CatchesNumber() {
-    //val userCatchesNum by viewModel.getUserCatches().collectAsState(null)
-    /*userCatchesNum?.let {
+fun CatchesNumber(userCatchesNum: List<UserCatch>?) {
+//    val userCatchesNum by viewModel.getUserCatches().collectAsState(null)
+    userCatchesNum?.let {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)
@@ -119,7 +137,7 @@ fun CatchesNumber() {
             )
             Text(it.size.toString())
         }
-    } ?: */Column(
+    } ?: Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)
     ) {
@@ -136,6 +154,7 @@ fun CatchesNumber() {
     }
 }
 
+@InternalCoroutinesApi
 @ExperimentalMaterialApi
 @Composable
 fun UserButtons() {
@@ -173,8 +192,12 @@ fun UserButtons() {
     }
 }
 
+@InternalCoroutinesApi
 @Composable
 fun LogoutDialog(dialogOnLogout: MutableState<Boolean>) {
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val viewModel = getViewModel<UserViewModel>()
     AlertDialog(
         title = { Text("Выход из аккаунта") },
         text = { Text("Вы уверены, что хотите выйти из своего аккаунта?") },
@@ -182,17 +205,17 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>) {
         confirmButton = {
             OutlinedButton(
                 onClick = {
-                    /*lifecycleScope.launch {
+                    scope.launch {
                         viewModel.logoutCurrentUser().collect { isLogout ->
-                            if (isLogout) startLoginActivity()
+                            if (isLogout) startLoginActivity(context)
                         }
-                    }*/
+                    }
                 },
-                content = { /*Text(getString(R.string.Yes))*/ })
+                content = { Text(stringResource(R.string.Yes)) })
         }, dismissButton = {
             OutlinedButton(
                 onClick = { dialogOnLogout.value = false },
-                content = { /*Text(getString(R.string.No))*/ })
+                content = { Text(stringResource(R.string.No)) })
         }
     )
 }
@@ -216,13 +239,13 @@ fun ColumnButton(image: Painter, name: String, click: () -> Unit) {
 
 @ExperimentalCoilApi
 @Composable
-fun UserInfo() {
-    //val user by viewModel.getCurrentUser().collectAsState(null)
-    /*user?.let { nutNullUser ->
+fun UserInfo(user: User?) {
+    //val user by
+    user?.let { nutNullUser ->
         Crossfade(nutNullUser, animationSpec = tween(500)) { animatedUser ->
             UserNameAndImage(animatedUser)
         }
-    } ?: */Row(
+    } ?: Row(
         modifier = Modifier.fillMaxWidth().height(150.dp).padding(20.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
@@ -280,7 +303,11 @@ fun AppBar() {
             elevation = 2.dp
         )
     }
+}
 
+private fun startLoginActivity(context: Context) {
+    val intent = Intent(context, LoginActivity::class.java)
+    context.startActivity(intent)
 }
 
 @ExperimentalCoilApi

@@ -8,12 +8,17 @@ object Libs {
     const val androidGradlePlugin = "com.android.tools.build:gradle:7.0.0"
 
     object Accompanist {
-        const val version = "0.18.0"
+        private const val version = "0.18.0"
         const val insets = "com.google.accompanist:accompanist-insets:$version"
         const val systemuicontroller = "com.google.accompanist:accompanist-systemuicontroller:$version"
         const val flowlayouts = "com.google.accompanist:accompanist-flowlayout:$version"
-        const val pager = "com.google.accompanist:accompanist-pager:$version" // Pager
-        const val pagerindicators = "com.google.accompanist:accompanist-pager-indicators:$version" // Pager Indicators
+        const val pager = "com.google.accompanist:accompanist-pager:$version"
+        const val pagerindicators = "com.google.accompanist:accompanist-pager-indicators:$version"
+    }
+
+    object GoogleMaps {
+        const val maps = "com.google.android.libraries.maps:maps:3.1.0-beta"
+        const val mapsKtx = "com.google.maps.android:maps-v3-ktx:2.2.0"
     }
 
     object Kotlin {
@@ -65,6 +70,16 @@ object Libs {
         object ConstraintLayout {
             const val constraintLayoutCompose =
                 "androidx.constraintlayout:constraintlayout-compose:1.0.0-beta02"
+        }
+
+        object DependencyInjection {
+            private const val koin_version = "3.1.2"
+
+            const val koinMain = "io.insert-koin:koin-android:${koin_version}"
+            const val koinJava = "io.insert-koin:koin-android-compat:${koin_version}"
+            const val koinWorkManager = "io.insert-koin:koin-androidx-workmanager:${koin_version}"
+            const val koinCompose = "io.insert-koin:koin-androidx-compose:${koin_version}"
+
         }
 
         object Test {

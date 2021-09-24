@@ -26,8 +26,8 @@ import kotlinx.coroutines.launch
  * Destinations used in the [FishingNotesApp].
  */
 object MainDestinations {
-    const val HOME_ROUTE = "home"
-    const val SNACK_DETAIL_ROUTE = "snack"
+    const val MAP_ROUTE = "map"
+    const val SNACK_DETAIL_ROUTE = "notes"
     const val SNACK_ID_KEY = "snackId"
 }
 
