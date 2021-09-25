@@ -288,8 +288,6 @@ fun UserNameAndImage(user: User) {
 
 @Composable
 fun AppBar() {
-    Column {
-        Spacer(Modifier.statusBarsHeight())
         TopAppBar(
             title = { Text(text = "User") },
             navigationIcon = {
@@ -302,7 +300,6 @@ fun AppBar() {
             },
             elevation = 2.dp
         )
-    }
 }
 
 private fun startLoginActivity(context: Context) {

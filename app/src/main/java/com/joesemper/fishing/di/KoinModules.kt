@@ -51,14 +51,12 @@ val mapScreen = module {
 }
 
 val userFragment = module {
-        viewModel { UserViewModel(get(), get()) }
-        single<UserRepository> { UserRepositoryImpl(get(), get()) }
+    viewModel { UserViewModel(get(), get()) }
+    single<UserRepository> { UserRepositoryImpl(get(), get()) }
 }
 
-val newCatchFragment = module {
-    scope(named<NewCatchFragment>()) {
-        viewModel { NewCatchViewModel(get()) }
-    }
+val newCatchScreen = module {
+    viewModel { NewCatchViewModel(get()) }
 }
 
 val newPlaceFragment = module {
@@ -95,7 +93,7 @@ val userPlaceFragment = module {
     }
 }
 val catchesFragment = module {
-        viewModel { UserCatchesViewModel(get()) }
+    viewModel { UserCatchesViewModel(get()) }
 }
 
 val placesFragment = module {

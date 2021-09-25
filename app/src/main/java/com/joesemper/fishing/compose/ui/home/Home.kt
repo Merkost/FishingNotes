@@ -39,8 +39,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.core.os.ConfigurationCompat
 import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -57,13 +59,14 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @InternalCoroutinesApi
 fun NavGraphBuilder.addHomeGraph(
     onSnackSelected: (Long, NavBackStackEntry) -> Unit,
-    modifier: Modifier = Modifier
+    navController: NavController,
+    modifier: Modifier = Modifier,
 ) {
     composable(HomeSections.MAP.route) { from ->
         Map(onSnackClick = { id -> onSnackSelected(id, from) }, modifier)
     }
     composable(HomeSections.NOTES.route) { from ->
-        Notes(onSnackClick = { id -> onSnackSelected(id, from) }, modifier)
+        Notes(onSnackClick = { id -> onSnackSelected(id, from) }, modifier, navController)
     }
     composable(HomeSections.WEATHER.route) { from ->
         Weather(onSnackClick = { id -> onSnackSelected(id, from) }, modifier)

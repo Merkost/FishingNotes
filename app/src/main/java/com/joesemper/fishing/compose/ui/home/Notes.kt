@@ -9,6 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.*
 import com.joesemper.fishing.compose.ui.TabItem
 import kotlinx.coroutines.launch
@@ -20,9 +23,10 @@ import kotlinx.coroutines.launch
 fun Notes(
     onSnackClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
-
+    navController: NavController
 //    state: SearchState = rememberSearchState()
 ) {
+
     val tabs = listOf(TabItem.Places, TabItem.Catches)
     val pagerState = rememberPagerState(pageCount = tabs.size)
 
@@ -31,7 +35,7 @@ fun Notes(
     ) {
         Column {
             Tabs(tabs = tabs, pagerState = pagerState)
-            TabsContent(tabs = tabs, pagerState = pagerState)
+            TabsContent(tabs = tabs, pagerState = pagerState, navController)
         }
     }
 
@@ -70,9 +74,9 @@ fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
 
 @ExperimentalPagerApi
 @Composable
-fun TabsContent(tabs: List<TabItem>, pagerState: PagerState) {
+fun TabsContent(tabs: List<TabItem>, pagerState: PagerState, navController: NavController) {
     HorizontalPager(state = pagerState) { page ->
-        tabs[page].screen()
+        tabs[page].screen(navController)
     }
 }
 
@@ -87,7 +91,7 @@ fun TabsContentPreview() {
         TabItem.Catches,
     )
     val pagerState = rememberPagerState(pageCount = tabs.size)
-    TabsContent(tabs = tabs, pagerState = pagerState)
+    TabsContent(tabs = tabs, pagerState = pagerState, rememberNavController())
 }
 
 

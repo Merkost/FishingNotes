@@ -27,7 +27,6 @@ fun Map(
             .fillMaxWidth()
             .background(Color.White)
     ) {
-        Spacer(Modifier.statusBarsHeight())
         MapViewContainer(mapView, 43.119808, 131.886917)
     }
 }
