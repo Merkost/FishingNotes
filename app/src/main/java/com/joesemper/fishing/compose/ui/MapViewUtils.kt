@@ -97,12 +97,12 @@ fun MapViewContainer(
     when {
         permissionState.hasPermission -> {
             lastKnownLocation.value = LatLng(55.755825, 37.617298) //for testing
-//            val locationResult = fusedLocationProviderClient.lastLocation
-//            locationResult.addOnCompleteListener { task ->
-//                if (task.isSuccessful) {
-//                    lastKnownLocation.value = LatLng(task.result.latitude, task.result.longitude)
-//                }
-//            }
+            val locationResult = fusedLocationProviderClient.lastLocation
+            locationResult.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    lastKnownLocation.value = LatLng(task.result.latitude, task.result.longitude)
+                }
+            }
         }
     }
 
@@ -133,41 +133,7 @@ fun MapViewContainer(
 
 
 
-    fun GoogleMap.setZoom(
-        @FloatRange(from = MinZoom.toDouble(), to = MaxZoom.toDouble()) zoom: Float
-    ) {
-        resetMinMaxZoomPreference()
-        setMinZoomPreference(zoom)
-        setMaxZoomPreference(zoom)
-    }
-}
 
-@Composable
-private fun ZoomControls(
-    zoom: Float,
-    onZoomChanged: (Float) -> Unit
-) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-        ZoomButton("-", onClick = { onZoomChanged(zoom * 0.8f) })
-        ZoomButton("+", onClick = { onZoomChanged(zoom * 1.2f) })
-    }
 }
 
 
-@Composable
-private fun ZoomButton(text: String, onClick: () -> Unit) {
-    Button(
-        modifier = Modifier.padding(8.dp),
-        colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.onPrimary,
-            contentColor = MaterialTheme.colors.primary
-        ),
-        onClick = onClick
-    ) {
-        Text(text = text, style = MaterialTheme.typography.h5)
-    }
-}
-
-private const val InitialZoom = 5f
-const val MinZoom = 2f
-const val MaxZoom = 20f
