@@ -3,13 +3,14 @@ package com.joesemper.fishing.model.datasource
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.joesemper.fishing.model.api.WeatherApiService
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
+import com.joesemper.fishing.model.repository.WeatherRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class WeatherRetrofitImplementation : WeatherProvider {
+class WeatherRepositoryRetrofitImpl : WeatherRepository {
 
     companion object {
         private const val BASE_WEATHER_URL = "https://api.openweathermap.org/data/2.5/"

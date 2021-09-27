@@ -3,17 +3,20 @@ package com.joesemper.fishing
 import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.joesemper.fishing.model.auth.AuthManager
-import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.domain.MainViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
+import com.joesemper.fishing.model.entity.common.User
+import com.joesemper.fishing.model.repository.UserRepository
 import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
-import org.junit.*
+import org.junit.After
 import org.junit.Assert.*
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.core.context.stopKoin
 import org.mockito.Mock
@@ -33,14 +36,14 @@ class MainViewModelTest {
     var testCoroutineRule = TestCoroutineRule()
 
     @Mock
-    private lateinit var repository: AuthManager
+    private lateinit var repository: UserRepository
 
     private lateinit var mainViewModel: MainViewModel
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        mainViewModel = MainViewModel(repository)
+        mainViewModel = MainViewModel()
     }
 
     @Test

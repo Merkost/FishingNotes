@@ -2,16 +2,20 @@ package com.joesemper.fishing.domain
 
 import androidx.lifecycle.ViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.model.repository.UserContentRepository
 import com.joesemper.fishing.model.repository.WeatherRepository
 
-class WeatherViewModel(private val repository: WeatherRepository) : ViewModel() {
+class WeatherViewModel(
+    private val weatherRepository: WeatherRepository,
+    private val contentRepository: UserContentRepository
+) : ViewModel() {
 
-    fun getAllMarkers() = repository.getAllUserMarkersList()
+    fun getAllMarkers() = contentRepository.getAllUserMarkersList()
 
     fun getMarkerWeather(marker: UserMapMarker) =
-        repository.getWeather(marker.latitude, marker.longitude)
+        weatherRepository.getWeather(marker.latitude, marker.longitude)
 
     fun getWeather(latitude: Double, longitude: Double) =
-        repository.getWeather(latitude, longitude)
+        weatherRepository.getWeather(latitude, longitude)
 
 }

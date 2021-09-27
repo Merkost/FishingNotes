@@ -17,10 +17,10 @@ import org.koin.dsl.module
 
 
 val appModule = module {
-    single<DatabaseProvider> { CloudFireStoreDatabaseImpl(get()) }
-    single<AuthManager> { FirebaseAuthManagerImpl(androidContext()) }
-    single<PhotoStorage> { CloudPhotoStorageImpl() }
-    single<UserContentRepository> { UserContentRepositoryImpl(get()) }
+    single<UserRepository> { FirebaseUserRepositoryImpl(androidContext()) }
+    single<UserContentRepository> { CloudFireStoreDatabase(get()) }
+    single<PhotoStorage> { CloudPhotoStorage() }
+    single<WeatherRepository> { WeatherRepositoryRetrofitImpl() }
     single { Logger() }
 
 }
@@ -39,8 +39,7 @@ val splashScreen = module {
 
 val loginScreen = module {
     scope(named<LoginActivity>()) {
-        viewModel { LoginViewModel(get(), get()) }
-        scoped<UserRepository> { UserRepositoryImpl(get(), get()) }
+        viewModel { LoginViewModel(get()) }
     }
 }
 
@@ -55,8 +54,8 @@ val userFragment = module {
     single<UserRepository> { UserRepositoryImpl(get(), get()) }
 }
 
-val newCatchScreen = module {
-    viewModel { NewCatchViewModel(get()) }
+val newCatchFragment = module {
+        viewModel { NewCatchViewModel(get(), get()) }
 }
 
 val newPlaceFragment = module {
@@ -68,15 +67,12 @@ val newPlaceFragment = module {
 val userCatchFragment = module {
     scope(named<UserCatchFragment>()) {
         viewModel { UserCatchViewModel(get(), get()) }
-        scoped<UserRepository> { UserRepositoryImpl(get(), get()) }
     }
 }
 
 val weatherScreen = module {
     scope(named<WeatherFragment>()) {
-        viewModel { WeatherViewModel(get()) }
-        scoped<WeatherProvider> { WeatherRetrofitImplementation() }
-        scoped<WeatherRepository> { WeatherRepositoryImpl(get(), get()) }
+        viewModel { WeatherViewModel(get(), get()) }
     }
 }
 
@@ -89,7 +85,6 @@ val weatherScreen = module {
 val userPlaceFragment = module {
     scope(named<UserPlaceFragment>()) {
         viewModel { UserPlaceViewModel(get(), get()) }
-        scoped<UserRepository> { UserRepositoryImpl(get(), get()) }
     }
 }
 val catchesFragment = module {

@@ -2,13 +2,16 @@ package com.joesemper.fishing.domain
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.joesemper.fishing.model.auth.AuthManager
-import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.domain.viewstates.BaseViewState
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import com.joesemper.fishing.model.entity.common.User
+import com.joesemper.fishing.model.repository.UserRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
-class SplashViewModel(private val repository: AuthManager) : ViewModel() {
+class SplashViewModel(private val repository: UserRepository) : ViewModel() {
 
     private val mutableStateFlow: MutableStateFlow<BaseViewState> =
         MutableStateFlow(BaseViewState.Loading(null))

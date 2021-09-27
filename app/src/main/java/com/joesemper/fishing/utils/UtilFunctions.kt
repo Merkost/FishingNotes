@@ -6,6 +6,8 @@ import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -26,6 +28,12 @@ fun Double.format(digits: Int) = "%.${digits}f".format(this)
 fun Double.roundTo(numFractionDigits: Int): Double {
     val factor = 10.0.pow(numFractionDigits.toDouble())
     return (this * factor).roundToInt() / factor
+}
+
+fun getDateByMilliseconds(ms: Long): String {
+    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+    val date = Date(ms * 1000)
+    return sdf.format(date)
 }
 
 fun View.hide() {
