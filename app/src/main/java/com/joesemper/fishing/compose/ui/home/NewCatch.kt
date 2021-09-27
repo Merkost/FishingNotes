@@ -1,10 +1,14 @@
 package com.joesemper.fishing.compose.ui.home
 
+import android.Manifest
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.net.Uri
 import android.text.format.DateUtils
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
@@ -37,9 +41,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionState
+import com.google.accompanist.permissions.rememberPermissionState
 import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
@@ -69,12 +77,14 @@ viewModel.marker.value = args.marker as UserMapMarker
 isNull = viewModel.marker.value .id.isEmpty()*/
 
 
+@ExperimentalPermissionsApi
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @ExperimentalCoilApi
 @Composable
 fun NewCatchScreen(navController: NavController) {
     val viewModel: NewCatchViewModel = getViewModel()
+
     Scaffold(
         topBar = { NewCatchAppBar(navController) }
     ) {
@@ -481,6 +491,7 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
     }
 }
 
+@ExperimentalPermissionsApi
 @ExperimentalAnimationApi
 @Composable
 fun Photos(
@@ -518,8 +529,19 @@ fun Photos(
     }
 }
 
+@ExperimentalPermissionsApi
 @Composable
 fun ItemAddPhoto() {
+    val viewModel: NewCatchViewModel = getViewModel()
+    val permissionState = rememberPermissionState(Manifest.permission.READ_EXTERNAL_STORAGE)
+    val addPhotoState = rememberSaveable{ mutableStateOf(false) }
+    val choosePhotoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { value ->
+        value.forEach { viewModel.addPhoto(it) }
+    }
+    /*val takePhotoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { value ->
+        viewModel.addPhoto(value.) }
+    }*/
+
     Box(
         modifier = Modifier
             .size(100.dp)
@@ -529,7 +551,7 @@ fun ItemAddPhoto() {
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(5.dp))
-                .clickable { addPhoto() },
+                .clickable { addPhotoState.value = true },
             elevation = 5.dp,
             backgroundColor = Color.LightGray
         ) {
@@ -542,6 +564,13 @@ fun ItemAddPhoto() {
                     .align(Alignment.Center)
             )
         }
+    }
+    if (addPhotoState.value) {
+        LaunchedEffect(addPhotoState) {
+            permissionState.launchPermissionRequest()
+
+        }
+        addPhoto(permissionState, addPhotoState, choosePhotoLauncher)
     }
 }
 
@@ -582,25 +611,30 @@ fun ItemPhoto(photo: Uri, clickedPhoto: (Uri) -> Unit, deletedPhoto: (Uri) -> Un
 
 }
 
-private fun addPhoto() {
-    /*val viewModel: NewCatchViewModel = getViewModel()
-    if (isPermissionAllowed()) {
-        getPhotoListener().showMultiImage { photos ->
-            photos.forEach { uri ->
-                viewModel.addPhoto(uri)
-            }
+@Composable
+@ExperimentalPermissionsApi
+private fun addPhoto(
+    permissionState: PermissionState,
+    addPhotoState: MutableState<Boolean>,
+    choosePhotoLauncher: ManagedActivityResultLauncher<Array<String>, MutableList<Uri>>
+) {
+    when {
+        permissionState.hasPermission -> {
+            choosePhotoLauncher.launch(arrayOf("image/*"))
+            addPhotoState.value = false
+            /*getPhotoListener().showMultiImage { photos ->
+                photos.forEach { uri ->
+                    viewModel.addPhoto(uri)
+                }
+            }*/
         }
-    } else {
-        AlertDialog.Builder(LocalContext.current)
-            .setTitle(getString(R.string.permissions_required))
-            .setMessage(getString(R.string.add_photo_permission))
-            .setPositiveButton(getString(R.string.provide)) { _, _ ->
-                askForPermission()
-            }
-            .setNegativeButton(getString(R.string.deny), null)
-            .show()
-    }*/
+    }
+
 }
+
+
+
+
 
 @Composable
 fun MyTextField(textState: MutableState<String>, label: String) {
