@@ -6,8 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.repository.UserContentRepository
-import com.joesemper.fishing.ui.composable.UiState
-import com.joesemper.fishing.view.weather.utils.getDateByMilliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -2,7 +2,7 @@ package com.joesemper.fishing.di
 
 import com.joesemper.fishing.domain.*
 import com.joesemper.fishing.model.auth.AuthManager
-import com.joesemper.fishing.model.auth.FirebaseAuthManagerImpl
+
 import com.joesemper.fishing.model.datasource.*
 import com.joesemper.fishing.model.repository.*
 import com.joesemper.fishing.ui.LoginActivity
@@ -51,10 +51,10 @@ val mapScreen = module {
 
 val userFragment = module {
     viewModel { UserViewModel(get(), get()) }
-    single<UserRepository> { UserRepositoryImpl(get(), get()) }
+
 }
 
-val newCatchFragment = module {
+val newCatchScreen = module {
         viewModel { NewCatchViewModel(get(), get()) }
 }
 

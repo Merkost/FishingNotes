@@ -49,6 +49,7 @@ import com.joesemper.fishing.utils.showToast
 import gun0912.tedbottompicker.TedBottomPicker
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.androidx.compose.getViewModel
+import java.io.File
 import java.util.*
 
 
@@ -739,7 +740,7 @@ fun LoadingDialog(loadingDialog: MutableState<Boolean>, loadingValue: MutableSta
     )
 }
 
-private fun getPhotos(): List<ByteArray> {
+private fun getPhotos(): List<File> {
     /*val viewModel: NewCatchViewModel = getViewModel()
     val result = mutableListOf<ByteArray>()
 //    val job = lifecycle.coroutineScope.launchWhenStarted {
