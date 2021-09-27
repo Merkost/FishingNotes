@@ -22,6 +22,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
+import java.io.File
 
 
 class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : DatabaseProvider {
@@ -376,7 +377,7 @@ class CloudFireStoreDatabaseImpl(private val cloudPhotoStorage: PhotoStorage) : 
 
 
     private suspend fun savePhotos(
-        photos: List<ByteArray>,
+        photos: List<File>,
         progressFlow: MutableStateFlow<Progress>
     ) =
         cloudPhotoStorage.uploadPhotos(photos, progressFlow)

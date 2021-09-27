@@ -1,6 +1,8 @@
 package com.joesemper.fishing.model.entity.raw
 
-data class RawUserCatch (
+import java.io.File
+
+data class RawUserCatch(
     val title: String = "My marker",
     val description: String? = "",
     val date: String = "",
@@ -15,5 +17,5 @@ data class RawUserCatch (
     val markerId: String = "",
     val isPublic: Boolean = false,
     val includeWeather: Boolean = true,
-    val photos: List<ByteArray> = listOf(),
+    val photos: List<File> = listOf(),
 )

@@ -36,7 +36,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
@@ -49,8 +48,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toFile
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.coroutineScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import coil.annotation.ExperimentalCoilApi
@@ -65,10 +64,14 @@ import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.utils.NavigationHolder
 import com.joesemper.fishing.utils.showToast
 import gun0912.tedbottompicker.TedBottomPicker
+import id.zelory.compressor.Compressor
+import id.zelory.compressor.constraint.quality
+import kotlinx.coroutines.runBlocking
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.fragmentScope
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.scope.Scope
+import java.io.File
 import java.util.*
 
 
@@ -226,9 +229,11 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                             isDropMenuOpen = true
                         }
                     },
-                    modifier = Modifier.fillMaxWidth().onFocusChanged {
-                        isDropMenuOpen = it.isFocused
-                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusChanged {
+                            isDropMenuOpen = it.isFocused
+                        },
                     label = { Text(text = label) },
                     trailingIcon = {
                         if (isNull) {
@@ -788,25 +793,17 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         returnTransition = MaterialFadeThrough()
     }
 
-    private fun getPhotos(): List<ByteArray> {
-
-        val result = mutableListOf<ByteArray>()
-        val job = lifecycle.coroutineScope.launchWhenStarted {
-
+    private fun getPhotos(): List<File> {
+        return runBlocking {
+            val result = mutableListOf<File>()
+            viewModel.images.forEach {
+                val compressedImageFile = Compressor.compress(requireContext(), it.toFile()) {
+                    quality(50)
+                }
+                result.add(compressedImageFile)
+            }
+            result
         }
-
-        /*TODO(URI TO BYTEARRAY IN COROUTINE SCOPE)*/
-        viewModel.images.forEach {
-//            val baos = ByteArrayOutputStream()
-//            val inputStream = requireActivity().contentResolver.openInputStream(it)
-//            val bmp = BitmapFactory.decodeStream(inputStream)
-//            bmp.compress(Bitmap.CompressFormat.JPEG, 50, baos)
-//            result.add(baos.toByteArray())
-            requireActivity().contentResolver.openInputStream(it)
-                ?.readBytes()
-                ?.let { it1 -> result.add(it1) }
-        }
-        return result
     }
 
     private fun getPhotoListener() =
@@ -949,31 +946,6 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
 //            }
 //        }
 //    }
-
-        //TODO("Photo convert from Uri to ByteArray in CoroutineScope")
-//        try {
-//            val bitmap = MediaStore.Images.Media.getBitmap(c.getContentResolver(), Uri.parse(paths))
-//        } catch (e: Exception) {
-//            //handle exception
-//        }
-//        return coroutineScope {
-//            val job = launch {
-//                try {
-//                    uris.forEach {
-//                        val stream = requireActivity().contentResolver.openInputStream(it)
-//                        val bitmap = BitmapDrawable(resources, stream).bitmap
-//                        val baos = ByteArrayOutputStream()
-//                        bitmap.compress(Bitmap.CompressFormat.JPEG, 20, baos)
-//                        result.add(baos.toByteArray())
-//                    }
-//                } catch (e: Throwable) {
-//                    Log.d("F", e.message, e)
-//                }
-//            }
-//            job.join()
-//            result
-//        }
-
 
 //    private fun setInitialPlaceData() {
 //        binding.etNewCatchPlaceTitle.setText(marker.title)

@@ -1,15 +1,11 @@
 package com.joesemper.fishing.utils
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import android.view.View
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import java.io.ByteArrayOutputStream
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -54,13 +50,6 @@ fun BottomSheetBehavior<ConstraintLayout>.hide() {
 
 fun BottomSheetBehavior<ConstraintLayout>.collapse() {
     this.state = BottomSheetBehavior.STATE_COLLAPSED
-}
-
-fun getByteArrayFromImageVew(view: ImageView): ByteArray {
-    val bitmap = (view.drawable as BitmapDrawable).bitmap
-    val baos = ByteArrayOutputStream()
-    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-    return baos.toByteArray()
 }
 
 fun showToast(context: Context, text: String) {

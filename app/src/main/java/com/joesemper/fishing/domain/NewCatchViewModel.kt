@@ -10,14 +10,21 @@ import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawUserCatch
+import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.repository.UserContentRepository
+import com.joesemper.fishing.model.repository.WeatherRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.io.File
 
-class NewCatchViewModel(private val repository: UserContentRepository) : ViewModel() {
+class NewCatchViewModel(
+    private val repository: UserContentRepository,
+    private val weatherRepository: WeatherRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
     val uiState: StateFlow<BaseViewState>
@@ -36,6 +43,15 @@ class NewCatchViewModel(private val repository: UserContentRepository) : ViewMod
     val lure = mutableStateOf("")
 
     val images = mutableStateListOf<Uri>()
+
+    val weather: MutableState<WeatherForecast>
+        get() {
+            return runBlocking {
+                marker.value.run {
+                    mutableStateOf(weatherRepository.getWeatherForecast(latitude, longitude))
+                }
+            }
+        }
 
     fun addPhoto(uri: Uri) {
         images.add(uri)
@@ -78,23 +94,25 @@ class NewCatchViewModel(private val repository: UserContentRepository) : ViewMod
         return title.value.isNotBlank() && marker.value.title.isNotEmpty()
     }
 
-    fun createNewUserCatch(photos: List<ByteArray>): Boolean {
+    fun createNewUserCatch(photos: List<File>): Boolean {
         if (isInputCorrect()) {
-            addNewCatch(RawUserCatch(
-                title = title.value,
-                description = description.value,
-                time = time.value,
-                date = date.value,
-                //fishType = fish,
-                fishAmount = fishAmount.value.toInt(),
-                fishWeight = weight.value.toDouble(),
-                fishingRodType = rod.value,
-                fishingBait = bite.value,
-                fishingLure = lure.value,
-                markerId = marker.value.id,
-                isPublic = false,
-                photos = photos
-            ))
+            addNewCatch(
+                RawUserCatch(
+                    title = title.value,
+                    description = description.value,
+                    time = time.value,
+                    date = date.value,
+                    //fishType = fish,
+                    fishAmount = fishAmount.value.toInt(),
+                    fishWeight = weight.value.toDouble(),
+                    fishingRodType = rod.value,
+                    fishingBait = bite.value,
+                    fishingLure = lure.value,
+                    markerId = marker.value.id,
+                    isPublic = false,
+                    photos = photos
+                )
+            )
             return true
         } else return false
 

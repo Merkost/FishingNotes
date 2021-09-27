@@ -1,5 +1,6 @@
 package com.joesemper.fishing.model.datasource
 
+import androidx.core.net.toUri
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.take
+import java.io.File
 
 class CloudPhotoStorageImpl : PhotoStorage {
 
@@ -20,7 +22,7 @@ class CloudPhotoStorageImpl : PhotoStorage {
 
     @ExperimentalCoroutinesApi
     override suspend fun uploadPhotos(
-        photos: List<ByteArray>,
+        photos: List<File>,
         progressFlow: MutableStateFlow<Progress>
     ): List<String> {
         val downloadLinks = mutableListOf<String>()
@@ -38,13 +40,13 @@ class CloudPhotoStorageImpl : PhotoStorage {
     }
 
     @ExperimentalCoroutinesApi
-    private fun savePhotosToDb(photoByteArrays: List<ByteArray>) = callbackFlow {
+    private fun savePhotosToDb(photoByteArrays: List<File>) = callbackFlow {
         val uploadTasks = mutableListOf<UploadTask>()
 
-        photoByteArrays.forEach { photoByteArray ->
+        photoByteArrays.forEach { photo ->
             val riversRef = storageRef.child("markerImages/${getNewPhotoId()}")
 
-            val uploadTask = riversRef.putBytes(photoByteArray)
+            val uploadTask = riversRef.putFile(photo.toUri())
             uploadTasks.add(uploadTask)
 
             val callback = uploadTask.continueWithTask { task ->
