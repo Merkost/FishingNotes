@@ -12,6 +12,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.fragment.findNavController
 import com.joesemper.fishing.domain.UserPlacesViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
@@ -22,7 +24,7 @@ import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
 @Composable
-fun UserPlacesScreen( viewModel: UserPlacesViewModel = getViewModel<UserPlacesViewModel>()) {
+fun UserPlacesScreen(navController: NavController, viewModel: UserPlacesViewModel = getViewModel<UserPlacesViewModel>()) {
     Scaffold() {
         val uiState by viewModel.uiState.collectAsState()
         Crossfade(uiState, animationSpec = tween(500)) { animatedUiState ->
@@ -33,7 +35,8 @@ fun UserPlacesScreen( viewModel: UserPlacesViewModel = getViewModel<UserPlacesVi
                     (animatedUiState as BaseViewState.Success<*>).data as List<UserMapMarker>, {
                         onAddNewPlaceClick()
                     }, { userMarker ->
-                        onPlaceItemClick(userMarker)
+
+                        //onPlaceItemClick(userMarker)
                     }
                 )
                 is BaseViewState.Error -> {

@@ -12,17 +12,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.navigation.fragment.findNavController
+import androidx.navigation.NavController
 import com.joesemper.fishing.domain.UserCatchesViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserCatch
-import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.fragments.NotesFragmentDirections
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
 @Composable
-fun UserCatchesScreen(viewModel: UserCatchesViewModel = getViewModel<UserCatchesViewModel>()) {
+fun UserCatchesScreen(navController: NavController, viewModel: UserCatchesViewModel = getViewModel<UserCatchesViewModel>()) {
     Scaffold() {
         val uiState by viewModel.uiState.collectAsState()
         Crossfade(uiState, animationSpec = tween(500)) { animatedUiState ->
@@ -31,7 +29,8 @@ fun UserCatchesScreen(viewModel: UserCatchesViewModel = getViewModel<UserCatches
                     UserCatchesLoading { onAddNewCatchClick() }
                 is BaseViewState.Success<*> -> UserCatches(
                     (uiState as BaseViewState.Success<*>).data as List<UserCatch>,
-                    { onAddNewCatchClick() }, { catch -> onCatchItemClick(catch) })
+                    { navController.navigate("new_catch")
+                        onAddNewCatchClick() }, { catch -> onCatchItemClick(catch) })
                 is BaseViewState.Error -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),

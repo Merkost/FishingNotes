@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.os.bundleOf
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
@@ -27,6 +28,7 @@ import kotlinx.coroutines.launch
  */
 object MainDestinations {
     const val MAP_ROUTE = "map"
+    const val NEW_CATCH_ROUTE = "new_catch"
     const val SNACK_DETAIL_ROUTE = "notes"
     const val SNACK_ID_KEY = "snackId"
 }

@@ -14,6 +14,7 @@ object Libs {
         const val flowlayouts = "com.google.accompanist:accompanist-flowlayout:$version"
         const val pager = "com.google.accompanist:accompanist-pager:$version"
         const val pagerindicators = "com.google.accompanist:accompanist-pager-indicators:$version"
+        const val permissions = "com.google.accompanist:accompanist-permissions:$version"
     }
 
     object GoogleMaps {
