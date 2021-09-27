@@ -137,7 +137,7 @@ fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>, navController: NavC
                     "Ваш улов успешно добавлен!",
                     Toast.LENGTH_SHORT
                 ).show()
-                navController.popBackStack()
+                //navController.popBackStack()
             }
         }
         is BaseViewState.Loading -> {
