@@ -72,7 +72,7 @@ fun NavGraphBuilder.addHomeGraph(
         Weather(onSnackClick = { id -> onSnackSelected(id, from) }, modifier)
     }
     composable(HomeSections.PROFILE.route) {
-        Profile(modifier)
+        Profile(navController, modifier)
     }
 }
 

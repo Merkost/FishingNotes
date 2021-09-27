@@ -24,11 +24,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
-import com.google.accompanist.insets.statusBarsHeight
 import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.UserViewModel
 import com.joesemper.fishing.model.entity.common.User
@@ -46,13 +47,13 @@ import org.koin.androidx.compose.getViewModel
 @ExperimentalMaterialApi
 @ExperimentalCoilApi
 @Composable
-fun Profile(modifier: Modifier = Modifier) {
+fun Profile(navController: NavController, modifier: Modifier = Modifier) {
     val viewModel = getViewModel<UserViewModel>()
 
 
     val uiState = viewModel.uiState
     Scaffold(
-        topBar = { AppBar() },
+        topBar = { AppBar(navController) },
         content = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -287,11 +288,11 @@ fun UserNameAndImage(user: User) {
 }
 
 @Composable
-fun AppBar() {
+fun AppBar(navController: NavController) {
         TopAppBar(
             title = { Text(text = "User") },
             navigationIcon = {
-                IconButton(onClick = { /*findNavController().popBackStack()*/ }) {
+                IconButton(onClick = { navController.popBackStack() }) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.back)
@@ -316,7 +317,7 @@ private fun startLoginActivity(context: Context) {
 @Composable
 fun ProfilePreview() {
     FigmaTheme {
-        Profile()
+        Profile(rememberNavController())
     }
 }
 

@@ -5,7 +5,6 @@ import android.app.TimePickerDialog
 import android.net.Uri
 import android.text.format.DateUtils
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
@@ -38,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import androidx.fragment.app.FragmentActivity
-import androidx.navigation.fragment.NavHostFragment.findNavController
+import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.joesemper.fishing.R
@@ -58,11 +57,11 @@ import java.util.*
 private val dateAndTime = Calendar.getInstance()
 private var isNull: Boolean = true
 
-//companion object {
+object Constants {
     private const val READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE = 111
-    private const val ITEM_ADD_PHOTO = "ITEM_ADD_PHOTO"
-    private const val ITEM_PHOTO = "ITEM_PHOTO"
-//}
+    const val ITEM_ADD_PHOTO = "ITEM_ADD_PHOTO"
+    const val ITEM_PHOTO = "ITEM_PHOTO"
+}
 
 /*
 viewModel.marker.value = args.marker as UserMapMarker
@@ -73,12 +72,12 @@ isNull = viewModel.marker.value .id.isEmpty()*/
 @ExperimentalMaterialApi
 @ExperimentalCoilApi
 @Composable
-fun NewCatchScreen() {
+fun NewCatchScreen(navController: NavController) {
     val viewModel: NewCatchViewModel = getViewModel()
     Scaffold(
-        topBar = { NewCatchAppBar() }
+        topBar = { NewCatchAppBar(navController) }
     ) {
-        SubscribeToProgress(viewModel.uiState)
+        SubscribeToProgress(viewModel.uiState, navController)
         val scrollState = rememberScrollState()
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -90,7 +89,6 @@ fun NewCatchScreen() {
                 .verticalScroll(state = scrollState, enabled = true),
         ) {
             Places(stringResource(R.string.place), viewModel)  //Выпадающий список мест
-            //FishSpeciesAndDescription()
 
             FishAndWeight(viewModel.fishAmount, viewModel.weight)
 
@@ -104,7 +102,7 @@ fun NewCatchScreen() {
 }
 
 @Composable
-fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>) {
+fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>, navController: NavController) {
     val errorDialog = rememberSaveable { mutableStateOf(false) }
     val loadingDialog = rememberSaveable { mutableStateOf(false) }
     val loadingValue = rememberSaveable { mutableStateOf(0) }
@@ -118,7 +116,7 @@ fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>) {
                     "Ваш улов успешно добавлен!",
                     Toast.LENGTH_SHORT
                 ).show()
-                //findNavController().popBackStack()
+                navController.popBackStack()
             }
         }
         is BaseViewState.Loading -> {
@@ -137,18 +135,11 @@ fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>) {
     }
 }
 
-@Composable
-fun FishSpeciesAndDescription() {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        /*FishSpecies(viewModel.title)
-        MyTextField(viewModel.description, stringResource(R.string.description))*/
-    }
-}
-
 //TODO("AutoCompleteTextView for places textField")
 @Composable
 private fun Places(label: String, viewModel: NewCatchViewModel) {
-
+    val context = LocalContext.current
+    val changePlaceError = stringResource(R.string.Another_place_in_new_catch)
     val marker by rememberSaveable { viewModel.marker }
     var textFieldValue by rememberSaveable {
         mutableStateOf(
@@ -215,10 +206,10 @@ private fun Places(label: String, viewModel: NewCatchViewModel) {
                         stringResource(R.string.locked),
                         tint = primaryFigmaColor,
                         modifier = Modifier.clickable {
-                            /*showToast(
-                                LocalContext.current,
-                                stringResource(R.string.Another_place_in_new_catch)
-                            )*/
+                            showToast(
+                                context,
+                                changePlaceError
+                            )
 
                         })
                 },
@@ -543,7 +534,7 @@ fun ItemAddPhoto() {
         ) {
             Icon(
                 painterResource(R.drawable.ic_baseline_add_photo_alternate_24), //Or we can use Icons.Default.Add
-                contentDescription = ITEM_ADD_PHOTO,
+                contentDescription = Constants.ITEM_ADD_PHOTO,
                 tint = Color.White,
                 modifier = Modifier
                     .fillMaxSize()
@@ -563,7 +554,7 @@ fun ItemPhoto(photo: Uri, clickedPhoto: (Uri) -> Unit, deletedPhoto: (Uri) -> Un
                 .padding(4.dp)
         ) {
             Image(painter = rememberImagePainter(data = pic),
-                contentDescription = ITEM_PHOTO,
+                contentDescription = Constants.ITEM_PHOTO,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -674,12 +665,12 @@ fun DateAndTime(dateState: MutableState<String>, timeState: MutableState<String>
 }
 
 @Composable
-fun NewCatchAppBar() {
+fun NewCatchAppBar(navController: NavController) {
     val viewModel: NewCatchViewModel = getViewModel()
     TopAppBar(
         title = { Text(text = stringResource(R.string.new_catch)) },
         navigationIcon = {
-            IconButton(onClick = { /*findNavController().popBackStack()*/ }) {
+            IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.back)

@@ -6,12 +6,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Snackbar
-import androidx.compose.material.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,8 +15,6 @@ import androidx.navigation.compose.navArgument
 import coil.annotation.ExperimentalCoilApi
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.statusBarsHeight
-import com.google.accompanist.insets.statusBarsPadding
-import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.compose.ui.MainDestinations
@@ -114,7 +108,7 @@ private fun NavGraphBuilder.NavGraph(
         route = MainDestinations.NEW_CATCH_ROUTE,
         //arguments = listOf(navArgument(MainDestinations.SNACK_ID_KEY) { type = NavType.LongType })
     ) { backStackEntry ->
-        NewCatchScreen()
+        NewCatchScreen(navController)
         //val arguments = requireNotNull(backStackEntry.arguments)
         //val snackId = arguments.getLong(MainDestinations.SNACK_ID_KEY)
 //        SnackDetail(snackId, upPress)

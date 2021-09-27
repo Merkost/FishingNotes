@@ -10,7 +10,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.*
 import com.joesemper.fishing.compose.ui.TabItem
@@ -23,7 +22,7 @@ import kotlinx.coroutines.launch
 fun Notes(
     onSnackClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
 //    state: SearchState = rememberSearchState()
 ) {
 
@@ -31,7 +30,7 @@ fun Notes(
     val pagerState = rememberPagerState(pageCount = tabs.size)
 
     Scaffold(
-        topBar = { AppBar() },
+        topBar = { AppBar(navController) },
     ) {
         Column {
             Tabs(tabs = tabs, pagerState = pagerState)
