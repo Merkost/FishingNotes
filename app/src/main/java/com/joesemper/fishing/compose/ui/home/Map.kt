@@ -2,6 +2,7 @@ package com.joesemper.fishing.compose.ui.home
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -25,6 +26,7 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.Task
 import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.LatLng
@@ -32,13 +34,14 @@ import com.google.android.libraries.maps.model.MarkerOptions
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @ExperimentalPermissionsApi
 @Composable
 fun Map(
     onSnackClick: (Long) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val mapView = rememberMapViewWithLifecycle()
     Column(
@@ -58,138 +61,189 @@ fun Map(
 fun MapViewContainer(
     map: MapView,
 ) {
-    Box(contentAlignment = Alignment.Center) {
-        val context = LocalContext.current
+//    val viewModel: MapViewModel = getViewModel()
 
-        val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
-        val fusedLocationProviderClient =
-            LocationServices.getFusedLocationProviderClient(context)
+    val coroutineScope = rememberCoroutineScope()
 
-        val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
+    val fusedLocationProviderClient =
+        LocationServices.getFusedLocationProviderClient(context)
 
-//    if (permissionsState.permissionRequested) {
-        PermissionDialog(permissionsState)
-//    }
+    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
 
-        val lastKnownLocation = remember {
-            mutableStateOf(LatLng(0.0, 0.0))
-        }
-
-        if (permissionsState.allPermissionsGranted) {
-            val locationResult = fusedLocationProviderClient.lastLocation
-            locationResult.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    lastKnownLocation.value = LatLng(task.result.latitude, task.result.longitude)
-                }
-            }
-        }
-
-        AndroidView(
-            { map },
-            modifier = Modifier.zIndex(-0.1f)
-        ) { mapView ->
-            coroutineScope.launch {
-                val googleMap = mapView.awaitMap()
-                googleMap.isMyLocationEnabled = permissionsState.allPermissionsGranted
-//                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLocation.value, 5f))
-            }
-        }
-
-        LaunchedEffect(map) {
-            val googleMap = map.awaitMap()
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLocation.value, 5f))
-        }
-
-        ConstraintLayout(modifier = Modifier.matchParentSize()) {
-            val (fab, pointer) = createRefs()
-
-            val placeSelectMode = remember {
-                mutableStateOf(false)
-            }
-
-            fun moveCameraToCurrentLocation() {
-                coroutineScope.launch {
-                    val googleMap = map.awaitMap()
-                    googleMap.animateCamera(
-                        CameraUpdateFactory.newLatLngZoom(
-                            lastKnownLocation.value,
-                            10f
-                        )
-                    )
-                }
-            }
-
-            FloatingActionButton(
-                onClick = {
-                    if (placeSelectMode.value) {
-                        coroutineScope.launch {
-                            val googleMap = map.awaitMap()
-                            val lat = googleMap.cameraPosition.target.latitude
-                            val lon = googleMap.cameraPosition.target.longitude
-                            googleMap.cameraPosition.target
-                            googleMap.addMarker(MarkerOptions().position(LatLng(lat, lon)))
-                        }
-                    } else {
-                        moveCameraToCurrentLocation()
-                    }
-
-                    placeSelectMode.value = !placeSelectMode.value
-                }, modifier = Modifier.constrainAs(fab) {
-                    bottom.linkTo(parent.bottom, margin = 24.dp)
-                    absoluteRight.linkTo(parent.end, margin = 24.dp)
-                }
-            ) {
-                Icon(
-                    painter = painterResource(
-                        id = if (placeSelectMode.value) R.drawable.ic_baseline_check_24
-                        else R.drawable.ic_baseline_add_location_24
-                    ),
-                    contentDescription = "Add new location",
-                    tint = Color.White,
-                )
-            }
-
-            if (placeSelectMode.value) {
-                Icon(
-                    modifier = Modifier
-                        .constrainAs(pointer) {
-                            top.linkTo(parent.top)
-                            bottom.linkTo(parent.bottom)
-                            absoluteLeft.linkTo(parent.absoluteLeft)
-                            absoluteRight.linkTo(parent.absoluteRight)
-                        }
-                        .height(64.dp)
-                        .width(64.dp),
-                    painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                    contentDescription = "pointer",
-                    tint = secondaryFigmaColor,
-                )
-            }
-        }
-
-        fun checkPermission(): Boolean {
-            return ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        }
-
+    val placeSelectMode = remember {
+        mutableStateOf(false)
     }
 
+    val lastKnownLocation = remember {
+        mutableStateOf(LatLng(0.0, 0.0))
+    }
+
+    fun updateLastKnownLocation(task: Task<Location>) {
+        if (task.isSuccessful) {
+            lastKnownLocation.value = LatLng(task.result.latitude, task.result.longitude)
+            coroutineScope.launch {
+                val googleMap = map.awaitMap()
+                googleMap.animateCamera(
+                    CameraUpdateFactory.newLatLngZoom(
+                        lastKnownLocation.value,
+                        DEFAULT_ZOOM
+                    )
+                )
+            }
+        }
+    }
+
+    fun enableMyLocationOnMap() {
+        coroutineScope.launch {
+            val googleMap = map.awaitMap()
+            googleMap.isMyLocationEnabled = true
+        }
+    }
+
+    if (permissionsState.allPermissionsGranted) {
+        val locationResult = fusedLocationProviderClient.lastLocation
+        locationResult.addOnCompleteListener { task ->
+            updateLastKnownLocation(task)
+            enableMyLocationOnMap()
+        }
+    }
+
+    fun setNewMarkerOnMap() {
+        coroutineScope.launch {
+            val googleMap = map.awaitMap()
+            val lat = googleMap.cameraPosition.target.latitude
+            val lon = googleMap.cameraPosition.target.longitude
+            googleMap.cameraPosition.target
+            googleMap.addMarker(MarkerOptions().position(LatLng(lat, lon)))
+        }
+    }
+
+    fun moveCameraToCurrentLocation() {
+        coroutineScope.launch {
+            val googleMap = map.awaitMap()
+            googleMap.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    lastKnownLocation.value,
+                    DEFAULT_ZOOM
+                )
+            )
+        }
+    }
+
+    Scaffold(
+        floatingActionButton = {
+            FubAddNewPlace(placeSelectMode.value) {
+                if (placeSelectMode.value) {
+                    setNewMarkerOnMap()
+                } else {
+                    moveCameraToCurrentLocation()
+                }
+                placeSelectMode.value = !placeSelectMode.value
+            }
+        },
+        floatingActionButtonPosition = FabPosition.End,
+    ) {
+        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+            val (permissionDialog, mapLayout, pointer) = createRefs()
+
+            PermissionDialog(modifier = Modifier.constrainAs(permissionDialog) {
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+            }, permissionsState = permissionsState)
+
+            GoogleMapLayout(
+                modifier = Modifier.constrainAs(mapLayout) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    absoluteRight.linkTo(parent.absoluteRight)
+                },
+                map = map,
+                coroutineScope = coroutineScope
+            )
+
+            if (placeSelectMode.value) {
+                PointerIcon(modifier = Modifier.constrainAs(pointer) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    absoluteRight.linkTo(parent.absoluteRight)
+                })
+            }
+
+        }
+    }
+
+    fun checkPermission(): Boolean {
+        return ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) != PackageManager.PERMISSION_GRANTED
+    }
+}
+
+
+@Composable
+fun GoogleMapLayout(modifier: Modifier, map: MapView, coroutineScope: CoroutineScope) {
+    AndroidView(
+        { map },
+        modifier = modifier.zIndex(-1.0f)
+    ) { mapView ->
+        coroutineScope.launch {
+            val googleMap = mapView.awaitMap()
+
+        }
+    }
+
+    LaunchedEffect(map) {
+        val googleMap = map.awaitMap()
+    }
+}
+
+@Composable
+fun PointerIcon(modifier: Modifier) {
+    Icon(
+        modifier = modifier
+            .height(64.dp)
+            .width(64.dp),
+        painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+        contentDescription = "pointer",
+        tint = secondaryFigmaColor,
+    )
+}
+
+@Composable
+fun FubAddNewPlace(placeSelectMode: Boolean, onClick: () -> Unit) {
+    FloatingActionButton(
+        onClick = onClick
+
+    ) {
+        Icon(
+            painter = painterResource(
+                id = if (placeSelectMode) R.drawable.ic_baseline_check_24
+                else R.drawable.ic_baseline_add_location_24
+            ),
+            contentDescription = "Add new location",
+            tint = Color.White,
+        )
+    }
 }
 
 @ExperimentalPermissionsApi
 @Composable
-fun PermissionDialog(permissionsState: MultiplePermissionsState) {
+fun PermissionDialog(modifier: Modifier, permissionsState: MultiplePermissionsState) {
     PermissionsRequired(
         multiplePermissionsState = permissionsState,
         permissionsNotGrantedContent = {
             Card(
-                modifier = Modifier
+                modifier = modifier
                     .wrapContentSize()
                     .padding(8.dp)
                     .zIndex(1.0f)
@@ -259,6 +313,8 @@ val locationPermissionsList = listOf(
     Manifest.permission.ACCESS_FINE_LOCATION,
     Manifest.permission.ACCESS_COARSE_LOCATION
 )
+
+const val DEFAULT_ZOOM = 15f
 
 
 
