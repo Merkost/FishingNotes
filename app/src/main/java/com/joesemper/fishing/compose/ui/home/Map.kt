@@ -184,6 +184,7 @@ fun Map(
 @ExperimentalMaterialApi
 @Composable
 fun BottomSheetMarkerDialog(marker: UserMapMarker?) {
+    Spacer(modifier = Modifier.size(1.dp))
     marker?.let {
 
         ConstraintLayout() {
