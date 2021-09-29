@@ -2,6 +2,7 @@ package com.joesemper.fishing.domain
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -21,13 +22,16 @@ class MapViewModel(
 
     private val mapMarkers = MutableStateFlow(listOf<UserMapMarker>())
 
-    fun getAllMarkers(): StateFlow<List<UserMapMarker>> = mapMarkers
-
-    fun subscribe(): StateFlow<BaseViewState> = viewStateFlow
+    val mapState = MutableStateFlow(Pair<LatLng?, Float?>(null, null))
 
     init {
         loadMarkers()
     }
+
+    fun getAllMarkers(): StateFlow<List<UserMapMarker>> = mapMarkers
+
+    fun subscribe(): StateFlow<BaseViewState> = viewStateFlow
+
 
     override fun onCleared() {
         super.onCleared()
@@ -37,10 +41,8 @@ class MapViewModel(
     private fun loadMarkers() {
         viewModelScope.launch {
             repository.getAllUserMarkersList().collect { markers ->
-                viewStateFlow.value = BaseViewState.Success(markers)
                 mapMarkers.value = markers as List<UserMapMarker>
             }
-
         }
     }
 
