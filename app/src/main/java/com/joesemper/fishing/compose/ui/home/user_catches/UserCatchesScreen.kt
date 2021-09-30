@@ -13,6 +13,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import com.joesemper.fishing.compose.ui.Arguments
+import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.domain.UserCatchesViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserCatch
@@ -26,11 +28,10 @@ fun UserCatchesScreen(navController: NavController, viewModel: UserCatchesViewMo
         Crossfade(uiState, animationSpec = tween(500)) { animatedUiState ->
             when (animatedUiState) {
                 is BaseViewState.Loading ->
-                    UserCatchesLoading { onAddNewCatchClick() }
+                    UserCatchesLoading { onAddNewCatchClick(navController) }
                 is BaseViewState.Success<*> -> UserCatches(
                     (uiState as BaseViewState.Success<*>).data as List<UserCatch>,
-                    { navController.navigate("new_catch")
-                        onAddNewCatchClick() }, { catch -> onCatchItemClick(catch) })
+                    { onAddNewCatchClick(navController) }, { catch -> onCatchItemClick(catch, navController) })
                 is BaseViewState.Error -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -44,16 +45,11 @@ fun UserCatchesScreen(navController: NavController, viewModel: UserCatchesViewMo
     }
 }
 
-private fun onAddNewCatchClick() {
-    /*val action =
-        NotesFragmentDirections.actionNotesFragmentToNewCatchDialogFragment(
-            UserMapMarker()
-        )
-    findNavController().navigate(action)*/
+private fun onAddNewCatchClick(navController: NavController) {
+    navController.navigate(MainDestinations.NEW_CATCH_ROUTE)
 }
 
-private fun onCatchItemClick(catch: UserCatch) {
-    /*val action =
-        NotesFragmentDirections.actionNotesFragmentToUserCatchFragment(catch)
-    findNavController().navigate(action)*/
+private fun onCatchItemClick(catch: UserCatch, navController: NavController) {
+    navController.currentBackStackEntry?.arguments?.putParcelable(Arguments.CATCH, catch)
+    navController.navigate(MainDestinations.CATCH_ROUTE)
 }

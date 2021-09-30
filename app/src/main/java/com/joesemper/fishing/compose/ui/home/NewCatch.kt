@@ -4,7 +4,10 @@ import android.Manifest
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.FileUtils
 import android.text.format.DateUtils
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -41,10 +44,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
+import androidx.core.net.toFile
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
-import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
@@ -55,8 +58,12 @@ import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.utils.showToast
+import id.zelory.compressor.Compressor
+import id.zelory.compressor.constraint.quality
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.runBlocking
 import org.koin.androidx.compose.getViewModel
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.*
 
@@ -82,18 +89,19 @@ isNull = viewModel.marker.value .id.isEmpty()*/
 @ExperimentalMaterialApi
 @ExperimentalCoilApi
 @Composable
-fun NewCatchScreen(navController: NavController) {
+fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
 
     val viewModel: NewCatchViewModel = getViewModel()
     val context = LocalContext.current
     val notAllFieldsFilled = stringResource(R.string.not_all_fields_are_filled)
+    place?.let { viewModel.marker.value = it; isNull = false }
 
     Scaffold(
         topBar = { NewCatchAppBar(navController) },
         floatingActionButton = {
             FloatingActionButton(modifier = Modifier.navigationBarsWithImePadding(),
                 onClick = { if (viewModel.isInputCorrect())
-                viewModel.createNewUserCatch(getPhotos()) else showToast(context, notAllFieldsFilled) }) {
+                viewModel.createNewUserCatch(getPhotos(viewModel, context)) else showToast(context, notAllFieldsFilled) }) {
                 Icon(Icons.Filled.Done, stringResource(R.string.create))
             }
         }
@@ -138,6 +146,8 @@ fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>, navController: NavC
                     Toast.LENGTH_SHORT
                 ).show()
                 //navController.popBackStack()
+                navController.popBackStack("new_catch", inclusive = true)
+                //navController.navigateUp() //to the map screen
             }
         }
         is BaseViewState.Loading -> {
@@ -288,38 +298,6 @@ private fun searchFor(
         }
     }
 }
-
-//@Composable
-//fun Place(label: String) {
-//
-//    OutlinedTextField(
-//        value = viewModel.marker.value.title, onValueChange = { }, readOnly = true,
-//        label = { Text(text = label) }, modifier = Modifier.fillMaxWidth()
-//    )
-//}
-
-/*@ExperimentalMaterialApi
-@Composable
-private fun BottomSheet() {
-    Row(
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .height(65.dp)
-            .fillMaxWidth()
-    ) {
-        Spacer(modifier = Modifier.size(20.dp))
-        OutlinedButton(
-            onClick = { findNavController().popBackStack() }) {
-            Text(text = stringResource(R.string.cancel))
-        }
-        Spacer(modifier = Modifier.size(20.dp))
-        OutlinedButton() {
-            Text(text = stringResource(R.string.create))
-        }
-        Spacer(modifier = Modifier.size(20.dp))
-    }
-}*/
 
 @Composable
 fun FishSpecies(name: MutableState<String>) {
@@ -720,10 +698,12 @@ fun DateAndTime(dateState: MutableState<String>, timeState: MutableState<String>
 @Composable
 fun NewCatchAppBar(navController: NavController) {
     val viewModel: NewCatchViewModel = getViewModel()
+    val context = LocalContext.current
     TopAppBar(
         title = { Text(text = stringResource(R.string.new_catch)) },
         navigationIcon = {
-            IconButton(onClick = { navController.popBackStack() }) {
+            IconButton(onClick = { //navController.popBackStack("new_catch", inclusive = true)
+                navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.back)
@@ -739,11 +719,9 @@ fun NewCatchAppBar(navController: NavController) {
 
                 IconButton(
                     onClick = {
-                        if (viewModel.isInputCorrect()) viewModel.createNewUserCatch(
-                            getPhotos()
-                        )
-                        /*else showToast(
-                            LocalContext.current,
+                        if (viewModel.isInputCorrect()) viewModel.createNewUserCatch(getPhotos(viewModel, context))
+                            /*else showToast(
+                            context,
                             stringResource(R.string.not_all_fields_are_filled)
                         )*/
                     },
@@ -758,13 +736,14 @@ fun NewCatchAppBar(navController: NavController) {
 @Composable
 fun ErrorDialog(errorDialog: MutableState<Boolean>) {
     val viewModel: NewCatchViewModel = getViewModel()
+    val context = LocalContext.current
     AlertDialog(
         title = { Text("Произошла ошибка!") },
         text = { Text("Не удалось загрузить фотографии. Проверьте интернет соединение и попробуйте еще раз.") },
         onDismissRequest = { errorDialog.value = false },
         confirmButton = {
             OutlinedButton(
-                onClick = { viewModel.createNewUserCatch(getPhotos()) },
+                onClick = { viewModel.createNewUserCatch(getPhotos(viewModel, context)) },
                 content = { Text(stringResource(R.string.Try_again)) })
         }, dismissButton = {
             OutlinedButton(
@@ -776,6 +755,7 @@ fun ErrorDialog(errorDialog: MutableState<Boolean>) {
 
 @Composable
 fun LoadingDialog(loadingDialog: MutableState<Boolean>, loadingValue: MutableState<Int>) {
+    //if (loadingDialog.value)
     AlertDialog(
         title = { Text("Загрузка фотографий!") },
         text = { Text("Пожалуйста, подождите, пока ваши фотографии полностью загрузятся. Текущий прогресс: " + loadingValue.value + "%") },
@@ -792,13 +772,45 @@ fun LoadingDialog(loadingDialog: MutableState<Boolean>, loadingValue: MutableSta
     )
 }
 
+private fun getPhotos(viewModel: NewCatchViewModel, context: Context): List<File> {
+    /*val result = mutableListOf<File>()
+    val byteArrays = mutableListOf<ByteArray>()
+    viewModel.images.forEach {
+            *//*val baos = ByteArrayOutputStream()
+            val inputStream = context.contentResolver.openInputStream(it)
+            val bmp = BitmapFactory.decodeStream(inputStream)
+            bmp.compress(Bitmap.CompressFormat.JPEG, 50, baos)
+            result.add(baos.toByteArray())*//*
+        context.contentResolver.openInputStream(it)
+            ?.readBytes()
+            ?.let { it1 -> byteArrays.add(it1) }
+    }
+    byteArrays.forEach {
+        result.add()
+    }*/
+    /*return runBlocking {
+        val result = mutableListOf<File>()
+        viewModel.images.forEach {
+            //val compressedImageFile = Compressor.compress(context, it.toFile()) {
+            //val inputStream = context.contentResolver.openInputStream(it)
+            //val arr = inputStream?.readBytes()
+            val compressedImageFile = Compressor.compress(context, File(getWorkingDirectory() + it.path)) {
+                quality(50)
+            }
+            result.add(compressedImageFile)
+
+        }
+        result
+    }*/
+    return listOf()
+}
+
 private fun getPhotos(): List<File> {
     /*val viewModel: NewCatchViewModel = getViewModel()
     val result = mutableListOf<ByteArray>()
 //    val job = lifecycle.coroutineScope.launchWhenStarted {
 //
 //    }
-
     TODO(URI TO BYTEARRAY IN COROUTINE SCOPE)
     viewModel.images.forEach {
 //            val baos = ByteArrayOutputStream()
@@ -812,6 +824,11 @@ private fun getPhotos(): List<File> {
     }
     return result*/
     return listOf()
+}
+
+fun getWorkingDirectory(): String {
+    val directory = File("");
+    return directory.absolutePath
 }
 
 /*@Composable
@@ -856,7 +873,7 @@ private fun setDate(
     dateSetState: MutableState<Boolean>,
     context: Context
 ) {
-    val dialog = DatePickerDialog(
+    DatePickerDialog(
         context,
         DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
             dateAndTime.set(Calendar.YEAR, year)

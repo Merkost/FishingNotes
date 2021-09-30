@@ -14,7 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.navArgument
 import androidx.navigation.fragment.findNavController
+import com.joesemper.fishing.compose.ui.Arguments
+import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.domain.UserPlacesViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -35,7 +38,9 @@ fun UserPlacesScreen(navController: NavController, viewModel: UserPlacesViewMode
                     (animatedUiState as BaseViewState.Success<*>).data as List<UserMapMarker>, {
                         onAddNewPlaceClick()
                     }, { userMarker ->
-
+                        navController.currentBackStackEntry?.arguments?.putParcelable(Arguments.PLACE, userMarker)
+                        navController.navigate(MainDestinations.PLACE_ROUTE)
+                        //navController.navigate(MainDestinations.PLACE_ROUTE, arg = navArgument(Arguments.PLACE) { marker = userMarker },)
                         //onPlaceItemClick(userMarker)
                     }
                 )

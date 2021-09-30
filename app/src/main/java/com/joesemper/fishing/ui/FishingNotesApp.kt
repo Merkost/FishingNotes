@@ -17,12 +17,12 @@ import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
-import com.joesemper.fishing.compose.ui.home.FishingNotesBottomBar
-import com.joesemper.fishing.compose.ui.home.HomeSections
-import com.joesemper.fishing.compose.ui.home.NewCatchScreen
-import com.joesemper.fishing.compose.ui.home.addHomeGraph
+import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.rememberAppStateHolder
+import com.joesemper.fishing.model.entity.content.UserCatch
+import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import kotlinx.coroutines.InternalCoroutinesApi
 
@@ -107,10 +107,24 @@ private fun NavGraphBuilder.NavGraph(
     composable(
         route = MainDestinations.NEW_CATCH_ROUTE,
         //arguments = listOf(navArgument(MainDestinations.SNACK_ID_KEY) { type = NavType.LongType })
+        //arguments = listOf(navArgument(Arguments.PLACE) {type = NavType.ParcelableArrayType(UserMapMarker::class.java)})
     ) { backStackEntry ->
-        NewCatchScreen(navController)
+        val place = navController.previousBackStackEntry?.arguments?.getParcelable<UserMapMarker>(Arguments.PLACE)
+        NewCatchScreen(navController, place)
         //val arguments = requireNotNull(backStackEntry.arguments)
         //val snackId = arguments.getLong(MainDestinations.SNACK_ID_KEY)
 //        SnackDetail(snackId, upPress)
+    }
+    composable(
+        route = MainDestinations.PLACE_ROUTE,
+    ) {
+        val marker = navController.previousBackStackEntry?.arguments?.getParcelable<UserMapMarker>(Arguments.PLACE)
+        UserPlaceScreen(navController, marker)
+    }
+    composable(
+        route = MainDestinations.CATCH_ROUTE,
+    ) {
+        val catch = navController.previousBackStackEntry?.arguments?.getParcelable<UserCatch>(Arguments.CATCH)
+        UserCatchScreen(navController, catch)
     }
 }

@@ -3,6 +3,7 @@ package com.joesemper.fishing.compose.ui.home
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
@@ -86,13 +87,13 @@ fun UserProfile(user: User?) {
 }
 
 @Composable
-fun PlaceInfo(user: User?, place: UserMapMarker) {
+fun PlaceInfo(user: User?, place: UserMapMarker, placeClicked: (UserMapMarker) -> Unit) {
     MyCardNoPadding {
         Column(
             verticalArrangement = Arrangement.Top,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp).padding(horizontal = 5.dp)
+                .padding(10.dp).padding(horizontal = 5.dp).clickable { placeClicked(place) }
         ) {
             Row(
                 modifier = Modifier

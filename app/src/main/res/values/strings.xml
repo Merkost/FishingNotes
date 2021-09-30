@@ -125,6 +125,7 @@
     <string name="not_specified">Not specified</string>
     <string name="catch_description">Catch description</string>
     <string name="note">Note</string>
+    <string name="user_catch">Catch</string>
 
 
 </resources>
