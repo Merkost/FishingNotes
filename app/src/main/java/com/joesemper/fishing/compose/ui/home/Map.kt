@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -17,7 +17,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
@@ -65,16 +64,20 @@ fun Map(
         bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
     )
 
-    var placeSelectMode: Boolean by remember {
-        mutableStateOf(false)
-    }
-
     val lastKnownLocation = remember {
         getCurrentLocation(context = context, permissionsState = permissionsState)
     }
 
     val currentMarker = remember {
         mutableStateOf<UserMapMarker?>(null)
+    }
+
+    var placeSelectMode by remember {
+        mutableStateOf(false)
+    }
+
+    var uiState: MapUiState by remember {
+        mutableStateOf(MapUiState.NormalMode)
     }
 
     BottomSheetScaffold(
@@ -87,46 +90,41 @@ fun Map(
         sheetPeekHeight = 0.dp,
         floatingActionButton = {
             FubOnMap(
-                placeSelectMode = placeSelectMode,
-                state = bottomSheetPlaceState,
+                state = uiState,
                 onClick = {
-                    when {
-                        placeSelectMode -> {
+                    when (uiState) {
+                        MapUiState.NormalMode -> {
+                            moveCameraToLocation(
+                                coroutineScope = coroutineScope,
+                                map = mapView,
+                                location = lastKnownLocation.value
+                            )
                             coroutineScope.launch {
                                 Toast.makeText(
                                     context,
-                                    "Open add new place \nPlace select mode off",
+                                    "Place select mode on",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
                             placeSelectMode = !placeSelectMode
                         }
-                        else -> {
-                            when {
-                                bottomSheetPlaceState.bottomSheetState.isExpanded -> {
-                                    coroutineScope.launch {
-                                        Toast.makeText(
-                                            context,
-                                            "Open add new catch",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                }
-                                else -> {
-                                    placeSelectMode = !placeSelectMode
-                                    moveCameraToLocation(
-                                        coroutineScope = coroutineScope,
-                                        map = mapView,
-                                        location = lastKnownLocation.value
-                                    )
-                                    coroutineScope.launch {
-                                        Toast.makeText(
-                                            context,
-                                            "Place select mode on",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                }
+                        MapUiState.PlaceSelectMode -> {
+                            coroutineScope.launch {
+                                Toast.makeText(
+                                    context,
+                                    "Place select mode off",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                            placeSelectMode = !placeSelectMode
+                        }
+                        MapUiState.BottomSheetMode -> {
+                            coroutineScope.launch {
+                                Toast.makeText(
+                                    context,
+                                    "Add New Catch",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     }
@@ -135,7 +133,14 @@ fun Map(
         floatingActionButtonPosition = FabPosition.End,
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (permissionDialog, mapLayout, pointer, bottomSheet) = createRefs()
+            val (permissionDialog, mapLayout, pointer) = createRefs()
+
+            uiState = when {
+                bottomSheetPlaceState.bottomSheetState.isExpanded -> MapUiState.BottomSheetMode
+                placeSelectMode -> MapUiState.PlaceSelectMode
+                else -> MapUiState.NormalMode
+            }
+
 
             PermissionDialog(modifier = Modifier.constrainAs(permissionDialog) {
                 top.linkTo(parent.top)
@@ -157,18 +162,17 @@ fun Map(
                 onMarkerClick = { marker ->
                     currentMarker.value = marker
                     coroutineScope.launch {
-                        bottomSheetPlaceState.bottomSheetState.expand()
                         moveCameraToLocation(
                             location = LatLng(marker.latitude, marker.longitude),
                             coroutineScope = coroutineScope,
                             map = mapView
                         )
+                        bottomSheetPlaceState.bottomSheetState.expand()
                     }
-
                 }
             )
 
-            if (placeSelectMode) {
+            if (uiState is MapUiState.PlaceSelectMode) {
                 PointerIcon(modifier = Modifier.constrainAs(pointer) {
                     top.linkTo(parent.top)
                     bottom.linkTo(parent.bottom)
@@ -306,34 +310,42 @@ fun PointerIcon(modifier: Modifier) {
 
 @ExperimentalMaterialApi
 @Composable
-fun FubOnMap(state: BottomSheetScaffoldState, placeSelectMode: Boolean, onClick: () -> Unit) {
+fun FubOnMap(state: MapUiState, onClick: () -> Unit) {
 
-    val fabImg = painterResource(
-        id =
-        when {
-            placeSelectMode -> R.drawable.ic_baseline_check_24
-            state.bottomSheetState.isExpanded -> R.drawable.ic_add_catch
-            else -> R.drawable.ic_baseline_add_location_24
-        }
-    )
+    val fabImg = remember {
+        mutableStateOf(R.drawable.ic_baseline_add_location_24)
+    }
 
-    val padding: Dp by animateDpAsState(
-        targetValue =
-        when {
-            state.bottomSheetState.isExpanded -> 0.dp
-            state.bottomSheetState.isCollapsed -> 128.dp
-            else -> 128.dp
+    val padding = remember {
+        mutableStateOf(128.dp)
+    }
+
+
+    when (state) {
+        MapUiState.BottomSheetMode -> {
+            fabImg.value = R.drawable.ic_add_catch
+            padding.value = 0.dp
         }
-    )
+        MapUiState.NormalMode -> {
+            fabImg.value = R.drawable.ic_baseline_add_location_24
+            padding.value = 128.dp
+        }
+        MapUiState.PlaceSelectMode -> {
+            fabImg.value = R.drawable.ic_baseline_check_24
+            padding.value = 128.dp
+        }
+    }
+
     FloatingActionButton(
         modifier = Modifier
+            .animateContentSize()
             .padding(
-                bottom = padding
+                bottom = padding.value
             ),
         onClick = onClick
     ) {
         Icon(
-            painter = fabImg,
+            painter = painterResource(id = fabImg.value),
             contentDescription = "Add new location",
             tint = Color.White,
         )
@@ -472,6 +484,12 @@ private fun getMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
             else -> throw IllegalStateException()
         }
     }
+
+sealed class MapUiState {
+    object NormalMode : MapUiState()
+    object PlaceSelectMode : MapUiState()
+    object BottomSheetMode : MapUiState()
+}
 
 val locationPermissionsList = listOf(
     Manifest.permission.ACCESS_FINE_LOCATION,
