@@ -63,6 +63,7 @@ dependencies {
     //implementation "com.github.ben-manes:gradle-versions-plugin:0.39.0"
 
 
+    implementation "com.airbnb.android:lottie-compose:4.0.0"
 
     //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.5.21"

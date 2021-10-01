@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,6 +25,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.airbnb.lottie.compose.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.PermissionsRequired
@@ -135,12 +137,15 @@ fun Map(
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (permissionDialog, mapLayout, pointer) = createRefs()
 
+            var cameraMoveState: CameraMoveState by remember {
+                mutableStateOf(CameraMoveState.MoveFinish)
+            }
+
             uiState = when {
                 bottomSheetPlaceState.bottomSheetState.isExpanded -> MapUiState.BottomSheetMode
                 placeSelectMode -> MapUiState.PlaceSelectMode
                 else -> MapUiState.NormalMode
             }
-
 
             PermissionDialog(modifier = Modifier.constrainAs(permissionDialog) {
                 top.linkTo(parent.top)
@@ -169,6 +174,9 @@ fun Map(
                         )
                         bottomSheetPlaceState.bottomSheetState.expand()
                     }
+                },
+                cameraMoveCallback = { state ->
+                    cameraMoveState = state
                 }
             )
 
@@ -178,7 +186,7 @@ fun Map(
                     bottom.linkTo(parent.bottom)
                     absoluteLeft.linkTo(parent.absoluteLeft)
                     absoluteRight.linkTo(parent.absoluteRight)
-                })
+                }, cameraMoveState = cameraMoveState)
             }
         }
     }
@@ -191,9 +199,12 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?) {
     Spacer(modifier = Modifier.size(1.dp))
     marker?.let {
 
-        ConstraintLayout() {
+        ConstraintLayout(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+        ) {
             val (locationIcon, title, description, navigateButton, detailsButton) = createRefs()
-
             Icon(
                 painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
                 contentDescription = "Marker",
@@ -202,7 +213,8 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?) {
                     .size(32.dp)
                     .constrainAs(locationIcon) {
                         absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-                        top.linkTo(parent.top, 8.dp)
+                        top.linkTo(title.top)
+                        bottom.linkTo(title.bottom)
                     }
             )
 
@@ -210,7 +222,7 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?) {
                 text = marker.title,
                 style = MaterialTheme.typography.h5,
                 modifier = Modifier.constrainAs(title) {
-                    top.linkTo(locationIcon.top)
+                    top.linkTo(parent.top, 16.dp)
                     absoluteLeft.linkTo(locationIcon.absoluteRight, 8.dp)
                 }
             )
@@ -228,26 +240,72 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?) {
                 }
             )
 
-            IconButton(
-                image = painterResource(id = R.drawable.ic_baseline_navigation_24),
-                name = stringResource(id = R.string.navigate),
-                click = { /*TODO*/ },
-                modifier = Modifier.constrainAs(navigateButton) {
-                    absoluteLeft.linkTo(locationIcon.absoluteLeft)
-                    top.linkTo(description.bottom, 8.dp)
-                    bottom.linkTo(parent.bottom, 8.dp)
+            Button(modifier = Modifier.constrainAs(detailsButton) {
+                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+                top.linkTo(description.bottom, 8.dp)
+                bottom.linkTo(parent.bottom, 16.dp)
+            },
+                shape = RoundedCornerShape(24.dp), onClick = { /*TODO*/ }) {
+                Row(
+                    modifier = Modifier.wrapContentSize(),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painterResource(id = R.drawable.ic_baseline_shortcut_24),
+                        "",
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        stringResource(id = R.string.details),
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
                 }
-            )
+            }
 
-            IconButton(
-                image = painterResource(id = R.drawable.ic_baseline_shortcut_24),
-                name = stringResource(id = R.string.details),
-                click = { /*TODO*/ },
-                modifier = Modifier.constrainAs(detailsButton) {
-                    absoluteLeft.linkTo(navigateButton.absoluteRight, 8.dp)
-                    top.linkTo(navigateButton.top)
+            OutlinedButton(modifier = Modifier.constrainAs(navigateButton) {
+                absoluteRight.linkTo(detailsButton.absoluteLeft, 8.dp)
+                top.linkTo(detailsButton.top)
+                bottom.linkTo(detailsButton.bottom)
+            }, shape = RoundedCornerShape(24.dp), onClick = { /*TODO*/ }) {
+                Row(
+                    modifier = Modifier.wrapContentSize(),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painterResource(id = R.drawable.ic_baseline_navigation_24),
+                        "",
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        stringResource(id = R.string.navigate),
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
                 }
-            )
+            }
+
+
+//            IconButton(
+//                image = painterResource(id = R.drawable.ic_baseline_navigation_24),
+//                name = stringResource(id = R.string.navigate),
+//                click = { /*TODO*/ },
+//                modifier = Modifier.constrainAs(navigateButton) {
+//                    absoluteLeft.linkTo(locationIcon.absoluteLeft)
+//                    top.linkTo(description.bottom, 8.dp)
+//                    bottom.linkTo(parent.bottom, 8.dp)
+//                }
+//            )
+//
+//            IconButton(
+//                image = painterResource(id = R.drawable.ic_baseline_shortcut_24),
+//                name = stringResource(id = R.string.details),
+//                click = { /*TODO*/ },
+//                modifier = Modifier.constrainAs(detailsButton) {
+//                    absoluteLeft.linkTo(navigateButton.absoluteRight, 8.dp)
+//                    top.linkTo(navigateButton.top)
+//                }
+//            )
         }
     }
 }
@@ -259,7 +317,8 @@ fun GoogleMapLayout(
     map: MapView,
     viewModel: MapViewModel,
     permissionsState: MultiplePermissionsState,
-    onMarkerClick: (marker: UserMapMarker) -> Unit
+    onMarkerClick: (marker: UserMapMarker) -> Unit,
+    cameraMoveCallback: (state: CameraMoveState) -> Unit
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -281,6 +340,12 @@ fun GoogleMapLayout(
                     )
                 marker.tag = it.id
             }
+            googleMap.setOnCameraMoveStartedListener {
+                cameraMoveCallback(CameraMoveState.MoveStart)
+            }
+            googleMap.setOnCameraIdleListener {
+                cameraMoveCallback(CameraMoveState.MoveFinish)
+            }
         }
     }
 
@@ -297,14 +362,30 @@ fun GoogleMapLayout(
 }
 
 @Composable
-fun PointerIcon(modifier: Modifier) {
-    Icon(
-        modifier = modifier
-            .height(64.dp)
-            .width(64.dp),
-        painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-        contentDescription = "pointer",
-        tint = secondaryFigmaColor,
+fun PointerIcon(cameraMoveState: CameraMoveState, modifier: Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.another_marker))
+    var minMaxFrame by remember {
+        mutableStateOf(LottieClipSpec.Frame(50, 82))
+    }
+
+    minMaxFrame = when (cameraMoveState) {
+        CameraMoveState.MoveFinish -> {
+            LottieClipSpec.Frame(50, 82)
+        }
+        CameraMoveState.MoveStart -> {
+            LottieClipSpec.Frame(0, 20)
+        }
+    }
+
+    val progress by animateLottieCompositionAsState(
+        composition = composition,
+        clipSpec = minMaxFrame,
+        iterations = 1
+    )
+    LottieAnimation(
+        modifier = modifier.size(128.dp),
+        composition = composition,
+        progress = progress
     )
 }
 
@@ -319,7 +400,6 @@ fun FubOnMap(state: MapUiState, onClick: () -> Unit) {
     val padding = remember {
         mutableStateOf(128.dp)
     }
-
 
     when (state) {
         MapUiState.BottomSheetMode -> {
@@ -489,6 +569,11 @@ sealed class MapUiState {
     object NormalMode : MapUiState()
     object PlaceSelectMode : MapUiState()
     object BottomSheetMode : MapUiState()
+}
+
+sealed class CameraMoveState {
+    object MoveStart : CameraMoveState()
+    object MoveFinish : CameraMoveState()
 }
 
 val locationPermissionsList = listOf(
