@@ -58,16 +58,12 @@ val newCatchScreen = module {
         viewModel { NewCatchViewModel(get(), get()) }
 }
 
-val newPlaceFragment = module {
-    scope(named<NewPlaceFragment>()) {
-        viewModel { NewPlaceViewModel(get()) }
-    }
+val newPlaceScreen = module {
+    viewModel { NewPlaceViewModel(get()) }
 }
 
-val userCatchFragment = module {
-    scope(named<UserCatchFragment>()) {
-        viewModel { UserCatchViewModel(get(), get()) }
-    }
+val userCatchScreen = module {
+    viewModel { UserCatchViewModel(get(), get()) }
 }
 
 val weatherScreen = module {
@@ -82,10 +78,8 @@ val weatherScreen = module {
 //    }
 //}
 
-val userPlaceFragment = module {
-    scope(named<UserPlaceFragment>()) {
-        viewModel { UserPlaceViewModel(get(), get()) }
-    }
+val userPlaceScreen = module {
+    viewModel { UserPlaceViewModel(get(), get()) }
 }
 val catchesFragment = module {
     viewModel { UserCatchesViewModel(get()) }

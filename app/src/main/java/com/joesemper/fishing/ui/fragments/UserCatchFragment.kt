@@ -101,7 +101,7 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
                 CatchInfo(catch, user)
                 Photos()
                 val mapMarker by viewModel.getMapMarker(catch.userMarkerId).collectAsState(null)
-                mapMarker?.let { it1 -> PlaceInfo(user, it1) }
+                mapMarker?.let { it1 -> PlaceInfo(user, it1){} }
                 MyTextField(
                     stringResource(R.string.weight),
                     catch.fishWeight.toString() + " " + stringResource(R.string.kg)
@@ -267,7 +267,7 @@ class UserCatchFragment : Fragment(), AndroidScopeComponent {
             onDismissRequest = { dialogOnDelete.value = false },
             confirmButton = {
                 OutlinedButton(
-                    onClick = { viewModel.deleteCatch(catch); findNavController().popBackStack() },
+                    onClick = { viewModel.deleteCatch(); findNavController().popBackStack() },
                     content = { Text(getString(R.string.Yes)) })
             }, dismissButton = {
                 OutlinedButton(

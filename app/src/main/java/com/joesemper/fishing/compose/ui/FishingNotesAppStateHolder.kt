@@ -28,9 +28,18 @@ import kotlinx.coroutines.launch
  */
 object MainDestinations {
     const val MAP_ROUTE = "map"
+
     const val NEW_CATCH_ROUTE = "new_catch"
+    const val PLACE_ROUTE = "place"
+    const val CATCH_ROUTE = "catch"
+
     const val SNACK_DETAIL_ROUTE = "notes"
-    const val SNACK_ID_KEY = "snackId"
+        //const val SNACK_ID_KEY = "snackId"
+}
+
+object Arguments {
+    const val PLACE = "place_arg"
+    const val CATCH = "catch_arg"
 }
 
 /**

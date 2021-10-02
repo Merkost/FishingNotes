@@ -100,6 +100,7 @@ fun MapViewContainer(
             val locationResult = fusedLocationProviderClient.lastLocation
             locationResult.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    if (task.result?.latitude != null && task.result?.longitude != null)
                     lastKnownLocation.value = LatLng(task.result.latitude, task.result.longitude)
                 }
             }

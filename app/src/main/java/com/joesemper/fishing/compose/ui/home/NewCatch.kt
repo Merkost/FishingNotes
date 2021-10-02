@@ -1,10 +1,18 @@
 package com.joesemper.fishing.compose.ui.home
 
+import android.Manifest
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.FileUtils
 import android.text.format.DateUtils
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
@@ -35,20 +43,28 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
-import androidx.fragment.app.FragmentActivity
+import androidx.core.net.toFile
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
+import com.google.accompanist.insets.navigationBarsWithImePadding
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionState
+import com.google.accompanist.permissions.rememberPermissionState
 import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.utils.showToast
-import gun0912.tedbottompicker.TedBottomPicker
+import id.zelory.compressor.Compressor
+import id.zelory.compressor.constraint.quality
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.runBlocking
 import org.koin.androidx.compose.getViewModel
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.*
 
@@ -69,14 +85,28 @@ viewModel.marker.value = args.marker as UserMapMarker
 isNull = viewModel.marker.value .id.isEmpty()*/
 
 
+@ExperimentalPermissionsApi
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @ExperimentalCoilApi
 @Composable
-fun NewCatchScreen(navController: NavController) {
+fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
+
     val viewModel: NewCatchViewModel = getViewModel()
+    val context = LocalContext.current
+    val notAllFieldsFilled = stringResource(R.string.not_all_fields_are_filled)
+    place?.let { viewModel.marker.value = it; isNull = false }
+
     Scaffold(
-        topBar = { NewCatchAppBar(navController) }
+        topBar = { NewCatchAppBar(navController) },
+        floatingActionButton = {
+            FloatingActionButton(
+                modifier = Modifier.navigationBarsWithImePadding(),
+                onClick = { if (viewModel.isInputCorrect())
+                viewModel.createNewUserCatch(getPhotos(viewModel, context)) else showToast(context, notAllFieldsFilled) }) {
+                Icon(Icons.Filled.Done, stringResource(R.string.create))
+            }
+        }
     ) {
         SubscribeToProgress(viewModel.uiState, navController)
         val scrollState = rememberScrollState()
@@ -117,7 +147,9 @@ fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>, navController: NavC
                     "Ваш улов успешно добавлен!",
                     Toast.LENGTH_SHORT
                 ).show()
-                navController.popBackStack()
+                //navController.popBackStack()
+                navController.popBackStack("new_catch", inclusive = true)
+                //navController.navigateUp() //to the map screen
             }
         }
         is BaseViewState.Loading -> {
@@ -140,6 +172,7 @@ fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>, navController: NavC
 @Composable
 private fun Places(label: String, viewModel: NewCatchViewModel) {
     val context = LocalContext.current
+
     val changePlaceError = stringResource(R.string.Another_place_in_new_catch)
     val marker by rememberSaveable { viewModel.marker }
     var textFieldValue by rememberSaveable {
@@ -151,6 +184,8 @@ private fun Places(label: String, viewModel: NewCatchViewModel) {
     val suggestions by viewModel.getAllUserMarkersList().collectAsState(listOf())
     val filteredList by rememberSaveable { mutableStateOf(suggestions.toMutableList()) }
     if (textFieldValue == "") searchFor("", suggestions, filteredList)
+
+
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(
             modifier = Modifier.align(Alignment.Start),
@@ -214,7 +249,7 @@ private fun Places(label: String, viewModel: NewCatchViewModel) {
 
                         })
                 },
-                isError = !isThatPlaceInList(textFieldValue, suggestions),
+                isError = !isThatPlaceInList(textFieldValue, suggestions).apply { viewModel.noErrors.value = this },
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
                 )
@@ -265,38 +300,6 @@ private fun searchFor(
         }
     }
 }
-
-//@Composable
-//fun Place(label: String) {
-//
-//    OutlinedTextField(
-//        value = viewModel.marker.value.title, onValueChange = { }, readOnly = true,
-//        label = { Text(text = label) }, modifier = Modifier.fillMaxWidth()
-//    )
-//}
-
-/*@ExperimentalMaterialApi
-@Composable
-private fun BottomSheet() {
-    Row(
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .height(65.dp)
-            .fillMaxWidth()
-    ) {
-        Spacer(modifier = Modifier.size(20.dp))
-        OutlinedButton(
-            onClick = { findNavController().popBackStack() }) {
-            Text(text = stringResource(R.string.cancel))
-        }
-        Spacer(modifier = Modifier.size(20.dp))
-        OutlinedButton() {
-            Text(text = stringResource(R.string.create))
-        }
-        Spacer(modifier = Modifier.size(20.dp))
-    }
-}*/
 
 @Composable
 fun FishSpecies(name: MutableState<String>) {
@@ -481,6 +484,7 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
     }
 }
 
+@ExperimentalPermissionsApi
 @ExperimentalAnimationApi
 @Composable
 fun Photos(
@@ -518,8 +522,20 @@ fun Photos(
     }
 }
 
+@ExperimentalPermissionsApi
 @Composable
 fun ItemAddPhoto() {
+    val viewModel: NewCatchViewModel = getViewModel()
+    val permissionState = rememberPermissionState(Manifest.permission.READ_EXTERNAL_STORAGE)
+    val addPhotoState = rememberSaveable{ mutableStateOf(false) }
+    val choosePhotoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { value ->
+        value.forEach {
+            viewModel.addPhoto(it) }
+    }
+    /*val takePhotoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { value ->
+        viewModel.addPhoto(value.) }
+    }*/
+
     Box(
         modifier = Modifier
             .size(100.dp)
@@ -529,7 +545,7 @@ fun ItemAddPhoto() {
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(5.dp))
-                .clickable { addPhoto() },
+                .clickable { addPhotoState.value = true },
             elevation = 5.dp,
             backgroundColor = Color.LightGray
         ) {
@@ -542,6 +558,13 @@ fun ItemAddPhoto() {
                     .align(Alignment.Center)
             )
         }
+    }
+    if (addPhotoState.value) {
+        LaunchedEffect(addPhotoState) {
+            permissionState.launchPermissionRequest()
+
+        }
+        addPhoto(permissionState, addPhotoState, choosePhotoLauncher)
     }
 }
 
@@ -582,25 +605,30 @@ fun ItemPhoto(photo: Uri, clickedPhoto: (Uri) -> Unit, deletedPhoto: (Uri) -> Un
 
 }
 
-private fun addPhoto() {
-    /*val viewModel: NewCatchViewModel = getViewModel()
-    if (isPermissionAllowed()) {
-        getPhotoListener().showMultiImage { photos ->
-            photos.forEach { uri ->
-                viewModel.addPhoto(uri)
-            }
+@Composable
+@ExperimentalPermissionsApi
+private fun addPhoto(
+    permissionState: PermissionState,
+    addPhotoState: MutableState<Boolean>,
+    choosePhotoLauncher: ManagedActivityResultLauncher<Array<String>, MutableList<Uri>>
+) {
+    when {
+        permissionState.hasPermission -> {
+            choosePhotoLauncher.launch(arrayOf("image/*"))
+            addPhotoState.value = false
+            /*getPhotoListener().showMultiImage { photos ->
+                photos.forEach { uri ->
+                    viewModel.addPhoto(uri)
+                }
+            }*/
         }
-    } else {
-        AlertDialog.Builder(LocalContext.current)
-            .setTitle(getString(R.string.permissions_required))
-            .setMessage(getString(R.string.add_photo_permission))
-            .setPositiveButton(getString(R.string.provide)) { _, _ ->
-                askForPermission()
-            }
-            .setNegativeButton(getString(R.string.deny), null)
-            .show()
-    }*/
+    }
+
 }
+
+
+
+
 
 @Composable
 fun MyTextField(textState: MutableState<String>, label: String) {
@@ -619,29 +647,34 @@ fun MyTextField(textState: MutableState<String>, label: String) {
 
 @Composable
 fun DateAndTime(dateState: MutableState<String>, timeState: MutableState<String>) {
+    val dateSetState = remember { mutableStateOf(false)}
+    val timeSetState = remember { mutableStateOf(false)}
+    val context = LocalContext.current
+
+    if(dateSetState.value) setDate(dateState, dateSetState, context)
+    if(timeSetState.value) setTime(timeState, timeSetState, context)
+
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-
-
-        dateState.value = setInitialDate()
+        dateState.value = setInitialDate(context)
         OutlinedTextField(value = dateState.value,
             onValueChange = {},
             label = { Text(text = stringResource(R.string.date)) },
             readOnly = true,
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable {
-                    /*showToast(
+                /*.clickable {
+                    *//*showToast(
                         LocalContext.current,
                         stringResource(R.string.click_on_icon_to_change)
-                    )*/
-                },
+                    )*//*
+                }*/,
             trailingIcon = {
                 Icon(painter = painterResource(R.drawable.ic_baseline_event_24),
                     tint = primaryFigmaColor,
                     contentDescription = stringResource(R.string.date),
-                    modifier = Modifier.clickable { /*setDate(dateState)*/ })
+                    modifier = Modifier.clickable { dateSetState.value = true })
             })
-        timeState.value = setInitialTime()
+        timeState.value = setInitialTime(context)
         OutlinedTextField(value = timeState.value,
             onValueChange = {},
             label = { Text(text = stringResource(R.string.time)) },
@@ -659,7 +692,7 @@ fun DateAndTime(dateState: MutableState<String>, timeState: MutableState<String>
                     tint = primaryFigmaColor,
                     contentDescription = stringResource(R.string.time),
                     modifier = Modifier.clickable {
-                        /*setTime(timeState)*/
+                        timeSetState.value = true
                     })
             })
     }
@@ -668,10 +701,12 @@ fun DateAndTime(dateState: MutableState<String>, timeState: MutableState<String>
 @Composable
 fun NewCatchAppBar(navController: NavController) {
     val viewModel: NewCatchViewModel = getViewModel()
+    val context = LocalContext.current
     TopAppBar(
         title = { Text(text = stringResource(R.string.new_catch)) },
         navigationIcon = {
-            IconButton(onClick = { navController.popBackStack() }) {
+            IconButton(onClick = { //navController.popBackStack("new_catch", inclusive = true)
+                navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.back)
@@ -687,15 +722,13 @@ fun NewCatchAppBar(navController: NavController) {
 
                 IconButton(
                     onClick = {
-                        if (viewModel.isInputCorrect()) viewModel.createNewUserCatch(
-                            getPhotos()
-                        )
-                        /*else showToast(
-                            LocalContext.current,
+                        if (viewModel.isInputCorrect()) viewModel.createNewUserCatch(getPhotos(viewModel, context))
+                            /*else showToast(
+                            context,
                             stringResource(R.string.not_all_fields_are_filled)
                         )*/
                     },
-                    content = { Icon(Icons.Filled.Done, stringResource(R.string.done)) }
+                    content = { Icon(Icons.Filled.Done, stringResource(R.string.ok)) }
                 )
             }
         },
@@ -706,13 +739,14 @@ fun NewCatchAppBar(navController: NavController) {
 @Composable
 fun ErrorDialog(errorDialog: MutableState<Boolean>) {
     val viewModel: NewCatchViewModel = getViewModel()
+    val context = LocalContext.current
     AlertDialog(
         title = { Text("Произошла ошибка!") },
         text = { Text("Не удалось загрузить фотографии. Проверьте интернет соединение и попробуйте еще раз.") },
         onDismissRequest = { errorDialog.value = false },
         confirmButton = {
             OutlinedButton(
-                onClick = { viewModel.createNewUserCatch(getPhotos()) },
+                onClick = { viewModel.createNewUserCatch(getPhotos(viewModel, context)) },
                 content = { Text(stringResource(R.string.Try_again)) })
         }, dismissButton = {
             OutlinedButton(
@@ -724,6 +758,7 @@ fun ErrorDialog(errorDialog: MutableState<Boolean>) {
 
 @Composable
 fun LoadingDialog(loadingDialog: MutableState<Boolean>, loadingValue: MutableState<Int>) {
+    //if (loadingDialog.value)
     AlertDialog(
         title = { Text("Загрузка фотографий!") },
         text = { Text("Пожалуйста, подождите, пока ваши фотографии полностью загрузятся. Текущий прогресс: " + loadingValue.value + "%") },
@@ -740,13 +775,46 @@ fun LoadingDialog(loadingDialog: MutableState<Boolean>, loadingValue: MutableSta
     )
 }
 
+private fun getPhotos(viewModel: NewCatchViewModel, context: Context): List<File> {
+    val result = mutableListOf<File>()
+    /*val byteArrays = mutableListOf<ByteArray>()
+    viewModel.images.forEach {
+            val baos = ByteArrayOutputStream()
+            val inputStream = context.contentResolver.openInputStream(it)
+            val bmp = BitmapFactory.decodeStream(inputStream)
+            bmp.compress(Bitmap.CompressFormat.JPEG, 50, baos)
+        byteArrays.add(baos.toByteArray())
+        context.contentResolver.openInputStream(it)
+            ?.readBytes()
+            ?.let { it1 -> byteArrays.add(it1) }
+    }*/
+    return result
+    /*byteArrays.forEach {
+        result.add()
+    }*/
+    /*return runBlocking {
+        val result = mutableListOf<File>()
+        viewModel.images.forEach {
+            //val compressedImageFile = Compressor.compress(context, it.toFile()) {
+            //val inputStream = context.contentResolver.openInputStream(it)
+            //val arr = inputStream?.readBytes()
+            val compressedImageFile = Compressor.compress(context, File(getWorkingDirectory() + it.path)) {
+                quality(50)
+            }
+            result.add(compressedImageFile)
+
+        }
+        result
+    }*/
+    //return listOf()
+}
+
 private fun getPhotos(): List<File> {
     /*val viewModel: NewCatchViewModel = getViewModel()
     val result = mutableListOf<ByteArray>()
 //    val job = lifecycle.coroutineScope.launchWhenStarted {
 //
 //    }
-
     TODO(URI TO BYTEARRAY IN COROUTINE SCOPE)
     viewModel.images.forEach {
 //            val baos = ByteArrayOutputStream()
@@ -762,133 +830,80 @@ private fun getPhotos(): List<File> {
     return listOf()
 }
 
-@Composable
+fun getWorkingDirectory(): String {
+    val directory = File("");
+    return directory.absolutePath
+}
+
+/*@Composable
 private fun getPhotoListener() =
     TedBottomPicker.with(LocalContext.current as FragmentActivity?)
         .setPeekHeight(1600)
         .showTitle(false)
         .setCompleteButtonText(stringResource(R.string.done))
         .setEmptySelectionText(stringResource(R.string.no_photo_selected))
-        .setSelectMaxCount(10)
+        .setSelectMaxCount(10)*/
 
 @Composable
-private fun setTime(timeState: MutableState<String>) {
+private fun setTime(
+    timeState: MutableState<String>,
+    timeSetState: MutableState<Boolean>,
+    context: Context
+) {
     TimePickerDialog(
-        LocalContext.current,
+        context,
         TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
             dateAndTime.set(Calendar.HOUR_OF_DAY, hourOfDay)
             dateAndTime.set(Calendar.MINUTE, minute)
-            /*timeState.value = setInitialTime()*/
+            timeState.value = setInitialTime(context)
         },
         dateAndTime.get(Calendar.HOUR_OF_DAY),
         dateAndTime.get(Calendar.MINUTE), true
     ).show()
+    timeSetState.value = false
 }
 
-@Composable
-private fun setInitialTime(): String =
+
+private fun setInitialTime(context: Context): String =
     DateUtils.formatDateTime(
-        LocalContext.current,
+        context,
         dateAndTime.timeInMillis,
         DateUtils.FORMAT_SHOW_TIME
     )
 
 @Composable
-private fun setDate(dateState: MutableState<String>) {
+private fun setDate(
+    dateState: MutableState<String>,
+    dateSetState: MutableState<Boolean>,
+    context: Context
+) {
     DatePickerDialog(
-        LocalContext.current,
+        context,
         DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
             dateAndTime.set(Calendar.YEAR, year)
             dateAndTime.set(Calendar.MONTH, monthOfYear)
             dateAndTime.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-            /*dateState.value = setInitialDate()*/
+            dateState.value = setInitialDate(context)
         },
         dateAndTime.get(Calendar.YEAR),
         dateAndTime.get(Calendar.MONTH),
         dateAndTime.get(Calendar.DAY_OF_MONTH)
-    ).show()
+    ).apply {
+        datePicker.maxDate = Date().time
+        show()
+    }
+    //dialog.datePicker.maxDate = Date().time
+    //ialog.show()
+    dateSetState.value = false
 }
 
-@Composable
-private fun setInitialDate() =
+
+private fun setInitialDate(context: Context) =
     DateUtils.formatDateTime(
-        LocalContext.current,
+        context,
         dateAndTime.timeInMillis,
         DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR
     )
-
-/*private fun askForPermission(): Boolean {
-    if (!isPermissionAllowed()) {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(
-                requireActivity(),
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )
-        ) {
-            showPermissionDeniedDialog()
-        } else {
-            ActivityCompat.requestPermissions(
-                requireActivity(),
-                arrayOf(
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ),
-                READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE
-            )
-        }
-        return false
-    }
-    return true
-}
-
-private fun isPermissionAllowed(): Boolean {
-    return ContextCompat.checkSelfPermission(
-        requireContext(),
-        Manifest.permission.WRITE_EXTERNAL_STORAGE
-    ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
-        requireContext(),
-        Manifest.permission.READ_EXTERNAL_STORAGE
-    ) == PackageManager.PERMISSION_GRANTED
-}
-
-override fun onRequestPermissionsResult(
-    requestCode: Int,
-    permissions: Array<String>,
-    grantResults: IntArray,
-) {
-    when (requestCode) {
-        READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE -> {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // permission is granted, you can perform your operation here
-            } else {
-                // permission is denied, you can ask for permission again, if you want
-                askForPermission()
-            }
-            return
-        }
-    }
-}
-
-private fun showPermissionDeniedDialog() {
-    AlertDialog.Builder(requireContext())
-        .setTitle(getString(R.string.permission_denied))
-        .setMessage(getString(R.string.permission_denied_message))
-        .setPositiveButton(getString(R.string.goto_app_settings),
-            DialogInterface.OnClickListener { dialogInterface, i ->
-                // send to app settings if permission is denied permanently
-                val intent = Intent()
-                intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                val uri = Uri.fromParts("package", requireActivity().packageName, null)
-                intent.data = uri
-                startActivity(intent)
-            })
-        .setNegativeButton(getString(R.string.cancel), null)
-        .show()
-}
-
-override fun onDetach() {
-    super.onDetach()
-    (requireActivity() as NavigationHolder).showNav()
-}*/
 
 fun commentary() {
 

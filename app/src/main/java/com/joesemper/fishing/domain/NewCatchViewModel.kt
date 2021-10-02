@@ -30,6 +30,8 @@ class NewCatchViewModel(
     val uiState: StateFlow<BaseViewState>
         get() = _uiState
 
+    val noErrors = mutableStateOf(true)
+
     val marker: MutableState<UserMapMarker> = mutableStateOf(UserMapMarker())
 
     val title = mutableStateOf("")
@@ -84,7 +86,7 @@ class NewCatchViewModel(
     }
 
     fun isInputCorrect(): Boolean {
-        return title.value.isNotBlank() && marker.value.title.isNotEmpty()
+        return title.value.isNotBlank() && marker.value.title.isNotEmpty() && noErrors.value
     }
 
     fun createNewUserCatch(photos: List<File>): Boolean {

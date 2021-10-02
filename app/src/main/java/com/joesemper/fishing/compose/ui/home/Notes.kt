@@ -25,7 +25,7 @@ fun Notes(
     navController: NavController,
 //    state: SearchState = rememberSearchState()
 ) {
-
+    //val navController = rememberNavController()
     val tabs = listOf(TabItem.Places, TabItem.Catches)
     val pagerState = rememberPagerState(pageCount = tabs.size)
 

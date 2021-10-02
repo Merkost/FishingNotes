@@ -114,7 +114,7 @@ class UserPlaceFragment : Fragment(), AndroidScopeComponent {
                     Buttons()
                     Catches(userCatches)
                 } else {
-                    PlaceInfo(user, viewModel.marker.value)
+                    PlaceInfo(user, viewModel.marker.value){}
                     Buttons()
                     Catches(userCatches)
                 }
