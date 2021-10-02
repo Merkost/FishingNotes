@@ -1,14 +1,17 @@
 package com.joesemper.fishing.di
 
 import com.joesemper.fishing.domain.*
-import com.joesemper.fishing.model.auth.AuthManager
-
 import com.joesemper.fishing.model.datasource.*
-import com.joesemper.fishing.model.repository.*
+import com.joesemper.fishing.model.repository.UserContentRepository
+import com.joesemper.fishing.model.repository.UserRepository
+import com.joesemper.fishing.model.repository.WeatherRepository
 import com.joesemper.fishing.ui.LoginActivity
 import com.joesemper.fishing.ui.MainActivity
 import com.joesemper.fishing.ui.SplashActivity
-import com.joesemper.fishing.ui.fragments.*
+import com.joesemper.fishing.ui.fragments.NewPlaceFragment
+import com.joesemper.fishing.ui.fragments.UserCatchFragment
+import com.joesemper.fishing.ui.fragments.UserPlaceFragment
+import com.joesemper.fishing.ui.fragments.WeatherFragment
 import com.joesemper.fishing.utils.Logger
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -44,9 +47,7 @@ val loginScreen = module {
 }
 
 val mapScreen = module {
-    scope(named<MapFragment>()) {
-        viewModel { MapViewModel(get()) }
-    }
+    viewModel { MapViewModel(get()) }
 }
 
 val userFragment = module {
@@ -55,7 +56,7 @@ val userFragment = module {
 }
 
 val newCatchScreen = module {
-        viewModel { NewCatchViewModel(get(), get()) }
+    viewModel { NewCatchViewModel(get(), get()) }
 }
 
 val newPlaceScreen = module {

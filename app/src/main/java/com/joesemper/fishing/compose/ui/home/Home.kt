@@ -42,7 +42,6 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -101,6 +100,7 @@ fun FishingNotesBottomBar(
     Surface(
 //        color = color,
 //        contentColor = contentColor
+    elevation = 8.dp
     ) {
         val springSpec = SpringSpec<Float>(
             // Determined experimentally
@@ -321,7 +321,7 @@ private fun MeasureScope.placeTextAndIcon(
 
 @Composable
 private fun FishingNotesBottomNavIndicator(
-    strokeWidth: Dp = 2.dp,
+    strokeWidth: Dp = 1.dp,
     color: Color = Color.Black,
     shape: Shape = BottomNavIndicatorShape
 ) {
