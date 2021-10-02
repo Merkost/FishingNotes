@@ -43,6 +43,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
 import androidx.core.net.toFile
 import androidx.navigation.NavController
@@ -99,7 +100,8 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
     Scaffold(
         topBar = { NewCatchAppBar(navController) },
         floatingActionButton = {
-            FloatingActionButton(modifier = Modifier.navigationBarsWithImePadding(),
+            FloatingActionButton(
+                modifier = Modifier.navigationBarsWithImePadding(),
                 onClick = { if (viewModel.isInputCorrect())
                 viewModel.createNewUserCatch(getPhotos(viewModel, context)) else showToast(context, notAllFieldsFilled) }) {
                 Icon(Icons.Filled.Done, stringResource(R.string.create))
@@ -527,7 +529,8 @@ fun ItemAddPhoto() {
     val permissionState = rememberPermissionState(Manifest.permission.READ_EXTERNAL_STORAGE)
     val addPhotoState = rememberSaveable{ mutableStateOf(false) }
     val choosePhotoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { value ->
-        value.forEach { viewModel.addPhoto(it) }
+        value.forEach {
+            viewModel.addPhoto(it) }
     }
     /*val takePhotoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { value ->
         viewModel.addPhoto(value.) }
@@ -725,7 +728,7 @@ fun NewCatchAppBar(navController: NavController) {
                             stringResource(R.string.not_all_fields_are_filled)
                         )*/
                     },
-                    content = { Icon(Icons.Filled.Done, stringResource(R.string.done)) }
+                    content = { Icon(Icons.Filled.Done, stringResource(R.string.ok)) }
                 )
             }
         },
@@ -773,19 +776,20 @@ fun LoadingDialog(loadingDialog: MutableState<Boolean>, loadingValue: MutableSta
 }
 
 private fun getPhotos(viewModel: NewCatchViewModel, context: Context): List<File> {
-    /*val result = mutableListOf<File>()
-    val byteArrays = mutableListOf<ByteArray>()
+    val result = mutableListOf<File>()
+    /*val byteArrays = mutableListOf<ByteArray>()
     viewModel.images.forEach {
-            *//*val baos = ByteArrayOutputStream()
+            val baos = ByteArrayOutputStream()
             val inputStream = context.contentResolver.openInputStream(it)
             val bmp = BitmapFactory.decodeStream(inputStream)
             bmp.compress(Bitmap.CompressFormat.JPEG, 50, baos)
-            result.add(baos.toByteArray())*//*
+        byteArrays.add(baos.toByteArray())
         context.contentResolver.openInputStream(it)
             ?.readBytes()
             ?.let { it1 -> byteArrays.add(it1) }
-    }
-    byteArrays.forEach {
+    }*/
+    return result
+    /*byteArrays.forEach {
         result.add()
     }*/
     /*return runBlocking {
@@ -802,7 +806,7 @@ private fun getPhotos(viewModel: NewCatchViewModel, context: Context): List<File
         }
         result
     }*/
-    return listOf()
+    //return listOf()
 }
 
 private fun getPhotos(): List<File> {

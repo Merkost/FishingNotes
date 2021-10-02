@@ -96,14 +96,14 @@ private fun NavGraphBuilder.NavGraph(
     ) {
         addHomeGraph(onSnackSelected, navController)
     }
-    composable(
+    /*composable(
         "${MainDestinations.SNACK_DETAIL_ROUTE}/{${MainDestinations.SNACK_ID_KEY}}",
         arguments = listOf(navArgument(MainDestinations.SNACK_ID_KEY) { type = NavType.LongType })
     ) { backStackEntry ->
         val arguments = requireNotNull(backStackEntry.arguments)
         val snackId = arguments.getLong(MainDestinations.SNACK_ID_KEY)
 //        SnackDetail(snackId, upPress)
-    }
+    }*/
     composable(
         route = MainDestinations.NEW_CATCH_ROUTE,
         //arguments = listOf(navArgument(MainDestinations.SNACK_ID_KEY) { type = NavType.LongType })

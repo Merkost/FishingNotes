@@ -34,7 +34,7 @@ object MainDestinations {
     const val CATCH_ROUTE = "catch"
 
     const val SNACK_DETAIL_ROUTE = "notes"
-    const val SNACK_ID_KEY = "snackId"
+        //const val SNACK_ID_KEY = "snackId"
 }
 
 object Arguments {
