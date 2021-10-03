@@ -1,7 +1,10 @@
 package com.joesemper.fishing.domain
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.Progress

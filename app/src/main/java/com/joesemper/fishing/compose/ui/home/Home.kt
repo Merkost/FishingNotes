@@ -62,7 +62,7 @@ fun NavGraphBuilder.addHomeGraph(
     modifier: Modifier = Modifier,
 ) {
     composable(HomeSections.MAP.route) { from ->
-        Map(onSnackClick = { id -> onSnackSelected(id, from) }, modifier)
+        Map(onSnackClick = { id -> onSnackSelected(id, from) }, modifier/*, navController*/)
     }
     composable(HomeSections.NOTES.route) { from ->
         Notes(onSnackClick = { id -> onSnackSelected(id, from) }, modifier, navController)

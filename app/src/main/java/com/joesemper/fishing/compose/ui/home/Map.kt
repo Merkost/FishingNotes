@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,6 +20,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
@@ -26,6 +29,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
@@ -40,12 +44,14 @@ import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.compose.getViewModel
+import java.lang.Exception
 
 @ExperimentalMaterialApi
 @ExperimentalPermissionsApi
@@ -53,6 +59,7 @@ import org.koin.androidx.compose.getViewModel
 fun Map(
     onSnackClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
+    //navController: NavController
 ) {
     val mapView = rememberMapViewWithLifecycle()
 
@@ -64,7 +71,7 @@ fun Map(
 
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
 
-    val bottomSheetPlaceState = rememberBottomSheetScaffoldState(
+    val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
     )
 
@@ -74,6 +81,10 @@ fun Map(
 
     val currentMarker = remember {
         mutableStateOf<UserMapMarker?>(null)
+    }
+
+    val currentPosition = remember {
+        mutableStateOf<RawMapMarker?>(null)
     }
 
     var placeSelectMode by remember {
@@ -86,9 +97,9 @@ fun Map(
 
     BottomSheetScaffold(
         modifier = modifier.fillMaxSize(),
-        scaffoldState = bottomSheetPlaceState,
+        scaffoldState = scaffoldState,
         sheetContent = {
-            BottomSheetMarkerDialog(currentMarker.value)
+            BottomSheetMarkerDialog(currentMarker.value, uiState)
         },
         drawerGesturesEnabled = true,
         sheetPeekHeight = 0.dp,
@@ -144,7 +155,7 @@ fun Map(
             }
 
             uiState = when {
-                bottomSheetPlaceState.bottomSheetState.isExpanded -> MapUiState.BottomSheetMode
+                scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetMode
                 placeSelectMode -> MapUiState.PlaceSelectMode
                 else -> MapUiState.NormalMode
             }
@@ -174,7 +185,8 @@ fun Map(
                             coroutineScope = coroutineScope,
                             map = mapView
                         )
-                        bottomSheetPlaceState.bottomSheetState.expand()
+                        scaffoldState.bottomSheetState.expand()
+                        MapUiState.BottomSheetMode
                     }
                 },
                 cameraMoveCallback = { state ->
@@ -194,11 +206,136 @@ fun Map(
     }
 }
 
+@ExperimentalMaterialApi
+@Composable
+fun BottomSheetAddMarkerDialog() {
+    Spacer(modifier = Modifier.size(2.dp))
+
+        ConstraintLayout(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+        ) {
+            val (name, locationIcon, title, description, saveButton, cancelButton) = createRefs()
+            Text(
+                text = "Новая точка",
+                style = MaterialTheme.typography.subtitle1,
+                modifier = Modifier.constrainAs(name) {
+                    top.linkTo(parent.top, 16.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 4.dp)
+                    absoluteRight.linkTo(parent.absoluteRight)
+                }
+            )
+            val titleValue = remember { mutableStateOf("") }
+            val descriptionValue = remember { mutableStateOf("") }
+            OutlinedTextField(
+                value = titleValue.value,
+                onValueChange = {
+                    titleValue.value = it
+
+                },
+                label = { Text(text = "Название") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                ),
+                modifier = Modifier.constrainAs(title) {
+                    top.linkTo(name.bottom, 2.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 4.dp)
+                    absoluteRight.linkTo(parent.absoluteRight, 4.dp)
+                }
+            )
+            OutlinedTextField(
+                value = descriptionValue.value,
+                onValueChange = {
+                    descriptionValue.value = it
+
+                },
+                label = { Text(text = "Описание") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                ),
+                modifier = Modifier.constrainAs(description) {
+                    top.linkTo(title.bottom, 2.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 4.dp)
+                    absoluteRight.linkTo(parent.absoluteRight, 4.dp)
+                }
+            )
+
+            /*Icon(
+                painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+                contentDescription = "Marker",
+                tint = secondaryFigmaColor,
+                modifier = Modifier
+                    .size(32.dp)
+                    .constrainAs(locationIcon) {
+                        absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
+                        top.linkTo(title.top)
+                        bottom.linkTo(title.bottom)
+                    }
+            )*/
+
+
+
+            Button(modifier = Modifier.constrainAs(saveButton) {
+                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+                top.linkTo(description.bottom, 8.dp)
+                bottom.linkTo(parent.bottom, 16.dp)
+            },
+                shape = RoundedCornerShape(24.dp), onClick = { /*TODO*/ }) {
+                Row(
+                    modifier = Modifier.wrapContentSize(),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    /*Icon(
+                        painterResource(id = R.drawable.ic_baseline_shortcut_24),
+                        "",
+                        modifier = Modifier.size(24.dp)
+                    )*/
+                    Text(
+                        stringResource(id = R.string.save),
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
+            }
+
+            OutlinedButton(modifier = Modifier.constrainAs(cancelButton) {
+                absoluteRight.linkTo(saveButton.absoluteLeft, 8.dp)
+                top.linkTo(saveButton.top)
+                bottom.linkTo(saveButton.bottom)
+            }, shape = RoundedCornerShape(24.dp), onClick = { /*TODO*/ }) {
+                Row(
+                    modifier = Modifier.wrapContentSize(),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    /*Icon(
+                        painterResource(id = R.drawable.ic_baseline_navigation_24),
+                        "",
+                        modifier = Modifier.size(24.dp)
+                    )*/
+                    Text(
+                        stringResource(id = R.string.cancel),
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
+            }
+        }
+}
+
 
 @ExperimentalMaterialApi
 @Composable
-fun BottomSheetMarkerDialog(marker: UserMapMarker?) {
-    Spacer(modifier = Modifier.size(1.dp))
+fun BottomSheetMarkerDialog(marker: UserMapMarker?, uiState: MapUiState) {
+
+    /*when (uiState) {
+        MapUiState.BottomSheetMode -> {*/
+
+    Spacer(modifier = Modifier.size(2.dp))
     marker?.let {
 
         ConstraintLayout(
@@ -284,8 +421,10 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?) {
                         stringResource(id = R.string.navigate),
                         modifier = Modifier.padding(start = 8.dp)
                     )
-                }
-            }
+                //}
+            //}
+        }
+    }
 
 
 //            IconButton(
@@ -418,7 +557,7 @@ fun FubOnMap(state: MapUiState, onClick: () -> Unit) {
     when (state) {
         MapUiState.BottomSheetMode -> {
             fabImg.value = R.drawable.ic_add_catch
-            padding.value = 0.dp
+            padding.value = 15.dp
         }
         MapUiState.NormalMode -> {
             fabImg.value = R.drawable.ic_baseline_add_location_24
@@ -436,7 +575,7 @@ fun FubOnMap(state: MapUiState, onClick: () -> Unit) {
             .padding(
                 bottom = padding.value
             ),
-        onClick = onClick
+        onClick = onClick,
     ) {
         Icon(
             painter = painterResource(id = fabImg.value),
@@ -485,12 +624,9 @@ fun PermissionDialog(modifier: Modifier, permissionsState: MultiplePermissionsSt
 
 @Composable
 fun rememberMapViewWithLifecycle(): MapView {
+    val viewModel: MapViewModel = getViewModel()
     val context = LocalContext.current
-    val mapView = remember {
-        MapView(context).apply {
-            id = R.id.map
-        }
-    }
+    val mapView: MapView = remember { MapView(context).apply { id = R.id.map } }
 
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle, mapView) {
@@ -535,10 +671,14 @@ fun getCurrentLocation(context: Context, permissionsState: MultiplePermissionsSt
 
     if (permissionsState.allPermissionsGranted) {
         val locationResult = fusedLocationProviderClient.lastLocation
-        locationResult.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                result.value = LatLng(task.result.latitude, task.result.longitude)
+        locationResult.addOnSuccessListener { task ->
+
+            try {
+                result.value = LatLng(task.latitude, task.longitude)
+            } catch (e: Exception) {
+                Log.d("MAP", "Unable to get location")
             }
+
         }
     }
     result
