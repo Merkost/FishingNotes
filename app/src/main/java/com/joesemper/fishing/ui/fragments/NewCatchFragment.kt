@@ -63,7 +63,6 @@ import com.joesemper.fishing.ui.theme.FigmaTheme
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.utils.NavigationHolder
 import com.joesemper.fishing.utils.showToast
-import gun0912.tedbottompicker.TedBottomPicker
 import id.zelory.compressor.Compressor
 import id.zelory.compressor.constraint.quality
 import kotlinx.coroutines.runBlocking
@@ -108,13 +107,13 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         return ComposeView(requireContext()).apply {
             setContent {
                 FigmaTheme {
-                    NewCatchScreen()
+                    //NewCatchScreen()
                 }
             }
         }
     }
 
-    @ExperimentalAnimationApi
+    /*@ExperimentalAnimationApi
     @ExperimentalMaterialApi
     @ExperimentalCoilApi
     @Composable
@@ -141,7 +140,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
                 Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
                 DateAndTime(viewModel.date, viewModel.time)
                 Photos(
-                    { clicked -> /*TODO(Open photo in full screen)*/ },
+                    { clicked -> *//*TODO(Open photo in full screen)*//* },
                     { deleted -> viewModel.deletePhoto(deleted) })
             }
         }
@@ -328,7 +327,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
         )
     }
 
-    /*@ExperimentalMaterialApi
+    *//*@ExperimentalMaterialApi
     @Composable
     private fun BottomSheet() {
         Row(
@@ -349,7 +348,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
             }
             Spacer(modifier = Modifier.size(20.dp))
         }
-    }*/
+    }*//*
 
     @Composable
     fun FishSpecies(name: MutableState<String>) {
@@ -927,7 +926,7 @@ class NewCatchFragment : Fragment(), AndroidScopeComponent {
     override fun onDetach() {
         super.onDetach()
         (requireActivity() as NavigationHolder).showNav()
-    }
+    }*/
 
     fun commentary() {
 

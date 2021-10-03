@@ -346,6 +346,7 @@ fun GoogleMapLayout(
             googleMap.setOnCameraIdleListener {
                 cameraMoveCallback(CameraMoveState.MoveFinish)
             }
+
         }
     }
 
@@ -375,6 +376,7 @@ fun PointerIcon(cameraMoveState: CameraMoveState, modifier: Modifier) {
         CameraMoveState.MoveStart -> {
             LottieClipSpec.Frame(0, 20)
         }
+
     }
 
     val progress by animateLottieCompositionAsState(
