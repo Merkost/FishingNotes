@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
@@ -41,6 +42,7 @@ import com.joesemper.fishing.domain.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.compose.getViewModel
@@ -365,29 +367,39 @@ fun GoogleMapLayout(
 @Composable
 fun PointerIcon(cameraMoveState: CameraMoveState, modifier: Modifier) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.another_marker))
+    val lottieAnimatable = rememberLottieAnimatable()
     var minMaxFrame by remember {
         mutableStateOf(LottieClipSpec.Frame(50, 82))
     }
 
-    minMaxFrame = when (cameraMoveState) {
+    when (cameraMoveState) {
         CameraMoveState.MoveFinish -> {
-            LottieClipSpec.Frame(50, 82)
+            minMaxFrame = LottieClipSpec.Frame(50, 82).also { Log.d("MAP", "MoveStart") }
+            LaunchedEffect(Unit) {
+                lottieAnimatable.animate(
+                    composition,
+                    iteration = 1,
+                    clipSpec = minMaxFrame,
+                )
+            }
         }
         CameraMoveState.MoveStart -> {
-            LottieClipSpec.Frame(0, 20)
-        }
+            minMaxFrame = LottieClipSpec.Frame(0, 50).also { Log.d("MAP", "MoveStart") }
+            LaunchedEffect(Unit) {
+                lottieAnimatable.animate(
+                    composition,
+                    iteration = 1,
+                    clipSpec = minMaxFrame,
+                )
+            }
 
+        }
     }
 
-    val progress by animateLottieCompositionAsState(
-        composition = composition,
-        clipSpec = minMaxFrame,
-        iterations = 1
-    )
     LottieAnimation(
         modifier = modifier.size(128.dp),
         composition = composition,
-        progress = progress
+        progress = lottieAnimatable.progress
     )
 }
 
