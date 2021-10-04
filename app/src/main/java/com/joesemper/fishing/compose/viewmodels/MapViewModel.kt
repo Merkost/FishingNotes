@@ -1,4 +1,4 @@
-package com.joesemper.fishing.domain
+package com.joesemper.fishing.compose.viewmodels
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf

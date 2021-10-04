@@ -21,8 +21,8 @@ import com.joesemper.fishing.domain.UserCatchesViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.compose.ui.home.user_catches.UserCatches
-import com.joesemper.fishing.compose.ui.home.user_catches.UserCatchesLoading
+import com.joesemper.fishing.compose.ui.home.notes.user_catches.UserCatches
+import com.joesemper.fishing.compose.ui.home.notes.user_catches.UserCatchesLoading
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
 

@@ -1,4 +1,4 @@
-package com.joesemper.fishing.compose.ui.home.user_catches
+package com.joesemper.fishing.compose.ui.home.notes.user_catches
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi

@@ -1,4 +1,4 @@
-package com.joesemper.fishing.compose.ui.home.user_places
+package com.joesemper.fishing.compose.ui.home.notes.user_places
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background

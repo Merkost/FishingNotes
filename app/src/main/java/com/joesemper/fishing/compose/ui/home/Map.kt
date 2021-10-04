@@ -29,7 +29,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
@@ -42,12 +41,11 @@ import com.google.android.libraries.maps.model.LatLng
 import com.google.android.libraries.maps.model.MarkerOptions
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
-import com.joesemper.fishing.domain.MapViewModel
+import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.androidx.compose.getViewModel
@@ -62,19 +60,13 @@ fun Map(
     //navController: NavController
 ) {
     val mapView = rememberMapViewWithLifecycle()
-
     val viewModel: MapViewModel = getViewModel()
-
     val context = LocalContext.current
-
     val coroutineScope = rememberCoroutineScope()
-
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
-
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
     )
-
     val lastKnownLocation = remember {
         getCurrentLocation(context = context, permissionsState = permissionsState)
     }
@@ -94,6 +86,8 @@ fun Map(
     var uiState: MapUiState by remember {
         mutableStateOf(MapUiState.NormalMode)
     }
+
+    subscribeToMapState(uiState, scaffoldState)
 
     BottomSheetScaffold(
         modifier = modifier.fillMaxSize(),
@@ -133,7 +127,7 @@ fun Map(
                             }
                             placeSelectMode = !placeSelectMode
                         }
-                        MapUiState.BottomSheetMode -> {
+                        MapUiState.BottomSheetAddMode -> {
                             coroutineScope.launch {
                                 Toast.makeText(
                                     context,
@@ -155,7 +149,7 @@ fun Map(
             }
 
             uiState = when {
-                scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetMode
+                scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetAddMode
                 placeSelectMode -> MapUiState.PlaceSelectMode
                 else -> MapUiState.NormalMode
             }
@@ -186,7 +180,7 @@ fun Map(
                             map = mapView
                         )
                         scaffoldState.bottomSheetState.expand()
-                        MapUiState.BottomSheetMode
+                        MapUiState.BottomSheetAddMode
                     }
                 },
                 cameraMoveCallback = { state ->
@@ -203,6 +197,13 @@ fun Map(
                 }, cameraMoveState = cameraMoveState)
             }
         }
+    }
+}
+
+@ExperimentalMaterialApi
+fun subscribeToMapState(uiState: MapUiState, scaffoldState: BottomSheetScaffoldState) {
+    when (uiState) {
+
     }
 }
 
@@ -555,7 +556,7 @@ fun FubOnMap(state: MapUiState, onClick: () -> Unit) {
     }
 
     when (state) {
-        MapUiState.BottomSheetMode -> {
+        MapUiState.BottomSheetAddMode -> {
             fabImg.value = R.drawable.ic_add_catch
             padding.value = 15.dp
         }
@@ -718,12 +719,6 @@ private fun getMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
             else -> throw IllegalStateException()
         }
     }
-
-sealed class MapUiState {
-    object NormalMode : MapUiState()
-    object PlaceSelectMode : MapUiState()
-    object BottomSheetMode : MapUiState()
-}
 
 sealed class CameraMoveState {
     object MoveStart : CameraMoveState()

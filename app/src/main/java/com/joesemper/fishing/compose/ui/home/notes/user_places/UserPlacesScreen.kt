@@ -1,4 +1,4 @@
-package com.joesemper.fishing.compose.ui.home.user_places
+package com.joesemper.fishing.compose.ui.home.notes.user_places
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -13,16 +13,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.navArgument
-import androidx.navigation.fragment.findNavController
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.domain.UserPlacesViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.fragments.NotesFragmentDirections
-import com.joesemper.fishing.utils.showToast
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
