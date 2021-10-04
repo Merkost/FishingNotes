@@ -54,6 +54,7 @@ class MapViewModel(
             repository.addNewMarker(newMarker).collect { progress ->
                 when (progress) {
                     is Progress.Complete -> {
+
                     }
                     is Progress.Loading -> {
                     }
