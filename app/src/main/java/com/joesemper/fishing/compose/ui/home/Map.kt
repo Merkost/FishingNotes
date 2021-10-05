@@ -45,6 +45,8 @@ import com.google.android.libraries.maps.model.MarkerOptions
 import com.google.maps.android.ktx.addMarker
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.Arguments
+import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
@@ -70,7 +72,7 @@ fun Map(
     val coroutineScope = rememberCoroutineScope()
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     val scaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = BottomSheetState(BottomSheetValue.Expanded)
+        //bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
     )
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val lastKnownLocation = remember {
@@ -97,14 +99,14 @@ fun Map(
     }
 
     ModalBottomSheetLayout(sheetContent = { BottomSheetAddMarkerDialog(currentGoogleMap, currentPosition, modalBottomSheetState) },
-        sheetState = modalBottomSheetState, modifier = Modifier.navigationBarsWithImePadding(),) {
+        sheetState = modalBottomSheetState, ) {
 
 
         BottomSheetScaffold(
             modifier = modifier.fillMaxSize(),
             scaffoldState = scaffoldState,
             sheetContent = {
-                BottomSheetMarkerDialog(currentMarker.value)
+                BottomSheetMarkerDialog(currentMarker.value, navController)
             },
             drawerGesturesEnabled = true,
             sheetPeekHeight = 0.dp,
@@ -386,7 +388,7 @@ fun saveNewMarker(
 
 @ExperimentalMaterialApi
 @Composable
-fun BottomSheetMarkerDialog(marker: UserMapMarker?) {
+fun BottomSheetMarkerDialog(marker: UserMapMarker?, navController: NavController) {
 
     Spacer(modifier = Modifier.size(2.dp))
     marker?.let {
@@ -436,7 +438,7 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?) {
                 top.linkTo(description.bottom, 8.dp)
                 bottom.linkTo(parent.bottom, 16.dp)
             },
-                shape = RoundedCornerShape(24.dp), onClick = { /*TODO*/ }) {
+                shape = RoundedCornerShape(24.dp), onClick = { detailsOnClick(navController, it) }) {
                 Row(
                     modifier = Modifier.wrapContentSize(),
                     horizontalArrangement = Arrangement.Start,
@@ -477,6 +479,11 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?) {
             }
         }
     }
+}
+
+fun detailsOnClick(navController: NavController, userMarker: UserMapMarker) {
+    navController.currentBackStackEntry?.arguments?.putParcelable(Arguments.PLACE, userMarker)
+    navController.navigate(MainDestinations.PLACE_ROUTE)
 }
 
 @ExperimentalPermissionsApi
