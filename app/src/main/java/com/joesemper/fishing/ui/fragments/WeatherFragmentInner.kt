@@ -6,9 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
-import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.databinding.FragmentWeatherInnerBinding
-import com.joesemper.fishing.view.weather.utils.getWeatherIconByName
+import com.joesemper.fishing.model.entity.weather.Daily
+import com.joesemper.fishing.model.mappers.getWeatherIconByName
 
 class WeatherFragmentInner: Fragment() {
 

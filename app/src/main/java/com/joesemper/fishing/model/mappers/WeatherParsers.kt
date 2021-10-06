@@ -1,4 +1,4 @@
-package com.joesemper.fishing.view.weather.utils
+package com.joesemper.fishing.model.mappers
 
 import com.joesemper.fishing.R
 
