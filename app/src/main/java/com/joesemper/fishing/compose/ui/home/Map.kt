@@ -31,7 +31,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
-import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.PermissionsRequired
@@ -66,17 +65,21 @@ fun Map(
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
-    val mapView = rememberMapViewWithLifecycle()
+
+
     val viewModel: MapViewModel = getViewModel()
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    var mapView = viewModel.mapView.value ?: rememberMapViewWithLifecycle().apply { viewModel.mapView.value = this }
+
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     val scaffoldState = rememberBottomSheetScaffoldState(
-        //bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
+        //bottomSheetState = BottomSheetState(BottomSheetValue.Expanded)
     )
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val lastKnownLocation = remember {
-        getCurrentLocation(context = context, permissionsState = permissionsState)
+        getCurrentLocation(context = context, permissionsState = permissionsState, viewModel)
     }
 
     val currentMarker = remember {
@@ -94,11 +97,17 @@ fun Map(
         mutableStateOf(false)
     }
 
-    var uiState: MapUiState by remember {
-        mutableStateOf(MapUiState.NormalMode)
+    val progressOnAdd = remember { mutableStateOf(false) }
+
+    var mapUiState by viewModel.uiState
+
+    when (mapUiState) {
+        MapUiState.NormalMode -> progressOnAdd.value = false
     }
 
-    ModalBottomSheetLayout(sheetContent = { BottomSheetAddMarkerDialog(currentGoogleMap, currentPosition, modalBottomSheetState) },
+
+
+    ModalBottomSheetLayout(sheetContent = { BottomSheetAddMarkerDialog(currentGoogleMap, currentPosition, modalBottomSheetState, progressOnAdd) },
         sheetState = modalBottomSheetState, ) {
 
 
@@ -111,10 +120,10 @@ fun Map(
             drawerGesturesEnabled = true,
             sheetPeekHeight = 0.dp,
             floatingActionButton = {
-                FubOnMap(
-                    state = uiState,
+                FabOnMap(
+                    state = mapUiState,
                     onClick = {
-                        when (uiState) {
+                        when (mapUiState) {
                             MapUiState.NormalMode -> {
                                 moveCameraToLocation(
                                     coroutineScope = coroutineScope,
@@ -148,6 +157,23 @@ fun Map(
                                 }
                                 placeSelectMode = !placeSelectMode
                             }
+                            MapUiState.BottomSheetInfoMode -> {
+                                moveCameraToLocation(
+                                    coroutineScope = coroutineScope,
+                                    map = mapView,
+                                    location = lastKnownLocation.value
+                                )
+                                coroutineScope.launch {
+                                    Toast.makeText(
+                                        context,
+                                        "Place select mode on",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    scaffoldState.bottomSheetState.collapse()
+                                }
+                                placeSelectMode = !placeSelectMode
+
+                            }
                             MapUiState.BottomSheetAddMode -> {
                                 coroutineScope.launch {
                                     Toast.makeText(
@@ -169,7 +195,7 @@ fun Map(
                     mutableStateOf(CameraMoveState.MoveFinish)
                 }
 
-                uiState = when {
+                mapUiState = when {
                     scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetInfoMode
                     placeSelectMode -> MapUiState.PlaceSelectMode
                     modalBottomSheetState.isVisible -> MapUiState.BottomSheetAddMode
@@ -201,7 +227,7 @@ fun Map(
                                 coroutineScope = coroutineScope,
                                 map = mapView
                             )
-                            uiState = MapUiState.BottomSheetInfoMode
+                            mapUiState = MapUiState.BottomSheetInfoMode
                             scaffoldState.bottomSheetState.expand()
 
                         }
@@ -211,10 +237,10 @@ fun Map(
                     }
                 )
 
-                if (uiState is MapUiState.PlaceSelectMode) {
+                if (mapUiState is MapUiState.PlaceSelectMode) {
                     PointerIcon(modifier = Modifier.constrainAs(pointer) {
                         top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
+                        bottom.linkTo(parent.bottom, 2.dp)
                         absoluteLeft.linkTo(parent.absoluteLeft)
                         absoluteRight.linkTo(parent.absoluteRight)
                     }, cameraMoveState = cameraMoveState)
@@ -240,10 +266,12 @@ fun Map(
 fun BottomSheetAddMarkerDialog(
     currentGoogleMap: MutableState<GoogleMap?>,
     currentPosition: MutableState<LatLng?>,
-    modalBottomSheetState: ModalBottomSheetState
+    modalBottomSheetState: ModalBottomSheetState,
+    progressOnAdd: MutableState<Boolean>
 ) {
     val viewModel = get<MapViewModel>()
-    val progressBar = remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+
     Spacer(modifier = Modifier.size(1.dp))
 
     ConstraintLayout(
@@ -251,13 +279,20 @@ fun BottomSheetAddMarkerDialog(
             .fillMaxWidth()
             .wrapContentHeight()
     ) {
-        if (progressBar.value) {
-            Surface {
+        val (progress, name, locationIcon, title, description, saveButton, cancelButton) = createRefs()
+
+        if (progressOnAdd.value) {
+            Surface(color = Color.LightGray, modifier = Modifier.constrainAs(progress) {
+                top.linkTo(parent.top)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+                bottom.linkTo(parent.bottom)
+            }) {
                 CircularProgressIndicator()
             }
         }
-        val coroutineScope = rememberCoroutineScope()
-        val (name, locationIcon, title, description, saveButton, cancelButton) = createRefs()
+
+
         Text(
             text = "Новая точка",
             style = MaterialTheme.typography.subtitle1,
@@ -273,7 +308,6 @@ fun BottomSheetAddMarkerDialog(
             value = titleValue.value,
             onValueChange = {
                 titleValue.value = it
-
             },
             label = { Text(text = "Название") },
             singleLine = true,
@@ -291,7 +325,6 @@ fun BottomSheetAddMarkerDialog(
             value = descriptionValue.value,
             onValueChange = {
                 descriptionValue.value = it
-
             },
             label = { Text(text = "Описание") },
             singleLine = true,
@@ -328,6 +361,7 @@ fun BottomSheetAddMarkerDialog(
         },
             shape = RoundedCornerShape(24.dp), onClick = { coroutineScope.launch {
                 modalBottomSheetState.hide()
+                progressOnAdd.value = false
             } }) {
             Row(
                 modifier = Modifier.wrapContentSize(),
@@ -350,7 +384,7 @@ fun BottomSheetAddMarkerDialog(
             absoluteRight.linkTo(cancelButton.absoluteLeft, 8.dp)
             top.linkTo(cancelButton.top)
             bottom.linkTo(cancelButton.bottom)
-        }, shape = RoundedCornerShape(24.dp), onClick = {progressBar.value = true
+        }, shape = RoundedCornerShape(24.dp), onClick = {progressOnAdd.value = true
             viewModel.addNewMarker(RawMapMarker
                 (titleValue.value, descriptionValue.value, currentPosition.value?.latitude ?: 0.0,
                 currentPosition.value?.longitude ?: 0.0))
@@ -389,13 +423,11 @@ fun saveNewMarker(
 @ExperimentalMaterialApi
 @Composable
 fun BottomSheetMarkerDialog(marker: UserMapMarker?, navController: NavController) {
-
-    Spacer(modifier = Modifier.size(2.dp))
     marker?.let {
         ConstraintLayout(
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentHeight()
+                .wrapContentHeight().padding(2.dp)
         ) {
             val (locationIcon, title, description, navigateButton, detailsButton) = createRefs()
             Icon(
@@ -579,7 +611,7 @@ fun PointerIcon(cameraMoveState: CameraMoveState, modifier: Modifier) {
 
 @ExperimentalMaterialApi
 @Composable
-fun FubOnMap(state: MapUiState, onClick: () -> Unit) {
+fun FabOnMap(state: MapUiState, onClick: () -> Unit) {
 
     val fabImg = remember {
         mutableStateOf(R.drawable.ic_baseline_add_location_24)
@@ -696,7 +728,11 @@ fun IconButton(image: Painter, name: String, click: () -> Unit, modifier: Modifi
 }
 
 @ExperimentalPermissionsApi
-fun getCurrentLocation(context: Context, permissionsState: MultiplePermissionsState) = runBlocking {
+fun getCurrentLocation(
+    context: Context,
+    permissionsState: MultiplePermissionsState,
+    viewModel: MapViewModel
+) = runBlocking {
     val fusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
 
@@ -710,8 +746,10 @@ fun getCurrentLocation(context: Context, permissionsState: MultiplePermissionsSt
 
             try {
                 result.value = LatLng(task.latitude, task.longitude)
+
             } catch (e: Exception) {
                 Log.d("MAP", "Unable to get location")
+                Toast.makeText(context, R.string.cant_get_current_location, Toast.LENGTH_SHORT).show()
             }
 
         }

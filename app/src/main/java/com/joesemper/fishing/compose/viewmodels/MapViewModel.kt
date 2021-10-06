@@ -1,11 +1,11 @@
 package com.joesemper.fishing.compose.viewmodels
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.LatLng
+import com.joesemper.fishing.compose.ui.home.MapUiState
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -14,6 +14,7 @@ import com.joesemper.fishing.model.repository.UserContentRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 class MapViewModel(
@@ -25,7 +26,9 @@ class MapViewModel(
 
     private val mapMarkers = MutableStateFlow(listOf<UserMapMarker>())
 
-    val mapState = MutableStateFlow(Pair<LatLng?, Float?>(null, null))
+    var uiState: MutableState<MapUiState> = mutableStateOf(MapUiState.NormalMode)
+
+    val mapView: MutableState<MapView?> = mutableStateOf(null)
 
     init {
         loadMarkers()
@@ -54,9 +57,10 @@ class MapViewModel(
             repository.addNewMarker(newMarker).collect { progress ->
                 when (progress) {
                     is Progress.Complete -> {
-
+                        uiState.value = MapUiState.NormalMode
                     }
                     is Progress.Loading -> {
+
                     }
                     is Progress.Error -> onError(progress.error)
                 }
