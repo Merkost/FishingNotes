@@ -1,4 +1,4 @@
-package com.joesemper.fishing.compose.ui.home
+package com.joesemper.fishing.compose.ui.home.weather
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
@@ -17,6 +17,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.TabItem
+import com.joesemper.fishing.compose.ui.home.getCurrentLocation
+import com.joesemper.fishing.compose.ui.home.locationPermissionsList
 import com.joesemper.fishing.domain.WeatherViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
@@ -83,7 +85,7 @@ fun Weather(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { AppBar(navController = navController) }
+        topBar = { com.joesemper.fishing.compose.ui.home.AppBar(navController = navController) }
     ) {
 
         Column(
@@ -108,27 +110,19 @@ fun Weather(
 
                 },
                 trailingIcon = {
-                    if (isDropdownMenuExpanded) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_down_24),
-                            tint = secondaryFigmaTextColor,
-                            contentDescription = "Arrow down icon",
-                            modifier = Modifier
-                                .clickable {
-                                    isDropdownMenuExpanded = !isDropdownMenuExpanded
-                                }
-                                .rotate(180f)
-                        )
-                    } else {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_down_24),
-                            tint = secondaryFigmaTextColor,
-                            contentDescription = "Arrow down icon",
-                            modifier = Modifier.clickable {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_down_24),
+                        tint = secondaryFigmaTextColor,
+                        contentDescription = "Arrow down icon",
+                        modifier = Modifier
+                            .rotate(
+                                if (isDropdownMenuExpanded) 180f else 0f
+                            )
+                            .clickable {
                                 isDropdownMenuExpanded = !isDropdownMenuExpanded
                             }
-                        )
-                    }
+
+                    )
                 }
             )
             DropdownMenu(

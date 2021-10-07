@@ -36,7 +36,7 @@ fun getDateByMilliseconds(ms: Long): String {
 }
 
 fun getTimeByMilliseconds(ms: Long): String {
-    val sdf = SimpleDateFormat("hh:mm", Locale.US)
+    val sdf = SimpleDateFormat("HH:mm", Locale.US)
     val date = Date(ms * 1000)
     return sdf.format(date)
 }
