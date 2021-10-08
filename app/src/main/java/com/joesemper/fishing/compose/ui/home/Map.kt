@@ -3,6 +3,7 @@ package com.joesemper.fishing.compose.ui.home
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -50,9 +51,8 @@ import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
+import me.vponomarenko.compose.shimmer.shimmer
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import java.lang.Exception
@@ -71,7 +71,9 @@ fun Map(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    var mapView = viewModel.mapView.value ?: rememberMapViewWithLifecycle().apply { viewModel.mapView.value = this }
+    var mapView = viewModel.mapView.value ?: rememberMapViewWithLifecycle().apply {
+        viewModel.mapView.value = this
+    }
 
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     val scaffoldState = rememberBottomSheetScaffoldState(
@@ -106,11 +108,22 @@ fun Map(
     when (mapUiState) {
         MapUiState.NormalMode -> progressOnAdd.value = false
     }
+    var cameraMoveState: CameraMoveState by remember {
+        mutableStateOf(CameraMoveState.MoveFinish)
+    }
 
 
-
-    ModalBottomSheetLayout(sheetContent = { BottomSheetAddMarkerDialog(currentGoogleMap, currentPosition, modalBottomSheetState, progressOnAdd) },
-        sheetState = modalBottomSheetState,  ) {
+    ModalBottomSheetLayout(
+        sheetContent = {
+            BottomSheetAddMarkerDialog(
+                currentGoogleMap,
+                currentPosition,
+                modalBottomSheetState,
+                progressOnAdd
+            )
+        },
+        sheetState = modalBottomSheetState,
+    ) {
 
 
         BottomSheetScaffold(
@@ -151,11 +164,11 @@ fun Map(
                                 }
                                 mapView.getMapAsync { googleMap ->
                                     val target = googleMap.cameraPosition.target
-                                    currentPosition.value = LatLng(target.latitude, target.longitude)
+                                    currentPosition.value =
+                                        LatLng(target.latitude, target.longitude)
                                     coroutineScope.launch {
                                         modalBottomSheetState.show()
                                     }
-
                                 }
                                 placeSelectMode = !placeSelectMode
                             }
@@ -193,10 +206,6 @@ fun Map(
             ConstraintLayout(modifier = Modifier.fillMaxSize()) {
                 val (permissionDialog, mapLayout, pointer, addMarkerFragment) = createRefs()
 
-                var cameraMoveState: CameraMoveState by remember {
-                    mutableStateOf(CameraMoveState.MoveFinish)
-                }
-
                 mapUiState = when {
                     placeSelectMode -> MapUiState.PlaceSelectMode
                     modalBottomSheetState.isVisible -> MapUiState.BottomSheetAddMode
@@ -204,36 +213,91 @@ fun Map(
                     else -> MapUiState.NormalMode
                 }
 
+                val chosenPlace = remember { mutableStateOf<String?>(null) }
+                val geocoder = Geocoder(context)
                 if (mapUiState == MapUiState.PlaceSelectMode) {
-                    Card (shape = RoundedCornerShape(size = 10.dp), modifier = Modifier.constrainAs(addMarkerFragment) {
-                        top.linkTo(parent.top, 4.dp)
-                        //bottom.linkTo(parent.bottom)
-                        absoluteLeft.linkTo(parent.absoluteLeft)
-                        absoluteRight.linkTo(parent.absoluteRight)
-                    }.wrapContentSize().padding(6.dp)) {
-                        Row(
-                            modifier = Modifier.wrapContentSize().padding(8.dp),
-                            horizontalArrangement = Arrangement.Start,
+
+                    when (cameraMoveState) {
+                        CameraMoveState.MoveStart -> {
+                            chosenPlace.value = null
+                        }
+                        CameraMoveState.MoveFinish -> {
+                            mapView.getMapAsync { googleMap ->
+
+                                val target = googleMap.cameraPosition.target
+                                currentPosition.value = LatLng(target.latitude, target.longitude)
+                                val position = geocoder.getFromLocation(
+                                    target.latitude,
+                                    target.longitude,
+                                    1)
+                                coroutineScope.launch {
+
+                                    delay(1200)
+                                    if (position.first().subAdminArea.isNullOrBlank()) {
+                                        chosenPlace.value = position.first().adminArea
+                                    } else {
+                                        chosenPlace.value = position.first().subAdminArea
+                                    }
+
+                                    //    modalBottomSheetState.show()
+                                }
+                            }
+                        }
+                    }
+
+                    Card(
+                        shape = RoundedCornerShape(size = 10.dp),
+                        modifier = Modifier.constrainAs(addMarkerFragment) {
+                            top.linkTo(parent.top, 4.dp)
+                            //bottom.linkTo(parent.bottom)
+                            absoluteLeft.linkTo(parent.absoluteLeft)
+                            absoluteRight.linkTo(parent.absoluteRight)
+                        }.wrapContentSize().padding(6.dp)
+                    ) {
+                        chosenPlace.value?.let {
+                            Row(
+                                modifier = Modifier.wrapContentSize().padding(12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+                                    contentDescription = "Marker",
+                                    tint = secondaryFigmaColor,
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                )
+                                Spacer(Modifier.size(8.dp))
+                                Text(it.toString())
+                            }
+
+                        } ?: Row(
+                            modifier = Modifier.wrapContentSize().padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
                                 contentDescription = "Marker",
-                                tint = secondaryFigmaColor,
+                                tint = Color.LightGray,
                                 modifier = Modifier
-                                    .size(28.dp)
+                                    .size(32.dp).shimmer()
                             )
-                            Spacer(Modifier.size(4.dp))
+                            Spacer(Modifier.size(8.dp))
                             Column {
-                                Text(
-                                    stringResource(id = R.string.details),
-                                    //modifier = Modifier.padding(start = 8.dp)
-                                )
+                                Card(
+                                    elevation = 0.dp,
+                                    shape = RoundedCornerShape(4.dp),
+                                    modifier = Modifier.wrapContentSize().shimmer(),
+                                    backgroundColor = Color.LightGray
+                                ) {
+                                    Text("longitude", color = Color.LightGray)
+                                }
                             }
-
                         }
                     }
                 }
+
 
                 PermissionDialog(modifier = Modifier.constrainAs(permissionDialog) {
                     top.linkTo(parent.top)
@@ -300,7 +364,7 @@ fun BottomSheetAddMarkerDialog(
     currentGoogleMap: MutableState<GoogleMap?>,
     currentPosition: MutableState<LatLng?>,
     modalBottomSheetState: ModalBottomSheetState,
-    progressOnAdd: MutableState<Boolean>
+    progressOnAdd: MutableState<Boolean>,
 ) {
     val viewModel = get<MapViewModel>()
     val coroutineScope = rememberCoroutineScope()
@@ -392,10 +456,11 @@ fun BottomSheetAddMarkerDialog(
             top.linkTo(description.bottom, 8.dp)
             bottom.linkTo(parent.bottom, 16.dp)
         },
-            shape = RoundedCornerShape(24.dp), onClick = { coroutineScope.launch {
-                modalBottomSheetState.hide()
-                progressOnAdd.value = false
-            } }) {
+            shape = RoundedCornerShape(24.dp), onClick = {
+                coroutineScope.launch {
+                    progressOnAdd.value = false
+                }
+            }) {
             Row(
                 modifier = Modifier.wrapContentSize(),
                 horizontalArrangement = Arrangement.Center,
@@ -417,11 +482,19 @@ fun BottomSheetAddMarkerDialog(
             absoluteRight.linkTo(cancelButton.absoluteLeft, 8.dp)
             top.linkTo(cancelButton.top)
             bottom.linkTo(cancelButton.bottom)
-        }, shape = RoundedCornerShape(24.dp), onClick = {progressOnAdd.value = true
-            viewModel.addNewMarker(RawMapMarker
-                (titleValue.value, descriptionValue.value, currentPosition.value?.latitude ?: 0.0,
-                currentPosition.value?.longitude ?: 0.0))
-            /*saveNewMarker(titleValue, descriptionValue, currentGoogleMap, currentPosition)*/ }) {
+        }, shape = RoundedCornerShape(24.dp), onClick = {
+            progressOnAdd.value = true
+            viewModel.addNewMarker(
+                RawMapMarker
+                    (
+                    titleValue.value,
+                    descriptionValue.value,
+                    currentPosition.value?.latitude ?: 0.0,
+                    currentPosition.value?.longitude ?: 0.0
+                )
+            )
+            /*saveNewMarker(titleValue, descriptionValue, currentGoogleMap, currentPosition)*/
+        }) {
             Row(
                 modifier = Modifier.wrapContentSize(),
                 horizontalArrangement = Arrangement.Center,
@@ -503,7 +576,8 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?, navController: NavController
                 top.linkTo(description.bottom, 8.dp)
                 bottom.linkTo(parent.bottom, 16.dp)
             },
-                shape = RoundedCornerShape(24.dp), onClick = { detailsOnClick(navController, it) }) {
+                shape = RoundedCornerShape(24.dp),
+                onClick = { detailsOnClick(navController, it) }) {
                 Row(
                     modifier = Modifier.wrapContentSize(),
                     horizontalArrangement = Arrangement.Start,
@@ -782,7 +856,8 @@ fun getCurrentLocation(
 
             } catch (e: Exception) {
                 Log.d("MAP", "Unable to get location")
-                Toast.makeText(context, R.string.cant_get_current_location, Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, R.string.cant_get_current_location, Toast.LENGTH_SHORT)
+                    .show()
             }
 
         }
