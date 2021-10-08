@@ -75,7 +75,7 @@ fun Map(
 
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     val scaffoldState = rememberBottomSheetScaffoldState(
-        //bottomSheetState = BottomSheetState(BottomSheetValue.Expanded)
+        //bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
     )
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val lastKnownLocation = remember {
@@ -99,7 +99,9 @@ fun Map(
 
     val progressOnAdd = remember { mutableStateOf(false) }
 
-    var mapUiState by viewModel.uiState
+    var mapUiState by remember {
+        mutableStateOf<MapUiState>(MapUiState.NormalMode)
+    }
 
     when (mapUiState) {
         MapUiState.NormalMode -> progressOnAdd.value = false
@@ -108,7 +110,7 @@ fun Map(
 
 
     ModalBottomSheetLayout(sheetContent = { BottomSheetAddMarkerDialog(currentGoogleMap, currentPosition, modalBottomSheetState, progressOnAdd) },
-        sheetState = modalBottomSheetState, ) {
+        sheetState = modalBottomSheetState,  ) {
 
 
         BottomSheetScaffold(
@@ -169,7 +171,7 @@ fun Map(
                                         "Place select mode on",
                                         Toast.LENGTH_SHORT
                                     ).show()
-                                    scaffoldState.bottomSheetState.collapse()
+                                    //scaffoldState.bottomSheetState.collapse()
                                 }
                                 placeSelectMode = !placeSelectMode
 
@@ -189,17 +191,48 @@ fun Map(
             floatingActionButtonPosition = FabPosition.End,
         ) {
             ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-                val (permissionDialog, mapLayout, pointer) = createRefs()
+                val (permissionDialog, mapLayout, pointer, addMarkerFragment) = createRefs()
 
                 var cameraMoveState: CameraMoveState by remember {
                     mutableStateOf(CameraMoveState.MoveFinish)
                 }
 
                 mapUiState = when {
-                    scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetInfoMode
                     placeSelectMode -> MapUiState.PlaceSelectMode
                     modalBottomSheetState.isVisible -> MapUiState.BottomSheetAddMode
+                    scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetInfoMode
                     else -> MapUiState.NormalMode
+                }
+
+                if (mapUiState == MapUiState.PlaceSelectMode) {
+                    Card (shape = RoundedCornerShape(size = 10.dp), modifier = Modifier.constrainAs(addMarkerFragment) {
+                        top.linkTo(parent.top, 4.dp)
+                        //bottom.linkTo(parent.bottom)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                    }.wrapContentSize().padding(6.dp)) {
+                        Row(
+                            modifier = Modifier.wrapContentSize().padding(8.dp),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+                                contentDescription = "Marker",
+                                tint = secondaryFigmaColor,
+                                modifier = Modifier
+                                    .size(28.dp)
+                            )
+                            Spacer(Modifier.size(4.dp))
+                            Column {
+                                Text(
+                                    stringResource(id = R.string.details),
+                                    //modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
+
+                        }
+                    }
                 }
 
                 PermissionDialog(modifier = Modifier.constrainAs(permissionDialog) {
@@ -227,7 +260,7 @@ fun Map(
                                 coroutineScope = coroutineScope,
                                 map = mapView
                             )
-                            mapUiState = MapUiState.BottomSheetInfoMode
+                            //mapUiState = MapUiState.BottomSheetInfoMode
                             scaffoldState.bottomSheetState.expand()
 
                         }
@@ -580,7 +613,7 @@ fun PointerIcon(cameraMoveState: CameraMoveState, modifier: Modifier) {
 
     when (cameraMoveState) {
         CameraMoveState.MoveFinish -> {
-            minMaxFrame = LottieClipSpec.Frame(50, 82).also { Log.d("MAP", "MoveStart") }
+            minMaxFrame = LottieClipSpec.Frame(50, 82).also { Log.d("MAP", "MoveFinish") }
             LaunchedEffect(Unit) {
                 lottieAnimatable.animate(
                     composition,
