@@ -10,13 +10,16 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
@@ -26,6 +29,7 @@ import com.joesemper.fishing.ui.theme.primaryFigmaBackgroundTint
 import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
 import com.joesemper.fishing.utils.getDateByMilliseconds
 import com.joesemper.fishing.utils.getTimeByMilliseconds
+import com.joesemper.fishing.utils.hPaToMmHg
 
 @Composable
 fun WeatherForADay(weather: WeatherForecast) {
@@ -59,7 +63,11 @@ fun WeatherParametersForADay(weather: WeatherForecast) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             val date = getDateByMilliseconds(weather.hourly.first().date)
-            WeatherText(text = date)
+            Text(
+                style = MaterialTheme.typography.subtitle1,
+                fontWeight = FontWeight.Bold,
+                text = date
+            )
             WeatherParameterItem(
                 color = primaryFigmaBackgroundTint,
                 icon = R.drawable.ic_clear_sky,
@@ -108,15 +116,20 @@ fun WeatherParametersForADay(weather: WeatherForecast) {
 
 @Composable
 fun WeatherParametersForADayMeanings(weather: WeatherForecast) {
+
     Column {
         LazyRow(
             content = {
-                items(24) { index ->
+                items(weather.hourly.size) { index ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         val time = getTimeByMilliseconds(weather.hourly[index].date)
-                        WeatherText(text = time)
+                        Text(
+                            style = MaterialTheme.typography.subtitle1,
+                            fontWeight = FontWeight.Bold,
+                            text = time
+                        )
                         WeatherParameterItemMeaning(
                             color = primaryFigmaBackgroundTint,
                             icon = getWeatherIconByName(weather.hourly[index].weather.first().icon),
@@ -128,7 +141,7 @@ fun WeatherParametersForADayMeanings(weather: WeatherForecast) {
                         )
                         WeatherParameterItemMeaning(
                             color = primaryFigmaBackgroundTint,
-                            text = weather.hourly[index].pressure.toString() + "hPa",
+                            text = hPaToMmHg(weather.daily[index].pressure).toString() + " mmHg",
                         )
                         WeatherParameterItemMeaning(
                             color = backgroundGreenColor,
@@ -142,7 +155,7 @@ fun WeatherParametersForADayMeanings(weather: WeatherForecast) {
                         )
                         WeatherParameterItemMeaning(
                             color = backgroundGreenColor,
-                            text = weather.hourly[index].probabilityOfPrecipitation.toString() + "%",
+                            text = (weather.daily[index].probabilityOfPrecipitation * 100).toString() + "%",
                         )
                         WeatherParameterItemMeaning(
                             color = primaryFigmaBackgroundTint,

@@ -9,21 +9,26 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
+import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.ui.theme.backgroundGreenColor
 import com.joesemper.fishing.ui.theme.primaryFigmaBackgroundTint
 import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
 import com.joesemper.fishing.utils.getDateByMilliseconds
 import com.joesemper.fishing.utils.getTimeByMilliseconds
+import com.joesemper.fishing.utils.hPaToMmHg
 
 @Composable
 fun WeatherForAWeek(weather: WeatherForecast) {
@@ -54,7 +59,11 @@ fun WeatherParametersForAWeek(weather: WeatherForecast) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            WeatherText(text = "")
+            Text(
+                style = MaterialTheme.typography.subtitle1,
+                fontWeight = FontWeight.Bold,
+                text = "Date:"
+            )
             WeatherParameterItem(
                 color = primaryFigmaBackgroundTint,
                 icon = R.drawable.ic_clear_sky,
@@ -124,12 +133,16 @@ fun WeatherParametersForAWeekMeanings(weather: WeatherForecast) {
     Column {
         LazyRow(
             content = {
-                items(7) { index ->
+                items(weather.daily.size) { index ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        val time = getDateByMilliseconds(weather.daily[index].date)
-                        WeatherText(text = time)
+                        val date = getDateByMilliseconds(weather.daily[index].date)
+                        Text(
+                            style = MaterialTheme.typography.subtitle1,
+                            fontWeight = FontWeight.Bold,
+                            text = date
+                        )
                         WeatherParameterItemMeaning(
                             color = primaryFigmaBackgroundTint,
                             icon = getWeatherIconByName(weather.daily[index].weather.first().icon),
@@ -137,15 +150,15 @@ fun WeatherParametersForAWeekMeanings(weather: WeatherForecast) {
                         )
                         WeatherParameterItemMeaning(
                             color = backgroundGreenColor,
-                            text = weather.daily[index].temperature.day.toString() + "°C",
+                            text = weather.daily[index].temperature.day.toString() + " °C",
                         )
                         WeatherParameterItemMeaning(
                             color = primaryFigmaBackgroundTint,
-                            text = weather.daily[index].pressure.toString() + "hPa",
+                            text = hPaToMmHg(weather.daily[index].pressure).toString() + " mmHg",
                         )
                         WeatherParameterItemMeaning(
                             color = backgroundGreenColor,
-                            text = weather.daily[index].windSpeed.toString() + "m/s",
+                            text = weather.daily[index].windSpeed.toString() + " m/s",
                             icon = R.drawable.ic_arrow_up,
                             iconRotation = weather.daily[index].windDeg
                         )
@@ -163,8 +176,7 @@ fun WeatherParametersForAWeekMeanings(weather: WeatherForecast) {
                         )
                         WeatherParameterItemMeaning(
                             color = backgroundGreenColor,
-                            icon = R.drawable.ic_moon_waning_crescent,
-                            text = weather.daily[index].moonPhase.toString(),
+                            icon = getMoonIconByPhase(weather.daily[index].moonPhase),
                         )
                         WeatherParameterItemMeaning(
                             color = primaryFigmaBackgroundTint,

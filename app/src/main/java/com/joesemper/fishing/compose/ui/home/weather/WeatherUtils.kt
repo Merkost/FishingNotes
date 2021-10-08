@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.joesemper.fishing.ui.theme.backgroundWhiteColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
@@ -54,7 +55,7 @@ fun WeatherParameterItemMeaning(
     modifier: Modifier = Modifier,
     color: Color = backgroundWhiteColor,
     icon: Int? = null,
-    text: String,
+    text: String? = null,
     iconRotation: Int = 0,
 ) {
     Surface(
@@ -76,7 +77,10 @@ fun WeatherParameterItemMeaning(
                     contentDescription = ""
                 )
             }
-            WeatherText(text = text)
+            text?.let {
+                WeatherText(text = text)
+            }
+
         }
     }
 }
@@ -86,6 +90,7 @@ fun WeatherText(modifier: Modifier = Modifier, text: String) {
     Text(
         modifier = modifier.padding(vertical = 4.dp),
         text = text,
+        textAlign = TextAlign.Center,
         style = MaterialTheme.typography.subtitle1
     )
 }

@@ -1,15 +1,19 @@
 package com.joesemper.fishing.compose.ui.home.weather
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.accompanist.pager.*
@@ -23,7 +27,6 @@ import com.joesemper.fishing.domain.WeatherViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
-import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
@@ -44,10 +47,6 @@ fun Weather(
     val coroutineScope = rememberCoroutineScope()
 
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
-
-    var isDropdownMenuExpanded by remember {
-        mutableStateOf(false)
-    }
 
     val lastKnownLocation = remember {
         getCurrentLocation(context = context, permissionsState = permissionsState)
@@ -83,84 +82,82 @@ fun Weather(
         }
     }
 
+    var isExpanded by remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { com.joesemper.fishing.compose.ui.home.AppBar(navController = navController) }
+        topBar = {
+            TopAppBar() {
+
+                Icon(imageVector = Icons.Filled.ArrowBack, "")
+
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+
+                    Row(
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .padding(horizontal = 8.dp)
+                            .clickable {
+                                isExpanded = !isExpanded
+                            },
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                            style = MaterialTheme.typography.h6,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            text = selectedPlace.title
+                        )
+                        Icon(imageVector = Icons.Filled.ArrowDropDown, "")
+
+                        DropdownMenu(
+                            modifier = Modifier.width(200.dp),
+                            expanded = isExpanded,
+                            onDismissRequest = {
+                                isExpanded = !isExpanded
+                            }) {
+                            userPlaces.forEachIndexed { index, userMapMarker ->
+                                DropdownMenuItem(onClick = {
+                                    selectedPlace = userPlaces[index]
+                                    isExpanded = !isExpanded
+                                }) {
+                                    Row() {
+                                        Icon(
+                                            painter = painterResource(
+                                                id =
+                                                if (index == 0) {
+                                                    R.drawable.ic_baseline_my_location_24
+                                                } else {
+                                                    R.drawable.ic_baseline_location_on_24
+                                                }
+                                            ),
+                                            tint = secondaryFigmaColor,
+                                            contentDescription = "Location icon",
+                                            modifier = Modifier.padding(4.dp)
+                                        )
+                                        Text(
+                                            maxLines = 1,
+                                            text = userMapMarker.title
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     ) {
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-
-            OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                        tint = secondaryFigmaColor,
-                        contentDescription = "Location icon"
-                    )
-                },
-                value = selectedPlace.title,
-                readOnly = true,
-                onValueChange = {
-
-                },
-                trailingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_keyboard_arrow_down_24),
-                        tint = secondaryFigmaTextColor,
-                        contentDescription = "Arrow down icon",
-                        modifier = Modifier
-                            .rotate(
-                                if (isDropdownMenuExpanded) 180f else 0f
-                            )
-                            .clickable {
-                                isDropdownMenuExpanded = !isDropdownMenuExpanded
-                            }
-
-                    )
-                }
-            )
-            DropdownMenu(
-                modifier = Modifier
-                    .width(350.dp)
-                    .animateContentSize(),
-                expanded = isDropdownMenuExpanded,
-                onDismissRequest = {
-                    isDropdownMenuExpanded = !isDropdownMenuExpanded
-                }) {
-                userPlaces.forEachIndexed { index, userMapMarker ->
-                    DropdownMenuItem(onClick = {
-                        selectedPlace = userPlaces[index]
-                        isDropdownMenuExpanded = !isDropdownMenuExpanded
-                    }) {
-                        Row() {
-                            Icon(
-                                painter = painterResource(
-                                    id =
-                                    if (index == 0) {
-                                        R.drawable.ic_baseline_my_location_24
-                                    } else {
-                                        R.drawable.ic_baseline_location_on_24
-                                    }
-                                ),
-                                tint = secondaryFigmaColor,
-                                contentDescription = "Location icon",
-                                modifier = Modifier.padding(4.dp)
-                            )
-                            Text(text = userMapMarker.title)
-                        }
-
-                    }
-                }
-
-            }
-
-            Spacer(modifier = Modifier.padding(vertical = 8.dp))
 
             if (currentWeather != null) {
                 WeatherForecastLayout(navController, currentWeather!!)
@@ -196,7 +193,7 @@ fun WeatherTabs(tabs: List<TabItem>, pagerState: PagerState) {
     val scope = rememberCoroutineScope()
     // OR ScrollableTabRow()
     TabRow(
-        modifier = Modifier.padding(horizontal = 16.dp),
+        modifier = Modifier.fillMaxWidth(),
         selectedTabIndex = pagerState.currentPage,
         backgroundColor = Color.White,
         contentColor = Color.Black,

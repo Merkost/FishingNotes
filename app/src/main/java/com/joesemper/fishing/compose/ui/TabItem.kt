@@ -30,7 +30,7 @@ sealed class TabItem(var icon: Int, var title: String, var screen: ComposableFun
         })
 
     class ForAWeek(weatherForecast: WeatherForecast) :
-        TabItem(R.drawable.ic_baseline_today_24, "For a week", { navController ->
+        TabItem(R.drawable.calendar_week, "For a week", { navController ->
             WeatherForAWeek(weather = weatherForecast)
         })
 }
