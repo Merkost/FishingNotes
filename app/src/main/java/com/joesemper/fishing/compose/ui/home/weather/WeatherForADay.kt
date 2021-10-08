@@ -141,7 +141,7 @@ fun WeatherParametersForADayMeanings(weather: WeatherForecast) {
                         )
                         WeatherParameterItemMeaning(
                             color = primaryFigmaBackgroundTint,
-                            text = hPaToMmHg(weather.daily[index].pressure).toString() + " mmHg",
+                            text = hPaToMmHg(weather.hourly[index].pressure).toString() + " mmHg",
                         )
                         WeatherParameterItemMeaning(
                             color = backgroundGreenColor,
@@ -155,7 +155,7 @@ fun WeatherParametersForADayMeanings(weather: WeatherForecast) {
                         )
                         WeatherParameterItemMeaning(
                             color = backgroundGreenColor,
-                            text = (weather.daily[index].probabilityOfPrecipitation * 100).toString() + "%",
+                            text = (weather.hourly[index].probabilityOfPrecipitation * 100).toString() + "%",
                         )
                         WeatherParameterItemMeaning(
                             color = primaryFigmaBackgroundTint,
