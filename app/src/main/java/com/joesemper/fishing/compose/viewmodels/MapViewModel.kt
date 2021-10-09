@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.compose.ui.home.MapUiState
+import com.joesemper.fishing.compose.ui.home.UiState
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -26,7 +27,10 @@ class MapViewModel(
 
     private val mapMarkers = MutableStateFlow(listOf<UserMapMarker>())
 
-    var uiState: MutableState<MapUiState> = mutableStateOf(MapUiState.NormalMode)
+    private val _uiState = MutableStateFlow<UiState?>(null)
+    val uiState: StateFlow<UiState?>
+        get() = _uiState
+
 
     val mapView: MutableState<MapView?> = mutableStateOf(null)
 
@@ -36,7 +40,7 @@ class MapViewModel(
 
     fun getAllMarkers(): StateFlow<List<UserMapMarker>> = mapMarkers
 
-    fun subscribe(): StateFlow<BaseViewState> = viewStateFlow
+    fun subscribe(): StateFlow<BaseViewState> = viewStateFlow //not Used in COmpose screens
 
 
     override fun onCleared() {
@@ -57,10 +61,10 @@ class MapViewModel(
             repository.addNewMarker(newMarker).collect { progress ->
                 when (progress) {
                     is Progress.Complete -> {
-                        uiState.value = MapUiState.NormalMode
+                        _uiState.value = UiState.Success
                     }
                     is Progress.Loading -> {
-
+                        _uiState.value = UiState.InProgress
                     }
                     is Progress.Error -> onError(progress.error)
                 }

@@ -28,6 +28,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.app.ActivityCompat
+import androidx.core.os.bundleOf
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
@@ -95,19 +96,17 @@ fun Map(
         mutableStateOf<LatLng?>(null)
     }
 
+    val chosenPlace = remember { mutableStateOf<String?>(null) }
+
     var placeSelectMode by remember {
         mutableStateOf(false)
     }
 
-    val progressOnAdd = remember { mutableStateOf(false) }
+    var mapUiState: MapUiState by remember { mutableStateOf(MapUiState.NormalMode) }
 
-    var mapUiState by remember {
-        mutableStateOf<MapUiState>(MapUiState.NormalMode)
-    }
-
-    when (mapUiState) {
+    /*when (mapUiState) {
         MapUiState.NormalMode -> progressOnAdd.value = false
-    }
+    }*/
     var cameraMoveState: CameraMoveState by remember {
         mutableStateOf(CameraMoveState.MoveFinish)
     }
@@ -116,10 +115,9 @@ fun Map(
     ModalBottomSheetLayout(
         sheetContent = {
             BottomSheetAddMarkerDialog(
-                currentGoogleMap,
                 currentPosition,
                 modalBottomSheetState,
-                progressOnAdd
+                chosenPlace
             )
         },
         sheetState = modalBottomSheetState,
@@ -207,13 +205,13 @@ fun Map(
                 val (permissionDialog, mapLayout, pointer, addMarkerFragment) = createRefs()
 
                 mapUiState = when {
-                    placeSelectMode -> MapUiState.PlaceSelectMode
+
                     modalBottomSheetState.isVisible -> MapUiState.BottomSheetAddMode
+                    placeSelectMode -> MapUiState.PlaceSelectMode
                     scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetInfoMode
                     else -> MapUiState.NormalMode
                 }
 
-                val chosenPlace = remember { mutableStateOf<String?>(null) }
                 val geocoder = Geocoder(context)
                 if (mapUiState == MapUiState.PlaceSelectMode) {
 
@@ -337,7 +335,7 @@ fun Map(
                 if (mapUiState is MapUiState.PlaceSelectMode) {
                     PointerIcon(modifier = Modifier.constrainAs(pointer) {
                         top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom, 2.dp)
+                        bottom.linkTo(parent.bottom, 4.dp)
                         absoluteLeft.linkTo(parent.absoluteLeft)
                         absoluteRight.linkTo(parent.absoluteRight)
                     }, cameraMoveState = cameraMoveState)
@@ -361,13 +359,14 @@ fun Map(
 @ExperimentalMaterialApi
 @Composable
 fun BottomSheetAddMarkerDialog(
-    currentGoogleMap: MutableState<GoogleMap?>,
     currentPosition: MutableState<LatLng?>,
     modalBottomSheetState: ModalBottomSheetState,
-    progressOnAdd: MutableState<Boolean>,
+    chosenPlace: MutableState<String?>,
 ) {
     val viewModel = get<MapViewModel>()
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val uiState by viewModel.uiState.collectAsState()
 
     Spacer(modifier = Modifier.size(1.dp))
 
@@ -378,16 +377,33 @@ fun BottomSheetAddMarkerDialog(
     ) {
         val (progress, name, locationIcon, title, description, saveButton, cancelButton) = createRefs()
 
-        if (progressOnAdd.value) {
-            Surface(color = Color.LightGray, modifier = Modifier.constrainAs(progress) {
-                top.linkTo(parent.top)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
-                bottom.linkTo(parent.bottom)
-            }) {
-                CircularProgressIndicator()
+
+        uiState?.let {
+            when (it) {
+                UiState.InProgress -> {
+                    Surface (color = Color.Gray, modifier = Modifier.constrainAs(progress) {
+                        top.linkTo(parent.top)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                        bottom.linkTo(parent.bottom)
+                    }.size(100.dp)) {
+                        FishLoading(modifier = Modifier.size(150.dp))
+                    }
+                }
+                UiState.Success -> {
+                    coroutineScope.launch {
+                        modalBottomSheetState.hide()
+                        Toast.makeText(
+                            context,
+                            "Place added successfully",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+                else -> {}
             }
         }
+
 
 
         Text(
@@ -399,7 +415,7 @@ fun BottomSheetAddMarkerDialog(
                 absoluteRight.linkTo(parent.absoluteRight)
             }
         )
-        val titleValue = remember { mutableStateOf("") }
+        val titleValue = remember { mutableStateOf(chosenPlace.value ?: "") }
         val descriptionValue = remember { mutableStateOf("") }
         OutlinedTextField(
             value = titleValue.value,
@@ -458,7 +474,7 @@ fun BottomSheetAddMarkerDialog(
         },
             shape = RoundedCornerShape(24.dp), onClick = {
                 coroutineScope.launch {
-                    progressOnAdd.value = false
+                    modalBottomSheetState.hide()
                 }
             }) {
             Row(
@@ -483,16 +499,13 @@ fun BottomSheetAddMarkerDialog(
             top.linkTo(cancelButton.top)
             bottom.linkTo(cancelButton.bottom)
         }, shape = RoundedCornerShape(24.dp), onClick = {
-            progressOnAdd.value = true
             viewModel.addNewMarker(
-                RawMapMarker
-                    (
+                RawMapMarker(
                     titleValue.value,
                     descriptionValue.value,
                     currentPosition.value?.latitude ?: 0.0,
                     currentPosition.value?.longitude ?: 0.0
-                )
-            )
+                ))
             /*saveNewMarker(titleValue, descriptionValue, currentGoogleMap, currentPosition)*/
         }) {
             Row(
@@ -512,6 +525,17 @@ fun BottomSheetAddMarkerDialog(
             }
         }
     }
+}
+
+@Composable
+fun FishLoading(modifier: Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.fish_loading))
+    val progress by animateLottieCompositionAsState(composition)
+    LottieAnimation(
+        composition,
+        progress,
+        modifier = modifier
+    )
 }
 
 fun saveNewMarker(
@@ -577,7 +601,10 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?, navController: NavController
                 bottom.linkTo(parent.bottom, 16.dp)
             },
                 shape = RoundedCornerShape(24.dp),
-                onClick = { detailsOnClick(navController, it) }) {
+                onClick = {
+                    navController.currentBackStackEntry?.arguments?.putParcelable(Arguments.PLACE, it)
+                    navController.navigate(MainDestinations.PLACE_ROUTE) }
+            ) {
                 Row(
                     modifier = Modifier.wrapContentSize(),
                     horizontalArrangement = Arrangement.Start,
@@ -618,11 +645,6 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?, navController: NavController
             }
         }
     }
-}
-
-fun detailsOnClick(navController: NavController, userMarker: UserMapMarker) {
-    navController.currentBackStackEntry?.arguments?.putParcelable(Arguments.PLACE, userMarker)
-    navController.navigate(MainDestinations.PLACE_ROUTE)
 }
 
 @ExperimentalPermissionsApi
@@ -798,7 +820,6 @@ fun PermissionDialog(modifier: Modifier, permissionsState: MultiplePermissionsSt
 
 @Composable
 fun rememberMapViewWithLifecycle(): MapView {
-    val viewModel: MapViewModel = getViewModel()
     val context = LocalContext.current
     val mapView: MapView = remember { MapView(context).apply { id = R.id.map } }
 
