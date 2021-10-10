@@ -3,7 +3,6 @@ package com.joesemper.fishing.utils
 import android.content.Context
 import android.view.View
 import android.widget.Toast
-import androidx.compose.runtime.Composable
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import java.text.SimpleDateFormat
@@ -31,9 +30,19 @@ fun Double.roundTo(numFractionDigits: Int): Double {
 }
 
 fun getDateByMilliseconds(ms: Long): String {
-    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+    val sdf = SimpleDateFormat("dd.MM.yy", Locale.US)
     val date = Date(ms * 1000)
     return sdf.format(date)
+}
+
+fun getTimeByMilliseconds(ms: Long): String {
+    val sdf = SimpleDateFormat("HH:mm", Locale.US)
+    val date = Date(ms * 1000)
+    return sdf.format(date)
+}
+
+fun hPaToMmHg(pressure: Int): Int {
+    return (pressure * 0.75006375541921).toInt()
 }
 
 fun View.hide() {

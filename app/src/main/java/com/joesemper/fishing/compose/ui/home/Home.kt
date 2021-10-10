@@ -47,6 +47,7 @@ import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.home.weather.Weather
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import kotlinx.coroutines.InternalCoroutinesApi
 
@@ -68,7 +69,7 @@ fun NavGraphBuilder.addHomeGraph(
         Notes(onSnackClick = { id -> onSnackSelected(id, from) }, modifier, navController)
     }
     composable(HomeSections.WEATHER.route) { from ->
-        Weather(onSnackClick = { id -> onSnackSelected(id, from) }, modifier)
+        Weather(onSnackClick = { id -> onSnackSelected(id, from) }, modifier, navController)
     }
     composable(HomeSections.PROFILE.route) {
         Profile(navController, modifier)

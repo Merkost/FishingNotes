@@ -8,10 +8,6 @@ import com.joesemper.fishing.model.repository.WeatherRepository
 import com.joesemper.fishing.ui.LoginActivity
 import com.joesemper.fishing.ui.MainActivity
 import com.joesemper.fishing.ui.SplashActivity
-import com.joesemper.fishing.ui.fragments.NewPlaceFragment
-import com.joesemper.fishing.ui.fragments.UserCatchFragment
-import com.joesemper.fishing.ui.fragments.UserPlaceFragment
-import com.joesemper.fishing.ui.fragments.WeatherFragment
 import com.joesemper.fishing.utils.Logger
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -68,9 +64,7 @@ val userCatchScreen = module {
 }
 
 val weatherScreen = module {
-    scope(named<WeatherFragment>()) {
-        viewModel { WeatherViewModel(get(), get()) }
-    }
+    viewModel { WeatherViewModel(get(), get()) }
 }
 
 //val notesFragment = module {

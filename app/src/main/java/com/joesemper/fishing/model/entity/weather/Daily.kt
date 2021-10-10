@@ -15,15 +15,17 @@ class Daily(
     @field:SerializedName("wind_speed") val windSpeed: Float,
     @field:SerializedName("wind_deg") val windDeg: Int,
     @field:SerializedName("weather") val weather: List<Weather>,
-    @field:SerializedName("temp") val temperature: Temperature
+    @field:SerializedName("temp") val temperature: Temperature,
+    @field:SerializedName("pop") val probabilityOfPrecipitation: Float,
+    @field:SerializedName("clouds") val clouds: Int,
 ) : Parcelable
 
 @Parcelize
 class Temperature(
-        @field:SerializedName("day") val day: Float,
-        @field:SerializedName("min") val min: Float,
-        @field:SerializedName("max") val max: Float,
-        @field:SerializedName("night") val night: Float,
-        @field:SerializedName("eve") val evening: Float,
-        @field:SerializedName("morn") val morning: Float,
+    @field:SerializedName("day") val day: Float,
+    @field:SerializedName("min") val min: Float,
+    @field:SerializedName("max") val max: Float,
+    @field:SerializedName("night") val night: Float,
+    @field:SerializedName("eve") val evening: Float,
+    @field:SerializedName("morn") val morning: Float,
 ) : Parcelable
