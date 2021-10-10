@@ -90,9 +90,6 @@ fun Map(
         mutableStateOf<UserMapMarker?>(null)
     }
 
-    val currentGoogleMap = remember {
-        mutableStateOf<GoogleMap?>(null)
-    }
     val currentPosition = remember {
         mutableStateOf<LatLng?>(null)
     }
@@ -547,21 +544,10 @@ fun FishLoading(modifier: Modifier) {
     )
 }
 
-fun saveNewMarker(
-    titleValue: MutableState<String>,
-    descriptionValue: MutableState<String>,
-    currentGoogleMap: MutableState<GoogleMap?>,
-    currentPosition: MutableState<LatLng?>
-) {
-    currentGoogleMap.value?.addMarker {
-        currentPosition.value
-    }
-}
-
-
 @ExperimentalMaterialApi
 @Composable
 fun BottomSheetMarkerDialog(marker: UserMapMarker?, navController: NavController) {
+    Spacer(modifier = Modifier.size(1.dp))
     marker?.let {
         ConstraintLayout(
             modifier = Modifier
