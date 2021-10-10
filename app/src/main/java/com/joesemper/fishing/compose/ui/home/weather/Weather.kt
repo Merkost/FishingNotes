@@ -20,7 +20,7 @@ import com.google.accompanist.pager.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.TabItem
+import com.joesemper.fishing.compose.ui.home.notes.TabItem
 import com.joesemper.fishing.compose.ui.home.getCurrentLocation
 import com.joesemper.fishing.compose.ui.home.locationPermissionsList
 import com.joesemper.fishing.domain.WeatherViewModel

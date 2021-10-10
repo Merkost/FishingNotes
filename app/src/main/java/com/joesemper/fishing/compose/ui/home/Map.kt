@@ -83,7 +83,7 @@ fun Map(
     )
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val lastKnownLocation = remember {
-        getCurrentLocation(context = context, permissionsState = permissionsState, viewModel)
+        getCurrentLocation(context = context, permissionsState = permissionsState)
     }
 
     val currentMarker = remember {
@@ -849,7 +849,6 @@ fun IconButton(image: Painter, name: String, click: () -> Unit, modifier: Modifi
 fun getCurrentLocation(
     context: Context,
     permissionsState: MultiplePermissionsState,
-    viewModel: MapViewModel
 ) = runBlocking {
     val fusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
