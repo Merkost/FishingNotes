@@ -126,6 +126,7 @@
     <string name="catch_description">Catch description</string>
     <string name="note">Note</string>
     <string name="user_catch">Catch</string>
+    <string name="cant_get_current_location">Can\'t get current location</string>
 
 
 </resources>

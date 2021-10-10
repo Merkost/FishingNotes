@@ -12,7 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.*
-import com.joesemper.fishing.compose.ui.TabItem
+import com.joesemper.fishing.compose.ui.home.notes.TabItem
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi

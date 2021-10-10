@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navArgument
 import coil.annotation.ExperimentalCoilApi
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.statusBarsHeight
@@ -113,7 +112,7 @@ private fun NavGraphBuilder.NavGraph(
         NewCatchScreen(navController, place)
         //val arguments = requireNotNull(backStackEntry.arguments)
         //val snackId = arguments.getLong(MainDestinations.SNACK_ID_KEY)
-//        SnackDetail(snackId, upPress)
+        //        SnackDetail(snackId, upPress)
     }
     composable(
         route = MainDestinations.PLACE_ROUTE,

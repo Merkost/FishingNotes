@@ -33,7 +33,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.joesemper.fishing.R
 import com.joesemper.fishing.databinding.FragmentMapBinding
-import com.joesemper.fishing.domain.MapViewModel
+import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.Content
 import com.joesemper.fishing.model.entity.content.UserMapMarker
