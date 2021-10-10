@@ -33,6 +33,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
+import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.PermissionsRequired
@@ -72,7 +73,7 @@ fun Map(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    var mapView = viewModel.mapView.value ?: rememberMapViewWithLifecycle().apply {
+    val mapView = viewModel.mapView.value ?: rememberMapViewWithLifecycle().apply {
         viewModel.mapView.value = this
     }
 
@@ -171,6 +172,25 @@ fun Map(
                                 placeSelectMode = !placeSelectMode
                             }
                             MapUiState.BottomSheetInfoMode -> {
+                                /*moveCameraToLocation(
+                                    coroutineScope = coroutineScope,
+                                    map = mapView,
+                                    location = lastKnownLocation.value
+                                )*/
+                                coroutineScope.launch {
+                                    Toast.makeText(
+                                        context,
+                                        "Place info mode on",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    //scaffoldState.bottomSheetState.collapse()
+                                }
+                                navController.currentBackStackEntry?.arguments?.putParcelable(Arguments.PLACE, currentMarker.value)
+                                navController.navigate(MainDestinations.NEW_CATCH_ROUTE)
+                                //placeSelectMode = !placeSelectMode
+
+                            }
+                            MapUiState.BottomSheetAddMode -> {
                                 moveCameraToLocation(
                                     coroutineScope = coroutineScope,
                                     map = mapView,
@@ -179,19 +199,7 @@ fun Map(
                                 coroutineScope.launch {
                                     Toast.makeText(
                                         context,
-                                        "Place select mode on",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    //scaffoldState.bottomSheetState.collapse()
-                                }
-                                placeSelectMode = !placeSelectMode
-
-                            }
-                            MapUiState.BottomSheetAddMode -> {
-                                coroutineScope.launch {
-                                    Toast.makeText(
-                                        context,
-                                        "Add New Catch",
+                                        "Add New Place",
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
@@ -224,12 +232,12 @@ fun Map(
 
                                 val target = googleMap.cameraPosition.target
                                 currentPosition.value = LatLng(target.latitude, target.longitude)
-                                val position = geocoder.getFromLocation(
-                                    target.latitude,
-                                    target.longitude,
-                                    1)
-                                coroutineScope.launch {
 
+                                coroutineScope.launch {
+                                    val position = geocoder.getFromLocation(
+                                        target.latitude,
+                                        target.longitude,
+                                        1)
                                     delay(1200)
                                     if (position.first().subAdminArea.isNullOrBlank()) {
                                         chosenPlace.value = position.first().adminArea
@@ -237,7 +245,7 @@ fun Map(
                                         chosenPlace.value = position.first().subAdminArea
                                     }
 
-                                    //    modalBottomSheetState.show()
+                                    //modalBottomSheetState.show()
                                 }
                             }
                         }
@@ -279,7 +287,7 @@ fun Map(
                                 contentDescription = "Marker",
                                 tint = Color.LightGray,
                                 modifier = Modifier
-                                    .size(32.dp).shimmer()
+                                    .size(32.dp)
                             )
                             Spacer(Modifier.size(8.dp))
                             Column {
@@ -287,9 +295,9 @@ fun Map(
                                     elevation = 0.dp,
                                     shape = RoundedCornerShape(4.dp),
                                     modifier = Modifier.wrapContentSize().shimmer(),
-                                    backgroundColor = Color.LightGray
+                                    //backgroundColor = Color.LightGray
                                 ) {
-                                    Text("longitude", color = Color.LightGray)
+                                    Text("Searching...", color = Color.LightGray)
                                 }
                             }
                         }
@@ -416,6 +424,7 @@ fun BottomSheetAddMarkerDialog(
             }
         )
         val titleValue = remember { mutableStateOf(chosenPlace.value ?: "") }
+        titleValue.value = chosenPlace.value ?: ""
         val descriptionValue = remember { mutableStateOf("") }
         OutlinedTextField(
             value = titleValue.value,
@@ -432,7 +441,7 @@ fun BottomSheetAddMarkerDialog(
                 top.linkTo(name.bottom, 2.dp)
                 absoluteLeft.linkTo(parent.absoluteLeft, 2.dp)
                 absoluteRight.linkTo(parent.absoluteRight, 2.dp)
-            }
+            }/*.navigationBarsWithImePadding(),*/
         )
         OutlinedTextField(
             value = descriptionValue.value,
@@ -449,7 +458,7 @@ fun BottomSheetAddMarkerDialog(
                 top.linkTo(title.bottom, 2.dp)
                 absoluteLeft.linkTo(parent.absoluteLeft, 4.dp)
                 absoluteRight.linkTo(parent.absoluteRight, 4.dp)
-            }
+            }/*.navigationBarsWithImePadding()*/
         )
 
         /*Icon(
@@ -742,22 +751,17 @@ fun PointerIcon(cameraMoveState: CameraMoveState, modifier: Modifier) {
 @Composable
 fun FabOnMap(state: MapUiState, onClick: () -> Unit) {
 
-    val fabImg = remember {
-        mutableStateOf(R.drawable.ic_baseline_add_location_24)
-    }
-
-    val padding = remember {
-        mutableStateOf(128.dp)
-    }
+    val fabImg = remember { mutableStateOf(R.drawable.ic_baseline_add_location_24) }
+    val padding = remember { mutableStateOf(128.dp) }
 
     when (state) {
-        MapUiState.BottomSheetAddMode -> {
-            fabImg.value = R.drawable.ic_add_catch
-            padding.value = 15.dp
-        }
         MapUiState.NormalMode -> {
             fabImg.value = R.drawable.ic_baseline_add_location_24
             padding.value = 128.dp
+        }
+        MapUiState.BottomSheetInfoMode -> {
+            fabImg.value = R.drawable.ic_add_catch
+            padding.value = 15.dp
         }
         MapUiState.PlaceSelectMode -> {
             fabImg.value = R.drawable.ic_baseline_check_24
