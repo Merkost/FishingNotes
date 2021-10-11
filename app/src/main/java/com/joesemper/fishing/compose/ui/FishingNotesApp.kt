@@ -1,12 +1,18 @@
-package com.joesemper.fishing.ui
+package com.joesemper.fishing.compose.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.*
 import androidx.navigation.compose.NavHost
@@ -16,10 +22,7 @@ import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.joesemper.fishing.compose.ui.Arguments
-import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.*
-import com.joesemper.fishing.compose.ui.rememberAppStateHolder
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.theme.FigmaTheme
@@ -35,12 +38,20 @@ fun FishingNotesApp() {
     ProvideWindowInsets {
         FigmaTheme {
             val appStateHolder = rememberAppStateHolder()
+            val bottomBarState = remember { mutableStateOf(true) }
+            var visibility = remember { true }
             Scaffold (
                 bottomBar = {
-                    if (appStateHolder.shouldShowBottomBar) {
+                    var lastRoute: String = "home/map"
+                    if (appStateHolder.shouldShowBottomBar && bottomBarState.value) {
+                        visibility = true
+                        lastRoute = appStateHolder.currentRoute!!
+                    }
+                    else visibility = false
+                    AnimatedVisibility(visible = visibility) {
                         FishingNotesBottomBar(
                             tabs = appStateHolder.bottomBarTabs,
-                            currentRoute = appStateHolder.currentRoute!!,
+                            currentRoute = lastRoute,
                             navigateToRoute = appStateHolder::navigateToBottomBarRoute
                         )
                     }
@@ -65,7 +76,8 @@ fun FishingNotesApp() {
                         NavGraph(
                             navController = appStateHolder.navController,
                             onSnackSelected = appStateHolder::navigateToSnackDetail,
-                            upPress = appStateHolder::upPress
+                            upPress = appStateHolder::upPress,
+                            bottomBarState = bottomBarState
                         )
                     }
                 }
@@ -87,13 +99,15 @@ fun FishingNotesApp() {
 private fun NavGraphBuilder.NavGraph(
     onSnackSelected: (Long, NavBackStackEntry) -> Unit,
     upPress: () -> Unit,
-    navController: NavController
+    navController: NavController,
+    bottomBarState: MutableState<Boolean>
+
 ) {
     navigation(
         route = MainDestinations.MAP_ROUTE,
         startDestination = HomeSections.MAP.route
     ) {
-        addHomeGraph(onSnackSelected, navController)
+        addHomeGraph(onSnackSelected, navController, Modifier, bottomBarState)
     }
     /*composable(
         "${MainDestinations.SNACK_DETAIL_ROUTE}/{${MainDestinations.SNACK_ID_KEY}}",

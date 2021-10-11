@@ -18,10 +18,7 @@ import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material.icons.outlined.WbSunny
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,9 +58,10 @@ fun NavGraphBuilder.addHomeGraph(
     onSnackSelected: (Long, NavBackStackEntry) -> Unit,
     navController: NavController,
     modifier: Modifier = Modifier,
+    bottomBarState: MutableState<Boolean>,
 ) {
     composable(HomeSections.MAP.route) { from ->
-        Map(onSnackClick = { id -> onSnackSelected(id, from) }, modifier, navController)
+        Map(onSnackClick = { id -> onSnackSelected(id, from) }, modifier, navController, bottomBarState)
     }
     composable(HomeSections.NOTES.route) { from ->
         Notes(onSnackClick = { id -> onSnackSelected(id, from) }, modifier, navController)

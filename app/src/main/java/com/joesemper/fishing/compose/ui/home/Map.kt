@@ -28,23 +28,19 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.app.ActivityCompat
-import androidx.core.os.bundleOf
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
-import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.location.LocationServices
 import com.google.android.libraries.maps.CameraUpdateFactory
-import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.LatLng
 import com.google.android.libraries.maps.model.MarkerOptions
-import com.google.maps.android.ktx.addMarker
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
@@ -65,9 +61,9 @@ import java.lang.Exception
 fun Map(
     onSnackClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    bottomBarVisibilityState: MutableState<Boolean>
 ) {
-
 
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
@@ -213,8 +209,8 @@ fun Map(
 
                     modalBottomSheetState.isVisible -> MapUiState.BottomSheetAddMode
                     placeSelectMode -> MapUiState.PlaceSelectMode
-                    scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetInfoMode
-                    else -> MapUiState.NormalMode
+                    scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetInfoMode.apply { bottomBarVisibilityState.value = false }
+                    else -> MapUiState.NormalMode.apply { bottomBarVisibilityState.value = true }
                 }
 
                 val geocoder = Geocoder(context)
@@ -236,11 +232,14 @@ fun Map(
                                         target.longitude,
                                         1)
                                     delay(1200)
-                                    if (position.first().subAdminArea.isNullOrBlank()) {
-                                        chosenPlace.value = position.first().adminArea
-                                    } else {
-                                        chosenPlace.value = position.first().subAdminArea
+                                    position?.let {
+                                        if (it.first().subAdminArea.isNullOrBlank()) {
+                                            chosenPlace.value = it.first().adminArea
+                                        } else {
+                                            chosenPlace.value = it.first().subAdminArea
+                                        }
                                     }
+
 
                                     //modalBottomSheetState.show()
                                 }
@@ -366,7 +365,7 @@ fun Map(
 fun BottomSheetAddMarkerDialog(
     currentPosition: MutableState<LatLng?>,
     modalBottomSheetState: ModalBottomSheetState,
-    chosenPlace: MutableState<String?>,
+    chosenPlace: MutableState<String?>
 ) {
     val viewModel = get<MapViewModel>()
     val context = LocalContext.current
@@ -381,7 +380,6 @@ fun BottomSheetAddMarkerDialog(
             .wrapContentHeight()
     ) {
         val (progress, name, locationIcon, title, description, saveButton, cancelButton) = createRefs()
-
 
         uiState?.let {
             when (it) {
@@ -512,7 +510,6 @@ fun BottomSheetAddMarkerDialog(
                     currentPosition.value?.latitude ?: 0.0,
                     currentPosition.value?.longitude ?: 0.0
                 ))
-            /*saveNewMarker(titleValue, descriptionValue, currentGoogleMap, currentPosition)*/
         }) {
             Row(
                 modifier = Modifier.wrapContentSize(),
