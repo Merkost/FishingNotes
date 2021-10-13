@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -66,12 +67,13 @@ fun FishingNotesApp() {
                 scaffoldState = appStateHolder.scaffoldState,
 //                modifier = Modifier.padding(top = Modifier.statusBarsHeight() as Dp)
             ) { innerPaddingModifier ->
-                Column {
+                /*Column */Surface {
                     Spacer(modifier = Modifier.statusBarsHeight())
                     NavHost(
                         navController = appStateHolder.navController,
                         startDestination = MainDestinations.MAP_ROUTE,
-                        modifier = Modifier.padding(innerPaddingModifier)
+                        modifier = Modifier //if (appStateHolder.navController.currentDestination?.displayName == MainDestinations.MAP_ROUTE) Modifier
+                        //else Modifier.padding(innerPaddingModifier)
                     ) {
                         NavGraph(
                             navController = appStateHolder.navController,

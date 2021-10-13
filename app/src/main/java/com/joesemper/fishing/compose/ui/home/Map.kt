@@ -7,6 +7,8 @@ import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -50,11 +52,13 @@ import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 import kotlinx.coroutines.*
+import kotlinx.coroutines.NonCancellable.isActive
 import me.vponomarenko.compose.shimmer.shimmer
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import java.lang.Exception
 
+@ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @ExperimentalPermissionsApi
 @Composable
@@ -90,8 +94,6 @@ fun Map(
         mutableStateOf<LatLng?>(null)
     }
 
-    val chosenPlace = remember { mutableStateOf<String?>(null) }
-
     var placeSelectMode by remember {
         mutableStateOf(false)
     }
@@ -111,7 +113,7 @@ fun Map(
             BottomSheetAddMarkerDialog(
                 currentPosition,
                 modalBottomSheetState,
-                chosenPlace
+                viewModel.chosenPlace,
             )
         },
         sheetState = modalBottomSheetState,
@@ -178,7 +180,10 @@ fun Map(
                                     ).show()
                                     //scaffoldState.bottomSheetState.collapse()
                                 }
-                                navController.currentBackStackEntry?.arguments?.putParcelable(Arguments.PLACE, currentMarker.value)
+                                navController.currentBackStackEntry?.arguments?.putParcelable(
+                                    Arguments.PLACE,
+                                    currentMarker.value
+                                )
                                 navController.navigate(MainDestinations.NEW_CATCH_ROUTE)
                                 //placeSelectMode = !placeSelectMode
 
@@ -209,97 +214,28 @@ fun Map(
 
                     modalBottomSheetState.isVisible -> MapUiState.BottomSheetAddMode
                     placeSelectMode -> MapUiState.PlaceSelectMode
-                    scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetInfoMode.apply { bottomBarVisibilityState.value = false }
+                    scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetInfoMode.apply {
+                        bottomBarVisibilityState.value = false
+                    }
                     else -> MapUiState.NormalMode.apply { bottomBarVisibilityState.value = true }
                 }
 
-                val geocoder = Geocoder(context)
                 if (mapUiState == MapUiState.PlaceSelectMode) {
-
-                    when (cameraMoveState) {
-                        CameraMoveState.MoveStart -> {
-                            chosenPlace.value = null
-                        }
-                        CameraMoveState.MoveFinish -> {
-                            mapView.getMapAsync { googleMap ->
-
-                                val target = googleMap.cameraPosition.target
-                                currentPosition.value = LatLng(target.latitude, target.longitude)
-
-                                coroutineScope.launch {
-                                    val position = geocoder.getFromLocation(
-                                        target.latitude,
-                                        target.longitude,
-                                        1)
-                                    delay(1200)
-                                    position?.let {
-                                        if (it.first().subAdminArea.isNullOrBlank()) {
-                                            chosenPlace.value = it.first().adminArea
-                                        } else {
-                                            chosenPlace.value = it.first().subAdminArea
-                                        }
-                                    }
-
-
-                                    //modalBottomSheetState.show()
-                                }
-                            }
-                        }
-                    }
-
-                    Card(
-                        shape = RoundedCornerShape(size = 10.dp),
+                    DialogOnPlaceChoosing(context, cameraMoveState, mapView, currentPosition,
                         modifier = Modifier.constrainAs(addMarkerFragment) {
                             top.linkTo(parent.top, 4.dp)
                             //bottom.linkTo(parent.bottom)
                             absoluteLeft.linkTo(parent.absoluteLeft)
                             absoluteRight.linkTo(parent.absoluteRight)
                         }.wrapContentSize().padding(6.dp)
-                    ) {
-                        chosenPlace.value?.let {
-                            Row(
-                                modifier = Modifier.wrapContentSize().padding(12.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                                    contentDescription = "Marker",
-                                    tint = secondaryFigmaColor,
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                )
-                                Spacer(Modifier.size(8.dp))
-                                Text(it.toString())
-                            }
-
-                        } ?: Row(
-                            modifier = Modifier.wrapContentSize().padding(12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                                contentDescription = "Marker",
-                                tint = Color.LightGray,
-                                modifier = Modifier
-                                    .size(32.dp)
-                            )
-                            Spacer(Modifier.size(8.dp))
-                            Column {
-                                Card(
-                                    elevation = 0.dp,
-                                    shape = RoundedCornerShape(4.dp),
-                                    modifier = Modifier.wrapContentSize().shimmer(),
-                                    //backgroundColor = Color.LightGray
-                                ) {
-                                    Text("Searching...", color = Color.LightGray)
-                                }
-                            }
-                        }
-                    }
+                    )
+                    PointerIcon(modifier = Modifier.constrainAs(pointer) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom, 4.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                    }, cameraMoveState = cameraMoveState)
                 }
-
 
                 PermissionDialog(modifier = Modifier.constrainAs(permissionDialog) {
                     top.linkTo(parent.top)
@@ -335,37 +271,17 @@ fun Map(
                         cameraMoveState = state
                     }
                 )
-
-                if (mapUiState is MapUiState.PlaceSelectMode) {
-                    PointerIcon(modifier = Modifier.constrainAs(pointer) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom, 4.dp)
-                        absoluteLeft.linkTo(parent.absoluteLeft)
-                        absoluteRight.linkTo(parent.absoluteRight)
-                    }, cameraMoveState = cameraMoveState)
-                }
             }
         }
     }
 }
-
-/*private fun addMarkerOnMap(marker: UserMapMarker) {
-    val latLng = com.google.android.gms.maps.model.LatLng(marker.latitude, marker.longitude)
-    val mapMarker = map.addMarker(
-        com.google.android.gms.maps.model.MarkerOptions()
-            .position(latLng)
-            .title(marker.title)
-    )
-    mapMarker?.tag = marker.id
-}*/
-
 
 @ExperimentalMaterialApi
 @Composable
 fun BottomSheetAddMarkerDialog(
     currentPosition: MutableState<LatLng?>,
     modalBottomSheetState: ModalBottomSheetState,
-    chosenPlace: MutableState<String?>
+    chosenPlace: MutableState<String?>,
 ) {
     val viewModel = get<MapViewModel>()
     val context = LocalContext.current
@@ -384,7 +300,7 @@ fun BottomSheetAddMarkerDialog(
         uiState?.let {
             when (it) {
                 UiState.InProgress -> {
-                    Surface (color = Color.Gray, modifier = Modifier.constrainAs(progress) {
+                    Surface(color = Color.Gray, modifier = Modifier.constrainAs(progress) {
                         top.linkTo(parent.top)
                         absoluteLeft.linkTo(parent.absoluteLeft)
                         absoluteRight.linkTo(parent.absoluteRight)
@@ -403,9 +319,18 @@ fun BottomSheetAddMarkerDialog(
                         ).show()
                     }
                 }
-                else -> {}
+                else -> {
+                }
             }
         }
+
+        val titleValue = remember { mutableStateOf(/*chosenPlace.value ?:*/ "") }
+        LaunchedEffect(chosenPlace.value) {
+            chosenPlace.value?.let {
+                titleValue.value = it
+            }
+        }
+        val descriptionValue = remember { mutableStateOf("") }
 
 
 
@@ -418,9 +343,7 @@ fun BottomSheetAddMarkerDialog(
                 absoluteRight.linkTo(parent.absoluteRight)
             }
         )
-        val titleValue = remember { mutableStateOf(chosenPlace.value ?: "") }
-        titleValue.value = chosenPlace.value ?: ""
-        val descriptionValue = remember { mutableStateOf("") }
+
         OutlinedTextField(
             value = titleValue.value,
             onValueChange = {
@@ -456,7 +379,7 @@ fun BottomSheetAddMarkerDialog(
             }/*.navigationBarsWithImePadding()*/
         )
 
-        /*Icon(
+         /*Icon(
             painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
             contentDescription = "Marker",
             tint = secondaryFigmaColor,
@@ -509,7 +432,8 @@ fun BottomSheetAddMarkerDialog(
                     descriptionValue.value,
                     currentPosition.value?.latitude ?: 0.0,
                     currentPosition.value?.longitude ?: 0.0
-                ))
+                )
+            )
         }) {
             Row(
                 modifier = Modifier.wrapContentSize(),
@@ -594,8 +518,12 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?, navController: NavController
             },
                 shape = RoundedCornerShape(24.dp),
                 onClick = {
-                    navController.currentBackStackEntry?.arguments?.putParcelable(Arguments.PLACE, it)
-                    navController.navigate(MainDestinations.PLACE_ROUTE) }
+                    navController.currentBackStackEntry?.arguments?.putParcelable(
+                        Arguments.PLACE,
+                        it
+                    )
+                    navController.navigate(MainDestinations.PLACE_ROUTE)
+                }
             ) {
                 Row(
                     modifier = Modifier.wrapContentSize(),
@@ -687,6 +615,117 @@ fun GoogleMapLayout(
             val mapMarker = markers.value.first { it.id == marker.tag }
             onMarkerClick(mapMarker)
             true
+        }
+    }
+}
+
+@ExperimentalAnimationApi
+@Composable
+fun DialogOnPlaceChoosing(
+    context: Context,
+    cameraMoveState: CameraMoveState,
+    mapView: MapView,
+    currentPosition: MutableState<LatLng?>,
+    modifier: Modifier
+) {
+    val viewModel: MapViewModel = getViewModel()
+    val coroutineScope = rememberCoroutineScope()
+    val geocoder = Geocoder(context)
+
+    var job: Job? = null
+
+
+    when (cameraMoveState) {
+        CameraMoveState.MoveStart -> {
+            //viewModel.getPlaceName
+            job?.cancel()
+            viewModel.chosenPlace.value = null
+        }
+        CameraMoveState.MoveFinish -> {
+            LaunchedEffect(cameraMoveState) {
+                job = coroutineScope.launch {
+
+                    delay(2000)
+                    if (isActive) {
+                        mapView.getMapAsync { googleMap ->
+                            val target = googleMap.cameraPosition.target
+                            currentPosition.value =
+                                LatLng(target.latitude, target.longitude)
+                        }
+                        //getPlaceName(coroutineScope, geocoder)
+                        try {
+                            val position = geocoder.getFromLocation(
+                                currentPosition.value!!.latitude,
+                                currentPosition.value!!.longitude,
+                                1
+                            )
+                            position?.first()?.let {
+
+                                if (!it.subAdminArea.isNullOrBlank()) {
+                                    viewModel.chosenPlace.value =
+                                        it.subAdminArea
+                                } else if (!it.adminArea.isNullOrBlank()) {
+                                    viewModel.chosenPlace.value = it.adminArea
+                                } else viewModel.chosenPlace.value = "Место без названия"
+                            }
+                        } catch (e: Throwable) {
+                            viewModel.chosenPlace.value = "Не удалось определить место"
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    Card(
+        shape = RoundedCornerShape(size = 10.dp),
+        modifier = modifier
+    ) {
+        AnimatedVisibility(viewModel.chosenPlace.value.isNullOrEmpty()) {
+            Row(
+                modifier = Modifier.wrapContentSize().padding(12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+                    contentDescription = "Marker",
+                    tint = Color.LightGray,
+                    modifier = Modifier
+                        .size(32.dp)
+                )
+                Spacer(Modifier.size(8.dp))
+                Column {
+                    Card(
+                        elevation = 0.dp,
+                        shape = RoundedCornerShape(4.dp),
+                        modifier = Modifier.wrapContentSize().shimmer(),
+                        //backgroundColor = Color.LightGray
+                    ) {
+                        Text("Searching...", color = Color.LightGray)
+                    }
+                }
+            }
+        }
+        AnimatedVisibility(!viewModel.chosenPlace.value.isNullOrEmpty()) {
+            viewModel.chosenPlace.value?.let {
+            Row(
+                modifier = Modifier.wrapContentSize().padding(12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+                    contentDescription = "Marker",
+                    tint = secondaryFigmaColor,
+                    modifier = Modifier
+                        .size(32.dp)
+                )
+                Spacer(Modifier.size(8.dp))
+                Text(it)
+            }
+            }
         }
     }
 }
@@ -918,6 +957,8 @@ val locationPermissionsList = listOf(
 )
 
 const val DEFAULT_ZOOM = 15f
+
+
 
 
 

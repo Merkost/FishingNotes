@@ -34,6 +34,8 @@ class MapViewModel(
 
     val mapView: MutableState<MapView?> = mutableStateOf(null)
 
+    val chosenPlace = mutableStateOf<String?>(null)
+
     init {
         loadMarkers()
     }
@@ -75,4 +77,5 @@ class MapViewModel(
     private fun onError(error: Throwable) {
         viewStateFlow.value = BaseViewState.Error(error)
     }
+
 }
