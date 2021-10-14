@@ -20,9 +20,9 @@ import com.google.accompanist.pager.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.notes.TabItem
 import com.joesemper.fishing.compose.ui.home.getCurrentLocation
 import com.joesemper.fishing.compose.ui.home.locationPermissionsList
+import com.joesemper.fishing.compose.ui.home.notes.TabItem
 import com.joesemper.fishing.domain.WeatherViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
@@ -72,13 +72,13 @@ fun Weather(
         mutableStateOf(userPlaces.first())
     }
 
-    var currentWeather by remember {
+    val currentWeather = remember {
         mutableStateOf<WeatherForecast?>(null)
     }
 
     LaunchedEffect(selectedPlace) {
         viewModel.getWeather(selectedPlace.latitude, selectedPlace.longitude).collect {
-            currentWeather = it
+            currentWeather.value = it
         }
     }
 
@@ -89,7 +89,10 @@ fun Weather(
         topBar = {
             TopAppBar() {
 
-                Icon(imageVector = Icons.Filled.ArrowBack, "")
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(imageVector = Icons.Filled.ArrowBack, "")
+                }
+
 
                 Box(
                     modifier = Modifier.fillMaxWidth(),
@@ -159,8 +162,8 @@ fun Weather(
                 .fillMaxWidth()
         ) {
 
-            if (currentWeather != null) {
-                WeatherForecastLayout(navController, currentWeather!!)
+            if (currentWeather.value != null) {
+                WeatherForecastLayout(navController, currentWeather.value!!)
             }
 
         }
@@ -175,7 +178,7 @@ fun WeatherForecastLayout(
     navController: NavController,
     weatherForecast: WeatherForecast
 ) {
-    val tabs by remember {
+    val tabs by remember(weatherForecast) {
         mutableStateOf(listOf(TabItem.ForADay(weatherForecast), TabItem.ForAWeek(weatherForecast)))
     }
 

@@ -353,8 +353,7 @@ class CloudFireStoreDatabase(private val cloudPhotoStorage: PhotoStorage) : User
 
     @ExperimentalCoroutinesApi
     private fun saveMarkerToDb(userMapMarker: UserMapMarker) = callbackFlow {
-        val documentRef = getUserMapMarkersCollection()
-            .document(userMapMarker.id)
+        val documentRef = getUserMapMarkersCollection().document(userMapMarker.id)
         val task = documentRef.set(userMapMarker)
         task.addOnCompleteListener {
             trySend(userMapMarker.id)

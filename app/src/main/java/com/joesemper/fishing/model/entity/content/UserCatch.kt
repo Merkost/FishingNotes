@@ -20,5 +20,5 @@ data class UserCatch(
     val userMarkerId: String = "",
     @JvmField
     val isPublic: Boolean = false,
-    val downloadPhotoLinks: List<String> = listOf()
+    val downloadPhotoLinks: List<String> = listOf(),
 ): Parcelable, Content

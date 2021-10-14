@@ -38,7 +38,7 @@
     <string name="markers_list">Markers list</string>
     <string name="add">Добавить</string>
     <string name="coordinates">Координаты</string>
-    <string name="photos">Photos</string>
+    <string name="photos">Фото</string>
     <string name="new_catch">Новый улов</string>
     <string name="share">Поделиться</string>
     <string name="route">Маршрут</string>
@@ -128,6 +128,10 @@
     <string name="note">Note</string>
     <string name="user_catch">Улов</string>
     <string name="cant_get_current_location">Can\'t get current location</string>
+    <string name="way_of_fishing">Way of fishing</string>
+    <string name="no_rod">No rod</string>
+    <string name="no_bait">No bait</string>
+    <string name="no_lure">No lure</string>
 
 
 </resources>

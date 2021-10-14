@@ -1,15 +1,12 @@
 package com.joesemper.fishing.compose.ui.home.weather
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
@@ -35,16 +32,20 @@ import com.joesemper.fishing.utils.hPaToMmHg
 fun WeatherForADay(weather: WeatherForecast) {
     Scaffold(modifier = Modifier.fillMaxSize()) {
         Surface(border = BorderStroke(0.1.dp, secondaryFigmaTextColor)) {
-            Row(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                WeatherParametersForADay(weather = weather)
-                WeatherParametersForADayMeanings(weather = weather)
+            Row {
+                val verticalScrollState = rememberScrollState()
+                WeatherParametersForADay(weather = weather, scrollState = verticalScrollState)
+                WeatherParametersForADayMeanings(
+                    weather = weather,
+                    scrollState = verticalScrollState
+                )
             }
         }
     }
 }
 
 @Composable
-fun WeatherParametersForADay(weather: WeatherForecast) {
+fun WeatherParametersForADay(weather: WeatherForecast, scrollState: ScrollState) {
 
     val isExpanded = remember {
         mutableStateOf(true)
@@ -68,54 +69,57 @@ fun WeatherParametersForADay(weather: WeatherForecast) {
                 fontWeight = FontWeight.Bold,
                 text = date
             )
-            WeatherParameterItem(
-                color = primaryFigmaBackgroundTint,
-                icon = R.drawable.ic_clear_sky,
-                text = "Weather",
-                isExpanded = isExpanded.value
-            )
-            WeatherParameterItem(
-                color = backgroundGreenColor,
-                icon = R.drawable.ic_thermometer,
-                text = "Temperature",
-                isExpanded = isExpanded.value
-            )
-            WeatherParameterItem(
-                color = primaryFigmaBackgroundTint,
-                icon = R.drawable.ic_gauge,
-                text = "Pressure",
-                isExpanded = isExpanded.value
-            )
-            WeatherParameterItem(
-                color = backgroundGreenColor,
-                icon = R.drawable.ic_wind,
-                text = "Wind",
-                isExpanded = isExpanded.value
-            )
-            WeatherParameterItem(
-                color = primaryFigmaBackgroundTint,
-                icon = R.drawable.ic_baseline_cloud_24,
-                text = "Cloudiness",
-                isExpanded = isExpanded.value
-            )
-            WeatherParameterItem(
-                color = backgroundGreenColor,
-                icon = R.drawable.ic_baseline_umbrella_24,
-                text = "Probability of \nprecipitation",
-                isExpanded = isExpanded.value
-            )
-            WeatherParameterItem(
-                color = primaryFigmaBackgroundTint,
-                icon = R.drawable.ic_baseline_opacity_24,
-                text = "Humidity",
-                isExpanded = isExpanded.value
-            )
+            Column(modifier = Modifier.verticalScroll(scrollState)) {
+                WeatherParameterItem(
+                    color = primaryFigmaBackgroundTint,
+                    icon = R.drawable.ic_clear_sky,
+                    text = "Weather",
+                    isExpanded = isExpanded.value
+                )
+                WeatherParameterItem(
+                    color = backgroundGreenColor,
+                    icon = R.drawable.ic_thermometer,
+                    text = "Temperature",
+                    isExpanded = isExpanded.value
+                )
+                WeatherParameterItem(
+                    color = primaryFigmaBackgroundTint,
+                    icon = R.drawable.ic_gauge,
+                    text = "Pressure",
+                    isExpanded = isExpanded.value
+                )
+                WeatherParameterItem(
+                    color = backgroundGreenColor,
+                    icon = R.drawable.ic_wind,
+                    text = "Wind",
+                    isExpanded = isExpanded.value
+                )
+                WeatherParameterItem(
+                    color = primaryFigmaBackgroundTint,
+                    icon = R.drawable.ic_baseline_cloud_24,
+                    text = "Cloudiness",
+                    isExpanded = isExpanded.value
+                )
+                WeatherParameterItem(
+                    color = backgroundGreenColor,
+                    icon = R.drawable.ic_baseline_umbrella_24,
+                    text = "Probability of \nprecipitation",
+                    isExpanded = isExpanded.value
+                )
+                WeatherParameterItem(
+                    color = primaryFigmaBackgroundTint,
+                    icon = R.drawable.ic_baseline_opacity_24,
+                    text = "Humidity",
+                    isExpanded = isExpanded.value
+                )
+            }
+
         }
     }
 }
 
 @Composable
-fun WeatherParametersForADayMeanings(weather: WeatherForecast) {
+fun WeatherParametersForADayMeanings(weather: WeatherForecast, scrollState: ScrollState) {
 
     Column {
         LazyRow(
@@ -130,37 +134,41 @@ fun WeatherParametersForADayMeanings(weather: WeatherForecast) {
                             fontWeight = FontWeight.Bold,
                             text = time
                         )
-                        WeatherParameterItemMeaning(
-                            color = primaryFigmaBackgroundTint,
-                            icon = getWeatherIconByName(weather.hourly[index].weather.first().icon),
-                            text = weather.hourly[index].weather.first().description
-                        )
-                        WeatherParameterItemMeaning(
-                            color = backgroundGreenColor,
-                            text = weather.hourly[index].temperature.toString() + "°C",
-                        )
-                        WeatherParameterItemMeaning(
-                            color = primaryFigmaBackgroundTint,
-                            text = hPaToMmHg(weather.hourly[index].pressure).toString() + " mmHg",
-                        )
-                        WeatherParameterItemMeaning(
-                            color = backgroundGreenColor,
-                            text = weather.hourly[index].windSpeed.toString() + "m/s",
-                            icon = R.drawable.ic_arrow_up,
-                            iconRotation = weather.hourly[index].windDeg
-                        )
-                        WeatherParameterItemMeaning(
-                            color = primaryFigmaBackgroundTint,
-                            text = weather.hourly[index].clouds.toString() + "%"
-                        )
-                        WeatherParameterItemMeaning(
-                            color = backgroundGreenColor,
-                            text = (weather.hourly[index].probabilityOfPrecipitation * 100).toString() + "%",
-                        )
-                        WeatherParameterItemMeaning(
-                            color = primaryFigmaBackgroundTint,
-                            text = weather.hourly[index].humidity.toString() + "%"
-                        )
+                        Column(modifier = Modifier.verticalScroll(scrollState)) {
+                            WeatherParameterItemMeaning(
+                                color = primaryFigmaBackgroundTint,
+                                icon = getWeatherIconByName(weather.hourly[index].weather.first().icon),
+                                text = weather.hourly[index].weather.first().description
+                            )
+                            WeatherParameterItemMeaning(
+                                color = backgroundGreenColor,
+                                text = weather.hourly[index].temperature.toString() + "°C",
+                            )
+                            WeatherParameterItemMeaning(
+                                color = primaryFigmaBackgroundTint,
+                                text = hPaToMmHg(weather.hourly[index].pressure).toString() + " mmHg",
+                            )
+                            WeatherParameterItemMeaning(
+                                color = backgroundGreenColor,
+                                text = weather.hourly[index].windSpeed.toString() + "m/s",
+                                icon = R.drawable.ic_arrow_up,
+                                iconRotation = weather.hourly[index].windDeg
+                            )
+                            WeatherParameterItemMeaning(
+                                color = primaryFigmaBackgroundTint,
+                                text = weather.hourly[index].clouds.toString() + "%"
+                            )
+                            WeatherParameterItemMeaning(
+                                color = backgroundGreenColor,
+                                text = (weather.hourly[index].probabilityOfPrecipitation * 100).toString() + "%",
+                            )
+                            WeatherParameterItemMeaning(
+                                color = primaryFigmaBackgroundTint,
+                                text = weather.hourly[index].humidity.toString() + "%"
+                            )
+                        }
+
+
                     }
                 }
             })
