@@ -15,6 +15,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -65,15 +66,17 @@ fun FishingNotesApp() {
                     )
                 },*/
                 scaffoldState = appStateHolder.scaffoldState,
-//                modifier = Modifier.padding(top = Modifier.statusBarsHeight() as Dp)
+                /*modifier = if (appStateHolder.currentRoute == HomeSections.MAP.route)
+                    Modifier.statusBarsHeight()
+                else Modifier*/
             ) { innerPaddingModifier ->
-                /*Column */Surface {
-                    Spacer(modifier = Modifier.statusBarsHeight())
+                Column /*Surface*/ {
+                    //Spacer(modifier = Modifier.statusBarsHeight())
                     NavHost(
                         navController = appStateHolder.navController,
                         startDestination = MainDestinations.MAP_ROUTE,
-                        modifier = Modifier //if (appStateHolder.navController.currentDestination?.displayName == MainDestinations.MAP_ROUTE) Modifier
-                        //else Modifier.padding(innerPaddingModifier)
+                        modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
+                            Modifier.padding(innerPaddingModifier) /*else Modifier*/
                     ) {
                         NavGraph(
                             navController = appStateHolder.navController,

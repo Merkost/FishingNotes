@@ -128,6 +128,8 @@
     <string name="note">Note</string>
     <string name="user_catch">Улов</string>
     <string name="cant_get_current_location">Can\'t get current location</string>
+    <string name="my_location">Моё местоположение</string>
+    <string name="layers">Слои</string>
 
 
 </resources>

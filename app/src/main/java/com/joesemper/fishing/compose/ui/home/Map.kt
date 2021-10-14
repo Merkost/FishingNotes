@@ -10,10 +10,17 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,8 +32,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.app.ActivityCompat
@@ -89,6 +98,8 @@ fun Map(
     val currentMarker = remember {
         mutableStateOf<UserMapMarker?>(null)
     }
+
+    val mapLayersSelection = remember { mutableStateOf(false) }
 
     val currentPosition = remember {
         mutableStateOf<LatLng?>(null)
@@ -208,7 +219,8 @@ fun Map(
             floatingActionButtonPosition = FabPosition.End,
         ) {
             ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-                val (permissionDialog, mapLayout, pointer, addMarkerFragment) = createRefs()
+                val (permissionDialog, mapLayout, myLocationButton, mapLayersButton,
+                    mapLayersView, pointer, addMarkerFragment) = createRefs()
 
                 mapUiState = when {
 
@@ -220,18 +232,94 @@ fun Map(
                     else -> MapUiState.NormalMode.apply { bottomBarVisibilityState.value = true }
                 }
 
+                MyLocationButton(coroutineScope, mapView, lastKnownLocation.value,
+                    modifier = Modifier.size(40.dp).constrainAs(myLocationButton) {
+                        top.linkTo(parent.top, 16.dp)
+                        absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+                    })
+
+                AnimatedVisibility(!mapLayersSelection.value,
+                    modifier = Modifier.constrainAs(mapLayersButton) {
+                    top.linkTo(parent.top, 16.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                }) {
+                    MapLayersButton(
+                        modifier = Modifier.size(40.dp)/*.constrainAs(mapLayersButton) {
+                            top.linkTo(parent.top, 16.dp)
+                            absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                        }*/,
+                        layersSelectionMode = mapLayersSelection,
+                    )
+                }
+
+                //MapLayersView
+                /*DropdownMenu(
+                    expanded = mapLayersSelection.value, //suggestions.isNotEmpty(),
+                    onDismissRequest = {
+                        mapLayersSelection.value = false
+                    },
+                    // This line here will accomplish what you want
+                    properties = PopupProperties(focusable = false),
+                    modifier = Modifier.width(200.dp).constrainAs(mapLayersView) {
+                        top.linkTo(parent.top, 16.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                    }
+                ) {
+                    Text("Тип карты", modifier = Modifier.align(Alignment.Start).padding(4.dp))
+                    LazyRow(modifier = Modifier.size(200.dp)) {
+                        items(3) { Icon(Icons.Default.Apps, "", modifier = Modifier.size(50.dp)) }
+                    }
+                    *//*filteredList.forEach { suggestion ->
+                            DropdownMenuItem(
+                                onClick = {
+                                    textFieldValue = suggestion.title
+                                    viewModel.marker.value = suggestion
+                                    isDropMenuOpen = false
+                                }) {
+                                Text(text = suggestion.title)
+                            }
+                        }*//*
+                    }*/
+                AnimatedVisibility(mapLayersSelection.value,
+                    modifier = Modifier.constrainAs(mapLayersView) {
+                        top.linkTo(parent.top, 16.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                    }) {
+                    Card(
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.width(200.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(2.dp)) {
+                            Text(
+                                "Тип карты",
+                                modifier = Modifier.align(Alignment.Start).padding(8.dp)
+                            )
+                            LazyRow(modifier = Modifier.width(200.dp).height(70.dp)) {
+                                items(3) {
+                                    Icon(Icons.Default.Apps, "",
+                                        modifier = Modifier.size(50.dp).clickable {
+                                            mapLayersSelection.value = false
+                                        })
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+
                 if (mapUiState == MapUiState.PlaceSelectMode) {
-                    DialogOnPlaceChoosing(context, cameraMoveState, mapView, currentPosition,
+                    DialogOnPlaceChoosing(
+                        context, cameraMoveState, mapView, currentPosition,
                         modifier = Modifier.constrainAs(addMarkerFragment) {
-                            top.linkTo(parent.top, 4.dp)
-                            //bottom.linkTo(parent.bottom)
-                            absoluteLeft.linkTo(parent.absoluteLeft)
-                            absoluteRight.linkTo(parent.absoluteRight)
-                        }.wrapContentSize().padding(6.dp)
+                            top.linkTo(parent.top, 16.dp)
+                            absoluteLeft.linkTo(parent.absoluteLeft, 72.dp)
+                            absoluteRight.linkTo(parent.absoluteRight, 72.dp)
+                        }.requiredWidth(240.dp).wrapContentSize()
                     )
                     PointerIcon(modifier = Modifier.constrainAs(pointer) {
                         top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom, 4.dp)
+                        bottom.linkTo(parent.bottom, 65.dp)
                         absoluteLeft.linkTo(parent.absoluteLeft)
                         absoluteRight.linkTo(parent.absoluteRight)
                     }, cameraMoveState = cameraMoveState)
@@ -272,6 +360,31 @@ fun Map(
                     }
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun MyLocationButton(
+    coroutineScope: CoroutineScope,
+    mapView: MapView,
+    lastKnownLocation: LatLng,
+    modifier: Modifier
+) {
+    Card(shape = CircleShape, modifier = modifier) {
+        IconButton(modifier = Modifier.padding(8.dp).fillMaxSize(),
+            onClick = { moveCameraToLocation(coroutineScope, mapView, lastKnownLocation) }) {
+            Icon(Icons.Default.MyLocation, stringResource(R.string.my_location))
+        }
+    }
+}
+
+@Composable
+fun MapLayersButton(layersSelectionMode: MutableState<Boolean>, modifier: Modifier) {
+    Card(shape = CircleShape, modifier = modifier) {
+        IconButton(modifier = Modifier.padding(8.dp).fillMaxSize(),
+            onClick = { layersSelectionMode.value = true }) {
+            Icon(Icons.Default.Apps, stringResource(R.string.layers))
         }
     }
 }
@@ -379,18 +492,18 @@ fun BottomSheetAddMarkerDialog(
             }/*.navigationBarsWithImePadding()*/
         )
 
-         /*Icon(
-            painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-            contentDescription = "Marker",
-            tint = secondaryFigmaColor,
-            modifier = Modifier
-                .size(32.dp)
-                .constrainAs(locationIcon) {
-                    absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-                    top.linkTo(title.top)
-                    bottom.linkTo(title.bottom)
-                }
-        )*/
+        /*Icon(
+           painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+           contentDescription = "Marker",
+           tint = secondaryFigmaColor,
+           modifier = Modifier
+               .size(32.dp)
+               .constrainAs(locationIcon) {
+                   absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
+                   top.linkTo(title.top)
+                   bottom.linkTo(title.bottom)
+               }
+       )*/
 
 
 
@@ -603,6 +716,8 @@ fun GoogleMapLayout(
             googleMap.setOnCameraIdleListener {
                 cameraMoveCallback(CameraMoveState.MoveFinish)
             }
+            googleMap.isMyLocationEnabled = true
+            googleMap.uiSettings.isMyLocationButtonEnabled = false
 
         }
     }
@@ -617,6 +732,12 @@ fun GoogleMapLayout(
             true
         }
     }
+
+    /*moveCameraToLocation(
+        coroutineScope = coroutineScope,
+        map = map,
+        location = lastKnownLocation.value
+    )*/
 }
 
 @ExperimentalAnimationApi
@@ -710,21 +831,21 @@ fun DialogOnPlaceChoosing(
         }
         AnimatedVisibility(!viewModel.chosenPlace.value.isNullOrEmpty()) {
             viewModel.chosenPlace.value?.let {
-            Row(
-                modifier = Modifier.wrapContentSize().padding(12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                    contentDescription = "Marker",
-                    tint = secondaryFigmaColor,
-                    modifier = Modifier
-                        .size(32.dp)
-                )
-                Spacer(Modifier.size(8.dp))
-                Text(it)
-            }
+                Row(
+                    modifier = Modifier.wrapContentSize().padding(12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+                        contentDescription = "Marker",
+                        tint = secondaryFigmaColor,
+                        modifier = Modifier
+                            .size(32.dp)
+                    )
+                    Spacer(Modifier.size(8.dp))
+                    Text(it)
+                }
             }
         }
     }
