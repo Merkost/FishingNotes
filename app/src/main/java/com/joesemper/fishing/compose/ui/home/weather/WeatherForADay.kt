@@ -1,5 +1,6 @@
 package com.joesemper.fishing.compose.ui.home.weather
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.joesemper.fishing.R
@@ -72,7 +74,7 @@ fun WeatherParametersForADay(weather: WeatherForecast, scrollState: ScrollState)
             Column(modifier = Modifier.verticalScroll(scrollState)) {
                 WeatherParameterItem(
                     color = primaryFigmaBackgroundTint,
-                    icon = R.drawable.ic_clear_sky,
+                    icon = R.drawable.weather_sunny,
                     text = "Weather",
                     isExpanded = isExpanded.value
                 )
@@ -90,13 +92,13 @@ fun WeatherParametersForADay(weather: WeatherForecast, scrollState: ScrollState)
                 )
                 WeatherParameterItem(
                     color = backgroundGreenColor,
-                    icon = R.drawable.ic_wind,
+                    icon = R.drawable.weather_windy,
                     text = "Wind",
                     isExpanded = isExpanded.value
                 )
                 WeatherParameterItem(
                     color = primaryFigmaBackgroundTint,
-                    icon = R.drawable.ic_baseline_cloud_24,
+                    icon = R.drawable.weather_cloudy,
                     text = "Cloudiness",
                     isExpanded = isExpanded.value
                 )
@@ -121,56 +123,65 @@ fun WeatherParametersForADay(weather: WeatherForecast, scrollState: ScrollState)
 @Composable
 fun WeatherParametersForADayMeanings(weather: WeatherForecast, scrollState: ScrollState) {
 
-    Column {
-        LazyRow(
-            content = {
-                items(weather.hourly.size) { index ->
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        val time = getTimeByMilliseconds(weather.hourly[index].date)
-                        Text(
-                            style = MaterialTheme.typography.subtitle1,
-                            fontWeight = FontWeight.Bold,
-                            text = time
-                        )
-                        Column(modifier = Modifier.verticalScroll(scrollState)) {
-                            WeatherParameterItemMeaning(
-                                color = primaryFigmaBackgroundTint,
-                                icon = getWeatherIconByName(weather.hourly[index].weather.first().icon),
-                                text = weather.hourly[index].weather.first().description
+    Crossfade(weather) { weatherForecast ->
+        Column {
+            LazyRow(
+                content = {
+                    items(weather.hourly.size) { index ->
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            val time = getTimeByMilliseconds(weatherForecast.hourly[index].date)
+                            Text(
+                                style = MaterialTheme.typography.subtitle1,
+                                fontWeight = FontWeight.Bold,
+                                text = time
                             )
-                            WeatherParameterItemMeaning(
-                                color = backgroundGreenColor,
-                                text = weather.hourly[index].temperature.toString() + "°C",
-                            )
-                            WeatherParameterItemMeaning(
-                                color = primaryFigmaBackgroundTint,
-                                text = hPaToMmHg(weather.hourly[index].pressure).toString() + " mmHg",
-                            )
-                            WeatherParameterItemMeaning(
-                                color = backgroundGreenColor,
-                                text = weather.hourly[index].windSpeed.toString() + "m/s",
-                                icon = R.drawable.ic_arrow_up,
-                                iconRotation = weather.hourly[index].windDeg
-                            )
-                            WeatherParameterItemMeaning(
-                                color = primaryFigmaBackgroundTint,
-                                text = weather.hourly[index].clouds.toString() + "%"
-                            )
-                            WeatherParameterItemMeaning(
-                                color = backgroundGreenColor,
-                                text = (weather.hourly[index].probabilityOfPrecipitation * 100).toString() + "%",
-                            )
-                            WeatherParameterItemMeaning(
-                                color = primaryFigmaBackgroundTint,
-                                text = weather.hourly[index].humidity.toString() + "%"
-                            )
+                            Column(modifier = Modifier.verticalScroll(scrollState)) {
+                                WeatherParameterItemMeaning(
+                                    color = primaryFigmaBackgroundTint,
+                                    icon = getWeatherIconByName(weatherForecast.hourly[index].weather.first().icon),
+                                    text = weatherForecast.hourly[index].weather.first().description
+                                )
+                                WeatherParameterItemMeaning(
+                                    color = backgroundGreenColor,
+                                    text = weatherForecast.hourly[index].temperature.toString()
+                                            + stringResource(R.string.celsius),
+                                )
+                                WeatherParameterItemMeaning(
+                                    color = primaryFigmaBackgroundTint,
+                                    text = hPaToMmHg(weatherForecast.hourly[index].pressure).toString()
+                                            + stringResource(R.string.pressure_units),
+                                )
+                                WeatherParameterItemMeaning(
+                                    color = backgroundGreenColor,
+                                    text = weatherForecast.hourly[index].windSpeed.toString()
+                                            + stringResource(R.string.wind_speed_units),
+                                    icon = R.drawable.ic_arrow_up,
+                                    iconRotation = weatherForecast.hourly[index].windDeg
+                                )
+                                WeatherParameterItemMeaning(
+                                    color = primaryFigmaBackgroundTint,
+                                    text = weatherForecast.hourly[index].clouds.toString()
+                                            + stringResource(R.string.percent)
+                                )
+                                WeatherParameterItemMeaning(
+                                    color = backgroundGreenColor,
+                                    text = (weatherForecast.hourly[index].probabilityOfPrecipitation * 100).toString()
+                                            + stringResource(R.string.percent),
+                                )
+                                WeatherParameterItemMeaning(
+                                    color = primaryFigmaBackgroundTint,
+                                    text = weatherForecast.hourly[index].humidity.toString()
+                                            + stringResource(R.string.percent)
+                                )
+                            }
+
+
                         }
-
-
                     }
-                }
-            })
+                })
+        }
     }
+
 }

@@ -19,17 +19,7 @@ class FishingApp : Application() {
                     appModule,
                     splashScreen,
                     loginScreen,
-                    mapScreen,
-                    weatherScreen,
                     mainActivity,
-                    newCatchScreen,
-                    newPlaceScreen,
-                    userCatchScreen,
-                    userFragment,
-//                    notesFragment,
-                    userPlaceScreen,
-                    placesFragment,
-                    catchesFragment
                 )
             )
         }

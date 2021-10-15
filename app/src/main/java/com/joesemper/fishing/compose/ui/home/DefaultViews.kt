@@ -5,18 +5,22 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
@@ -24,7 +28,10 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.ui.theme.primaryFigmaColor
+import com.joesemper.fishing.ui.theme.primaryFigmaTextColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
 
 @Composable
 fun MyCardNoPadding(content: @Composable () -> Unit) {
@@ -34,7 +41,9 @@ fun MyCardNoPadding(content: @Composable () -> Unit) {
 
 @Composable
 fun MyCard(content: @Composable () -> Unit) {
-    Card(elevation = 8.dp, modifier = Modifier.fillMaxWidth().padding(4.dp), content = content)
+    Card(elevation = 8.dp, modifier = Modifier
+        .fillMaxWidth()
+        .padding(4.dp), content = content)
 }
 
 @Composable
@@ -70,7 +79,9 @@ fun UserProfile(user: User?) {
         Image(
             painter = painterResource(R.drawable.ic_fisher),
             contentDescription = stringResource(R.string.fisher),
-            Modifier.fillMaxHeight().padding(10.dp)
+            Modifier
+                .fillMaxHeight()
+                .padding(10.dp)
         )
         Column(verticalArrangement = Arrangement.Center) {
             Text(
@@ -93,7 +104,9 @@ fun PlaceInfo(user: User?, place: UserMapMarker, placeClicked: (UserMapMarker) -
             verticalArrangement = Arrangement.Top,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp).padding(horizontal = 5.dp).clickable { placeClicked(place) }
+                .padding(10.dp)
+                .padding(horizontal = 5.dp)
+                .clickable { placeClicked(place) }
         ) {
             Row(
                 modifier = Modifier
@@ -120,14 +133,16 @@ fun CatchInfo(catch: UserCatch, user: User?) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp).padding(horizontal = 5.dp),
+                .padding(10.dp)
+                .padding(horizontal = 5.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
-                    .fillMaxWidth().height(50.dp)
+                    .fillMaxWidth()
+                    .height(50.dp)
             ) {
                 Text(
                     catch.title,
@@ -135,7 +150,8 @@ fun CatchInfo(catch: UserCatch, user: User?) {
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
                 Row( modifier = Modifier
-                    .padding(horizontal = 10.dp).fillMaxHeight()) {
+                    .padding(horizontal = 10.dp)
+                    .fillMaxHeight()) {
                 UserProfile(user) }
             }
             if (!catch.description.isNullOrEmpty()) Text(
@@ -151,4 +167,91 @@ fun CatchInfo(catch: UserCatch, user: User?) {
             }
         }
     }
+}
+
+@Composable
+fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Spacer(Modifier.size(8.dp))
+        Icon(
+            painter = painterResource(id = icon),
+            contentDescription = stringResource(R.string.place),
+            tint = primaryFigmaColor,
+            modifier = Modifier.size(30.dp)
+        )
+        Spacer(Modifier.size(8.dp))
+        Text(text)
+    }
+}
+
+@Composable
+fun SimpleOutlinedTextField(textState: MutableState<String>, label: String) {
+    var text by rememberSaveable { textState }
+    OutlinedTextField(
+        value = text,
+        onValueChange = { text = it },
+        label = { Text(text = label) },
+        modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Next
+        ),
+        singleLine = true
+    )
+}
+
+@Composable
+fun HeaderText(modifier: Modifier = Modifier, text: String) {
+    Text(
+        modifier = modifier,
+        style = MaterialTheme.typography.h5,
+        maxLines = 1,
+        color = primaryFigmaTextColor,
+        text = text
+    )
+}
+
+@Composable
+fun SubtitleText(modifier: Modifier = Modifier, text: String) {
+    Text(
+        modifier = modifier,
+        style = MaterialTheme.typography.subtitle2,
+        maxLines = 1,
+        color = secondaryFigmaTextColor,
+        text = text
+    )
+}
+
+@Composable
+fun PrimaryText(modifier: Modifier = Modifier, text: String) {
+    Text(
+        modifier = modifier,
+        style = MaterialTheme.typography.body1,
+        maxLines = 1,
+        color = primaryFigmaTextColor,
+        text = text
+    )
+}
+
+@Composable
+fun SecondaryText(modifier: Modifier = Modifier, text: String) {
+    Text(
+        textAlign = TextAlign.Center,
+        modifier = modifier,
+        style = MaterialTheme.typography.body1,
+        color = secondaryFigmaTextColor,
+        text = text
+    )
+}
+
+@Composable
+fun SecondaryTextColored(modifier: Modifier = Modifier, text: String) {
+    Text(
+        modifier = modifier,
+        style = MaterialTheme.typography.body2,
+        color = primaryFigmaColor,
+        text = text
+    )
 }

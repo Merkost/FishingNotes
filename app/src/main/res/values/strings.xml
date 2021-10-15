@@ -131,6 +131,10 @@
     <string name="no_rod">No rod</string>
     <string name="no_bait">No bait</string>
     <string name="no_lure">No lure</string>
+    <string name="celsius">°C</string>
+    <string name="pressure_units">mmHg</string>
+    <string name="wind_speed_units">m/s</string>
+    <string name="percent">%</string>
 
 
 </resources>

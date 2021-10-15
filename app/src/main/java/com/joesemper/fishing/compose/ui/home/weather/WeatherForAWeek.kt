@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.joesemper.fishing.R
@@ -66,7 +67,7 @@ fun WeatherParametersForAWeek(weather: WeatherForecast, scrollState: ScrollState
             Column(modifier = Modifier.verticalScroll(scrollState)) {
                 WeatherParameterItem(
                     color = primaryFigmaBackgroundTint,
-                    icon = R.drawable.ic_clear_sky,
+                    icon = R.drawable.weather_sunny,
                     text = "Weather",
                     isExpanded = isExpanded.value
                 )
@@ -84,13 +85,13 @@ fun WeatherParametersForAWeek(weather: WeatherForecast, scrollState: ScrollState
                 )
                 WeatherParameterItem(
                     color = backgroundGreenColor,
-                    icon = R.drawable.ic_wind,
+                    icon = R.drawable.weather_windy,
                     text = "Wind",
                     isExpanded = isExpanded.value
                 )
                 WeatherParameterItem(
                     color = primaryFigmaBackgroundTint,
-                    icon = R.drawable.ic_baseline_cloud_24,
+                    icon = R.drawable.weather_cloudy,
                     text = "Cloudiness",
                     isExpanded = isExpanded.value
                 )
@@ -114,13 +115,13 @@ fun WeatherParametersForAWeek(weather: WeatherForecast, scrollState: ScrollState
                 )
                 WeatherParameterItem(
                     color = primaryFigmaBackgroundTint,
-                    icon = R.drawable.ic_weather_sunny,
+                    icon = R.drawable.weather_sunset_up,
                     text = "Sunrise",
                     isExpanded = isExpanded.value
                 )
                 WeatherParameterItem(
                     color = backgroundGreenColor,
-                    icon = R.drawable.ic_weather_sunny,
+                    icon = R.drawable.weather_sunset_down,
                     text = "Sunset",
                     isExpanded = isExpanded.value
                 )
@@ -153,29 +154,35 @@ fun WeatherParametersForAWeekMeanings(weather: WeatherForecast, scrollState: Scr
                             )
                             WeatherParameterItemMeaning(
                                 color = backgroundGreenColor,
-                                text = weather.daily[index].temperature.day.toString() + " °C",
+                                text = weather.daily[index].temperature.day.toString()
+                                        + stringResource(R.string.celsius),
                             )
                             WeatherParameterItemMeaning(
                                 color = primaryFigmaBackgroundTint,
-                                text = hPaToMmHg(weather.daily[index].pressure).toString() + " mmHg",
+                                text = hPaToMmHg(weather.daily[index].pressure).toString()
+                                        + stringResource(R.string.pressure_units),
                             )
                             WeatherParameterItemMeaning(
                                 color = backgroundGreenColor,
-                                text = weather.daily[index].windSpeed.toString() + " m/s",
+                                text = weather.daily[index].windSpeed.toString()
+                                        + stringResource(R.string.wind_speed_units),
                                 icon = R.drawable.ic_arrow_up,
                                 iconRotation = weather.daily[index].windDeg
                             )
                             WeatherParameterItemMeaning(
                                 color = primaryFigmaBackgroundTint,
-                                text = weather.daily[index].clouds.toString() + "%"
+                                text = weather.daily[index].clouds.toString()
+                                        + stringResource(R.string.percent)
                             )
                             WeatherParameterItemMeaning(
                                 color = backgroundGreenColor,
-                                text = (weather.daily[index].probabilityOfPrecipitation * 100).toString() + "%",
+                                text = (weather.daily[index].probabilityOfPrecipitation * 100).toString()
+                                        + stringResource(R.string.percent),
                             )
                             WeatherParameterItemMeaning(
                                 color = primaryFigmaBackgroundTint,
-                                text = weather.daily[index].humidity.toString() + "%"
+                                text = weather.daily[index].humidity.toString()
+                                        + stringResource(R.string.percent)
                             )
                             WeatherParameterItemMeaning(
                                 color = backgroundGreenColor,

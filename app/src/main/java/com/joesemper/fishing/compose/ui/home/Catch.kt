@@ -24,8 +24,6 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.UserCatchViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.theme.primaryFigmaColor
-import com.joesemper.fishing.ui.theme.primaryFigmaTextColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
 import org.koin.androidx.compose.getViewModel
@@ -328,60 +326,6 @@ fun CatchContent(catch: UserCatch, viewModel: UserCatchViewModel) {
 
     }
 }
-
-@Composable
-fun HeaderText(modifier: Modifier = Modifier, text: String) {
-    Text(
-        modifier = modifier,
-        style = MaterialTheme.typography.h5,
-        maxLines = 1,
-        color = primaryFigmaTextColor,
-        text = text
-    )
-}
-
-@Composable
-fun SubtitleText(modifier: Modifier = Modifier, text: String) {
-    Text(
-        modifier = modifier,
-        style = MaterialTheme.typography.subtitle2,
-        maxLines = 1,
-        color = secondaryFigmaTextColor,
-        text = text
-    )
-}
-
-@Composable
-fun PrimaryText(modifier: Modifier = Modifier, text: String) {
-    Text(
-        modifier = modifier,
-        style = MaterialTheme.typography.body1,
-        maxLines = 1,
-        color = primaryFigmaTextColor,
-        text = text
-    )
-}
-
-@Composable
-fun SecondaryText(modifier: Modifier = Modifier, text: String) {
-    Text(
-        modifier = modifier,
-        style = MaterialTheme.typography.body1,
-        color = secondaryFigmaTextColor,
-        text = text
-    )
-}
-
-@Composable
-fun SecondaryTextColored(modifier: Modifier = Modifier, text: String) {
-    Text(
-        modifier = modifier,
-        style = MaterialTheme.typography.body2,
-        color = primaryFigmaColor,
-        text = text
-    )
-}
-
 
 //    catch?.let { viewModel.catch.value = it }
 //    Scaffold(
