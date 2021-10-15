@@ -10,32 +10,33 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.layout.Arrangement.SpaceEvenly
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.app.ActivityCompat
@@ -43,14 +44,17 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
+import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.location.LocationServices
 import com.google.android.libraries.maps.CameraUpdateFactory
+import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.LatLng
+import com.google.android.libraries.maps.model.MapStyleOptions
 import com.google.android.libraries.maps.model.MarkerOptions
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
@@ -61,7 +65,6 @@ import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 import kotlinx.coroutines.*
-import kotlinx.coroutines.NonCancellable.isActive
 import me.vponomarenko.compose.shimmer.shimmer
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
@@ -100,6 +103,7 @@ fun Map(
     }
 
     val mapLayersSelection = remember { mutableStateOf(false) }
+    var mapType by remember { mutableStateOf(MapTypes.roadmap) }
 
     val currentPosition = remember {
         mutableStateOf<LatLng?>(null)
@@ -240,14 +244,14 @@ fun Map(
 
                 AnimatedVisibility(!mapLayersSelection.value,
                     modifier = Modifier.constrainAs(mapLayersButton) {
-                    top.linkTo(parent.top, 16.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                }) {
+                        top.linkTo(parent.top, 16.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                    }) {
                     MapLayersButton(
-                        modifier = Modifier.size(40.dp)/*.constrainAs(mapLayersButton) {
+                        modifier = Modifier.size(40.dp),/*.constrainAs(mapLayersButton) {
                             top.linkTo(parent.top, 16.dp)
                             absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                        }*/,
+                        }*/
                         layersSelectionMode = mapLayersSelection,
                     )
                 }
@@ -287,20 +291,71 @@ fun Map(
                     }) {
                     Card(
                         shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.width(200.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(2.dp)) {
-                            Text(
-                                "Тип карты",
-                                modifier = Modifier.align(Alignment.Start).padding(8.dp)
+                        modifier = Modifier.width(250.dp).wrapContentHeight()/*pointerInput(Unit) {
+                            detectTapGestures(
+                                onPress = { *//* Called when the gesture starts *//* },
+                                onDoubleTap = { *//* Called on Double Tap *//* },
+                                onLongPress = { *//* Called on Long Press *//* },
+                                onTap = { *//* Called on Tap *//* }
                             )
-                            LazyRow(modifier = Modifier.width(200.dp).height(70.dp)) {
-                                items(3) {
-                                    Icon(Icons.Default.Apps, "",
-                                        modifier = Modifier.size(50.dp).clickable {
-                                            mapLayersSelection.value = false
-                                        })
+                        }*/
+                    ) {
+                        Column(modifier = Modifier.padding(2.dp).padding(bottom = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("Тип карты")
+                                Card(shape = CircleShape, modifier = Modifier.size(20.dp)) {
+                                    IconButton(onClick = { mapLayersSelection.value = false }) {
+                                        Icon(Icons.Default.Close, "")
+                                    }
                                 }
+                            }
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                //roadmap button
+                                Box(modifier = Modifier.size(70.dp)) {
+                                    IconToggleButton(
+                                        onCheckedChange = { if (it) mapType = MapTypes.roadmap },
+                                        checked = mapType == MapTypes.roadmap,
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        Image(painterResource(R.drawable.ic_map_default), "",
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Crop)
+                                    }
+                                }
+                                Box(modifier = Modifier.size(70.dp)) {
+                                    IconToggleButton(
+                                        onCheckedChange = { if (it) mapType = MapTypes.satellite },
+                                        checked = mapType == MapTypes.satellite,
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        Image(painterResource(R.drawable.ic_map_satellite), "",
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Crop)
+                                    }
+                                }
+                                Box(modifier = Modifier.size(70.dp)) {
+                                    IconToggleButton(
+                                        onCheckedChange = { if (it) mapType = MapTypes.terrain },
+                                        checked = mapType == MapTypes.terrain,
+                                        modifier = Modifier.fillMaxSize()
+                                    ) {
+                                        Image(painterResource(R.drawable.ic_map_terrain), "",
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Crop)
+                                    }
+                                }
+                                /*LaunchedEffect(mapType) {
+                                    val googleMap = mapView.awaitMap()
+                                    googleMap.setMapStyle(MapStyleOptions(mapType))
+                                }*/
                             }
                         }
                     }
@@ -357,7 +412,8 @@ fun Map(
                     },
                     cameraMoveCallback = { state ->
                         cameraMoveState = state
-                    }
+                    },
+                    mapType = mapType
                 )
             }
         }
@@ -688,7 +744,8 @@ fun GoogleMapLayout(
     viewModel: MapViewModel,
     permissionsState: MultiplePermissionsState,
     onMarkerClick: (marker: UserMapMarker) -> Unit,
-    cameraMoveCallback: (state: CameraMoveState) -> Unit
+    cameraMoveCallback: (state: CameraMoveState) -> Unit,
+    mapType: Int
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -719,6 +776,7 @@ fun GoogleMapLayout(
             googleMap.isMyLocationEnabled = true
             googleMap.uiSettings.isMyLocationButtonEnabled = false
 
+
         }
     }
 
@@ -731,6 +789,11 @@ fun GoogleMapLayout(
             onMarkerClick(mapMarker)
             true
         }
+    }
+
+    LaunchedEffect(mapType) {
+        val googleMap = map.awaitMap()
+        googleMap.mapType = mapType
     }
 
     /*moveCameraToLocation(
@@ -1076,6 +1139,13 @@ val locationPermissionsList = listOf(
     Manifest.permission.ACCESS_FINE_LOCATION,
     Manifest.permission.ACCESS_COARSE_LOCATION
 )
+
+object MapTypes {
+    const val roadmap = GoogleMap.MAP_TYPE_NORMAL
+    const val satellite = GoogleMap.MAP_TYPE_SATELLITE
+    const val hybrid = GoogleMap.MAP_TYPE_HYBRID
+    const val terrain = GoogleMap.MAP_TYPE_TERRAIN
+}
 
 const val DEFAULT_ZOOM = 15f
 
