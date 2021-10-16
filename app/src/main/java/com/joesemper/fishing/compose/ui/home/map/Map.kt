@@ -223,7 +223,7 @@ fun Map(
         ) {
             ConstraintLayout(modifier = Modifier.fillMaxSize()) {
                 val (permissionDialog, mapLayout, myLocationButton, mapLayersButton,
-                    mapLayersBackground, mapLayersView, pointer, addMarkerFragment) = createRefs()
+                    mapLayersView, pointer, addMarkerFragment) = createRefs()
 
                 mapUiState = when {
 
@@ -243,62 +243,21 @@ fun Map(
                             absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                         })
 
-                AnimatedVisibility(!mapLayersSelection.value,
-                    modifier = Modifier.constrainAs(mapLayersButton) {
-                        top.linkTo(parent.top, 16.dp)
-                        absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                    }) {
-                    MapLayersButton(
-                        modifier = Modifier.size(40.dp),/*.constrainAs(mapLayersButton) {
-                            top.linkTo(parent.top, 16.dp)
-                            absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                        }*/
-                        layersSelectionMode = mapLayersSelection,
-                    )
-                }
-
-                //MapLayersView
-                /*DropdownMenu(
-                    expanded = mapLayersSelection.value, //suggestions.isNotEmpty(),
-                    onDismissRequest = {
-                        mapLayersSelection.value = false
-                    },
-                    // This line here will accomplish what you want
-                    properties = PopupProperties(focusable = false),
-                    modifier = Modifier.width(200.dp).constrainAs(mapLayersView) {
-                        top.linkTo(parent.top, 16.dp)
-                        absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                    }
-                ) {
-                    Text("Тип карты", modifier = Modifier.align(Alignment.Start).padding(4.dp))
-                    LazyRow(modifier = Modifier.size(200.dp)) {
-                        items(3) { Icon(Icons.Default.Apps, "", modifier = Modifier.size(50.dp)) }
-                    }
-                    *//*filteredList.forEach { suggestion ->
-                            DropdownMenuItem(
-                                onClick = {
-                                    textFieldValue = suggestion.title
-                                    viewModel.marker.value = suggestion
-                                    isDropMenuOpen = false
-                                }) {
-                                Text(text = suggestion.title)
-                            }
-                        }*//*
-                    }*/
                 if (mapLayersSelection.value) Surface(modifier = Modifier
                     .fillMaxSize()
                     .alpha(0f)
-                    .clickable { mapLayersSelection.value = false }, color = Color.White) {}
-                        AnimatedVisibility(mapLayersSelection.value,
-                            modifier = Modifier.constrainAs(mapLayersView) {
-                                top.linkTo(parent.top, 16.dp)
-                                absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                            }) {
-                            Card(
-                                shape = RoundedCornerShape(8.dp),
-                                modifier = Modifier
-                                    .width(250.dp)
-                                    .wrapContentHeight()/*pointerInput(Unit) {
+                    .clickable { mapLayersSelection.value = false }, color = Color.White
+                ) {}
+                AnimatedVisibility(mapLayersSelection.value,
+                    modifier = Modifier.constrainAs(mapLayersView) {
+                        top.linkTo(parent.top, 16.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                    }) {
+                    Card(
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier
+                            .width(250.dp)
+                            .wrapContentHeight()/*pointerInput(Unit) {
                             detectTapGestures(
                                 onPress = { *//* Called when the gesture starts *//* },
                                 onDoubleTap = { *//* Called on Double Tap *//* },
@@ -306,46 +265,64 @@ fun Map(
                                 onTap = { *//* Called on Tap *//* }
                             )
                         }*/
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(2.dp).padding(bottom = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Column(modifier = Modifier
-                                    .padding(2.dp)
-                                    .padding(bottom = 8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(8.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text("Тип карты")
-                                        Card(shape = CircleShape, modifier = Modifier.size(20.dp)) {
-                                            IconButton(onClick = { mapLayersSelection.value = false }) {
-                                                Icon(Icons.Default.Close, "")
-                                            }
-                                        }
+                                Text("Тип карты")
+                                Card(shape = CircleShape, modifier = Modifier.size(20.dp)) {
+                                    IconButton(onClick = { mapLayersSelection.value = false }) {
+                                        Icon(Icons.Default.Close, "")
                                     }
-                                    Row(
-                                        horizontalArrangement = Arrangement.SpaceEvenly,
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        MapLayerItem(mapType, layer = MapTypes.roadmap,
-                                            painter = painterResource(R.drawable.ic_map_default), name = "По умолчанию")
-                                        MapLayerItem(mapType, layer = MapTypes.satellite,
-                                            painter = painterResource(R.drawable.ic_map_satellite), name = "Спутник")
-                                        MapLayerItem(mapType, layer = MapTypes.terrain,
-                                            painter = painterResource(R.drawable.ic_map_terrain), name = "Рельеф")
+                                }
+                            }
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                MapLayerItem(
+                                    mapType,
+                                    layer = MapTypes.roadmap,
+                                    painter = painterResource(R.drawable.ic_map_default),
+                                    name = "По умолчанию"
+                                )
+                                MapLayerItem(
+                                    mapType,
+                                    layer = MapTypes.satellite,
+                                    painter = painterResource(R.drawable.ic_map_satellite),
+                                    name = "Спутник"
+                                )
+                                MapLayerItem(
+                                    mapType,
+                                    layer = MapTypes.terrain,
+                                    painter = painterResource(R.drawable.ic_map_terrain),
+                                    name = "Рельеф"
+                                )
 
-                                        /*LaunchedEffect(mapType) {
-                                            val googleMap = mapView.awaitMap()
-                                            googleMap.setMapStyle(MapStyleOptions(mapType))
-                                        }*/
-                                    }
+                                /*LaunchedEffect(mapType) {
+                                    val googleMap = mapView.awaitMap()
+                                    googleMap.setMapStyle(MapStyleOptions(mapType))
+                                }*/
+                            }
                         }
                     }
                 }
 
-
+                AnimatedVisibility(!mapLayersSelection.value,
+                    modifier = Modifier.constrainAs(mapLayersButton) {
+                        top.linkTo(parent.top, 16.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                    }) {
+                    MapLayersButton(
+                        modifier = Modifier.size(40.dp),
+                        layersSelectionMode = mapLayersSelection,
+                    )
+                }
 
 
                 if (mapUiState == MapUiState.PlaceSelectMode) {
@@ -357,7 +334,6 @@ fun Map(
                                 absoluteLeft.linkTo(parent.absoluteLeft, 72.dp)
                                 absoluteRight.linkTo(parent.absoluteRight, 72.dp)
                             }
-                            .requiredWidth(240.dp)
                             .wrapContentSize()
                     )
                     PointerIcon(modifier = Modifier.constrainAs(pointer) {
@@ -420,13 +396,15 @@ fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name:
                     width = 2.dp,
                     color = Color.Blue,
                     shape = RoundedCornerShape(15.dp)
-                ) else Modifier.size(70.dp)
+                ) else Modifier.size(70.dp).padding(2.dp)
         ) {
-            Image(painter, layer.toString(),
+            Image(
+                painter, layer.toString(),
                 modifier = Modifier
                     .padding(4.dp)
                     .fillMaxSize(),
-                contentScale = ContentScale.Crop)
+                contentScale = ContentScale.Crop
+            )
         }
         Text(text = name, fontSize = 12.sp, overflow = TextOverflow.Ellipsis, maxLines = 1)
     }
@@ -882,14 +860,14 @@ fun DialogOnPlaceChoosing(
 
 
     Card(
-        shape = RoundedCornerShape(size = 10.dp),
-        modifier = modifier
+        shape = RoundedCornerShape(size = 20.dp),
+        modifier = modifier.heightIn(min = 40.dp, max = 40.dp).widthIn(max = 240.dp)
     ) {
         AnimatedVisibility(viewModel.chosenPlace.value.isNullOrEmpty()) {
             Row(
                 modifier = Modifier
                     .wrapContentSize()
-                    .padding(12.dp),
+                    .padding(6.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -920,7 +898,7 @@ fun DialogOnPlaceChoosing(
                 Row(
                     modifier = Modifier
                         .wrapContentSize()
-                        .padding(12.dp),
+                        .padding(6.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -931,8 +909,9 @@ fun DialogOnPlaceChoosing(
                         modifier = Modifier
                             .size(32.dp)
                     )
-                    Spacer(Modifier.size(8.dp))
-                    Text(it)
+                    Spacer(Modifier.size(4.dp))
+                    Text(it, overflow = TextOverflow.Ellipsis, maxLines = 1)
+                    Spacer(Modifier.size(4.dp))
                 }
             }
         }
