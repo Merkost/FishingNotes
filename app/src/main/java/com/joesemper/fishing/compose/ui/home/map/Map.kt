@@ -1,4 +1,4 @@
-package com.joesemper.fishing.compose.ui.home
+package com.joesemper.fishing.compose.ui.home.map
 
 import android.Manifest
 import android.content.Context
@@ -12,7 +12,6 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement.SpaceEvenly
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -45,7 +44,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
-import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.PermissionsRequired
@@ -55,12 +53,12 @@ import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.LatLng
-import com.google.android.libraries.maps.model.MapStyleOptions
 import com.google.android.libraries.maps.model.MarkerOptions
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.home.UiState
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
@@ -104,7 +102,7 @@ fun Map(
     }
 
     val mapLayersSelection = remember { mutableStateOf(false) }
-    var mapType by remember { mutableStateOf(MapTypes.roadmap) }
+    var mapType = remember { mutableStateOf(MapTypes.roadmap) }
 
     val currentPosition = remember {
         mutableStateOf<LatLng?>(null)
@@ -331,63 +329,13 @@ fun Map(
                                         horizontalArrangement = Arrangement.SpaceEvenly,
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        //roadmap button
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(70.dp)) {
-                                            IconToggleButton(
-                                                onCheckedChange = { if (it) mapType = MapTypes.roadmap },
-                                                checked = mapType == MapTypes.roadmap,
-                                                modifier = if (mapType == MapTypes.roadmap) Modifier
-                                                    .size(70.dp)
-                                                    .border(width = 2.dp, color = Color.Blue, shape = RoundedCornerShape(15.dp)) else Modifier.size(70.dp)
-                                            ) {
-                                                Image(painterResource(R.drawable.ic_map_default), "",
-                                                    modifier = Modifier
-                                                        .padding(4.dp)
-                                                        .fillMaxSize(),
-                                                    contentScale = ContentScale.Crop)
-                                            }
-                                            Text(text = "По умолчанию", fontSize = 12.sp, overflow = TextOverflow.Ellipsis, maxLines = 1)
-                                        }
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(70.dp)) {
-                                            IconToggleButton(
-                                                onCheckedChange = { if (it) mapType = MapTypes.satellite },
-                                                checked = mapType == MapTypes.satellite,
-                                                modifier = if (mapType == MapTypes.satellite) Modifier
-                                                    .size(70.dp)
-                                                    .border(
-                                                        width = 2.dp,
-                                                        color = Color.Blue,
-                                                        shape = RoundedCornerShape(15.dp)
-                                                    ) else Modifier.size(70.dp)
-                                            ) {
-                                                Image(painterResource(R.drawable.ic_map_satellite), "",
-                                                    modifier = Modifier
-                                                        .padding(4.dp)
-                                                        .fillMaxSize(),
-                                                    contentScale = ContentScale.Crop)
-                                            }
-                                            Text(text = "Спутник", fontSize = 12.sp)
-                                        }
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(70.dp)) {
-                                            IconToggleButton(
-                                                onCheckedChange = { if (it) mapType = MapTypes.terrain },
-                                                checked = mapType == MapTypes.terrain,
-                                                modifier = if (mapType == MapTypes.terrain) Modifier
-                                                    .size(70.dp)
-                                                    .border(
-                                                        width = 2.dp,
-                                                        color = Color.Blue,
-                                                        shape = RoundedCornerShape(15.dp)
-                                                    ) else Modifier.size(70.dp)
-                                            ) {
-                                                Image(painterResource(R.drawable.ic_map_terrain), "",
-                                                    modifier = Modifier
-                                                        .padding(4.dp)
-                                                        .fillMaxSize(),
-                                                    contentScale = ContentScale.Crop)
-                                            }
-                                            Text(text = "Рельеф", fontSize = 12.sp)
-                                        }
+                                        MapLayerItem(mapType, layer = MapTypes.roadmap,
+                                            painter = painterResource(R.drawable.ic_map_default), name = "По умолчанию")
+                                        MapLayerItem(mapType, layer = MapTypes.satellite,
+                                            painter = painterResource(R.drawable.ic_map_satellite), name = "Спутник")
+                                        MapLayerItem(mapType, layer = MapTypes.terrain,
+                                            painter = painterResource(R.drawable.ic_map_terrain), name = "Рельеф")
+
                                         /*LaunchedEffect(mapType) {
                                             val googleMap = mapView.awaitMap()
                                             googleMap.setMapStyle(MapStyleOptions(mapType))
@@ -453,10 +401,34 @@ fun Map(
                     cameraMoveCallback = { state ->
                         cameraMoveState = state
                     },
-                    mapType = mapType
+                    mapType = mapType.value
                 )
             }
         }
+    }
+}
+
+@Composable
+fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(70.dp)) {
+        IconToggleButton(
+            onCheckedChange = { if (it) mapType.value = layer },
+            checked = mapType.value == layer,
+            modifier = if (mapType.value == layer) Modifier
+                .size(70.dp)
+                .border(
+                    width = 2.dp,
+                    color = Color.Blue,
+                    shape = RoundedCornerShape(15.dp)
+                ) else Modifier.size(70.dp)
+        ) {
+            Image(painter, layer.toString(),
+                modifier = Modifier
+                    .padding(4.dp)
+                    .fillMaxSize(),
+                contentScale = ContentScale.Crop)
+        }
+        Text(text = name, fontSize = 12.sp, overflow = TextOverflow.Ellipsis, maxLines = 1)
     }
 }
 
@@ -1182,27 +1154,3 @@ private fun getMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
             else -> throw IllegalStateException()
         }
     }
-
-sealed class CameraMoveState {
-    object MoveStart : CameraMoveState()
-    object MoveFinish : CameraMoveState()
-}
-
-val locationPermissionsList = listOf(
-    Manifest.permission.ACCESS_FINE_LOCATION,
-    Manifest.permission.ACCESS_COARSE_LOCATION
-)
-
-object MapTypes {
-    const val roadmap = GoogleMap.MAP_TYPE_NORMAL
-    const val satellite = GoogleMap.MAP_TYPE_SATELLITE
-    const val hybrid = GoogleMap.MAP_TYPE_HYBRID
-    const val terrain = GoogleMap.MAP_TYPE_TERRAIN
-}
-
-const val DEFAULT_ZOOM = 15f
-
-
-
-
-
