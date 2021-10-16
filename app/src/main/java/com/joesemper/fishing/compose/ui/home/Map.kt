@@ -10,9 +10,7 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement.SpaceEvenly
 import androidx.compose.foundation.shape.CircleShape
@@ -26,6 +24,7 @@ import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -35,7 +34,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -224,7 +225,7 @@ fun Map(
         ) {
             ConstraintLayout(modifier = Modifier.fillMaxSize()) {
                 val (permissionDialog, mapLayout, myLocationButton, mapLayersButton,
-                    mapLayersView, pointer, addMarkerFragment) = createRefs()
+                    mapLayersBackground, mapLayersView, pointer, addMarkerFragment) = createRefs()
 
                 mapUiState = when {
 
@@ -237,10 +238,12 @@ fun Map(
                 }
 
                 MyLocationButton(coroutineScope, mapView, lastKnownLocation.value,
-                    modifier = Modifier.size(40.dp).constrainAs(myLocationButton) {
-                        top.linkTo(parent.top, 16.dp)
-                        absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-                    })
+                    modifier = Modifier
+                        .size(40.dp)
+                        .constrainAs(myLocationButton) {
+                            top.linkTo(parent.top, 16.dp)
+                            absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+                        })
 
                 AnimatedVisibility(!mapLayersSelection.value,
                     modifier = Modifier.constrainAs(mapLayersButton) {
@@ -284,14 +287,20 @@ fun Map(
                             }
                         }*//*
                     }*/
-                AnimatedVisibility(mapLayersSelection.value,
-                    modifier = Modifier.constrainAs(mapLayersView) {
-                        top.linkTo(parent.top, 16.dp)
-                        absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                    }) {
-                    Card(
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.width(250.dp).wrapContentHeight()/*pointerInput(Unit) {
+                if (mapLayersSelection.value) Surface(modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(0f)
+                    .clickable { mapLayersSelection.value = false }, color = Color.White) {}
+                        AnimatedVisibility(mapLayersSelection.value,
+                            modifier = Modifier.constrainAs(mapLayersView) {
+                                top.linkTo(parent.top, 16.dp)
+                                absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                            }) {
+                            Card(
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier
+                                    .width(250.dp)
+                                    .wrapContentHeight()/*pointerInput(Unit) {
                             detectTapGestures(
                                 onPress = { *//* Called when the gesture starts *//* },
                                 onDoubleTap = { *//* Called on Double Tap *//* },
@@ -299,78 +308,109 @@ fun Map(
                                 onTap = { *//* Called on Tap *//* }
                             )
                         }*/
-                    ) {
-                        Column(modifier = Modifier.padding(2.dp).padding(bottom = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("Тип карты")
-                                Card(shape = CircleShape, modifier = Modifier.size(20.dp)) {
-                                    IconButton(onClick = { mapLayersSelection.value = false }) {
-                                        Icon(Icons.Default.Close, "")
-                                    }
-                                }
-                            }
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceEvenly,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                //roadmap button
-                                Box(modifier = Modifier.size(70.dp)) {
-                                    IconToggleButton(
-                                        onCheckedChange = { if (it) mapType = MapTypes.roadmap },
-                                        checked = mapType == MapTypes.roadmap,
-                                        modifier = Modifier.fillMaxSize()
+                                Column(modifier = Modifier
+                                    .padding(2.dp)
+                                    .padding(bottom = 8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(8.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
-                                        Image(painterResource(R.drawable.ic_map_default), "",
-                                            modifier = Modifier.fillMaxSize(),
-                                            contentScale = ContentScale.Crop)
+                                        Text("Тип карты")
+                                        Card(shape = CircleShape, modifier = Modifier.size(20.dp)) {
+                                            IconButton(onClick = { mapLayersSelection.value = false }) {
+                                                Icon(Icons.Default.Close, "")
+                                            }
+                                        }
                                     }
-                                }
-                                Box(modifier = Modifier.size(70.dp)) {
-                                    IconToggleButton(
-                                        onCheckedChange = { if (it) mapType = MapTypes.satellite },
-                                        checked = mapType == MapTypes.satellite,
-                                        modifier = Modifier.fillMaxSize()
+                                    Row(
+                                        horizontalArrangement = Arrangement.SpaceEvenly,
+                                        modifier = Modifier.fillMaxWidth()
                                     ) {
-                                        Image(painterResource(R.drawable.ic_map_satellite), "",
-                                            modifier = Modifier.fillMaxSize(),
-                                            contentScale = ContentScale.Crop)
+                                        //roadmap button
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(70.dp)) {
+                                            IconToggleButton(
+                                                onCheckedChange = { if (it) mapType = MapTypes.roadmap },
+                                                checked = mapType == MapTypes.roadmap,
+                                                modifier = if (mapType == MapTypes.roadmap) Modifier
+                                                    .size(70.dp)
+                                                    .border(width = 2.dp, color = Color.Blue, shape = RoundedCornerShape(15.dp)) else Modifier.size(70.dp)
+                                            ) {
+                                                Image(painterResource(R.drawable.ic_map_default), "",
+                                                    modifier = Modifier
+                                                        .padding(4.dp)
+                                                        .fillMaxSize(),
+                                                    contentScale = ContentScale.Crop)
+                                            }
+                                            Text(text = "По умолчанию", fontSize = 12.sp, overflow = TextOverflow.Ellipsis, maxLines = 1)
+                                        }
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(70.dp)) {
+                                            IconToggleButton(
+                                                onCheckedChange = { if (it) mapType = MapTypes.satellite },
+                                                checked = mapType == MapTypes.satellite,
+                                                modifier = if (mapType == MapTypes.satellite) Modifier
+                                                    .size(70.dp)
+                                                    .border(
+                                                        width = 2.dp,
+                                                        color = Color.Blue,
+                                                        shape = RoundedCornerShape(15.dp)
+                                                    ) else Modifier.size(70.dp)
+                                            ) {
+                                                Image(painterResource(R.drawable.ic_map_satellite), "",
+                                                    modifier = Modifier
+                                                        .padding(4.dp)
+                                                        .fillMaxSize(),
+                                                    contentScale = ContentScale.Crop)
+                                            }
+                                            Text(text = "Спутник", fontSize = 12.sp)
+                                        }
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(70.dp)) {
+                                            IconToggleButton(
+                                                onCheckedChange = { if (it) mapType = MapTypes.terrain },
+                                                checked = mapType == MapTypes.terrain,
+                                                modifier = if (mapType == MapTypes.terrain) Modifier
+                                                    .size(70.dp)
+                                                    .border(
+                                                        width = 2.dp,
+                                                        color = Color.Blue,
+                                                        shape = RoundedCornerShape(15.dp)
+                                                    ) else Modifier.size(70.dp)
+                                            ) {
+                                                Image(painterResource(R.drawable.ic_map_terrain), "",
+                                                    modifier = Modifier
+                                                        .padding(4.dp)
+                                                        .fillMaxSize(),
+                                                    contentScale = ContentScale.Crop)
+                                            }
+                                            Text(text = "Рельеф", fontSize = 12.sp)
+                                        }
+                                        /*LaunchedEffect(mapType) {
+                                            val googleMap = mapView.awaitMap()
+                                            googleMap.setMapStyle(MapStyleOptions(mapType))
+                                        }*/
                                     }
-                                }
-                                Box(modifier = Modifier.size(70.dp)) {
-                                    IconToggleButton(
-                                        onCheckedChange = { if (it) mapType = MapTypes.terrain },
-                                        checked = mapType == MapTypes.terrain,
-                                        modifier = Modifier.fillMaxSize()
-                                    ) {
-                                        Image(painterResource(R.drawable.ic_map_terrain), "",
-                                            modifier = Modifier.fillMaxSize(),
-                                            contentScale = ContentScale.Crop)
-                                    }
-                                }
-                                /*LaunchedEffect(mapType) {
-                                    val googleMap = mapView.awaitMap()
-                                    googleMap.setMapStyle(MapStyleOptions(mapType))
-                                }*/
-                            }
                         }
                     }
                 }
 
 
 
+
                 if (mapUiState == MapUiState.PlaceSelectMode) {
                     DialogOnPlaceChoosing(
                         context, cameraMoveState, mapView, currentPosition,
-                        modifier = Modifier.constrainAs(addMarkerFragment) {
-                            top.linkTo(parent.top, 16.dp)
-                            absoluteLeft.linkTo(parent.absoluteLeft, 72.dp)
-                            absoluteRight.linkTo(parent.absoluteRight, 72.dp)
-                        }.requiredWidth(240.dp).wrapContentSize()
+                        modifier = Modifier
+                            .constrainAs(addMarkerFragment) {
+                                top.linkTo(parent.top, 16.dp)
+                                absoluteLeft.linkTo(parent.absoluteLeft, 72.dp)
+                                absoluteRight.linkTo(parent.absoluteRight, 72.dp)
+                            }
+                            .requiredWidth(240.dp)
+                            .wrapContentSize()
                     )
                     PointerIcon(modifier = Modifier.constrainAs(pointer) {
                         top.linkTo(parent.top)
@@ -428,7 +468,9 @@ fun MyLocationButton(
     modifier: Modifier
 ) {
     Card(shape = CircleShape, modifier = modifier) {
-        IconButton(modifier = Modifier.padding(8.dp).fillMaxSize(),
+        IconButton(modifier = Modifier
+            .padding(8.dp)
+            .fillMaxSize(),
             onClick = { moveCameraToLocation(coroutineScope, mapView, lastKnownLocation) }) {
             Icon(Icons.Default.MyLocation, stringResource(R.string.my_location))
         }
@@ -438,7 +480,9 @@ fun MyLocationButton(
 @Composable
 fun MapLayersButton(layersSelectionMode: MutableState<Boolean>, modifier: Modifier) {
     Card(shape = CircleShape, modifier = modifier) {
-        IconButton(modifier = Modifier.padding(8.dp).fillMaxSize(),
+        IconButton(modifier = Modifier
+            .padding(8.dp)
+            .fillMaxSize(),
             onClick = { layersSelectionMode.value = true }) {
             Icon(Icons.Default.Apps, stringResource(R.string.layers))
         }
@@ -469,12 +513,14 @@ fun BottomSheetAddMarkerDialog(
         uiState?.let {
             when (it) {
                 UiState.InProgress -> {
-                    Surface(color = Color.Gray, modifier = Modifier.constrainAs(progress) {
-                        top.linkTo(parent.top)
-                        absoluteLeft.linkTo(parent.absoluteLeft)
-                        absoluteRight.linkTo(parent.absoluteRight)
-                        bottom.linkTo(parent.bottom)
-                    }.size(100.dp)) {
+                    Surface(color = Color.Gray, modifier = Modifier
+                        .constrainAs(progress) {
+                            top.linkTo(parent.top)
+                            absoluteLeft.linkTo(parent.absoluteLeft)
+                            absoluteRight.linkTo(parent.absoluteRight)
+                            bottom.linkTo(parent.bottom)
+                        }
+                        .size(100.dp)) {
                         FishLoading(modifier = Modifier.size(150.dp))
                     }
                 }
@@ -642,7 +688,8 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?, navController: NavController
         ConstraintLayout(
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentHeight().padding(2.dp)
+                .wrapContentHeight()
+                .padding(2.dp)
         ) {
             val (locationIcon, title, description, navigateButton, detailsButton) = createRefs()
             Icon(
@@ -868,7 +915,9 @@ fun DialogOnPlaceChoosing(
     ) {
         AnimatedVisibility(viewModel.chosenPlace.value.isNullOrEmpty()) {
             Row(
-                modifier = Modifier.wrapContentSize().padding(12.dp),
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -884,7 +933,9 @@ fun DialogOnPlaceChoosing(
                     Card(
                         elevation = 0.dp,
                         shape = RoundedCornerShape(4.dp),
-                        modifier = Modifier.wrapContentSize().shimmer(),
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .shimmer(),
                         //backgroundColor = Color.LightGray
                     ) {
                         Text("Searching...", color = Color.LightGray)
@@ -895,7 +946,9 @@ fun DialogOnPlaceChoosing(
         AnimatedVisibility(!viewModel.chosenPlace.value.isNullOrEmpty()) {
             viewModel.chosenPlace.value?.let {
                 Row(
-                    modifier = Modifier.wrapContentSize().padding(12.dp),
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .padding(12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
