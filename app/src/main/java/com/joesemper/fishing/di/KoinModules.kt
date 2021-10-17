@@ -9,7 +9,6 @@ import com.joesemper.fishing.model.repository.WeatherRepository
 import com.joesemper.fishing.ui.LoginActivity
 import com.joesemper.fishing.ui.MainActivity
 import com.joesemper.fishing.ui.SplashActivity
-import com.joesemper.fishing.ui.fragments.WeatherFragment
 import com.joesemper.fishing.utils.Logger
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -30,6 +29,17 @@ val mainActivity = module {
     scope(named<MainActivity>()) {
         viewModel { MainViewModel() }
     }
+
+    viewModel { MapViewModel(get()) }
+    viewModel { NewCatchViewModel(get(), get()) }
+    viewModel { UserViewModel(get(), get()) }
+    viewModel { NewPlaceViewModel(get()) }
+    viewModel { UserCatchViewModel(get(), get()) }
+    viewModel { WeatherViewModel(get(), get()) }
+    viewModel { UserPlaceViewModel(get(), get()) }
+    viewModel { UserCatchesViewModel(get()) }
+    viewModel { UserPlacesViewModel(get()) }
+
 }
 
 val splashScreen = module {
@@ -42,46 +52,4 @@ val loginScreen = module {
     scope(named<LoginActivity>()) {
         viewModel { LoginViewModel(get()) }
     }
-}
-
-val mapScreen = module {
-    viewModel { MapViewModel(get()) }
-}
-
-val userFragment = module {
-    viewModel { UserViewModel(get(), get()) }
-
-}
-
-val newCatchScreen = module {
-    viewModel { NewCatchViewModel(get(), get()) }
-}
-
-val newPlaceScreen = module {
-    viewModel { NewPlaceViewModel(get()) }
-}
-
-val userCatchScreen = module {
-    viewModel { UserCatchViewModel(get(), get()) }
-}
-
-val weatherScreen = module {
-    viewModel { WeatherViewModel(get(), get()) }
-}
-
-//val notesFragment = module {
-//    scope(named<NotesFragment>()) {
-//        viewModel { NotesViewModel(get()) }
-//    }
-//}
-
-val userPlaceScreen = module {
-    viewModel { UserPlaceViewModel(get(), get()) }
-}
-val catchesFragment = module {
-    viewModel { UserCatchesViewModel(get()) }
-}
-
-val placesFragment = module {
-    viewModel { UserPlacesViewModel(get()) }
 }

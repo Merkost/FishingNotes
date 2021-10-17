@@ -26,9 +26,17 @@ fun WeatherParameterItem(
     isExpanded: Boolean
 ) {
     Surface(
-        modifier = Modifier
-            .height(100.dp)
-            .width(100.dp),
+        modifier = if (isExpanded) {
+            Modifier
+                .height(100.dp)
+                .width(100.dp)
+        } else {
+            Modifier
+                .height(100.dp)
+                .wrapContentWidth()
+        },
+
+
         color = color,
         border = BorderStroke(0.1.dp, secondaryFigmaTextColor),
     ) {

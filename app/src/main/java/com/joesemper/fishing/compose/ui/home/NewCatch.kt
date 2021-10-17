@@ -4,10 +4,7 @@ import android.Manifest
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
-import android.os.FileUtils
 import android.text.format.DateUtils
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -15,16 +12,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -33,6 +27,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -43,9 +38,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
-import androidx.core.net.toFile
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
@@ -57,14 +50,15 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.model.entity.weather.WeatherForecast
+import com.joesemper.fishing.model.mappers.getMoonIconByPhase
+import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
+import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
 import com.joesemper.fishing.utils.showToast
-import id.zelory.compressor.Compressor
-import id.zelory.compressor.constraint.quality
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.getViewModel
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.*
 
@@ -95,16 +89,34 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
     val viewModel: NewCatchViewModel = getViewModel()
     val context = LocalContext.current
     val notAllFieldsFilled = stringResource(R.string.not_all_fields_are_filled)
-    place?.let { viewModel.marker.value = it; isNull = false }
+
+    var weather by remember {
+        mutableStateOf<WeatherForecast?>(null)
+    }
+
+    place?.let {
+        viewModel.marker.value = it; isNull = false
+    }
+
+    LaunchedEffect(viewModel.marker.value) {
+        viewModel.getWeather().collect {
+            weather = it
+        }
+    }
 
     Scaffold(
+        modifier = Modifier.navigationBarsWithImePadding(),
         topBar = { NewCatchAppBar(navController) },
         floatingActionButton = {
             FloatingActionButton(
-                modifier = Modifier.navigationBarsWithImePadding(),
-                onClick = { if (viewModel.isInputCorrect())
-                viewModel.createNewUserCatch(getPhotos(viewModel, context)) else showToast(context, notAllFieldsFilled) }) {
-                Icon(Icons.Filled.Done, stringResource(R.string.create))
+                onClick = {
+                    if (viewModel.isInputCorrect())
+                        viewModel.createNewUserCatch(getPhotos(viewModel, context)) else showToast(
+                        context,
+                        notAllFieldsFilled
+                    )
+                }) {
+                Icon(Icons.Filled.Done, stringResource(R.string.create), tint = Color.White)
             }
         }
     ) {
@@ -115,7 +127,6 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
             verticalArrangement = Arrangement.spacedBy(30.dp),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 12.dp)
                 .padding(horizontal = 16.dp)
                 .verticalScroll(state = scrollState, enabled = true),
         ) {
@@ -125,9 +136,13 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
 
             Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
             DateAndTime(viewModel.date, viewModel.time)
+            NewCatchWeather(weather)
+
             Photos(
                 { clicked -> /*TODO(Open photo in full screen)*/ },
                 { deleted -> viewModel.deletePhoto(deleted) })
+
+            Spacer(modifier = Modifier.padding(8.dp))
         }
     }
 }
@@ -187,19 +202,11 @@ private fun Places(label: String, viewModel: NewCatchViewModel) {
 
 
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Row(
+        SubtitleWithIcon(
             modifier = Modifier.align(Alignment.Start),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                Icons.Default.Place,
-                stringResource(R.string.place),
-                tint = primaryFigmaColor,
-                modifier = Modifier.size(30.dp)
-            )
-            Spacer(Modifier.size(8.dp))
-            Text(stringResource(R.string.place))
-        }
+            icon = R.drawable.ic_baseline_location_on_24,
+            text = stringResource(id = R.string.location)
+        )
         Row(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
                 readOnly = !isNull,
@@ -212,9 +219,11 @@ private fun Places(label: String, viewModel: NewCatchViewModel) {
                         isDropMenuOpen = true
                     }
                 },
-                modifier = Modifier.fillMaxWidth().onFocusChanged {
-                    isDropMenuOpen = it.isFocused
-                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged {
+                        isDropMenuOpen = it.isFocused
+                    },
                 label = { Text(text = label) },
                 trailingIcon = {
                     if (isNull) {
@@ -249,7 +258,10 @@ private fun Places(label: String, viewModel: NewCatchViewModel) {
 
                         })
                 },
-                isError = !isThatPlaceInList(textFieldValue, suggestions).apply { viewModel.noErrors.value = this },
+                isError = !isThatPlaceInList(
+                    textFieldValue,
+                    suggestions
+                ).apply { viewModel.noErrors.value = this },
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next
                 )
@@ -332,24 +344,15 @@ fun Fishing(
     lure: MutableState<String>
 ) {
     Column {
-        Row(
+        SubtitleWithIcon(
             modifier = Modifier.align(Alignment.Start),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Spacer(Modifier.size(5.dp))
-            Icon(
-                painterResource(R.drawable.ic_fishing_rod),
-                stringResource(R.string.fish_rod),
-                modifier = Modifier.size(30.dp),
-                tint = primaryFigmaColor
-            )
-            Spacer(Modifier.size(8.dp))
-            Text(stringResource(R.string.fishing_method))
-        }
+            icon = R.drawable.ic_fishing_rod,
+            text = stringResource(id = R.string.way_of_fishing)
+        )
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            MyTextField(rod, stringResource(R.string.fish_rod))
-            MyTextField(bite, stringResource(R.string.bait))
-            MyTextField(lure, stringResource(R.string.lure))
+            SimpleOutlinedTextField(rod, stringResource(R.string.fish_rod))
+            SimpleOutlinedTextField(bite, stringResource(R.string.bait))
+            SimpleOutlinedTextField(lure, stringResource(R.string.lure))
         }
 
     }
@@ -360,22 +363,15 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
     val viewModel: NewCatchViewModel = getViewModel()
     Column {
 
-        Row(
+        SubtitleWithIcon(
             modifier = Modifier.align(Alignment.Start),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painterResource(R.drawable.ic_fish),
-                stringResource(R.string.fish_catch),
-                tint = primaryFigmaColor,
-                modifier = Modifier.size(30.dp)
-            )
-            Spacer(Modifier.size(8.dp))
-            Text(stringResource(R.string.fish_catch))
-        }
+            icon = R.drawable.ic_fish,
+            text = stringResource(id = R.string.fish_catch)
+        )
+
         FishSpecies(viewModel.title)
 
-        MyTextField(viewModel.description, stringResource(R.string.note))
+        SimpleOutlinedTextField(viewModel.description, stringResource(R.string.note))
         Spacer(modifier = Modifier.size(2.dp))
         Row {
             Column(Modifier.weight(1F)) {
@@ -494,20 +490,13 @@ fun Photos(
     val viewModel: NewCatchViewModel = getViewModel()
     val photos = remember { viewModel.images }
     Column {
-        Row(
+
+        SubtitleWithIcon(
             modifier = Modifier.align(Alignment.Start),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Spacer(Modifier.size(5.dp))
-            Icon(
-                painterResource(R.drawable.ic_baseline_image_24),
-                stringResource(R.string.photos),
-                modifier = Modifier.size(30.dp),
-                tint = primaryFigmaColor
-            )
-            Spacer(Modifier.size(8.dp))
-            Text(stringResource(R.string.photos))
-        }
+            icon = R.drawable.ic_baseline_image_24,
+            text = stringResource(id = R.string.photos)
+        )
+
         LazyRow(modifier = Modifier.fillMaxSize()) {
             item { ItemAddPhoto() }
             items(items = photos) {
@@ -527,37 +516,43 @@ fun Photos(
 fun ItemAddPhoto() {
     val viewModel: NewCatchViewModel = getViewModel()
     val permissionState = rememberPermissionState(Manifest.permission.READ_EXTERNAL_STORAGE)
-    val addPhotoState = rememberSaveable{ mutableStateOf(false) }
-    val choosePhotoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { value ->
-        value.forEach {
-            viewModel.addPhoto(it) }
-    }
+    val addPhotoState = rememberSaveable { mutableStateOf(false) }
+    val choosePhotoLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { value ->
+            value.forEach {
+                viewModel.addPhoto(it)
+            }
+        }
     /*val takePhotoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { value ->
         viewModel.addPhoto(value.) }
     }*/
 
-    Box(
+
+    Card(
         modifier = Modifier
             .size(100.dp)
             .padding(4.dp)
+            .fillMaxSize()
+            .clip(RoundedCornerShape(5.dp))
+            .clickable { addPhotoState.value = true },
+        elevation = 8.dp,
+        border = BorderStroke(1.dp, primaryFigmaColor)
     ) {
-        Card(
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(5.dp))
-                .clickable { addPhotoState.value = true },
-            elevation = 5.dp,
-            backgroundColor = Color.LightGray
+
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
                 painterResource(R.drawable.ic_baseline_add_photo_alternate_24), //Or we can use Icons.Default.Add
                 contentDescription = Constants.ITEM_ADD_PHOTO,
-                tint = Color.White,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .align(Alignment.Center)
+                tint = secondaryFigmaTextColor,
+                modifier = Modifier.size(48.dp)
             )
+            SecondaryText(text = stringResource(id = R.string.add_photo))
         }
+
+
     }
     if (addPhotoState.value) {
         LaunchedEffect(addPhotoState) {
@@ -606,6 +601,144 @@ fun ItemPhoto(photo: Uri, clickedPhoto: (Uri) -> Unit, deletedPhoto: (Uri) -> Un
 }
 
 @Composable
+fun NewCatchWeather(weather: WeatherForecast?) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+
+        SubtitleWithIcon(
+            modifier = Modifier.align(Alignment.Start),
+            icon = R.drawable.weather_sunny,
+            text = stringResource(id = R.string.weather)
+        )
+
+        if (weather != null && weather.hourly.isNotEmpty()) {
+
+            Spacer(Modifier.size(8.dp))
+            OutlinedTextField(
+                value = weather.hourly.first().weather.first().description,
+                leadingIcon = {
+                    Icon(
+                        modifier = Modifier.size(32.dp),
+                        painter = painterResource(
+                            id = getWeatherIconByName(weather.hourly.first().weather.first().icon)
+                        ),
+                        contentDescription = "",
+                        tint = secondaryFigmaTextColor
+                    )
+                },
+                onValueChange = { },
+                label = { Text(text = "Weather") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next
+                ),
+                singleLine = true
+            )
+
+            Spacer(Modifier.size(8.dp))
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = weather.hourly.first().temperature.toString(),
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_thermometer),
+                            contentDescription = "",
+                            tint = secondaryFigmaTextColor
+                        )
+                    },
+                    trailingIcon = {
+                        Text(text = "°C")
+                    },
+                    onValueChange = { },
+                    label = { Text(text = "Temperature") },
+                    modifier = Modifier.weight(1f, true),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next
+                    ),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.padding(4.dp))
+
+                OutlinedTextField(
+                    value = weather.hourly.first().pressure.toString(),
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_gauge),
+                            contentDescription = "",
+                            tint = secondaryFigmaTextColor
+                        )
+                    },
+                    trailingIcon = {
+                        Text(text = "hPa")
+                    },
+                    onValueChange = { },
+                    label = { Text(text = "Pressure") },
+                    modifier = Modifier.weight(1f, true),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next
+                    ),
+                    singleLine = true
+                )
+            }
+
+            Spacer(Modifier.size(8.dp))
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = weather.hourly.first().windSpeed.toString(),
+                    leadingIcon = {
+                        Icon(
+                            modifier = Modifier.rotate(weather.hourly.first().windDeg.toFloat()),
+                            painter = painterResource(id = R.drawable.ic_arrow_up),
+                            contentDescription = "",
+                            tint = secondaryFigmaTextColor,
+                        )
+                    },
+                    trailingIcon = {
+                        Text(text = "m/s")
+                    },
+                    onValueChange = { },
+                    label = { Text(text = "Wind") },
+                    modifier = Modifier.weight(1f, true),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next
+                    ),
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.padding(4.dp))
+
+                OutlinedTextField(
+                    value = (weather.daily.first().moonPhase * 100).toInt().toString(),
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(
+                                id = getMoonIconByPhase(weather.daily.first().moonPhase)
+                            ),
+                            contentDescription = "",
+                            tint = secondaryFigmaTextColor
+                        )
+                    },
+                    onValueChange = { },
+                    trailingIcon = {
+                        Text(text = "%")
+                    },
+                    label = { Text(text = "Moon phase") },
+                    modifier = Modifier.weight(1f, true),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next
+                    ),
+                    singleLine = true
+                )
+            }
+        } else {
+            SecondaryText(text = "Select place to load weather")
+        }
+    }
+}
+
+@Composable
 @ExperimentalPermissionsApi
 private fun addPhoto(
     permissionState: PermissionState,
@@ -626,33 +759,14 @@ private fun addPhoto(
 
 }
 
-
-
-
-
-@Composable
-fun MyTextField(textState: MutableState<String>, label: String) {
-    var text by rememberSaveable { textState }
-    OutlinedTextField(
-        value = text,
-        onValueChange = { text = it },
-        label = { Text(text = label) },
-        modifier = Modifier.fillMaxWidth(),
-        keyboardOptions = KeyboardOptions(
-            imeAction = ImeAction.Next
-        ),
-        singleLine = true
-    )
-}
-
 @Composable
 fun DateAndTime(dateState: MutableState<String>, timeState: MutableState<String>) {
-    val dateSetState = remember { mutableStateOf(false)}
-    val timeSetState = remember { mutableStateOf(false)}
+    val dateSetState = remember { mutableStateOf(false) }
+    val timeSetState = remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    if(dateSetState.value) setDate(dateState, dateSetState, context)
-    if(timeSetState.value) setTime(timeState, timeSetState, context)
+    if (dateSetState.value) setDate(dateState, dateSetState, context)
+    if (timeSetState.value) setTime(timeState, timeSetState, context)
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         dateState.value = setInitialDate(context)
@@ -662,8 +776,8 @@ fun DateAndTime(dateState: MutableState<String>, timeState: MutableState<String>
             readOnly = true,
             modifier = Modifier
                 .fillMaxWidth()
-                /*.clickable {
-                    *//*showToast(
+            /*.clickable {
+                *//*showToast(
                         LocalContext.current,
                         stringResource(R.string.click_on_icon_to_change)
                     )*//*
@@ -700,39 +814,19 @@ fun DateAndTime(dateState: MutableState<String>, timeState: MutableState<String>
 
 @Composable
 fun NewCatchAppBar(navController: NavController) {
-    val viewModel: NewCatchViewModel = getViewModel()
-    val context = LocalContext.current
     TopAppBar(
         title = { Text(text = stringResource(R.string.new_catch)) },
         navigationIcon = {
             IconButton(onClick = { //navController.popBackStack("new_catch", inclusive = true)
-                navController.popBackStack() }) {
+                navController.popBackStack()
+            }) {
                 Icon(
                     imageVector = Icons.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.back)
                 )
             }
         },
-        actions = {
-            Row(
-                modifier = Modifier.padding(end = 3.dp),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-
-                IconButton(
-                    onClick = {
-                        if (viewModel.isInputCorrect()) viewModel.createNewUserCatch(getPhotos(viewModel, context))
-                            /*else showToast(
-                            context,
-                            stringResource(R.string.not_all_fields_are_filled)
-                        )*/
-                    },
-                    content = { Icon(Icons.Filled.Done, stringResource(R.string.ok)) }
-                )
-            }
-        },
-        elevation = 2.dp
+        elevation = 4.dp
     )
 }
 
@@ -774,6 +868,7 @@ fun LoadingDialog(loadingDialog: MutableState<Boolean>, loadingValue: MutableSta
         }
     )
 }
+
 
 private fun getPhotos(viewModel: NewCatchViewModel, context: Context): List<File> {
     val result = mutableListOf<File>()
