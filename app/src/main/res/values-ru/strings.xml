@@ -140,6 +140,7 @@
     <string name="layers">Слои</string>
     <string name="pressure">Pressure</string>
     <string name="temperature">Temperature</string>
+    <string name="wind">Wind</string>
 
 
 </resources>

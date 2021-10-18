@@ -20,6 +20,14 @@ class UserCatchMapper {
         fishingLure = newCatch.fishingLure ?: "",
         userMarkerId = newCatch.markerId,
         isPublic = newCatch.isPublic,
-        downloadPhotoLinks = photoLinks
+        downloadPhotoLinks = photoLinks,
+        placeTitle = newCatch.placeTitle,
+        weatherPrimary = newCatch.weatherPrimary,
+        weatherIcon = newCatch.weatherIcon,
+        weatherTemperature = newCatch.weatherTemperature,
+        weatherWindSpeed = newCatch.weatherWindSpeed,
+        weatherWindDeg = newCatch.weatherWindDeg,
+        weatherPressure = newCatch.weatherPressure,
+        weatherMoonPhase = newCatch.weatherMoonPhase
     )
 }

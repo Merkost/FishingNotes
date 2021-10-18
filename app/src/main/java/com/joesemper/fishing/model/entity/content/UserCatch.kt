@@ -16,6 +16,7 @@ data class UserCatch(
     val fishingBait: String = "",
     val fishingLure: String = "",
     val userMarkerId: String = "",
+    val placeTitle: String = "",
     @JvmField
     val isPublic: Boolean = false,
     val downloadPhotoLinks: List<String> = listOf(),

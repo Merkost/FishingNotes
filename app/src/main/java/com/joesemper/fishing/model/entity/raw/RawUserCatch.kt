@@ -11,7 +11,7 @@ data class RawUserCatch(
     val fishingRodType: String? = "",
     val fishingBait: String? = "",
     val fishingLure: String? = "",
-    val userMarkerId: String? = "",
+    val placeTitle: String = "",
     val markerId: String = "",
     val isPublic: Boolean = false,
     val includeWeather: Boolean = true,

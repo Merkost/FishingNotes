@@ -13,6 +13,7 @@ import com.joesemper.fishing.model.entity.raw.RawUserCatch
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.repository.UserContentRepository
 import com.joesemper.fishing.model.repository.WeatherRepository
+import com.joesemper.fishing.utils.getHoursByMilliseconds
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,7 +33,7 @@ class NewCatchViewModel(
 
     val noErrors = mutableStateOf(true)
 
-    val marker: MutableState<UserMapMarker> = mutableStateOf(UserMapMarker())
+    val marker: MutableState<UserMapMarker?> = mutableStateOf(null)
     val weather: MutableState<WeatherForecast?> = mutableStateOf(null)
 
     val fishType = mutableStateOf("")
@@ -43,17 +44,18 @@ class NewCatchViewModel(
     val rod = mutableStateOf("")
     val bite = mutableStateOf("")
     val lure = mutableStateOf("")
+    val moonPhase = mutableStateOf(0.0f)
 
     val images = mutableStateListOf<Uri>()
 
     fun getWeather() = runBlocking {
-        marker.value.run {
+        marker.value?.run {
             weatherRepository.getWeather(latitude, longitude)
         }
     }
 
     fun getHistoricalWeather() = runBlocking {
-        marker.value.run {
+        marker.value?.run {
             weatherRepository.getHistoricalWeather(latitude, longitude, (date.value / 1000))
         }
     }
@@ -71,44 +73,60 @@ class NewCatchViewModel(
     private fun addNewCatch(newCatch: RawUserCatch) {
         _uiState.value = BaseViewState.Loading(0)
         viewModelScope.launch {
-            repository.addNewCatch(marker.value.id, newCatch).collect { progress ->
-                when (progress) {
-                    is Progress.Complete -> {
-                        _uiState.value = BaseViewState.Success(progress)
-                    }
-                    is Progress.Loading -> {
-                        _uiState.value = BaseViewState.Loading(progress.percents)
-                    }
-                    is Progress.Error -> {
-                        _uiState.value =
-                            BaseViewState.Error(progress.error)
+            marker.value?.let { userMapMarker ->
+                repository.addNewCatch(userMapMarker.id, newCatch).collect { progress ->
+                    when (progress) {
+                        is Progress.Complete -> {
+                            _uiState.value = BaseViewState.Success(progress)
+                        }
+                        is Progress.Loading -> {
+                            _uiState.value = BaseViewState.Loading(progress.percents)
+                        }
+                        is Progress.Error -> {
+                            _uiState.value =
+                                BaseViewState.Error(progress.error)
+                        }
                     }
                 }
             }
+
         }
     }
 
     fun isInputCorrect(): Boolean {
-        return fishType.value.isNotBlank() && marker.value.title.isNotEmpty() && noErrors.value
+        return fishType.value.isNotBlank() && !marker.value?.title.isNullOrEmpty() && noErrors.value
     }
 
     fun createNewUserCatch(photos: List<File>): Boolean {
         if (isInputCorrect()) {
-            addNewCatch(
-                RawUserCatch(
-                    fishType = fishType.value,
-                    description = description.value,
-                    date = date.value.toLong(),
-                    fishAmount = fishAmount.value.toInt(),
-                    fishWeight = weight.value.toDouble(),
-                    fishingRodType = rod.value,
-                    fishingBait = bite.value,
-                    fishingLure = lure.value,
-                    markerId = marker.value.id,
-                    isPublic = false,
-                    photos = photos
-                )
-            )
+            marker.value?.let { userMapMarker ->
+                val hour = getHoursByMilliseconds(date.value).toInt()
+                weather.value?.let { forecast ->
+                    addNewCatch(
+                        RawUserCatch(
+                            fishType = fishType.value,
+                            description = description.value,
+                            date = date.value.toLong(),
+                            fishAmount = fishAmount.value.toInt(),
+                            fishWeight = weight.value.toDouble(),
+                            fishingRodType = rod.value,
+                            fishingBait = bite.value,
+                            fishingLure = lure.value,
+                            markerId = userMapMarker.id,
+                            placeTitle = userMapMarker.title,
+                            isPublic = false,
+                            photos = photos,
+                            weatherPrimary = forecast.hourly[hour].weather.first().description,
+                            weatherIcon = forecast.hourly[hour].weather.first().icon,
+                            weatherTemperature = forecast.hourly[hour].temperature,
+                            weatherWindSpeed = forecast.hourly[hour].windSpeed,
+                            weatherWindDeg = forecast.hourly[hour].windDeg,
+                            weatherPressure = forecast.hourly[hour].pressure,
+                            weatherMoonPhase = moonPhase.value
+                        )
+                    )
+                }
+            }
             return true
         } else return false
     }

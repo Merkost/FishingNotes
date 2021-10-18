@@ -139,6 +139,8 @@
     <string name="percent">%</string>
     <string name="pressure">Pressure</string>
     <string name="temperature">Temperature</string>
+    <string name="wind">Wind</string>
+    <string name="moon_phase">Moon phase</string>
 
 
 </resources>

@@ -11,7 +11,7 @@ import kotlin.math.pow
 import kotlin.math.roundToInt
 
 
-const val MILLISECONDS_IN_DAY = 432000000L
+const val MILLISECONDS_IN_DAY = 86400000L
 const val SECONDS_IN_DAY = 86400L
 const val MILLISECONDS_IN_SECOND = 1000L
 const val MOON_PHASE_INCREMENT_IN_DAY = 0.03f
