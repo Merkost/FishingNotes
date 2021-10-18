@@ -23,10 +23,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.compose.ui.home.MyCard
+import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.utils.getTimeByMilliseconds
 
 
 @ExperimentalAnimationApi
@@ -94,7 +95,8 @@ fun ItemCatch(catch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxHeight().width(80.dp)
+                        .fillMaxHeight()
+                        .width(80.dp)
                 ) {
                     if (catch.downloadPhotoLinks.isNullOrEmpty()) {
                         Icon(
@@ -141,7 +143,7 @@ fun ItemCatch(catch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
                     verticalArrangement = Arrangement.SpaceBetween,
                     horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxHeight()
                 ) {
-                    Text(catch.title, fontWeight = FontWeight.Bold)
+                    Text(catch.fishType, fontWeight = FontWeight.Bold)
                     Text(
                         stringResource(R.string.amount) + ": " + catch.fishAmount,
                         fontSize = 12.sp
@@ -166,7 +168,7 @@ fun ItemCatch(catch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
                 modifier = Modifier.fillMaxHeight()
             ) {
                 Text(text = catch.fishWeight.toString() + " KG", fontWeight = FontWeight.Bold)
-                Text(catch.time, color = primaryFigmaColor, fontSize = 12.sp)
+                Text(getTimeByMilliseconds(catch.date), color = primaryFigmaColor, fontSize = 12.sp)
             }
         }
     }

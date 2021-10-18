@@ -10,6 +10,7 @@ import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawUserCatch
+import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.repository.UserContentRepository
 import com.joesemper.fishing.model.repository.WeatherRepository
 import kotlinx.coroutines.flow.Flow
@@ -32,13 +33,13 @@ class NewCatchViewModel(
     val noErrors = mutableStateOf(true)
 
     val marker: MutableState<UserMapMarker> = mutableStateOf(UserMapMarker())
+    val weather: MutableState<WeatherForecast?> = mutableStateOf(null)
 
-    val title = mutableStateOf("")
+    val fishType = mutableStateOf("")
     val description = mutableStateOf("")
     val fishAmount = mutableStateOf("0")
     val weight = mutableStateOf("0")
-    val date = mutableStateOf("")
-    val time = mutableStateOf("")
+    val date = mutableStateOf(0L)
     val rod = mutableStateOf("")
     val bite = mutableStateOf("")
     val lure = mutableStateOf("")
@@ -48,6 +49,12 @@ class NewCatchViewModel(
     fun getWeather() = runBlocking {
         marker.value.run {
             weatherRepository.getWeather(latitude, longitude)
+        }
+    }
+
+    fun getHistoricalWeather() = runBlocking {
+        marker.value.run {
+            weatherRepository.getHistoricalWeather(latitude, longitude, (date.value / 1000))
         }
     }
 
@@ -82,18 +89,16 @@ class NewCatchViewModel(
     }
 
     fun isInputCorrect(): Boolean {
-        return title.value.isNotBlank() && marker.value.title.isNotEmpty() && noErrors.value
+        return fishType.value.isNotBlank() && marker.value.title.isNotEmpty() && noErrors.value
     }
 
     fun createNewUserCatch(photos: List<File>): Boolean {
         if (isInputCorrect()) {
             addNewCatch(
                 RawUserCatch(
-                    title = title.value,
+                    fishType = fishType.value,
                     description = description.value,
-                    time = time.value,
-                    date = date.value,
-                    //fishType = fish,
+                    date = date.value.toLong(),
                     fishAmount = fishAmount.value.toInt(),
                     fishWeight = weight.value.toDouble(),
                     fishingRodType = rod.value,

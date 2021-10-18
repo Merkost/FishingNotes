@@ -36,6 +36,7 @@ import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.theme.primaryFigmaBackgroundTint
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.utils.getDateByMilliseconds
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalMaterialApi
@@ -152,7 +153,8 @@ private fun EditPlaceInfo(user: User?, place: UserMapMarker) {
             verticalArrangement = Arrangement.Top,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp).padding(horizontal = 5.dp)
+                .padding(10.dp)
+                .padding(horizontal = 5.dp)
         ) {
             Row(
                 modifier = Modifier
@@ -222,7 +224,7 @@ fun ItemCatch(
                 .padding(14.dp)
         ) {
             Text(
-                text = catch.title,
+                text = catch.fishType,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp
             )
@@ -264,7 +266,7 @@ fun ItemCatch(
                             .align(Alignment.Center)
                     )
                     Text(
-                        text = catch.date,
+                        text = getDateByMilliseconds(catch.date),
                         fontSize = 12.sp,
                         modifier = Modifier
                             .padding(start = 5.dp)

@@ -55,7 +55,7 @@ import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
-import com.joesemper.fishing.utils.showToast
+import com.joesemper.fishing.utils.*
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.getViewModel
@@ -90,18 +90,24 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
     val context = LocalContext.current
     val notAllFieldsFilled = stringResource(R.string.not_all_fields_are_filled)
 
-    var weather by remember {
-        mutableStateOf<WeatherForecast?>(null)
-    }
+    viewModel.date.value = dateAndTime.timeInMillis
 
     place?.let {
         viewModel.marker.value = it; isNull = false
     }
 
-    LaunchedEffect(viewModel.marker.value) {
-        viewModel.getWeather().collect {
-            weather = it
+    LaunchedEffect(key1 = viewModel.marker.value, key2 = viewModel.date.value) {
+        if (getDateByMilliseconds(viewModel.date.value) != getDateByMilliseconds(Date().time)) {
+            viewModel.getHistoricalWeather().collect {
+                viewModel.weather.value = it
+            }
+        } else {
+            viewModel.getWeather().collect {
+                viewModel.weather.value = it
+            }
         }
+
+
     }
 
     Scaffold(
@@ -135,8 +141,8 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
             FishAndWeight(viewModel.fishAmount, viewModel.weight)
 
             Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
-            DateAndTime(viewModel.date, viewModel.time)
-            NewCatchWeather(weather)
+            DateAndTime(viewModel.date)
+            NewCatchWeather(viewModel.weather.value)
 
             Photos(
                 { clicked -> /*TODO(Open photo in full screen)*/ },
@@ -369,7 +375,7 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
             text = stringResource(id = R.string.fish_catch)
         )
 
-        FishSpecies(viewModel.title)
+        FishSpecies(viewModel.fishType)
 
         SimpleOutlinedTextField(viewModel.description, stringResource(R.string.note))
         Spacer(modifier = Modifier.size(2.dp))
@@ -602,6 +608,7 @@ fun ItemPhoto(photo: Uri, clickedPhoto: (Uri) -> Unit, deletedPhoto: (Uri) -> Un
 
 @Composable
 fun NewCatchWeather(weather: WeatherForecast?) {
+
     Column(modifier = Modifier.fillMaxWidth()) {
 
         SubtitleWithIcon(
@@ -612,128 +619,155 @@ fun NewCatchWeather(weather: WeatherForecast?) {
 
         if (weather != null && weather.hourly.isNotEmpty()) {
 
-            Spacer(Modifier.size(8.dp))
-            OutlinedTextField(
-                value = weather.hourly.first().weather.first().description,
-                leadingIcon = {
-                    Icon(
-                        modifier = Modifier.size(32.dp),
-                        painter = painterResource(
-                            id = getWeatherIconByName(weather.hourly.first().weather.first().icon)
-                        ),
-                        contentDescription = "",
-                        tint = secondaryFigmaTextColor
-                    )
-                },
-                onValueChange = { },
-                label = { Text(text = "Weather") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next
-                ),
-                singleLine = true
-            )
+            val currentMoonPhase = remember {
+                weather.daily.first().moonPhase
+            }
 
-            Spacer(Modifier.size(8.dp))
-
-            Row(modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(
-                    value = weather.hourly.first().temperature.toString(),
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_thermometer),
-                            contentDescription = "",
-                            tint = secondaryFigmaTextColor
-                        )
-                    },
-                    trailingIcon = {
-                        Text(text = "°C")
-                    },
-                    onValueChange = { },
-                    label = { Text(text = "Temperature") },
-                    modifier = Modifier.weight(1f, true),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next
-                    ),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.padding(4.dp))
-
-                OutlinedTextField(
-                    value = weather.hourly.first().pressure.toString(),
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_gauge),
-                            contentDescription = "",
-                            tint = secondaryFigmaTextColor
-                        )
-                    },
-                    trailingIcon = {
-                        Text(text = "hPa")
-                    },
-                    onValueChange = { },
-                    label = { Text(text = "Pressure") },
-                    modifier = Modifier.weight(1f, true),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next
-                    ),
-                    singleLine = true
+            val moonPhase = remember(weather) {
+                calcMoonPhase(
+                    currentMoonPhase,
+                    Date().time / MILLISECONDS_IN_SECOND,
+                    weather.hourly.first().date
                 )
             }
 
-            Spacer(Modifier.size(8.dp))
+            val selectedHour = remember(dateAndTime.timeInMillis) {
+                mutableStateOf(getHoursByMilliseconds(dateAndTime.timeInMillis).toInt())
+            }
 
-            Row(modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(
-                    value = weather.hourly.first().windSpeed.toString(),
-                    leadingIcon = {
-                        Icon(
-                            modifier = Modifier.rotate(weather.hourly.first().windDeg.toFloat()),
-                            painter = painterResource(id = R.drawable.ic_arrow_up),
-                            contentDescription = "",
-                            tint = secondaryFigmaTextColor,
-                        )
-                    },
-                    trailingIcon = {
-                        Text(text = "m/s")
-                    },
-                    onValueChange = { },
-                    label = { Text(text = "Wind") },
-                    modifier = Modifier.weight(1f, true),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next
-                    ),
-                    singleLine = true
-                )
+            Crossfade(targetState = weather) { weatherForecast ->
+                Column() {
+                    Spacer(Modifier.size(8.dp))
+                    OutlinedTextField(
+                        value = weatherForecast.hourly[selectedHour.value].weather.first().description,
+                        leadingIcon = {
+                            Icon(
+                                modifier = Modifier.size(32.dp),
+                                painter = painterResource(
+                                    id = getWeatherIconByName(weatherForecast.hourly.first().weather.first().icon)
+                                ),
+                                contentDescription = "",
+                                tint = secondaryFigmaTextColor
+                            )
+                        },
+                        onValueChange = { },
+                        label = { Text(text = stringResource(id = R.string.weather)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Next
+                        ),
+                        singleLine = true
+                    )
 
-                Spacer(modifier = Modifier.padding(4.dp))
+                    Spacer(Modifier.size(8.dp))
 
-                OutlinedTextField(
-                    value = (weather.daily.first().moonPhase * 100).toInt().toString(),
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(
-                                id = getMoonIconByPhase(weather.daily.first().moonPhase)
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedTextField(
+                            value = weatherForecast.hourly[selectedHour.value].temperature.toString(),
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_thermometer),
+                                    contentDescription = "",
+                                    tint = secondaryFigmaTextColor
+                                )
+                            },
+                            trailingIcon = {
+                                Text(text = stringResource(R.string.celsius))
+                            },
+                            onValueChange = { },
+                            label = { Text(text = stringResource(R.string.temperature)) },
+                            modifier = Modifier.weight(1f, true),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Next
                             ),
-                            contentDescription = "",
-                            tint = secondaryFigmaTextColor
+                            singleLine = true
                         )
-                    },
-                    onValueChange = { },
-                    trailingIcon = {
-                        Text(text = "%")
-                    },
-                    label = { Text(text = "Moon phase") },
-                    modifier = Modifier.weight(1f, true),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next
-                    ),
-                    singleLine = true
-                )
+
+                        Spacer(modifier = Modifier.padding(4.dp))
+
+                        OutlinedTextField(
+                            value = hPaToMmHg(weatherForecast.hourly[selectedHour.value].pressure).toString(),
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_gauge),
+                                    contentDescription = "",
+                                    tint = secondaryFigmaTextColor
+                                )
+                            },
+                            trailingIcon = {
+                                Text(
+                                    modifier = Modifier.padding(horizontal = 4.dp),
+                                    text = stringResource(R.string.pressure_units)
+                                )
+                            },
+                            onValueChange = { },
+                            label = { Text(text = stringResource(R.string.pressure)) },
+                            modifier = Modifier.weight(1f, true),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Next
+                            ),
+                            singleLine = true
+                        )
+                    }
+
+                    Spacer(Modifier.size(8.dp))
+
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedTextField(
+                            value = weatherForecast.hourly[selectedHour.value].windSpeed.toString(),
+                            leadingIcon = {
+                                Icon(
+                                    modifier = Modifier.rotate(weatherForecast.hourly[selectedHour.value].windDeg.toFloat()),
+                                    painter = painterResource(id = R.drawable.ic_arrow_up),
+                                    contentDescription = "",
+                                    tint = secondaryFigmaTextColor,
+                                )
+                            },
+                            trailingIcon = {
+                                Text(text = stringResource(R.string.wind_speed_units))
+                            },
+                            onValueChange = { },
+                            label = { Text(text = "Wind") },
+                            modifier = Modifier.weight(1f, true),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Next
+                            ),
+                            singleLine = true
+                        )
+
+                        Spacer(modifier = Modifier.padding(4.dp))
+
+                        OutlinedTextField(
+                            value = (moonPhase * 100).toInt().toString(),
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(
+                                        id = getMoonIconByPhase(moonPhase)
+                                    ),
+                                    contentDescription = "",
+                                    tint = secondaryFigmaTextColor
+                                )
+                            },
+                            onValueChange = { },
+                            trailingIcon = {
+                                Text(text = "%")
+                            },
+                            label = { Text(text = "Moon phase") },
+                            modifier = Modifier.weight(1f, true),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Next
+                            ),
+                            singleLine = true
+                        )
+                    }
+                }
+
             }
         } else {
-            SecondaryText(text = "Select place to load weather")
+            SecondaryText(
+                modifier = Modifier.padding(vertical = 8.dp),
+                text = "Select place to load weather"
+            )
         }
     }
 }
@@ -760,17 +794,16 @@ private fun addPhoto(
 }
 
 @Composable
-fun DateAndTime(dateState: MutableState<String>, timeState: MutableState<String>) {
+fun DateAndTime(date: MutableState<Long>) {
     val dateSetState = remember { mutableStateOf(false) }
     val timeSetState = remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    if (dateSetState.value) setDate(dateState, dateSetState, context)
-    if (timeSetState.value) setTime(timeState, timeSetState, context)
+    if (dateSetState.value) DatePicker(date, dateSetState, context)
+    if (timeSetState.value) TimePicker(date, timeSetState, context)
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        dateState.value = setInitialDate(context)
-        OutlinedTextField(value = dateState.value,
+        OutlinedTextField(value = getDateByMilliseconds(date.value),
             onValueChange = {},
             label = { Text(text = stringResource(R.string.date)) },
             readOnly = true,
@@ -788,8 +821,8 @@ fun DateAndTime(dateState: MutableState<String>, timeState: MutableState<String>
                     contentDescription = stringResource(R.string.date),
                     modifier = Modifier.clickable { dateSetState.value = true })
             })
-        timeState.value = setInitialTime(context)
-        OutlinedTextField(value = timeState.value,
+        OutlinedTextField(
+            value = getTimeByMilliseconds(date.value),
             onValueChange = {},
             label = { Text(text = stringResource(R.string.time)) },
             readOnly = true,
@@ -940,17 +973,17 @@ private fun getPhotoListener() =
         .setSelectMaxCount(10)*/
 
 @Composable
-private fun setTime(
-    timeState: MutableState<String>,
+private fun TimePicker(
+    date: MutableState<Long>,
     timeSetState: MutableState<Boolean>,
     context: Context
 ) {
     TimePickerDialog(
         context,
-        TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
+        TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
             dateAndTime.set(Calendar.HOUR_OF_DAY, hourOfDay)
             dateAndTime.set(Calendar.MINUTE, minute)
-            timeState.value = setInitialTime(context)
+            date.value = dateAndTime.timeInMillis
         },
         dateAndTime.get(Calendar.HOUR_OF_DAY),
         dateAndTime.get(Calendar.MINUTE), true
@@ -959,32 +992,33 @@ private fun setTime(
 }
 
 
-private fun setInitialTime(context: Context): String =
-    DateUtils.formatDateTime(
-        context,
-        dateAndTime.timeInMillis,
-        DateUtils.FORMAT_SHOW_TIME
-    )
+//private fun setInitialTime(context: Context): String =
+//    DateUtils.formatDateTime(
+//        context,
+//        dateAndTime.timeInMillis,
+//        DateUtils.FORMAT_SHOW_TIME
+//    )
 
 @Composable
-private fun setDate(
-    dateState: MutableState<String>,
+private fun DatePicker(
+    date: MutableState<Long>,
     dateSetState: MutableState<Boolean>,
     context: Context
 ) {
     DatePickerDialog(
         context,
-        DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
+        DatePickerDialog.OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
             dateAndTime.set(Calendar.YEAR, year)
             dateAndTime.set(Calendar.MONTH, monthOfYear)
             dateAndTime.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-            dateState.value = setInitialDate(context)
+            date.value = dateAndTime.timeInMillis
         },
         dateAndTime.get(Calendar.YEAR),
         dateAndTime.get(Calendar.MONTH),
         dateAndTime.get(Calendar.DAY_OF_MONTH)
     ).apply {
         datePicker.maxDate = Date().time
+        datePicker.minDate = Date().time - MILLISECONDS_IN_DAY
         show()
     }
     //dialog.datePicker.maxDate = Date().time

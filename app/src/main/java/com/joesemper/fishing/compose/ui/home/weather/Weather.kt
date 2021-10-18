@@ -20,8 +20,8 @@ import com.google.accompanist.pager.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.getCurrentLocation
-import com.joesemper.fishing.compose.ui.home.locationPermissionsList
+import com.joesemper.fishing.compose.ui.home.map.getCurrentLocation
+import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
 import com.joesemper.fishing.compose.ui.home.notes.TabItem
 import com.joesemper.fishing.domain.WeatherViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -162,12 +162,10 @@ fun Weather(
                 .fillMaxWidth()
         ) {
 
-            if (currentWeather != null) {
-                WeatherForecastLayout(navController, currentWeather!!)
+            if (currentWeather.value != null) {
+                WeatherForecastLayout(navController, currentWeather.value!!)
             }
-
         }
-
     }
 }
 

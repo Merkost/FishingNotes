@@ -32,6 +32,8 @@ import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.ui.theme.primaryFigmaTextColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
+import com.joesemper.fishing.utils.getDateByMilliseconds
+import com.joesemper.fishing.utils.getTimeByMilliseconds
 
 @Composable
 fun MyCardNoPadding(content: @Composable () -> Unit) {
@@ -145,7 +147,7 @@ fun CatchInfo(catch: UserCatch, user: User?) {
                     .height(50.dp)
             ) {
                 Text(
-                    catch.title,
+                    catch.fishType,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
@@ -162,8 +164,14 @@ fun CatchInfo(catch: UserCatch, user: User?) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(catch.time, fontSize = MaterialTheme.typography.caption.fontSize)
-                Text(catch.date, fontSize = MaterialTheme.typography.caption.fontSize)
+                Text(
+                    getTimeByMilliseconds(catch.date),
+                    fontSize = MaterialTheme.typography.caption.fontSize
+                )
+                Text(
+                    getDateByMilliseconds(catch.date),
+                    fontSize = MaterialTheme.typography.caption.fontSize
+                )
             }
         }
     }

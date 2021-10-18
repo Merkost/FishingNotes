@@ -138,6 +138,8 @@
     <string name="percent">%</string>
     <string name="my_location">Моё местоположение</string>
     <string name="layers">Слои</string>
+    <string name="pressure">Pressure</string>
+    <string name="temperature">Temperature</string>
 
 
 </resources>

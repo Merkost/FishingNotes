@@ -137,6 +137,8 @@
     <string name="pressure_units">mmHg</string>
     <string name="wind_speed_units">m/s</string>
     <string name="percent">%</string>
+    <string name="pressure">Pressure</string>
+    <string name="temperature">Temperature</string>
 
 
 </resources>

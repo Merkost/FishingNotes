@@ -11,11 +11,16 @@ import kotlin.math.pow
 import kotlin.math.roundToInt
 
 
+const val MILLISECONDS_IN_DAY = 432000000L
+const val SECONDS_IN_DAY = 86400L
+const val MILLISECONDS_IN_SECOND = 1000L
+const val MOON_PHASE_INCREMENT_IN_DAY = 0.03f
+
 fun getNewCatchId() = getRandomString(10)
 fun getNewMarkerId() = getRandomString(15)
 fun getNewPhotoId() = getRandomString(12)
 
-fun getRandomString(length: Int) : String {
+fun getRandomString(length: Int): String {
     val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
     return (1..length)
         .map { allowedChars.random() }
@@ -29,15 +34,50 @@ fun Double.roundTo(numFractionDigits: Int): Double {
     return (this * factor).roundToInt() / factor
 }
 
+fun getDateBySeconds(ms: Long): String {
+    val sdf = SimpleDateFormat("dd.MM.yy", Locale.US)
+    val date = Date(ms * 100)
+    return sdf.format(date)
+}
+
+fun getTimeBySeconds(ms: Long): String {
+    val sdf = SimpleDateFormat("HH:mm", Locale.US)
+    val date = Date(ms * 100)
+    return sdf.format(date)
+}
+
+fun getHoursByMilliseconds(ms: Long): String {
+    val sdf = SimpleDateFormat("HH", Locale.US)
+    val date = Date(ms)
+    return sdf.format(date)
+}
+
 fun getDateByMilliseconds(ms: Long): String {
     val sdf = SimpleDateFormat("dd.MM.yy", Locale.US)
-    val date = Date(ms * 1000)
+    val date = Date(ms)
     return sdf.format(date)
+}
+
+fun getDayByMilliseconds(ms: Long): String {
+    val sdf = SimpleDateFormat("dd", Locale.US)
+    val date = Date(ms)
+    return sdf.format(date)
+}
+
+fun calcMoonPhase(currentPhase: Float, currentDate: Long, requiredDate: Long): Float {
+    var result = currentPhase
+    val dif = currentDate - requiredDate
+    val numOfDays = dif / SECONDS_IN_DAY
+    result -= (numOfDays * MOON_PHASE_INCREMENT_IN_DAY)
+    if (result < 0.0f) {
+        result += 1.0f
+    }
+    return result
 }
 
 fun getTimeByMilliseconds(ms: Long): String {
     val sdf = SimpleDateFormat("HH:mm", Locale.US)
-    val date = Date(ms * 1000)
+    val date = Date(ms)
     return sdf.format(date)
 }
 

@@ -60,7 +60,7 @@ fun CatchTopBar(navController: NavController, catch: UserCatch) {
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             maxLines = 1,
-            text = stringResource(id = R.string.user_catch) + " " + catch.date + " " + catch.time
+            text = stringResource(id = R.string.user_catch)
         )
         Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
             IconButton(onClick = { }) {
@@ -106,7 +106,7 @@ fun CatchContent(catch: UserCatch, viewModel: UserCatchViewModel) {
                         top.linkTo(parent.top)
                         absoluteLeft.linkTo(parent.absoluteLeft)
                     },
-                    text = catch.title
+                    text = catch.fishType
                 )
 
                 HeaderText(

@@ -7,10 +7,8 @@ import kotlinx.android.parcel.Parcelize
 data class UserCatch(
     val id: String = "",
     val userId: String = "",
-    val title: String = "My catch",
     val description: String = "",
-    val date: String = "",
-    val time: String = "",
+    val date: Long = 0,
     val fishType: String = "",
     val fishAmount: Int = 0,
     val fishWeight: Double = 0.0,
