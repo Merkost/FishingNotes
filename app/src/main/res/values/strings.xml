@@ -127,6 +127,8 @@
     <string name="note">Note</string>
     <string name="user_catch">Catch</string>
     <string name="cant_get_current_location">Can\'t get current location</string>
+    <string name="my_location">Моё местоположение</string>
+    <string name="layers">Слои</string>
     <string name="way_of_fishing">Way of fishing</string>
     <string name="no_rod">No rod</string>
     <string name="no_bait">No bait</string>

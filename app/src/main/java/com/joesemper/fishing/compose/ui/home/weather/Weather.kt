@@ -162,8 +162,8 @@ fun Weather(
                 .fillMaxWidth()
         ) {
 
-            if (currentWeather.value != null) {
-                WeatherForecastLayout(navController, currentWeather.value!!)
+            if (currentWeather != null) {
+                WeatherForecastLayout(navController, currentWeather!!)
             }
 
         }
