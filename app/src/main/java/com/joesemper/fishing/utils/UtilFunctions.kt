@@ -1,6 +1,7 @@
 package com.joesemper.fishing.utils
 
 import android.content.Context
+import android.net.Uri
 import android.view.View
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -9,7 +10,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.pow
 import kotlin.math.roundToInt
-
 
 const val MILLISECONDS_IN_DAY = 86400000L
 const val SECONDS_IN_DAY = 86400L
@@ -112,5 +112,8 @@ fun BottomSheetBehavior<ConstraintLayout>.collapse() {
 fun showToast(context: Context, text: String) {
     Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
 }
+
+fun readBytes(context: Context, uri: Uri): ByteArray? =
+    context.contentResolver.openInputStream(uri)?.buffered()?.use { it.readBytes() }
 
 

@@ -1,6 +1,6 @@
 package com.joesemper.fishing.model.entity.raw
 
-import java.io.File
+import android.net.Uri
 
 data class RawUserCatch(
     val description: String? = "",
@@ -15,7 +15,7 @@ data class RawUserCatch(
     val markerId: String = "",
     val isPublic: Boolean = false,
     val includeWeather: Boolean = true,
-    val photos: List<File> = listOf(),
+    val photos: List<Uri> = listOf(),
     val weatherPrimary: String = "",
     val weatherIcon: String = "",
     val weatherTemperature: Float = 0.0f,

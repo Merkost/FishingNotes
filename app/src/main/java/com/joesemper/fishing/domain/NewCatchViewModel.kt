@@ -115,7 +115,7 @@ class NewCatchViewModel(
                             markerId = userMapMarker.id,
                             placeTitle = userMapMarker.title,
                             isPublic = false,
-                            photos = photos,
+                            photos = images,
                             weatherPrimary = forecast.hourly[hour].weather.first().description,
                             weatherIcon = forecast.hourly[hour].weather.first().icon,
                             weatherTemperature = forecast.hourly[hour].temperature,

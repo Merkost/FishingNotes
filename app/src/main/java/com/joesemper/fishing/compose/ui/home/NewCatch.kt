@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
 import android.text.format.DateUtils
 import android.widget.Toast
@@ -60,7 +61,6 @@ import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.getViewModel
 import java.io.File
 import java.util.*
-
 
 //private val args: NewCatchFragmentArgs by navArgs()
 
@@ -137,17 +137,13 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
                 .verticalScroll(state = scrollState, enabled = true),
         ) {
             Places(stringResource(R.string.place), viewModel)  //Выпадающий список мест
-
             FishAndWeight(viewModel.fishAmount, viewModel.weight)
-
             Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
             DateAndTime(viewModel.date)
             NewCatchWeather(viewModel)
-
             Photos(
                 { clicked -> /*TODO(Open photo in full screen)*/ },
                 { deleted -> viewModel.deletePhoto(deleted) })
-
             Spacer(modifier = Modifier.padding(8.dp))
         }
     }
@@ -208,6 +204,8 @@ private fun Places(label: String, viewModel: NewCatchViewModel) {
 
 
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Spacer(modifier = Modifier.padding(1.dp))
+
         SubtitleWithIcon(
             modifier = Modifier.align(Alignment.Start),
             icon = R.drawable.ic_baseline_location_on_24,
@@ -783,11 +781,11 @@ private fun addPhoto(
         permissionState.hasPermission -> {
             choosePhotoLauncher.launch(arrayOf("image/*"))
             addPhotoState.value = false
-            /*getPhotoListener().showMultiImage { photos ->
-                photos.forEach { uri ->
-                    viewModel.addPhoto(uri)
-                }
-            }*/
+//            getPhotoListener().showMultiImage { photos ->
+//                photos.forEach { uri ->
+//                    viewModel.addPhoto(uri)
+//                }
+//            }
         }
     }
 
@@ -1024,6 +1022,57 @@ private fun DatePicker(
     //dialog.datePicker.maxDate = Date().time
     //ialog.show()
     dateSetState.value = false
+}
+
+@Composable
+fun RequestContentPermission() {
+    var imageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+    val context = LocalContext.current
+    val bitmap = remember {
+        mutableStateOf<Bitmap?>(null)
+    }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract =
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        imageUri = uri
+    }
+
+    Column() {
+        Button(onClick = {
+            launcher.launch("image/*")
+        }) {
+            Text(text = "Pick image")
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+
+        imageUri?.let { uri ->
+
+            val bytes = readBytes(context, uri)
+
+            bytes?.let {
+                Image(
+                    painter = rememberImagePainter(uri,
+                        builder = {
+                            crossfade(true)
+                            placeholder(R.drawable.ic_baseline_image_24)
+                        }),
+                    stringResource(R.string.place),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                )
+            }
+
+        }
+
+    }
 }
 
 
