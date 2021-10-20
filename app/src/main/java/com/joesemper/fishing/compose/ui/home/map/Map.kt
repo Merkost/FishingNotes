@@ -50,7 +50,6 @@ import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.location.LocationServices
 import com.google.android.libraries.maps.CameraUpdateFactory
-import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.LatLng
 import com.google.android.libraries.maps.model.MarkerOptions
@@ -102,7 +101,7 @@ fun Map(
     }
 
     val mapLayersSelection = remember { mutableStateOf(false) }
-    var mapType = remember { mutableStateOf(MapTypes.roadmap) }
+    val mapType = remember { mutableStateOf(MapTypes.roadmap) }
 
     val currentPosition = remember {
         mutableStateOf<LatLng?>(null)
@@ -114,9 +113,6 @@ fun Map(
 
     var mapUiState: MapUiState by remember { mutableStateOf(MapUiState.NormalMode) }
 
-    /*when (mapUiState) {
-        MapUiState.NormalMode -> progressOnAdd.value = false
-    }*/
     var cameraMoveState: CameraMoveState by remember {
         mutableStateOf(CameraMoveState.MoveFinish)
     }
@@ -293,7 +289,7 @@ fun Map(
                                 )
                                 MapLayerItem(
                                     mapType,
-                                    layer = MapTypes.satellite,
+                                    layer = MapTypes.hybrid,
                                     painter = painterResource(R.drawable.ic_map_satellite),
                                     name = "Спутник"
                                 )
@@ -377,7 +373,8 @@ fun Map(
                     cameraMoveCallback = { state ->
                         cameraMoveState = state
                     },
-                    mapType = mapType.value
+                    mapType = mapType.value,
+                    lastLocation = lastKnownLocation
                 )
             }
         }
@@ -742,7 +739,8 @@ fun GoogleMapLayout(
     permissionsState: MultiplePermissionsState,
     onMarkerClick: (marker: UserMapMarker) -> Unit,
     cameraMoveCallback: (state: CameraMoveState) -> Unit,
-    mapType: Int
+    mapType: Int,
+    lastLocation: MutableState<LatLng>
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -773,9 +771,15 @@ fun GoogleMapLayout(
             googleMap.isMyLocationEnabled = true
             googleMap.uiSettings.isMyLocationButtonEnabled = false
 
-
+            if (viewModel.lastLocation.value == null) {
+                //val lastLatLng = lastLocation.value
+                moveCameraToLocation(coroutineScope, map, lastLocation.value)
+                //viewModel.lastLocation.value = lastLocation.value
+            }
         }
     }
+
+
 
     LaunchedEffect(map) {
         val googleMap = map.awaitMap()

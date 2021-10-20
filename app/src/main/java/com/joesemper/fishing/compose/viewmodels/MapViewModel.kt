@@ -4,6 +4,7 @@ import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.maps.MapView
+import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.compose.ui.home.UiState
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.Progress
@@ -27,6 +28,8 @@ class MapViewModel(
     private val _uiState = MutableStateFlow<UiState?>(null)
     val uiState: StateFlow<UiState?>
         get() = _uiState
+
+    val lastLocation: MutableState<LatLng?> = mutableStateOf(null)
 
 
     val mapView: MutableState<MapView?> = mutableStateOf(null)
