@@ -101,7 +101,6 @@ fun Map(
     }
 
     val mapLayersSelection = remember { mutableStateOf(false) }
-    val mapType = remember { mutableStateOf(MapTypes.roadmap) }
 
     val currentPosition = remember {
         mutableStateOf<LatLng?>(null)
@@ -253,27 +252,25 @@ fun Map(
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier
                             .width(250.dp)
-                            .wrapContentHeight()/*pointerInput(Unit) {
-                            detectTapGestures(
-                                onPress = { *//* Called when the gesture starts *//* },
-                                onDoubleTap = { *//* Called on Double Tap *//* },
-                                onLongPress = { *//* Called on Long Press *//* },
-                                onTap = { *//* Called on Tap *//* }
-                            )
-                        }*/
+                            .wrapContentHeight()
                     ) {
+                        val mapType = remember { mutableStateOf(MapTypes.roadmap) }
                         Column(
-                            modifier = Modifier.padding(2.dp).padding(bottom = 8.dp),
+                            modifier = Modifier
+                                .padding(2.dp)
+                                .padding(bottom = 8.dp),
                             verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Row(
-                                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("Тип карты")
+                                Text(stringResource(R.string.map_type))
                                 Card(shape = CircleShape, modifier = Modifier.size(20.dp)) {
                                     IconButton(onClick = { mapLayersSelection.value = false }) {
-                                        Icon(Icons.Default.Close, "")
+                                        Icon(Icons.Default.Close, stringResource(R.string.close))
                                     }
                                 }
                             }
@@ -285,25 +282,25 @@ fun Map(
                                     mapType,
                                     layer = MapTypes.roadmap,
                                     painter = painterResource(R.drawable.ic_map_default),
-                                    name = "По умолчанию"
+                                    name = stringResource(R.string.roadmap)
                                 )
                                 MapLayerItem(
                                     mapType,
                                     layer = MapTypes.hybrid,
                                     painter = painterResource(R.drawable.ic_map_satellite),
-                                    name = "Спутник"
+                                    name = stringResource(R.string.satellite)
                                 )
                                 MapLayerItem(
                                     mapType,
                                     layer = MapTypes.terrain,
                                     painter = painterResource(R.drawable.ic_map_terrain),
-                                    name = "Рельеф"
+                                    name = stringResource(R.string.terrain)
                                 )
 
-                                /*LaunchedEffect(mapType) {
+                                LaunchedEffect(mapType.value) {
                                     val googleMap = mapView.awaitMap()
-                                    googleMap.setMapStyle(MapStyleOptions(mapType))
-                                }*/
+                                    googleMap.mapType = mapType.value
+                                }
                             }
                         }
                     }
@@ -370,10 +367,7 @@ fun Map(
 
                         }
                     },
-                    cameraMoveCallback = { state ->
-                        cameraMoveState = state
-                    },
-                    mapType = mapType.value,
+                    cameraMoveCallback = { state -> cameraMoveState = state },
                     lastLocation = lastKnownLocation
                 )
             }
@@ -393,7 +387,9 @@ fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name:
                     width = 2.dp,
                     color = Color.Blue,
                     shape = RoundedCornerShape(15.dp)
-                ) else Modifier.size(70.dp).padding(2.dp)
+                ) else Modifier
+                .size(70.dp)
+                .padding(2.dp)
         ) {
             Image(
                 painter, layer.toString(),
@@ -739,7 +735,6 @@ fun GoogleMapLayout(
     permissionsState: MultiplePermissionsState,
     onMarkerClick: (marker: UserMapMarker) -> Unit,
     cameraMoveCallback: (state: CameraMoveState) -> Unit,
-    mapType: Int,
     lastLocation: MutableState<LatLng>
 ) {
     val context = LocalContext.current
@@ -779,8 +774,6 @@ fun GoogleMapLayout(
         }
     }
 
-
-
     LaunchedEffect(map) {
         val googleMap = map.awaitMap()
         checkPermission(context)
@@ -790,11 +783,6 @@ fun GoogleMapLayout(
             onMarkerClick(mapMarker)
             true
         }
-    }
-
-    LaunchedEffect(mapType) {
-        val googleMap = map.awaitMap()
-        googleMap.mapType = mapType
     }
 
     /*moveCameraToLocation(
@@ -865,7 +853,9 @@ fun DialogOnPlaceChoosing(
 
     Card(
         shape = RoundedCornerShape(size = 20.dp),
-        modifier = modifier.heightIn(min = 40.dp, max = 40.dp).widthIn(max = 240.dp)
+        modifier = modifier
+            .heightIn(min = 40.dp, max = 40.dp)
+            .widthIn(max = 240.dp)
     ) {
         AnimatedVisibility(viewModel.chosenPlace.value.isNullOrEmpty()) {
             Row(

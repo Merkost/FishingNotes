@@ -130,6 +130,11 @@
     <string name="cant_get_current_location">Can\'t get current location</string>
     <string name="my_location">Моё местоположение</string>
     <string name="layers">Слои</string>
+    <string name="terrain">Рельеф</string>
+    <string name="satellite">Спутник</string>
+    <string name="roadmap">По умолчанию</string>
+    <string name="close">Закрыть</string>
+    <string name="map_type">Тип карты</string>
 
 
 </resources>
