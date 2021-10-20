@@ -4,9 +4,7 @@ import android.Manifest
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
-import android.graphics.Bitmap
 import android.net.Uri
-import android.text.format.DateUtils
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -22,7 +20,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -39,10 +40,15 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
@@ -59,10 +65,8 @@ import com.joesemper.fishing.utils.*
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.getViewModel
-import java.io.File
 import java.util.*
 
-//private val args: NewCatchFragmentArgs by navArgs()
 
 private val dateAndTime = Calendar.getInstance()
 private var isNull: Boolean = true
@@ -72,11 +76,6 @@ object Constants {
     const val ITEM_ADD_PHOTO = "ITEM_ADD_PHOTO"
     const val ITEM_PHOTO = "ITEM_PHOTO"
 }
-
-/*
-viewModel.marker.value = args.marker as UserMapMarker
-isNull = viewModel.marker.value .id.isEmpty()*/
-
 
 @ExperimentalPermissionsApi
 @ExperimentalAnimationApi
@@ -117,7 +116,7 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
             FloatingActionButton(
                 onClick = {
                     if (viewModel.isInputCorrect())
-                        viewModel.createNewUserCatch(getPhotos(viewModel, context)) else showToast(
+                        viewModel.createNewUserCatch() else showToast(
                         context,
                         notAllFieldsFilled
                     )
@@ -128,6 +127,9 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
     ) {
         SubscribeToProgress(viewModel.uiState, navController)
         val scrollState = rememberScrollState()
+        val fullScreenPhoto = remember {
+            mutableStateOf<Uri?>(null)
+        }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(30.dp),
@@ -142,9 +144,13 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
             DateAndTime(viewModel.date)
             NewCatchWeather(viewModel)
             Photos(
-                { clicked -> /*TODO(Open photo in full screen)*/ },
+                { clicked -> fullScreenPhoto.value = clicked },
                 { deleted -> viewModel.deletePhoto(deleted) })
-            Spacer(modifier = Modifier.padding(8.dp))
+            Spacer(modifier = Modifier.padding(16.dp))
+
+            fullScreenPhoto.value?.let {
+                FullScreenPhoto(fullScreenPhoto)
+            }
         }
     }
 }
@@ -152,8 +158,6 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
 @Composable
 fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>, navController: NavController) {
     val errorDialog = rememberSaveable { mutableStateOf(false) }
-    val loadingDialog = rememberSaveable { mutableStateOf(false) }
-    val loadingValue = rememberSaveable { mutableStateOf(0) }
 
     val uiState by vmuiState.collectAsState()
     when (uiState) {
@@ -164,14 +168,11 @@ fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>, navController: NavC
                     "Ваш улов успешно добавлен!",
                     Toast.LENGTH_SHORT
                 ).show()
-                //navController.popBackStack()
                 navController.popBackStack("new_catch", inclusive = true)
-                //navController.navigateUp() //to the map screen
             }
         }
         is BaseViewState.Loading -> {
-            LoadingDialog(loadingDialog, loadingValue)
-            loadingValue.value = (uiState as BaseViewState.Loading).progress ?: 0
+            LoadingDialog()
         }
         is BaseViewState.Error -> {
             ErrorDialog(errorDialog)
@@ -411,7 +412,13 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
                             .weight(1F)
                             .fillMaxHeight()
                             .align(Alignment.CenterVertically)
-                    ) { Text("-") }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_baseline_minus),
+                            tint = secondaryFigmaTextColor,
+                            contentDescription = ""
+                        )
+                    }
                     Spacer(modifier = Modifier.size(6.dp))
                     OutlinedButton(
                         onClick = {
@@ -423,7 +430,13 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
                             .weight(1F)
                             .fillMaxHeight()
                             .align(Alignment.CenterVertically)
-                    ) { Text(stringResource(R.string.plus)) }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_baseline_plus),
+                            tint = secondaryFigmaTextColor,
+                            contentDescription = ""
+                        )
+                    }
                 }
 
             }
@@ -455,28 +468,40 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
                 Row(Modifier.fillMaxWidth()) {
                     OutlinedButton(
                         onClick = {
-                            if (weightState.value.toDouble() >= 0.5 && weightState.value.isNotBlank())
+                            if (weightState.value.toDouble() >= 0.1 && weightState.value.isNotBlank())
                                 weightState.value =
-                                    ((weightState.value.toDouble() - 0.5).toString())
+                                    ((weightState.value.toDouble() - 0.1).roundTo(1).toString())
                         },
                         Modifier
                             .weight(1F)
                             .fillMaxHeight()
                             .align(Alignment.CenterVertically)
-                    ) { Text(stringResource(R.string.minus)) }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_baseline_minus),
+                            tint = secondaryFigmaTextColor,
+                            contentDescription = ""
+                        )
+                    }
                     Spacer(modifier = Modifier.size(6.dp))
                     OutlinedButton(
                         onClick = {
                             if (weightState.value.isEmpty()) weightState.value =
-                                0.5f.toString()
+                                0.1f.roundTo(1).toString()
                             else weightState.value =
-                                ((weightState.value.toDouble() + 0.5).toString())
+                                ((weightState.value.toDouble() + 0.1).roundTo(1).toString())
                         },
                         Modifier
                             .weight(1F)
                             .fillMaxHeight()
                             .align(Alignment.CenterVertically)
-                    ) { Text(stringResource(R.string.plus)) }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_baseline_plus),
+                            tint = secondaryFigmaTextColor,
+                            contentDescription = ""
+                        )
+                    }
                 }
             }
         }
@@ -527,10 +552,6 @@ fun ItemAddPhoto() {
                 viewModel.addPhoto(it)
             }
         }
-    /*val takePhotoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { value ->
-        viewModel.addPhoto(value.) }
-    }*/
-
 
     Card(
         modifier = Modifier
@@ -570,6 +591,7 @@ fun ItemAddPhoto() {
 @ExperimentalAnimationApi
 @Composable
 fun ItemPhoto(photo: Uri, clickedPhoto: (Uri) -> Unit, deletedPhoto: (Uri) -> Unit) {
+
     Crossfade(photo) { pic ->
         Box(
             modifier = Modifier
@@ -601,7 +623,20 @@ fun ItemPhoto(photo: Uri, clickedPhoto: (Uri) -> Unit, deletedPhoto: (Uri) -> Un
             }
         }
     }
+}
 
+@ExperimentalPermissionsApi
+private fun addPhoto(
+    permissionState: PermissionState,
+    addPhotoState: MutableState<Boolean>,
+    choosePhotoLauncher: ManagedActivityResultLauncher<Array<String>, MutableList<Uri>>
+) {
+    when {
+        permissionState.hasPermission -> {
+            choosePhotoLauncher.launch(arrayOf("image/*"))
+            addPhotoState.value = false
+        }
+    }
 }
 
 @Composable
@@ -637,6 +672,7 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
                 Column() {
                     Spacer(Modifier.size(8.dp))
                     OutlinedTextField(
+                        readOnly = true,
                         value = weatherForecast.hourly[hour].weather.first().description,
                         leadingIcon = {
                             Icon(
@@ -661,6 +697,7 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
 
                     Row(modifier = Modifier.fillMaxWidth()) {
                         OutlinedTextField(
+                            readOnly = true,
                             value = weatherForecast.hourly[hour].temperature.toString(),
                             leadingIcon = {
                                 Icon(
@@ -684,6 +721,7 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
                         Spacer(modifier = Modifier.padding(4.dp))
 
                         OutlinedTextField(
+                            readOnly = true,
                             value = hPaToMmHg(weatherForecast.hourly[hour].pressure).toString(),
                             leadingIcon = {
                                 Icon(
@@ -712,6 +750,7 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
 
                     Row(modifier = Modifier.fillMaxWidth()) {
                         OutlinedTextField(
+                            readOnly = true,
                             value = weatherForecast.hourly[hour].windSpeed.toString(),
                             leadingIcon = {
                                 Icon(
@@ -736,6 +775,7 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
                         Spacer(modifier = Modifier.padding(4.dp))
 
                         OutlinedTextField(
+                            readOnly = true,
                             value = (viewModel.moonPhase.value * 100).toInt().toString(),
                             leadingIcon = {
                                 Icon(
@@ -771,27 +811,6 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
 }
 
 @Composable
-@ExperimentalPermissionsApi
-private fun addPhoto(
-    permissionState: PermissionState,
-    addPhotoState: MutableState<Boolean>,
-    choosePhotoLauncher: ManagedActivityResultLauncher<Array<String>, MutableList<Uri>>
-) {
-    when {
-        permissionState.hasPermission -> {
-            choosePhotoLauncher.launch(arrayOf("image/*"))
-            addPhotoState.value = false
-//            getPhotoListener().showMultiImage { photos ->
-//                photos.forEach { uri ->
-//                    viewModel.addPhoto(uri)
-//                }
-//            }
-        }
-    }
-
-}
-
-@Composable
 fun DateAndTime(date: MutableState<Long>) {
     val dateSetState = remember { mutableStateOf(false) }
     val timeSetState = remember { mutableStateOf(false) }
@@ -806,13 +825,7 @@ fun DateAndTime(date: MutableState<Long>) {
             label = { Text(text = stringResource(R.string.date)) },
             readOnly = true,
             modifier = Modifier
-                .fillMaxWidth()
-            /*.clickable {
-                *//*showToast(
-                        LocalContext.current,
-                        stringResource(R.string.click_on_icon_to_change)
-                    )*//*
-                }*/,
+                .fillMaxWidth(),
             trailingIcon = {
                 Icon(painter = painterResource(R.drawable.ic_baseline_event_24),
                     tint = primaryFigmaColor,
@@ -825,13 +838,7 @@ fun DateAndTime(date: MutableState<Long>) {
             label = { Text(text = stringResource(R.string.time)) },
             readOnly = true,
             modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    /*showToast(
-                        LocalContext.current,
-                        stringResource(R.string.click_on_icon_to_change)
-                    )*/
-                },
+                .fillMaxWidth(),
             trailingIcon = {
                 Icon(painter = painterResource(R.drawable.ic_baseline_access_time_24),
                     tint = primaryFigmaColor,
@@ -845,19 +852,11 @@ fun DateAndTime(date: MutableState<Long>) {
 
 @Composable
 fun NewCatchAppBar(navController: NavController) {
-    TopAppBar(
-        title = { Text(text = stringResource(R.string.new_catch)) },
-        navigationIcon = {
-            IconButton(onClick = { //navController.popBackStack("new_catch", inclusive = true)
-                navController.popBackStack()
-            }) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.back)
-                )
-            }
+    DefaultAppBar(
+        onNavClick = {
+            navController.popBackStack()
         },
-        elevation = 4.dp
+        title = stringResource(R.string.back)
     )
 }
 
@@ -871,7 +870,7 @@ fun ErrorDialog(errorDialog: MutableState<Boolean>) {
         onDismissRequest = { errorDialog.value = false },
         confirmButton = {
             OutlinedButton(
-                onClick = { viewModel.createNewUserCatch(getPhotos(viewModel, context)) },
+                onClick = { viewModel.createNewUserCatch() },
                 content = { Text(stringResource(R.string.Try_again)) })
         }, dismissButton = {
             OutlinedButton(
@@ -882,93 +881,36 @@ fun ErrorDialog(errorDialog: MutableState<Boolean>) {
 }
 
 @Composable
-fun LoadingDialog(loadingDialog: MutableState<Boolean>, loadingValue: MutableState<Int>) {
-    //if (loadingDialog.value)
-    AlertDialog(
-        title = { Text("Загрузка фотографий!") },
-        text = { Text("Пожалуйста, подождите, пока ваши фотографии полностью загрузятся. Текущий прогресс: " + loadingValue.value + "%") },
-        onDismissRequest = { },
-        confirmButton = {
-            OutlinedButton(
-                onClick = { },
-                content = { Text(stringResource(R.string.Try_again)) })
-        }, dismissButton = {
-            OutlinedButton(
-                onClick = { },
-                content = { Text(stringResource(R.string.Cancel)) })
-        }
-    )
-}
-
-
-private fun getPhotos(viewModel: NewCatchViewModel, context: Context): List<File> {
-    val result = mutableListOf<File>()
-    /*val byteArrays = mutableListOf<ByteArray>()
-    viewModel.images.forEach {
-            val baos = ByteArrayOutputStream()
-            val inputStream = context.contentResolver.openInputStream(it)
-            val bmp = BitmapFactory.decodeStream(inputStream)
-            bmp.compress(Bitmap.CompressFormat.JPEG, 50, baos)
-        byteArrays.add(baos.toByteArray())
-        context.contentResolver.openInputStream(it)
-            ?.readBytes()
-            ?.let { it1 -> byteArrays.add(it1) }
-    }*/
-    return result
-    /*byteArrays.forEach {
-        result.add()
-    }*/
-    /*return runBlocking {
-        val result = mutableListOf<File>()
-        viewModel.images.forEach {
-            //val compressedImageFile = Compressor.compress(context, it.toFile()) {
-            //val inputStream = context.contentResolver.openInputStream(it)
-            //val arr = inputStream?.readBytes()
-            val compressedImageFile = Compressor.compress(context, File(getWorkingDirectory() + it.path)) {
-                quality(50)
+fun LoadingDialog() {
+    Dialog(onDismissRequest = {}) {
+        Card(modifier = Modifier.wrapContentSize()) {
+            Column(modifier = Modifier.wrapContentSize()) {
+                PrimaryText(
+                    modifier = Modifier
+                        .align(alignment = Alignment.Start)
+                        .padding(8.dp),
+                    text = stringResource(R.string.saving_new_catch)
+                )
+                val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.fish_loading))
+                LottieAnimation(
+                    modifier = Modifier.size(128.dp),
+                    composition = composition,
+                    iterations = LottieConstants.IterateForever,
+                    isPlaying = true
+                )
+                OutlinedButton(
+                    modifier = Modifier
+                        .align(alignment = Alignment.End)
+                        .padding(8.dp),
+                    onClick = { },
+                    content = { Text(stringResource(R.string.Cancel)) }
+                )
             }
-            result.add(compressedImageFile)
-
         }
-        result
-    }*/
-    //return listOf()
-}
 
-private fun getPhotos(): List<File> {
-    /*val viewModel: NewCatchViewModel = getViewModel()
-    val result = mutableListOf<ByteArray>()
-//    val job = lifecycle.coroutineScope.launchWhenStarted {
-//
-//    }
-    TODO(URI TO BYTEARRAY IN COROUTINE SCOPE)
-    viewModel.images.forEach {
-//            val baos = ByteArrayOutputStream()
-//            val inputStream = requireActivity().contentResolver.openInputStream(it)
-//            val bmp = BitmapFactory.decodeStream(inputStream)
-//            bmp.compress(Bitmap.CompressFormat.JPEG, 50, baos)
-//            result.add(baos.toByteArray())
-        requireActivity().contentResolver.openInputStream(it)
-            ?.readBytes()
-            ?.let { it1 -> result.add(it1) }
     }
-    return result*/
-    return listOf()
 }
 
-fun getWorkingDirectory(): String {
-    val directory = File("");
-    return directory.absolutePath
-}
-
-/*@Composable
-private fun getPhotoListener() =
-    TedBottomPicker.with(LocalContext.current as FragmentActivity?)
-        .setPeekHeight(1600)
-        .showTitle(false)
-        .setCompleteButtonText(stringResource(R.string.done))
-        .setEmptySelectionText(stringResource(R.string.no_photo_selected))
-        .setSelectMaxCount(10)*/
 
 @Composable
 private fun TimePicker(
@@ -989,14 +931,6 @@ private fun TimePicker(
     timeSetState.value = false
 }
 
-
-//private fun setInitialTime(context: Context): String =
-//    DateUtils.formatDateTime(
-//        context,
-//        dateAndTime.timeInMillis,
-//        DateUtils.FORMAT_SHOW_TIME
-//    )
-
 @Composable
 private fun DatePicker(
     date: MutableState<Long>,
@@ -1005,7 +939,7 @@ private fun DatePicker(
 ) {
     DatePickerDialog(
         context,
-        DatePickerDialog.OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
+        { _, year, monthOfYear, dayOfMonth ->
             dateAndTime.set(Calendar.YEAR, year)
             dateAndTime.set(Calendar.MONTH, monthOfYear)
             dateAndTime.set(Calendar.DAY_OF_MONTH, dayOfMonth)
@@ -1019,118 +953,6 @@ private fun DatePicker(
         datePicker.minDate = Date().time - (MILLISECONDS_IN_DAY * 5)
         show()
     }
-    //dialog.datePicker.maxDate = Date().time
-    //ialog.show()
     dateSetState.value = false
 }
 
-@Composable
-fun RequestContentPermission() {
-    var imageUri by remember {
-        mutableStateOf<Uri?>(null)
-    }
-    val context = LocalContext.current
-    val bitmap = remember {
-        mutableStateOf<Bitmap?>(null)
-    }
-
-    val launcher = rememberLauncherForActivityResult(
-        contract =
-        ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        imageUri = uri
-    }
-
-    Column() {
-        Button(onClick = {
-            launcher.launch("image/*")
-        }) {
-            Text(text = "Pick image")
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-
-        imageUri?.let { uri ->
-
-            val bytes = readBytes(context, uri)
-
-            bytes?.let {
-                Image(
-                    painter = rememberImagePainter(uri,
-                        builder = {
-                            crossfade(true)
-                            placeholder(R.drawable.ic_baseline_image_24)
-                        }),
-                    stringResource(R.string.place),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                )
-            }
-
-        }
-
-    }
-}
-
-
-private fun setInitialDate(context: Context) =
-    DateUtils.formatDateTime(
-        context,
-        dateAndTime.timeInMillis,
-        DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR
-    )
-
-fun commentary() {
-
-    TODO("Subscribe to ViewState")
-//    private fun subscribeOnViewModel() {
-//        lifecycleScope.launchWhenStarted {
-//            viewModel.subscribe().collect { state ->
-//                when (state) {
-//                    is BaseViewState.Loading -> binding.loading.visibility = View.VISIBLE
-//                    is BaseViewState.Success<*> -> binding.loading.visibility = View.GONE
-//                    is BaseViewState.Error -> {
-//                        binding.loading.visibility = View.GONE
-//                        Toast.makeText(context, state.error.message, Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-    //TODO("Photo convert from Uri to ByteArray in CoroutineScope")
-//        try {
-//            val bitmap = MediaStore.Images.Media.getBitmap(c.getContentResolver(), Uri.parse(paths))
-//        } catch (e: Exception) {
-//            //handle exception
-//        }
-//        return coroutineScope {
-//            val job = launch {
-//                try {
-//                    uris.forEach {
-//                        val stream = requireActivity().contentResolver.openInputStream(it)
-//                        val bitmap = BitmapDrawable(resources, stream).bitmap
-//                        val baos = ByteArrayOutputStream()
-//                        bitmap.compress(Bitmap.CompressFormat.JPEG, 20, baos)
-//                        result.add(baos.toByteArray())
-//                    }
-//                } catch (e: Throwable) {
-//                    Log.d("F", e.message, e)
-//                }
-//            }
-//            job.join()
-//            result
-//        }
-
-
-//    private fun setInitialPlaceData() {
-//        binding.etNewCatchPlaceTitle.setText(marker.title)
-//        binding.etNewCatchPlaceTitle.inputType = InputType.TYPE_NULL
-//        setCurrentCoordinates()
-//    }
-}
-
-//    }

@@ -34,6 +34,11 @@ fun Double.roundTo(numFractionDigits: Int): Double {
     return (this * factor).roundToInt() / factor
 }
 
+fun Float.roundTo(numFractionDigits: Int): Float {
+    val factor = 10.0.pow(numFractionDigits.toDouble())
+    return (this * factor).roundToInt() / factor.toFloat()
+}
+
 fun getDateBySeconds(ms: Long): String {
     val sdf = SimpleDateFormat("dd.MM.yy", Locale.US)
     val date = Date(ms * 100)

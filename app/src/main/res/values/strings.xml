@@ -141,6 +141,7 @@
     <string name="temperature">Temperature</string>
     <string name="wind">Wind</string>
     <string name="moon_phase">Moon phase</string>
+    <string name="saving_new_catch">Saving new catch</string>
 
 
 </resources>

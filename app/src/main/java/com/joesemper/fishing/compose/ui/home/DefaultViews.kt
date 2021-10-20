@@ -1,5 +1,6 @@
 package com.joesemper.fishing.compose.ui.home
 
+import android.net.Uri
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -16,24 +18,24 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.common.User
-import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.ui.theme.primaryFigmaTextColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
-import com.joesemper.fishing.utils.getDateByMilliseconds
-import com.joesemper.fishing.utils.getTimeByMilliseconds
 
 @Composable
 fun MyCardNoPadding(content: @Composable () -> Unit) {
@@ -130,54 +132,6 @@ fun PlaceInfo(user: User?, place: UserMapMarker, placeClicked: (UserMapMarker) -
 }
 
 @Composable
-fun CatchInfo(catch: UserCatch, user: User?) {
-    MyCardNoPadding {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp)
-                .padding(horizontal = 5.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-            ) {
-                Text(
-                    catch.fishType,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                )
-                Row( modifier = Modifier
-                    .padding(horizontal = 10.dp)
-                    .fillMaxHeight()) {
-                UserProfile(user) }
-            }
-            if (!catch.description.isNullOrEmpty()) Text(
-                catch.description, modifier = Modifier.fillMaxWidth(),
-                fontSize = MaterialTheme.typography.button.fontSize
-            )
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    getTimeByMilliseconds(catch.date),
-                    fontSize = MaterialTheme.typography.caption.fontSize
-                )
-                Text(
-                    getDateByMilliseconds(catch.date),
-                    fontSize = MaterialTheme.typography.caption.fontSize
-                )
-            }
-        }
-    }
-}
-
-@Composable
 fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
     Row(
         modifier = modifier,
@@ -262,4 +216,43 @@ fun SecondaryTextColored(modifier: Modifier = Modifier, text: String) {
         color = primaryFigmaColor,
         text = text
     )
+}
+
+@Composable
+fun DefaultAppBar(
+    modifier: Modifier = Modifier,
+    navIcon: ImageVector = Icons.Filled.ArrowBack,
+    onNavClick: () -> Unit,
+    title: String
+) {
+    TopAppBar(
+        title = { Text(text = title) },
+        navigationIcon = {
+            IconButton(onClick = { onNavClick() }) {
+                Icon(
+                    imageVector = navIcon,
+                    contentDescription = stringResource(R.string.back)
+                )
+            }
+        },
+        elevation = 4.dp
+    )
+}
+
+@Composable
+fun FullScreenPhoto(photo: MutableState<Uri?>) {
+    Dialog(
+        properties = DialogProperties(dismissOnClickOutside = true, dismissOnBackPress = true),
+        onDismissRequest = { photo.value = null }) {
+        Image(
+            modifier = Modifier
+                .padding(64.dp)
+                .wrapContentSize()
+                .clickable {
+                    photo.value = null
+                },
+            painter = rememberImagePainter(data = photo.value),
+            contentDescription = stringResource(id = R.string.catch_photo)
+        )
+    }
 }

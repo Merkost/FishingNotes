@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.io.File
 
 class NewCatchViewModel(
     private val repository: UserContentRepository,
@@ -38,8 +37,8 @@ class NewCatchViewModel(
 
     val fishType = mutableStateOf("")
     val description = mutableStateOf("")
-    val fishAmount = mutableStateOf("0")
-    val weight = mutableStateOf("0")
+    val fishAmount = mutableStateOf("1")
+    val weight = mutableStateOf("0.1")
     val date = mutableStateOf(0L)
     val rod = mutableStateOf("")
     val bite = mutableStateOf("")
@@ -70,7 +69,7 @@ class NewCatchViewModel(
 
     fun getAllUserMarkersList() = repository.getAllUserMarkersList() as Flow<List<UserMapMarker>>
 
-    private fun addNewCatch(newCatch: RawUserCatch) {
+    private fun saveNewCatch(newCatch: RawUserCatch) {
         _uiState.value = BaseViewState.Loading(0)
         viewModelScope.launch {
             marker.value?.let { userMapMarker ->
@@ -89,7 +88,6 @@ class NewCatchViewModel(
                     }
                 }
             }
-
         }
     }
 
@@ -97,12 +95,12 @@ class NewCatchViewModel(
         return fishType.value.isNotBlank() && !marker.value?.title.isNullOrEmpty() && noErrors.value
     }
 
-    fun createNewUserCatch(photos: List<File>): Boolean {
+    fun createNewUserCatch(): Boolean {
         if (isInputCorrect()) {
             marker.value?.let { userMapMarker ->
                 val hour = getHoursByMilliseconds(date.value).toInt()
                 weather.value?.let { forecast ->
-                    addNewCatch(
+                    saveNewCatch(
                         RawUserCatch(
                             fishType = fishType.value,
                             description = description.value,
