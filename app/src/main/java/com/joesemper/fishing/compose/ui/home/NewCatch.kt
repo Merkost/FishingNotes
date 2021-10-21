@@ -11,13 +11,15 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -32,7 +34,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -44,7 +45,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
-import coil.compose.rememberImagePainter
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -127,9 +127,6 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
     ) {
         SubscribeToProgress(viewModel.uiState, navController)
         val scrollState = rememberScrollState()
-        val fullScreenPhoto = remember {
-            mutableStateOf<Uri?>(null)
-        }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(30.dp),
@@ -144,13 +141,9 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
             DateAndTime(viewModel.date)
             NewCatchWeather(viewModel)
             Photos(
-                { clicked -> fullScreenPhoto.value = clicked },
+                { clicked -> { } },
                 { deleted -> viewModel.deletePhoto(deleted) })
             Spacer(modifier = Modifier.padding(16.dp))
-
-            fullScreenPhoto.value?.let {
-                FullScreenPhoto(fullScreenPhoto)
-            }
         }
     }
 }
@@ -588,43 +581,6 @@ fun ItemAddPhoto() {
     }
 }
 
-@ExperimentalAnimationApi
-@Composable
-fun ItemPhoto(photo: Uri, clickedPhoto: (Uri) -> Unit, deletedPhoto: (Uri) -> Unit) {
-
-    Crossfade(photo) { pic ->
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .padding(4.dp)
-        ) {
-            Image(painter = rememberImagePainter(data = pic),
-                contentDescription = Constants.ITEM_PHOTO,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(5.dp))
-                    .clickable { clickedPhoto(pic) })
-            Surface( //For making delete button background half transparent
-                color = Color.LightGray.copy(alpha = 0.2f),
-                modifier = Modifier
-                    .size(25.dp)
-                    .align(Alignment.TopEnd)
-                    .padding(3.dp)
-                    .clip(CircleShape)
-            ) {
-                Icon(
-                    Icons.Default.Close,
-                    tint = Color.White,
-                    contentDescription = stringResource(R.string.delete_photo),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable { deletedPhoto(pic) })
-            }
-        }
-    }
-}
-
 @ExperimentalPermissionsApi
 private fun addPhoto(
     permissionState: PermissionState,
@@ -910,7 +866,6 @@ fun LoadingDialog() {
 
     }
 }
-
 
 @Composable
 private fun TimePicker(

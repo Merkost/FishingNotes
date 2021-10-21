@@ -2,23 +2,27 @@ package com.joesemper.fishing.compose.ui.home
 
 import android.net.Uri
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -32,22 +36,35 @@ import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.theme.primaryFigmaColor
-import com.joesemper.fishing.ui.theme.primaryFigmaTextColor
-import com.joesemper.fishing.ui.theme.secondaryFigmaColor
-import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
+import com.joesemper.fishing.ui.theme.*
 
 @Composable
 fun MyCardNoPadding(content: @Composable () -> Unit) {
-    Card(elevation = 4.dp, shape = MaterialTheme.shapes.large,
-        modifier = Modifier.fillMaxWidth(), content = content)
+    Card(
+        elevation = 4.dp, shape = MaterialTheme.shapes.large,
+        modifier = Modifier.fillMaxWidth(), content = content
+    )
 }
 
 @Composable
 fun MyCard(content: @Composable () -> Unit) {
-    Card(elevation = 8.dp, modifier = Modifier
-        .fillMaxWidth()
-        .padding(4.dp), content = content)
+    Card(
+        elevation = 8.dp, modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp), content = content
+    )
+}
+
+@Composable
+fun DefaultCard(content: @Composable () -> Unit) {
+    Card(
+        shape = RoundedCornerShape(8.dp),
+        elevation = 8.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(4.dp), content = content
+    )
 }
 
 @Composable
@@ -120,7 +137,11 @@ fun PlaceInfo(user: User?, place: UserMapMarker, placeClicked: (UserMapMarker) -
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Default.Place, stringResource(R.string.place), tint = secondaryFigmaColor)
+                Icon(
+                    Icons.Default.Place,
+                    stringResource(R.string.place),
+                    tint = secondaryFigmaColor
+                )
                 Spacer(modifier = Modifier.width(150.dp))
                 UserProfile(user)
             }
@@ -141,11 +162,11 @@ fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
         Icon(
             painter = painterResource(id = icon),
             contentDescription = stringResource(R.string.place),
-            tint = primaryFigmaColor,
+            tint = secondaryFigmaTextColor,
             modifier = Modifier.size(30.dp)
         )
         Spacer(Modifier.size(8.dp))
-        Text(text)
+        SubtitleText(text = text)
     }
 }
 
@@ -165,12 +186,33 @@ fun SimpleOutlinedTextField(textState: MutableState<String>, label: String) {
 }
 
 @Composable
-fun HeaderText(modifier: Modifier = Modifier, text: String) {
+fun HeaderText(
+    modifier: Modifier = Modifier,
+    text: String,
+    textAlign: TextAlign = TextAlign.Start
+) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.h5,
+        style = MaterialTheme.typography.h6,
         maxLines = 1,
+        textAlign = TextAlign.Start,
         color = primaryFigmaTextColor,
+        text = text
+    )
+}
+
+@Composable
+fun HeaderTextSecondary(
+    modifier: Modifier = Modifier,
+    text: String,
+    textAlign: TextAlign = TextAlign.Start
+) {
+    Text(
+        modifier = modifier,
+        style = MaterialTheme.typography.h6,
+        maxLines = 1,
+        textAlign = TextAlign.Start,
+        color = secondaryFigmaTextColor,
         text = text
     )
 }
@@ -179,7 +221,7 @@ fun HeaderText(modifier: Modifier = Modifier, text: String) {
 fun SubtitleText(modifier: Modifier = Modifier, text: String) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.subtitle2,
+        style = MaterialTheme.typography.subtitle1,
         maxLines = 1,
         color = secondaryFigmaTextColor,
         text = text
@@ -223,7 +265,8 @@ fun DefaultAppBar(
     modifier: Modifier = Modifier,
     navIcon: ImageVector = Icons.Filled.ArrowBack,
     onNavClick: () -> Unit,
-    title: String
+    title: String,
+    actions: @Composable() (RowScope.() -> Unit) = {}
 ) {
     TopAppBar(
         title = { Text(text = title) },
@@ -235,7 +278,8 @@ fun DefaultAppBar(
                 )
             }
         },
-        elevation = 4.dp
+        elevation = 4.dp,
+        actions = actions
     )
 }
 
@@ -256,3 +300,109 @@ fun FullScreenPhoto(photo: MutableState<Uri?>) {
         )
     }
 }
+
+@Composable
+fun SimpleUnderlineTextField(
+    modifier: Modifier = Modifier,
+    text: String,
+    label: String = "",
+    trailingIcon: @Composable() (() -> Unit)? = null,
+    leadingIcon: @Composable() (() -> Unit)? = null,
+    helperText: String? = null
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = label,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 4.dp, start = 8.dp),
+            textAlign = TextAlign.Start,
+            color = secondaryFigmaTextColor,
+            style = MaterialTheme.typography.body2,
+        )
+        TextField(
+            modifier = Modifier.fillMaxWidth(),
+            readOnly = true,
+            value = text,
+            textStyle = MaterialTheme.typography.body1,
+            colors = TextFieldDefaults.textFieldColors(
+                textColor = primaryFigmaTextColor,
+                backgroundColor = backgroundGreenColor,
+                cursorColor = Color.Black,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
+            onValueChange = { },
+            shape = RoundedCornerShape(8.dp),
+            singleLine = true,
+            trailingIcon = trailingIcon,
+            leadingIcon = leadingIcon
+        )
+        helperText?.let {
+            SecondaryTextColored(
+                modifier = Modifier
+                    .padding(top = 4.dp, end = 8.dp)
+                    .align(Alignment.End),
+                text = it
+            )
+        }
+
+
+    }
+}
+
+@ExperimentalAnimationApi
+@Composable
+fun ItemPhoto(
+    photo: Uri,
+    clickedPhoto: (Uri) -> Unit,
+    deletedPhoto: (Uri) -> Unit,
+    deleteEnabled: Boolean = true
+) {
+
+    val fullScreenPhoto = remember {
+        mutableStateOf<Uri?>(null)
+    }
+
+    Crossfade(photo) { pic ->
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .padding(4.dp)
+        ) {
+            Image(painter = rememberImagePainter(data = pic),
+                contentDescription = Constants.ITEM_PHOTO,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(5.dp))
+                    .clickable {
+                        clickedPhoto(pic)
+                        fullScreenPhoto.value = pic
+                    })
+            if (deleteEnabled) {
+                Surface( //For making delete button background half transparent
+                    color = Color.LightGray.copy(alpha = 0.2f),
+                    modifier = Modifier
+                        .size(25.dp)
+                        .align(Alignment.TopEnd)
+                        .padding(3.dp)
+                        .clip(CircleShape)
+                ) {
+                    Icon(
+                        Icons.Default.Close,
+                        tint = Color.White,
+                        contentDescription = stringResource(R.string.delete_photo),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable { deletedPhoto(pic) })
+                }
+            }
+        }
+    }
+
+    fullScreenPhoto.value?.let {
+        FullScreenPhoto(fullScreenPhoto)
+    }
+}
+

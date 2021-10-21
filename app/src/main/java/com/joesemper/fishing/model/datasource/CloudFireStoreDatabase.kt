@@ -361,7 +361,6 @@ class CloudFireStoreDatabase(private val cloudPhotoStorage: PhotoStorage) : User
         awaitClose {}
     }
 
-
     private suspend fun savePhotos(
         photos: List<Uri>,
         progressFlow: MutableStateFlow<Progress>
@@ -374,6 +373,9 @@ class CloudFireStoreDatabase(private val cloudPhotoStorage: PhotoStorage) : User
 
     override suspend fun deleteCatch(userCatch: UserCatch) {
         getUserCatchesCollection(userCatch.userMarkerId).document(userCatch.id).delete()
+        userCatch.downloadPhotoLinks.forEach {
+            cloudPhotoStorage.deletePhoto(it)
+        }
     }
 
     private fun getUsersCollection(): CollectionReference {

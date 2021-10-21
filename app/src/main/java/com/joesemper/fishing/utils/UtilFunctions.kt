@@ -86,6 +86,12 @@ fun getTimeByMilliseconds(ms: Long): String {
     return sdf.format(date)
 }
 
+fun getDateAndTimeByMilliseconds(ms: Long): String {
+    val sdf = SimpleDateFormat("dd.MM.yy HH:mm", Locale.US)
+    val date = Date(ms)
+    return sdf.format(date)
+}
+
 fun hPaToMmHg(pressure: Int): Int {
     return (pressure * 0.75006375541921).toInt()
 }
