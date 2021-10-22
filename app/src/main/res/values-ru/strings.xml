@@ -38,7 +38,7 @@
     <string name="markers_list">Markers list</string>
     <string name="add">Добавить</string>
     <string name="coordinates">Координаты</string>
-    <string name="photos">Photos</string>
+    <string name="photos">Фото</string>
     <string name="new_catch">Новый улов</string>
     <string name="share">Поделиться</string>
     <string name="route">Маршрут</string>
@@ -125,7 +125,7 @@
     <string name="map_types">Map types</string>
     <string name="not_specified">Not specified</string>
     <string name="catch_description">Catch description</string>
-    <string name="note">Note</string>
+    <string name="note">Заметка</string>
     <string name="user_catch">Улов</string>
     <string name="cant_get_current_location">Can\'t get current location</string>
     <string name="my_location">Моё местоположение</string>
@@ -135,6 +135,14 @@
     <string name="roadmap">По умолчанию</string>
     <string name="close">Закрыть</string>
     <string name="map_type">Тип карты</string>
+    <string name="way_of_fishing">Способ ловли</string>
+    <string name="no_rod">Удочка не указана</string>
+    <string name="no_bait">Наживка не указана</string>
+    <string name="no_lure">Подкормка не указана</string>
+    <string name="celsius">°C</string>
+    <string name="pressure_units">mmHg</string>
+    <string name="wind_speed_units">m/s</string>
+    <string name="percent">%</string>
 
 
 </resources>

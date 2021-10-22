@@ -20,5 +20,12 @@ data class UserCatch(
     val userMarkerId: String = "",
     @JvmField
     val isPublic: Boolean = false,
-    val downloadPhotoLinks: List<String> = listOf()
+    val downloadPhotoLinks: List<String> = listOf(),
+    val weatherPrimary: String = "",
+    val weatherIcon: String = "",
+    val weatherTemperature: Float = 0.0f,
+    val weatherWindSpeed: Float = 0.0f,
+    val weatherWindDeg: Int = 0,
+    val weatherPressure: Int = 0,
+    val weatherMoonPhase: Float = 0.0f
 ): Parcelable, Content

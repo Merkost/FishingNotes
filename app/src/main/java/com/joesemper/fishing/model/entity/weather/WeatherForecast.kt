@@ -6,10 +6,10 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 class WeatherForecast(
-    @field:SerializedName("lat") val latitude: String,
-    @field:SerializedName("lon") val longitude: String,
-    @field:SerializedName("timezone_offset") val timezoneOffset: Long,
-    @field:SerializedName("hourly") val hourly: List<Hourly>,
-    @field:SerializedName("daily") val daily: List<Daily>,
-    @field:SerializedName("current") val current: Current
+    @field:SerializedName("lat") val latitude: String = "0.0",
+    @field:SerializedName("lon") val longitude: String = "0.0",
+    @field:SerializedName("timezone_offset") val timezoneOffset: Long = 0,
+    @field:SerializedName("hourly") val hourly: List<Hourly> = listOf(),
+    @field:SerializedName("daily") val daily: List<Daily> = listOf(),
+    @field:SerializedName("current") val current: Current = Current()
 ): Parcelable

@@ -134,6 +134,13 @@
     <string name="roadmap">По умолчанию</string>
     <string name="close">Закрыть</string>
     <string name="map_type">Тип карты</string>
-
+    <string name="way_of_fishing">Way of fishing</string>
+    <string name="no_rod">No rod</string>
+    <string name="no_bait">No bait</string>
+    <string name="no_lure">No lure</string>
+    <string name="celsius">°C</string>
+    <string name="pressure_units">mmHg</string>
+    <string name="wind_speed_units">m/s</string>
+    <string name="percent">%</string>
 
 </resources>

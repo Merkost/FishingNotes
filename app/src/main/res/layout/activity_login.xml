@@ -54,13 +54,12 @@
             android:orientation="vertical">
 
 
-
-                <ImageView
-                    android:layout_width="120dp"
-                    android:layout_height="120dp"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="10dp"
-                    android:src="@mipmap/ic_launcher" />
+            <ImageView
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:src="@mipmap/ic_launcher" />
 
 
             <TextView
@@ -184,4 +183,3 @@
     </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-
