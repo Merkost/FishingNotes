@@ -117,7 +117,7 @@ fun Map(
     }
 
 
-    ModalBottomSheetLayout(
+    /*ModalBottomSheetLayout(
         sheetContent = {
             BottomSheetAddMarkerDialog(
                 currentPosition,
@@ -126,7 +126,7 @@ fun Map(
             )
         },
         sheetState = modalBottomSheetState,
-    ) {
+    ) {*/
 
 
         BottomSheetScaffold(
@@ -169,9 +169,10 @@ fun Map(
                                     val target = googleMap.cameraPosition.target
                                     currentPosition.value =
                                         LatLng(target.latitude, target.longitude)
-                                    coroutineScope.launch {
+                                    /*coroutineScope.launch {
                                         modalBottomSheetState.show()
-                                    }
+                                    }*/
+
                                 }
                                 placeSelectMode = !placeSelectMode
                             }
@@ -371,7 +372,7 @@ fun Map(
                     lastLocation = lastKnownLocation
                 )
             }
-        }
+        //}
     }
 }
 
@@ -400,35 +401,6 @@ fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name:
             )
         }
         Text(text = name, fontSize = 12.sp, overflow = TextOverflow.Ellipsis, maxLines = 1)
-    }
-}
-
-@Composable
-fun MyLocationButton(
-    coroutineScope: CoroutineScope,
-    mapView: MapView,
-    lastKnownLocation: LatLng,
-    modifier: Modifier
-) {
-    Card(shape = CircleShape, modifier = modifier) {
-        IconButton(modifier = Modifier
-            .padding(8.dp)
-            .fillMaxSize(),
-            onClick = { moveCameraToLocation(coroutineScope, mapView, lastKnownLocation) }) {
-            Icon(Icons.Default.MyLocation, stringResource(R.string.my_location))
-        }
-    }
-}
-
-@Composable
-fun MapLayersButton(layersSelectionMode: MutableState<Boolean>, modifier: Modifier) {
-    Card(shape = CircleShape, modifier = modifier) {
-        IconButton(modifier = Modifier
-            .padding(8.dp)
-            .fillMaxSize(),
-            onClick = { layersSelectionMode.value = true }) {
-            Icon(Icons.Default.Apps, stringResource(R.string.layers))
-        }
     }
 }
 
@@ -766,11 +738,11 @@ fun GoogleMapLayout(
             googleMap.isMyLocationEnabled = true
             googleMap.uiSettings.isMyLocationButtonEnabled = false
 
-            if (viewModel.lastLocation.value == null) {
-                //val lastLatLng = lastLocation.value
-                moveCameraToLocation(coroutineScope, map, lastLocation.value)
-                //viewModel.lastLocation.value = lastLocation.value
-            }
+//            if (viewModel.lastLocation.value == null) {
+//                //val lastLatLng = lastLocation.value
+//                moveCameraToLocation(coroutineScope, map, lastLocation.value)
+//                //viewModel.lastLocation.value = lastLocation.value
+//            }
         }
     }
 
