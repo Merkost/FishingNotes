@@ -17,13 +17,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -37,6 +36,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.app.ActivityCompat
@@ -50,7 +51,6 @@ import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.location.LocationServices
 import com.google.android.libraries.maps.CameraUpdateFactory
-import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.LatLng
 import com.google.android.libraries.maps.model.MarkerOptions
@@ -58,10 +58,12 @@ import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.home.MyCard
 import com.joesemper.fishing.compose.ui.home.UiState
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
+import com.joesemper.fishing.ui.theme.Shapes
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 import kotlinx.coroutines.*
 import me.vponomarenko.compose.shimmer.shimmer
@@ -92,7 +94,9 @@ fun Map(
     val scaffoldState = rememberBottomSheetScaffoldState(
         //bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
     )
-    val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+
+    val dialogAddPlaceIsShowing = remember { mutableStateOf(false)}
+
     val lastKnownLocation = remember {
         getCurrentLocation(context = context, permissionsState = permissionsState)
     }
@@ -102,7 +106,6 @@ fun Map(
     }
 
     val mapLayersSelection = remember { mutableStateOf(false) }
-    var mapType = remember { mutableStateOf(MapTypes.roadmap) }
 
     val currentPosition = remember {
         mutableStateOf<LatLng?>(null)
@@ -114,25 +117,9 @@ fun Map(
 
     var mapUiState: MapUiState by remember { mutableStateOf(MapUiState.NormalMode) }
 
-    /*when (mapUiState) {
-        MapUiState.NormalMode -> progressOnAdd.value = false
-    }*/
     var cameraMoveState: CameraMoveState by remember {
         mutableStateOf(CameraMoveState.MoveFinish)
     }
-
-
-    ModalBottomSheetLayout(
-        sheetContent = {
-            BottomSheetAddMarkerDialog(
-                currentPosition,
-                modalBottomSheetState,
-                viewModel.chosenPlace,
-            )
-        },
-        sheetState = modalBottomSheetState,
-    ) {
-
 
         BottomSheetScaffold(
             modifier = modifier.fillMaxSize(),
@@ -174,9 +161,11 @@ fun Map(
                                     val target = googleMap.cameraPosition.target
                                     currentPosition.value =
                                         LatLng(target.latitude, target.longitude)
-                                    coroutineScope.launch {
+                                    /*coroutineScope.launch {
                                         modalBottomSheetState.show()
-                                    }
+                                    }*/
+                                    dialogAddPlaceIsShowing.value = true
+
                                 }
                                 placeSelectMode = !placeSelectMode
                             }
@@ -227,12 +216,17 @@ fun Map(
 
                 mapUiState = when {
 
-                    modalBottomSheetState.isVisible -> MapUiState.BottomSheetAddMode
+                    dialogAddPlaceIsShowing.value -> MapUiState.BottomSheetAddMode
                     placeSelectMode -> MapUiState.PlaceSelectMode
                     scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetInfoMode.apply {
                         bottomBarVisibilityState.value = false
                     }
                     else -> MapUiState.NormalMode.apply { bottomBarVisibilityState.value = true }
+                }
+
+                if (dialogAddPlaceIsShowing.value) Dialog(onDismissRequest = {dialogAddPlaceIsShowing.value = false},
+                    properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = false)) {
+                    AddMarkerDialog(currentPosition, dialogAddPlaceIsShowing, viewModel.chosenPlace)
                 }
 
                 MyLocationButton(coroutineScope, mapView, lastKnownLocation.value,
@@ -257,27 +251,25 @@ fun Map(
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier
                             .width(250.dp)
-                            .wrapContentHeight()/*pointerInput(Unit) {
-                            detectTapGestures(
-                                onPress = { *//* Called when the gesture starts *//* },
-                                onDoubleTap = { *//* Called on Double Tap *//* },
-                                onLongPress = { *//* Called on Long Press *//* },
-                                onTap = { *//* Called on Tap *//* }
-                            )
-                        }*/
+                            .wrapContentHeight()
                     ) {
+                        val mapType = remember { mutableStateOf(MapTypes.roadmap) }
                         Column(
-                            modifier = Modifier.padding(2.dp).padding(bottom = 8.dp),
+                            modifier = Modifier
+                                .padding(2.dp)
+                                .padding(bottom = 8.dp),
                             verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Row(
-                                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text("Тип карты")
+                                Text(stringResource(R.string.map_type))
                                 Card(shape = CircleShape, modifier = Modifier.size(20.dp)) {
                                     IconButton(onClick = { mapLayersSelection.value = false }) {
-                                        Icon(Icons.Default.Close, "")
+                                        Icon(Icons.Default.Close, stringResource(R.string.close))
                                     }
                                 }
                             }
@@ -289,25 +281,25 @@ fun Map(
                                     mapType,
                                     layer = MapTypes.roadmap,
                                     painter = painterResource(R.drawable.ic_map_default),
-                                    name = "По умолчанию"
+                                    name = stringResource(R.string.roadmap)
                                 )
                                 MapLayerItem(
                                     mapType,
-                                    layer = MapTypes.satellite,
+                                    layer = MapTypes.hybrid,
                                     painter = painterResource(R.drawable.ic_map_satellite),
-                                    name = "Спутник"
+                                    name = stringResource(R.string.satellite)
                                 )
                                 MapLayerItem(
                                     mapType,
                                     layer = MapTypes.terrain,
                                     painter = painterResource(R.drawable.ic_map_terrain),
-                                    name = "Рельеф"
+                                    name = stringResource(R.string.terrain)
                                 )
 
-                                /*LaunchedEffect(mapType) {
+                                LaunchedEffect(mapType.value) {
                                     val googleMap = mapView.awaitMap()
-                                    googleMap.setMapStyle(MapStyleOptions(mapType))
-                                }*/
+                                    googleMap.mapType = mapType.value
+                                }
                             }
                         }
                     }
@@ -374,13 +366,11 @@ fun Map(
 
                         }
                     },
-                    cameraMoveCallback = { state ->
-                        cameraMoveState = state
-                    },
-                    mapType = mapType.value
+                    cameraMoveCallback = { state -> cameraMoveState = state },
+                    lastLocation = lastKnownLocation
                 )
             }
-        }
+        //}
     }
 }
 
@@ -396,7 +386,9 @@ fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name:
                     width = 2.dp,
                     color = Color.Blue,
                     shape = RoundedCornerShape(15.dp)
-                ) else Modifier.size(70.dp).padding(2.dp)
+                ) else Modifier
+                .size(70.dp)
+                .padding(2.dp)
         ) {
             Image(
                 painter, layer.toString(),
@@ -410,40 +402,11 @@ fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name:
     }
 }
 
-@Composable
-fun MyLocationButton(
-    coroutineScope: CoroutineScope,
-    mapView: MapView,
-    lastKnownLocation: LatLng,
-    modifier: Modifier
-) {
-    Card(shape = CircleShape, modifier = modifier) {
-        IconButton(modifier = Modifier
-            .padding(8.dp)
-            .fillMaxSize(),
-            onClick = { moveCameraToLocation(coroutineScope, mapView, lastKnownLocation) }) {
-            Icon(Icons.Default.MyLocation, stringResource(R.string.my_location))
-        }
-    }
-}
-
-@Composable
-fun MapLayersButton(layersSelectionMode: MutableState<Boolean>, modifier: Modifier) {
-    Card(shape = CircleShape, modifier = modifier) {
-        IconButton(modifier = Modifier
-            .padding(8.dp)
-            .fillMaxSize(),
-            onClick = { layersSelectionMode.value = true }) {
-            Icon(Icons.Default.Apps, stringResource(R.string.layers))
-        }
-    }
-}
-
 @ExperimentalMaterialApi
 @Composable
-fun BottomSheetAddMarkerDialog(
+fun AddMarkerDialog(
     currentPosition: MutableState<LatLng?>,
-    modalBottomSheetState: ModalBottomSheetState,
+    dialogState: MutableState<Boolean>,
     chosenPlace: MutableState<String?>,
 ) {
     val viewModel = get<MapViewModel>()
@@ -451,172 +414,174 @@ fun BottomSheetAddMarkerDialog(
     val coroutineScope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsState()
 
-    Spacer(modifier = Modifier.size(1.dp))
 
-    ConstraintLayout(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-    ) {
-        val (progress, name, locationIcon, title, description, saveButton, cancelButton) = createRefs()
+    MyCard(shape = Shapes.large) {
+        ConstraintLayout(
+            modifier = Modifier
+                .requiredHeight(250.dp)
+                .requiredWidth(300.dp).background(Color.White)
+        ) {
+            val (progress, name, locationIcon, title, description, saveButton, cancelButton) = createRefs()
 
-        uiState?.let {
-            when (it) {
-                UiState.InProgress -> {
-                    Surface(color = Color.Gray, modifier = Modifier
-                        .constrainAs(progress) {
-                            top.linkTo(parent.top)
-                            absoluteLeft.linkTo(parent.absoluteLeft)
-                            absoluteRight.linkTo(parent.absoluteRight)
-                            bottom.linkTo(parent.bottom)
+            uiState?.let {
+                when (it) {
+                    UiState.InProgress -> {
+                        Surface(color = Color.Gray, modifier = Modifier
+                            .constrainAs(progress) {
+                                top.linkTo(parent.top)
+                                absoluteLeft.linkTo(parent.absoluteLeft)
+                                absoluteRight.linkTo(parent.absoluteRight)
+                                bottom.linkTo(parent.bottom)
+                            }
+                            .size(100.dp)) {
+                            FishLoading(modifier = Modifier.size(150.dp))
                         }
-                        .size(100.dp)) {
-                        FishLoading(modifier = Modifier.size(150.dp))
+                    }
+                    UiState.Success -> {
+                        coroutineScope.launch {
+                            dialogState.value = false
+                            Toast.makeText(
+                                context,
+                                "Place added successfully",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                    else -> {
                     }
                 }
-                UiState.Success -> {
-                    coroutineScope.launch {
-                        modalBottomSheetState.hide()
-                        Toast.makeText(
-                            context,
-                            "Place added successfully",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-                else -> {
+            }
+
+            val titleValue = remember { mutableStateOf(/*chosenPlace.value ?:*/ "") }
+            LaunchedEffect(chosenPlace.value) {
+                chosenPlace.value?.let {
+                    titleValue.value = it
                 }
             }
-        }
-
-        val titleValue = remember { mutableStateOf(/*chosenPlace.value ?:*/ "") }
-        LaunchedEffect(chosenPlace.value) {
-            chosenPlace.value?.let {
-                titleValue.value = it
-            }
-        }
-        val descriptionValue = remember { mutableStateOf("") }
+            val descriptionValue = remember { mutableStateOf("") }
 
 
 
-        Text(
-            text = "Новая точка",
-            style = MaterialTheme.typography.subtitle1,
-            modifier = Modifier.constrainAs(name) {
-                top.linkTo(parent.top, 16.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft, 4.dp)
-                absoluteRight.linkTo(parent.absoluteRight)
-            }
-        )
-
-        OutlinedTextField(
-            value = titleValue.value,
-            onValueChange = {
-                titleValue.value = it
-            },
-            label = { Text(text = "Название") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next
-            ),
-            modifier = Modifier.constrainAs(title) {
-                top.linkTo(name.bottom, 2.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft, 2.dp)
-                absoluteRight.linkTo(parent.absoluteRight, 2.dp)
-            }/*.navigationBarsWithImePadding(),*/
-        )
-        OutlinedTextField(
-            value = descriptionValue.value,
-            onValueChange = {
-                descriptionValue.value = it
-            },
-            label = { Text(text = "Описание") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next
-            ),
-            modifier = Modifier.constrainAs(description) {
-                top.linkTo(title.bottom, 2.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft, 4.dp)
-                absoluteRight.linkTo(parent.absoluteRight, 4.dp)
-            }/*.navigationBarsWithImePadding()*/
-        )
-
-        /*Icon(
-           painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-           contentDescription = "Marker",
-           tint = secondaryFigmaColor,
-           modifier = Modifier
-               .size(32.dp)
-               .constrainAs(locationIcon) {
-                   absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-                   top.linkTo(title.top)
-                   bottom.linkTo(title.bottom)
-               }
-       )*/
-
-
-
-        OutlinedButton(modifier = Modifier.constrainAs(cancelButton) {
-            absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-            top.linkTo(description.bottom, 8.dp)
-            bottom.linkTo(parent.bottom, 16.dp)
-        },
-            shape = RoundedCornerShape(24.dp), onClick = {
-                coroutineScope.launch {
-                    modalBottomSheetState.hide()
+            Text(
+                text = "Новая точка",
+                style = MaterialTheme.typography.subtitle1,
+                modifier = Modifier.constrainAs(name) {
+                    top.linkTo(parent.top, 16.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 4.dp)
+                    absoluteRight.linkTo(parent.absoluteRight)
                 }
-            }) {
-            Row(
-                modifier = Modifier.wrapContentSize(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                /*Icon(
-                    painterResource(id = R.drawable.ic_baseline_shortcut_24),
-                    "",
-                    modifier = Modifier.size(24.dp)
-                )*/
-                Text(
-                    stringResource(id = R.string.cancel),
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-        }
-
-        Button(modifier = Modifier.constrainAs(saveButton) {
-            absoluteRight.linkTo(cancelButton.absoluteLeft, 8.dp)
-            top.linkTo(cancelButton.top)
-            bottom.linkTo(cancelButton.bottom)
-        }, shape = RoundedCornerShape(24.dp), onClick = {
-            viewModel.addNewMarker(
-                RawMapMarker(
-                    titleValue.value,
-                    descriptionValue.value,
-                    currentPosition.value?.latitude ?: 0.0,
-                    currentPosition.value?.longitude ?: 0.0
-                )
             )
-        }) {
-            Row(
-                modifier = Modifier.wrapContentSize(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                /*Icon(
-                    painterResource(id = R.drawable.ic_baseline_navigation_24),
-                    "",
-                    modifier = Modifier.size(24.dp)
-                )*/
-                Text(
-                    stringResource(id = R.string.save),
-                    modifier = Modifier.padding(start = 8.dp)
+
+            OutlinedTextField(
+                value = titleValue.value,
+                onValueChange = {
+                    titleValue.value = it
+                },
+                label = { Text(text = "Название") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                ),
+                modifier = Modifier.constrainAs(title) {
+                    top.linkTo(name.bottom, 2.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 2.dp)
+                    absoluteRight.linkTo(parent.absoluteRight, 2.dp)
+                }/*.navigationBarsWithImePadding(),*/
+            )
+            OutlinedTextField(
+                value = descriptionValue.value,
+                onValueChange = {
+                    descriptionValue.value = it
+                },
+                label = { Text(text = "Описание") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                ),
+                modifier = Modifier.constrainAs(description) {
+                    top.linkTo(title.bottom, 2.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 4.dp)
+                    absoluteRight.linkTo(parent.absoluteRight, 4.dp)
+                }/*.navigationBarsWithImePadding()*/
+            )
+
+            /*Icon(
+               painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+               contentDescription = "Marker",
+               tint = secondaryFigmaColor,
+               modifier = Modifier
+                   .size(32.dp)
+                   .constrainAs(locationIcon) {
+                       absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
+                       top.linkTo(title.top)
+                       bottom.linkTo(title.bottom)
+                   }
+           )*/
+
+
+
+            OutlinedButton(modifier = Modifier.constrainAs(cancelButton) {
+                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+                top.linkTo(description.bottom, 8.dp)
+                bottom.linkTo(parent.bottom, 16.dp)
+            },
+                shape = RoundedCornerShape(24.dp), onClick = {
+                    coroutineScope.launch {
+                        dialogState.value = false
+                    }
+                }) {
+                Row(
+                    modifier = Modifier.wrapContentSize(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    /*Icon(
+                        painterResource(id = R.drawable.ic_baseline_shortcut_24),
+                        "",
+                        modifier = Modifier.size(24.dp)
+                    )*/
+                    Text(
+                        stringResource(id = R.string.cancel),
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
+            }
+
+            Button(modifier = Modifier.constrainAs(saveButton) {
+                absoluteRight.linkTo(cancelButton.absoluteLeft, 8.dp)
+                top.linkTo(cancelButton.top)
+                bottom.linkTo(cancelButton.bottom)
+            }, shape = RoundedCornerShape(24.dp), onClick = {
+                viewModel.addNewMarker(
+                    RawMapMarker(
+                        titleValue.value,
+                        descriptionValue.value,
+                        currentPosition.value?.latitude ?: 0.0,
+                        currentPosition.value?.longitude ?: 0.0
+                    )
                 )
+            }) {
+                Row(
+                    modifier = Modifier.wrapContentSize(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    /*Icon(
+                        painterResource(id = R.drawable.ic_baseline_navigation_24),
+                        "",
+                        modifier = Modifier.size(24.dp)
+                    )*/
+                    Text(
+                        stringResource(id = R.string.save),
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
             }
         }
     }
+
 }
 
 @Composable
@@ -742,7 +707,7 @@ fun GoogleMapLayout(
     permissionsState: MultiplePermissionsState,
     onMarkerClick: (marker: UserMapMarker) -> Unit,
     cameraMoveCallback: (state: CameraMoveState) -> Unit,
-    mapType: Int
+    lastLocation: MutableState<LatLng>
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -773,7 +738,11 @@ fun GoogleMapLayout(
             googleMap.isMyLocationEnabled = true
             googleMap.uiSettings.isMyLocationButtonEnabled = false
 
-
+//            if (viewModel.lastLocation.value == null) {
+//                //val lastLatLng = lastLocation.value
+//                moveCameraToLocation(coroutineScope, map, lastLocation.value)
+//                //viewModel.lastLocation.value = lastLocation.value
+//            }
         }
     }
 
@@ -786,11 +755,6 @@ fun GoogleMapLayout(
             onMarkerClick(mapMarker)
             true
         }
-    }
-
-    LaunchedEffect(mapType) {
-        val googleMap = map.awaitMap()
-        googleMap.mapType = mapType
     }
 
     /*moveCameraToLocation(
@@ -861,7 +825,9 @@ fun DialogOnPlaceChoosing(
 
     Card(
         shape = RoundedCornerShape(size = 20.dp),
-        modifier = modifier.heightIn(min = 40.dp, max = 40.dp).widthIn(max = 240.dp)
+        modifier = modifier
+            .heightIn(min = 40.dp, max = 40.dp)
+            .widthIn(max = 240.dp)
     ) {
         AnimatedVisibility(viewModel.chosenPlace.value.isNullOrEmpty()) {
             Row(

@@ -129,6 +129,11 @@
     <string name="cant_get_current_location">Can\'t get current location</string>
     <string name="my_location">Моё местоположение</string>
     <string name="layers">Слои</string>
+    <string name="terrain">Рельеф</string>
+    <string name="satellite">Спутник</string>
+    <string name="roadmap">По умолчанию</string>
+    <string name="close">Закрыть</string>
+    <string name="map_type">Тип карты</string>
     <string name="way_of_fishing">Way of fishing</string>
     <string name="no_rod">No rod</string>
     <string name="no_bait">No bait</string>
@@ -137,6 +142,5 @@
     <string name="pressure_units">mmHg</string>
     <string name="wind_speed_units">m/s</string>
     <string name="percent">%</string>
-
 
 </resources>
