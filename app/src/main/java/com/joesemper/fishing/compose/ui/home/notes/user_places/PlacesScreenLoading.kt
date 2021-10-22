@@ -15,8 +15,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.compose.ui.home.MyCard
+import com.joesemper.fishing.compose.ui.home.notes.ItemAdd
+import com.joesemper.fishing.model.entity.content.UserMapMarker
 import me.vponomarenko.compose.shimmer.shimmer
 
 val places = listOf(
@@ -31,7 +32,13 @@ val places = listOf(
 @Composable
 fun UserPlacesLoading(addNewPlaceClicked: () -> Unit) {
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        item { ItemAddPlace(addNewPlaceClicked) }
+        item {
+            ItemAdd(
+                icon = painterResource(R.drawable.ic_baseline_add_location_24),
+                text = stringResource(R.string.add_new_place),
+                onClickAction = addNewPlaceClicked
+            )
+        }
         items(items = places) { userPlace ->
             ItemPlaceLoading(
                 place = userPlace
@@ -48,14 +55,29 @@ fun ItemPlaceLoading(place: UserMapMarker) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.height(75.dp).fillMaxWidth().padding(5.dp)
+            modifier = Modifier
+                .height(75.dp)
+                .fillMaxWidth()
+                .padding(5.dp)
         ) {
-            Row(modifier = Modifier, horizontalArrangement = Arrangement.spacedBy(5.dp), verticalAlignment = Alignment.CenterVertically) {
-                Box(modifier = Modifier.size(50.dp).padding(5.dp)) {
+            Row(
+                modifier = Modifier,
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(50.dp)
+                        .padding(5.dp)
+                ) {
                     Icon(
                         painterResource(R.drawable.ic_baseline_location_on_24),
                         stringResource(R.string.place),
-                        modifier = Modifier.align(Alignment.Center).padding(5.dp).fillMaxSize().shimmer(),
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .padding(5.dp)
+                            .fillMaxSize()
+                            .shimmer(),
                         tint = Color.LightGray
                     )
                 }
@@ -63,8 +85,28 @@ fun ItemPlaceLoading(place: UserMapMarker) {
                     modifier = Modifier.fillMaxHeight(),
                     verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically)
                 ) {
-                    Row(modifier = Modifier.height(18.dp).shimmer()) {Text(place.title, color = Color.LightGray, modifier = Modifier.background(Color.LightGray))}
-                    Row(modifier = Modifier.height(18.dp).shimmer()) {Text("Great Place For fishing", color = Color.LightGray, modifier = Modifier.background(Color.LightGray))}
+                    Row(
+                        modifier = Modifier
+                            .height(18.dp)
+                            .shimmer()
+                    ) {
+                        Text(
+                            place.title,
+                            color = Color.LightGray,
+                            modifier = Modifier.background(Color.LightGray)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .height(18.dp)
+                            .shimmer()
+                    ) {
+                        Text(
+                            "Great Place For fishing",
+                            color = Color.LightGray,
+                            modifier = Modifier.background(Color.LightGray)
+                        )
+                    }
                 }
             }
             Column(
@@ -75,10 +117,23 @@ fun ItemPlaceLoading(place: UserMapMarker) {
                 Icon(
                     painterResource(R.drawable.ic_fish),
                     stringResource(R.string.fish_catch),
-                    modifier = Modifier.padding(2.dp).height(18.dp).shimmer(),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .height(18.dp)
+                        .shimmer(),
                     tint = Color.LightGray
                 )
-                Row(modifier = Modifier.height(18.dp).shimmer()) { Text("10", color = Color.LightGray, modifier = Modifier.background(Color.LightGray)) }
+                Row(
+                    modifier = Modifier
+                        .height(18.dp)
+                        .shimmer()
+                ) {
+                    Text(
+                        "10",
+                        color = Color.LightGray,
+                        modifier = Modifier.background(Color.LightGray)
+                    )
+                }
             }
         }
     }
