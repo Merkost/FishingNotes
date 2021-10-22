@@ -813,7 +813,7 @@ fun NewCatchAppBar(navController: NavController) {
         onNavClick = {
             navController.popBackStack()
         },
-        title = stringResource(R.string.back)
+        title = stringResource(R.string.new_catch)
     )
 }
 

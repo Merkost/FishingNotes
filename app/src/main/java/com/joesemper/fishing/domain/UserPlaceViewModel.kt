@@ -4,9 +4,11 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.repository.UserContentRepository
 import com.joesemper.fishing.model.repository.UserRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class UserPlaceViewModel(
@@ -14,26 +16,20 @@ class UserPlaceViewModel(
     private val repository: UserContentRepository,
 ) : ViewModel() {
 
-    val marker: MutableState<UserMapMarker> = mutableStateOf(UserMapMarker())
+    val marker: MutableState<UserMapMarker?> = mutableStateOf(null)
 
-    var titleTemp = mutableStateOf("")
-    var descriptionTemp = mutableStateOf("")
-
-    var title = marker.value.title
-    var description = marker.value.description
-
-    fun save() {
-        marker.value.title = titleTemp.value
-        marker.value.description = descriptionTemp.value
+    fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>> {
+        return viewModelScope.run {
+            repository.getCatchesByMarkerId(markerId)
+        }
     }
 
-    fun getCatchesByMarkerId(markerId: String) = repository.getCatchesByMarkerId(markerId)
-
-    fun getCurrentUser() = userRepository.currentUser
-
-    fun deletePlace(place: UserMapMarker) {
+    fun deletePlace() {
         viewModelScope.launch {
-            repository.deleteMarker(place)
+            marker.value?.let {
+                repository.deleteMarker(it)
+            }
+
         }
     }
 
