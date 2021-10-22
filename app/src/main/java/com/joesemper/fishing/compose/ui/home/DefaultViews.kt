@@ -29,14 +29,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.net.toUri
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.common.User
+import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.theme.*
+import com.joesemper.fishing.utils.getTimeByMilliseconds
 
 @Composable
 fun MyCardNoPadding(content: @Composable () -> Unit) {
@@ -233,6 +238,7 @@ fun PrimaryText(modifier: Modifier = Modifier, text: String) {
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.body1,
+        fontSize = 18.sp,
         maxLines = 1,
         color = primaryFigmaTextColor,
         text = text
@@ -245,6 +251,7 @@ fun SecondaryText(modifier: Modifier = Modifier, text: String) {
         textAlign = TextAlign.Center,
         modifier = modifier,
         style = MaterialTheme.typography.body1,
+        fontSize = 18.sp,
         color = secondaryFigmaTextColor,
         text = text
     )
@@ -324,7 +331,7 @@ fun SimpleUnderlineTextField(
             modifier = Modifier.fillMaxWidth(),
             readOnly = true,
             value = text,
-            textStyle = MaterialTheme.typography.body1,
+            textStyle = MaterialTheme.typography.body1.copy(fontSize = 18.sp),
             colors = TextFieldDefaults.textFieldColors(
                 textColor = primaryFigmaTextColor,
                 backgroundColor = backgroundGreenColor,
@@ -403,6 +410,157 @@ fun ItemPhoto(
 
     fullScreenPhoto.value?.let {
         FullScreenPhoto(fullScreenPhoto)
+    }
+}
+
+@ExperimentalAnimationApi
+@Composable
+fun ItemCatchPhotos(
+    modifier: Modifier = Modifier,
+    photo: Uri? = null,
+    photosCount: Int = 0
+) {
+    Crossfade(photo) { pic ->
+        Box(
+            modifier = modifier
+                .size(100.dp)
+                .padding(4.dp)
+        ) {
+            if (pic != null) {
+                Image(
+                    painter = rememberImagePainter(
+                        data = pic
+                    ),
+                    contentDescription = Constants.ITEM_PHOTO,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(5.dp))
+                )
+            } else {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_no_photo_vector),
+                    contentDescription = Constants.ITEM_PHOTO,
+                    tint = secondaryFigmaTextColor,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(5.dp))
+                )
+            }
+
+            if (photosCount > 1) {
+                Surface( //For making delete button background half transparent
+                    color = Color.LightGray.copy(alpha = 0.2f),
+                    modifier = Modifier
+                        .size(25.dp)
+                        .align(Alignment.BottomStart)
+                        .padding(3.dp)
+                ) {
+                    Text(
+                        text = "X$photosCount",
+                        color = Color.White,
+                        modifier = Modifier
+                            .fillMaxSize()
+                    )
+                }
+            }
+        }
+    }
+}
+
+@ExperimentalAnimationApi
+@Composable
+fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
+    val photo = if (userCatch.downloadPhotoLinks.isNotEmpty()) {
+        userCatch.downloadPhotoLinks.first()
+    } else {
+        null
+    }
+
+    DefaultCard() {
+        ConstraintLayout(modifier = Modifier
+            .padding(2.dp)
+            .clickable {
+                userCatchClicked(userCatch)
+            }) {
+            val (photos, fish, weight, kg, description, icon, place, date) = createRefs()
+            val guideline = createGuidelineFromAbsoluteLeft(104.dp)
+
+            ItemCatchPhotos(
+                modifier = Modifier.constrainAs(photos) {
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                },
+                photo = photo?.toUri(),
+                photosCount = userCatch.downloadPhotoLinks.count()
+            )
+
+            PrimaryText(
+                modifier = Modifier.constrainAs(fish) {
+                    absoluteLeft.linkTo(guideline, 4.dp)
+                    top.linkTo(parent.top)
+                },
+                text = userCatch.fishType
+            )
+
+            SecondaryText(
+                modifier = Modifier.constrainAs(kg) {
+                    absoluteRight.linkTo(parent.absoluteRight, 4.dp)
+                    top.linkTo(parent.top)
+                },
+                text = stringResource(id = R.string.kg)
+            )
+
+            PrimaryText(
+                modifier = Modifier.constrainAs(weight) {
+                    absoluteRight.linkTo(kg.absoluteLeft, 1.dp)
+                    top.linkTo(parent.top)
+                },
+                text = userCatch.fishWeight.toString()
+            )
+
+            SecondaryText(
+                modifier = Modifier.constrainAs(description) {
+                    absoluteLeft.linkTo(guideline, 4.dp)
+                    linkTo(fish.bottom, icon.top, bottomMargin = 2.dp, bias = 0F)
+                },
+                text = if (userCatch.description.isNotBlank()) {
+                    userCatch.description
+                } else {
+                    stringResource(id = R.string.no_description)
+                }
+            )
+
+            Icon(
+                modifier = Modifier.constrainAs(icon) {
+                    absoluteLeft.linkTo(guideline)
+                    bottom.linkTo(parent.bottom)
+                },
+                painter = painterResource(
+                    id = R.drawable.ic_baseline_location_on_24
+                ),
+                contentDescription = stringResource(R.string.icon),
+                tint = secondaryFigmaColor
+            )
+
+            SecondaryTextColored(
+                modifier = Modifier.constrainAs(place) {
+                    top.linkTo(icon.top)
+                    bottom.linkTo(icon.bottom)
+                    absoluteLeft.linkTo(icon.absoluteRight)
+                },
+                text = userCatch.placeTitle
+            )
+
+            SecondaryTextColored(
+                modifier = Modifier.constrainAs(date) {
+                    absoluteRight.linkTo(parent.absoluteRight, 4.dp)
+                    top.linkTo(place.top)
+                },
+                text = getTimeByMilliseconds(userCatch.date)
+            )
+        }
     }
 }
 

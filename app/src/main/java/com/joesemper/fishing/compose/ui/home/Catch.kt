@@ -87,255 +87,257 @@ fun CatchContent(navController: NavController, viewModel: UserCatchViewModel) {
                     mapMarker = it
                 }
 
-            DefaultCard() {
-                ConstraintLayout(
-                    modifier = Modifier.padding(8.dp),
-                ) {
+            ConstraintLayout(
+                modifier = Modifier.padding(8.dp),
+            ) {
 
-                    val (title, date, fish, photos, note, place) = createRefs()
+                val (title, date, fish, photos, note, place, fishingWay, rod, bait, lure) = createRefs()
 
-                    SubtitleText(
-                        modifier = Modifier.constrainAs(title) {
-                            top.linkTo(parent.top)
-                            absoluteLeft.linkTo(parent.absoluteLeft)
-                        },
-                        text = stringResource(R.string.main)
-                    )
-
-                    SecondaryTextColored(
-                        modifier = Modifier.constrainAs(date) {
-                            top.linkTo(parent.top)
-                            absoluteRight.linkTo(parent.absoluteRight)
-                        },
-                        text = getDateAndTimeByMilliseconds(catch.date)
-                    )
-
-                    SimpleUnderlineTextField(
-                        modifier = Modifier.constrainAs(fish) {
-                            top.linkTo(title.bottom, 16.dp)
-                            absoluteLeft.linkTo(parent.absoluteLeft)
-                        },
-                        text = catch.fishType,
-                        label = stringResource(id = R.string.user_catch),
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_fish),
-                                contentDescription = ""
-                            )
-                        },
-                        trailingIcon = {
-                            Row() {
-                                PrimaryText(text = catch.fishWeight.toString())
-                                SecondaryText(text = stringResource(id = R.string.kg))
-                            }
-
-                        },
-                        helperText = catch.fishAmount.toString() + stringResource(id = R.string.pc)
-                    )
-
-                    SimpleUnderlineTextField(
-                        modifier = Modifier.constrainAs(note) {
-                            top.linkTo(fish.bottom, 8.dp)
-                            absoluteLeft.linkTo(parent.absoluteLeft)
-                        },
-                        text = if (catch.description.isBlank()) {
-                            stringResource(id = R.string.no_description)
-                        } else {
-                            catch.description
-                        },
-                        label = stringResource(id = R.string.note),
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_baseline_edit_note_24),
-                                contentDescription = ""
-                            )
-                        }
-                    )
-
-                    SimpleUnderlineTextField(modifier = Modifier.constrainAs(place) {
-                        top.linkTo(note.bottom, 16.dp)
+                SubtitleWithIcon(
+                    modifier = Modifier.constrainAs(title) {
+                        top.linkTo(parent.top)
                         absoluteLeft.linkTo(parent.absoluteLeft)
                     },
-                        text = catch.placeTitle,
-                        label = stringResource(id = R.string.place),
+                    icon = R.drawable.ic_hook,
+                    text = stringResource(R.string.main)
+                )
+
+                SecondaryTextColored(
+                    modifier = Modifier.constrainAs(date) {
+                        top.linkTo(parent.top)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                    },
+                    text = getDateAndTimeByMilliseconds(catch.date)
+                )
+
+                SimpleUnderlineTextField(
+                    modifier = Modifier.constrainAs(fish) {
+                        top.linkTo(title.bottom, 16.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                    },
+                    text = catch.fishType,
+                    label = stringResource(id = R.string.fish_species),
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_fish),
+                            contentDescription = ""
+                        )
+                    },
+                    trailingIcon = {
+                        Row(modifier = Modifier.padding(end = 2.dp)) {
+                            PrimaryText(text = catch.fishWeight.toString())
+                            SecondaryText(text = stringResource(id = R.string.kg))
+                        }
+
+                    },
+                    helperText = catch.fishAmount.toString() + stringResource(id = R.string.pc)
+                )
+
+                SimpleUnderlineTextField(
+                    modifier = Modifier.constrainAs(note) {
+                        top.linkTo(fish.bottom, 8.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                    },
+                    text = if (catch.description.isBlank()) {
+                        stringResource(id = R.string.no_description)
+                    } else {
+                        catch.description
+                    },
+                    label = stringResource(id = R.string.note)
+                )
+
+                SimpleUnderlineTextField(modifier = Modifier.constrainAs(place) {
+                    top.linkTo(photos.bottom, 16.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                },
+                    text = catch.placeTitle,
+                    label = stringResource(id = R.string.place),
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+                            tint = secondaryFigmaColor,
+                            contentDescription = ""
+                        )
+                    },
+                    trailingIcon = {
+                        IconButton(
+                            onClick = { /*TODO*/ }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_baseline_chevron_right_24),
+                                tint = secondaryFigmaTextColor,
+                                contentDescription = ""
+                            )
+                        }
+                    })
+
+                if (catch.downloadPhotoLinks.isNotEmpty()) {
+                    LazyRow(modifier = Modifier.constrainAs(photos) {
+                        top.linkTo(note.bottom, 16.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                    }) {
+                        items(items = catch.downloadPhotoLinks) {
+                            ItemPhoto(
+                                photo = it.toUri(),
+                                clickedPhoto = {},
+                                deletedPhoto = {},
+                                deleteEnabled = false
+                            )
+                        }
+
+                    }
+                } else {
+                    Spacer(modifier = Modifier
+                        .padding(1.dp)
+                        .constrainAs(photos) {
+                            top.linkTo(note.bottom, 16.dp)
+                            absoluteLeft.linkTo(parent.absoluteLeft)
+                        })
+                }
+
+                SubtitleWithIcon(
+                    modifier = Modifier.constrainAs(fishingWay) {
+                        top.linkTo(place.bottom, 32.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                    },
+                    icon = R.drawable.ic_fishing_rod,
+                    text = stringResource(id = R.string.way_of_fishing)
+                )
+
+                SimpleUnderlineTextField(
+                    modifier = Modifier.constrainAs(rod) {
+                        top.linkTo(fishingWay.bottom, 8.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                    },
+                    text = if (catch.fishingRodType.isNotBlank()) {
+                        catch.fishingRodType
+                    } else {
+                        stringResource(id = R.string.no_rod)
+                    },
+                    label = stringResource(id = R.string.fish_rod)
+                )
+
+                SimpleUnderlineTextField(
+                    modifier = Modifier.constrainAs(bait) {
+                        top.linkTo(rod.bottom, 8.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                    },
+                    text = if (catch.fishingBait.isNotBlank()) {
+                        catch.fishingBait
+                    } else {
+                        stringResource(id = R.string.no_bait)
+                    },
+                    label = stringResource(id = R.string.bait)
+                )
+
+                SimpleUnderlineTextField(
+                    modifier = Modifier.constrainAs(lure) {
+                        top.linkTo(bait.bottom, 8.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                    },
+                    text = if (catch.fishingLure.isNotBlank()) {
+                        catch.fishingLure
+                    } else {
+                        stringResource(id = R.string.no_lure)
+                    },
+                    label = stringResource(id = R.string.lure)
+                )
+            }
+
+            Column(
+                modifier = Modifier.padding(
+                    start = 8.dp,
+                    top = 32.dp,
+                    end = 8.dp,
+                    bottom = 16.dp
+                )
+            ) {
+                SubtitleWithIcon(
+                    icon = R.drawable.weather_sunny,
+                    modifier = Modifier,
+                    text = stringResource(id = R.string.weather)
+                )
+                Spacer(Modifier.size(8.dp))
+                SimpleUnderlineTextField(modifier = Modifier,
+                    text = catch.weatherPrimary,
+                    label = stringResource(id = R.string.description),
+                    trailingIcon = {
+                        Icon(
+                            painter = painterResource(getWeatherIconByName(catch.weatherIcon)),
+                            contentDescription = ""
+                        )
+                    }
+                )
+
+                Spacer(Modifier.size(8.dp))
+
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    SimpleUnderlineTextField(modifier = Modifier.weight(1f, true),
+                        text = catch.weatherTemperature.toString(),
+                        label = stringResource(id = R.string.temperature),
                         leadingIcon = {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                                tint = secondaryFigmaColor,
+                                painter = painterResource(id = R.drawable.ic_thermometer),
                                 contentDescription = ""
                             )
                         },
                         trailingIcon = {
-                            IconButton(
-                                onClick = { /*TODO*/ }) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_baseline_chevron_right_24),
-                                    tint = secondaryFigmaTextColor,
-                                    contentDescription = ""
-                                )
-                            }
-                        })
-
-                    if (catch.downloadPhotoLinks.isNotEmpty()) {
-                        LazyRow(modifier = Modifier.constrainAs(photos) {
-                            top.linkTo(place.bottom, 16.dp)
-                            absoluteLeft.linkTo(parent.absoluteLeft)
-                        }) {
-                            items(items = catch.downloadPhotoLinks) {
-                                ItemPhoto(
-                                    photo = it.toUri(),
-                                    clickedPhoto = {},
-                                    deletedPhoto = {},
-                                    deleteEnabled = false
-                                )
-                            }
-
+                            SecondaryText(text = stringResource(id = R.string.celsius))
                         }
-                    }
-                }
-            }
-
-            DefaultCard() {
-                ConstraintLayout(modifier = Modifier.padding(8.dp)) {
-                    val (title, rod, bait, lure) = createRefs()
-
-                    SubtitleText(
-                        modifier = Modifier.constrainAs(title) {
-                            top.linkTo(parent.top)
-                            absoluteLeft.linkTo(parent.absoluteLeft)
-                        },
-                        text = stringResource(id = R.string.way_of_fishing)
                     )
 
-                    SimpleUnderlineTextField(
-                        modifier = Modifier.constrainAs(rod) {
-                            top.linkTo(title.bottom, 8.dp)
-                            absoluteLeft.linkTo(parent.absoluteLeft)
-                        },
-                        text = if (catch.fishingRodType.isNotBlank()) {
-                            catch.fishingRodType
-                        } else {
-                            stringResource(id = R.string.no_rod)
-                        },
-                        label = stringResource(id = R.string.fish_rod)
-                    )
+                    Spacer(modifier = Modifier.padding(4.dp))
 
-                    SimpleUnderlineTextField(
-                        modifier = Modifier.constrainAs(bait) {
-                            top.linkTo(rod.bottom, 8.dp)
-                            absoluteLeft.linkTo(parent.absoluteLeft)
-                        },
-                        text = if (catch.fishingBait.isNotBlank()) {
-                            catch.fishingBait
-                        } else {
-                            stringResource(id = R.string.no_bait)
-                        },
-                        label = stringResource(id = R.string.bait)
-                    )
-
-                    SimpleUnderlineTextField(
-                        modifier = Modifier.constrainAs(lure) {
-                            top.linkTo(bait.bottom, 8.dp)
-                            absoluteLeft.linkTo(parent.absoluteLeft)
-                        },
-                        text = if (catch.fishingLure.isNotBlank()) {
-                            catch.fishingLure
-                        } else {
-                            stringResource(id = R.string.no_lure)
-                        },
-                        label = stringResource(id = R.string.lure)
-                    )
-                }
-            }
-
-            DefaultCard() {
-                Column(modifier = Modifier.padding(8.dp)) {
-                    SubtitleText(
-                        modifier = Modifier,
-                        text = stringResource(id = R.string.weather)
-                    )
-                    Spacer(Modifier.size(8.dp))
-                    SimpleUnderlineTextField(modifier = Modifier,
-                        text = catch.weatherPrimary,
-                        label = stringResource(id = R.string.main),
-                        trailingIcon = {
+                    SimpleUnderlineTextField(modifier = Modifier.weight(1f, true),
+                        text = hPaToMmHg(catch.weatherPressure).toString(),
+                        label = stringResource(id = R.string.pressure),
+                        leadingIcon = {
                             Icon(
-                                painter = painterResource(getWeatherIconByName(catch.weatherIcon)),
+                                painter = painterResource(id = R.drawable.ic_gauge),
                                 contentDescription = ""
                             )
+                        },
+                        trailingIcon = {
+                            SecondaryText(text = stringResource(id = R.string.pressure_units) + " ")
+                        }
+                    )
+                }
+
+                Spacer(Modifier.size(8.dp))
+
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    SimpleUnderlineTextField(modifier = Modifier.weight(1f, true),
+                        text = catch.weatherWindSpeed.toString(),
+                        label = stringResource(id = R.string.wind),
+                        leadingIcon = {
+                            Icon(
+                                modifier = Modifier.rotate(catch.weatherWindDeg.toFloat()),
+                                painter = painterResource(id = R.drawable.ic_arrow_up),
+                                contentDescription = ""
+                            )
+                        },
+                        trailingIcon = {
+                            SecondaryText(text = stringResource(id = R.string.wind_speed_units))
                         }
                     )
 
-                    Spacer(Modifier.size(8.dp))
+                    Spacer(modifier = Modifier.padding(4.dp))
 
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        SimpleUnderlineTextField(modifier = Modifier.weight(1f, true),
-                            text = catch.weatherTemperature.toString(),
-                            label = stringResource(id = R.string.temperature),
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_thermometer),
-                                    contentDescription = ""
-                                )
-                            },
-                            trailingIcon = {
-                                SecondaryText(text = stringResource(id = R.string.celsius))
-                            }
-                        )
-
-                        Spacer(modifier = Modifier.padding(4.dp))
-
-                        SimpleUnderlineTextField(modifier = Modifier.weight(1f, true),
-                            text = hPaToMmHg(catch.weatherPressure).toString(),
-                            label = stringResource(id = R.string.pressure),
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_gauge),
-                                    contentDescription = ""
-                                )
-                            },
-                            trailingIcon = {
-                                SecondaryText(text = stringResource(id = R.string.pressure_units) + " ")
-                            }
-                        )
-                    }
-
-                    Spacer(Modifier.size(8.dp))
-
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        SimpleUnderlineTextField(modifier = Modifier.weight(1f, true),
-                            text = catch.weatherWindSpeed.toString(),
-                            label = stringResource(id = R.string.wind),
-                            leadingIcon = {
-                                Icon(
-                                    modifier = Modifier.rotate(catch.weatherWindDeg.toFloat()),
-                                    painter = painterResource(id = R.drawable.ic_arrow_up),
-                                    contentDescription = ""
-                                )
-                            },
-                            trailingIcon = {
-                                SecondaryText(text = stringResource(id = R.string.wind_speed_units))
-                            }
-                        )
-
-                        Spacer(modifier = Modifier.padding(4.dp))
-
-                        SimpleUnderlineTextField(modifier = Modifier.weight(1f, true),
-                            text = (catch.weatherMoonPhase * 100).toInt().toString(),
-                            label = stringResource(id = R.string.moon_phase),
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(id = getMoonIconByPhase(catch.weatherMoonPhase)),
-                                    contentDescription = ""
-                                )
-                            },
-                            trailingIcon = {
-                                SecondaryText(text = stringResource(id = R.string.percent))
-                            }
-                        )
-                    }
+                    SimpleUnderlineTextField(modifier = Modifier.weight(1f, true),
+                        text = (catch.weatherMoonPhase * 100).toInt().toString(),
+                        label = stringResource(id = R.string.moon_phase),
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(id = getMoonIconByPhase(catch.weatherMoonPhase)),
+                                contentDescription = ""
+                            )
+                        },
+                        trailingIcon = {
+                            SecondaryText(text = stringResource(id = R.string.percent))
+                        }
+                    )
                 }
             }
+
         }
     }
 }
