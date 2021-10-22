@@ -5,6 +5,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CornerBasedShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -24,6 +26,7 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.ui.theme.Shapes
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 
 @Composable
@@ -33,8 +36,9 @@ fun MyCardNoPadding(content: @Composable () -> Unit) {
 }
 
 @Composable
-fun MyCard(content: @Composable () -> Unit) {
-    Card(elevation = 8.dp, modifier = Modifier.fillMaxWidth().padding(4.dp), content = content)
+fun MyCard(shape: CornerBasedShape = Shapes.small, content: @Composable () -> Unit) {
+    Card(elevation = 8.dp, shape = shape,
+        modifier = Modifier.fillMaxWidth().padding(4.dp), content = content)
 }
 
 @Composable

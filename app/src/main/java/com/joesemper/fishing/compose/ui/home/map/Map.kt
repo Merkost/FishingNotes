@@ -17,13 +17,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -37,6 +36,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.app.ActivityCompat
@@ -57,10 +58,12 @@ import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.home.MyCard
 import com.joesemper.fishing.compose.ui.home.UiState
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
+import com.joesemper.fishing.ui.theme.Shapes
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 import kotlinx.coroutines.*
 import me.vponomarenko.compose.shimmer.shimmer
@@ -91,7 +94,9 @@ fun Map(
     val scaffoldState = rememberBottomSheetScaffoldState(
         //bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
     )
-    val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+
+    val dialogAddPlaceIsShowing = remember { mutableStateOf(false)}
+
     val lastKnownLocation = remember {
         getCurrentLocation(context = context, permissionsState = permissionsState)
     }
@@ -115,19 +120,6 @@ fun Map(
     var cameraMoveState: CameraMoveState by remember {
         mutableStateOf(CameraMoveState.MoveFinish)
     }
-
-
-    /*ModalBottomSheetLayout(
-        sheetContent = {
-            BottomSheetAddMarkerDialog(
-                currentPosition,
-                modalBottomSheetState,
-                viewModel.chosenPlace,
-            )
-        },
-        sheetState = modalBottomSheetState,
-    ) {*/
-
 
         BottomSheetScaffold(
             modifier = modifier.fillMaxSize(),
@@ -172,6 +164,7 @@ fun Map(
                                     /*coroutineScope.launch {
                                         modalBottomSheetState.show()
                                     }*/
+                                    dialogAddPlaceIsShowing.value = true
 
                                 }
                                 placeSelectMode = !placeSelectMode
@@ -223,12 +216,17 @@ fun Map(
 
                 mapUiState = when {
 
-                    modalBottomSheetState.isVisible -> MapUiState.BottomSheetAddMode
+                    dialogAddPlaceIsShowing.value -> MapUiState.BottomSheetAddMode
                     placeSelectMode -> MapUiState.PlaceSelectMode
                     scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetInfoMode.apply {
                         bottomBarVisibilityState.value = false
                     }
                     else -> MapUiState.NormalMode.apply { bottomBarVisibilityState.value = true }
+                }
+
+                if (dialogAddPlaceIsShowing.value) Dialog(onDismissRequest = {dialogAddPlaceIsShowing.value = false},
+                    properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = false)) {
+                    AddMarkerDialog(currentPosition, dialogAddPlaceIsShowing, viewModel.chosenPlace)
                 }
 
                 MyLocationButton(coroutineScope, mapView, lastKnownLocation.value,
@@ -406,9 +404,9 @@ fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name:
 
 @ExperimentalMaterialApi
 @Composable
-fun BottomSheetAddMarkerDialog(
+fun AddMarkerDialog(
     currentPosition: MutableState<LatLng?>,
-    modalBottomSheetState: ModalBottomSheetState,
+    dialogState: MutableState<Boolean>,
     chosenPlace: MutableState<String?>,
 ) {
     val viewModel = get<MapViewModel>()
@@ -416,172 +414,174 @@ fun BottomSheetAddMarkerDialog(
     val coroutineScope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsState()
 
-    Spacer(modifier = Modifier.size(1.dp))
 
-    ConstraintLayout(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-    ) {
-        val (progress, name, locationIcon, title, description, saveButton, cancelButton) = createRefs()
+    MyCard(shape = Shapes.large) {
+        ConstraintLayout(
+            modifier = Modifier
+                .requiredHeight(250.dp)
+                .requiredWidth(300.dp).background(Color.White)
+        ) {
+            val (progress, name, locationIcon, title, description, saveButton, cancelButton) = createRefs()
 
-        uiState?.let {
-            when (it) {
-                UiState.InProgress -> {
-                    Surface(color = Color.Gray, modifier = Modifier
-                        .constrainAs(progress) {
-                            top.linkTo(parent.top)
-                            absoluteLeft.linkTo(parent.absoluteLeft)
-                            absoluteRight.linkTo(parent.absoluteRight)
-                            bottom.linkTo(parent.bottom)
+            uiState?.let {
+                when (it) {
+                    UiState.InProgress -> {
+                        Surface(color = Color.Gray, modifier = Modifier
+                            .constrainAs(progress) {
+                                top.linkTo(parent.top)
+                                absoluteLeft.linkTo(parent.absoluteLeft)
+                                absoluteRight.linkTo(parent.absoluteRight)
+                                bottom.linkTo(parent.bottom)
+                            }
+                            .size(100.dp)) {
+                            FishLoading(modifier = Modifier.size(150.dp))
                         }
-                        .size(100.dp)) {
-                        FishLoading(modifier = Modifier.size(150.dp))
+                    }
+                    UiState.Success -> {
+                        coroutineScope.launch {
+                            dialogState.value = false
+                            Toast.makeText(
+                                context,
+                                "Place added successfully",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                    else -> {
                     }
                 }
-                UiState.Success -> {
-                    coroutineScope.launch {
-                        modalBottomSheetState.hide()
-                        Toast.makeText(
-                            context,
-                            "Place added successfully",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-                else -> {
+            }
+
+            val titleValue = remember { mutableStateOf(/*chosenPlace.value ?:*/ "") }
+            LaunchedEffect(chosenPlace.value) {
+                chosenPlace.value?.let {
+                    titleValue.value = it
                 }
             }
-        }
-
-        val titleValue = remember { mutableStateOf(/*chosenPlace.value ?:*/ "") }
-        LaunchedEffect(chosenPlace.value) {
-            chosenPlace.value?.let {
-                titleValue.value = it
-            }
-        }
-        val descriptionValue = remember { mutableStateOf("") }
+            val descriptionValue = remember { mutableStateOf("") }
 
 
 
-        Text(
-            text = "Новая точка",
-            style = MaterialTheme.typography.subtitle1,
-            modifier = Modifier.constrainAs(name) {
-                top.linkTo(parent.top, 16.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft, 4.dp)
-                absoluteRight.linkTo(parent.absoluteRight)
-            }
-        )
-
-        OutlinedTextField(
-            value = titleValue.value,
-            onValueChange = {
-                titleValue.value = it
-            },
-            label = { Text(text = "Название") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next
-            ),
-            modifier = Modifier.constrainAs(title) {
-                top.linkTo(name.bottom, 2.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft, 2.dp)
-                absoluteRight.linkTo(parent.absoluteRight, 2.dp)
-            }/*.navigationBarsWithImePadding(),*/
-        )
-        OutlinedTextField(
-            value = descriptionValue.value,
-            onValueChange = {
-                descriptionValue.value = it
-            },
-            label = { Text(text = "Описание") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next
-            ),
-            modifier = Modifier.constrainAs(description) {
-                top.linkTo(title.bottom, 2.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft, 4.dp)
-                absoluteRight.linkTo(parent.absoluteRight, 4.dp)
-            }/*.navigationBarsWithImePadding()*/
-        )
-
-        /*Icon(
-           painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-           contentDescription = "Marker",
-           tint = secondaryFigmaColor,
-           modifier = Modifier
-               .size(32.dp)
-               .constrainAs(locationIcon) {
-                   absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-                   top.linkTo(title.top)
-                   bottom.linkTo(title.bottom)
-               }
-       )*/
-
-
-
-        OutlinedButton(modifier = Modifier.constrainAs(cancelButton) {
-            absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-            top.linkTo(description.bottom, 8.dp)
-            bottom.linkTo(parent.bottom, 16.dp)
-        },
-            shape = RoundedCornerShape(24.dp), onClick = {
-                coroutineScope.launch {
-                    modalBottomSheetState.hide()
+            Text(
+                text = "Новая точка",
+                style = MaterialTheme.typography.subtitle1,
+                modifier = Modifier.constrainAs(name) {
+                    top.linkTo(parent.top, 16.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 4.dp)
+                    absoluteRight.linkTo(parent.absoluteRight)
                 }
-            }) {
-            Row(
-                modifier = Modifier.wrapContentSize(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                /*Icon(
-                    painterResource(id = R.drawable.ic_baseline_shortcut_24),
-                    "",
-                    modifier = Modifier.size(24.dp)
-                )*/
-                Text(
-                    stringResource(id = R.string.cancel),
-                    modifier = Modifier.padding(start = 8.dp)
-                )
-            }
-        }
-
-        Button(modifier = Modifier.constrainAs(saveButton) {
-            absoluteRight.linkTo(cancelButton.absoluteLeft, 8.dp)
-            top.linkTo(cancelButton.top)
-            bottom.linkTo(cancelButton.bottom)
-        }, shape = RoundedCornerShape(24.dp), onClick = {
-            viewModel.addNewMarker(
-                RawMapMarker(
-                    titleValue.value,
-                    descriptionValue.value,
-                    currentPosition.value?.latitude ?: 0.0,
-                    currentPosition.value?.longitude ?: 0.0
-                )
             )
-        }) {
-            Row(
-                modifier = Modifier.wrapContentSize(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                /*Icon(
-                    painterResource(id = R.drawable.ic_baseline_navigation_24),
-                    "",
-                    modifier = Modifier.size(24.dp)
-                )*/
-                Text(
-                    stringResource(id = R.string.save),
-                    modifier = Modifier.padding(start = 8.dp)
+
+            OutlinedTextField(
+                value = titleValue.value,
+                onValueChange = {
+                    titleValue.value = it
+                },
+                label = { Text(text = "Название") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                ),
+                modifier = Modifier.constrainAs(title) {
+                    top.linkTo(name.bottom, 2.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 2.dp)
+                    absoluteRight.linkTo(parent.absoluteRight, 2.dp)
+                }/*.navigationBarsWithImePadding(),*/
+            )
+            OutlinedTextField(
+                value = descriptionValue.value,
+                onValueChange = {
+                    descriptionValue.value = it
+                },
+                label = { Text(text = "Описание") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                ),
+                modifier = Modifier.constrainAs(description) {
+                    top.linkTo(title.bottom, 2.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 4.dp)
+                    absoluteRight.linkTo(parent.absoluteRight, 4.dp)
+                }/*.navigationBarsWithImePadding()*/
+            )
+
+            /*Icon(
+               painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+               contentDescription = "Marker",
+               tint = secondaryFigmaColor,
+               modifier = Modifier
+                   .size(32.dp)
+                   .constrainAs(locationIcon) {
+                       absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
+                       top.linkTo(title.top)
+                       bottom.linkTo(title.bottom)
+                   }
+           )*/
+
+
+
+            OutlinedButton(modifier = Modifier.constrainAs(cancelButton) {
+                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+                top.linkTo(description.bottom, 8.dp)
+                bottom.linkTo(parent.bottom, 16.dp)
+            },
+                shape = RoundedCornerShape(24.dp), onClick = {
+                    coroutineScope.launch {
+                        dialogState.value = false
+                    }
+                }) {
+                Row(
+                    modifier = Modifier.wrapContentSize(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    /*Icon(
+                        painterResource(id = R.drawable.ic_baseline_shortcut_24),
+                        "",
+                        modifier = Modifier.size(24.dp)
+                    )*/
+                    Text(
+                        stringResource(id = R.string.cancel),
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
+            }
+
+            Button(modifier = Modifier.constrainAs(saveButton) {
+                absoluteRight.linkTo(cancelButton.absoluteLeft, 8.dp)
+                top.linkTo(cancelButton.top)
+                bottom.linkTo(cancelButton.bottom)
+            }, shape = RoundedCornerShape(24.dp), onClick = {
+                viewModel.addNewMarker(
+                    RawMapMarker(
+                        titleValue.value,
+                        descriptionValue.value,
+                        currentPosition.value?.latitude ?: 0.0,
+                        currentPosition.value?.longitude ?: 0.0
+                    )
                 )
+            }) {
+                Row(
+                    modifier = Modifier.wrapContentSize(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    /*Icon(
+                        painterResource(id = R.drawable.ic_baseline_navigation_24),
+                        "",
+                        modifier = Modifier.size(24.dp)
+                    )*/
+                    Text(
+                        stringResource(id = R.string.save),
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
             }
         }
     }
+
 }
 
 @Composable
