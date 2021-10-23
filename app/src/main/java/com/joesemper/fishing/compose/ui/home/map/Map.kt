@@ -261,6 +261,8 @@ fun Map(
 
                 //PlaceName while PlaceSelectMode is active
                 AnimatedVisibility (mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection.value,
+                    enter = fadeIn(animationSpec = tween(300)),
+                    exit = fadeOut(animationSpec = tween(300)),
                     modifier = Modifier.constrainAs(addMarkerFragment) {
                         top.linkTo(parent.top, 16.dp)
                         absoluteLeft.linkTo(mapLayersButton.absoluteRight, 8.dp)
