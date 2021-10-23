@@ -203,7 +203,8 @@ fun Map(
                                 }
                             }
                         }
-                    })
+                    }
+                )
             },
             floatingActionButtonPosition = FabPosition.End,
         ) {
@@ -212,7 +213,6 @@ fun Map(
                     mapLayersView, pointer) = createRefs()
 
                 mapUiState = when {
-
                     dialogAddPlaceIsShowing.value -> MapUiState.BottomSheetAddMode
                     placeSelectMode -> MapUiState.PlaceSelectMode
                     scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetInfoMode.apply {
@@ -237,8 +237,8 @@ fun Map(
                         })
 
                 //DialogOnAddPlace
-                if (dialogAddPlaceIsShowing.value) Dialog(onDismissRequest = {dialogAddPlaceIsShowing.value = false},
-                    properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = false)) {
+                if (dialogAddPlaceIsShowing.value)
+                    Dialog(onDismissRequest = { dialogAddPlaceIsShowing.value = false }) {
                     AddMarkerDialog(currentPosition, dialogAddPlaceIsShowing, viewModel.chosenPlace)
                 }
 
@@ -267,11 +267,8 @@ fun Map(
                         absoluteRight.linkTo(mapMyLocationButton.absoluteLeft, 8.dp)
                     }
                 ) {
-                    DialogOnPlaceChoosing(
-                        context, cameraMoveState, mapView, currentPosition,
-                        modifier = Modifier
-                            .wrapContentSize()
-                    )
+                    DialogOnPlaceChoosing(context, cameraMoveState, mapView, currentPosition,
+                        modifier = Modifier.wrapContentSize())
                 }
                 AnimatedVisibility (mapUiState == MapUiState.PlaceSelectMode,
                     modifier = Modifier.constrainAs(pointer) {
@@ -282,7 +279,6 @@ fun Map(
                     } )  {
                     PointerIcon(cameraMoveState = cameraMoveState)
                 }
-
 
                 PermissionDialog(modifier = Modifier.constrainAs(permissionDialog) {
                     top.linkTo(parent.top)
@@ -309,16 +305,13 @@ fun Map(
                                 coroutineScope = coroutineScope,
                                 map = mapView
                             )
-                            //mapUiState = MapUiState.BottomSheetInfoMode
                             scaffoldState.bottomSheetState.expand()
-
                         }
                     },
                     cameraMoveCallback = { state -> cameraMoveState = state },
                     lastLocation = lastKnownLocation
                 )
             }
-        //}
     }
 }
 
@@ -362,12 +355,10 @@ fun AddMarkerDialog(
     val coroutineScope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsState()
 
-
     MyCard(shape = Shapes.large) {
         ConstraintLayout(
-            modifier = Modifier
-                .requiredHeight(250.dp)
-                .requiredWidth(300.dp).background(Color.White)
+            modifier = Modifier.wrapContentSize().background(Color.White)
+                /*.requiredHeight(250.dp).requiredWidth(300.dp)*/
         ) {
             val (progress, name, locationIcon, title, description, saveButton, cancelButton) = createRefs()
 
@@ -395,23 +386,28 @@ fun AddMarkerDialog(
                             ).show()
                         }
                     }
-                    else -> {
-                    }
+                    else -> { }
                 }
             }
-
+            val descriptionValue = remember { mutableStateOf("") }
             val titleValue = remember { mutableStateOf(/*chosenPlace.value ?:*/ "") }
             LaunchedEffect(chosenPlace.value) {
                 chosenPlace.value?.let {
                     titleValue.value = it
                 }
             }
-            val descriptionValue = remember { mutableStateOf("") }
 
-
+            Icon(painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+                contentDescription = "Marker",
+                tint = secondaryFigmaColor,
+                modifier = Modifier.constrainAs(locationIcon) {
+                        absoluteRight.linkTo(name.absoluteLeft, 8.dp)
+                        top.linkTo(name.top)
+                        bottom.linkTo(name.bottom)
+                    })
 
             Text(
-                text = "Новая точка",
+                text = stringResource(R.string.new_place),
                 style = MaterialTheme.typography.subtitle1,
                 modifier = Modifier.constrainAs(name) {
                     top.linkTo(parent.top, 16.dp)
@@ -422,10 +418,8 @@ fun AddMarkerDialog(
 
             OutlinedTextField(
                 value = titleValue.value,
-                onValueChange = {
-                    titleValue.value = it
-                },
-                label = { Text(text = "Название") },
+                onValueChange = { titleValue.value = it },
+                label = { Text(text = stringResource(R.string.title)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
@@ -442,7 +436,7 @@ fun AddMarkerDialog(
                 onValueChange = {
                     descriptionValue.value = it
                 },
-                label = { Text(text = "Описание") },
+                label = { Text(text = stringResource(R.string.description)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
@@ -455,25 +449,10 @@ fun AddMarkerDialog(
                 }/*.navigationBarsWithImePadding()*/
             )
 
-            /*Icon(
-               painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-               contentDescription = "Marker",
-               tint = secondaryFigmaColor,
-               modifier = Modifier
-                   .size(32.dp)
-                   .constrainAs(locationIcon) {
-                       absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-                       top.linkTo(title.top)
-                       bottom.linkTo(title.bottom)
-                   }
-           )*/
-
-
-
             OutlinedButton(modifier = Modifier.constrainAs(cancelButton) {
-                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-                top.linkTo(description.bottom, 8.dp)
-                bottom.linkTo(parent.bottom, 16.dp)
+                absoluteRight.linkTo(parent.absoluteRight, 4.dp)
+                top.linkTo(description.bottom, 12.dp)
+                bottom.linkTo(parent.bottom, 12.dp)
             },
                 shape = RoundedCornerShape(24.dp), onClick = {
                     coroutineScope.launch {
