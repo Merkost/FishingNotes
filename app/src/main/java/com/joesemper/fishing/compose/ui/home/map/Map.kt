@@ -7,22 +7,18 @@ import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -105,7 +101,8 @@ fun Map(
         mutableStateOf<UserMapMarker?>(null)
     }
 
-    val mapLayersSelection = remember { mutableStateOf(false) }
+    val mapType = rememberSaveable { mutableStateOf(MapTypes.roadmap) }
+    val mapLayersSelection = rememberSaveable { mutableStateOf(false) }
 
     val currentPosition = remember {
         mutableStateOf<LatLng?>(null)
@@ -211,8 +208,8 @@ fun Map(
             floatingActionButtonPosition = FabPosition.End,
         ) {
             ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-                val (permissionDialog, mapLayout, myLocationButton, mapLayersButton,
-                    mapLayersView, pointer, addMarkerFragment) = createRefs()
+                val (permissionDialog, mapLayout, addMarkerFragment, mapMyLocationButton, mapLayersButton,
+                    mapLayersView, pointer) = createRefs()
 
                 mapUiState = when {
 
@@ -224,117 +221,68 @@ fun Map(
                     else -> MapUiState.NormalMode.apply { bottomBarVisibilityState.value = true }
                 }
 
+                //MapLayersButton
+                MapLayersButton(modifier = Modifier.size(40.dp).constrainAs(mapLayersButton) {
+                        top.linkTo(parent.top, 16.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                    }, layersSelectionMode = mapLayersSelection,)
+
+                //MyLocationButton
+                MyLocationButton(coroutineScope, mapView, lastKnownLocation.value,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .constrainAs(mapMyLocationButton) {
+                            top.linkTo(parent.top, 16.dp)
+                            absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+                        })
+
+                //DialogOnAddPlace
                 if (dialogAddPlaceIsShowing.value) Dialog(onDismissRequest = {dialogAddPlaceIsShowing.value = false},
                     properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = false)) {
                     AddMarkerDialog(currentPosition, dialogAddPlaceIsShowing, viewModel.chosenPlace)
                 }
 
-                MyLocationButton(coroutineScope, mapView, lastKnownLocation.value,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .constrainAs(myLocationButton) {
-                            top.linkTo(parent.top, 16.dp)
-                            absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-                        })
-
+                //LayersSelectionView
                 if (mapLayersSelection.value) Surface(modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(0f)
+                    .fillMaxSize().alpha(0f)
                     .clickable { mapLayersSelection.value = false }, color = Color.White
-                ) {}
+                ) { }
                 AnimatedVisibility(mapLayersSelection.value,
+                    enter = expandIn(Alignment.TopStart) + fadeIn(),
+                    exit = shrinkOut(Alignment.TopStart,
+                        animationSpec = tween(380))
+                            + fadeOut(animationSpec = tween(280)),
                     modifier = Modifier.constrainAs(mapLayersView) {
                         top.linkTo(parent.top, 16.dp)
                         absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
                     }) {
-                    Card(
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier
-                            .width(250.dp)
-                            .wrapContentHeight()
-                    ) {
-                        val mapType = remember { mutableStateOf(MapTypes.roadmap) }
-                        Column(
-                            modifier = Modifier
-                                .padding(2.dp)
-                                .padding(bottom = 8.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(stringResource(R.string.map_type))
-                                Card(shape = CircleShape, modifier = Modifier.size(20.dp)) {
-                                    IconButton(onClick = { mapLayersSelection.value = false }) {
-                                        Icon(Icons.Default.Close, stringResource(R.string.close))
-                                    }
-                                }
-                            }
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceEvenly,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                MapLayerItem(
-                                    mapType,
-                                    layer = MapTypes.roadmap,
-                                    painter = painterResource(R.drawable.ic_map_default),
-                                    name = stringResource(R.string.roadmap)
-                                )
-                                MapLayerItem(
-                                    mapType,
-                                    layer = MapTypes.hybrid,
-                                    painter = painterResource(R.drawable.ic_map_satellite),
-                                    name = stringResource(R.string.satellite)
-                                )
-                                MapLayerItem(
-                                    mapType,
-                                    layer = MapTypes.terrain,
-                                    painter = painterResource(R.drawable.ic_map_terrain),
-                                    name = stringResource(R.string.terrain)
-                                )
-
-                                LaunchedEffect(mapType.value) {
-                                    val googleMap = mapView.awaitMap()
-                                    googleMap.mapType = mapType.value
-                                }
-                            }
-                        }
-                    }
+                    LayersView(mapView, mapLayersSelection, mapType)
                 }
 
-                AnimatedVisibility(!mapLayersSelection.value,
-                    modifier = Modifier.constrainAs(mapLayersButton) {
+                //PlaceName while PlaceSelectMode is active
+                AnimatedVisibility (mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection.value,
+                    modifier = Modifier.constrainAs(addMarkerFragment) {
                         top.linkTo(parent.top, 16.dp)
-                        absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                    }) {
-                    MapLayersButton(
-                        modifier = Modifier.size(40.dp),
-                        layersSelectionMode = mapLayersSelection,
-                    )
-                }
-
-
-                if (mapUiState == MapUiState.PlaceSelectMode) {
+                        absoluteLeft.linkTo(mapLayersButton.absoluteRight, 8.dp)
+                        absoluteRight.linkTo(mapMyLocationButton.absoluteLeft, 8.dp)
+                    }
+                ) {
                     DialogOnPlaceChoosing(
                         context, cameraMoveState, mapView, currentPosition,
                         modifier = Modifier
-                            .constrainAs(addMarkerFragment) {
-                                top.linkTo(parent.top, 16.dp)
-                                absoluteLeft.linkTo(parent.absoluteLeft, 72.dp)
-                                absoluteRight.linkTo(parent.absoluteRight, 72.dp)
-                            }
                             .wrapContentSize()
                     )
-                    PointerIcon(modifier = Modifier.constrainAs(pointer) {
+                }
+                AnimatedVisibility (mapUiState == MapUiState.PlaceSelectMode,
+                    modifier = Modifier.constrainAs(pointer) {
                         top.linkTo(parent.top)
                         bottom.linkTo(parent.bottom, 65.dp)
                         absoluteLeft.linkTo(parent.absoluteLeft)
                         absoluteRight.linkTo(parent.absoluteRight)
-                    }, cameraMoveState = cameraMoveState)
+                    } )  {
+                    PointerIcon(cameraMoveState = cameraMoveState)
                 }
+
 
                 PermissionDialog(modifier = Modifier.constrainAs(permissionDialog) {
                     top.linkTo(parent.top)
@@ -822,18 +770,17 @@ fun DialogOnPlaceChoosing(
         }
     }
 
-
     Card(
         shape = RoundedCornerShape(size = 20.dp),
         modifier = modifier
-            .heightIn(min = 40.dp, max = 40.dp)
+            .heightIn(min = 40.dp, max = 80.dp)
             .widthIn(max = 240.dp)
     ) {
         AnimatedVisibility(viewModel.chosenPlace.value.isNullOrEmpty()) {
             Row(
                 modifier = Modifier
                     .wrapContentSize()
-                    .padding(6.dp),
+                    .padding(5.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -842,7 +789,7 @@ fun DialogOnPlaceChoosing(
                     contentDescription = "Marker",
                     tint = Color.LightGray,
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(30.dp)
                 )
                 Spacer(Modifier.size(8.dp))
                 Column {
@@ -864,7 +811,7 @@ fun DialogOnPlaceChoosing(
                 Row(
                     modifier = Modifier
                         .wrapContentSize()
-                        .padding(6.dp),
+                        .padding(5.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -873,10 +820,10 @@ fun DialogOnPlaceChoosing(
                         contentDescription = "Marker",
                         tint = secondaryFigmaColor,
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(30.dp)
                     )
                     Spacer(Modifier.size(4.dp))
-                    Text(it, overflow = TextOverflow.Ellipsis, maxLines = 1)
+                    Text(it, overflow = TextOverflow.Ellipsis)
                     Spacer(Modifier.size(4.dp))
                 }
             }
@@ -885,7 +832,7 @@ fun DialogOnPlaceChoosing(
 }
 
 @Composable
-fun PointerIcon(cameraMoveState: CameraMoveState, modifier: Modifier) {
+fun PointerIcon(cameraMoveState: CameraMoveState, modifier: Modifier = Modifier) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.another_marker))
     val lottieAnimatable = rememberLottieAnimatable()
     var minMaxFrame by remember {
@@ -926,7 +873,6 @@ fun PointerIcon(cameraMoveState: CameraMoveState, modifier: Modifier) {
 @ExperimentalMaterialApi
 @Composable
 fun FabOnMap(state: MapUiState, onClick: () -> Unit) {
-
     val fabImg = remember { mutableStateOf(R.drawable.ic_baseline_add_location_24) }
     val padding = remember { mutableStateOf(128.dp) }
 
@@ -946,13 +892,7 @@ fun FabOnMap(state: MapUiState, onClick: () -> Unit) {
     }
 
     FloatingActionButton(
-        modifier = Modifier
-            .animateContentSize()
-            .padding(
-                bottom = padding.value
-            ),
-        onClick = onClick,
-    ) {
+        modifier = Modifier.animateContentSize().padding(bottom = padding.value), onClick = onClick,) {
         Icon(
             painter = painterResource(id = fabImg.value),
             contentDescription = "Add new location",
@@ -992,10 +932,8 @@ fun PermissionDialog(modifier: Modifier, permissionsState: MultiplePermissionsSt
             }
 
         },
-        permissionsNotAvailableContent = {
-            Text("The location is not available")
-        }) {
-    }
+        permissionsNotAvailableContent = { Text("The location is not available") })
+    {}
 }
 
 @Composable
@@ -1012,7 +950,6 @@ fun rememberMapViewWithLifecycle(): MapView {
             lifecycle.removeObserver(lifecycleObserver)
         }
     }
-
     return mapView
 }
 
@@ -1020,9 +957,7 @@ fun rememberMapViewWithLifecycle(): MapView {
 fun IconButton(image: Painter, name: String, click: () -> Unit, modifier: Modifier) {
     OutlinedButton(
         onClick = click,
-        modifier = modifier
-            .wrapContentSize()
-            .padding(4.dp),
+        modifier = modifier.wrapContentSize().padding(4.dp),
         content = {
             Row(
                 modifier = Modifier.wrapContentSize(),
