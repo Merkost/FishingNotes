@@ -270,6 +270,8 @@ fun Map(
                     DialogOnPlaceChoosing(context, cameraMoveState, mapView, currentPosition,
                         modifier = Modifier.wrapContentSize())
                 }
+
+                //PointerIcon
                 AnimatedVisibility (mapUiState == MapUiState.PlaceSelectMode,
                     modifier = Modifier.constrainAs(pointer) {
                         top.linkTo(parent.top)
@@ -710,41 +712,38 @@ fun DialogOnPlaceChoosing(
     when (cameraMoveState) {
         CameraMoveState.MoveStart -> {
             //viewModel.getPlaceName
-            job?.cancel()
+            //job?.cancel()
             viewModel.chosenPlace.value = null
         }
         CameraMoveState.MoveFinish -> {
             LaunchedEffect(cameraMoveState) {
-                job = coroutineScope.launch {
-
-                    delay(2000)
-                    if (isActive) {
-                        mapView.getMapAsync { googleMap ->
-                            val target = googleMap.cameraPosition.target
-                            currentPosition.value =
-                                LatLng(target.latitude, target.longitude)
-                        }
-                        //getPlaceName(coroutineScope, geocoder)
-                        try {
-                            val position = geocoder.getFromLocation(
-                                currentPosition.value!!.latitude,
-                                currentPosition.value!!.longitude,
-                                1
-                            )
-                            position?.first()?.let {
-
-                                if (!it.subAdminArea.isNullOrBlank()) {
-                                    viewModel.chosenPlace.value =
-                                        it.subAdminArea
-                                } else if (!it.adminArea.isNullOrBlank()) {
-                                    viewModel.chosenPlace.value = it.adminArea
-                                } else viewModel.chosenPlace.value = "Место без названия"
+                    delay(1200)
+                            mapView.getMapAsync { googleMap ->
+                                val target = googleMap.cameraPosition.target
+                                currentPosition.value =
+                                    LatLng(target.latitude, target.longitude)
+////////////////////////////////////////////////////////////////////
+                                try {
+                                    val position = geocoder.getFromLocation(
+                                        currentPosition.value!!.latitude,
+                                        currentPosition.value!!.longitude,
+                                        1
+                                    )
+                                    position?.first()?.let {
+                                        if (!it.subAdminArea.isNullOrBlank()) {
+                                            viewModel.chosenPlace.value =
+                                                it.subAdminArea
+                                        } else if (!it.adminArea.isNullOrBlank()) {
+                                            viewModel.chosenPlace.value = it.adminArea
+                                        } else viewModel.chosenPlace.value = "Место без названия"
+                                    }
+                                } catch (e: Throwable) {
+                                    viewModel.chosenPlace.value = "Не удалось определить место"
+                                }
                             }
-                        } catch (e: Throwable) {
-                            viewModel.chosenPlace.value = "Не удалось определить место"
-                        }
-                    }
-                }
+
+                        //getPlaceName(coroutineScope, geocoder)
+
             }
         }
     }
