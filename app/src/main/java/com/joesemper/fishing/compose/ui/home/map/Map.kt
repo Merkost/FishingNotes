@@ -666,8 +666,8 @@ fun GoogleMapLayout(
             googleMap.setOnCameraIdleListener {
                 cameraMoveCallback(CameraMoveState.MoveFinish)
             }
-            googleMap.isMyLocationEnabled = true
             googleMap.uiSettings.isMyLocationButtonEnabled = false
+            //googleMap.uiSettings.isCompassEnabled = true
 
 //            if (viewModel.lastLocation.value == null) {
 //                //val lastLatLng = lastLocation.value
@@ -676,6 +676,15 @@ fun GoogleMapLayout(
 //            }
         }
     }
+
+   /* LaunchedEffect(permissionsState)  {
+        when {
+            permissionsState.allPermissionsGranted -> {
+                val googleMap = map.awaitMap()
+                googleMap.isMyLocationEnabled = true
+            }
+        }
+    }*/
 
     LaunchedEffect(map) {
         val googleMap = map.awaitMap()
@@ -724,6 +733,7 @@ fun DialogOnPlaceChoosing(
                                 val target = googleMap.cameraPosition.target
                                 currentPosition.value =
                                     LatLng(target.latitude, target.longitude)
+
 ////////////////////////////////////////////////////////////////////
                                 try {
                                     val position = geocoder.getFromLocation(

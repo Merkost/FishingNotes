@@ -1,14 +1,17 @@
 package com.joesemper.fishing.compose.ui.home
 
+import android.net.Uri
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -17,22 +20,24 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.theme.primaryFigmaColor
-import com.joesemper.fishing.ui.theme.primaryFigmaTextColor
-import com.joesemper.fishing.ui.theme.secondaryFigmaColor
-import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
+import com.joesemper.fishing.ui.theme.*
 
 @Composable
 fun MyCardNoPadding(content: @Composable () -> Unit) {
@@ -41,7 +46,7 @@ fun MyCardNoPadding(content: @Composable () -> Unit) {
 }
 
 @Composable
-fun MyCard(shape: CornerBasedShape = Shapes.small, content: @Composable () -> Unit) {
+fun MyCard(shape: CornerBasedShape = RoundedCornerShape(8.dp), content: @Composable () -> Unit) {
     Card(elevation = 8.dp, shape = shape,
         modifier = Modifier.fillMaxWidth().padding(4.dp), content = content)
 }
@@ -262,7 +267,7 @@ fun SecondaryTextColored(modifier: Modifier = Modifier, text: String) {
 @Composable
 fun DefaultAppBar(
     modifier: Modifier = Modifier,
-    navIcon: ImageVector = Icons.Filled.ArrowBack,
+    navIcon: ImageVector =  Icons.Default.ArrowBack,
     onNavClick: () -> Unit,
     title: String,
     actions: @Composable() (RowScope.() -> Unit) = {}
