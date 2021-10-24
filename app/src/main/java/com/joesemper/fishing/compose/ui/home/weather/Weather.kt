@@ -165,9 +165,7 @@ fun Weather(
             if (currentWeather.value != null) {
                 WeatherForecastLayout(navController, currentWeather.value!!)
             }
-
         }
-
     }
 }
 

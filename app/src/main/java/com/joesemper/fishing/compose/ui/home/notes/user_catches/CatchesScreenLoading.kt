@@ -17,8 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.compose.ui.home.MyCard
+import com.joesemper.fishing.compose.ui.home.notes.ItemAdd
+import com.joesemper.fishing.model.entity.content.UserCatch
 import me.vponomarenko.compose.shimmer.shimmer
 
 val catches = listOf(
@@ -35,7 +36,13 @@ fun UserCatchesLoading(
     addNewCatchClicked: () -> Unit
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        item { ItemAddCatch { addNewCatchClicked() } }
+        item {
+            ItemAdd(
+                icon = painterResource(R.drawable.ic_add_catch),
+                text = stringResource(R.string.add_new_catch),
+                onClickAction = addNewCatchClicked
+            )
+        }
         items(items = catches) {
             ItemCatchLoading(
                 catch = it
@@ -52,18 +59,27 @@ fun ItemCatchLoading(catch: UserCatch) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.height(75.dp).fillMaxWidth()
+            modifier = Modifier
+                .height(75.dp)
+                .fillMaxWidth()
                 .padding(5.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxHeight(),
                 horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.Start)
             ) {
-                Box(modifier = Modifier.size(75.dp).padding(5.dp)) {
+                Box(
+                    modifier = Modifier
+                        .size(75.dp)
+                        .padding(5.dp)
+                ) {
                     Icon(
                         painterResource(R.drawable.ic_no_photo_vector),
                         stringResource(R.string.place),
-                        modifier = Modifier.fillMaxSize().align(Alignment.Center).shimmer(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .align(Alignment.Center)
+                            .shimmer(),
                         tint = Color.Gray
                     )
                 }
@@ -71,7 +87,11 @@ fun ItemCatchLoading(catch: UserCatch) {
                     verticalArrangement = Arrangement.SpaceBetween,
                     horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxHeight()
                 ) {
-                    Row(modifier = Modifier.height(18.dp).shimmer()) {
+                    Row(
+                        modifier = Modifier
+                            .height(18.dp)
+                            .shimmer()
+                    ) {
                         Text(
                             "Название места",
                             fontWeight = FontWeight.Bold,
@@ -80,7 +100,9 @@ fun ItemCatchLoading(catch: UserCatch) {
                         )
                     }
                     Row(
-                        modifier = Modifier.height(18.dp).shimmer()
+                        modifier = Modifier
+                            .height(18.dp)
+                            .shimmer()
                     ) {
                         Text(
                             stringResource(R.string.amount) + ": 0",
@@ -95,11 +117,15 @@ fun ItemCatchLoading(catch: UserCatch) {
                         Icon(
                             painterResource(R.drawable.ic_baseline_location_on_24),
                             stringResource(R.string.place),
-                            modifier = Modifier.size(20.dp).shimmer(),
+                            modifier = Modifier
+                                .size(20.dp)
+                                .shimmer(),
                             tint = Color.LightGray
                         )
                         Row(
-                            modifier = Modifier.height(18.dp).shimmer()
+                            modifier = Modifier
+                                .height(18.dp)
+                                .shimmer()
                         ) {
                             Text(
                                 "Place", color = Color.LightGray,
@@ -114,7 +140,11 @@ fun ItemCatchLoading(catch: UserCatch) {
                 horizontalAlignment = Alignment.End,
                 modifier = Modifier.fillMaxHeight()
             ) {
-                Row(modifier = Modifier.height(18.dp).shimmer()) {
+                Row(
+                    modifier = Modifier
+                        .height(18.dp)
+                        .shimmer()
+                ) {
                     Text(
                         text = "0.0 KG",
                         fontWeight = FontWeight.Bold,
@@ -122,7 +152,11 @@ fun ItemCatchLoading(catch: UserCatch) {
                         modifier = Modifier.background(Color.LightGray)
                     )
                 }
-                Row(modifier = Modifier.height(18.dp).shimmer()) {
+                Row(
+                    modifier = Modifier
+                        .height(18.dp)
+                        .shimmer()
+                ) {
                     Text(
                         "14:06",
                         color = Color.LightGray,

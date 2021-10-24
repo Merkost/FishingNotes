@@ -5,12 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -34,7 +29,6 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.theme.Shapes
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.ui.theme.primaryFigmaTextColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
@@ -50,6 +44,21 @@ fun MyCardNoPadding(content: @Composable () -> Unit) {
 fun MyCard(shape: CornerBasedShape = Shapes.small, content: @Composable () -> Unit) {
     Card(elevation = 8.dp, shape = shape,
         modifier = Modifier.fillMaxWidth().padding(4.dp), content = content)
+}
+
+@Composable
+fun DefaultCard(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(8.dp),
+        elevation = 4.dp,
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(4.dp), content = content
+    )
 }
 
 @Composable
@@ -134,48 +143,6 @@ fun PlaceInfo(user: User?, place: UserMapMarker, placeClicked: (UserMapMarker) -
 }
 
 @Composable
-fun CatchInfo(catch: UserCatch, user: User?) {
-    MyCardNoPadding {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp)
-                .padding(horizontal = 5.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-            ) {
-                Text(
-                    catch.title,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                )
-                Row( modifier = Modifier
-                    .padding(horizontal = 10.dp)
-                    .fillMaxHeight()) {
-                UserProfile(user) }
-            }
-            if (!catch.description.isNullOrEmpty()) Text(
-                catch.description, modifier = Modifier.fillMaxWidth(),
-                fontSize = MaterialTheme.typography.button.fontSize
-            )
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(catch.time, fontSize = MaterialTheme.typography.caption.fontSize)
-                Text(catch.date, fontSize = MaterialTheme.typography.caption.fontSize)
-            }
-        }
-    }
-}
-
-@Composable
 fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
     Row(
         modifier = modifier,
@@ -185,11 +152,11 @@ fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
         Icon(
             painter = painterResource(id = icon),
             contentDescription = stringResource(R.string.place),
-            tint = primaryFigmaColor,
+            tint = secondaryFigmaTextColor,
             modifier = Modifier.size(30.dp)
         )
         Spacer(Modifier.size(8.dp))
-        Text(text)
+        SubtitleText(text = text)
     }
 }
 
@@ -209,21 +176,36 @@ fun SimpleOutlinedTextField(textState: MutableState<String>, label: String) {
 }
 
 @Composable
-fun HeaderText(modifier: Modifier = Modifier, text: String) {
+fun HeaderText(
+    modifier: Modifier = Modifier,
+    text: String,
+    textAlign: TextAlign = TextAlign.Start,
+    textColor: Color = primaryFigmaTextColor
+) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.h5,
+        style = MaterialTheme.typography.h6,
         maxLines = 1,
+        textAlign = TextAlign.Start,
         color = primaryFigmaTextColor,
         text = text
     )
 }
 
 @Composable
+fun HeaderTextSecondary(
+    modifier: Modifier = Modifier,
+    text: String,
+    textAlign: TextAlign = TextAlign.Start
+) {
+    HeaderText(modifier, text, textAlign, secondaryFigmaTextColor)
+}
+
+@Composable
 fun SubtitleText(modifier: Modifier = Modifier, text: String) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.subtitle2,
+        style = MaterialTheme.typography.subtitle1,
         maxLines = 1,
         color = secondaryFigmaTextColor,
         text = text
@@ -235,6 +217,20 @@ fun PrimaryText(modifier: Modifier = Modifier, text: String) {
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.body1,
+        fontSize = 18.sp,
+        maxLines = 1,
+        color = primaryFigmaTextColor,
+        text = text
+    )
+}
+
+@Composable
+fun PrimaryTextBold(modifier: Modifier = Modifier, text: String) {
+    Text(
+        modifier = modifier,
+        style = MaterialTheme.typography.body1,
+        fontWeight = FontWeight.Bold,
+        fontSize = 18.sp,
         maxLines = 1,
         color = primaryFigmaTextColor,
         text = text
@@ -247,6 +243,7 @@ fun SecondaryText(modifier: Modifier = Modifier, text: String) {
         textAlign = TextAlign.Center,
         modifier = modifier,
         style = MaterialTheme.typography.body1,
+        fontSize = 18.sp,
         color = secondaryFigmaTextColor,
         text = text
     )
@@ -261,3 +258,96 @@ fun SecondaryTextColored(modifier: Modifier = Modifier, text: String) {
         text = text
     )
 }
+
+@Composable
+fun DefaultAppBar(
+    modifier: Modifier = Modifier,
+    navIcon: ImageVector = Icons.Filled.ArrowBack,
+    onNavClick: () -> Unit,
+    title: String,
+    actions: @Composable() (RowScope.() -> Unit) = {}
+) {
+    TopAppBar(
+        title = { Text(text = title) },
+        navigationIcon = {
+            IconButton(onClick = { onNavClick() }) {
+                Icon(
+                    imageVector = navIcon,
+                    contentDescription = stringResource(R.string.back)
+                )
+            }
+        },
+        elevation = 4.dp,
+        actions = actions
+    )
+}
+
+@Composable
+fun FullScreenPhoto(photo: MutableState<Uri?>) {
+    Dialog(
+        properties = DialogProperties(dismissOnClickOutside = true, dismissOnBackPress = true),
+        onDismissRequest = { photo.value = null }) {
+        Image(
+            modifier = Modifier
+                .padding(64.dp)
+                .wrapContentSize()
+                .clickable {
+                    photo.value = null
+                },
+            painter = rememberImagePainter(data = photo.value),
+            contentDescription = stringResource(id = R.string.catch_photo)
+        )
+    }
+}
+
+@Composable
+fun SimpleUnderlineTextField(
+    modifier: Modifier = Modifier,
+    text: String,
+    label: String = "",
+    trailingIcon: @Composable() (() -> Unit)? = null,
+    leadingIcon: @Composable() (() -> Unit)? = null,
+    helperText: String? = null
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = label,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 4.dp, start = 8.dp),
+            textAlign = TextAlign.Start,
+            color = secondaryFigmaTextColor,
+            style = MaterialTheme.typography.body2,
+        )
+        TextField(
+            modifier = Modifier.fillMaxWidth(),
+            readOnly = true,
+            value = text,
+            textStyle = MaterialTheme.typography.body1.copy(fontSize = 18.sp),
+            colors = TextFieldDefaults.textFieldColors(
+                textColor = primaryFigmaTextColor,
+                backgroundColor = backgroundGreenColor,
+                cursorColor = Color.Black,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
+            onValueChange = { },
+            shape = RoundedCornerShape(8.dp),
+            singleLine = true,
+            trailingIcon = trailingIcon,
+            leadingIcon = leadingIcon
+        )
+        helperText?.let {
+            SecondaryTextColored(
+                modifier = Modifier
+                    .padding(top = 4.dp, end = 8.dp)
+                    .align(Alignment.End),
+                text = it
+            )
+        }
+
+
+    }
+}
+
+

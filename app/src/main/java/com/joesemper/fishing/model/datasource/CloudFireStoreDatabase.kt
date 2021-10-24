@@ -1,5 +1,6 @@
 package com.joesemper.fishing.model.datasource
 
+import android.net.Uri
 import android.util.Log
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
@@ -22,7 +23,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
-import java.io.File
 
 
 class CloudFireStoreDatabase(private val cloudPhotoStorage: PhotoStorage) : UserContentRepository {
@@ -361,9 +361,8 @@ class CloudFireStoreDatabase(private val cloudPhotoStorage: PhotoStorage) : User
         awaitClose {}
     }
 
-
     private suspend fun savePhotos(
-        photos: List<File>,
+        photos: List<Uri>,
         progressFlow: MutableStateFlow<Progress>
     ) =
         cloudPhotoStorage.uploadPhotos(photos, progressFlow)
@@ -374,6 +373,9 @@ class CloudFireStoreDatabase(private val cloudPhotoStorage: PhotoStorage) : User
 
     override suspend fun deleteCatch(userCatch: UserCatch) {
         getUserCatchesCollection(userCatch.userMarkerId).document(userCatch.id).delete()
+        userCatch.downloadPhotoLinks.forEach {
+            cloudPhotoStorage.deletePhoto(it)
+        }
     }
 
     private fun getUsersCollection(): CollectionReference {

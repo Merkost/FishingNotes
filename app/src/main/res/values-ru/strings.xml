@@ -141,8 +141,15 @@
     <string name="no_lure">Подкормка не указана</string>
     <string name="celsius">°C</string>
     <string name="pressure_units">mmHg</string>
-    <string name="wind_speed_units">m/s</string>
+    <string name="wind_speed_units">м/с</string>
     <string name="percent">%</string>
-
+    <string name="pressure">Давление</string>
+    <string name="temperature">Температура</string>
+    <string name="moon_phase">Фаза луны</string>
+    <string name="wind">Ветер</string>
+    <string name="saving_new_catch">Сохраняем улов</string>
+    <string name="no_added_photos">No added photos</string>
+    <string name="main">Основное</string>
+    <string name="icon">Icon</string>
 
 </resources>

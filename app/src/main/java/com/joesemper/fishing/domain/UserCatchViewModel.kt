@@ -14,11 +14,13 @@ class UserCatchViewModel(
     private val userRepository: UserRepository
 ) : ViewModel() {
 
-    val catch: MutableState<UserCatch> = mutableStateOf(UserCatch())
+    val catch: MutableState<UserCatch?> = mutableStateOf(null)
 
     fun deleteCatch() {
         viewModelScope.launch {
-            contentRepository.deleteCatch(catch.value)
+            catch.value?.let {
+                contentRepository.deleteCatch(it)
+            }
         }
     }
 

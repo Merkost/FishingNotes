@@ -25,12 +25,10 @@ class UserCatchesViewModel(private val repository: UserContentRepository) : View
     private fun loadAllUserCatches() {
         viewModelScope.launch {
             repository.getAllUserCatchesState().collect { contentState ->
-
                 currentContent.apply {
                     addAll(contentState.added)
                     removeAll(contentState.deleted)
                 }
-
                 _uiState.value = BaseViewState.Success(currentContent)
             }
         }
