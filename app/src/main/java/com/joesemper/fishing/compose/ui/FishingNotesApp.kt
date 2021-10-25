@@ -1,5 +1,8 @@
 package com.joesemper.fishing.compose.ui
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.tween
 import android.os.Parcelable
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.Column
@@ -38,7 +41,7 @@ fun FishingNotesApp() {
             Scaffold (
                 bottomBar = {
                     var lastRoute: String = "home/map"
-                    if (appStateHolder.shouldShowBottomBar && bottomBarState.value) {
+                    if (appStateHolder.shouldShowBottomBar/* && bottomBarState.value*/) {
                         visibility = true
                         lastRoute = appStateHolder.currentRoute!!
                     }

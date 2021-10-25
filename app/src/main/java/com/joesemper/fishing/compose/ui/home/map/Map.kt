@@ -7,6 +7,7 @@ import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
@@ -19,6 +20,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -78,7 +80,6 @@ fun Map(
     bottomBarVisibilityState: MutableState<Boolean> = mutableStateOf(true),
     addPlaceOnStart: Boolean = false
 ) {
-
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -119,6 +120,12 @@ fun Map(
         if (addPlaceOnStart) mutableStateOf(MapUiState.PlaceSelectMode)
     else mutableStateOf(MapUiState.NormalMode) }
 
+    BackHandler(onBack = {
+        when (mapUiState) {
+        MapUiState.NormalMode -> navController.popBackStack()
+        else -> mapUiState = MapUiState.NormalMode
+    }})
+
     var cameraMoveState: CameraMoveState by remember {
         mutableStateOf(CameraMoveState.MoveFinish)
     }
@@ -126,11 +133,14 @@ fun Map(
         BottomSheetScaffold(
             modifier = modifier.fillMaxSize(),
             scaffoldState = scaffoldState,
+            sheetShape = Shapes.large,
             sheetContent = {
                 BottomSheetMarkerDialog(currentMarker.value, navController)
             },
+            sheetBackgroundColor = Color.White.copy(0f),
             drawerGesturesEnabled = true,
             sheetPeekHeight = 0.dp,
+            //sheetElevation = 0.dp,
             floatingActionButton = {
                 FabOnMap(
                     state = mapUiState,
@@ -226,7 +236,9 @@ fun Map(
                 }
 
                 //MapLayersButton
-                MapLayersButton(modifier = Modifier.size(40.dp).constrainAs(mapLayersButton) {
+                MapLayersButton(modifier = Modifier
+                    .size(40.dp)
+                    .constrainAs(mapLayersButton) {
                         top.linkTo(parent.top, 16.dp)
                         absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
                     }, layersSelectionMode = mapLayersSelection,)
@@ -248,7 +260,8 @@ fun Map(
 
                 //LayersSelectionView
                 if (mapLayersSelection.value) Surface(modifier = Modifier
-                    .fillMaxSize().alpha(0f)
+                    .fillMaxSize()
+                    .alpha(0f)
                     .clickable { mapLayersSelection.value = false }, color = Color.White
                 ) { }
                 AnimatedVisibility(mapLayersSelection.value,
@@ -365,7 +378,9 @@ fun AddMarkerDialog(
 
     MyCard(shape = Shapes.large) {
         ConstraintLayout(
-            modifier = Modifier.wrapContentSize().background(Color.White)
+            modifier = Modifier
+                .wrapContentSize()
+                .background(Color.White)
                 /*.requiredHeight(250.dp).requiredWidth(300.dp)*/
         ) {
             val (progress, name, locationIcon, title, description, saveButton, cancelButton) = createRefs()
@@ -535,11 +550,14 @@ fun FishLoading(modifier: Modifier) {
 fun BottomSheetMarkerDialog(marker: UserMapMarker?, navController: NavController) {
     Spacer(modifier = Modifier.size(1.dp))
     marker?.let {
+
         ConstraintLayout(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .padding(2.dp)
+                .padding(horizontal = 8.dp)
+                .clip(Shapes.large)
+                .background(Color.White)
         ) {
             val (locationIcon, title, description, navigateButton, detailsButton) = createRefs()
             Icon(
@@ -873,7 +891,7 @@ fun FabOnMap(state: MapUiState, onClick: () -> Unit) {
         }
         MapUiState.BottomSheetInfoMode -> {
             fabImg.value = R.drawable.ic_add_catch
-            padding.value = 15.dp
+            padding.value = 8.dp
         }
         MapUiState.PlaceSelectMode -> {
             fabImg.value = R.drawable.ic_baseline_check_24
@@ -882,7 +900,10 @@ fun FabOnMap(state: MapUiState, onClick: () -> Unit) {
     }
 
     FloatingActionButton(
-        modifier = Modifier.animateContentSize().padding(bottom = padding.value), onClick = onClick,) {
+        modifier = Modifier
+            .animateContentSize()
+            .padding(bottom = padding.value)
+            .zIndex(10f), onClick = onClick,) {
         Icon(
             painter = painterResource(id = fabImg.value),
             contentDescription = "Add new location",
@@ -947,7 +968,9 @@ fun rememberMapViewWithLifecycle(): MapView {
 fun IconButton(image: Painter, name: String, click: () -> Unit, modifier: Modifier) {
     OutlinedButton(
         onClick = click,
-        modifier = modifier.wrapContentSize().padding(4.dp),
+        modifier = modifier
+            .wrapContentSize()
+            .padding(4.dp),
         content = {
             Row(
                 modifier = Modifier.wrapContentSize(),
