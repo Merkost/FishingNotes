@@ -89,6 +89,10 @@ fun Map(
     }
 
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
+    // Track if the user doesn't want to see the rationale any more.
+    val doNotShowRationale = rememberSaveable { mutableStateOf(false) }
+    val arePermissonsGiven = rememberSaveable{ mutableStateOf(permissionsState.allPermissionsGranted) }
+
     val scaffoldState = rememberBottomSheetScaffoldState(
         //bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
     )
@@ -244,7 +248,7 @@ fun Map(
                     }, layersSelectionMode = mapLayersSelection,)
 
                 //MyLocationButton
-                MyLocationButton(coroutineScope, mapView, lastKnownLocation.value,
+                MyLocationButton(coroutineScope, mapView, lastKnownLocation.value, permissionsState,
                     modifier = Modifier
                         .size(40.dp)
                         .constrainAs(mapMyLocationButton) {
@@ -301,12 +305,7 @@ fun Map(
                     PointerIcon(cameraMoveState = cameraMoveState)
                 }
 
-                PermissionDialog(modifier = Modifier.constrainAs(permissionDialog) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                    absoluteRight.linkTo(parent.absoluteRight)
-                }, permissionsState = permissionsState)
+                PermissionDialog(permissionsState = permissionsState)
 
                 GoogleMapLayout(
                     modifier = Modifier.constrainAs(mapLayout) {
@@ -330,7 +329,8 @@ fun Map(
                         }
                     },
                     cameraMoveCallback = { state -> cameraMoveState = state },
-                    lastLocation = lastKnownLocation
+                    lastLocation = lastKnownLocation,
+                    arePermissonsGiven = arePermissonsGiven
                 )
             }
     }
@@ -656,7 +656,8 @@ fun GoogleMapLayout(
     permissionsState: MultiplePermissionsState,
     onMarkerClick: (marker: UserMapMarker) -> Unit,
     cameraMoveCallback: (state: CameraMoveState) -> Unit,
-    lastLocation: MutableState<LatLng>
+    lastLocation: MutableState<LatLng>,
+    arePermissonsGiven: MutableState<Boolean>
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -695,19 +696,16 @@ fun GoogleMapLayout(
         }
     }
 
-   /* LaunchedEffect(permissionsState)  {
-        when {
-            permissionsState.allPermissionsGranted -> {
-                val googleMap = map.awaitMap()
-                googleMap.isMyLocationEnabled = true
-            }
-        }
-    }*/
+    LaunchedEffect(arePermissonsGiven)  {
+        checkPermission(context)
+        val googleMap = map.awaitMap()
+        googleMap.isMyLocationEnabled = permissionsState.allPermissionsGranted
+    }
 
     LaunchedEffect(map) {
         val googleMap = map.awaitMap()
-        checkPermission(context)
-        googleMap.isMyLocationEnabled = permissionsState.allPermissionsGranted
+        //checkPermission(context)
+        //googleMap.isMyLocationEnabled = permissionsState.allPermissionsGranted
         googleMap.setOnMarkerClickListener { marker ->
             val mapMarker = markers.value.first { it.id == marker.tag }
             onMarkerClick(mapMarker)
@@ -914,37 +912,48 @@ fun FabOnMap(state: MapUiState, onClick: () -> Unit) {
 
 @ExperimentalPermissionsApi
 @Composable
-fun PermissionDialog(modifier: Modifier, permissionsState: MultiplePermissionsState) {
+fun PermissionDialog(
+    modifier: Modifier = Modifier,
+    permissionsState: MultiplePermissionsState
+) {
+    val context = LocalContext.current
     PermissionsRequired(
         multiplePermissionsState = permissionsState,
         permissionsNotGrantedContent = {
-            Card(
-                modifier = modifier
+            GrantPermissionsDialog(permissionsState)
+        },
+        permissionsNotAvailableContent = { Text("Your current location is not available") })
+    { checkPermission(context) }
+}
+
+@Composable
+@ExperimentalPermissionsApi
+fun GrantPermissionsDialog(permissionsState: MultiplePermissionsState) {
+    Dialog(onDismissRequest = {}) {
+        Card(
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(8.dp)
+                .zIndex(1.0f)
+        ) {
+            Column(
+                modifier = Modifier
                     .wrapContentSize()
                     .padding(8.dp)
-                    .zIndex(1.0f)
             ) {
-                Column(
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .padding(8.dp)
+                Text("The location is important for this app. \nPlease grant the permission.")
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.wrapContentSize()
                 ) {
-                    Text("The location is important for this app. \nPlease grant the permission.")
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.wrapContentSize()
-                    ) {
-                        Button(onClick = { permissionsState.launchMultiplePermissionRequest() }) {
-                            Text("Ok!")
-                        }
-                        Spacer(Modifier.width(8.dp))
+                    Button(onClick = { permissionsState.launchMultiplePermissionRequest() }) {
+                        Text("Ok!")
                     }
+                    Spacer(Modifier.width(8.dp))
                 }
             }
-
-        },
-        permissionsNotAvailableContent = { Text("The location is not available") })
-    {}
+        }
+    }
 }
 
 @Composable

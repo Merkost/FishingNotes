@@ -69,6 +69,7 @@ fun NavGraphBuilder.addHomeGraph(
     }
     composable(HomeSections.WEATHER.route) { from ->
         Weather(onSnackClick = { id -> onSnackSelected(id, from) }, modifier, navController)
+        { navController.popBackStack() }
     }
     composable(HomeSections.PROFILE.route) {
         Profile(navController, modifier)

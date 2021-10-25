@@ -130,7 +130,8 @@ private fun NavGraphBuilder.NavGraph(
     composable(
         route = MainDestinations.NEW_CATCH_ROUTE,
     ) {
-        NewCatchScreen({ navController.popBackStack() } , it.requiredArg(Arguments.PLACE))
+        NewCatchScreen({ navController.popBackStack(route = MainDestinations.NEW_CATCH_ROUTE,
+            inclusive = true) } , it.requiredArg(Arguments.PLACE))
     }
 
     composable(

@@ -8,7 +8,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.runtime.*
@@ -16,25 +15,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.LatLng
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
 import kotlinx.coroutines.CoroutineScope
 
+@ExperimentalPermissionsApi
 @Composable
 fun MyLocationButton(
     coroutineScope: CoroutineScope,
     mapView: MapView,
-    lastKnownLocation: LatLng,
-    modifier: Modifier
+    lastKnownLocation: LatLng?,
+    permissionsState: MultiplePermissionsState,
+    modifier: Modifier,
 ) {
     Card(shape = CircleShape, modifier = modifier) {
         androidx.compose.material.IconButton(modifier = Modifier
             .padding(8.dp)
             .fillMaxSize(),
-            onClick = { moveCameraToLocation(coroutineScope, mapView, lastKnownLocation) }) {
+            onClick = { lastKnownLocation?.let {
+                moveCameraToLocation(coroutineScope, mapView, lastKnownLocation)
+            } }) {
             Icon(Icons.Default.MyLocation, stringResource(R.string.my_location))
         }
     }
