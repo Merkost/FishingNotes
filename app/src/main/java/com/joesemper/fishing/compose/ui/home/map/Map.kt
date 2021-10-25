@@ -9,6 +9,8 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -338,6 +340,10 @@ fun Map(
 
 @Composable
 fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name: String) {
+    val animatedColor by animateColorAsState(
+        if (mapType.value == layer) Color.Blue else Color.White,
+        animationSpec = tween(300)
+    )
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(70.dp)) {
         IconToggleButton(
             onCheckedChange = { if (it) mapType.value = layer },
@@ -346,11 +352,11 @@ fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name:
                 .size(70.dp)
                 .border(
                     width = 2.dp,
-                    color = Color.Blue,
+                    color = animatedColor,
                     shape = RoundedCornerShape(15.dp)
                 ) else Modifier
                 .size(70.dp)
-                .padding(2.dp)
+                .padding(0.dp)
         ) {
             Image(
                 painter, layer.toString(),

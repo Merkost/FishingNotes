@@ -82,7 +82,7 @@ fun LayersView(
             ) {
                 Text(stringResource(R.string.map_type))
                 Card(shape = CircleShape, modifier = Modifier.size(20.dp)) {
-                    androidx.compose.material.IconButton(onClick = { mapLayersSelection.value = false }) {
+                    IconButton(onClick = { mapLayersSelection.value = false }) {
                         Icon(Icons.Default.Close, stringResource(R.string.close))
                     }
                 }
