@@ -3,31 +3,28 @@ package com.joesemper.fishing.compose.ui
 import androidx.compose.animation.*
 import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.tween
+import android.os.Parcelable
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
 import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import coil.annotation.ExperimentalCoilApi
 import com.google.accompanist.insets.ProvideWindowInsets
-import com.google.accompanist.insets.statusBarsHeight
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.compose.ui.home.*
-import com.joesemper.fishing.model.entity.content.UserCatch
-import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import kotlinx.coroutines.InternalCoroutinesApi
+import com.joesemper.fishing.compose.ui.home.map.Map
 
 @ExperimentalPermissionsApi
 @ExperimentalAnimationApi
@@ -113,6 +110,15 @@ private fun NavGraphBuilder.NavGraph(
     ) {
         addHomeGraph(onSnackSelected, navController, Modifier, bottomBarState)
     }
+   /* composable(
+        route = MainDestinations.MAP_ROUTE
+    ) {
+        val isAddingPlace: Boolean = navController.currentBackStackEntry?.arguments?.getBoolean(Arguments.MAP_NEW_PLACE) ?: false
+        navController.currentBackStackEntry?.arguments?.clear()
+        Map({ },
+        navController = navController,
+        addPlaceOnStart = isAddingPlace)
+    }*/
     /*composable(
         "${MainDestinations.SNACK_DETAIL_ROUTE}/{${MainDestinations.SNACK_ID_KEY}}",
         arguments = listOf(navArgument(MainDestinations.SNACK_ID_KEY) { type = NavType.LongType })
@@ -123,27 +129,31 @@ private fun NavGraphBuilder.NavGraph(
     }*/
     composable(
         route = MainDestinations.NEW_CATCH_ROUTE,
-        //arguments = listOf(navArgument(MainDestinations.SNACK_ID_KEY) { type = NavType.LongType })
-        //arguments = listOf(navArgument(Arguments.PLACE) {type = NavType.ParcelableArrayType(UserMapMarker::class.java)})
-    ) { backStackEntry ->
-        val place = navController.previousBackStackEntry?.arguments?.getParcelable<UserMapMarker>(Arguments.PLACE)
-        NewCatchScreen(navController, place)
-        //val arguments = requireNotNull(backStackEntry.arguments)
-        //val snackId = arguments.getLong(MainDestinations.SNACK_ID_KEY)
-        //        SnackDetail(snackId, upPress)
+    ) {
+        NewCatchScreen({ navController.popBackStack() } , it.requiredArg(Arguments.PLACE))
     }
+
     composable(
         route = MainDestinations.PLACE_ROUTE,
-    ) {
-        val marker = navController.previousBackStackEntry?.arguments?.getParcelable<UserMapMarker>(Arguments.PLACE)
-        UserPlaceScreen(navController, marker)
-    }
+    ) { UserPlaceScreen(navController, it.requiredArg(Arguments.PLACE)) }
+
     composable(
         route = MainDestinations.CATCH_ROUTE,
-    ) {
-        val catch = navController.previousBackStackEntry?.arguments?.getParcelable<UserCatch>(Arguments.CATCH)
-        AnimatedVisibility(true,
-            enter= slideInVertically(animationSpec = tween(800)),) {
-            UserCatchScreen(navController, catch) }
+    ) { UserCatchScreen(navController, it.requiredArg(Arguments.CATCH)) }
+}
+
+fun NavController.navigate(route: String, vararg args: Pair<String, Parcelable>) {
+    navigate(route)
+
+    requireNotNull(currentBackStackEntry?.arguments).apply {
+        args.forEach { (key: String, arg: Parcelable) ->
+            putParcelable(key, arg)
+        }
+    }
+}
+
+inline fun <reified T : Parcelable> NavBackStackEntry.requiredArg(key: String): T {
+    return requireNotNull(arguments) { "arguments bundle is null" }.run {
+        requireNotNull(getParcelable(key)) { "argument for $key is null" }
     }
 }

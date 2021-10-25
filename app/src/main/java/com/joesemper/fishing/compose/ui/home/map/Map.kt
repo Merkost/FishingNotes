@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.app.ActivityCompat
@@ -58,6 +57,7 @@ import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.MyCard
 import com.joesemper.fishing.compose.ui.home.UiState
+import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
@@ -77,7 +77,8 @@ fun Map(
     onSnackClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavController,
-    bottomBarVisibilityState: MutableState<Boolean>
+    bottomBarVisibilityState: MutableState<Boolean> = mutableStateOf(true),
+    addPlaceOnStart: Boolean = false
 ) {
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
@@ -110,10 +111,14 @@ fun Map(
     }
 
     var placeSelectMode by remember {
-        mutableStateOf(false)
+        if (addPlaceOnStart) mutableStateOf(true)
+        else mutableStateOf(false)
+
     }
 
-    var mapUiState: MapUiState by remember { mutableStateOf(MapUiState.NormalMode) }
+    var mapUiState: MapUiState by remember {
+        if (addPlaceOnStart) mutableStateOf(MapUiState.PlaceSelectMode)
+    else mutableStateOf(MapUiState.NormalMode) }
 
     BackHandler(onBack = {
         when (mapUiState) {
@@ -190,15 +195,14 @@ fun Map(
                                     ).show()
                                     //scaffoldState.bottomSheetState.collapse()
                                 }
-                                navController.currentBackStackEntry?.arguments?.putParcelable(
-                                    Arguments.PLACE,
-                                    currentMarker.value
-                                )
-                                navController.navigate(MainDestinations.NEW_CATCH_ROUTE)
-                                //placeSelectMode = !placeSelectMode
-
+                                placeSelectMode = !placeSelectMode
+                                val marker: UserMapMarker? = currentMarker.value
+                                marker?.let {
+                                    //placeSelectMode = !placeSelectMode
+                                    navController.navigate(MainDestinations.NEW_CATCH_ROUTE, Arguments.PLACE to it)
+                                }
                             }
-                            MapUiState.BottomSheetAddMode -> {
+                            MapUiState.DialogAddMode -> {
                                 moveCameraToLocation(
                                     coroutineScope = coroutineScope,
                                     map = mapView,
@@ -223,7 +227,7 @@ fun Map(
                     mapLayersView, pointer) = createRefs()
 
                 mapUiState = when {
-                    dialogAddPlaceIsShowing.value -> MapUiState.BottomSheetAddMode
+                    dialogAddPlaceIsShowing.value -> MapUiState.DialogAddMode
                     placeSelectMode -> MapUiState.PlaceSelectMode
                     scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetInfoMode.apply {
                         bottomBarVisibilityState.value = false
@@ -598,11 +602,7 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?, navController: NavController
             },
                 shape = RoundedCornerShape(24.dp),
                 onClick = {
-                    navController.currentBackStackEntry?.arguments?.putParcelable(
-                        Arguments.PLACE,
-                        it
-                    )
-                    navController.navigate(MainDestinations.PLACE_ROUTE)
+                    navController.navigate(MainDestinations.PLACE_ROUTE, Arguments.PLACE to marker)
                 }
             ) {
                 Row(
@@ -684,8 +684,8 @@ fun GoogleMapLayout(
             googleMap.setOnCameraIdleListener {
                 cameraMoveCallback(CameraMoveState.MoveFinish)
             }
-            googleMap.isMyLocationEnabled = true
             googleMap.uiSettings.isMyLocationButtonEnabled = false
+            //googleMap.uiSettings.isCompassEnabled = true
 
 //            if (viewModel.lastLocation.value == null) {
 //                //val lastLatLng = lastLocation.value
@@ -694,6 +694,15 @@ fun GoogleMapLayout(
 //            }
         }
     }
+
+   /* LaunchedEffect(permissionsState)  {
+        when {
+            permissionsState.allPermissionsGranted -> {
+                val googleMap = map.awaitMap()
+                googleMap.isMyLocationEnabled = true
+            }
+        }
+    }*/
 
     LaunchedEffect(map) {
         val googleMap = map.awaitMap()
@@ -742,6 +751,7 @@ fun DialogOnPlaceChoosing(
                                 val target = googleMap.cameraPosition.target
                                 currentPosition.value =
                                     LatLng(target.latitude, target.longitude)
+
 ////////////////////////////////////////////////////////////////////
                                 try {
                                     val position = geocoder.getFromLocation(

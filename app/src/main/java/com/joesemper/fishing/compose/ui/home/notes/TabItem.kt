@@ -20,7 +20,7 @@ sealed class TabItem(var icon: Int, var title: String, var screen: ComposableFun
     })
 
     @ExperimentalAnimationApi
-    object Catches : TabItem(R.drawable.ic_add_catch, "Catches", { navController ->
+    object Catches : TabItem(R.drawable.ic_fish, "Catches", { navController ->
         UserCatchesScreen(navController = navController)
     })
 

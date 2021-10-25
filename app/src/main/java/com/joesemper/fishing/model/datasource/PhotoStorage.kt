@@ -1,13 +1,13 @@
 package com.joesemper.fishing.model.datasource
 
+import android.net.Uri
 import com.joesemper.fishing.model.entity.common.Progress
 import kotlinx.coroutines.flow.MutableStateFlow
-import java.io.File
 
 
 interface PhotoStorage {
     suspend fun uploadPhotos(
-        photos: List<File>,
+        photos: List<Uri>,
         progressFlow: MutableStateFlow<Progress>
     ): List<String>
 

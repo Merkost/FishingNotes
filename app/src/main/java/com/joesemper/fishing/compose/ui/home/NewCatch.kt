@@ -5,23 +5,27 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.net.Uri
-import android.text.format.DateUtils
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -30,7 +34,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -38,32 +41,32 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
-import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
-import coil.compose.rememberImagePainter
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
-import com.joesemper.fishing.utils.showToast
+import com.joesemper.fishing.utils.*
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.getViewModel
-import java.io.File
 import java.util.*
 
-
-//private val args: NewCatchFragmentArgs by navArgs()
 
 private val dateAndTime = Calendar.getInstance()
 private var isNull: Boolean = true
@@ -74,44 +77,46 @@ object Constants {
     const val ITEM_PHOTO = "ITEM_PHOTO"
 }
 
-/*
-viewModel.marker.value = args.marker as UserMapMarker
-isNull = viewModel.marker.value .id.isEmpty()*/
-
-
 @ExperimentalPermissionsApi
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @ExperimentalCoilApi
 @Composable
-fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
+fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
 
     val viewModel: NewCatchViewModel = getViewModel()
     val context = LocalContext.current
     val notAllFieldsFilled = stringResource(R.string.not_all_fields_are_filled)
 
-    var weather by remember {
-        mutableStateOf<WeatherForecast?>(null)
+    viewModel.date.value = dateAndTime.timeInMillis
+
+    if (place.id.isNotEmpty()) {
+        viewModel.marker.value = place; isNull = false
     }
 
-    place?.let {
-        viewModel.marker.value = it; isNull = false
-    }
-
-    LaunchedEffect(viewModel.marker.value) {
-        viewModel.getWeather().collect {
-            weather = it
+    LaunchedEffect(key1 = viewModel.marker.value, key2 = viewModel.date.value) {
+        viewModel.marker.value?.let {
+            if (getDateByMilliseconds(viewModel.date.value) != getDateByMilliseconds(Date().time)) {
+                viewModel.getHistoricalWeather()?.collect {
+                    viewModel.weather.value = it
+                }
+            } else {
+                viewModel.getWeather()?.collect {
+                    viewModel.weather.value = it
+                }
+            }
         }
+
     }
 
     Scaffold(
         modifier = Modifier.navigationBarsWithImePadding(),
-        topBar = { NewCatchAppBar(navController) },
+        topBar = { NewCatchAppBar(upPress) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
                     if (viewModel.isInputCorrect())
-                        viewModel.createNewUserCatch(getPhotos(viewModel, context)) else showToast(
+                        viewModel.createNewUserCatch() else showToast(
                         context,
                         notAllFieldsFilled
                     )
@@ -120,7 +125,7 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
             }
         }
     ) {
-        SubscribeToProgress(viewModel.uiState, navController)
+        SubscribeToProgress(viewModel.uiState, upPress)
         val scrollState = rememberScrollState()
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -131,27 +136,21 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
                 .verticalScroll(state = scrollState, enabled = true),
         ) {
             Places(stringResource(R.string.place), viewModel)  //Выпадающий список мест
-
             FishAndWeight(viewModel.fishAmount, viewModel.weight)
-
             Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
-            DateAndTime(viewModel.date, viewModel.time)
-            NewCatchWeather(weather)
-
+            DateAndTime(viewModel.date)
+            NewCatchWeather(viewModel)
             Photos(
-                { clicked -> /*TODO(Open photo in full screen)*/ },
+                { clicked -> { } },
                 { deleted -> viewModel.deletePhoto(deleted) })
-
-            Spacer(modifier = Modifier.padding(8.dp))
+            Spacer(modifier = Modifier.padding(16.dp))
         }
     }
 }
 
 @Composable
-fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>, navController: NavController) {
+fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>, upPress: () -> Unit) {
     val errorDialog = rememberSaveable { mutableStateOf(false) }
-    val loadingDialog = rememberSaveable { mutableStateOf(false) }
-    val loadingValue = rememberSaveable { mutableStateOf(0) }
 
     val uiState by vmuiState.collectAsState()
     when (uiState) {
@@ -162,14 +161,11 @@ fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>, navController: NavC
                     "Ваш улов успешно добавлен!",
                     Toast.LENGTH_SHORT
                 ).show()
-                //navController.popBackStack()
-                navController.popBackStack("new_catch", inclusive = true)
-                //navController.navigateUp() //to the map screen
+                upPress()
             }
         }
         is BaseViewState.Loading -> {
-            LoadingDialog(loadingDialog, loadingValue)
-            loadingValue.value = (uiState as BaseViewState.Loading).progress ?: 0
+            LoadingDialog()
         }
         is BaseViewState.Error -> {
             ErrorDialog(errorDialog)
@@ -192,7 +188,7 @@ private fun Places(label: String, viewModel: NewCatchViewModel) {
     val marker by rememberSaveable { viewModel.marker }
     var textFieldValue by rememberSaveable {
         mutableStateOf(
-            if (marker.id.isNotEmpty()) marker.title else ""
+            marker?.title ?: ""
         )
     }
     var isDropMenuOpen by rememberSaveable { mutableStateOf(false) }
@@ -202,6 +198,8 @@ private fun Places(label: String, viewModel: NewCatchViewModel) {
 
 
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Spacer(modifier = Modifier.padding(1.dp))
+
         SubtitleWithIcon(
             modifier = Modifier.align(Alignment.Start),
             icon = R.drawable.ic_baseline_location_on_24,
@@ -369,7 +367,7 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
             text = stringResource(id = R.string.fish_catch)
         )
 
-        FishSpecies(viewModel.title)
+        FishSpecies(viewModel.fishType)
 
         SimpleOutlinedTextField(viewModel.description, stringResource(R.string.note))
         Spacer(modifier = Modifier.size(2.dp))
@@ -407,7 +405,13 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
                             .weight(1F)
                             .fillMaxHeight()
                             .align(Alignment.CenterVertically)
-                    ) { Text("-") }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_baseline_minus),
+                            tint = secondaryFigmaTextColor,
+                            contentDescription = ""
+                        )
+                    }
                     Spacer(modifier = Modifier.size(6.dp))
                     OutlinedButton(
                         onClick = {
@@ -419,7 +423,13 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
                             .weight(1F)
                             .fillMaxHeight()
                             .align(Alignment.CenterVertically)
-                    ) { Text(stringResource(R.string.plus)) }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_baseline_plus),
+                            tint = secondaryFigmaTextColor,
+                            contentDescription = ""
+                        )
+                    }
                 }
 
             }
@@ -451,28 +461,40 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
                 Row(Modifier.fillMaxWidth()) {
                     OutlinedButton(
                         onClick = {
-                            if (weightState.value.toDouble() >= 0.5 && weightState.value.isNotBlank())
+                            if (weightState.value.toDouble() >= 0.1 && weightState.value.isNotBlank())
                                 weightState.value =
-                                    ((weightState.value.toDouble() - 0.5).toString())
+                                    ((weightState.value.toDouble() - 0.1).roundTo(1).toString())
                         },
                         Modifier
                             .weight(1F)
                             .fillMaxHeight()
                             .align(Alignment.CenterVertically)
-                    ) { Text(stringResource(R.string.minus)) }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_baseline_minus),
+                            tint = secondaryFigmaTextColor,
+                            contentDescription = ""
+                        )
+                    }
                     Spacer(modifier = Modifier.size(6.dp))
                     OutlinedButton(
                         onClick = {
                             if (weightState.value.isEmpty()) weightState.value =
-                                0.5f.toString()
+                                0.1f.roundTo(1).toString()
                             else weightState.value =
-                                ((weightState.value.toDouble() + 0.5).toString())
+                                ((weightState.value.toDouble() + 0.1).roundTo(1).toString())
                         },
                         Modifier
                             .weight(1F)
                             .fillMaxHeight()
                             .align(Alignment.CenterVertically)
-                    ) { Text(stringResource(R.string.plus)) }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_baseline_plus),
+                            tint = secondaryFigmaTextColor,
+                            contentDescription = ""
+                        )
+                    }
                 }
             }
         }
@@ -523,10 +545,6 @@ fun ItemAddPhoto() {
                 viewModel.addPhoto(it)
             }
         }
-    /*val takePhotoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { value ->
-        viewModel.addPhoto(value.) }
-    }*/
-
 
     Card(
         modifier = Modifier
@@ -563,182 +581,6 @@ fun ItemAddPhoto() {
     }
 }
 
-@ExperimentalAnimationApi
-@Composable
-fun ItemPhoto(photo: Uri, clickedPhoto: (Uri) -> Unit, deletedPhoto: (Uri) -> Unit) {
-    Crossfade(photo) { pic ->
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .padding(4.dp)
-        ) {
-            Image(painter = rememberImagePainter(data = pic),
-                contentDescription = Constants.ITEM_PHOTO,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(5.dp))
-                    .clickable { clickedPhoto(pic) })
-            Surface( //For making delete button background half transparent
-                color = Color.LightGray.copy(alpha = 0.2f),
-                modifier = Modifier
-                    .size(25.dp)
-                    .align(Alignment.TopEnd)
-                    .padding(3.dp)
-                    .clip(CircleShape)
-            ) {
-                Icon(
-                    Icons.Default.Close,
-                    tint = Color.White,
-                    contentDescription = stringResource(R.string.delete_photo),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable { deletedPhoto(pic) })
-            }
-        }
-    }
-
-}
-
-@Composable
-fun NewCatchWeather(weather: WeatherForecast?) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-
-        SubtitleWithIcon(
-            modifier = Modifier.align(Alignment.Start),
-            icon = R.drawable.weather_sunny,
-            text = stringResource(id = R.string.weather)
-        )
-
-        if (weather != null && weather.hourly.isNotEmpty()) {
-
-            Spacer(Modifier.size(8.dp))
-            OutlinedTextField(
-                value = weather.hourly.first().weather.first().description,
-                leadingIcon = {
-                    Icon(
-                        modifier = Modifier.size(32.dp),
-                        painter = painterResource(
-                            id = getWeatherIconByName(weather.hourly.first().weather.first().icon)
-                        ),
-                        contentDescription = "",
-                        tint = secondaryFigmaTextColor
-                    )
-                },
-                onValueChange = { },
-                label = { Text(text = "Weather") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next
-                ),
-                singleLine = true
-            )
-
-            Spacer(Modifier.size(8.dp))
-
-            Row(modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(
-                    value = weather.hourly.first().temperature.toString(),
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_thermometer),
-                            contentDescription = "",
-                            tint = secondaryFigmaTextColor
-                        )
-                    },
-                    trailingIcon = {
-                        Text(text = "°C")
-                    },
-                    onValueChange = { },
-                    label = { Text(text = "Temperature") },
-                    modifier = Modifier.weight(1f, true),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next
-                    ),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.padding(4.dp))
-
-                OutlinedTextField(
-                    value = weather.hourly.first().pressure.toString(),
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_gauge),
-                            contentDescription = "",
-                            tint = secondaryFigmaTextColor
-                        )
-                    },
-                    trailingIcon = {
-                        Text(text = "hPa")
-                    },
-                    onValueChange = { },
-                    label = { Text(text = "Pressure") },
-                    modifier = Modifier.weight(1f, true),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next
-                    ),
-                    singleLine = true
-                )
-            }
-
-            Spacer(Modifier.size(8.dp))
-
-            Row(modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(
-                    value = weather.hourly.first().windSpeed.toString(),
-                    leadingIcon = {
-                        Icon(
-                            modifier = Modifier.rotate(weather.hourly.first().windDeg.toFloat()),
-                            painter = painterResource(id = R.drawable.ic_arrow_up),
-                            contentDescription = "",
-                            tint = secondaryFigmaTextColor,
-                        )
-                    },
-                    trailingIcon = {
-                        Text(text = "m/s")
-                    },
-                    onValueChange = { },
-                    label = { Text(text = "Wind") },
-                    modifier = Modifier.weight(1f, true),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next
-                    ),
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.padding(4.dp))
-
-                OutlinedTextField(
-                    value = (weather.daily.first().moonPhase * 100).toInt().toString(),
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(
-                                id = getMoonIconByPhase(weather.daily.first().moonPhase)
-                            ),
-                            contentDescription = "",
-                            tint = secondaryFigmaTextColor
-                        )
-                    },
-                    onValueChange = { },
-                    trailingIcon = {
-                        Text(text = "%")
-                    },
-                    label = { Text(text = "Moon phase") },
-                    modifier = Modifier.weight(1f, true),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next
-                    ),
-                    singleLine = true
-                )
-            }
-        } else {
-            SecondaryText(text = "Select place to load weather")
-        }
-    }
-}
-
-@Composable
 @ExperimentalPermissionsApi
 private fun addPhoto(
     permissionState: PermissionState,
@@ -749,58 +591,210 @@ private fun addPhoto(
         permissionState.hasPermission -> {
             choosePhotoLauncher.launch(arrayOf("image/*"))
             addPhotoState.value = false
-            /*getPhotoListener().showMultiImage { photos ->
-                photos.forEach { uri ->
-                    viewModel.addPhoto(uri)
-                }
-            }*/
         }
     }
-
 }
 
 @Composable
-fun DateAndTime(dateState: MutableState<String>, timeState: MutableState<String>) {
+fun NewCatchWeather(viewModel: NewCatchViewModel) {
+
+    val weather = viewModel.weather.value
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+
+        SubtitleWithIcon(
+            modifier = Modifier.align(Alignment.Start),
+            icon = R.drawable.weather_sunny,
+            text = stringResource(id = R.string.weather)
+        )
+
+        if (weather != null && weather.hourly.isNotEmpty()) {
+
+            val currentMoonPhase = remember {
+                weather.daily.first().moonPhase
+            }
+
+            viewModel.moonPhase.value = calcMoonPhase(
+                currentMoonPhase,
+                Date().time / MILLISECONDS_IN_SECOND,
+                weather.hourly.first().date
+            )
+
+            val hour by remember(dateAndTime.timeInMillis) {
+                mutableStateOf(getHoursByMilliseconds(dateAndTime.timeInMillis).toInt())
+            }
+
+            Crossfade(targetState = weather) { weatherForecast ->
+                Column() {
+                    Spacer(Modifier.size(8.dp))
+                    OutlinedTextField(
+                        readOnly = true,
+                        value = weatherForecast.hourly[hour].weather.first().description,
+                        leadingIcon = {
+                            Icon(
+                                modifier = Modifier.size(32.dp),
+                                painter = painterResource(
+                                    id = getWeatherIconByName(weatherForecast.hourly.first().weather.first().icon)
+                                ),
+                                contentDescription = "",
+                                tint = secondaryFigmaTextColor
+                            )
+                        },
+                        onValueChange = { },
+                        label = { Text(text = stringResource(id = R.string.weather)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Next
+                        ),
+                        singleLine = true
+                    )
+
+                    Spacer(Modifier.size(8.dp))
+
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedTextField(
+                            readOnly = true,
+                            value = weatherForecast.hourly[hour].temperature.toString(),
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_thermometer),
+                                    contentDescription = "",
+                                    tint = secondaryFigmaTextColor
+                                )
+                            },
+                            trailingIcon = {
+                                Text(text = stringResource(R.string.celsius))
+                            },
+                            onValueChange = { },
+                            label = { Text(text = stringResource(R.string.temperature)) },
+                            modifier = Modifier.weight(1f, true),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Next
+                            ),
+                            singleLine = true
+                        )
+
+                        Spacer(modifier = Modifier.padding(4.dp))
+
+                        OutlinedTextField(
+                            readOnly = true,
+                            value = hPaToMmHg(weatherForecast.hourly[hour].pressure).toString(),
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_gauge),
+                                    contentDescription = "",
+                                    tint = secondaryFigmaTextColor
+                                )
+                            },
+                            trailingIcon = {
+                                Text(
+                                    modifier = Modifier.padding(horizontal = 4.dp),
+                                    text = stringResource(R.string.pressure_units)
+                                )
+                            },
+                            onValueChange = { },
+                            label = { Text(text = stringResource(R.string.pressure)) },
+                            modifier = Modifier.weight(1f, true),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Next
+                            ),
+                            singleLine = true
+                        )
+                    }
+
+                    Spacer(Modifier.size(8.dp))
+
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedTextField(
+                            readOnly = true,
+                            value = weatherForecast.hourly[hour].windSpeed.toString(),
+                            leadingIcon = {
+                                Icon(
+                                    modifier = Modifier.rotate(weatherForecast.hourly[hour].windDeg.toFloat()),
+                                    painter = painterResource(id = R.drawable.ic_arrow_up),
+                                    contentDescription = "",
+                                    tint = secondaryFigmaTextColor,
+                                )
+                            },
+                            trailingIcon = {
+                                Text(text = stringResource(R.string.wind_speed_units))
+                            },
+                            onValueChange = { },
+                            label = { Text(text = stringResource(R.string.wind)) },
+                            modifier = Modifier.weight(1f, true),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Next
+                            ),
+                            singleLine = true
+                        )
+
+                        Spacer(modifier = Modifier.padding(4.dp))
+
+                        OutlinedTextField(
+                            readOnly = true,
+                            value = (viewModel.moonPhase.value * 100).toInt().toString(),
+                            leadingIcon = {
+                                Icon(
+                                    painter = painterResource(
+                                        id = getMoonIconByPhase(viewModel.moonPhase.value)
+                                    ),
+                                    contentDescription = "",
+                                    tint = secondaryFigmaTextColor
+                                )
+                            },
+                            onValueChange = { },
+                            trailingIcon = {
+                                Text(text = stringResource(R.string.percent))
+                            },
+                            label = { Text(text = stringResource(R.string.moon_phase)) },
+                            modifier = Modifier.weight(1f, true),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Next
+                            ),
+                            singleLine = true
+                        )
+                    }
+                }
+
+            }
+        } else {
+            SecondaryText(
+                modifier = Modifier.padding(vertical = 8.dp),
+                text = "Select place to load weather"
+            )
+        }
+    }
+}
+
+@Composable
+fun DateAndTime(date: MutableState<Long>) {
     val dateSetState = remember { mutableStateOf(false) }
     val timeSetState = remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    if (dateSetState.value) setDate(dateState, dateSetState, context)
-    if (timeSetState.value) setTime(timeState, timeSetState, context)
+    if (dateSetState.value) DatePicker(date, dateSetState, context)
+    if (timeSetState.value) TimePicker(date, timeSetState, context)
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        dateState.value = setInitialDate(context)
-        OutlinedTextField(value = dateState.value,
+        OutlinedTextField(value = getDateByMilliseconds(date.value),
             onValueChange = {},
             label = { Text(text = stringResource(R.string.date)) },
             readOnly = true,
             modifier = Modifier
-                .fillMaxWidth()
-            /*.clickable {
-                *//*showToast(
-                        LocalContext.current,
-                        stringResource(R.string.click_on_icon_to_change)
-                    )*//*
-                }*/,
+                .fillMaxWidth(),
             trailingIcon = {
                 Icon(painter = painterResource(R.drawable.ic_baseline_event_24),
                     tint = primaryFigmaColor,
                     contentDescription = stringResource(R.string.date),
                     modifier = Modifier.clickable { dateSetState.value = true })
             })
-        timeState.value = setInitialTime(context)
-        OutlinedTextField(value = timeState.value,
+        OutlinedTextField(
+            value = getTimeByMilliseconds(date.value),
             onValueChange = {},
             label = { Text(text = stringResource(R.string.time)) },
             readOnly = true,
             modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    /*showToast(
-                        LocalContext.current,
-                        stringResource(R.string.click_on_icon_to_change)
-                    )*/
-                },
+                .fillMaxWidth(),
             trailingIcon = {
                 Icon(painter = painterResource(R.drawable.ic_baseline_access_time_24),
                     tint = primaryFigmaColor,
@@ -813,20 +807,10 @@ fun DateAndTime(dateState: MutableState<String>, timeState: MutableState<String>
 }
 
 @Composable
-fun NewCatchAppBar(navController: NavController) {
-    TopAppBar(
-        title = { Text(text = stringResource(R.string.new_catch)) },
-        navigationIcon = {
-            IconButton(onClick = { //navController.popBackStack("new_catch", inclusive = true)
-                navController.popBackStack()
-            }) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.back)
-                )
-            }
-        },
-        elevation = 4.dp
+fun NewCatchAppBar(upPress: () -> Unit) {
+    DefaultAppBar(
+        onNavClick = upPress,
+        title = stringResource(R.string.new_catch)
     )
 }
 
@@ -840,7 +824,7 @@ fun ErrorDialog(errorDialog: MutableState<Boolean>) {
         onDismissRequest = { errorDialog.value = false },
         confirmButton = {
             OutlinedButton(
-                onClick = { viewModel.createNewUserCatch(getPhotos(viewModel, context)) },
+                onClick = { viewModel.createNewUserCatch() },
                 content = { Text(stringResource(R.string.Try_again)) })
         }, dismissButton = {
             OutlinedButton(
@@ -851,106 +835,48 @@ fun ErrorDialog(errorDialog: MutableState<Boolean>) {
 }
 
 @Composable
-fun LoadingDialog(loadingDialog: MutableState<Boolean>, loadingValue: MutableState<Int>) {
-    //if (loadingDialog.value)
-    AlertDialog(
-        title = { Text("Загрузка фотографий!") },
-        text = { Text("Пожалуйста, подождите, пока ваши фотографии полностью загрузятся. Текущий прогресс: " + loadingValue.value + "%") },
-        onDismissRequest = { },
-        confirmButton = {
-            OutlinedButton(
-                onClick = { },
-                content = { Text(stringResource(R.string.Try_again)) })
-        }, dismissButton = {
-            OutlinedButton(
-                onClick = { },
-                content = { Text(stringResource(R.string.Cancel)) })
-        }
-    )
-}
-
-
-private fun getPhotos(viewModel: NewCatchViewModel, context: Context): List<File> {
-    val result = mutableListOf<File>()
-    /*val byteArrays = mutableListOf<ByteArray>()
-    viewModel.images.forEach {
-            val baos = ByteArrayOutputStream()
-            val inputStream = context.contentResolver.openInputStream(it)
-            val bmp = BitmapFactory.decodeStream(inputStream)
-            bmp.compress(Bitmap.CompressFormat.JPEG, 50, baos)
-        byteArrays.add(baos.toByteArray())
-        context.contentResolver.openInputStream(it)
-            ?.readBytes()
-            ?.let { it1 -> byteArrays.add(it1) }
-    }*/
-    return result
-    /*byteArrays.forEach {
-        result.add()
-    }*/
-    /*return runBlocking {
-        val result = mutableListOf<File>()
-        viewModel.images.forEach {
-            //val compressedImageFile = Compressor.compress(context, it.toFile()) {
-            //val inputStream = context.contentResolver.openInputStream(it)
-            //val arr = inputStream?.readBytes()
-            val compressedImageFile = Compressor.compress(context, File(getWorkingDirectory() + it.path)) {
-                quality(50)
+fun LoadingDialog() {
+    Dialog(onDismissRequest = {}) {
+        Card(modifier = Modifier.wrapContentSize()) {
+            Column(modifier = Modifier.wrapContentSize()) {
+                PrimaryText(
+                    modifier = Modifier
+                        .align(alignment = Alignment.Start)
+                        .padding(8.dp),
+                    text = stringResource(R.string.saving_new_catch)
+                )
+                val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.fish_loading))
+                LottieAnimation(
+                    modifier = Modifier.size(128.dp),
+                    composition = composition,
+                    iterations = LottieConstants.IterateForever,
+                    isPlaying = true
+                )
+                OutlinedButton(
+                    modifier = Modifier
+                        .align(alignment = Alignment.End)
+                        .padding(8.dp),
+                    onClick = { },
+                    content = { Text(stringResource(R.string.Cancel)) }
+                )
             }
-            result.add(compressedImageFile)
-
         }
-        result
-    }*/
-    //return listOf()
-}
 
-private fun getPhotos(): List<File> {
-    /*val viewModel: NewCatchViewModel = getViewModel()
-    val result = mutableListOf<ByteArray>()
-//    val job = lifecycle.coroutineScope.launchWhenStarted {
-//
-//    }
-    TODO(URI TO BYTEARRAY IN COROUTINE SCOPE)
-    viewModel.images.forEach {
-//            val baos = ByteArrayOutputStream()
-//            val inputStream = requireActivity().contentResolver.openInputStream(it)
-//            val bmp = BitmapFactory.decodeStream(inputStream)
-//            bmp.compress(Bitmap.CompressFormat.JPEG, 50, baos)
-//            result.add(baos.toByteArray())
-        requireActivity().contentResolver.openInputStream(it)
-            ?.readBytes()
-            ?.let { it1 -> result.add(it1) }
     }
-    return result*/
-    return listOf()
 }
-
-fun getWorkingDirectory(): String {
-    val directory = File("");
-    return directory.absolutePath
-}
-
-/*@Composable
-private fun getPhotoListener() =
-    TedBottomPicker.with(LocalContext.current as FragmentActivity?)
-        .setPeekHeight(1600)
-        .showTitle(false)
-        .setCompleteButtonText(stringResource(R.string.done))
-        .setEmptySelectionText(stringResource(R.string.no_photo_selected))
-        .setSelectMaxCount(10)*/
 
 @Composable
-private fun setTime(
-    timeState: MutableState<String>,
+private fun TimePicker(
+    date: MutableState<Long>,
     timeSetState: MutableState<Boolean>,
     context: Context
 ) {
     TimePickerDialog(
         context,
-        TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
+        TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
             dateAndTime.set(Calendar.HOUR_OF_DAY, hourOfDay)
             dateAndTime.set(Calendar.MINUTE, minute)
-            timeState.value = setInitialTime(context)
+            date.value = dateAndTime.timeInMillis
         },
         dateAndTime.get(Calendar.HOUR_OF_DAY),
         dateAndTime.get(Calendar.MINUTE), true
@@ -958,96 +884,28 @@ private fun setTime(
     timeSetState.value = false
 }
 
-
-private fun setInitialTime(context: Context): String =
-    DateUtils.formatDateTime(
-        context,
-        dateAndTime.timeInMillis,
-        DateUtils.FORMAT_SHOW_TIME
-    )
-
 @Composable
-private fun setDate(
-    dateState: MutableState<String>,
+private fun DatePicker(
+    date: MutableState<Long>,
     dateSetState: MutableState<Boolean>,
     context: Context
 ) {
     DatePickerDialog(
         context,
-        DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
+        { _, year, monthOfYear, dayOfMonth ->
             dateAndTime.set(Calendar.YEAR, year)
             dateAndTime.set(Calendar.MONTH, monthOfYear)
             dateAndTime.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-            dateState.value = setInitialDate(context)
+            date.value = dateAndTime.timeInMillis
         },
         dateAndTime.get(Calendar.YEAR),
         dateAndTime.get(Calendar.MONTH),
         dateAndTime.get(Calendar.DAY_OF_MONTH)
     ).apply {
         datePicker.maxDate = Date().time
+        datePicker.minDate = Date().time - (MILLISECONDS_IN_DAY * 5)
         show()
     }
-    //dialog.datePicker.maxDate = Date().time
-    //ialog.show()
     dateSetState.value = false
 }
 
-
-private fun setInitialDate(context: Context) =
-    DateUtils.formatDateTime(
-        context,
-        dateAndTime.timeInMillis,
-        DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_YEAR
-    )
-
-fun commentary() {
-
-    TODO("Subscribe to ViewState")
-//    private fun subscribeOnViewModel() {
-//        lifecycleScope.launchWhenStarted {
-//            viewModel.subscribe().collect { state ->
-//                when (state) {
-//                    is BaseViewState.Loading -> binding.loading.visibility = View.VISIBLE
-//                    is BaseViewState.Success<*> -> binding.loading.visibility = View.GONE
-//                    is BaseViewState.Error -> {
-//                        binding.loading.visibility = View.GONE
-//                        Toast.makeText(context, state.error.message, Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-    //TODO("Photo convert from Uri to ByteArray in CoroutineScope")
-//        try {
-//            val bitmap = MediaStore.Images.Media.getBitmap(c.getContentResolver(), Uri.parse(paths))
-//        } catch (e: Exception) {
-//            //handle exception
-//        }
-//        return coroutineScope {
-//            val job = launch {
-//                try {
-//                    uris.forEach {
-//                        val stream = requireActivity().contentResolver.openInputStream(it)
-//                        val bitmap = BitmapDrawable(resources, stream).bitmap
-//                        val baos = ByteArrayOutputStream()
-//                        bitmap.compress(Bitmap.CompressFormat.JPEG, 20, baos)
-//                        result.add(baos.toByteArray())
-//                    }
-//                } catch (e: Throwable) {
-//                    Log.d("F", e.message, e)
-//                }
-//            }
-//            job.join()
-//            result
-//        }
-
-
-//    private fun setInitialPlaceData() {
-//        binding.etNewCatchPlaceTitle.setText(marker.title)
-//        binding.etNewCatchPlaceTitle.inputType = InputType.TYPE_NULL
-//        setCurrentCoordinates()
-//    }
-}
-
-//    }
