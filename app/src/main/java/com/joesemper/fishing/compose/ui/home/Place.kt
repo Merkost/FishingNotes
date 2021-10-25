@@ -26,6 +26,7 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.notes.ItemUserCatch
+import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserPlaceViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -341,11 +342,10 @@ fun UserPlaceAppBar(navController: NavController, viewModel: UserPlaceViewModel)
 //}
 
 private fun newCatchClicked(navController: NavController, viewModel: UserPlaceViewModel) {
-    navController.currentBackStackEntry?.arguments?.putParcelable(
-        Arguments.PLACE,
-        viewModel.marker.value
-    )
-    navController.navigate(MainDestinations.NEW_CATCH_ROUTE)
+    val marker: UserMapMarker? = viewModel.marker.value
+    marker?.let {
+        navController.navigate(MainDestinations.NEW_CATCH_ROUTE, Arguments.PLACE to it)
+    }
 }
 
 
@@ -388,6 +388,5 @@ private fun shareClicked() {
 }
 
 private fun onCatchItemClick(catch: UserCatch, navController: NavController) {
-    navController.currentBackStackEntry?.arguments?.putParcelable(Arguments.CATCH, catch)
-    navController.navigate(MainDestinations.CATCH_ROUTE)
+    navController.navigate(MainDestinations.CATCH_ROUTE, Arguments.CATCH to catch)
 }

@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserPlacesViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -33,10 +34,7 @@ fun UserPlacesScreen(navController: NavController, viewModel: UserPlacesViewMode
                     (animatedUiState as BaseViewState.Success<*>).data as List<UserMapMarker>, {
                         onAddNewPlaceClick()
                     }, { userMarker ->
-                        navController.currentBackStackEntry?.arguments?.putParcelable(Arguments.PLACE, userMarker)
-                        navController.navigate(MainDestinations.PLACE_ROUTE)
-                        //navController.navigate(MainDestinations.PLACE_ROUTE, arg = navArgument(Arguments.PLACE) { marker = userMarker },)
-                        //onPlaceItemClick(userMarker)
+                        navController.navigate(MainDestinations.PLACE_ROUTE, Arguments.PLACE to userMarker)
                     }
                 )
                 is BaseViewState.Error -> {

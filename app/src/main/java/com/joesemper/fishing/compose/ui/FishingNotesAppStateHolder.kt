@@ -28,7 +28,6 @@ import kotlinx.coroutines.launch
  */
 object MainDestinations {
     const val MAP_ROUTE = "map"
-
     const val NEW_CATCH_ROUTE = "new_catch"
     const val PLACE_ROUTE = "place"
     const val CATCH_ROUTE = "catch"

@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
-import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -83,7 +82,7 @@ object Constants {
 @ExperimentalMaterialApi
 @ExperimentalCoilApi
 @Composable
-fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
+fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
 
     val viewModel: NewCatchViewModel = getViewModel()
     val context = LocalContext.current
@@ -91,8 +90,8 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
 
     viewModel.date.value = dateAndTime.timeInMillis
 
-    place?.let {
-        viewModel.marker.value = it; isNull = false
+    if (place.id.isNotEmpty()) {
+        viewModel.marker.value = place; isNull = false
     }
 
     LaunchedEffect(key1 = viewModel.marker.value, key2 = viewModel.date.value) {
@@ -112,7 +111,7 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
 
     Scaffold(
         modifier = Modifier.navigationBarsWithImePadding(),
-        topBar = { NewCatchAppBar(navController) },
+        topBar = { NewCatchAppBar(upPress) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -126,7 +125,7 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
             }
         }
     ) {
-        SubscribeToProgress(viewModel.uiState, navController)
+        SubscribeToProgress(viewModel.uiState, upPress)
         val scrollState = rememberScrollState()
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -150,7 +149,7 @@ fun NewCatchScreen(navController: NavController, place: UserMapMarker?) {
 }
 
 @Composable
-fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>, navController: NavController) {
+fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>, upPress: () -> Unit) {
     val errorDialog = rememberSaveable { mutableStateOf(false) }
 
     val uiState by vmuiState.collectAsState()
@@ -162,7 +161,7 @@ fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>, navController: NavC
                     "Ваш улов успешно добавлен!",
                     Toast.LENGTH_SHORT
                 ).show()
-                navController.popBackStack("new_catch", inclusive = true)
+                upPress()
             }
         }
         is BaseViewState.Loading -> {
@@ -808,11 +807,9 @@ fun DateAndTime(date: MutableState<Long>) {
 }
 
 @Composable
-fun NewCatchAppBar(navController: NavController) {
+fun NewCatchAppBar(upPress: () -> Unit) {
     DefaultAppBar(
-        onNavClick = {
-            navController.popBackStack()
-        },
+        onNavClick = upPress,
         title = stringResource(R.string.new_catch)
     )
 }

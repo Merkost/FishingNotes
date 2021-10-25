@@ -15,9 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserCatchesViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserCatch
+import com.joesemper.fishing.model.entity.content.UserMapMarker
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
@@ -46,10 +48,9 @@ fun UserCatchesScreen(navController: NavController, viewModel: UserCatchesViewMo
 }
 
 private fun onAddNewCatchClick(navController: NavController) {
-    navController.navigate(MainDestinations.NEW_CATCH_ROUTE)
+    navController.navigate(MainDestinations.NEW_CATCH_ROUTE, Arguments.PLACE to UserMapMarker())
 }
 
 private fun onCatchItemClick(catch: UserCatch, navController: NavController) {
-    navController.currentBackStackEntry?.arguments?.putParcelable(Arguments.CATCH, catch)
-    navController.navigate(MainDestinations.CATCH_ROUTE)
+    navController.navigate(MainDestinations.CATCH_ROUTE, Arguments.CATCH to catch)
 }
