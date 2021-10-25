@@ -1,9 +1,8 @@
 package com.joesemper.fishing.compose.ui
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.*
 import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -45,7 +44,7 @@ fun FishingNotesApp() {
             Scaffold (
                 bottomBar = {
                     var lastRoute: String = "home/map"
-                    if (appStateHolder.shouldShowBottomBar && bottomBarState.value) {
+                    if (appStateHolder.shouldShowBottomBar/* && bottomBarState.value*/) {
                         visibility = true
                         lastRoute = appStateHolder.currentRoute!!
                     }
@@ -143,6 +142,8 @@ private fun NavGraphBuilder.NavGraph(
         route = MainDestinations.CATCH_ROUTE,
     ) {
         val catch = navController.previousBackStackEntry?.arguments?.getParcelable<UserCatch>(Arguments.CATCH)
-        UserCatchScreen(navController, catch)
+        AnimatedVisibility(true,
+            enter= slideInVertically(animationSpec = tween(800)),) {
+            UserCatchScreen(navController, catch) }
     }
 }

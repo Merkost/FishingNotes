@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
@@ -47,8 +48,8 @@ fun MyCardNoPadding(content: @Composable () -> Unit) {
 }
 
 @Composable
-fun MyCard(shape: CornerBasedShape = Shapes.small, content: @Composable () -> Unit) {
-    Card(elevation = 8.dp, shape = shape,
+fun MyCard(modifier: Modifier = Modifier, shape: CornerBasedShape = Shapes.small, elevation: Dp = 8.dp, content: @Composable () -> Unit) {
+    Card(elevation = elevation, shape = shape,
         modifier = Modifier.fillMaxWidth().padding(4.dp), content = content)
 }
 
