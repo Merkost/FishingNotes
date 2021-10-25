@@ -39,6 +39,7 @@ object MainDestinations {
 object Arguments {
     const val PLACE = "place_arg"
     const val CATCH = "catch_arg"
+    const val MAP_NEW_PLACE = "map_new_place_arg"
 }
 
 /**

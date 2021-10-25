@@ -19,9 +19,9 @@ import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.compose.ui.home.*
-import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import kotlinx.coroutines.InternalCoroutinesApi
+import com.joesemper.fishing.compose.ui.home.map.Map
 
 @ExperimentalPermissionsApi
 @ExperimentalAnimationApi
@@ -107,6 +107,15 @@ private fun NavGraphBuilder.NavGraph(
     ) {
         addHomeGraph(onSnackSelected, navController, Modifier, bottomBarState)
     }
+   /* composable(
+        route = MainDestinations.MAP_ROUTE
+    ) {
+        val isAddingPlace: Boolean = navController.currentBackStackEntry?.arguments?.getBoolean(Arguments.MAP_NEW_PLACE) ?: false
+        navController.currentBackStackEntry?.arguments?.clear()
+        Map({ },
+        navController = navController,
+        addPlaceOnStart = isAddingPlace)
+    }*/
     /*composable(
         "${MainDestinations.SNACK_DETAIL_ROUTE}/{${MainDestinations.SNACK_ID_KEY}}",
         arguments = listOf(navArgument(MainDestinations.SNACK_ID_KEY) { type = NavType.LongType })

@@ -75,7 +75,8 @@ fun Map(
     onSnackClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavController,
-    bottomBarVisibilityState: MutableState<Boolean>
+    bottomBarVisibilityState: MutableState<Boolean> = mutableStateOf(true),
+    addPlaceOnStart: Boolean = false
 ) {
 
     val viewModel: MapViewModel = getViewModel()
@@ -109,10 +110,14 @@ fun Map(
     }
 
     var placeSelectMode by remember {
-        mutableStateOf(false)
+        if (addPlaceOnStart) mutableStateOf(true)
+        else mutableStateOf(false)
+
     }
 
-    var mapUiState: MapUiState by remember { mutableStateOf(MapUiState.NormalMode) }
+    var mapUiState: MapUiState by remember {
+        if (addPlaceOnStart) mutableStateOf(MapUiState.PlaceSelectMode)
+    else mutableStateOf(MapUiState.NormalMode) }
 
     var cameraMoveState: CameraMoveState by remember {
         mutableStateOf(CameraMoveState.MoveFinish)

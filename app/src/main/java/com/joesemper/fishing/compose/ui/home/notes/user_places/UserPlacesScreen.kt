@@ -1,5 +1,6 @@
 package com.joesemper.fishing.compose.ui.home.notes.user_places
 
+import android.os.Parcel
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
@@ -13,9 +14,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
-import com.joesemper.fishing.compose.ui.navigate
+import com.joesemper.fishing.compose.ui.home.HomeSections
 import com.joesemper.fishing.domain.UserPlacesViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -23,18 +25,24 @@ import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
 @Composable
-fun UserPlacesScreen(navController: NavController, viewModel: UserPlacesViewModel = getViewModel<UserPlacesViewModel>()) {
+fun UserPlacesScreen(
+    navController: NavController,
+    viewModel: UserPlacesViewModel = getViewModel<UserPlacesViewModel>()
+) {
     Scaffold() {
         val uiState by viewModel.uiState.collectAsState()
         Crossfade(uiState, animationSpec = tween(500)) { animatedUiState ->
             when (animatedUiState) {
                 is BaseViewState.Loading ->
-                    UserPlacesLoading { onAddNewPlaceClick() }
+                    UserPlacesLoading { onAddNewPlaceClick(navController) }
                 is BaseViewState.Success<*> -> UserPlaces(
                     (animatedUiState as BaseViewState.Success<*>).data as List<UserMapMarker>, {
-                        onAddNewPlaceClick()
+                        onAddNewPlaceClick(navController)
                     }, { userMarker ->
-                        navController.navigate(MainDestinations.PLACE_ROUTE, Arguments.PLACE to userMarker)
+                        navController.navigate(
+                            MainDestinations.PLACE_ROUTE,
+                            Arguments.PLACE to userMarker
+                        )
                     }
                 )
                 is BaseViewState.Error -> {
@@ -52,9 +60,9 @@ fun UserPlacesScreen(navController: NavController, viewModel: UserPlacesViewMode
 }
 
 
-
-private fun onAddNewPlaceClick() {
-    /*showToast(requireContext(), "Not yet implemented")*/
+private fun onAddNewPlaceClick(navController: NavController) {
+    navController.currentBackStackEntry?.arguments?.putBoolean(Arguments.MAP_NEW_PLACE, true)
+    navController.navigate(MainDestinations.MAP_ROUTE)
 }
 
 private fun onPlaceItemClick(place: UserMapMarker) {
