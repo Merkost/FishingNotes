@@ -7,6 +7,7 @@ import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
@@ -78,7 +79,6 @@ fun Map(
     navController: NavController,
     bottomBarVisibilityState: MutableState<Boolean>
 ) {
-
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -114,6 +114,12 @@ fun Map(
     }
 
     var mapUiState: MapUiState by remember { mutableStateOf(MapUiState.NormalMode) }
+
+    BackHandler(onBack = {
+        when (mapUiState) {
+        MapUiState.NormalMode -> navController.popBackStack()
+        else -> mapUiState = MapUiState.NormalMode
+    }})
 
     var cameraMoveState: CameraMoveState by remember {
         mutableStateOf(CameraMoveState.MoveFinish)
@@ -538,6 +544,7 @@ fun FishLoading(modifier: Modifier) {
 @ExperimentalMaterialApi
 @Composable
 fun BottomSheetMarkerDialog(marker: UserMapMarker?, navController: NavController) {
+    Spacer(modifier = Modifier.size(1.dp))
     marker?.let {
 
         ConstraintLayout(
@@ -885,7 +892,8 @@ fun FabOnMap(state: MapUiState, onClick: () -> Unit) {
     FloatingActionButton(
         modifier = Modifier
             .animateContentSize()
-            .padding(bottom = padding.value).zIndex(10f), onClick = onClick,) {
+            .padding(bottom = padding.value)
+            .zIndex(10f), onClick = onClick,) {
         Icon(
             painter = painterResource(id = fabImg.value),
             contentDescription = "Add new location",
