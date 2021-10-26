@@ -27,7 +27,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -36,20 +35,25 @@ import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.common.User
-import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.theme.*
 
 @Composable
 fun MyCardNoPadding(content: @Composable () -> Unit) {
-    Card(elevation = 4.dp, shape = MaterialTheme.shapes.large,
-        modifier = Modifier.fillMaxWidth(), content = content)
+    Card(
+        elevation = 4.dp, shape = MaterialTheme.shapes.large,
+        modifier = Modifier.fillMaxWidth(), content = content
+    )
 }
 
 @Composable
 fun MyCard(shape: CornerBasedShape = RoundedCornerShape(8.dp), content: @Composable () -> Unit) {
-    Card(elevation = 8.dp, shape = shape,
-        modifier = Modifier.fillMaxWidth().padding(4.dp), content = content)
+    Card(
+        elevation = 8.dp, shape = shape,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp), content = content
+    )
 }
 
 @Composable
@@ -137,7 +141,11 @@ fun PlaceInfo(user: User?, place: UserMapMarker, placeClicked: (UserMapMarker) -
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Default.Place, stringResource(R.string.place), tint = secondaryFigmaColor)
+                Icon(
+                    Icons.Default.Place,
+                    stringResource(R.string.place),
+                    tint = secondaryFigmaColor
+                )
                 Spacer(modifier = Modifier.width(150.dp))
                 UserProfile(user)
             }
@@ -219,11 +227,16 @@ fun SubtitleText(modifier: Modifier = Modifier, text: String) {
 }
 
 @Composable
-fun PrimaryText(modifier: Modifier = Modifier, text: String) {
+fun PrimaryText(
+    modifier: Modifier = Modifier,
+    fontWeight: FontWeight? = null,
+    text: String
+) {
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
+        fontWeight = fontWeight,
         maxLines = 1,
         color = primaryFigmaTextColor,
         text = text
@@ -232,13 +245,9 @@ fun PrimaryText(modifier: Modifier = Modifier, text: String) {
 
 @Composable
 fun PrimaryTextBold(modifier: Modifier = Modifier, text: String) {
-    Text(
+    PrimaryText(
         modifier = modifier,
-        style = MaterialTheme.typography.body1,
         fontWeight = FontWeight.Bold,
-        fontSize = 18.sp,
-        maxLines = 1,
-        color = primaryFigmaTextColor,
         text = text
     )
 }
@@ -268,7 +277,7 @@ fun SecondaryTextColored(modifier: Modifier = Modifier, text: String) {
 @Composable
 fun DefaultAppBar(
     modifier: Modifier = Modifier,
-    navIcon: ImageVector =  Icons.Default.ArrowBack,
+    navIcon: ImageVector = Icons.Default.ArrowBack,
     onNavClick: () -> Unit,
     title: String,
     actions: @Composable() (RowScope.() -> Unit) = {}
@@ -351,8 +360,6 @@ fun SimpleUnderlineTextField(
                 text = it
             )
         }
-
-
     }
 }
 

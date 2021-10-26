@@ -151,5 +151,9 @@
     <string name="no_added_photos">No added photos</string>
     <string name="main">Основное</string>
     <string name="icon">Icon</string>
+    <string name="no_cathces_added">No catches added</string>
+    <string name="add_catch_text">+ Add new catch</string>
+    <string name="no_places_added">No places added</string>
+    <string name="new_place_text">+ Add new place</string>
 
 </resources>

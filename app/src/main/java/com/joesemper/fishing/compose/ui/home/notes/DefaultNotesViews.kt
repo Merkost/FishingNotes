@@ -174,7 +174,7 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
                 photosCount = userCatch.downloadPhotoLinks.count()
             )
 
-            PrimaryTextBold(
+            PrimaryText(
                 modifier = Modifier.constrainAs(fish) {
                     absoluteLeft.linkTo(guideline, 4.dp)
                     top.linkTo(parent.top)
@@ -190,7 +190,7 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
                 text = stringResource(id = R.string.kg)
             )
 
-            PrimaryTextBold(
+            PrimaryText(
                 modifier = Modifier.constrainAs(weight) {
                     absoluteRight.linkTo(kg.absoluteLeft, 1.dp)
                     top.linkTo(parent.top)
@@ -268,7 +268,7 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
                 tint = secondaryFigmaColor
             )
 
-            PrimaryTextBold(
+            PrimaryText(
                 modifier = Modifier.constrainAs(title) {
                     linkTo(icon.absoluteRight, amount.absoluteLeft, bias = 0f)
                     top.linkTo(parent.top)
@@ -287,7 +287,7 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
                 contentDescription = stringResource(id = R.string.fish_catch)
             )
 
-            PrimaryTextBold(
+            PrimaryText(
                 modifier = Modifier.constrainAs(amount) {
                     absoluteRight.linkTo(fishIcon.absoluteLeft, 2.dp)
                     top.linkTo(title.top)
@@ -344,5 +344,30 @@ fun ItemAdd(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun NoElementsView(
+    modifier: Modifier = Modifier,
+    mainText: String,
+    secondaryText: String,
+    onClickAction: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(200.dp)
+    ) {
+        SecondaryText(text = mainText)
+        Spacer(modifier = Modifier.height(8.dp))
+        SecondaryTextColored(
+            modifier = Modifier.clickable {
+                onClickAction()
+            },
+            text = secondaryText
+        )
     }
 }

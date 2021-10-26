@@ -2,48 +2,81 @@ package com.joesemper.fishing.compose.ui.home.notes.user_catches
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.home.notes.ItemAdd
+import com.joesemper.fishing.compose.ui.home.notes.ItemUserCatch
+import com.joesemper.fishing.compose.ui.home.notes.NoElementsView
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserCatchesViewModel
-import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
 @Composable
-fun UserCatchesScreen(navController: NavController, viewModel: UserCatchesViewModel = getViewModel<UserCatchesViewModel>()) {
-    Scaffold() {
-        val uiState by viewModel.uiState.collectAsState()
-        Crossfade(uiState, animationSpec = tween(500)) { animatedUiState ->
-            when (animatedUiState) {
-                is BaseViewState.Loading ->
-                    UserCatchesLoading { onAddNewCatchClick(navController) }
-                is BaseViewState.Success<*> -> UserCatches(
-                    (uiState as BaseViewState.Success<*>).data as List<UserCatch>,
-                    { onAddNewCatchClick(navController) }, { catch -> onCatchItemClick(catch, navController) })
-                is BaseViewState.Error -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "An error occurred fetching the catches.")
-                    }
+fun UserCatchesScreen(
+    navController: NavController,
+    viewModel: UserCatchesViewModel = getViewModel()
+) {
+    Scaffold {
+        val catches by viewModel.currentContent.collectAsState()
+        Crossfade(catches) { animatedUiState ->
+            UserCatches(
+                catches = animatedUiState,
+                addNewCatchClicked = { onAddNewCatchClick(navController) },
+                userCatchClicked = { catch -> onCatchItemClick(catch, navController) })
+        }
+    }
+}
+
+@ExperimentalAnimationApi
+@Composable
+fun UserCatches(
+    catches: List<UserCatch>,
+    addNewCatchClicked: () -> Unit,
+    userCatchClicked: (UserCatch) -> Unit
+) {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+        item {
+            ItemAdd(
+                icon = painterResource(R.drawable.ic_add_catch),
+                text = stringResource(R.string.add_new_catch),
+                onClickAction = addNewCatchClicked
+            )
+        }
+        when {
+            catches.isNotEmpty() -> {
+                items(items = catches.sortedByDescending { it.date }) {
+                    ItemUserCatch(
+                        userCatch = it,
+                        userCatchClicked = userCatchClicked
+                    )
+                }
+            }
+            catches.isEmpty() -> {
+                item {
+                    NoElementsView(
+                        mainText = stringResource(R.string.no_cathces_added),
+                        secondaryText = stringResource(R.string.add_catch_text),
+                        onClickAction = addNewCatchClicked
+                    )
                 }
             }
         }
+
     }
 }
 
