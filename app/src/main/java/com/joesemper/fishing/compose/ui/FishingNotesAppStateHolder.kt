@@ -1,6 +1,7 @@
 package com.joesemper.fishing.compose.ui
 
 import android.content.res.Resources
+import android.os.Parcelable
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -12,10 +13,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Lifecycle
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavDestination
-import androidx.navigation.NavGraph
-import androidx.navigation.NavHostController
+import androidx.navigation.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.joesemper.fishing.compose.ui.home.HomeSections
@@ -28,13 +26,13 @@ import kotlinx.coroutines.launch
  */
 object MainDestinations {
     const val HOME_ROUTE = "home"
-
+    const val MAP_ROUTE = "map"
     const val NEW_CATCH_ROUTE = "new_catch"
     const val PLACE_ROUTE = "place"
     const val CATCH_ROUTE = "catch"
 
     const val SNACK_DETAIL_ROUTE = "notes"
-        //const val SNACK_ID_KEY = "snackId"
+    const val SNACK_ID_KEY = "snackId"
 }
 
 object Arguments {
@@ -69,6 +67,8 @@ class AppStateHolder(
     private val resources: Resources,
     coroutineScope: CoroutineScope
 ) {
+    var current: Any? = null
+
     // Process snackbars coming from SnackbarManager
     init {
         /*coroutineScope.launch {
@@ -94,7 +94,9 @@ class AppStateHolder(
     // Not all routes need to show the bottom bar.
     val shouldShowBottomBar: Boolean
         @Composable get() = navController
-            .currentBackStackEntryAsState().value?.destination?.route in bottomBarRoutes
+            .currentBackStackEntryAsState().value?.destination?.route.apply {
+                current = this
+            } in bottomBarRoutes
 
     val currentRoute: String?
         get() = navController.currentDestination?.route
@@ -122,6 +124,23 @@ class AppStateHolder(
         if (from.lifecycleIsResumed()) {
             navController.navigate("${MainDestinations.SNACK_DETAIL_ROUTE}/$snackId")
         }
+    }
+}
+
+
+fun NavController.navigate(route: String, vararg args: Pair<String, Parcelable>) {
+    navigate(route)
+
+    requireNotNull(currentBackStackEntry?.arguments).apply {
+        args.forEach { (key: String, arg: Parcelable) ->
+            putParcelable(key, arg)
+        }
+    }
+}
+
+inline fun <reified T : Parcelable> NavBackStackEntry.requiredArg(key: String): T {
+    return requireNotNull(arguments) { "arguments bundle is null" }.run {
+        requireNotNull(getParcelable(key)) { "argument for $key is null" }
     }
 }
 
