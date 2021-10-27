@@ -84,8 +84,8 @@ fun UserPlaces(
 
 
 private fun onAddNewPlaceClick(navController: NavController) {
-    navController.currentBackStackEntry?.arguments?.putBoolean(Arguments.MAP_NEW_PLACE, true)
-    navController.navigate(MainDestinations.MAP_ROUTE)
+    val addNewPlace = true
+    navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${addNewPlace}")
 }
 
 private fun onPlaceItemClick(place: UserMapMarker, navController: NavController) {

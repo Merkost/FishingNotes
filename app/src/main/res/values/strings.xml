@@ -155,5 +155,10 @@
     <string name="no_places_added">No places added</string>
     <string name="new_place_text">+ Add new place</string>
 
+    <!--    For Testing    -->
+    <string name="mode_place_selecting">You are in place selecting mode!</string>
+    <string name="mode_place_selecting_off">Режим выбора места выключен!</string>
+    <string name="mode_place_info">Вы в режиме просмотра информации о месте!</string>
+
 
 </resources>

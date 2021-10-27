@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.LatLng
+import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.UiState
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.Progress
@@ -18,6 +19,7 @@ import kotlinx.coroutines.launch
 
 class MapViewModel(
     private val repository: UserContentRepository,
+    private val snackbarManager: SnackbarManager,
 ) : ViewModel() {
 
     private val viewStateFlow: MutableStateFlow<BaseViewState> =
@@ -42,12 +44,16 @@ class MapViewModel(
 
     fun getAllMarkers(): StateFlow<List<UserMapMarker>> = mapMarkers
 
-    fun subscribe(): StateFlow<BaseViewState> = viewStateFlow //not Used in COmpose screens
+    fun subscribe(): StateFlow<BaseViewState> = viewStateFlow //not Used in Compose screens
 
 
     override fun onCleared() {
         super.onCleared()
         viewStateFlow.value = BaseViewState.Loading(null)
+    }
+
+    fun showMessage(s: String) {
+
     }
 
     private fun loadMarkers() {
