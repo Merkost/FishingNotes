@@ -32,6 +32,7 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.ui.theme.backgroundGreenColor
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
@@ -161,7 +162,7 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
             userCatchClicked(userCatch)
         }) {
         ConstraintLayout(modifier = Modifier.padding(2.dp)) {
-            val (photos, fishIcon, fish, weight, kg, description, icon, place, date) = createRefs()
+            val (photos, fish, weight, kg, description, icon, place, date) = createRefs()
             val guideline = createGuidelineFromAbsoluteLeft(104.dp)
 
             ItemCatchPhotos(
@@ -174,21 +175,9 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
                 photosCount = userCatch.downloadPhotoLinks.count()
             )
 
-            Icon(
-                modifier = Modifier.constrainAs(fishIcon) {
-                    absoluteLeft.linkTo(guideline)
-                    top.linkTo(parent.top)
-                },
-                painter = painterResource(id = R.drawable.ic_fish),
-                tint = secondaryFigmaTextColor,
-                contentDescription = stringResource(
-                    id = R.string.fish_catch
-                )
-            )
-
             PrimaryText(
                 modifier = Modifier.constrainAs(fish) {
-                    absoluteLeft.linkTo(fishIcon.absoluteRight)
+                    absoluteLeft.linkTo(guideline, 4.dp)
                     top.linkTo(parent.top)
                 },
                 text = userCatch.fishType
@@ -357,6 +346,32 @@ fun ItemAdd(
             }
         }
     }
+}
+
+@Composable
+fun ItemDate(text: String) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .wrapContentHeight()
+            .fillMaxWidth()
+    ) {
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            modifier = Modifier
+                .wrapContentSize(),
+            color = backgroundGreenColor
+        ) {
+            SecondaryTextColored(
+                modifier = Modifier.padding(8.dp),
+                text = text,
+                color = secondaryFigmaTextColor
+            )
+        }
+
+    }
+
+
 }
 
 @Composable

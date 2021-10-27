@@ -16,10 +16,12 @@ import androidx.navigation.NavController
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.home.HomeSections
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserCatchesViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.utils.getDateByMilliseconds
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
@@ -58,11 +60,20 @@ fun UserCatches(
         }
         when {
             catches.isNotEmpty() -> {
-                items(items = catches.sortedByDescending { it.date }) {
-                    ItemUserCatch(
-                        userCatch = it,
-                        userCatchClicked = userCatchClicked
-                    )
+                getDatesList(catches).forEach { catchDate ->
+                    item {
+                        ItemDate(text = catchDate)
+                    }
+                    items(items = catches
+                        .filter { userCatch ->
+                            getDateByMilliseconds(userCatch.date) == catchDate
+                        }
+                        .sortedByDescending { it.date }) {
+                        ItemUserCatch(
+                            userCatch = it,
+                            userCatchClicked = userCatchClicked
+                        )
+                    }
                 }
             }
             catches.isEmpty() -> {
@@ -79,8 +90,22 @@ fun UserCatches(
     }
 }
 
+private fun getDatesList(catches: List<UserCatch>): List<String> {
+    val dates = mutableListOf<String>()
+    catches.sortedByDescending { it.date }.forEach { userCatch ->
+        val date = getDateByMilliseconds(userCatch.date)
+        if (!dates.contains(date)) {
+            dates.add(date)
+        }
+    }
+    return dates
+}
+
 private fun onAddNewCatchClick(navController: NavController) {
-    navController.navigate(MainDestinations.NEW_CATCH_ROUTE, Arguments.PLACE to UserMapMarker())
+    navController.navigate(
+        "${HomeSections.NOTES.route}/${MainDestinations.NEW_CATCH_ROUTE}",
+        Arguments.PLACE to UserMapMarker()
+    )
 }
 
 private fun onCatchItemClick(catch: UserCatch, navController: NavController) {
