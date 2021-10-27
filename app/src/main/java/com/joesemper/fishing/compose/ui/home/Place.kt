@@ -344,7 +344,7 @@ fun UserPlaceAppBar(navController: NavController, viewModel: UserPlaceViewModel)
 private fun newCatchClicked(navController: NavController, viewModel: UserPlaceViewModel) {
     val marker: UserMapMarker? = viewModel.marker.value
     marker?.let {
-        navController.navigate(MainDestinations.NEW_CATCH_ROUTE, Arguments.PLACE to it)
+        navController.navigate(MainDestinations.NOTES_TO_NEW_CATCH_ROUTE, Arguments.PLACE to it)
     }
 }
 

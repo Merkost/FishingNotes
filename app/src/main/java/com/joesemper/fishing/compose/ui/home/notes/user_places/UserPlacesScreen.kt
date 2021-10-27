@@ -38,7 +38,7 @@ fun UserPlacesScreen(
                         onAddNewPlaceClick(navController)
                     }, { userMarker ->
                         navController.navigate(
-                            MainDestinations.PLACE_ROUTE,
+                            MainDestinations.NOTES_TO_PLACE_ROUTE,
                             Arguments.PLACE to userMarker
                         )
                     }
@@ -60,11 +60,6 @@ fun UserPlacesScreen(
 
 private fun onAddNewPlaceClick(navController: NavController) {
     val addNewPlace = true
-    navController.navigate("${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${addNewPlace}")
+    navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${addNewPlace}")
 }
 
-private fun onPlaceItemClick(place: UserMapMarker) {
-    /*val action =
-        NotesFragmentDirections.actionNotesFragmentToUserPlaceFragment(place)
-    findNavController().navigate(action)*/
-}
