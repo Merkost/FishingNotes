@@ -17,7 +17,6 @@ import androidx.navigation.NavController
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
-import com.joesemper.fishing.compose.ui.home.HomeSections
 import com.joesemper.fishing.domain.UserPlacesViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -63,7 +62,8 @@ fun UserPlacesScreen(
 private fun onAddNewPlaceClick(navController: NavController) {
     val addNewPlace = true
     //navController.currentBackStackEntry?.arguments?.putBoolean(Arguments.MAP_NEW_PLACE, true)
-    navController.navigate("${HomeSections.MAP.route}/$addNewPlace")
+    //navController.navigate("profile/user1234")
+    navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${addNewPlace}")
 }
 
 private fun onPlaceItemClick(place: UserMapMarker) {

@@ -61,12 +61,12 @@ fun NavGraphBuilder.addHomeGraph(
     modifier: Modifier = Modifier,
 ) {
     composable(
-        HomeSections.MAP.route/*"${HomeSections.MAP.route}?${Arguments.MAP_NEW_PLACE}={${Arguments.MAP_NEW_PLACE}}"*/,
-        //arguments = listOf(navArgument(Arguments.MAP_NEW_PLACE) { defaultValue = false })
+        HomeSections.MAP.route,
+        arguments = listOf(navArgument(Arguments.MAP_NEW_PLACE) { defaultValue = false })
     ) { from ->
-        //val addPlace = requireNotNull(from.arguments).getBoolean(Arguments.MAP_NEW_PLACE, false)
+        val addPlace = requireNotNull(from.arguments).getBoolean(Arguments.MAP_NEW_PLACE, false)
         //from.arguments?.getBoolean(Arguments.MAP_NEW_PLACE)!!
-        Map(modifier, navController, false)
+        Map(modifier, navController, addPlace)
     }
     composable(HomeSections.NOTES.route) { from ->
         Notes(onSnackClick = { id -> onSnackSelected(id, from) }, modifier, navController)
@@ -85,7 +85,7 @@ enum class HomeSections(
     val icon: ImageVector,
     val route: String
 ) {
-    MAP(R.string.map, Icons.Outlined.Map, "home/map"),
+    MAP(R.string.map, Icons.Outlined.Map, "home/map?${Arguments.MAP_NEW_PLACE}={${Arguments.MAP_NEW_PLACE}}"),
     NOTES(R.string.notes, Icons.Outlined.Menu, "home/notes"),
     WEATHER(R.string.weather, Icons.Outlined.WbSunny, "home/weather"),
     PROFILE(R.string.profile, Icons.Outlined.VerifiedUser, "home/profile")

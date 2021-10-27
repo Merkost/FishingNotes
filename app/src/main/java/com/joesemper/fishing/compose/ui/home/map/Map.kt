@@ -124,10 +124,13 @@ fun Map(
     else mutableStateOf(MapUiState.NormalMode) }
 
     BackHandler(onBack = {
-        when (mapUiState) {
-        MapUiState.NormalMode -> navController.popBackStack()
-        else -> mapUiState = MapUiState.NormalMode
-    }})
+        if (placeSelectMode) placeSelectMode = !placeSelectMode
+        else {
+            when (mapUiState) {
+                MapUiState.NormalMode -> navController.popBackStack(MainDestinations.MAP_ROUTE, inclusive = true) //TODO: Handle closing application by to times back clickes
+                else -> mapUiState = MapUiState.NormalMode
+            }}
+        })
 
     var cameraMoveState: CameraMoveState by remember {
         mutableStateOf(CameraMoveState.MoveFinish)
@@ -155,6 +158,7 @@ fun Map(
                                     map = mapView,
                                     location = lastKnownLocation.value
                                 )
+                                viewModel.
                                 coroutineScope.launch {
                                     Toast.makeText(
                                         context,

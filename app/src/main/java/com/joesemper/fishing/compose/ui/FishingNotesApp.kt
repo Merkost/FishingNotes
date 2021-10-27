@@ -87,7 +87,7 @@ private fun NavGraphBuilder.NavGraph(
 ) {
     navigation(
         route = MainDestinations.HOME_ROUTE,
-        startDestination = HomeSections.MAP.route/*"${HomeSections.MAP.route}?${Arguments.MAP_NEW_PLACE}={${Arguments.MAP_NEW_PLACE}}"*/
+        startDestination = HomeSections.MAP.route
     ) {
         addHomeGraph(onSnackSelected, navController)
     }
