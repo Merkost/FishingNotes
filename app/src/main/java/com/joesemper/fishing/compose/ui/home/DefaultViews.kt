@@ -10,6 +10,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
@@ -26,7 +27,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -309,6 +312,10 @@ fun DefaultAppBar(
 @ExperimentalAnimationApi
 @Composable
 fun FullScreenPhoto(photo: MutableState<Uri?>) {
+
+    /*val scale = remember { mutableStateOf(1f) }
+    val rotationState = remember { mutableStateOf(1f) }*/
+
     val coroutineScope = rememberCoroutineScope()
     val offsetY = remember { Animatable(0f) }
     val alpha = 0.8f - abs(offsetY.value).div(600)
@@ -343,6 +350,7 @@ fun FullScreenPhoto(photo: MutableState<Uri?>) {
 
                         },
                         onDragStopped = {
+
                             if (offsetY.value >= 400f || offsetY.value <= -400f) photo.value =
                                 null else
                                 coroutineScope.launch {
@@ -358,7 +366,18 @@ fun FullScreenPhoto(photo: MutableState<Uri?>) {
                     )
                     .clickable {
                         photo.value = null
-                    },
+                    }
+                    /*}.pointerInput(Unit) {
+                        detectTransformGestures { centroid, pan, zoom, rotation ->
+                            scale.value *= zoom
+                            rotationState.value += rotation
+                        }
+                    }.graphicsLayer(
+                        // adding some zoom limits (min 50%, max 200%)
+                        scaleX = maxOf(.5f, minOf(1f, scale.value)),
+                        scaleY = maxOf(.5f, minOf(1f, scale.value)),
+                        rotationZ = rotationState.value
+                    )*/,
                 painter = rememberImagePainter(data = photo.value),
                 contentDescription = stringResource(id = R.string.catch_photo)
             )
