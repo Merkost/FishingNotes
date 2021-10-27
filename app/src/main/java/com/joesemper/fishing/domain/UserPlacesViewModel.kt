@@ -10,9 +10,7 @@ import kotlinx.coroutines.launch
 
 class UserPlacesViewModel(private val repository: UserContentRepository) : ViewModel() {
 
-    private val places = mutableListOf<UserMapMarker>()
-
-    val currentContent = MutableStateFlow<List<UserMapMarker>>(places)
+    val currentContent = MutableStateFlow<MutableList<UserMapMarker>>(mutableListOf())
 
     init {
         loadAllUserPlaces()
@@ -21,8 +19,8 @@ class UserPlacesViewModel(private val repository: UserContentRepository) : ViewM
     private fun loadAllUserPlaces() {
         viewModelScope.launch {
             repository.getAllUserMarkersList().collect { userPlaces ->
-                places.clear()
-                places.addAll(userPlaces as List<UserMapMarker>)
+                currentContent.value.clear()
+                currentContent.value.addAll(userPlaces as List<UserMapMarker>)
             }
         }
     }

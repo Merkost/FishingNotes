@@ -1,4 +1,4 @@
-package com.joesemper.fishing.compose.ui.home.notes.user_places
+package com.joesemper.fishing.compose.ui.home.notes
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -16,9 +16,6 @@ import androidx.navigation.NavController
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
-import com.joesemper.fishing.compose.ui.home.notes.ItemAdd
-import com.joesemper.fishing.compose.ui.home.notes.ItemUserPlace
-import com.joesemper.fishing.compose.ui.home.notes.NoElementsView
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserPlacesViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -28,10 +25,10 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun UserPlacesScreen(
     navController: NavController,
-    viewModel: UserPlacesViewModel = getViewModel<UserPlacesViewModel>()
+    viewModel: UserPlacesViewModel = getViewModel()
 ) {
     Scaffold() {
-        val places by viewModel.currentContent.collectAsState()
+        val places: List<UserMapMarker> by viewModel.currentContent.collectAsState()
         Crossfade(places) { animatedUiState ->
             UserPlaces(
                 places = animatedUiState,

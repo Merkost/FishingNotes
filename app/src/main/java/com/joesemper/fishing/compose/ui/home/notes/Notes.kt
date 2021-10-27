@@ -1,4 +1,4 @@
-package com.joesemper.fishing.compose.ui.home
+package com.joesemper.fishing.compose.ui.home.notes
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
@@ -8,11 +8,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.*
-import com.joesemper.fishing.compose.ui.home.notes.TabItem
+import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.home.DefaultAppBar
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
@@ -30,7 +32,12 @@ fun Notes(
     val pagerState = rememberPagerState(pageCount = tabs.size)
 
     Scaffold(
-        topBar = { AppBar(navController) },
+        topBar = {
+            DefaultAppBar(
+                onNavClick = { navController.popBackStack() },
+                title = stringResource(id = R.string.notes)
+            )
+        }
     ) {
         Column {
             Tabs(tabs = tabs, pagerState = pagerState)

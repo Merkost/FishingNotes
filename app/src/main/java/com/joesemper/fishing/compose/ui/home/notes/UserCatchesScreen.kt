@@ -1,4 +1,4 @@
-package com.joesemper.fishing.compose.ui.home.notes.user_catches
+package com.joesemper.fishing.compose.ui.home.notes
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -16,9 +16,6 @@ import androidx.navigation.NavController
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
-import com.joesemper.fishing.compose.ui.home.notes.ItemAdd
-import com.joesemper.fishing.compose.ui.home.notes.ItemUserCatch
-import com.joesemper.fishing.compose.ui.home.notes.NoElementsView
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserCatchesViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch

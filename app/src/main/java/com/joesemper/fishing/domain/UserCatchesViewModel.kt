@@ -10,9 +10,7 @@ import kotlinx.coroutines.launch
 
 class UserCatchesViewModel(private val repository: UserContentRepository) : ViewModel() {
 
-    private val catches = mutableListOf<UserCatch>()
-
-    val currentContent = MutableStateFlow<List<UserCatch>>(catches)
+    val currentContent = MutableStateFlow<MutableList<UserCatch>>(mutableListOf())
 
     init {
         loadAllUserCatches()
@@ -21,11 +19,10 @@ class UserCatchesViewModel(private val repository: UserContentRepository) : View
     private fun loadAllUserCatches() {
         viewModelScope.launch {
             repository.getAllUserCatchesState().collect { contentState ->
-                catches.apply {
+                currentContent.value.apply {
                     addAll(contentState.added)
                     removeAll(contentState.deleted)
                 }
-                currentContent.value = catches
             }
         }
     }
