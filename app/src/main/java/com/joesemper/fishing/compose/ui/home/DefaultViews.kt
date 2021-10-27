@@ -268,8 +268,18 @@ fun SecondaryText(modifier: Modifier = Modifier, text: String) {
 fun SecondaryTextColored(modifier: Modifier = Modifier, text: String) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.body2,
+        style = MaterialTheme.typography.body1,
         color = primaryFigmaColor,
+        text = text
+    )
+}
+
+@Composable
+fun SupportText(modifier: Modifier = Modifier, text: String) {
+    Text(
+        modifier = modifier,
+        style = MaterialTheme.typography.body2,
+        color = supportFigmaTextColor,
         text = text
     )
 }

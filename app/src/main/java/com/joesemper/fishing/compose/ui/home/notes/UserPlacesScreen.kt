@@ -28,15 +28,17 @@ fun UserPlacesScreen(
     viewModel: UserPlacesViewModel = getViewModel()
 ) {
     Scaffold() {
-        val places: List<UserMapMarker> by viewModel.currentContent.collectAsState()
+        val places: List<UserMapMarker>? by viewModel.currentContent.collectAsState()
         Crossfade(places) { animatedUiState ->
-            UserPlaces(
-                places = animatedUiState,
-                addNewPlaceClicked = { onAddNewPlaceClick(navController) },
-                userPlaceClicked = { userMarker ->
-                    onPlaceItemClick(userMarker, navController)
-                }
-            )
+            if (animatedUiState != null) {
+                UserPlaces(
+                    places = animatedUiState,
+                    addNewPlaceClicked = { onAddNewPlaceClick(navController) },
+                    userPlaceClicked = { userMarker ->
+                        onPlaceItemClick(userMarker, navController)
+                    }
+                )
+            }
         }
     }
 }

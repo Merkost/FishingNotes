@@ -31,10 +31,12 @@ fun UserCatchesScreen(
     Scaffold {
         val catches by viewModel.currentContent.collectAsState()
         Crossfade(catches) { animatedUiState ->
-            UserCatches(
-                catches = animatedUiState,
-                addNewCatchClicked = { onAddNewCatchClick(navController) },
-                userCatchClicked = { catch -> onCatchItemClick(catch, navController) })
+            if (animatedUiState != null) {
+                UserCatches(
+                    catches = animatedUiState,
+                    addNewCatchClicked = { onAddNewCatchClick(navController) },
+                    userCatchClicked = { catch -> onCatchItemClick(catch, navController) })
+            }
         }
     }
 }

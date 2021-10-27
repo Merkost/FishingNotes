@@ -161,7 +161,7 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
             userCatchClicked(userCatch)
         }) {
         ConstraintLayout(modifier = Modifier.padding(2.dp)) {
-            val (photos, fish, weight, kg, description, icon, place, date) = createRefs()
+            val (photos, fishIcon, fish, weight, kg, description, icon, place, date) = createRefs()
             val guideline = createGuidelineFromAbsoluteLeft(104.dp)
 
             ItemCatchPhotos(
@@ -174,9 +174,21 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
                 photosCount = userCatch.downloadPhotoLinks.count()
             )
 
+            Icon(
+                modifier = Modifier.constrainAs(fishIcon) {
+                    absoluteLeft.linkTo(guideline)
+                    top.linkTo(parent.top)
+                },
+                painter = painterResource(id = R.drawable.ic_fish),
+                tint = secondaryFigmaTextColor,
+                contentDescription = stringResource(
+                    id = R.string.fish_catch
+                )
+            )
+
             PrimaryText(
                 modifier = Modifier.constrainAs(fish) {
-                    absoluteLeft.linkTo(guideline, 4.dp)
+                    absoluteLeft.linkTo(fishIcon.absoluteRight)
                     top.linkTo(parent.top)
                 },
                 text = userCatch.fishType
@@ -200,7 +212,7 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
 
             SecondaryText(
                 modifier = Modifier.constrainAs(description) {
-                    absoluteLeft.linkTo(guideline, 4.dp)
+                    absoluteLeft.linkTo(fish.absoluteLeft)
                     linkTo(fish.bottom, icon.top, bottomMargin = 2.dp, bias = 0F)
                 },
                 text = if (userCatch.description.isNotBlank()) {
@@ -231,7 +243,7 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
                 text = userCatch.placeTitle
             )
 
-            SecondaryTextColored(
+            SupportText(
                 modifier = Modifier.constrainAs(date) {
                     absoluteRight.linkTo(parent.absoluteRight, 4.dp)
                     top.linkTo(place.top)
