@@ -35,15 +35,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.core.os.ConfigurationCompat
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
+import androidx.navigation.*
 import androidx.navigation.compose.composable
 import coil.annotation.ExperimentalCoilApi
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.Arguments
+import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.map.Map
 import com.joesemper.fishing.compose.ui.home.weather.Weather
 import com.joesemper.fishing.ui.theme.FigmaTheme
@@ -59,10 +59,14 @@ fun NavGraphBuilder.addHomeGraph(
     onSnackSelected: (Long, NavBackStackEntry) -> Unit,
     navController: NavController,
     modifier: Modifier = Modifier,
-    bottomBarState: MutableState<Boolean>,
 ) {
-    composable(HomeSections.MAP.route) { from ->
-        Map(onSnackClick = { id -> onSnackSelected(id, from) }, modifier, navController, bottomBarState)
+    composable(
+        "${HomeSections.MAP.route}?${Arguments.MAP_NEW_PLACE}={${Arguments.MAP_NEW_PLACE}}",
+        //arguments = listOf(navArgument(Arguments.MAP_NEW_PLACE) { defaultValue = false })
+    ) { from ->
+        //val addPlace = requireNotNull(from.arguments).getBoolean(Arguments.MAP_NEW_PLACE, false)
+        //from.arguments?.getBoolean(Arguments.MAP_NEW_PLACE)!!
+        Map(modifier, navController, false)
     }
     composable(HomeSections.NOTES.route) { from ->
         Notes(onSnackClick = { id -> onSnackSelected(id, from) }, modifier, navController)
@@ -81,7 +85,7 @@ enum class HomeSections(
     val icon: ImageVector,
     val route: String
 ) {
-    MAP(R.string.map, Icons.Outlined.Map, "home/map"),
+    MAP(R.string.map, Icons.Outlined.Map, "home/map?${Arguments.MAP_NEW_PLACE}={${Arguments.MAP_NEW_PLACE}}"),
     NOTES(R.string.notes, Icons.Outlined.Menu, "home/notes"),
     WEATHER(R.string.weather, Icons.Outlined.WbSunny, "home/weather"),
     PROFILE(R.string.profile, Icons.Outlined.VerifiedUser, "home/profile")
@@ -101,7 +105,7 @@ fun FishingNotesBottomBar(
     Surface(
 //        color = color,
 //        contentColor = contentColor
-    elevation = 8.dp
+        elevation = 8.dp
     ) {
         val springSpec = SpringSpec<Float>(
             // Determined experimentally

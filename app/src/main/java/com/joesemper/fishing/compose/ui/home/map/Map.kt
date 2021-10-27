@@ -76,10 +76,8 @@ import java.lang.Exception
 @ExperimentalPermissionsApi
 @Composable
 fun Map(
-    onSnackClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavController,
-    bottomBarVisibilityState: MutableState<Boolean> = mutableStateOf(true),
     addPlaceOnStart: Boolean = false
 ) {
     val viewModel: MapViewModel = getViewModel()
@@ -119,7 +117,6 @@ fun Map(
     var placeSelectMode by remember {
         if (addPlaceOnStart) mutableStateOf(true)
         else mutableStateOf(false)
-
     }
 
     var mapUiState: MapUiState by remember {
@@ -235,10 +232,8 @@ fun Map(
                 mapUiState = when {
                     dialogAddPlaceIsShowing.value -> MapUiState.DialogAddMode
                     placeSelectMode -> MapUiState.PlaceSelectMode
-                    scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetInfoMode.apply {
-                        bottomBarVisibilityState.value = false
-                    }
-                    else -> MapUiState.NormalMode.apply { bottomBarVisibilityState.value = true }
+                    scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetInfoMode
+                    else -> MapUiState.NormalMode
                 }
 
                 //MapLayersButton
