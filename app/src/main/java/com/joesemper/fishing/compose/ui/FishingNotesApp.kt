@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.*
@@ -12,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import coil.annotation.ExperimentalCoilApi
 import com.google.accompanist.insets.ProvideWindowInsets
+import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.compose.ui.home.*
@@ -38,13 +40,13 @@ fun FishingNotesApp() {
                         )
                     }
                 },
-                /*snackbarHost = {
+                snackbarHost = {
                     SnackbarHost(
                         hostState = it,
                         modifier = Modifier.systemBarsPadding(),
-                        snackbar = { snackbarData -> Snackbar(snackbarData) }
+                        snackbar = { snackbarData -> AppSnackbar(snackbarData) }
                     )
-                },*/
+                },
                 scaffoldState = appStateHolder.scaffoldState,
                 /*modifier = if (appStateHolder.currentRoute == HomeSections.MAP.route)
                     Modifier.statusBarsHeight()

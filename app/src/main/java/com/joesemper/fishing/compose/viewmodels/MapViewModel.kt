@@ -52,6 +52,10 @@ class MapViewModel(
         viewStateFlow.value = BaseViewState.Loading(null)
     }
 
+    fun showMessage(s: String) {
+
+    }
+
     private fun loadMarkers() {
         viewModelScope.launch {
             repository.getAllUserMarkersList().collect { markers ->

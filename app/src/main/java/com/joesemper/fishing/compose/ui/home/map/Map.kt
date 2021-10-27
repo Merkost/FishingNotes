@@ -58,6 +58,7 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.MyCard
+import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.UiState
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
@@ -158,24 +159,11 @@ fun Map(
                                     map = mapView,
                                     location = lastKnownLocation.value
                                 )
-                                viewModel.
-                                coroutineScope.launch {
-                                    Toast.makeText(
-                                        context,
-                                        "Place select mode on",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
+                                SnackbarManager.showMessage(R.string.mode_place_selecting)
                                 placeSelectMode = !placeSelectMode
                             }
                             MapUiState.PlaceSelectMode -> {
-                                coroutineScope.launch {
-                                    Toast.makeText(
-                                        context,
-                                        "Place select mode off",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
+                                SnackbarManager.showMessage(R.string.mode_place_selecting_off)
                                 mapView.getMapAsync { googleMap ->
                                     val target = googleMap.cameraPosition.target
                                     currentPosition.value =
@@ -189,19 +177,7 @@ fun Map(
                                 placeSelectMode = !placeSelectMode
                             }
                             MapUiState.BottomSheetInfoMode -> {
-                                /*moveCameraToLocation(
-                                    coroutineScope = coroutineScope,
-                                    map = mapView,
-                                    location = lastKnownLocation.value
-                                )*/
-                                coroutineScope.launch {
-                                    Toast.makeText(
-                                        context,
-                                        "Place info mode on",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    //scaffoldState.bottomSheetState.collapse()
-                                }
+                                SnackbarManager.showMessage(R.string.mode_place_info)
                                 placeSelectMode = !placeSelectMode
                                 val marker: UserMapMarker? = currentMarker.value
                                 marker?.let {
@@ -215,13 +191,6 @@ fun Map(
                                     map = mapView,
                                     location = lastKnownLocation.value
                                 )
-                                coroutineScope.launch {
-                                    Toast.makeText(
-                                        context,
-                                        "Add New Place",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
                             }
                         }
                     }

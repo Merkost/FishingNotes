@@ -17,6 +17,7 @@ import androidx.navigation.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.joesemper.fishing.compose.ui.home.HomeSections
+import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -48,12 +49,12 @@ object Arguments {
 fun rememberAppStateHolder(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     navController: NavHostController = rememberNavController(),
-//    snackbarManager: SnackbarManager = SnackbarManager,
+    snackbarManager: SnackbarManager = SnackbarManager,
     resources: Resources = resources(),
     coroutineScope: CoroutineScope = rememberCoroutineScope()
 ) =
     remember(scaffoldState, navController, /*snackbarManager,*/ resources, coroutineScope) {
-        AppStateHolder(scaffoldState, navController, /*snackbarManager,*/ resources, coroutineScope)
+        AppStateHolder(scaffoldState, navController, snackbarManager, resources, coroutineScope)
     }
 
 /**
@@ -63,7 +64,7 @@ fun rememberAppStateHolder(
 class AppStateHolder(
     val scaffoldState: ScaffoldState,
     val navController: NavHostController,
-    /*private val snackbarManager: SnackbarManager,*/
+    private val snackbarManager: SnackbarManager,
     private val resources: Resources,
     coroutineScope: CoroutineScope
 ) {
@@ -71,7 +72,7 @@ class AppStateHolder(
 
     // Process snackbars coming from SnackbarManager
     init {
-        /*coroutineScope.launch {
+        coroutineScope.launch {
             snackbarManager.messages.collect { currentMessages ->
                 if (currentMessages.isNotEmpty()) {
                     val message = currentMessages[0]
@@ -84,8 +85,12 @@ class AppStateHolder(
                     snackbarManager.setMessageShown(message.id)
                 }
             }
-        }*/
+        }
     }
+
+    // ----------------------------------------------------------
+    // BottomBar state source of truth
+    // ----------------------------------------------------------
 
     val bottomBarTabs = HomeSections.values()
     private val bottomBarRoutes = bottomBarTabs.map { it.route }
