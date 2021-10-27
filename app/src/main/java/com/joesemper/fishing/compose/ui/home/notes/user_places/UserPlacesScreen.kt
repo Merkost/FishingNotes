@@ -1,6 +1,5 @@
 package com.joesemper.fishing.compose.ui.home.notes.user_places
 
-import android.os.Parcel
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
@@ -61,8 +60,6 @@ fun UserPlacesScreen(
 
 private fun onAddNewPlaceClick(navController: NavController) {
     val addNewPlace = true
-    //navController.currentBackStackEntry?.arguments?.putBoolean(Arguments.MAP_NEW_PLACE, true)
-    //navController.navigate("profile/user1234")
     navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${addNewPlace}")
 }
 
