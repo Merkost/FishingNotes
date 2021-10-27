@@ -1,10 +1,7 @@
 package com.joesemper.fishing.compose.ui
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.core.tween
 import android.os.Parcelable
-import androidx.compose.animation.*
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
@@ -24,7 +21,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import kotlinx.coroutines.InternalCoroutinesApi
-import com.joesemper.fishing.compose.ui.home.map.Map
 
 @ExperimentalPermissionsApi
 @ExperimentalAnimationApi
@@ -70,7 +66,7 @@ fun FishingNotesApp() {
                     //Spacer(modifier = Modifier.statusBarsHeight())
                     NavHost(
                         navController = appStateHolder.navController,
-                        startDestination = MainDestinations.MAP_ROUTE,
+                        startDestination = MainDestinations.HOME_ROUTE,
                         modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
                             Modifier.padding(innerPaddingModifier) /*else Modifier*/
                     ) {
@@ -105,7 +101,7 @@ private fun NavGraphBuilder.NavGraph(
 
 ) {
     navigation(
-        route = MainDestinations.MAP_ROUTE,
+        route = MainDestinations.HOME_ROUTE,
         startDestination = HomeSections.MAP.route
     ) {
         addHomeGraph(onSnackSelected, navController, Modifier, bottomBarState)
