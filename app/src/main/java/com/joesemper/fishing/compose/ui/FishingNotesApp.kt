@@ -102,15 +102,16 @@ private fun NavGraphBuilder.NavGraph(
         //SnackDetail(snackId, upPress)
     }
 
-    /*composable(
-        route = "${MainDestinations.MAP_ROUTE}/{${Arguments.MAP_NEW_PLACE}}",
-        arguments = listOf(navArgument(Arguments.MAP_NEW_PLACE) { type = NavType.BoolType })
-    ) {
-        Map() }*/
-
     composable(
         route = MainDestinations.NEW_CATCH_ROUTE,
     ) {
+        NewCatchScreen({ navController.popBackStack(route = MainDestinations.MAP_TO_NEW_CATCH_ROUTE,
+                inclusive = true) }, it.requiredArg(Arguments.PLACE))
+    }
+
+    composable(
+        route = MainDestinations.MAP_TO_NEW_CATCH_ROUTE,
+        ) {
         NewCatchScreen({
             navController.popBackStack(route = MainDestinations.NEW_CATCH_ROUTE,
                 inclusive = true) },
