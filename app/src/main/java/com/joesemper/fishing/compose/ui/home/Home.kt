@@ -350,7 +350,7 @@ private val BottomNavLabelTransformOrigin = TransformOrigin(0f, 0.5f)
 private val BottomNavIndicatorShape = RoundedCornerShape(percent = 50)
 private val BottomNavigationItemPadding = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
 
-@Preview
+/*@Preview
 @Composable
 private fun FishingNotesBottomNavPreview() {
     FigmaTheme {
@@ -360,4 +360,4 @@ private fun FishingNotesBottomNavPreview() {
             navigateToRoute = { }
         )
     }
-}
+}*/

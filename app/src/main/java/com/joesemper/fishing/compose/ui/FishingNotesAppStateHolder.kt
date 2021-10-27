@@ -27,10 +27,19 @@ import kotlinx.coroutines.launch
  */
 object MainDestinations {
     const val HOME_ROUTE = "home"
-    const val MAP_ROUTE = "map"
+
     const val NEW_CATCH_ROUTE = "new_catch"
     const val PLACE_ROUTE = "place"
+
     const val CATCH_ROUTE = "catch"
+
+    const val MAP_ROUTE = "map"
+    const val MAP_TO_PLACE_ROUTE = "${HOME_ROUTE}/${MAP_ROUTE}/${PLACE_ROUTE}"
+    const val MAP_TO_NEW_CATCH_ROUTE = "${HOME_ROUTE}/${MAP_ROUTE}/${NEW_CATCH_ROUTE}"
+
+    const val NOTES_ROUTE = "notes"
+    const val NOTES_TO_NEW_CATCH_ROUTE = "${HOME_ROUTE}/${NOTES_ROUTE}/${NEW_CATCH_ROUTE}"
+    const val NOTES_TO_PLACE_ROUTE = "${HOME_ROUTE}/${NOTES_ROUTE}/${PLACE_ROUTE}"
 
     const val SNACK_DETAIL_ROUTE = "notes"
     const val SNACK_ID_KEY = "snackId"

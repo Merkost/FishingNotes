@@ -61,6 +61,7 @@ import com.joesemper.fishing.compose.ui.home.MyCard
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.UiState
 import com.joesemper.fishing.compose.ui.navigate
+import com.joesemper.fishing.compose.ui.rememberAppStateHolder
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
@@ -84,6 +85,7 @@ fun Map(
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+
 
     val mapView = viewModel.mapView.value ?: rememberMapViewWithLifecycle().apply {
         viewModel.mapView.value = this
@@ -182,7 +184,7 @@ fun Map(
                                 val marker: UserMapMarker? = currentMarker.value
                                 marker?.let {
                                     //placeSelectMode = !placeSelectMode
-                                    navController.navigate(MainDestinations.NEW_CATCH_ROUTE, Arguments.PLACE to it)
+                                    navController.navigate(MainDestinations.MAP_TO_NEW_CATCH_ROUTE, Arguments.PLACE to it)
                                 }
                             }
                             MapUiState.DialogAddMode -> {
@@ -576,7 +578,7 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?, navController: NavController
             },
                 shape = RoundedCornerShape(24.dp),
                 onClick = {
-                    navController.navigate(MainDestinations.PLACE_ROUTE, Arguments.PLACE to marker)
+                    navController.navigate(MainDestinations.MAP_TO_PLACE_ROUTE, Arguments.PLACE to marker)
                 }
             ) {
                 Row(
