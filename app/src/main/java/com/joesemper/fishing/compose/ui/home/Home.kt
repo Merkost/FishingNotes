@@ -61,7 +61,7 @@ fun NavGraphBuilder.addHomeGraph(
     modifier: Modifier = Modifier,
 ) {
     composable(
-        "${HomeSections.MAP.route}?${Arguments.MAP_NEW_PLACE}={${Arguments.MAP_NEW_PLACE}}",
+        HomeSections.MAP.route/*"${HomeSections.MAP.route}?${Arguments.MAP_NEW_PLACE}={${Arguments.MAP_NEW_PLACE}}"*/,
         //arguments = listOf(navArgument(Arguments.MAP_NEW_PLACE) { defaultValue = false })
     ) { from ->
         //val addPlace = requireNotNull(from.arguments).getBoolean(Arguments.MAP_NEW_PLACE, false)
@@ -85,7 +85,7 @@ enum class HomeSections(
     val icon: ImageVector,
     val route: String
 ) {
-    MAP(R.string.map, Icons.Outlined.Map, "home/map?${Arguments.MAP_NEW_PLACE}={${Arguments.MAP_NEW_PLACE}}"),
+    MAP(R.string.map, Icons.Outlined.Map, "home/map"),
     NOTES(R.string.notes, Icons.Outlined.Menu, "home/notes"),
     WEATHER(R.string.weather, Icons.Outlined.WbSunny, "home/weather"),
     PROFILE(R.string.profile, Icons.Outlined.VerifiedUser, "home/profile")

@@ -54,7 +54,7 @@ fun FishingNotesApp() {
                     //Spacer(modifier = Modifier.statusBarsHeight())
                     NavHost(
                         navController = appStateHolder.navController,
-                        startDestination = "${HomeSections.MAP.route}?${Arguments.MAP_NEW_PLACE}={${Arguments.MAP_NEW_PLACE}}",
+                        startDestination = MainDestinations.HOME_ROUTE,
                         modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
                             Modifier.padding(innerPaddingModifier) /*else Modifier*/
                     ) {
@@ -86,8 +86,8 @@ private fun NavGraphBuilder.NavGraph(
     navController: NavController,
 ) {
     navigation(
-        route = MainDestinations.MAP_ROUTE,
-        startDestination = "${HomeSections.MAP.route}?${Arguments.MAP_NEW_PLACE}={${Arguments.MAP_NEW_PLACE}}"
+        route = MainDestinations.HOME_ROUTE,
+        startDestination = HomeSections.MAP.route/*"${HomeSections.MAP.route}?${Arguments.MAP_NEW_PLACE}={${Arguments.MAP_NEW_PLACE}}"*/
     ) {
         addHomeGraph(onSnackSelected, navController)
     }
