@@ -2,9 +2,13 @@ package com.joesemper.fishing.compose.ui.home
 
 import android.net.Uri
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,11 +17,8 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -39,6 +41,8 @@ import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.theme.*
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @Composable
 fun MyCardNoPadding(content: @Composable () -> Unit) {
@@ -290,13 +294,42 @@ fun DefaultAppBar(
 
 @Composable
 fun FullScreenPhoto(photo: MutableState<Uri?>) {
+    val coroutineScope = rememberCoroutineScope()
+    val offsetY  =  remember { Animatable(0f) }
+
     Dialog(
         properties = DialogProperties(dismissOnClickOutside = true, dismissOnBackPress = true),
         onDismissRequest = { photo.value = null }) {
         Image(
             modifier = Modifier
-                .padding(64.dp)
+                .fillMaxWidth()
                 .wrapContentSize()
+                .offset {
+                    IntOffset(0, offsetY.value.roundToInt())
+                }
+                .draggable(
+                    state = rememberDraggableState { delta ->
+                        coroutineScope.launch {
+                            offsetY.snapTo(offsetY.value + delta)
+                        }
+                    },
+                    orientation = Orientation.Vertical,
+                    onDragStarted = {
+                          //if (it.y >= 200f || it.y <= -200f ) photo.value = null
+                    },
+                    onDragStopped = {
+                        if (offsetY.value >= 400f || offsetY.value <= -400f ) photo.value = null else
+                        coroutineScope.launch {
+                            offsetY.animateTo(
+                                targetValue = 0f,
+                                animationSpec = tween(
+                                    durationMillis = 400,
+                                    delayMillis = 0
+                                )
+                            )
+                        }
+                    }
+                )
                 .clickable {
                     photo.value = null
                 },
