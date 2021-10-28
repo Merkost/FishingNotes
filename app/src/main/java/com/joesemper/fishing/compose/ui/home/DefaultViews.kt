@@ -6,7 +6,6 @@ import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -64,8 +63,7 @@ fun DefaultCard(
     content: @Composable () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(8.dp),
-        border = BorderStroke(width = 0.1.dp, color = secondaryFigmaTextColor),
+        shape = RoundedCornerShape(4.dp),
         elevation = 2.dp,
         modifier = modifier
             .fillMaxWidth()
