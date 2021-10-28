@@ -28,7 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 fun MyLocationButton(
     coroutineScope: CoroutineScope,
     mapView: MapView,
-    lastKnownLocation: LatLng?,
+    lastKnownLocation: LatLng,
     modifier: Modifier,
 ) {
     Card(shape = CircleShape, modifier = modifier) {

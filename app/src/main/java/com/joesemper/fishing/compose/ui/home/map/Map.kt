@@ -267,10 +267,8 @@ fun Map(
             )
 
             if (lastKnownLocationState is LocationState.LocationGranted) {
-                MyLocationButton(coroutineScope,
-                    mapView,
+                MyLocationButton(coroutineScope, mapView,
                     (lastKnownLocationState as LocationState.LocationGranted).location,
-                    permissionsState,
                     modifier = Modifier
                         .size(40.dp)
                         .constrainAs(mapMyLocationButton) {
