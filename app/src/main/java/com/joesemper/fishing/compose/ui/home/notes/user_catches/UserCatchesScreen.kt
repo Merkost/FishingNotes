@@ -49,7 +49,7 @@ fun UserCatchesScreen(navController: NavController, viewModel: UserCatchesViewMo
 }
 
 private fun onAddNewCatchClick(navController: NavController) {
-    navController.navigate("${HomeSections.NOTES.route}/${MainDestinations.NEW_CATCH_ROUTE}",
+    navController.navigate("${MainDestinations.NEW_CATCH_ROUTE}",
             Arguments.PLACE to UserMapMarker())
 }
 

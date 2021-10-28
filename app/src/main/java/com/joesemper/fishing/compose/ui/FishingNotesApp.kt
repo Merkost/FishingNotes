@@ -112,28 +112,28 @@ private fun NavGraphBuilder.NavGraph(
     }
 
     composable(
-        route = MainDestinations.NOTES_TO_NEW_CATCH_ROUTE,
+        route = MainDestinations.NEW_CATCH_ROUTE,
     ) {
-        NewCatchScreen({ navController.popBackStack(route = MainDestinations.NOTES_TO_NEW_CATCH_ROUTE,
+        NewCatchScreen({ navController.popBackStack(route = MainDestinations.NEW_CATCH_ROUTE,
                 inclusive = true) }, it.requiredArg(Arguments.PLACE))
     }
 
-    composable(
+    /*composable(
         route = MainDestinations.MAP_TO_NEW_CATCH_ROUTE,
         ) {
         NewCatchScreen({
             navController.popBackStack(route = MainDestinations.MAP_TO_NEW_CATCH_ROUTE,
                 inclusive = true) },
             it.requiredArg(Arguments.PLACE))
-    }
+    }*/
 
     composable(
-        route = MainDestinations.NOTES_TO_PLACE_ROUTE,
+        route = MainDestinations.PLACE_ROUTE,
     ) { UserPlaceScreen(navController, it.requiredArg(Arguments.PLACE)) }
 
-    composable(
+    /*composable(
         route = MainDestinations.MAP_TO_PLACE_ROUTE,
-    ) { UserPlaceScreen(navController, it.requiredArg(Arguments.PLACE)) }
+    ) { UserPlaceScreen(navController, it.requiredArg(Arguments.PLACE)) }*/
 
     composable(
         route = MainDestinations.CATCH_ROUTE,

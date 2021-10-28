@@ -34,8 +34,8 @@ object MainDestinations {
     const val CATCH_ROUTE = "catch"
 
     const val MAP_ROUTE = "map"
-    const val MAP_TO_PLACE_ROUTE = "${HOME_ROUTE}/${MAP_ROUTE}/${PLACE_ROUTE}"
-    const val MAP_TO_NEW_CATCH_ROUTE = "${HOME_ROUTE}/${MAP_ROUTE}/${NEW_CATCH_ROUTE}"
+    //const val MAP_TO_PLACE_ROUTE = "${HOME_ROUTE}/${MAP_ROUTE}/${PLACE_ROUTE}"
+    //const val MAP_TO_NEW_CATCH_ROUTE = "${HOME_ROUTE}/${MAP_ROUTE}/${NEW_CATCH_ROUTE}"
 
     const val NOTES_ROUTE = "notes"
     const val NOTES_TO_NEW_CATCH_ROUTE = "${HOME_ROUTE}/${NOTES_ROUTE}/${NEW_CATCH_ROUTE}"

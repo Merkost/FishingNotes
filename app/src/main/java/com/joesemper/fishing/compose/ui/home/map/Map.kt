@@ -184,7 +184,7 @@ fun Map(
                                 val marker: UserMapMarker? = currentMarker.value
                                 marker?.let {
                                     //placeSelectMode = !placeSelectMode
-                                    navController.navigate(MainDestinations.MAP_TO_NEW_CATCH_ROUTE, Arguments.PLACE to it)
+                                    navController.navigate(MainDestinations.NEW_CATCH_ROUTE, Arguments.PLACE to it)
                                 }
                             }
                             MapUiState.DialogAddMode -> {
@@ -578,7 +578,7 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?, navController: NavController
             },
                 shape = RoundedCornerShape(24.dp),
                 onClick = {
-                    navController.navigate(MainDestinations.MAP_TO_PLACE_ROUTE, Arguments.PLACE to marker)
+                    navController.navigate(MainDestinations.PLACE_ROUTE, Arguments.PLACE to marker)
                 }
             ) {
                 Row(
