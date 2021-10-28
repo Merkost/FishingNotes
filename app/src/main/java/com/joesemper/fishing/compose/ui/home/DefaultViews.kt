@@ -64,7 +64,7 @@ fun DefaultCard(
 ) {
     Card(
         shape = RoundedCornerShape(4.dp),
-        elevation = 2.dp,
+        elevation = 8.dp,
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
