@@ -243,10 +243,8 @@ fun Map(
             mapUiState = when {
                 dialogAddPlaceIsShowing.value -> MapUiState.DialogAddMode
                 placeSelectMode -> MapUiState.PlaceSelectMode
-                scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetInfoMode.apply {
-                    bottomBarVisibilityState.value = false
-                }
-                else -> MapUiState.NormalMode.apply { bottomBarVisibilityState.value = true }
+                scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetInfoMode
+                else -> MapUiState.NormalMode
             }
 
             //MapLayersButton
@@ -691,7 +689,6 @@ fun GoogleMapLayout(
     onMarkerClick: (marker: UserMapMarker) -> Unit,
     cameraMoveCallback: (state: CameraMoveState) -> Unit,
     lastLocation: MutableState<LatLng>,
-    arePermissonsGiven: MutableState<Boolean>
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()

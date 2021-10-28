@@ -141,7 +141,6 @@ class AppStateHolder(
     }
 }
 
-
 fun NavController.navigate(route: String, vararg args: Pair<String, Parcelable>) {
     navigate(route)
 

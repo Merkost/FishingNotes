@@ -29,7 +29,6 @@ fun MyLocationButton(
     coroutineScope: CoroutineScope,
     mapView: MapView,
     lastKnownLocation: LatLng?,
-    permissionsState: MultiplePermissionsState,
     modifier: Modifier,
 ) {
     Card(shape = CircleShape, modifier = modifier) {
