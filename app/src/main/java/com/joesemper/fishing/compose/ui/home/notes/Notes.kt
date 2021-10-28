@@ -4,17 +4,21 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.*
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.DefaultAppBar
+import com.joesemper.fishing.compose.ui.home.SubtitleWithIcon
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
@@ -37,6 +41,34 @@ fun Notes(
                 onNavClick = { navController.popBackStack() },
                 title = stringResource(id = R.string.notes)
             )
+        },
+        floatingActionButton = {
+            val expanded = remember {
+                mutableStateOf(false)
+            }
+            FloatingActionButton(onClick = { expanded.value = !expanded.value }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_baseline_plus),
+                    contentDescription = ""
+                )
+
+                DropdownMenu(
+                    properties = PopupProperties(),
+                    expanded = expanded.value,
+                    onDismissRequest = { expanded.value = !expanded.value }) {
+
+                    DropdownMenuItem(onClick = { /*TODO*/ }) {
+                        SubtitleWithIcon(icon = R.drawable.ic_add_catch, text = "New catch")
+                    }
+                    DropdownMenuItem(onClick = { /*TODO*/ }) {
+                        SubtitleWithIcon(
+                            icon = R.drawable.ic_baseline_add_location_24,
+                            text = "New place"
+                        )
+                    }
+
+                }
+            }
         }
     ) {
         Column {

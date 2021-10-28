@@ -32,7 +32,6 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.theme.backgroundGreenColor
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
@@ -212,10 +211,12 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
             )
 
             Icon(
-                modifier = Modifier.constrainAs(icon) {
-                    absoluteLeft.linkTo(guideline)
-                    bottom.linkTo(parent.bottom)
-                },
+                modifier = Modifier
+                    .size(24.dp)
+                    .constrainAs(icon) {
+                        absoluteLeft.linkTo(guideline)
+                        bottom.linkTo(parent.bottom)
+                    },
                 painter = painterResource(
                     id = R.drawable.ic_baseline_location_on_24
                 ),
@@ -351,27 +352,17 @@ fun ItemAdd(
 @Composable
 fun ItemDate(text: String) {
     Box(
-        contentAlignment = Alignment.Center,
+        contentAlignment = Alignment.CenterStart,
         modifier = Modifier
             .wrapContentHeight()
             .fillMaxWidth()
     ) {
-        Surface(
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier
-                .wrapContentSize(),
-            color = backgroundGreenColor
-        ) {
-            SecondaryTextColored(
-                modifier = Modifier.padding(8.dp),
-                text = text,
-                color = secondaryFigmaTextColor
-            )
-        }
-
+        SecondaryTextColored(
+            modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp),
+            text = text,
+            color = secondaryFigmaTextColor
+        )
     }
-
-
 }
 
 @Composable
