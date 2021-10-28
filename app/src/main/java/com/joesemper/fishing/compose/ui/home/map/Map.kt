@@ -12,7 +12,10 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -68,11 +71,20 @@ import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.ui.theme.Shapes
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
 import me.vponomarenko.compose.shimmer.shimmer
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
-import java.lang.Exception
 
+
+sealed class LocationState() {
+    object NoPermission : LocationState()
+    class LocationGranted(val location: LatLng) : LocationState()
+    object LocationNotGranted : LocationState()
+}
+
+@ExperimentalCoroutinesApi
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @ExperimentalPermissionsApi
@@ -100,11 +112,21 @@ fun Map(
         //bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
     )
 
-    val dialogAddPlaceIsShowing = remember { mutableStateOf(false) }
+    val dialogAddPlaceIsShowing = remember { mutableStateOf(false)}
 
-    val lastKnownLocation = remember {
-        getCurrentLocation(context = context, permissionsState = permissionsState)
-    }
+//    val lastKnownLocation = getCurrentLocation(
+//        context = context,
+//        permissionsState = permissionsState
+//    ).collectAsState(
+//        initial = LatLng(0.0, 0.0)
+//    )
+
+    val lastKnownLocationState by getCurrentLocationFlow(
+        context = context,
+        permissionsState = permissionsState
+    ).collectAsState(
+        initial = LocationState.LocationNotGranted
+    )
 
     val currentMarker = remember {
         mutableStateOf<UserMapMarker?>(null)
@@ -131,7 +153,10 @@ fun Map(
         if (placeSelectMode) placeSelectMode = !placeSelectMode
         else {
             when (mapUiState) {
-                MapUiState.NormalMode -> navController.popBackStack(MainDestinations.MAP_ROUTE, inclusive = true) //TODO: Handle closing application by to times back clickes
+                MapUiState.NormalMode -> navController.popBackStack(
+                    MainDestinations.MAP_ROUTE,
+                    inclusive = true
+                ) //TODO: Handle closing application by to times back clickes
                 else -> mapUiState = MapUiState.NormalMode
             }}
         })
@@ -152,87 +177,71 @@ fun Map(
         sheetPeekHeight = 0.dp,
         //sheetElevation = 0.dp,
         floatingActionButton = {
-            FabOnMap(
-                state = mapUiState,
-                onClick = {
-                    when (mapUiState) {
-                        MapUiState.NormalMode -> {
-                            moveCameraToLocation(
-                                coroutineScope = coroutineScope,
-                                map = mapView,
-                                location = lastKnownLocation.value
-                            )
-                            coroutineScope.launch {
-                                Toast.makeText(
-                                    context,
-                                    "Place select mode on",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                            placeSelectMode = !placeSelectMode
-                        }
-                        MapUiState.PlaceSelectMode -> {
-                            coroutineScope.launch {
-                                Toast.makeText(
-                                    context,
-                                    "Place select mode off",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                            mapView.getMapAsync { googleMap ->
-                                val target = googleMap.cameraPosition.target
-                                currentPosition.value =
-                                    LatLng(target.latitude, target.longitude)
-                                /*coroutineScope.launch {
-                                    modalBottomSheetState.show()
-                                }*/
-                                dialogAddPlaceIsShowing.value = true
+            when (lastKnownLocationState) {
+                is LocationState.LocationGranted -> {
+                    FabOnMap(
+                        state = mapUiState,
+                        onClick = {
+                            when (mapUiState) {
+                                MapUiState.NormalMode -> {
+                                    moveCameraToLocation(
+                                        coroutineScope = coroutineScope,
+                                        map = mapView,
+                                        location = (lastKnownLocationState as LocationState.LocationGranted).location
+                                    )
+                                    coroutineScope.launch {
+                                        Toast.makeText(
+                                            context,
+                                            "Place select mode on",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                    placeSelectMode = !placeSelectMode
+                                }
+                                MapUiState.PlaceSelectMode -> {
+                                    coroutineScope.launch {
+                                        Toast.makeText(
+                                            context,
+                                            "Place select mode off",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                    mapView.getMapAsync { googleMap ->
+                                        val target = googleMap.cameraPosition.target
+                                        currentPosition.value =
+                                            LatLng(target.latitude, target.longitude)
+                                        /*coroutineScope.launch {
+                                            modalBottomSheetState.show()
+                                        }*/
+                                        dialogAddPlaceIsShowing.value = true
 
-                            }
-                            placeSelectMode = !placeSelectMode
-                        }
-                        MapUiState.BottomSheetInfoMode -> {
-                            /*moveCameraToLocation(
-                                coroutineScope = coroutineScope,
-                                map = mapView,
-                                location = lastKnownLocation.value
-                            )*/
-                            coroutineScope.launch {
-                                Toast.makeText(
-                                    context,
-                                    "Place info mode on",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                //scaffoldState.bottomSheetState.collapse()
-                            }
-                            placeSelectMode = !placeSelectMode
-                            val marker: UserMapMarker? = currentMarker.value
-                            marker?.let {
-                                //placeSelectMode = !placeSelectMode
-                                navController.navigate(
-                                    MainDestinations.NEW_CATCH_ROUTE,
-                                    Arguments.PLACE to it
-                                )
+                                    }
+                                    placeSelectMode = !placeSelectMode
+                                }
+                                MapUiState.BottomSheetInfoMode -> {
+                                    SnackbarManager.showMessage(R.string.mode_place_info)
+                                    placeSelectMode = !placeSelectMode
+                                    val marker: UserMapMarker? = currentMarker.value
+                                    marker?.let {
+                                        //placeSelectMode = !placeSelectMode
+                                        navController.navigate(
+                                            MainDestinations.NEW_CATCH_ROUTE,
+                                            Arguments.PLACE to it
+                                        )
+                                    }
+                                }
+                                MapUiState.DialogAddMode -> {
+                                    moveCameraToLocation(
+                                        coroutineScope = coroutineScope,
+                                        map = mapView,
+                                        location = (lastKnownLocationState as LocationState.LocationGranted).location
+                                    )
+                                }
                             }
                         }
-                        MapUiState.DialogAddMode -> {
-                            moveCameraToLocation(
-                                coroutineScope = coroutineScope,
-                                map = mapView,
-                                location = lastKnownLocation.value
-                            )
-                            coroutineScope.launch {
-                                Toast.makeText(
-                                    context,
-                                    "Add New Place",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                    }
-
+                    )
                 }
-            )
+            }
         },
         floatingActionButtonPosition = FabPosition.End,
     ) {
@@ -240,16 +249,15 @@ fun Map(
             val (permissionDialog, mapLayout, addMarkerFragment, mapMyLocationButton, mapLayersButton,
                 mapLayersView, pointer) = createRefs()
 
-            mapUiState = when {
-                dialogAddPlaceIsShowing.value -> MapUiState.DialogAddMode
-                placeSelectMode -> MapUiState.PlaceSelectMode
-                scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetInfoMode
-                else -> MapUiState.NormalMode
-            }
+                mapUiState = when {
+                    dialogAddPlaceIsShowing.value -> MapUiState.DialogAddMode
+                    placeSelectMode -> MapUiState.PlaceSelectMode
+                    scaffoldState.bottomSheetState.isExpanded -> MapUiState.BottomSheetInfoMode
+                    else -> MapUiState.NormalMode
+                }
 
-            //MapLayersButton
-            MapLayersButton(
-                modifier = Modifier
+                //MapLayersButton
+                MapLayersButton(modifier = Modifier
                     .size(40.dp)
                     .constrainAs(mapLayersButton) {
                         top.linkTo(parent.top, 16.dp)
@@ -257,14 +265,22 @@ fun Map(
                     },
                 layersSelectionMode = mapLayersSelection,
             )
+
+            if (lastKnownLocationState is LocationState.LocationGranted) {
+                MyLocationButton(coroutineScope,
+                    mapView,
+                    (lastKnownLocationState as LocationState.LocationGranted).location,
+                    permissionsState,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .constrainAs(mapMyLocationButton) {
+                            top.linkTo(parent.top, 16.dp)
+                            absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+                        })
+            }
+
             //MyLocationButton
-            MyLocationButton(coroutineScope, mapView, lastKnownLocation.value,
-                modifier = Modifier
-                    .size(40.dp)
-                    .constrainAs(mapMyLocationButton) {
-                        top.linkTo(parent.top, 16.dp)
-                        absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-                    })
+
 
             //DialogOnAddPlace
             if (dialogAddPlaceIsShowing.value)
@@ -272,61 +288,48 @@ fun Map(
                     AddMarkerDialog(currentPosition, dialogAddPlaceIsShowing, viewModel.chosenPlace)
                 }
 
-            //LayersSelectionView
-            if (mapLayersSelection.value) Surface(
-                modifier = Modifier
+                //LayersSelectionView
+                if (mapLayersSelection.value) Surface(modifier = Modifier
                     .fillMaxSize()
                     .alpha(0f)
                     .clickable { mapLayersSelection.value = false }, color = Color.White
-            ) { }
-            AnimatedVisibility(mapLayersSelection.value,
-                enter = expandIn(Alignment.TopStart) + fadeIn(),
-                exit = shrinkOut(
-                    Alignment.TopStart,
-                    animationSpec = tween(380)
-                )
-                        + fadeOut(animationSpec = tween(280)),
-                modifier = Modifier.constrainAs(mapLayersView) {
-                    top.linkTo(parent.top, 16.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                }) {
-                LayersView(mapView, mapLayersSelection, mapType)
-            }
-
-            //PlaceName while PlaceSelectMode is active
-            AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection.value,
-                enter = fadeIn(animationSpec = tween(400)) + slideInVertically(
-                    animationSpec = tween(
-                        400
-                    )
-                ),
-                exit = fadeOut(animationSpec = tween(400)) + slideOutVertically(
-                    animationSpec = tween(
-                        400
-                    )
-                ),
-                modifier = Modifier.constrainAs(addMarkerFragment) {
-                    top.linkTo(parent.top, 16.dp)
-                    absoluteLeft.linkTo(mapLayersButton.absoluteRight, 8.dp)
-                    absoluteRight.linkTo(mapMyLocationButton.absoluteLeft, 8.dp)
+                ) { }
+                AnimatedVisibility(mapLayersSelection.value,
+                    enter = expandIn(Alignment.TopStart) + fadeIn(),
+                    exit = shrinkOut(Alignment.TopStart,
+                        animationSpec = tween(380))
+                            + fadeOut(animationSpec = tween(280)),
+                    modifier = Modifier.constrainAs(mapLayersView) {
+                        top.linkTo(parent.top, 16.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                    }) {
+                    LayersView(mapView, mapLayersSelection, mapType)
                 }
-            ) {
-                DialogOnPlaceChoosing(
-                    context, cameraMoveState, mapView, currentPosition,
-                    modifier = Modifier.wrapContentSize().animateContentSize()
-                )
-            }
 
-            //PointerIcon
-            AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode,
-                modifier = Modifier.constrainAs(pointer) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom, 65.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                    absoluteRight.linkTo(parent.absoluteRight)
-                }) {
-                PointerIcon(cameraMoveState = cameraMoveState)
-            }
+                //PlaceName while PlaceSelectMode is active
+                AnimatedVisibility (mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection.value,
+                    enter = fadeIn(animationSpec = tween(300)),
+                    exit = fadeOut(animationSpec = tween(300)),
+                    modifier = Modifier.constrainAs(addMarkerFragment) {
+                        top.linkTo(parent.top, 16.dp)
+                        absoluteLeft.linkTo(mapLayersButton.absoluteRight, 8.dp)
+                        absoluteRight.linkTo(mapMyLocationButton.absoluteLeft, 8.dp)
+                    }
+                ) {
+                    DialogOnPlaceChoosing(context, cameraMoveState, mapView, currentPosition,
+                        modifier = Modifier.wrapContentSize())
+                }
+
+                //PointerIcon
+                AnimatedVisibility (mapUiState == MapUiState.PlaceSelectMode,
+                    modifier = Modifier.constrainAs(pointer) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom, 65.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                    } )  {
+                    PointerIcon(cameraMoveState = cameraMoveState)
+                }
 
             PermissionDialog(modifier = Modifier.constrainAs(permissionDialog) {
                 top.linkTo(parent.top)
@@ -335,30 +338,32 @@ fun Map(
                 absoluteRight.linkTo(parent.absoluteRight)
             }, permissionsState = permissionsState)
 
-            GoogleMapLayout(
-                modifier = Modifier.constrainAs(mapLayout) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                    absoluteRight.linkTo(parent.absoluteRight)
-                },
-                map = mapView,
-                permissionsState = permissionsState,
-                viewModel = viewModel,
-                onMarkerClick = { marker ->
-                    currentMarker.value = marker
-                    coroutineScope.launch {
-                        moveCameraToLocation(
-                            location = LatLng(marker.latitude, marker.longitude),
-                            coroutineScope = coroutineScope,
-                            map = mapView
-                        )
-                        scaffoldState.bottomSheetState.expand()
-                    }
-                },
-                cameraMoveCallback = { state -> cameraMoveState = state },
-                lastLocation = lastKnownLocation
-            )
+            if (lastKnownLocationState is LocationState.LocationGranted) {
+                GoogleMapLayout(
+                    modifier = Modifier.constrainAs(mapLayout) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                    },
+                    map = mapView,
+                    permissionsState = permissionsState,
+                    viewModel = viewModel,
+                    onMarkerClick = { marker ->
+                        currentMarker.value = marker
+                        coroutineScope.launch {
+                            moveCameraToLocation(
+                                location = LatLng(marker.latitude, marker.longitude),
+                                coroutineScope = coroutineScope,
+                                map = mapView
+                            )
+                            scaffoldState.bottomSheetState.expand()
+                        }
+                    },
+                    cameraMoveCallback = { state -> cameraMoveState = state },
+                    lastLocation = (lastKnownLocationState as LocationState.LocationGranted).location
+                )
+            }
         }
     }
 }
@@ -412,7 +417,7 @@ fun AddMarkerDialog(
             modifier = Modifier
                 .wrapContentSize()
                 .background(Color.White)
-            /*.requiredHeight(250.dp).requiredWidth(300.dp)*/
+                /*.requiredHeight(250.dp).requiredWidth(300.dp)*/
         ) {
             val (progress, name, locationIcon, title, description, saveButton, cancelButton) = createRefs()
 
@@ -440,8 +445,7 @@ fun AddMarkerDialog(
                             ).show()
                         }
                     }
-                    else -> {
-                    }
+                    else -> { }
                 }
             }
             val descriptionValue = remember { mutableStateOf("") }
@@ -456,10 +460,10 @@ fun AddMarkerDialog(
                 contentDescription = "Marker",
                 tint = secondaryFigmaColor,
                 modifier = Modifier.constrainAs(locationIcon) {
-                    absoluteRight.linkTo(name.absoluteLeft, 8.dp)
-                    top.linkTo(name.top)
-                    bottom.linkTo(name.bottom)
-                })
+                        absoluteRight.linkTo(name.absoluteLeft, 8.dp)
+                        top.linkTo(name.top)
+                        bottom.linkTo(name.bottom)
+                    })
 
             Text(
                 text = stringResource(R.string.new_place),
@@ -688,7 +692,7 @@ fun GoogleMapLayout(
     permissionsState: MultiplePermissionsState,
     onMarkerClick: (marker: UserMapMarker) -> Unit,
     cameraMoveCallback: (state: CameraMoveState) -> Unit,
-    lastLocation: MutableState<LatLng>,
+    lastLocation: LatLng,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -727,17 +731,25 @@ fun GoogleMapLayout(
         }
     }
 
-    /* LaunchedEffect(permissionsState)  {
-         when {
-             permissionsState.allPermissionsGranted -> {
-                 val googleMap = map.awaitMap()
-                 googleMap.isMyLocationEnabled = true
-             }
-         }
-     }*/
+    LaunchedEffect(key1 = lastLocation) {
+        moveCameraToLocation(
+            coroutineScope = coroutineScope,
+            map = map,
+            location = lastLocation //here we got 0.0
+        )
+    }
 
-    LaunchedEffect(map) {
+    LaunchedEffect(map, permissionsState) {
         val googleMap = map.awaitMap()
+        checkPermission(context)
+        if (permissionsState.allPermissionsGranted) {
+            googleMap.isMyLocationEnabled = true
+//            moveCameraToLocation(
+//                coroutineScope = coroutineScope,
+//                map = map,
+//                location = lastLocation.value //here we got 0.0
+//            )
+        }
         //checkPermission(context)
         //googleMap.isMyLocationEnabled = permissionsState.allPermissionsGranted
         googleMap.setOnMarkerClickListener { marker ->
@@ -746,12 +758,6 @@ fun GoogleMapLayout(
             true
         }
     }
-
-    /*moveCameraToLocation(
-        coroutineScope = coroutineScope,
-        map = map,
-        location = lastKnownLocation.value
-    )*/
 }
 
 @ExperimentalAnimationApi
@@ -863,12 +869,11 @@ fun PointerIcon(cameraMoveState: CameraMoveState, modifier: Modifier = Modifier)
             }
         }
         CameraMoveState.MoveStart -> {
-            minMaxFrame = LottieClipSpec.Frame(0, 30).also { Log.d("MAP", "MoveStart") }
+            minMaxFrame = LottieClipSpec.Frame(0, 50).also { Log.d("MAP", "MoveStart") }
             LaunchedEffect(Unit) {
                 lottieAnimatable.animate(
                     composition,
                     iteration = 1,
-                    continueFromPreviousAnimate = true,
                     clipSpec = minMaxFrame,
                 )
             }
@@ -908,9 +913,7 @@ fun FabOnMap(state: MapUiState, onClick: () -> Unit) {
         modifier = Modifier
             .animateContentSize()
             .padding(bottom = padding.value)
-            .zIndex(10f),
-        onClick = onClick,
-    ) {
+            .zIndex(10f), onClick = onClick,) {
         Icon(
             painter = painterResource(id = fabImg.value),
             contentDescription = "Add new location",
@@ -1029,6 +1032,48 @@ fun getCurrentLocation(
         }
     }
     result
+}
+
+
+@ExperimentalCoroutinesApi
+@ExperimentalPermissionsApi
+fun getCurrentLocationFlow(
+    context: Context,
+    permissionsState: MultiplePermissionsState,
+) = callbackFlow {
+    val fusedLocationProviderClient =
+        LocationServices.getFusedLocationProviderClient(context)
+
+    checkPermission(context)
+
+    val result = mutableStateOf(LatLng(0.0, 0.0))
+
+    if (permissionsState.allPermissionsGranted) {
+        val locationResult = fusedLocationProviderClient.lastLocation
+        locationResult.addOnSuccessListener { task ->
+
+            try {
+                result.value = LatLng(task.latitude, task.longitude)
+                trySend(
+                    LocationState.LocationGranted(
+                        location = LatLng(
+                            task.latitude,
+                            task.longitude
+                        )
+                    )
+                )
+
+            } catch (e: Exception) {
+                Log.d("MAP", "Unable to get location")
+                Toast.makeText(context, R.string.cant_get_current_location, Toast.LENGTH_SHORT)
+                    .show()
+            }
+
+        }
+    } else {
+        trySend(LocationState.NoPermission)
+    }
+    awaitClose { }
 }
 
 fun moveCameraToLocation(coroutineScope: CoroutineScope, map: MapView, location: LatLng) {

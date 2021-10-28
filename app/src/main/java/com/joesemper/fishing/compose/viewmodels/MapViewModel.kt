@@ -1,6 +1,7 @@
 package com.joesemper.fishing.compose.viewmodels
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.maps.MapView
@@ -31,8 +32,7 @@ class MapViewModel(
     val uiState: StateFlow<UiState?>
         get() = _uiState
 
-    val lastLocation: MutableState<LatLng?> = mutableStateOf(null)
-
+    val lastLocation: MutableState<LatLng> = mutableStateOf(LatLng(0.0, 0.0))
 
     val mapView: MutableState<MapView?> = mutableStateOf(null)
 
