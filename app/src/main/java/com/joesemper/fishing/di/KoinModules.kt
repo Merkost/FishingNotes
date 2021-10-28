@@ -1,5 +1,6 @@
 package com.joesemper.fishing.di
 
+import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.domain.*
 import com.joesemper.fishing.model.datasource.*
@@ -22,6 +23,7 @@ val appModule = module {
     single<PhotoStorage> { CloudPhotoStorage() }
     single<WeatherRepository> { WeatherRepositoryRetrofitImpl() }
     single { Logger() }
+    single { SnackbarManager }
 
 }
 
@@ -30,7 +32,7 @@ val mainActivity = module {
         viewModel { MainViewModel() }
     }
 
-    viewModel { MapViewModel(get()) }
+    viewModel { MapViewModel(get(), get()) }
     viewModel { NewCatchViewModel(get(), get()) }
     viewModel { UserViewModel(get(), get()) }
     viewModel { NewPlaceViewModel(get()) }

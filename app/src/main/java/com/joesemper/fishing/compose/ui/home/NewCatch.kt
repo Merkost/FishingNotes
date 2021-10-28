@@ -575,7 +575,6 @@ fun ItemAddPhoto() {
     if (addPhotoState.value) {
         LaunchedEffect(addPhotoState) {
             permissionState.launchPermissionRequest()
-
         }
         addPhoto(permissionState, addPhotoState, choosePhotoLauncher)
     }

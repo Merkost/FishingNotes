@@ -1,5 +1,10 @@
 package com.joesemper.fishing.compose.ui.home.weather
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -16,10 +21,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
+import com.google.accompanist.insets.navigationBarsHeight
+import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.home.map.FishLoading
 import com.joesemper.fishing.compose.ui.home.map.getCurrentLocation
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
 import com.joesemper.fishing.compose.ui.home.notes.TabItem
@@ -27,10 +39,12 @@ import com.joesemper.fishing.domain.WeatherViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 
+@ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @ExperimentalPagerApi
 @ExperimentalPermissionsApi
@@ -38,7 +52,8 @@ import org.koin.androidx.compose.getViewModel
 fun Weather(
     onSnackClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
-    navController: NavController
+    navController: NavController,
+    upPress: () -> Unit,
 ) {
     val viewModel: WeatherViewModel = getViewModel()
 
@@ -77,7 +92,9 @@ fun Weather(
     }
 
     LaunchedEffect(selectedPlace) {
+        val start = System.currentTimeMillis()
         viewModel.getWeather(selectedPlace.latitude, selectedPlace.longitude).collect {
+            if (System.currentTimeMillis() - start < 400) delay(400)
             currentWeather.value = it
         }
     }
@@ -89,7 +106,7 @@ fun Weather(
         topBar = {
             TopAppBar() {
 
-                IconButton(onClick = { navController.popBackStack() }) {
+                IconButton(onClick = { upPress() }) {
                     Icon(imageVector = Icons.Filled.ArrowBack, "")
                 }
 
@@ -156,17 +173,41 @@ fun Weather(
             }
         }
     ) {
+        AnimatedVisibility (currentWeather.value != null,
+                enter = fadeIn() + expandIn(expandFrom = Alignment.BottomStart)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                // verticalArrangement = Arrangement.Center
+            ) {
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
 
-            if (currentWeather.value != null) {
                 WeatherForecastLayout(navController, currentWeather.value!!)
             }
         }
+            AnimatedVisibility (currentWeather.value == null,
+                ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize().systemBarsPadding(false),
+                     verticalArrangement = Arrangement.Center
+                ) {
+                WeatherLoading(modifier = Modifier.size(500.dp).align(Alignment.CenterHorizontally))
+                    //Spacer(modifier = Modifier.size())
+            }
+        }
     }
+}
+
+@Composable
+fun WeatherLoading(modifier: Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.clouds))
+    val progress by animateLottieCompositionAsState(composition)
+    LottieAnimation(
+        composition,
+        progress,
+        modifier = modifier
+    )
 }
 
 @ExperimentalMaterialApi
@@ -184,6 +225,7 @@ fun WeatherForecastLayout(
 
     WeatherTabs(tabs = tabs, pagerState = pagerState)
     Spacer(modifier = Modifier.height(8.dp))
+
     WeatherTabsContent(tabs = tabs, pagerState = pagerState, navController)
 }
 

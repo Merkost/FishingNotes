@@ -1,6 +1,5 @@
 package com.joesemper.fishing.compose.ui.home.notes.user_places
 
-import android.os.Parcel
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
@@ -17,7 +16,6 @@ import androidx.navigation.NavController
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
-import com.joesemper.fishing.compose.ui.home.HomeSections
 import com.joesemper.fishing.domain.UserPlacesViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -61,12 +59,8 @@ fun UserPlacesScreen(
 
 
 private fun onAddNewPlaceClick(navController: NavController) {
-    navController.currentBackStackEntry?.arguments?.putBoolean(Arguments.MAP_NEW_PLACE, true)
-    navController.navigate(MainDestinations.MAP_ROUTE)
+    val addNewPlace = true
+    navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}" +
+            "?${Arguments.MAP_NEW_PLACE}=${addNewPlace}")
 }
 
-private fun onPlaceItemClick(place: UserMapMarker) {
-    /*val action =
-        NotesFragmentDirections.actionNotesFragmentToUserPlaceFragment(place)
-    findNavController().navigate(action)*/
-}

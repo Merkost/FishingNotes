@@ -1,6 +1,7 @@
 package com.joesemper.fishing.compose.ui
 
 import android.content.res.Resources
+import android.os.Parcelable
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -12,13 +13,11 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Lifecycle
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavDestination
-import androidx.navigation.NavGraph
-import androidx.navigation.NavHostController
+import androidx.navigation.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.joesemper.fishing.compose.ui.home.HomeSections
+import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -27,13 +26,23 @@ import kotlinx.coroutines.launch
  * Destinations used in the [FishingNotesApp].
  */
 object MainDestinations {
-    const val MAP_ROUTE = "map"
+    const val HOME_ROUTE = "home"
+
     const val NEW_CATCH_ROUTE = "new_catch"
     const val PLACE_ROUTE = "place"
+
     const val CATCH_ROUTE = "catch"
 
+    const val MAP_ROUTE = "map"
+    //const val MAP_TO_PLACE_ROUTE = "${HOME_ROUTE}/${MAP_ROUTE}/${PLACE_ROUTE}"
+    //const val MAP_TO_NEW_CATCH_ROUTE = "${HOME_ROUTE}/${MAP_ROUTE}/${NEW_CATCH_ROUTE}"
+
+    const val NOTES_ROUTE = "notes"
+    const val NOTES_TO_NEW_CATCH_ROUTE = "${HOME_ROUTE}/${NOTES_ROUTE}/${NEW_CATCH_ROUTE}"
+    const val NOTES_TO_PLACE_ROUTE = "${HOME_ROUTE}/${NOTES_ROUTE}/${PLACE_ROUTE}"
+
     const val SNACK_DETAIL_ROUTE = "notes"
-        //const val SNACK_ID_KEY = "snackId"
+    const val SNACK_ID_KEY = "snackId"
 }
 
 object Arguments {
@@ -49,12 +58,12 @@ object Arguments {
 fun rememberAppStateHolder(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     navController: NavHostController = rememberNavController(),
-//    snackbarManager: SnackbarManager = SnackbarManager,
+    snackbarManager: SnackbarManager = SnackbarManager,
     resources: Resources = resources(),
     coroutineScope: CoroutineScope = rememberCoroutineScope()
 ) =
     remember(scaffoldState, navController, /*snackbarManager,*/ resources, coroutineScope) {
-        AppStateHolder(scaffoldState, navController, /*snackbarManager,*/ resources, coroutineScope)
+        AppStateHolder(scaffoldState, navController, snackbarManager, resources, coroutineScope)
     }
 
 /**
@@ -64,13 +73,15 @@ fun rememberAppStateHolder(
 class AppStateHolder(
     val scaffoldState: ScaffoldState,
     val navController: NavHostController,
-    /*private val snackbarManager: SnackbarManager,*/
+    private val snackbarManager: SnackbarManager,
     private val resources: Resources,
     coroutineScope: CoroutineScope
 ) {
+    var current: Any? = null
+
     // Process snackbars coming from SnackbarManager
     init {
-        /*coroutineScope.launch {
+        coroutineScope.launch {
             snackbarManager.messages.collect { currentMessages ->
                 if (currentMessages.isNotEmpty()) {
                     val message = currentMessages[0]
@@ -83,8 +94,12 @@ class AppStateHolder(
                     snackbarManager.setMessageShown(message.id)
                 }
             }
-        }*/
+        }
     }
+
+    // ----------------------------------------------------------
+    // BottomBar state source of truth
+    // ----------------------------------------------------------
 
     val bottomBarTabs = HomeSections.values()
     private val bottomBarRoutes = bottomBarTabs.map { it.route }
@@ -93,7 +108,9 @@ class AppStateHolder(
     // Not all routes need to show the bottom bar.
     val shouldShowBottomBar: Boolean
         @Composable get() = navController
-            .currentBackStackEntryAsState().value?.destination?.route in bottomBarRoutes
+            .currentBackStackEntryAsState().value?.destination?.route.apply {
+                current = this
+            } in bottomBarRoutes
 
     val currentRoute: String?
         get() = navController.currentDestination?.route
@@ -121,6 +138,23 @@ class AppStateHolder(
         if (from.lifecycleIsResumed()) {
             navController.navigate("${MainDestinations.SNACK_DETAIL_ROUTE}/$snackId")
         }
+    }
+}
+
+
+fun NavController.navigate(route: String, vararg args: Pair<String, Parcelable>) {
+    navigate(route)
+
+    requireNotNull(currentBackStackEntry?.arguments).apply {
+        args.forEach { (key: String, arg: Parcelable) ->
+            putParcelable(key, arg)
+        }
+    }
+}
+
+inline fun <reified T : Parcelable> NavBackStackEntry.requiredArg(key: String): T {
+    return requireNotNull(arguments) { "arguments bundle is null" }.run {
+        requireNotNull(getParcelable(key)) { "argument for $key is null" }
     }
 }
 

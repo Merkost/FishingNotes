@@ -9,6 +9,8 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -56,8 +58,10 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.MyCard
+import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.UiState
 import com.joesemper.fishing.compose.ui.navigate
+import com.joesemper.fishing.compose.ui.rememberAppStateHolder
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
@@ -74,21 +78,24 @@ import java.lang.Exception
 @ExperimentalPermissionsApi
 @Composable
 fun Map(
-    onSnackClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavController,
-    bottomBarVisibilityState: MutableState<Boolean> = mutableStateOf(true),
     addPlaceOnStart: Boolean = false
 ) {
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
+
     val mapView = viewModel.mapView.value ?: rememberMapViewWithLifecycle().apply {
         viewModel.mapView.value = this
     }
 
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
+    // Track if the user doesn't want to see the rationale any more.
+    val doNotShowRationale = rememberSaveable { mutableStateOf(false) }
+    val arePermissonsGiven = rememberSaveable{ mutableStateOf(permissionsState.allPermissionsGranted) }
+
     val scaffoldState = rememberBottomSheetScaffoldState(
         //bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
     )
@@ -113,7 +120,6 @@ fun Map(
     var placeSelectMode by remember {
         if (addPlaceOnStart) mutableStateOf(true)
         else mutableStateOf(false)
-
     }
 
     var mapUiState: MapUiState by remember {
@@ -122,11 +128,13 @@ fun Map(
     }
 
     BackHandler(onBack = {
-        when (mapUiState) {
-            MapUiState.NormalMode -> navController.popBackStack()
-            else -> mapUiState = MapUiState.NormalMode
-        }
-    })
+        if (placeSelectMode) placeSelectMode = !placeSelectMode
+        else {
+            when (mapUiState) {
+                MapUiState.NormalMode -> navController.popBackStack(MainDestinations.MAP_ROUTE, inclusive = true) //TODO: Handle closing application by to times back clickes
+                else -> mapUiState = MapUiState.NormalMode
+            }}
+        })
 
     var cameraMoveState: CameraMoveState by remember {
         mutableStateOf(CameraMoveState.MoveFinish)
@@ -222,6 +230,7 @@ fun Map(
                             }
                         }
                     }
+
                 }
             )
         },
@@ -250,7 +259,6 @@ fun Map(
                     },
                 layersSelectionMode = mapLayersSelection,
             )
-
             //MyLocationButton
             MyLocationButton(coroutineScope, mapView, lastKnownLocation.value,
                 modifier = Modifier
@@ -359,6 +367,10 @@ fun Map(
 
 @Composable
 fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name: String) {
+    val animatedColor by animateColorAsState(
+        if (mapType.value == layer) Color.Blue else Color.White,
+        animationSpec = tween(300)
+    )
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(70.dp)) {
         IconToggleButton(
             onCheckedChange = { if (it) mapType.value = layer },
@@ -367,11 +379,11 @@ fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name:
                 .size(70.dp)
                 .border(
                     width = 2.dp,
-                    color = Color.Blue,
+                    color = animatedColor,
                     shape = RoundedCornerShape(15.dp)
                 ) else Modifier
                 .size(70.dp)
-                .padding(2.dp)
+                .padding(0.dp)
         ) {
             Image(
                 painter, layer.toString(),
@@ -678,7 +690,8 @@ fun GoogleMapLayout(
     permissionsState: MultiplePermissionsState,
     onMarkerClick: (marker: UserMapMarker) -> Unit,
     cameraMoveCallback: (state: CameraMoveState) -> Unit,
-    lastLocation: MutableState<LatLng>
+    lastLocation: MutableState<LatLng>,
+    arePermissonsGiven: MutableState<Boolean>
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -728,8 +741,8 @@ fun GoogleMapLayout(
 
     LaunchedEffect(map) {
         val googleMap = map.awaitMap()
-        checkPermission(context)
-        googleMap.isMyLocationEnabled = permissionsState.allPermissionsGranted
+        //checkPermission(context)
+        //googleMap.isMyLocationEnabled = permissionsState.allPermissionsGranted
         googleMap.setOnMarkerClickListener { marker ->
             val mapMarker = markers.value.first { it.id == marker.tag }
             onMarkerClick(mapMarker)
@@ -911,37 +924,48 @@ fun FabOnMap(state: MapUiState, onClick: () -> Unit) {
 
 @ExperimentalPermissionsApi
 @Composable
-fun PermissionDialog(modifier: Modifier, permissionsState: MultiplePermissionsState) {
+fun PermissionDialog(
+    modifier: Modifier = Modifier,
+    permissionsState: MultiplePermissionsState
+) {
+    val context = LocalContext.current
     PermissionsRequired(
         multiplePermissionsState = permissionsState,
         permissionsNotGrantedContent = {
-            Card(
-                modifier = modifier
+            GrantPermissionsDialog(permissionsState)
+        },
+        permissionsNotAvailableContent = { Text("Your current location is not available") })
+    { checkPermission(context) }
+}
+
+@Composable
+@ExperimentalPermissionsApi
+fun GrantPermissionsDialog(permissionsState: MultiplePermissionsState) {
+    Dialog(onDismissRequest = {}) {
+        Card(
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(8.dp)
+                .zIndex(1.0f)
+        ) {
+            Column(
+                modifier = Modifier
                     .wrapContentSize()
                     .padding(8.dp)
-                    .zIndex(1.0f)
             ) {
-                Column(
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .padding(8.dp)
+                Text("The location is important for this app. \nPlease grant the permission.")
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.wrapContentSize()
                 ) {
-                    Text("The location is important for this app. \nPlease grant the permission.")
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.wrapContentSize()
-                    ) {
-                        Button(onClick = { permissionsState.launchMultiplePermissionRequest() }) {
-                            Text("Ok!")
-                        }
-                        Spacer(Modifier.width(8.dp))
+                    Button(onClick = { permissionsState.launchMultiplePermissionRequest() }) {
+                        Text("Ok!")
                     }
+                    Spacer(Modifier.width(8.dp))
                 }
             }
-
-        },
-        permissionsNotAvailableContent = { Text("The location is not available") })
-    {}
+        }
+    }
 }
 
 @Composable

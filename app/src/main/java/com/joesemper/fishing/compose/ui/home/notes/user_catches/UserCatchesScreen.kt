@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.home.HomeSections
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserCatchesViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
@@ -48,7 +49,8 @@ fun UserCatchesScreen(navController: NavController, viewModel: UserCatchesViewMo
 }
 
 private fun onAddNewCatchClick(navController: NavController) {
-    navController.navigate(MainDestinations.NEW_CATCH_ROUTE, Arguments.PLACE to UserMapMarker())
+    navController.navigate("${MainDestinations.NEW_CATCH_ROUTE}",
+            Arguments.PLACE to UserMapMarker())
 }
 
 private fun onCatchItemClick(catch: UserCatch, navController: NavController) {
