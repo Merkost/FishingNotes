@@ -9,10 +9,11 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -61,18 +62,19 @@ import com.joesemper.fishing.compose.ui.home.MyCard
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.UiState
 import com.joesemper.fishing.compose.ui.navigate
-import com.joesemper.fishing.compose.ui.rememberAppStateHolder
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.ui.theme.Shapes
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
 import me.vponomarenko.compose.shimmer.shimmer
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
-import java.lang.Exception
 
+@ExperimentalCoroutinesApi
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @ExperimentalPermissionsApi
@@ -103,9 +105,12 @@ fun Map(
 
     val dialogAddPlaceIsShowing = remember { mutableStateOf(false) }
 
-    val lastKnownLocation = remember {
-        getCurrentLocation(context = context, permissionsState = permissionsState)
-    }
+    val lastKnownLocation = getCurrentLocationFlow(
+        context = context,
+        permissionsState = permissionsState
+    ).collectAsState(
+        initial = LatLng(0.0, 0.0)
+    )
 
     val currentMarker = remember {
         mutableStateOf<UserMapMarker?>(null)
@@ -321,6 +326,14 @@ fun Map(
                 lastLocation = lastKnownLocation,
                 arePermissonsGiven = arePermissonsGiven
             )
+
+//            LaunchedEffect(key1 = lastKnownLocation.value) {
+//                moveCameraToLocation(
+//                    coroutineScope = coroutineScope,
+//                    map = mapView,
+//                    location = lastKnownLocation.value //here we got 0.0
+//                )
+//            }
         }
     }
 }
@@ -650,7 +663,7 @@ fun GoogleMapLayout(
     permissionsState: MultiplePermissionsState,
     onMarkerClick: (marker: UserMapMarker) -> Unit,
     cameraMoveCallback: (state: CameraMoveState) -> Unit,
-    lastLocation: MutableState<LatLng>,
+    lastLocation: State<LatLng>,
     arePermissonsGiven: MutableState<Boolean>
 ) {
     val context = LocalContext.current
@@ -690,16 +703,24 @@ fun GoogleMapLayout(
         }
     }
 
+    LaunchedEffect(key1 = lastLocation.value) {
+        moveCameraToLocation(
+            coroutineScope = coroutineScope,
+            map = map,
+            location = lastLocation.value //here we got 0.0
+        )
+    }
+
     LaunchedEffect(map, permissionsState) {
         val googleMap = map.awaitMap()
         checkPermission(context)
         if (permissionsState.allPermissionsGranted) {
             googleMap.isMyLocationEnabled = true
-            moveCameraToLocation(
-                coroutineScope = coroutineScope,
-                map = map,
-                location = lastLocation.value //here we got 0.0
-            )
+//            moveCameraToLocation(
+//                coroutineScope = coroutineScope,
+//                map = map,
+//                location = lastLocation.value //here we got 0.0
+//            )
         }
         //checkPermission(context)
         //googleMap.isMyLocationEnabled = permissionsState.allPermissionsGranted
@@ -1015,6 +1036,39 @@ fun getCurrentLocation(
         }
     }
     result
+}
+
+
+@ExperimentalCoroutinesApi
+@ExperimentalPermissionsApi
+fun getCurrentLocationFlow(
+    context: Context,
+    permissionsState: MultiplePermissionsState,
+) = callbackFlow {
+    val fusedLocationProviderClient =
+        LocationServices.getFusedLocationProviderClient(context)
+
+    checkPermission(context)
+
+    val result = mutableStateOf(LatLng(0.0, 0.0))
+
+    if (permissionsState.allPermissionsGranted) {
+        val locationResult = fusedLocationProviderClient.lastLocation
+        locationResult.addOnSuccessListener { task ->
+
+            try {
+                result.value = LatLng(task.latitude, task.longitude)
+                trySend(LatLng(task.latitude, task.longitude))
+
+            } catch (e: Exception) {
+                Log.d("MAP", "Unable to get location")
+                Toast.makeText(context, R.string.cant_get_current_location, Toast.LENGTH_SHORT)
+                    .show()
+            }
+
+        }
+    }
+    awaitClose { }
 }
 
 fun moveCameraToLocation(coroutineScope: CoroutineScope, map: MapView, location: LatLng) {
