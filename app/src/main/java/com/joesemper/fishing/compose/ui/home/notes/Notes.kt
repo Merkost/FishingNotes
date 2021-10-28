@@ -4,21 +4,24 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.*
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.Arguments
+import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.DefaultAppBar
-import com.joesemper.fishing.compose.ui.home.SubtitleWithIcon
+import com.joesemper.fishing.compose.ui.home.FabMenuItem
+import com.joesemper.fishing.compose.ui.home.FabWithMenu
+import com.joesemper.fishing.compose.ui.home.HomeSections
+import com.joesemper.fishing.compose.ui.navigate
+import com.joesemper.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
@@ -43,32 +46,18 @@ fun Notes(
             )
         },
         floatingActionButton = {
-            val expanded = remember {
-                mutableStateOf(false)
-            }
-            FloatingActionButton(onClick = { expanded.value = !expanded.value }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_baseline_plus),
-                    contentDescription = ""
+            FabWithMenu(
+                items = listOf(
+                    FabMenuItem(
+                        icon = R.drawable.ic_add_catch,
+                        onClick = { onAddNewCatchClick(navController) }
+                    ),
+                    FabMenuItem(
+                        icon = R.drawable.ic_baseline_add_location_24,
+                        onClick = { onAddNewPlaceClick(navController) }
+                    )
                 )
-
-                DropdownMenu(
-                    properties = PopupProperties(),
-                    expanded = expanded.value,
-                    onDismissRequest = { expanded.value = !expanded.value }) {
-
-                    DropdownMenuItem(onClick = { /*TODO*/ }) {
-                        SubtitleWithIcon(icon = R.drawable.ic_add_catch, text = "New catch")
-                    }
-                    DropdownMenuItem(onClick = { /*TODO*/ }) {
-                        SubtitleWithIcon(
-                            icon = R.drawable.ic_baseline_add_location_24,
-                            text = "New place"
-                        )
-                    }
-
-                }
-            }
+            )
         }
     ) {
         Column {
@@ -118,6 +107,19 @@ fun TabsContent(tabs: List<TabItem>, pagerState: PagerState, navController: NavC
     }
 }
 
+private fun onAddNewCatchClick(navController: NavController) {
+    navController.navigate(
+        "${HomeSections.NOTES.route}/${MainDestinations.NEW_CATCH_ROUTE}",
+        Arguments.PLACE to UserMapMarker()
+    )
+}
+
+private fun onAddNewPlaceClick(navController: NavController) {
+    val addNewPlace = true
+    navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${addNewPlace}")
+}
+
+
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @ExperimentalPagerApi
@@ -131,5 +133,7 @@ fun TabsContentPreview() {
     val pagerState = rememberPagerState(pageCount = tabs.size)
     TabsContent(tabs = tabs, pagerState = pagerState, rememberNavController())
 }
+
+
 
 

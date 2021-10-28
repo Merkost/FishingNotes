@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.joesemper.fishing.R
@@ -33,7 +32,6 @@ fun UserPlacesScreen(
             if (animatedUiState != null) {
                 UserPlaces(
                     places = animatedUiState,
-                    addNewPlaceClicked = { onAddNewPlaceClick(navController) },
                     userPlaceClicked = { userMarker ->
                         onPlaceItemClick(userMarker, navController)
                     }
@@ -47,17 +45,9 @@ fun UserPlacesScreen(
 @Composable
 fun UserPlaces(
     places: List<UserMapMarker>,
-    addNewPlaceClicked: () -> Unit,
     userPlaceClicked: (UserMapMarker) -> Unit,
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        item {
-            ItemAdd(
-                icon = painterResource(R.drawable.ic_baseline_add_location_24),
-                text = stringResource(R.string.add_new_place),
-                onClickAction = addNewPlaceClicked
-            )
-        }
         when {
             places.isNotEmpty() -> {
                 items(items = places) { userPlace ->
@@ -71,7 +61,7 @@ fun UserPlaces(
                     NoElementsView(
                         mainText = stringResource(R.string.no_places_added),
                         secondaryText = stringResource(R.string.new_place_text),
-                        onClickAction = addNewPlaceClicked
+                        onClickAction = { }
                     )
                 }
 
@@ -81,20 +71,9 @@ fun UserPlaces(
     }
 }
 
-
-private fun onAddNewPlaceClick(navController: NavController) {
-    val addNewPlace = true
-    navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${addNewPlace}")
-}
-
 private fun onPlaceItemClick(place: UserMapMarker, navController: NavController) {
     navController.navigate(
         MainDestinations.PLACE_ROUTE,
         Arguments.PLACE to place
     )
-
-
-    /*val action =
-        NotesFragmentDirections.actionNotesFragmentToUserPlaceFragment(place)
-    findNavController().navigate(action)*/
 }
