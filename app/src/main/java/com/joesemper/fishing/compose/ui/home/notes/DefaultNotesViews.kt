@@ -1,6 +1,7 @@
 package com.joesemper.fishing.compose.ui.home.notes
 
 import android.net.Uri
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
@@ -17,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -37,6 +39,7 @@ import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
 import com.joesemper.fishing.utils.getTimeByMilliseconds
 
+@ExperimentalComposeUiApi
 @ExperimentalAnimationApi
 @Composable
 fun ItemPhoto(
@@ -87,9 +90,10 @@ fun ItemPhoto(
         }
     }
 
-    fullScreenPhoto.value?.let {
+    AnimatedVisibility(fullScreenPhoto.value != null) {
         FullScreenPhoto(fullScreenPhoto)
     }
+
 }
 
 @ExperimentalAnimationApi

@@ -1,10 +1,18 @@
 package com.joesemper.fishing.compose.ui.home
 
 import android.net.Uri
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,21 +21,22 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -39,17 +48,24 @@ import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.theme.*
+import kotlinx.coroutines.launch
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 @Composable
 fun MyCardNoPadding(content: @Composable () -> Unit) {
-    Card(elevation = 4.dp, shape = MaterialTheme.shapes.large,
-        modifier = Modifier.fillMaxWidth(), content = content)
+    Card(
+        elevation = 4.dp, shape = MaterialTheme.shapes.large,
+        modifier = Modifier.fillMaxWidth(), content = content
+    )
 }
 
 @Composable
 fun MyCard(shape: CornerBasedShape = RoundedCornerShape(8.dp), content: @Composable () -> Unit) {
-    Card(elevation = 8.dp, shape = shape,
-        modifier = Modifier.fillMaxWidth().padding(4.dp), content = content)
+    Card(
+        elevation = 8.dp, shape = shape,
+        modifier = Modifier.fillMaxWidth().padding(4.dp), content = content
+    )
 }
 
 @Composable
@@ -137,7 +153,11 @@ fun PlaceInfo(user: User?, place: UserMapMarker, placeClicked: (UserMapMarker) -
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Default.Place, stringResource(R.string.place), tint = secondaryFigmaColor)
+                Icon(
+                    Icons.Default.Place,
+                    stringResource(R.string.place),
+                    tint = secondaryFigmaColor
+                )
                 Spacer(modifier = Modifier.width(150.dp))
                 UserProfile(user)
             }
@@ -268,7 +288,7 @@ fun SecondaryTextColored(modifier: Modifier = Modifier, text: String) {
 @Composable
 fun DefaultAppBar(
     modifier: Modifier = Modifier,
-    navIcon: ImageVector =  Icons.Default.ArrowBack,
+    navIcon: ImageVector = Icons.Default.ArrowBack,
     onNavClick: () -> Unit,
     title: String,
     actions: @Composable() (RowScope.() -> Unit) = {}
@@ -288,21 +308,81 @@ fun DefaultAppBar(
     )
 }
 
+@ExperimentalComposeUiApi
+@ExperimentalAnimationApi
 @Composable
 fun FullScreenPhoto(photo: MutableState<Uri?>) {
+
+    /*val scale = remember { mutableStateOf(1f) }
+    val rotationState = remember { mutableStateOf(1f) }*/
+
+    val coroutineScope = rememberCoroutineScope()
+    val offsetY = remember { Animatable(0f) }
+    val alpha = 0.8f - abs(offsetY.value).div(600)
+    val backgroundColor = animateColorAsState(
+        targetValue = Color.Black.copy(if (alpha < 0) 0f else alpha)
+    )
+
     Dialog(
-        properties = DialogProperties(dismissOnClickOutside = true, dismissOnBackPress = true),
+        properties = DialogProperties(
+            dismissOnClickOutside = true,
+            dismissOnBackPress = true, usePlatformDefaultWidth = false
+        ),
         onDismissRequest = { photo.value = null }) {
-        Image(
-            modifier = Modifier
-                .padding(64.dp)
-                .wrapContentSize()
-                .clickable {
-                    photo.value = null
-                },
-            painter = rememberImagePainter(data = photo.value),
-            contentDescription = stringResource(id = R.string.catch_photo)
-        )
+        Surface(
+            Modifier
+                .fillMaxSize(), color = backgroundColor.value
+        ) {
+            Image(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .offset {
+                        IntOffset(0, offsetY.value.roundToInt())
+                    }
+                    .draggable(
+                        state = rememberDraggableState { delta ->
+                            coroutineScope.launch {
+                                offsetY.snapTo(offsetY.value + delta)
+                            }
+                        },
+                        orientation = Orientation.Vertical,
+                        onDragStarted = {
+
+                        },
+                        onDragStopped = {
+
+                            if (offsetY.value >= 400f || offsetY.value <= -400f) photo.value =
+                                null else
+                                coroutineScope.launch {
+                                    offsetY.animateTo(
+                                        targetValue = 0f,
+                                        animationSpec = tween(
+                                            durationMillis = 400,
+                                            delayMillis = 0
+                                        )
+                                    )
+                                }
+                        }
+                    )
+                    .clickable {
+                        photo.value = null
+                    }
+                    /*}.pointerInput(Unit) {
+                        detectTransformGestures { centroid, pan, zoom, rotation ->
+                            scale.value *= zoom
+                            rotationState.value += rotation
+                        }
+                    }.graphicsLayer(
+                        // adding some zoom limits (min 50%, max 200%)
+                        scaleX = maxOf(.5f, minOf(1f, scale.value)),
+                        scaleY = maxOf(.5f, minOf(1f, scale.value)),
+                        rotationZ = rotationState.value
+                    )*/,
+                painter = rememberImagePainter(data = photo.value),
+                contentDescription = stringResource(id = R.string.catch_photo)
+            )
+        }
+
     }
 }
 
