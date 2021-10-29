@@ -61,9 +61,11 @@ android {
 dependencies {
     //implementation "com.github.ben-manes:gradle-versions-plugin:0.39.0"
 
-    implementation 'androidx.work:work-runtime-ktx:2.7.0-rc01'
+    implementation 'androidx.work:work-runtime-ktx:2.7.0'
 
     implementation "com.airbnb.android:lottie-compose:4.0.0"
+
+    implementation "androidx.core:core-splashscreen:1.0.0-alpha02"
 
     // Preferences DataStore
     //implementation "androidx.datastore:datastore-preferences:1.0.0"

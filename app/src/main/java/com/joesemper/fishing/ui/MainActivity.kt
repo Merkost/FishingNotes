@@ -3,25 +3,40 @@ package com.joesemper.fishing.ui
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.animation.OvershootInterpolator
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -30,8 +45,6 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.FishingNotesApp
-import com.joesemper.fishing.domain.MainViewModel
-import com.joesemper.fishing.domain.SplashViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.utils.Logger
@@ -39,28 +52,41 @@ import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.delay
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.navArgument
+import com.airbnb.lottie.compose.*
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.home.LoginScreen
+import com.joesemper.fishing.compose.viewmodels.MainViewModel
+import com.joesemper.fishing.domain.LoginViewModel
+import com.joesemper.fishing.ui.theme.Typography
+import com.joesemper.fishing.ui.theme.primaryFigmaColor
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.get
 
 class MainActivity : ComponentActivity() {
 
-//    override val scope: Scope by activityScope()
-    //private val viewModel: MainViewModel by viewModel()
-
     private val logger: Logger by inject()
 
-    //private var _binding: ActivityMainBinding? = null
-    //private val binding get() = _binding!!
+    private lateinit var googleSignInClient: GoogleSignInClient
+    private lateinit var auth: FirebaseAuth
+
+    private val registeredActivity =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            onActivityResult(result)
+        }
 
     companion object {
-        fun getStartIntent(context: Context) = Intent(context, MainActivity::class.java)
+        const val splashFadeDurationMillis = 300
     }
-
-//    override fun hideNav() {
-//        binding.bottomNav.visibility = View.GONE
-//    }
-//
-//    override fun showNav() {
-//        binding.bottomNav.visibility = View.VISIBLE
-//    }
 
     @ExperimentalPermissionsApi
     @ExperimentalPagerApi
@@ -69,21 +95,110 @@ class MainActivity : ComponentActivity() {
     @ExperimentalMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val viewModel: MainViewModel = get()
+        val isUserHere = mutableStateOf(false)
+
+        val user = viewModel.subscribe()
+        val splashWasDisplayed = savedInstanceState != null
+        if (!splashWasDisplayed) {
+            val splashScreen = installSplashScreen()
+
+            splashScreen.setKeepVisibleCondition {
+                user.value is BaseViewState.Success<*>
+            }
+            splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
+                // Get icon instance and start a fade out animation
+                splashScreenViewProvider.iconView
+                    .animate()
+                    .setDuration(splashFadeDurationMillis.toLong())
+                    .alpha(0f)
+                    .withEndAction {
+                        // After the fade out, remove the splash and set content view
+                        splashScreenViewProvider.remove()
+                        setContent {
+                            if ((user.value as BaseViewState.Success<*>).data as User? != null)
+                                FishingNotesApp()
+                            else Navigation()
+                        }
+                    }.start()
+            }
+        } else {
+            setTheme(R.style.Theme_SplashScreen)
+            setContent {
+                if ((user.value as BaseViewState.Success<*>).data as User? != null)
+                    FishingNotesApp()
+                else Navigation()
+            }
+        }
+        auth = FirebaseAuth.getInstance()
+    }
+
         // This app draws behind the system bars, so we want to handle fitting system windows
         // WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        setContent {
-            FishingNotesApp()
-        }
-
         //light тема
-//        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
-    }
 
+    @ExperimentalAnimationApi
     @Composable
-    fun LoginScreen(navController: NavController) {
+    fun StartScreen() {
+        var visible by remember { mutableStateOf(false) }
 
+        Scaffold(
+            content = {
+                Box(
+                    modifier = Modifier
+                        .background(colorResource(id = R.color.blue))
+                        .fillMaxSize(),
+                ) {
+                    AnimatedVisibility(
+                        visible = visible,
+                        enter = slideInVertically(
+                            initialOffsetY = {
+                                // Slide in from top
+                                -it
+                            },
+                            animationSpec = tween(
+                                durationMillis = MainActivity.splashFadeDurationMillis,
+                                easing = CubicBezierEasing(0f, 0f, 0f, 1f)
+
+                            )
+                        ),
+                    ) {
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .padding(0.dp, 0.dp, 0.dp, 0.dp)
+                                .background(colorResource(id = R.color.blue))
+                                .fillMaxSize()
+                        ) {
+                            Text(
+                                stringResource(id = R.string.start_screen_title),
+                                fontSize = 36.sp,
+                                modifier = Modifier.padding(bottom = dimensionResource(R.dimen.start_content_title_margin_bottom)),
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .height(dimensionResource(R.dimen.start_content_size))
+                                    .width(dimensionResource(R.dimen.start_content_size))
+                                    .clip(
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .background(color = Color.White)
+                            )
+                        }
+                    }
+                }
+                LaunchedEffect(true) {
+                    visible = true
+                }
+            }
+        )
     }
 
     @InternalCoroutinesApi
@@ -94,104 +209,81 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun Navigation() {
         val navController = rememberNavController()
-        NavHost(navController = navController,
-            startDestination = "splash_screen") {
-
-            composable("splash_screen") {
-                SplashScreen(navController = navController)
-            }
-
+        NavHost(
+            navController = navController,
+            startDestination = "login_screen"
+        ) {
             composable("login_screen") {
                 LoginScreen(navController = navController)
             }
             // Main Screen
-            composable("main_screen") {
+            composable(MainDestinations.HOME_ROUTE) {
                 FishingNotesApp()
             }
         }
     }
 
-    @Composable
-    fun SplashScreen(navController: NavController) {
-        val viewModel: SplashViewModel by viewModel()
-        val userState = viewModel.subscribe().collectAsState()
+    fun startGoogleLogin() {
+        // Configure GOOGLE sign-in to request the user's ID, email address, and basic
+        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        // Build a GoogleSignInClient with the options specified by gso.
+        googleSignInClient = GoogleSignIn.getClient(this, gso)
+        val signInIntent: Intent = googleSignInClient.signInIntent
+        registeredActivity.launch(signInIntent)
+    }
 
-        LaunchedEffect(userState) {
-            when (userState.value) {
-                is BaseViewState.Success<*> -> onSuccess((userState.value as BaseViewState.Success<*>).data as User?, navController)
-                is BaseViewState.Loading -> { }
-                is BaseViewState.Error -> { } //showErrorSnackbar
+    private fun onActivityResult(result: ActivityResult) {
+        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        val exception = task.exception
+        if (task.isSuccessful) {
+            try {
+                // Google Sign In was successful, authenticate with Firebase
+                val account = task.getResult(ApiException::class.java)
+                firebaseAuthWithGoogle(account.idToken!!)
+            } catch (e: ApiException) {
+                // Google Sign In failed, update UI appropriately
+                handleError(exception as Throwable)
             }
+        } else {
+            handleError(exception as Throwable)
         }
+    }
 
-        val scale = remember {
-            Animatable(0f)
-        }
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
 
-        // AnimationEffect
-        LaunchedEffect(key1 = true) {
-            scale.animateTo(
-                targetValue = 0.2f,
-                animationSpec = tween(
-                    durationMillis = 1000,
-                    easing = {
-                        OvershootInterpolator(4f).getInterpolation(it)
-                    })
-            )
-            delay(1000)
-            navController.navigate("main_screen")
-        }
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // Sign in success, update UI with the signed-in user's information
+                } else {
+                    // If sign in fails, display a message to the user.
+                    handleError(task.exception as Throwable)
+                }
+            }
+    }
 
-        // Image
-        Box(contentAlignment = Alignment.Center,
-            modifier = Modifier.fillMaxSize()) {
-            Image(painter = painterResource(id = R.drawable.ic_fishing),
-                contentDescription = "Logo",
-                modifier = Modifier.scale(scale.value))
-        }
+    private fun handleError(error: Throwable) {
+        /*setViews(false)
+        vb.warning.visibility = View.VISIBLE
+        Toast.makeText(this, error.message, Toast.LENGTH_SHORT).show()
+        vb.warning.setOnClickListener {
+            Toast.makeText(this, error.message, Toast.LENGTH_LONG).show()
+        }*/
+        logger.log(error.message)
     }
 
     private fun onSuccess(user: User?, navController: NavController) {
         if (user != null) {
+            //vb.progressAnimationView.playAnimation()
+            //Timer().schedule(2250) {
             navController.navigate("main_screen")
-        } else {
-            navController.navigate("login_screen")
-        }
+            //}
+        } //TODO: Else
     }
-
-//    private fun subscribeOnViewModel() {
-//        lifecycleScope.launchWhenStarted {
-//            viewModel.subscribe().collect { viewState ->
-//                when (viewState) {
-//                    is BaseViewState.Success<*> -> {
-//                        onSuccess()
-//                    }
-//                    is BaseViewState.Error -> {
-//                        onError(viewState.error)
-//                    }
-//                    is BaseViewState.Loading -> {
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
-//    private fun onSuccess() {
-//
-//    }
-//
-//    private fun onError(error: Throwable) {
-//        Toast.makeText(this, error.message, Toast.LENGTH_SHORT).show()
-//        logger.log(error.message)
-//    }
-
-
-    fun notReadyYetToast() {
-        Toast.makeText(
-            this,
-            "This feature is still in development. Please, try it later",
-            Toast.LENGTH_SHORT
-        ).show()
-    }
-
 }

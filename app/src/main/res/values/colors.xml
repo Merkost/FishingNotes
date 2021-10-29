@@ -33,4 +33,6 @@
     <color name="text_secondary_color">#8A000000</color>
     <color name="text_support_color">#42000000</color>
 
+    <color name="blue">#FF4D5EFF</color>
+
 </resources>

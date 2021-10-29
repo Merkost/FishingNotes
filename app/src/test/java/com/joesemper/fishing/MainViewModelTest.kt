@@ -3,7 +3,7 @@ package com.joesemper.fishing
 import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.joesemper.fishing.domain.MainViewModel
+import com.joesemper.fishing.compose.viewmodels.MainViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.repository.UserRepository

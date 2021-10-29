@@ -152,5 +152,6 @@
     <string name="main">Основное</string>
     <string name="icon">Icon</string>
     <string name="google_login">Вход с помощью google</string>
+    <string name="start_screen_title">Start Screen</string>
 
 </resources>

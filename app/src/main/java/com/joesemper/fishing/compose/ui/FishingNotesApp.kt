@@ -3,6 +3,7 @@ package com.joesemper.fishing.compose.ui
 import android.view.animation.OvershootInterpolator
 import androidx.annotation.StringRes
 import androidx.compose.animation.*
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -17,10 +18,7 @@ import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.VerifiedUser
 import androidx.compose.material.icons.outlined.WbSunny
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -36,10 +34,10 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.*
-import com.joesemper.fishing.domain.SplashViewModel
 import com.joesemper.fishing.domain.UserCatchViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.User
+import com.joesemper.fishing.ui.MainActivity
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -57,7 +55,9 @@ fun FishingNotesApp() {
     ProvideWindowInsets {
         FigmaTheme {
             val appStateHolder = rememberAppStateHolder()
-            Scaffold (
+            var visible by remember { mutableStateOf(false) }
+
+            Scaffold(
                 bottomBar = {
                     if (appStateHolder.shouldShowBottomBar) {
                         FishingNotesBottomBar(
@@ -79,25 +79,41 @@ fun FishingNotesApp() {
                     Modifier.statusBarsHeight()
                 else Modifier*/
             ) { innerPaddingModifier ->
-                Column /*Surface*/ {
-                    //Spacer(modifier = Modifier.statusBarsHeight())
-                    NavHost(
-                        navController = appStateHolder.navController,
-                        startDestination = MainDestinations.HOME_ROUTE,
-                        modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
-                            Modifier.padding(innerPaddingModifier) /*else Modifier*/
+                Column () {
+                    AnimatedVisibility(
+                        visible = visible,
+                        enter = fadeIn(animationSpec = tween(
+                            durationMillis = MainActivity.splashFadeDurationMillis))
+                        /*slideInVertically(
+                            initialOffsetY = {
+                                // Slide in from top
+                                -it
+                            },
+                            animationSpec = tween(
+                                durationMillis = MainActivity.splashFadeDurationMillis,
+                                easing = CubicBezierEasing(0f, 0f, 0f, 1f)
+
+                            )
+                        )*/,
                     ) {
-                        NavGraph(
+                        //Spacer(modifier = Modifier.statusBarsHeight())
+                        NavHost(
                             navController = appStateHolder.navController,
-                            onSnackSelected = appStateHolder::navigateToSnackDetail,
-                            upPress = appStateHolder::upPress,
-                        )
+                            startDestination = MainDestinations.HOME_ROUTE,
+                            modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
+                            Modifier.padding(innerPaddingModifier) /*else Modifier*/
+                        ) {
+                            NavGraph(
+                                navController = appStateHolder.navController,
+                                onSnackSelected = appStateHolder::navigateToSnackDetail,
+                                upPress = appStateHolder::upPress,
+                            )
+                        }
                     }
                 }
-
-
-
-
+                LaunchedEffect(true) {
+                    visible = true
+                }
             }
         }
     }
@@ -121,13 +137,8 @@ private fun NavGraphBuilder.NavGraph(
         addHomeGraph(onSnackSelected, navController)
     }
 
-    composable(
-        "${MainDestinations.SNACK_DETAIL_ROUTE}/{${MainDestinations.SNACK_ID_KEY}}",
-        arguments = listOf(navArgument(MainDestinations.SNACK_ID_KEY) { type = NavType.LongType })
-    ) { backStackEntry ->
-        val arguments = requireNotNull(backStackEntry.arguments)
-        val snackId = arguments.getLong(MainDestinations.SNACK_ID_KEY)
-        //SnackDetail(snackId, upPress)
+    composable(MainDestinations.LOGIN_ROUTE) {
+        LoginScreen(navController = navController)
     }
 
     composable(
@@ -137,78 +148,13 @@ private fun NavGraphBuilder.NavGraph(
                 inclusive = true) }, it.requiredArg(Arguments.PLACE))
     }
 
-    /*composable(
-        route = MainDestinations.MAP_TO_NEW_CATCH_ROUTE,
-        ) {
-        NewCatchScreen({
-            navController.popBackStack(route = MainDestinations.MAP_TO_NEW_CATCH_ROUTE,
-                inclusive = true) },
-            it.requiredArg(Arguments.PLACE))
-    }*/
-
     composable(
         route = MainDestinations.PLACE_ROUTE,
     ) { UserPlaceScreen(navController, it.requiredArg(Arguments.PLACE)) }
-
-    /*composable(
-        route = MainDestinations.MAP_TO_PLACE_ROUTE,
-    ) { UserPlaceScreen(navController, it.requiredArg(Arguments.PLACE)) }*/
 
     composable(
         route = MainDestinations.CATCH_ROUTE,
     ) { UserCatchScreen(navController, it.requiredArg(Arguments.CATCH)) }
 }
 
-@Composable
-fun LoginScreen(navController: NavController) {
-
-}
-
-@Composable
-fun SplashScreen(navController: NavController) {
-    val viewModel: SplashViewModel = get()
-    val userState = viewModel.subscribe().collectAsState()
-
-    LaunchedEffect(userState) {
-        when (userState.value) {
-            is BaseViewState.Success<*> -> onSuccess((userState.value as BaseViewState.Success<*>).data as User?, navController)
-            is BaseViewState.Loading -> { }
-            is BaseViewState.Error -> { } //showErrorSnackbar
-        }
-    }
-
-    val scale = remember {
-        androidx.compose.animation.core.Animatable(0f)
-    }
-
-    // AnimationEffect
-    LaunchedEffect(key1 = true) {
-        scale.animateTo(
-            targetValue = 0.2f,
-            animationSpec = tween(
-                durationMillis = 1000,
-                easing = {
-                    OvershootInterpolator(4f).getInterpolation(it)
-                })
-        )
-        delay(1000)
-        navController.navigate("main_screen")
-    }
-
-    // Image
-    Box(contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize()) {
-        Image(painter = painterResource(id = R.drawable.ic_fishing),
-            contentDescription = "Logo",
-            modifier = Modifier.scale(scale.value))
-    }
-}
-
-private fun onSuccess(user: User?, navController: NavController) {
-    if (user != null) {
-        navController.navigate("main_screen")
-    } else {
-        navController.navigate("login_screen")
-    }
-}
 

@@ -158,5 +158,7 @@
     <string name="login_title">Let\'s get it started!</string>
     <string name="google_login">Sign with google</string>
 
+    <string name="start_screen_title">Start Screen</string>
+
 
 </resources>

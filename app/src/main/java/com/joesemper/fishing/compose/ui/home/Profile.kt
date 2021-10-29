@@ -26,19 +26,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavOptions
 import androidx.navigation.compose.rememberNavController
 
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.SplashScreen
+import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.domain.UserViewModel
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.model.entity.content.UserCatch
-import com.joesemper.fishing.ui.LoginActivity
-import com.joesemper.fishing.ui.SplashActivity
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -211,7 +210,8 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
                 onClick = {
                     scope.launch {
                         viewModel.logoutCurrentUser().collect { isLogout ->
-                        startLoginActivity(context)
+                        if (isLogout) navController.navigate(MainDestinations.LOGIN_ROUTE)
+                        //startLoginActivity(context)
                         }
                     }
                 },
@@ -307,10 +307,11 @@ fun AppBar(navController: NavController) {
 }
 
 private fun startLoginActivity(context: Context) {
-    val activity = (context as Activity)
+    /*val activity = (context as Activity)
     val intent = Intent(context, SplashActivity::class.java)
     context.startActivity(intent)
-    activity.finish()
+    activity.finish()*/
+
 
 }
 
