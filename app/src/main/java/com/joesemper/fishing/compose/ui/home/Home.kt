@@ -33,7 +33,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
@@ -52,7 +51,6 @@ import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.home.map.Map
 import com.joesemper.fishing.compose.ui.home.notes.Notes
 import com.joesemper.fishing.compose.ui.home.weather.Weather
-import com.joesemper.fishing.ui.theme.FigmaTheme
 import kotlinx.coroutines.InternalCoroutinesApi
 
 @ExperimentalPermissionsApi
@@ -109,8 +107,8 @@ fun FishingNotesBottomBar(
     val currentSection = tabs.first { it.route == currentRoute }
 
     Surface(
-//        color = color,
-//        contentColor = contentColor
+//        color = primaryFigmaLightColor,
+//        contentColor = Color.White,
         elevation = 8.dp
     ) {
         val springSpec = SpringSpec<Float>(

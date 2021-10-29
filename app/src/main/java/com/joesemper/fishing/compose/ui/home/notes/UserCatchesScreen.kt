@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.joesemper.fishing.R
@@ -18,7 +19,7 @@ import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserCatchesViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
-import com.joesemper.fishing.utils.getDateByMilliseconds
+import com.joesemper.fishing.utils.getDateByMillisecondsTextMonth
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
@@ -27,7 +28,7 @@ fun UserCatchesScreen(
     navController: NavController,
     viewModel: UserCatchesViewModel = getViewModel()
 ) {
-    Scaffold {
+    Scaffold(backgroundColor = Color.Transparent) {
         val catches by viewModel.currentContent.collectAsState()
         Crossfade(catches) { animatedUiState ->
             if (animatedUiState != null) {
@@ -54,7 +55,7 @@ fun UserCatches(
                     }
                     items(items = catches
                         .filter { userCatch ->
-                            getDateByMilliseconds(userCatch.date) == catchDate
+                            getDateByMillisecondsTextMonth(userCatch.date) == catchDate
                         }
                         .sortedByDescending { it.date }) {
                         ItemUserCatch(
@@ -81,7 +82,7 @@ fun UserCatches(
 private fun getDatesList(catches: List<UserCatch>): List<String> {
     val dates = mutableListOf<String>()
     catches.sortedByDescending { it.date }.forEach { userCatch ->
-        val date = getDateByMilliseconds(userCatch.date)
+        val date = getDateByMillisecondsTextMonth(userCatch.date)
         if (!dates.contains(date)) {
             dates.add(date)
         }

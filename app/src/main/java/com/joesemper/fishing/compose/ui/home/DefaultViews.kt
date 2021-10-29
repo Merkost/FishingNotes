@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.zIndex
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
@@ -65,7 +66,9 @@ fun DefaultCard(
     Card(
         shape = RoundedCornerShape(4.dp),
         elevation = 8.dp,
+        backgroundColor = Color.White,
         modifier = modifier
+            .zIndex(1.0f)
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(4.dp), content = content
@@ -283,7 +286,7 @@ fun SecondaryTextColored(
 fun SupportText(modifier: Modifier = Modifier, text: String) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.body2,
+        style = MaterialTheme.typography.body1,
         color = supportFigmaTextColor,
         text = text
     )
@@ -358,11 +361,11 @@ fun SimpleUnderlineTextField(
                 textColor = primaryFigmaTextColor,
                 backgroundColor = backgroundGreenColor,
                 cursorColor = Color.Black,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
+                focusedIndicatorColor = primaryFigmaTextColor,
+                unfocusedIndicatorColor = primaryFigmaTextColor
             ),
             onValueChange = { },
-            shape = RoundedCornerShape(8.dp),
+//            shape = RoundedCornerShape(8.dp),
             singleLine = true,
             trailingIcon = trailingIcon,
             leadingIcon = leadingIcon

@@ -20,7 +20,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -33,10 +35,7 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.theme.primaryFigmaColor
-import com.joesemper.fishing.ui.theme.secondaryFigmaColor
-import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
-import com.joesemper.fishing.ui.theme.surfaceGrayColor
+import com.joesemper.fishing.ui.theme.*
 import com.joesemper.fishing.utils.getTimeByMilliseconds
 
 @ExperimentalAnimationApi
@@ -162,9 +161,9 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
         .clickable {
             userCatchClicked(userCatch)
         }) {
-        ConstraintLayout(modifier = Modifier.padding(2.dp)) {
+        ConstraintLayout(modifier = Modifier.padding(8.dp)) {
             val (photos, fish, weight, kg, description, icon, place, date) = createRefs()
-            val guideline = createGuidelineFromAbsoluteLeft(104.dp)
+            val guideline = createGuidelineFromAbsoluteLeft(110.dp)
 
             ItemCatchPhotos(
                 modifier = Modifier.constrainAs(photos) {
@@ -343,17 +342,22 @@ fun ItemAdd(
 
 @Composable
 fun ItemDate(text: String) {
-    Column(
-        verticalArrangement = Arrangement.Center,
+    Box(
+        contentAlignment = Alignment.Center,
         modifier = Modifier
             .wrapContentHeight()
             .fillMaxWidth()
     ) {
-        SecondaryTextColored(
-            modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
-            text = text,
-            color = secondaryFigmaTextColor
-        )
+        Surface(
+            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
+            shape = RoundedCornerShape(24.dp), color = cardColor
+        ) {
+            SecondaryTextColored(
+                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                text = text,
+                color = Color.White
+            )
+        }
     }
 }
 
@@ -569,18 +573,29 @@ fun ItemCounter(
     text: String,
     icon: Int
 ) {
-    Surface(
-        modifier = modifier,
-        color = surfaceGrayColor,
-        shape = RoundedCornerShape(4.dp)
-    ) {
-        Row(modifier = Modifier.padding(2.dp)) {
-            Icon(
-                tint = secondaryFigmaTextColor,
-                painter = painterResource(id = icon),
-                contentDescription = ""
-            )
-            SecondaryText(text = text)
-        }
+    Row(modifier = modifier.padding(2.dp)) {
+        Icon(
+            tint = secondaryFigmaTextColor,
+            painter = painterResource(id = icon),
+            contentDescription = "",
+            modifier = Modifier.padding(horizontal = 4.dp)
+        )
+        SecondaryText(text = text)
     }
+
+}
+
+@Composable
+fun BackgroundImage(modifier: Modifier = Modifier) {
+    Image(
+        modifier = modifier.fillMaxSize(),
+        colorFilter = ColorFilter.tint(
+            surfaceGreenColor,
+            BlendMode.ColorDodge
+        ),
+        painter = painterResource(id = R.drawable.ic_pattern_background),
+        contentDescription = "",
+        alpha = 0.1f,
+        contentScale = ContentScale.FillWidth
+    )
 }

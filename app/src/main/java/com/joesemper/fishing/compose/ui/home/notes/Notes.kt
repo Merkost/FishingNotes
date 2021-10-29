@@ -1,7 +1,10 @@
 package com.joesemper.fishing.compose.ui.home.notes
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -22,6 +25,8 @@ import com.joesemper.fishing.compose.ui.home.FabWithMenu
 import com.joesemper.fishing.compose.ui.home.HomeSections
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.ui.theme.primaryFigmaLightColor
+import com.joesemper.fishing.ui.theme.primaryFigmaTextColor
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
@@ -58,14 +63,22 @@ fun Notes(
                     )
                 )
             )
-        }
+        },
+        modifier = Modifier.background(color = Color.Transparent)
     ) {
-        Column {
+        Column(
+            modifier = Modifier
+                .background(color = Color.Transparent)
+        ) {
             Tabs(tabs = tabs, pagerState = pagerState)
-            TabsContent(tabs = tabs, pagerState = pagerState, navController)
-        }
-    }
+            Box(modifier = Modifier.fillMaxSize()) {
+                BackgroundImage()
+                TabsContent(tabs = tabs, pagerState = pagerState, navController)
+            }
 
+        }
+
+    }
 }
 
 @ExperimentalPagerApi
@@ -76,8 +89,8 @@ fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
     // OR ScrollableTabRow()
     TabRow(
         selectedTabIndex = pagerState.currentPage,
-        backgroundColor = Color.White,
-        contentColor = Color.Black,
+        backgroundColor = primaryFigmaLightColor,
+        contentColor = primaryFigmaTextColor,
         indicator = { tabPositions ->
             TabRowDefaults.Indicator(
                 Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
@@ -102,10 +115,13 @@ fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
 @ExperimentalPagerApi
 @Composable
 fun TabsContent(tabs: List<TabItem>, pagerState: PagerState, navController: NavController) {
-    HorizontalPager(state = pagerState) { page ->
+    HorizontalPager(
+        state = pagerState
+    ) { page ->
         tabs[page].screen(navController)
     }
 }
+
 
 private fun onAddNewCatchClick(navController: NavController) {
     navController.navigate(
