@@ -1,5 +1,6 @@
 package com.joesemper.fishing.compose.ui.home
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.compose.animation.Crossfade
@@ -31,11 +32,13 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.SplashScreen
 import com.joesemper.fishing.domain.UserViewModel
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.ui.LoginActivity
+import com.joesemper.fishing.ui.SplashActivity
 import com.joesemper.fishing.ui.theme.FigmaTheme
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -76,7 +79,7 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
                     }
 
                 }
-                UserButtons()
+                UserButtons(navController)
             }
         })
 }
@@ -158,7 +161,7 @@ fun CatchesNumber(userCatchesNum: List<UserCatch>?) {
 @InternalCoroutinesApi
 @ExperimentalMaterialApi
 @Composable
-fun UserButtons() {
+fun UserButtons(navController: NavController) {
     val dialogOnLogout = rememberSaveable { mutableStateOf(false) }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -189,13 +192,13 @@ fun UserButtons() {
             dialogOnLogout.value = true
         }) { Text(stringResource(R.string.logout)) }
         Spacer(modifier = Modifier.size(30.dp))
-        if (dialogOnLogout.value) LogoutDialog(dialogOnLogout)
+        if (dialogOnLogout.value) LogoutDialog(dialogOnLogout, navController)
     }
 }
 
 @InternalCoroutinesApi
 @Composable
-fun LogoutDialog(dialogOnLogout: MutableState<Boolean>) {
+fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavController) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val viewModel = getViewModel<UserViewModel>()
@@ -208,7 +211,7 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>) {
                 onClick = {
                     scope.launch {
                         viewModel.logoutCurrentUser().collect { isLogout ->
-                            if (isLogout) startLoginActivity(context)
+                        startLoginActivity(context)
                         }
                     }
                 },
@@ -304,8 +307,11 @@ fun AppBar(navController: NavController) {
 }
 
 private fun startLoginActivity(context: Context) {
-    val intent = Intent(context, LoginActivity::class.java)
+    val activity = (context as Activity)
+    val intent = Intent(context, SplashActivity::class.java)
     context.startActivity(intent)
+    activity.finish()
+
 }
 
 @ExperimentalCoilApi

@@ -47,8 +47,10 @@ import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.map.Map
 import com.joesemper.fishing.compose.ui.home.weather.Weather
 import com.joesemper.fishing.ui.theme.FigmaTheme
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 
+@ExperimentalCoroutinesApi
 @ExperimentalPermissionsApi
 @ExperimentalAnimationApi
 @ExperimentalPagerApi

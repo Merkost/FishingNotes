@@ -30,7 +30,10 @@ val appModule = module {
 val mainActivity = module {
     scope(named<MainActivity>()) {
         viewModel { MainViewModel() }
+
     }
+    viewModel { LoginViewModel(get()) }
+    viewModel { SplashViewModel(get()) }
 
     viewModel { MapViewModel(get(), get()) }
     viewModel { NewCatchViewModel(get(), get()) }
@@ -42,16 +45,4 @@ val mainActivity = module {
     viewModel { UserCatchesViewModel(get()) }
     viewModel { UserPlacesViewModel(get()) }
 
-}
-
-val splashScreen = module {
-    scope(named<SplashActivity>()) {
-        viewModel { SplashViewModel(get()) }
-    }
-}
-
-val loginScreen = module {
-    scope(named<LoginActivity>()) {
-        viewModel { LoginViewModel(get()) }
-    }
 }

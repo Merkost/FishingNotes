@@ -151,5 +151,6 @@
     <string name="no_added_photos">No added photos</string>
     <string name="main">Основное</string>
     <string name="icon">Icon</string>
+    <string name="google_login">Вход с помощью google</string>
 
 </resources>
