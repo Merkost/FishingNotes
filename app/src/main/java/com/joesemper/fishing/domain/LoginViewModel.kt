@@ -14,7 +14,7 @@ class LoginViewModel(private val repository: UserRepository) : ViewModel() {
     private val mutableStateFlow: MutableStateFlow<BaseViewState> =
         MutableStateFlow(BaseViewState.Success(null))
 
-    fun subscribe(): StateFlow<BaseViewState> = mutableStateFlow
+    fun subscribe() = mutableStateFlow
 
     init {
         loadCurrentUser()

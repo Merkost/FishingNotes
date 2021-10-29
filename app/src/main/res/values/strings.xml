@@ -155,6 +155,10 @@
     <string name="mode_place_selecting">You are in place selecting mode!</string>
     <string name="mode_place_selecting_off">Режим выбора места выключен!</string>
     <string name="mode_place_info">Вы в режиме просмотра информации о месте!</string>
+    <string name="login_title">Let\'s get it started!</string>
+    <string name="google_login">Sign with google</string>
+
+    <string name="start_screen_title">Start Screen</string>
 
 
 </resources>

@@ -1,4 +1,4 @@
-package com.joesemper.fishing.domain
+package com.joesemper.fishing.compose.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,16 +11,12 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class SplashViewModel(private val repository: UserRepository) : ViewModel() {
+class MainViewModel(private val repository: UserRepository) : ViewModel() {
 
     private val mutableStateFlow: MutableStateFlow<BaseViewState> =
         MutableStateFlow(BaseViewState.Loading(null))
 
-    fun subscribe(): StateFlow<BaseViewState> = mutableStateFlow
-
-    init {
-        loadCurrentUser()
-    }
+    fun subscribe(): StateFlow<BaseViewState> = mutableStateFlow.apply { loadCurrentUser() }
 
     private fun loadCurrentUser() {
         viewModelScope.launch {
@@ -37,5 +33,4 @@ class SplashViewModel(private val repository: UserRepository) : ViewModel() {
     private fun handleError(error: Throwable) {
         mutableStateFlow.value = BaseViewState.Error(error)
     }
-
 }

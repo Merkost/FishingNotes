@@ -17,8 +17,6 @@ class FishingApp : Application() {
             modules(
                 listOf(
                     appModule,
-                    splashScreen,
-                    loginScreen,
                     mainActivity,
                 )
             )
