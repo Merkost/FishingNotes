@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
@@ -70,6 +71,7 @@ fun CatchTopBar(navController: NavController, viewModel: UserCatchViewModel) {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalAnimationApi
 @Composable
 fun CatchContent(navController: NavController, viewModel: UserCatchViewModel) {
