@@ -210,7 +210,10 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
                 onClick = {
                     scope.launch {
                         viewModel.logoutCurrentUser().collect { isLogout ->
-                        if (isLogout) navController.navigate(MainDestinations.LOGIN_ROUTE)
+                        if (isLogout) {
+                            dialogOnLogout.value = false
+                            navController.navigate(MainDestinations.LOGIN_ROUTE)
+                        }
                         //startLoginActivity(context)
                         }
                     }
