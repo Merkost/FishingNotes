@@ -67,7 +67,7 @@ fun LoginScreen(navController: NavController) {
 
                 if ((uiState.value as BaseViewState.Success<*>).data as User? != null) {
                     visible = false
-                    delay((MainActivity.splashFadeDurationMillis * 3).toLong())
+                    delay((MainActivity.splashFadeDurationMillis * 2).toLong())
                     navController.navigate(MainDestinations.HOME_ROUTE)
                 }
             }
@@ -129,7 +129,7 @@ fun LoginScreen(navController: NavController) {
                         -it
                     },
                     animationSpec = tween(
-                        durationMillis = MainActivity.splashFadeDurationMillis * 3,
+                        durationMillis = MainActivity.splashFadeDurationMillis * 2,
                         //delayMillis = MainActivity.splashFadeDurationMillis / 2,
                         easing = CubicBezierEasing(0f, 0f, 0f, 1f)
                     )
@@ -149,9 +149,8 @@ fun LoginScreen(navController: NavController) {
                     },
                     animationSpec = tween(
                         durationMillis = MainActivity.splashFadeDurationMillis * 4,
-                        delayMillis = MainActivity.splashFadeDurationMillis / 2,
+                        //delayMillis = MainActivity.splashFadeDurationMillis / 2,
                         //easing = CubicBezierEasing(0f, 0f, 0f, 1f)
-
                     )
                 ),
                 exit = slideOutVertically(
@@ -160,10 +159,8 @@ fun LoginScreen(navController: NavController) {
                         2 * it
                     },
                     animationSpec = tween(
-                        durationMillis = MainActivity.splashFadeDurationMillis * 3,
-
+                        durationMillis = MainActivity.splashFadeDurationMillis * 2,
                         //easing = CubicBezierEasing(0f, 0f, 0f, 1f)
-
                     )
                 ),
                 modifier = Modifier.constrainAs(card) {
@@ -217,12 +214,12 @@ fun LoginScreen(navController: NavController) {
                         )
 
                         //LottieLoading
-                        AnimatedVisibility(isLoading,) { LottieLoading(modifier = Modifier.size(140.dp)) }
-                        AnimatedVisibility(!isLoading) {
+                        //AnimatedVisibility(isLoading,) { LottieLoading(modifier = Modifier.size(140.dp)) }
+                        //AnimatedVisibility(!isLoading) {
                             Spacer(
                                 modifier = Modifier.fillMaxWidth().height(30.dp)
                             )
-                        }
+                        //}
 
                         //Google button
                         Card(
