@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
@@ -502,6 +503,7 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalPermissionsApi
 @ExperimentalAnimationApi
 @Composable

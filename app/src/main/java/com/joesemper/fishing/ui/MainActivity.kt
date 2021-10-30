@@ -2,6 +2,7 @@ package com.joesemper.fishing.ui
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
 import android.view.animation.OvershootInterpolator
@@ -29,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -64,6 +67,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.LoginScreen
+import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.viewmodels.MainViewModel
 import com.joesemper.fishing.domain.LoginViewModel
 import com.joesemper.fishing.ui.theme.Typography
@@ -275,6 +279,7 @@ class MainActivity : ComponentActivity() {
         vb.warning.setOnClickListener {
             Toast.makeText(this, error.message, Toast.LENGTH_LONG).show()
         }*/
+        SnackbarManager.showMessage(R.string.google_login_failed)
         logger.log(error.message)
     }
 
@@ -286,4 +291,15 @@ class MainActivity : ComponentActivity() {
             //}
         } //TODO: Else
     }
+}
+
+/**
+ * A composable function that returns the [Resources]. It will be recomposed when `Configuration`
+ * gets updated.
+ */
+@Composable
+@ReadOnlyComposable
+fun resources(): Resources {
+    LocalConfiguration.current
+    return LocalContext.current.resources
 }
