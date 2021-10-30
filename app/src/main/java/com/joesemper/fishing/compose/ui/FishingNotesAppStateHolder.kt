@@ -178,6 +178,8 @@ private tailrec fun findStartDestination(graph: NavDestination): NavDestination 
     return if (graph is NavGraph) findStartDestination(graph.startDestination!!) else graph
 }
 
+
+/*
 /**
  * A composable function that returns the [Resources]. It will be recomposed when `Configuration`
  * gets updated.
@@ -188,3 +190,4 @@ private fun resources(): Resources {
     LocalConfiguration.current
     return LocalContext.current.resources
 }
+*/

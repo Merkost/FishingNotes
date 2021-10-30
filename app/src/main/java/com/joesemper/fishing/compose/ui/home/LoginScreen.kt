@@ -1,16 +1,13 @@
 package com.joesemper.fishing.compose.ui.home
 
-import android.app.Activity
-import android.content.res.Resources
-import android.util.Log
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -19,29 +16,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.core.content.res.TypedArrayUtils.getText
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 import com.google.accompanist.insets.systemBarsPadding
+import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.MainActivity
 import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.resources
 import com.joesemper.fishing.domain.LoginViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.User
-import com.joesemper.fishing.compose.ui.MainActivity
-import com.joesemper.fishing.ui.resources
 import com.joesemper.fishing.ui.theme.Typography
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.koin.android.ext.android.get
 import org.koin.androidx.compose.get
 
 @ExperimentalMaterialApi
@@ -113,48 +107,50 @@ fun LoginScreen(navController: NavController) {
             val (background, card, lottieSuccess, cardColumn) = createRefs()
 
             AnimatedVisibility(
-            visible = visible,
-            enter = slideInVertically(
-                initialOffsetY = {
-                    // Slide in from top
-                    -it
-                },
-                animationSpec = tween(
-                    durationMillis = MainActivity.splashFadeDurationMillis*4,
+                visible = visible,
+                enter = slideInVertically(
+                    initialOffsetY = {
+                        // Slide in from top
+                        -it
+                    },
+                    animationSpec = tween(
+                        durationMillis = MainActivity.splashFadeDurationMillis * 4,
 
-                    easing = CubicBezierEasing(0f, 0f, 0f, 1f)
-                )
-            ),
-        ) {Surface(modifier = Modifier.fillMaxWidth().height(450.dp).constrainAs(background) {
-                top.linkTo(parent.top)
-            }, color = primaryFigmaColor) {}}
+                        easing = CubicBezierEasing(0f, 0f, 0f, 1f)
+                    )
+                ),
+            ) {
+                Surface(modifier = Modifier.fillMaxWidth().height(450.dp).constrainAs(background) {
+                    top.linkTo(parent.top)
+                }, color = primaryFigmaColor) {}
+            }
 
             AnimatedVisibility(
-            visible = visible,
-            enter = slideInVertically(
-                initialOffsetY = {
-                    // Slide in from top
-                    2*it
-                },
-                animationSpec = tween(
-                    durationMillis = MainActivity.splashFadeDurationMillis*4,
-                    delayMillis = MainActivity.splashFadeDurationMillis/2,
-                    //easing = CubicBezierEasing(0f, 0f, 0f, 1f)
+                visible = visible,
+                enter = slideInVertically(
+                    initialOffsetY = {
+                        // Slide in from top
+                        2 * it
+                    },
+                    animationSpec = tween(
+                        durationMillis = MainActivity.splashFadeDurationMillis * 4,
+                        delayMillis = MainActivity.splashFadeDurationMillis / 2,
+                        //easing = CubicBezierEasing(0f, 0f, 0f, 1f)
 
-                )
-            ),
+                    )
+                ),
                 modifier = Modifier.constrainAs(card) {
                     top.linkTo(parent.top)
                     bottom.linkTo(parent.bottom)
                 }) {
-            Card(
-                modifier = Modifier.fillMaxWidth().padding(30.dp).wrapContentHeight(),
-                elevation = 10.dp,
-                shape = RoundedCornerShape(30.dp)
-            ) {
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(30.dp).wrapContentHeight(),
+                    elevation = 10.dp,
+                    shape = RoundedCornerShape(30.dp)
+                ) {
 
-                //LottieSuccess
-                /*AnimatedVisibility(visible = isSuccess, modifier = Modifier.constrainAs(lottieSuccess) {
+                    //LottieSuccess
+                    /*AnimatedVisibility(visible = isSuccess, modifier = Modifier.constrainAs(lottieSuccess) {
                     top.linkTo(card.top)
                     bottom.linkTo(card.bottom)
                     absoluteLeft.linkTo(card.absoluteLeft)
@@ -163,76 +159,77 @@ fun LoginScreen(navController: NavController) {
                     navController.navigate(MainDestinations.HOME_ROUTE)
                 } }*/
 
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .constrainAs(cardColumn) {
-                            top.linkTo(card.top)
-                            bottom.linkTo(card.bottom)
-                            absoluteLeft.linkTo(card.absoluteLeft)
-                            absoluteRight.linkTo(card.absoluteRight)
-                        }.fillMaxWidth().animateContentSize()
-                ) {
-
-                    //AppIcon
-                    Image(
-                        painterResource(R.mipmap.ic_launcher), stringResource(R.string.icon),
-                        modifier = Modifier.padding(30.dp).size(140.dp)
-                    )
-
-                    //Title
-                    Text(
-                        stringResource(R.string.login_title),
-                        style = Typography.h5,
-                        color = Color.DarkGray
-                    )
-
-                    //LottieLoading
-                    AnimatedVisibility(isLoading) { LottieLoading(modifier = Modifier.size(140.dp)) }
-                    AnimatedVisibility(!isLoading) {
-                        Spacer(
-                            modifier = Modifier.fillMaxWidth().height(30.dp)
-                        )
-                    }
-
-                    //Google button
-                    Card(
-                        shape = RoundedCornerShape(20.dp), elevation = 10.dp,
-                        onClickLabel = stringResource(
-                            R.string.google_login
-                        ),
-                        onClick = { activity.startGoogleLogin() },
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .constrainAs(cardColumn) {
+                                top.linkTo(card.top)
+                                bottom.linkTo(card.bottom)
+                                absoluteLeft.linkTo(card.absoluteLeft)
+                                absoluteRight.linkTo(card.absoluteRight)
+                            }.fillMaxWidth().animateContentSize()
                     ) {
-                        Row(
-                            modifier = Modifier.padding(10.dp),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Image(
-                                painterResource(R.drawable.googleg_standard_color_18),
-                                stringResource(R.string.google_login),
-                                modifier = Modifier.size(25.dp)
+
+                        //AppIcon
+                        Image(
+                            painterResource(R.mipmap.ic_launcher), stringResource(R.string.icon),
+                            modifier = Modifier.padding(30.dp).size(140.dp)
+                        )
+
+                        //Title
+                        Text(
+                            stringResource(R.string.login_title),
+                            style = Typography.h5,
+                            color = Color.DarkGray
+                        )
+
+                        //LottieLoading
+                        AnimatedVisibility(isLoading) { LottieLoading(modifier = Modifier.size(140.dp)) }
+                        AnimatedVisibility(!isLoading) {
+                            Spacer(
+                                modifier = Modifier.fillMaxWidth().height(30.dp)
                             )
-                            Text("Sign in with Google", style = Typography.body1)
                         }
+
+                        //Google button
+                        Card(
+                            shape = RoundedCornerShape(20.dp), elevation = 10.dp,
+                            onClickLabel = stringResource(
+                                R.string.google_login
+                            ),
+                            onClick = { activity.startGoogleLogin() },
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(10.dp),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Image(
+                                    painterResource(R.drawable.googleg_standard_color_18),
+                                    stringResource(R.string.google_login),
+                                    modifier = Modifier.size(25.dp)
+                                )
+                                Text("Sign in with Google", style = Typography.body1)
+                            }
+                        }
+
+                        //Space
+                        Spacer(modifier = Modifier.fillMaxWidth().height(30.dp))
                     }
 
-                    //Space
-                    Spacer(modifier = Modifier.fillMaxWidth().height(30.dp))
+
                 }
-
-
+            }
+            LaunchedEffect(true) {
+                visible = true
             }
         }
-        }
-    LaunchedEffect(true) {
-        visible = true
     }
-    }
+}
 
 
 @Composable
-private fun LottieSuccess(modifier: Modifier = Modifier, onFinished: () -> Unit) {
+fun LottieSuccess(modifier: Modifier = Modifier, onFinished: () -> Unit) {
     val spec = LottieCompositionSpec.RawRes(R.raw.confetti)
     val composition by rememberLottieComposition(spec)
     val compositionResult: LottieCompositionResult = rememberLottieComposition(spec)
@@ -255,7 +252,7 @@ private fun LottieSuccess(modifier: Modifier = Modifier, onFinished: () -> Unit)
 }
 
 @Composable
-private fun LottieLoading(modifier: Modifier = Modifier) {
+fun LottieLoading(modifier: Modifier = Modifier) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.walking_fish))
     val progress by animateLottieCompositionAsState(
         composition,
