@@ -1,11 +1,9 @@
 package com.joesemper.fishing.compose.ui.home
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.*
 import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,11 +12,13 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
@@ -28,6 +28,7 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.MainActivity
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.resources
+import com.joesemper.fishing.compose.ui.utils.GoogleButton
 import com.joesemper.fishing.domain.LoginViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.User
@@ -48,6 +49,7 @@ fun LoginScreen(navController: NavController) {
     var isLoading by remember { mutableStateOf(false) }
     var isSuccess by remember { mutableStateOf(false) }
     var visible by remember { mutableStateOf(false) }
+    var clicked by remember { mutableStateOf(false) }
 
     val loginViewModel: LoginViewModel = get()
     val activity = LocalContext.current as MainActivity
@@ -61,9 +63,11 @@ fun LoginScreen(navController: NavController) {
                 delay(300)
                 isSuccess = true
                 isLoading = false
-                delay(300)
+                delay((MainActivity.splashFadeDurationMillis * 2).toLong())
 
                 if ((uiState.value as BaseViewState.Success<*>).data as User? != null) {
+                    visible = false
+                    delay((MainActivity.splashFadeDurationMillis * 3).toLong())
                     navController.navigate(MainDestinations.HOME_ROUTE)
                 }
             }
@@ -119,6 +123,17 @@ fun LoginScreen(navController: NavController) {
                         easing = CubicBezierEasing(0f, 0f, 0f, 1f)
                     )
                 ),
+                exit = slideOutVertically(
+                    targetOffsetY = {
+                        // Slide to top
+                        -it
+                    },
+                    animationSpec = tween(
+                        durationMillis = MainActivity.splashFadeDurationMillis * 3,
+                        delayMillis = MainActivity.splashFadeDurationMillis / 2,
+                        easing = CubicBezierEasing(0f, 0f, 0f, 1f)
+                    )
+                )
             ) {
                 Surface(modifier = Modifier.fillMaxWidth().height(450.dp).constrainAs(background) {
                     top.linkTo(parent.top)
@@ -135,6 +150,18 @@ fun LoginScreen(navController: NavController) {
                     animationSpec = tween(
                         durationMillis = MainActivity.splashFadeDurationMillis * 4,
                         delayMillis = MainActivity.splashFadeDurationMillis / 2,
+                        //easing = CubicBezierEasing(0f, 0f, 0f, 1f)
+
+                    )
+                ),
+                exit = slideOutVertically(
+                    targetOffsetY = {
+                        // Slide in from top
+                        2 * it
+                    },
+                    animationSpec = tween(
+                        durationMillis = MainActivity.splashFadeDurationMillis * 3,
+
                         //easing = CubicBezierEasing(0f, 0f, 0f, 1f)
 
                     )
@@ -168,7 +195,12 @@ fun LoginScreen(navController: NavController) {
                                 bottom.linkTo(card.bottom)
                                 absoluteLeft.linkTo(card.absoluteLeft)
                                 absoluteRight.linkTo(card.absoluteRight)
-                            }.fillMaxWidth().animateContentSize()
+                            }.fillMaxWidth().animateContentSize(
+                                animationSpec = tween(
+                                    durationMillis = 300,
+                                    easing = LinearOutSlowInEasing
+                                )
+                            )
                     ) {
 
                         //AppIcon
@@ -185,7 +217,7 @@ fun LoginScreen(navController: NavController) {
                         )
 
                         //LottieLoading
-                        AnimatedVisibility(isLoading) { LottieLoading(modifier = Modifier.size(140.dp)) }
+                        AnimatedVisibility(isLoading,) { LottieLoading(modifier = Modifier.size(140.dp)) }
                         AnimatedVisibility(!isLoading) {
                             Spacer(
                                 modifier = Modifier.fillMaxWidth().height(30.dp)
@@ -198,20 +230,43 @@ fun LoginScreen(navController: NavController) {
                             onClickLabel = stringResource(
                                 R.string.google_login
                             ),
-                            onClick = { activity.startGoogleLogin() },
+                            onClick = { clicked = true; activity.startGoogleLogin() },
                         ) {
                             Row(
-                                modifier = Modifier.padding(10.dp),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                modifier = Modifier.padding(10.dp).animateContentSize(
+                                    animationSpec = tween(
+                                        durationMillis = 300,
+                                        easing = LinearOutSlowInEasing
+                                    )
+                                ),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Image(
                                     painterResource(R.drawable.googleg_standard_color_18),
                                     stringResource(R.string.google_login),
                                     modifier = Modifier.size(25.dp)
                                 )
-                                Text("Sign in with Google", style = Typography.body1)
+                                Text(text = if (clicked) "Signing In" else "Sign in with Google")
+                                if (clicked) {
+                                    //Spacer(modifier = Modifier.width(16.dp))
+                                    CircularProgressIndicator(
+                                        modifier = Modifier
+                                            .height(16.dp)
+                                            .width(16.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MaterialTheme.colors.primary
+                                    )
+                                }
+                                //Text("Sign in with Google", style = Typography.body1)
                             }
                         }
+
+                        /*GoogleButton(
+                            text = "Sign In with Google",
+                            loadingText = "Signing In...",
+                            onClicked = {activity.startGoogleLogin()}
+                        )*/
 
                         //Space
                         Spacer(modifier = Modifier.fillMaxWidth().height(30.dp))
@@ -220,7 +275,7 @@ fun LoginScreen(navController: NavController) {
 
                 }
             }
-            LaunchedEffect(true) {
+            LaunchedEffect(this) {
                 visible = true
             }
         }
