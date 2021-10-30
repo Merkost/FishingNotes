@@ -130,7 +130,7 @@ fun LoginScreen(navController: NavController) {
                     },
                     animationSpec = tween(
                         durationMillis = MainActivity.splashFadeDurationMillis * 3,
-                        delayMillis = MainActivity.splashFadeDurationMillis / 2,
+                        //delayMillis = MainActivity.splashFadeDurationMillis / 2,
                         easing = CubicBezierEasing(0f, 0f, 0f, 1f)
                     )
                 )
