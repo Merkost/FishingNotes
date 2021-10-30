@@ -3,9 +3,9 @@ package com.joesemper.fishing.compose.ui.home
 import android.app.Activity
 import android.content.res.Resources
 import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.*
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -34,7 +34,7 @@ import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.domain.LoginViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.User
-import com.joesemper.fishing.ui.MainActivity
+import com.joesemper.fishing.compose.ui.MainActivity
 import com.joesemper.fishing.ui.resources
 import com.joesemper.fishing.ui.theme.Typography
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
@@ -43,8 +43,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
 import org.koin.androidx.compose.get
-import com.joesemper.fishing.R as R
-
 
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
@@ -55,6 +53,7 @@ fun LoginScreen(navController: NavController) {
     val scaffoldState = rememberScaffoldState()
     var isLoading by remember { mutableStateOf(false) }
     var isSuccess by remember { mutableStateOf(false) }
+    var visible by remember { mutableStateOf(false) }
 
     val loginViewModel: LoginViewModel = get()
     val activity = LocalContext.current as MainActivity
@@ -62,7 +61,7 @@ fun LoginScreen(navController: NavController) {
     val errorString = stringResource(R.string.signin_error)
     val resources = resources()
 
-    LaunchedEffect(loginViewModel.subscribe().collectAsState().value) {
+    LaunchedEffect(uiState.value) {
         when (uiState.value) {
             is BaseViewState.Success<*> -> {
                 delay(300)
@@ -113,15 +112,43 @@ fun LoginScreen(navController: NavController) {
         ConstraintLayout(modifier = Modifier.fillMaxSize().background(Color.White)) {
             val (background, card, lottieSuccess, cardColumn) = createRefs()
 
-            Surface(modifier = Modifier.fillMaxWidth().height(450.dp).constrainAs(background) {
-                top.linkTo(parent.top)
-            }, color = primaryFigmaColor) {}
+            AnimatedVisibility(
+            visible = visible,
+            enter = slideInVertically(
+                initialOffsetY = {
+                    // Slide in from top
+                    -it
+                },
+                animationSpec = tween(
+                    durationMillis = MainActivity.splashFadeDurationMillis*4,
 
-            Card(
+                    easing = CubicBezierEasing(0f, 0f, 0f, 1f)
+                )
+            ),
+        ) {Surface(modifier = Modifier.fillMaxWidth().height(450.dp).constrainAs(background) {
+                top.linkTo(parent.top)
+            }, color = primaryFigmaColor) {}}
+
+            AnimatedVisibility(
+            visible = visible,
+            enter = slideInVertically(
+                initialOffsetY = {
+                    // Slide in from top
+                    2*it
+                },
+                animationSpec = tween(
+                    durationMillis = MainActivity.splashFadeDurationMillis*4,
+                    delayMillis = MainActivity.splashFadeDurationMillis/2,
+                    //easing = CubicBezierEasing(0f, 0f, 0f, 1f)
+
+                )
+            ),
                 modifier = Modifier.constrainAs(card) {
                     top.linkTo(parent.top)
                     bottom.linkTo(parent.bottom)
-                }.fillMaxWidth().padding(30.dp).wrapContentHeight(),
+                }) {
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(30.dp).wrapContentHeight(),
                 elevation = 10.dp,
                 shape = RoundedCornerShape(30.dp)
             ) {
@@ -197,8 +224,12 @@ fun LoginScreen(navController: NavController) {
 
             }
         }
+        }
+    LaunchedEffect(true) {
+        visible = true
     }
-}
+    }
+
 
 @Composable
 private fun LottieSuccess(modifier: Modifier = Modifier, onFinished: () -> Unit) {
@@ -236,4 +267,3 @@ private fun LottieLoading(modifier: Modifier = Modifier) {
         modifier = modifier
     )
 }
-

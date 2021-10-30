@@ -1,25 +1,19 @@
-package com.joesemper.fishing.ui
+package com.joesemper.fishing.compose.ui
 
-import android.content.Context
+import android.animation.TimeInterpolator
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
-import android.util.Log
-import android.view.animation.OvershootInterpolator
-import android.widget.Toast
+import android.view.animation.BounceInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,18 +22,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -47,33 +38,21 @@ import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.FishingNotesApp
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.utils.Logger
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.delay
 import org.koin.android.ext.android.inject
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.navArgument
-import com.airbnb.lottie.compose.*
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.LoginScreen
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.viewmodels.MainViewModel
-import com.joesemper.fishing.domain.LoginViewModel
-import com.joesemper.fishing.ui.theme.Typography
-import com.joesemper.fishing.ui.theme.primaryFigmaColor
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
 
 class MainActivity : ComponentActivity() {
@@ -101,16 +80,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val viewModel: MainViewModel = get()
-        val isUserHere = mutableStateOf(false)
-
         val user = viewModel.subscribe()
+
         val splashWasDisplayed = savedInstanceState != null
         if (!splashWasDisplayed) {
             val splashScreen = installSplashScreen()
 
-            splashScreen.setKeepVisibleCondition {
-                user.value is BaseViewState.Success<*>
-            }
+            splashScreen.setKeepVisibleCondition { user.value is BaseViewState.Success<*> }
+
             splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
                 // Get icon instance and start a fade out animation
                 splashScreenViewProvider.iconView
@@ -165,7 +142,7 @@ class MainActivity : ComponentActivity() {
                                 -it
                             },
                             animationSpec = tween(
-                                durationMillis = MainActivity.splashFadeDurationMillis,
+                                durationMillis = splashFadeDurationMillis,
                                 easing = CubicBezierEasing(0f, 0f, 0f, 1f)
 
                             )
