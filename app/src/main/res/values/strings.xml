@@ -166,6 +166,7 @@
     <string name="signin_error">Произошла ошибка при входе, попробуйте еще раз!</string>
     <string name="google_login_failed">google_login_failed</string>
     <string name="add_place_success">Place added successfully</string>
+    <string name="back_clicked">Do it again to close the app</string>
 
 
 </resources>

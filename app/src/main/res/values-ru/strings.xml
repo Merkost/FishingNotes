@@ -160,5 +160,6 @@
     <string name="add_catch_text">+ Add new catch</string>
     <string name="no_places_added">No places added</string>
     <string name="new_place_text">+ Add new place</string>
+    <string name="back_clicked">Do it again to close the app</string>
 
 </resources>
