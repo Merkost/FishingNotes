@@ -32,7 +32,7 @@ fun AppSnackbar(
         modifier = modifier,
         actionOnNewLine = actionOnNewLine,
         shape = shape,
-        backgroundColor = backgroundColor,
+        backgroundColor = /*backgroundColor*/Color.LightGray,
         /*contentColor = contentColor,
         actionColor = actionColor,*/
         elevation = elevation
