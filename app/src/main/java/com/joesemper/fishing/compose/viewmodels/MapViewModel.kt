@@ -8,6 +8,7 @@ import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.UiState
+import com.joesemper.fishing.compose.ui.home.map.MapUiState
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -27,6 +28,8 @@ class MapViewModel(
         MutableStateFlow(BaseViewState.Loading(null))
 
     private val mapMarkers = MutableStateFlow(listOf<UserMapMarker>())
+
+    var mapUiState: MapUiState = MapUiState.NormalMode
 
     private val _uiState = MutableStateFlow<UiState?>(null)
     val uiState: StateFlow<UiState?>

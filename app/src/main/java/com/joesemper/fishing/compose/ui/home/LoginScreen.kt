@@ -95,8 +95,6 @@ fun LoginScreen(navController: NavController) {
         }
     }
 
-
-
     Scaffold(
         scaffoldState = scaffoldState,
         snackbarHost = {
@@ -300,7 +298,6 @@ fun LottieSuccess(modifier: Modifier = Modifier, onFinished: () -> Unit) {
             onFinished()
         }
     }
-
 }
 
 @Composable
