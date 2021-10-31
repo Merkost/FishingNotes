@@ -85,11 +85,10 @@ fun Map(
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val resources = resources()
 
-    val mapView = viewModel.mapView.value ?: rememberMapViewWithLifecycle().apply {
-        viewModel.mapView.value = this
-    }
+    val mapView = rememberMapViewWithLifecycle()/*.apply {
+        //viewModel.mapView.value = this
+    }*/
 
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     // Track if the user doesn't want to see the rationale any more.
@@ -118,7 +117,7 @@ fun Map(
         )
     )
 
-    val currentMarker = remember { mutableStateOf<UserMapMarker?>(null) }
+    ///val currentMarker = remember { mutableStateOf<UserMapMarker?>(null) }
 
     val mapType = rememberSaveable { mutableStateOf(MapTypes.roadmap) }
     val mapLayersSelection = rememberSaveable { mutableStateOf(false) }
@@ -160,9 +159,11 @@ fun Map(
 
     LaunchedEffect(mapUiState) {
         viewModel.mapUiState = mapUiState
+
         when (mapUiState) {
             MapUiState.NormalMode -> {
                 scaffoldState.bottomSheetState.collapse()
+                viewModel.currentMarker.value = null
             }
             MapUiState.BottomSheetInfoMode -> {
                 scaffoldState.bottomSheetState.expand()
@@ -178,7 +179,7 @@ fun Map(
         scaffoldState = scaffoldState,
         sheetShape = Shapes.large,
         sheetContent = {
-            BottomSheetMarkerDialog(currentMarker.value) { marker ->
+            BottomSheetMarkerDialog(viewModel.currentMarker.value) { marker ->
                 coroutineScope.launch {
                     scaffoldState.bottomSheetState.collapse()
                     navController.navigate(MainDestinations.PLACE_ROUTE, Arguments.PLACE to marker)
@@ -196,11 +197,11 @@ fun Map(
                         onClick = {
                             when (mapUiState) {
                                 MapUiState.NormalMode -> {
-                                    SnackbarManager.showMessage(R.string.mode_place_selecting)
+                                    //SnackbarManager.showMessage(R.string.mode_place_selecting)
                                     mapUiState = MapUiState.PlaceSelectMode
                                 }
                                 MapUiState.PlaceSelectMode -> {
-                                    SnackbarManager.showMessage(R.string.mode_place_selecting_off)
+                                    //SnackbarManager.showMessage(R.string.mode_place_selecting_off)
                                     mapView.getMapAsync { googleMap ->
                                         val target = googleMap.cameraPosition.target
                                         currentPosition.value =
@@ -210,7 +211,7 @@ fun Map(
                                     mapUiState = MapUiState.NormalMode
                                 }
                                 MapUiState.BottomSheetInfoMode -> {
-                                    val marker: UserMapMarker? = currentMarker.value
+                                    val marker: UserMapMarker? = viewModel.currentMarker.value
                                     marker?.let {
                                         coroutineScope.launch {
                                             scaffoldState.bottomSheetState.collapse()
@@ -330,20 +331,20 @@ fun Map(
                     permissionsState = permissionsState,
                     viewModel = viewModel,
                     onMarkerClick = { marker ->
-                        currentMarker.value = marker
+                        viewModel.currentMarker.value = marker
                         coroutineScope.launch {
-                            SnackbarManager.showMessage(R.string.mode_place_info)
+                            //SnackbarManager.showMessage(R.string.mode_place_info)
                             moveCameraToLocation(
                                 location = LatLng(marker.latitude, marker.longitude),
                                 coroutineScope = coroutineScope,
                                 map = mapView
                             )
-                            //scaffoldState.bottomSheetState.expand()
                             mapUiState = MapUiState.BottomSheetInfoMode
                         }
                     },
                     cameraMoveCallback = { state -> cameraMoveState = state },
-                    lastLocation = (lastKnownLocationState as LocationState.LocationGranted).location
+                    lastLocation = (lastKnownLocationState as LocationState.LocationGranted).location,
+                    mapUiState = mapUiState
                 )
             }
         }
@@ -699,6 +700,7 @@ fun GoogleMapLayout(
     onMarkerClick: (marker: UserMapMarker) -> Unit,
     cameraMoveCallback: (state: CameraMoveState) -> Unit,
     lastLocation: LatLng,
+    mapUiState: MapUiState,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -738,11 +740,21 @@ fun GoogleMapLayout(
     }
 
     LaunchedEffect(key1 = lastLocation) {
-        moveCameraToLocation(
-            coroutineScope = coroutineScope,
-            map = map,
-            location = lastLocation //here we got 0.0
-        )
+        if (mapUiState == MapUiState.BottomSheetInfoMode) {
+            viewModel.currentMarker.value?.let {
+                moveCameraToLocation(
+                    coroutineScope = coroutineScope,
+                    map = map,
+                    location = LatLng(it.latitude, it.longitude) //here we got 0.0
+                )
+            }
+        } else /*(mapUiState != MapUiState.BottomSheetInfoMode) */{
+            moveCameraToLocation(
+                coroutineScope = coroutineScope,
+                map = map,
+                location = lastLocation //here we got 0.0
+            )
+        }
     }
 
     LaunchedEffect(map, permissionsState) {
@@ -903,7 +915,7 @@ fun PointerIcon(cameraMoveState: CameraMoveState, modifier: Modifier = Modifier)
 @Composable
 fun FabOnMap(state: MapUiState, onClick: () -> Unit) {
     val fabImg = remember { mutableStateOf(R.drawable.ic_baseline_add_location_24) }
-    val defaultBottomPadding: Dp = 194.dp
+    val defaultBottomPadding: Dp = 128.dp
     val paddingBottom = remember { mutableStateOf(defaultBottomPadding) } //128
     val paddingTop = remember { mutableStateOf(0.dp) }
 

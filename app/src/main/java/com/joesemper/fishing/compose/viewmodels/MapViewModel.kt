@@ -37,7 +37,8 @@ class MapViewModel(
 
     val lastLocation: MutableState<LatLng> = mutableStateOf(LatLng(0.0, 0.0))
 
-    val mapView: MutableState<MapView?> = mutableStateOf(null)
+    //val mapView: MutableState<MapView?> = mutableStateOf(null)
+    val currentMarker: MutableState<UserMapMarker?> = mutableStateOf(null)
 
     val chosenPlace = mutableStateOf<String?>(null)
 
