@@ -1,6 +1,7 @@
 package com.joesemper.fishing.domain
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.repository.UserContentRepository
 import com.joesemper.fishing.model.repository.UserRepository
@@ -20,14 +21,22 @@ class UserViewModel(
     val uiState: StateFlow<BaseViewState>
         get() = _uiState
 
-    fun getCurrentUser() = userRepository.currentUser
+    fun getCurrentUser() = viewModelScope.run {
+        userRepository.currentUser
+    }
 
-    fun getUserPlaces() = repository.getAllUserMarkersList()
+    fun getUserPlaces() = viewModelScope.run {
+        repository.getAllUserMarkersList()
+    }
 
-    fun getUserCatches() = repository.getAllUserCatchesList()
+    fun getUserCatches() = viewModelScope.run {
+        repository.getAllUserCatchesList()
+    }
 
-
-    suspend fun logoutCurrentUser() = userRepository.logoutCurrentUser()
-
+    suspend fun logoutCurrentUser() = viewModelScope.run {
+        userRepository.logoutCurrentUser()
+    }
 
 }
+
+

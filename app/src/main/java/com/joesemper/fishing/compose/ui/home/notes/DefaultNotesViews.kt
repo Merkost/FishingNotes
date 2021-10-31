@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -21,7 +22,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -34,9 +37,7 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.theme.primaryFigmaColor
-import com.joesemper.fishing.ui.theme.secondaryFigmaColor
-import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
+import com.joesemper.fishing.ui.theme.*
 import com.joesemper.fishing.utils.getTimeByMilliseconds
 
 @ExperimentalComposeUiApi
@@ -164,9 +165,9 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
         .clickable {
             userCatchClicked(userCatch)
         }) {
-        ConstraintLayout(modifier = Modifier.padding(2.dp)) {
+        ConstraintLayout(modifier = Modifier.padding(8.dp)) {
             val (photos, fish, weight, kg, description, icon, place, date) = createRefs()
-            val guideline = createGuidelineFromAbsoluteLeft(104.dp)
+            val guideline = createGuidelineFromAbsoluteLeft(110.dp)
 
             ItemCatchPhotos(
                 modifier = Modifier.constrainAs(photos) {
@@ -178,7 +179,7 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
                 photosCount = userCatch.downloadPhotoLinks.count()
             )
 
-            PrimaryTextBold(
+            PrimaryText(
                 modifier = Modifier.constrainAs(fish) {
                     absoluteLeft.linkTo(guideline, 4.dp)
                     top.linkTo(parent.top)
@@ -194,9 +195,9 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
                 text = stringResource(id = R.string.kg)
             )
 
-            PrimaryTextBold(
+            PrimaryText(
                 modifier = Modifier.constrainAs(weight) {
-                    absoluteRight.linkTo(kg.absoluteLeft, 1.dp)
+                    absoluteRight.linkTo(kg.absoluteLeft, 4.dp)
                     top.linkTo(parent.top)
                 },
                 text = userCatch.fishWeight.toString()
@@ -204,7 +205,7 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
 
             SecondaryText(
                 modifier = Modifier.constrainAs(description) {
-                    absoluteLeft.linkTo(guideline, 4.dp)
+                    absoluteLeft.linkTo(fish.absoluteLeft)
                     linkTo(fish.bottom, icon.top, bottomMargin = 2.dp, bias = 0F)
                 },
                 text = if (userCatch.description.isNotBlank()) {
@@ -215,10 +216,12 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
             )
 
             Icon(
-                modifier = Modifier.constrainAs(icon) {
-                    absoluteLeft.linkTo(guideline)
-                    bottom.linkTo(parent.bottom)
-                },
+                modifier = Modifier
+                    .size(24.dp)
+                    .constrainAs(icon) {
+                        absoluteLeft.linkTo(guideline)
+                        bottom.linkTo(parent.bottom)
+                    },
                 painter = painterResource(
                     id = R.drawable.ic_baseline_location_on_24
                 ),
@@ -235,7 +238,7 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
                 text = userCatch.placeTitle
             )
 
-            SecondaryTextColored(
+            SupportText(
                 modifier = Modifier.constrainAs(date) {
                     absoluteRight.linkTo(parent.absoluteRight, 4.dp)
                     top.linkTo(place.top)
@@ -265,6 +268,7 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
                     .size(32.dp)
                     .constrainAs(icon) {
                         top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
                         absoluteLeft.linkTo(parent.absoluteLeft)
                     },
                 painter = painterResource(R.drawable.ic_baseline_location_on_24),
@@ -272,7 +276,7 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
                 tint = secondaryFigmaColor
             )
 
-            PrimaryTextBold(
+            PrimaryText(
                 modifier = Modifier.constrainAs(title) {
                     linkTo(icon.absoluteRight, amount.absoluteLeft, bias = 0f)
                     top.linkTo(parent.top)
@@ -280,24 +284,13 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
                 text = place.title
             )
 
-            Icon(
+            ItemCounter(
                 modifier = Modifier.constrainAs(fishIcon) {
-                    absoluteRight.linkTo(parent.absoluteRight, 4.dp)
-                    top.linkTo(title.top)
-                    bottom.linkTo(title.bottom)
+                    bottom.linkTo(parent.bottom)
+                    absoluteRight.linkTo(parent.absoluteRight)
                 },
-                painter = painterResource(id = R.drawable.ic_fish),
-                tint = secondaryFigmaTextColor,
-                contentDescription = stringResource(id = R.string.fish_catch)
-            )
-
-            PrimaryTextBold(
-                modifier = Modifier.constrainAs(amount) {
-                    absoluteRight.linkTo(fishIcon.absoluteLeft, 2.dp)
-                    top.linkTo(title.top)
-                    bottom.linkTo(title.bottom)
-                },
-                text = place.catchesCount.toString()
+                text = "0",
+                icon = R.drawable.ic_fish
             )
 
             SecondaryText(
@@ -349,4 +342,264 @@ fun ItemAdd(
             }
         }
     }
+}
+
+@Composable
+fun ItemDate(text: String) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .wrapContentHeight()
+            .fillMaxWidth()
+    ) {
+        Surface(
+            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
+            shape = RoundedCornerShape(24.dp), color = cardColor
+        ) {
+            SecondaryTextColored(
+                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                text = text,
+                color = Color.White
+            )
+        }
+    }
+}
+
+@Composable
+fun NoElementsView(
+    modifier: Modifier = Modifier,
+    mainText: String,
+    secondaryText: String,
+    onClickAction: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(200.dp)
+    ) {
+        SecondaryText(text = mainText)
+        Spacer(modifier = Modifier.height(8.dp))
+        SecondaryTextColored(
+            modifier = Modifier.clickable {
+                onClickAction()
+            },
+            text = secondaryText
+        )
+    }
+}
+
+@Composable
+fun ItemPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Unit) {
+    ConstraintLayout(
+        modifier = Modifier
+            .height(75.dp)
+            .fillMaxWidth()
+            .padding(5.dp)
+            .clickable {
+                userPlaceClicked(place)
+            }
+    ) {
+        val (icon, title, description, amount, fishIcon, divider) = createRefs()
+
+        Icon(
+            modifier = Modifier
+                .padding(5.dp)
+                .size(32.dp)
+                .constrainAs(icon) {
+                    top.linkTo(parent.top)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                },
+            painter = painterResource(R.drawable.ic_baseline_location_on_24),
+            contentDescription = stringResource(R.string.place),
+            tint = secondaryFigmaColor
+        )
+
+        PrimaryText(
+            modifier = Modifier.constrainAs(title) {
+                linkTo(icon.absoluteRight, amount.absoluteLeft, bias = 0f)
+                top.linkTo(parent.top)
+            },
+            text = place.title
+        )
+
+        Icon(
+            modifier = Modifier.constrainAs(fishIcon) {
+                absoluteRight.linkTo(parent.absoluteRight, 4.dp)
+                top.linkTo(title.top)
+                bottom.linkTo(title.bottom)
+            },
+            painter = painterResource(id = R.drawable.ic_fish),
+            tint = secondaryFigmaTextColor,
+            contentDescription = stringResource(id = R.string.fish_catch)
+        )
+
+        PrimaryText(
+            modifier = Modifier.constrainAs(amount) {
+                absoluteRight.linkTo(fishIcon.absoluteLeft, 2.dp)
+                top.linkTo(title.top)
+                bottom.linkTo(title.bottom)
+            },
+            text = place.catchesCount.toString()
+        )
+
+        SecondaryText(
+            modifier = Modifier.constrainAs(description) {
+                top.linkTo(title.bottom)
+                absoluteLeft.linkTo(title.absoluteLeft)
+            },
+            text = if (place.description.isNotBlank()) {
+                place.description
+            } else {
+                stringResource(id = R.string.no_description)
+            }
+        )
+
+        Divider(
+            startIndent = 42.dp,
+            modifier = Modifier.constrainAs(divider) {
+                bottom.linkTo(parent.bottom)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+            })
+    }
+}
+
+@ExperimentalAnimationApi
+@Composable
+fun ItemCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
+    val photo = if (userCatch.downloadPhotoLinks.isNotEmpty()) {
+        userCatch.downloadPhotoLinks.first()
+    } else {
+        null
+    }
+
+    Surface() {
+        ConstraintLayout(modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp)
+            .clickable {
+                userCatchClicked(userCatch)
+            }) {
+            val (photos, fish, weight, kg, description, icon, place, date, divider) = createRefs()
+            val guideline = createGuidelineFromAbsoluteLeft(104.dp)
+
+            ItemCatchPhotos(
+                modifier = Modifier.constrainAs(photos) {
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                },
+                photo = photo?.toUri(),
+                photosCount = userCatch.downloadPhotoLinks.count()
+            )
+
+            PrimaryText(
+                modifier = Modifier.constrainAs(fish) {
+                    absoluteLeft.linkTo(guideline, 4.dp)
+                    top.linkTo(parent.top)
+                },
+                text = userCatch.fishType
+            )
+
+            SecondaryText(
+                modifier = Modifier.constrainAs(kg) {
+                    absoluteRight.linkTo(parent.absoluteRight, 4.dp)
+                    top.linkTo(parent.top)
+                },
+                text = stringResource(id = R.string.kg)
+            )
+
+            PrimaryText(
+                modifier = Modifier.constrainAs(weight) {
+                    absoluteRight.linkTo(kg.absoluteLeft, 1.dp)
+                    top.linkTo(parent.top)
+                },
+                text = userCatch.fishWeight.toString()
+            )
+
+            SecondaryText(
+                modifier = Modifier.constrainAs(description) {
+                    absoluteLeft.linkTo(fish.absoluteLeft)
+                    linkTo(fish.bottom, icon.top, bottomMargin = 2.dp, bias = 0F)
+                },
+                text = if (userCatch.description.isNotBlank()) {
+                    userCatch.description
+                } else {
+                    stringResource(id = R.string.no_description)
+                }
+            )
+
+            Icon(
+                modifier = Modifier
+                    .size(24.dp)
+                    .constrainAs(icon) {
+                        absoluteLeft.linkTo(guideline)
+                        bottom.linkTo(parent.bottom)
+                    },
+                painter = painterResource(
+                    id = R.drawable.ic_baseline_location_on_24
+                ),
+                contentDescription = stringResource(R.string.icon),
+                tint = secondaryFigmaTextColor
+            )
+
+            SecondaryTextColored(
+                modifier = Modifier.constrainAs(place) {
+                    top.linkTo(icon.top)
+                    bottom.linkTo(icon.bottom)
+                    absoluteLeft.linkTo(icon.absoluteRight)
+                },
+                text = userCatch.placeTitle
+            )
+
+            SupportText(
+                modifier = Modifier.constrainAs(date) {
+                    absoluteRight.linkTo(parent.absoluteRight, 4.dp)
+                    top.linkTo(place.top)
+                },
+                text = getTimeByMilliseconds(userCatch.date)
+            )
+
+            Divider(
+                modifier = Modifier.constrainAs(divider) {
+                    bottom.linkTo(parent.bottom)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun ItemCounter(
+    modifier: Modifier = Modifier,
+    text: String,
+    icon: Int
+) {
+    Row(modifier = modifier.padding(2.dp)) {
+        Icon(
+            tint = secondaryFigmaTextColor,
+            painter = painterResource(id = icon),
+            contentDescription = "",
+            modifier = Modifier.padding(horizontal = 4.dp)
+        )
+        SecondaryText(text = text)
+    }
+
+}
+
+@Composable
+fun BackgroundImage(modifier: Modifier = Modifier) {
+    Image(
+        modifier = modifier.fillMaxSize(),
+        colorFilter = ColorFilter.tint(
+            surfaceGreenColor,
+            BlendMode.ColorDodge
+        ),
+        painter = painterResource(id = R.drawable.ic_pattern_background),
+        contentDescription = "",
+        alpha = 0.1f,
+        contentScale = ContentScale.FillWidth
+    )
 }

@@ -3,10 +3,13 @@ package com.joesemper.fishing.compose.ui.home
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
@@ -26,6 +29,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -41,11 +45,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.zIndex
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.common.User
-import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.ui.theme.*
 import kotlinx.coroutines.launch
@@ -64,7 +68,9 @@ fun MyCardNoPadding(content: @Composable () -> Unit) {
 fun MyCard(shape: CornerBasedShape = RoundedCornerShape(8.dp), content: @Composable () -> Unit) {
     Card(
         elevation = 8.dp, shape = shape,
-        modifier = Modifier.fillMaxWidth().padding(4.dp), content = content
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(4.dp), content = content
     )
 }
 
@@ -74,9 +80,11 @@ fun DefaultCard(
     content: @Composable () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(8.dp),
-        elevation = 4.dp,
+        shape = RoundedCornerShape(4.dp),
+        elevation = 8.dp,
+        backgroundColor = Color.White,
         modifier = modifier
+            .zIndex(1.0f)
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(4.dp), content = content
@@ -239,11 +247,16 @@ fun SubtitleText(modifier: Modifier = Modifier, text: String) {
 }
 
 @Composable
-fun PrimaryText(modifier: Modifier = Modifier, text: String) {
+fun PrimaryText(
+    modifier: Modifier = Modifier,
+    fontWeight: FontWeight? = null,
+    text: String
+) {
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
+        fontWeight = fontWeight,
         maxLines = 1,
         color = primaryFigmaTextColor,
         text = text
@@ -252,13 +265,9 @@ fun PrimaryText(modifier: Modifier = Modifier, text: String) {
 
 @Composable
 fun PrimaryTextBold(modifier: Modifier = Modifier, text: String) {
-    Text(
+    PrimaryText(
         modifier = modifier,
-        style = MaterialTheme.typography.body1,
         fontWeight = FontWeight.Bold,
-        fontSize = 18.sp,
-        maxLines = 1,
-        color = primaryFigmaTextColor,
         text = text
     )
 }
@@ -276,11 +285,25 @@ fun SecondaryText(modifier: Modifier = Modifier, text: String) {
 }
 
 @Composable
-fun SecondaryTextColored(modifier: Modifier = Modifier, text: String) {
+fun SecondaryTextColored(
+    modifier: Modifier = Modifier,
+    text: String,
+    color: Color = primaryFigmaColor
+) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.body2,
-        color = primaryFigmaColor,
+        style = MaterialTheme.typography.body1,
+        color = color,
+        text = text
+    )
+}
+
+@Composable
+fun SupportText(modifier: Modifier = Modifier, text: String) {
+    Text(
+        modifier = modifier,
+        style = MaterialTheme.typography.body1,
+        color = supportFigmaTextColor,
         text = text
     )
 }
@@ -414,11 +437,11 @@ fun SimpleUnderlineTextField(
                 textColor = primaryFigmaTextColor,
                 backgroundColor = backgroundGreenColor,
                 cursorColor = Color.Black,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
+                focusedIndicatorColor = primaryFigmaTextColor,
+                unfocusedIndicatorColor = primaryFigmaTextColor
             ),
             onValueChange = { },
-            shape = RoundedCornerShape(8.dp),
+//            shape = RoundedCornerShape(8.dp),
             singleLine = true,
             trailingIcon = trailingIcon,
             leadingIcon = leadingIcon
@@ -431,9 +454,73 @@ fun SimpleUnderlineTextField(
                 text = it
             )
         }
-
-
     }
+}
+
+@Composable
+fun FabWithMenu(
+    modifier: Modifier = Modifier,
+    items: List<FabMenuItem>
+) {
+    val toState = remember { mutableStateOf(MultiFabState.COLLAPSED) }
+    val transition = updateTransition(targetState = toState, label = "")
+
+    val size = transition.animateDp(label = "") { state ->
+        if (state.value == MultiFabState.EXPANDED) 48.dp else 0.dp
+    }
+    val rotation = transition.animateFloat(label = "") { state ->
+        if (state.value == MultiFabState.EXPANDED) 45f else 0f
+    }
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+
+        items.forEach {
+            FabMenuItem(item = it, modifier = Modifier.size(size.value))
+        }
+
+        FloatingActionButton(onClick = {
+            if (transition.currentState.value == MultiFabState.EXPANDED) {
+                transition.currentState.value = MultiFabState.COLLAPSED
+            } else transition.currentState.value = MultiFabState.EXPANDED
+        }) {
+            Icon(
+                modifier = Modifier.rotate(rotation.value),
+                tint = Color.White,
+                painter = painterResource(id = R.drawable.ic_baseline_plus),
+                contentDescription = ""
+            )
+        }
+    }
+}
+
+@Composable
+fun FabMenuItem(item: FabMenuItem, modifier: Modifier = Modifier) {
+    FloatingActionButton(
+        backgroundColor = primaryFigmaColor,
+        modifier = modifier,
+        onClick = item.onClick
+    ) {
+        Icon(
+            tint = Color.White,
+            painter = painterResource(id = item.icon),
+            contentDescription = ""
+        )
+    }
+}
+
+class FabMenuItem(
+    val icon: Int,
+    val text: String = "",
+    val onClick: () -> Unit
+)
+
+enum class MultiFabState {
+    COLLAPSED, EXPANDED
 }
 
 

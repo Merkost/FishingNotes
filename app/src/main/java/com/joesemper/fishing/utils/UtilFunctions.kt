@@ -63,6 +63,12 @@ fun getDateByMilliseconds(ms: Long): String {
     return sdf.format(date)
 }
 
+fun getDateByMillisecondsTextMonth(ms: Long): String {
+    val sdf = SimpleDateFormat("dd MMM yyyy", Locale.US)
+    val date = Date(ms)
+    return sdf.format(date)
+}
+
 fun getDayByMilliseconds(ms: Long): String {
     val sdf = SimpleDateFormat("dd", Locale.US)
     val date = Date(ms)

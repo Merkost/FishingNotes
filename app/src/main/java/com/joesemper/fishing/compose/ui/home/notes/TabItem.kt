@@ -4,8 +4,6 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.notes.user_catches.UserCatchesScreen
-import com.joesemper.fishing.compose.ui.home.notes.user_places.UserPlacesScreen
 import com.joesemper.fishing.compose.ui.home.weather.WeatherForADay
 import com.joesemper.fishing.compose.ui.home.weather.WeatherForAWeek
 import com.joesemper.fishing.model.entity.weather.WeatherForecast

@@ -110,6 +110,13 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
 
     }
 
+    DisposableEffect(key1 = dateAndTime) {
+        onDispose {
+            dateAndTime.timeInMillis = Date().time
+        }
+
+    }
+
     Scaffold(
         modifier = Modifier.navigationBarsWithImePadding(),
         topBar = { NewCatchAppBar(upPress) },
@@ -206,7 +213,7 @@ private fun Places(label: String, viewModel: NewCatchViewModel) {
             icon = R.drawable.ic_baseline_location_on_24,
             text = stringResource(id = R.string.location)
         )
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
                 readOnly = !isNull,
                 singleLine = true,
@@ -271,8 +278,7 @@ private fun Places(label: String, viewModel: NewCatchViewModel) {
                 onDismissRequest = {
                     if (isDropMenuOpen) isDropMenuOpen = false
                 },
-                // This line here will accomplish what you want
-                properties = PopupProperties(focusable = false),
+                properties = PopupProperties(focusable = false)
             ) {
                 filteredList.forEach { suggestion ->
                     DropdownMenuItem(

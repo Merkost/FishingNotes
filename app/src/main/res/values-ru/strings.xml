@@ -156,5 +156,9 @@
     <string name="signin_error">Произошла ошибка при входе, попробуйте еще раз!</string>
     <string name="google_login_failed">google_login_failed</string>
     <string name="add_place_success">Place added successfully</string>
+    <string name="no_cathces_added">No catches added</string>
+    <string name="add_catch_text">+ Add new catch</string>
+    <string name="no_places_added">No places added</string>
+    <string name="new_place_text">+ Add new place</string>
 
 </resources>
