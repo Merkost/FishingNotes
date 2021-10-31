@@ -26,4 +26,4 @@ Screenshots
 -----------
 <img src="screenshots/login.jpg" width="200" /> <img src="screenshots/place_choosing.jpg" width="200" /> <img src="screenshots/map.jpg" width="200" />
 <img src="screenshots/place_info.jpg" width="200" /> <img src="screenshots/new_catch.jpg" width="200" /> <img src="screenshots/catch.jpg" width="200" />
-<img src="screenshots/place.jpg" width="200" /> <img src="screenshots/catches.jpg" width="200" />
+<img src="screenshots/places.jpg" width="200" /> <img src="screenshots/catches.jpg" width="200" />
