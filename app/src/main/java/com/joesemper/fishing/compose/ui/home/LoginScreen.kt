@@ -104,7 +104,9 @@ fun LoginScreen(navController: NavController) {
             )
         },
     ) {
-        ConstraintLayout(modifier = Modifier.fillMaxSize().background(Color.White)) {
+        ConstraintLayout(modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)) {
             val (background, card, lottieSuccess, cardColumn) = createRefs()
 
             AnimatedVisibility(
@@ -132,9 +134,12 @@ fun LoginScreen(navController: NavController) {
                     )
                 )
             ) {
-                Surface(modifier = Modifier.fillMaxWidth().height(450.dp).constrainAs(background) {
-                    top.linkTo(parent.top)
-                }, color = primaryFigmaColor) {}
+                Surface(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(450.dp)
+                    .constrainAs(background) {
+                        top.linkTo(parent.top)
+                    }, color = primaryFigmaColor) {}
             }
 
             AnimatedVisibility(
@@ -165,7 +170,10 @@ fun LoginScreen(navController: NavController) {
                     bottom.linkTo(parent.bottom)
                 }) {
                 Card(
-                    modifier = Modifier.fillMaxWidth().padding(30.dp).wrapContentHeight(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(30.dp)
+                        .wrapContentHeight(),
                     elevation = 10.dp,
                     shape = RoundedCornerShape(30.dp)
                 ) {
@@ -189,7 +197,9 @@ fun LoginScreen(navController: NavController) {
                                 bottom.linkTo(card.bottom)
                                 absoluteLeft.linkTo(card.absoluteLeft)
                                 absoluteRight.linkTo(card.absoluteRight)
-                            }.fillMaxWidth().animateContentSize(
+                            }
+                            .fillMaxWidth()
+                            .animateContentSize(
                                 animationSpec = tween(
                                     durationMillis = 300,
                                     easing = LinearOutSlowInEasing
@@ -200,7 +210,9 @@ fun LoginScreen(navController: NavController) {
                         //AppIcon
                         Image(
                             painterResource(R.mipmap.ic_launcher), stringResource(R.string.icon),
-                            modifier = Modifier.padding(30.dp).size(140.dp)
+                            modifier = Modifier
+                                .padding(30.dp)
+                                .size(140.dp)
                         )
 
                         //Title
@@ -214,7 +226,9 @@ fun LoginScreen(navController: NavController) {
                         //AnimatedVisibility(isLoading,) { LottieLoading(modifier = Modifier.size(140.dp)) }
                         //AnimatedVisibility(!isLoading) {
                             Spacer(
-                                modifier = Modifier.fillMaxWidth().height(30.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(30.dp)
                             )
                         //}
 
@@ -227,12 +241,14 @@ fun LoginScreen(navController: NavController) {
                             onClick = { clicked = true; activity.startGoogleLogin() },
                         ) {
                             Row(
-                                modifier = Modifier.padding(10.dp).animateContentSize(
-                                    animationSpec = tween(
-                                        durationMillis = 300,
-                                        easing = LinearOutSlowInEasing
-                                    )
-                                ),
+                                modifier = Modifier
+                                    .padding(10.dp)
+                                    .animateContentSize(
+                                        animationSpec = tween(
+                                            durationMillis = 300,
+                                            easing = LinearOutSlowInEasing
+                                        )
+                                    ),
                                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
@@ -241,7 +257,8 @@ fun LoginScreen(navController: NavController) {
                                     stringResource(R.string.google_login),
                                     modifier = Modifier.size(25.dp)
                                 )
-                                Text(text = if (clicked) "Signing In" else "Sign in with Google")
+                                Text(text = if (clicked) stringResource(R.string.signing_in)
+                                else stringResource(R.string.sign_with_google))
                                 if (clicked) {
                                     //Spacer(modifier = Modifier.width(16.dp))
                                     CircularProgressIndicator(
@@ -263,7 +280,9 @@ fun LoginScreen(navController: NavController) {
                         )*/
 
                         //Space
-                        Spacer(modifier = Modifier.fillMaxWidth().height(30.dp))
+                        Spacer(modifier = Modifier
+                            .fillMaxWidth()
+                            .height(30.dp))
                     }
 
 

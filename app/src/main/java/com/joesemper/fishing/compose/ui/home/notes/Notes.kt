@@ -22,10 +22,8 @@ import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.DefaultAppBar
 import com.joesemper.fishing.compose.ui.home.FabMenuItem
 import com.joesemper.fishing.compose.ui.home.FabWithMenu
-import com.joesemper.fishing.compose.ui.home.HomeSections
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.theme.primaryFigmaLightColor
 import com.joesemper.fishing.ui.theme.primaryFigmaTextColor
 import kotlinx.coroutines.launch
 
@@ -100,7 +98,7 @@ fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
             // OR Tab()
             LeadingIconTab(
                 icon = { Icon(painter = painterResource(id = tab.icon), contentDescription = "") },
-                text = { Text(tab.title) },
+                text = { Text(stringResource(tab.titleRes)) },
                 selected = pagerState.currentPage == index,
                 onClick = {
                     scope.launch {
