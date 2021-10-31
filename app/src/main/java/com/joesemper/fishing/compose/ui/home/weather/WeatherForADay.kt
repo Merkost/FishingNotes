@@ -21,14 +21,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.home.PrimaryText
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.ui.theme.backgroundGreenColor
 import com.joesemper.fishing.ui.theme.primaryFigmaBackgroundTint
 import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
-import com.joesemper.fishing.utils.getDateByMilliseconds
-import com.joesemper.fishing.utils.getTimeByMilliseconds
-import com.joesemper.fishing.utils.hPaToMmHg
+import com.joesemper.fishing.utils.*
 
 @Composable
 fun WeatherForADay(weather: WeatherForecast) {
@@ -65,12 +64,8 @@ fun WeatherParametersForADay(weather: WeatherForecast, scrollState: ScrollState)
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val date = getDateByMilliseconds(weather.hourly.first().date)
-            Text(
-                style = MaterialTheme.typography.subtitle1,
-                fontWeight = FontWeight.Bold,
-                text = date
-            )
+            val date = getDateBySeconds(weather.hourly.first().date)
+            PrimaryText(text = date)
             Column(modifier = Modifier.verticalScroll(scrollState)) {
                 WeatherParameterItem(
                     color = primaryFigmaBackgroundTint,
@@ -131,12 +126,8 @@ fun WeatherParametersForADayMeanings(weather: WeatherForecast, scrollState: Scro
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            val time = getTimeByMilliseconds(weatherForecast.hourly[index].date)
-                            Text(
-                                style = MaterialTheme.typography.subtitle1,
-                                fontWeight = FontWeight.Bold,
-                                text = time
-                            )
+                            val time = getTimeBySeconds(weatherForecast.hourly[index].date)
+                            PrimaryText(text = time)
                             Column(modifier = Modifier.verticalScroll(scrollState)) {
                                 WeatherParameterItemMeaning(
                                     color = primaryFigmaBackgroundTint,

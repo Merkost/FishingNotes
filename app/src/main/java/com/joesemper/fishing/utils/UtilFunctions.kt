@@ -41,13 +41,13 @@ fun Float.roundTo(numFractionDigits: Int): Float {
 
 fun getDateBySeconds(ms: Long): String {
     val sdf = SimpleDateFormat("dd.MM.yy", Locale.US)
-    val date = Date(ms * 100)
+    val date = Date(ms * 1000)
     return sdf.format(date)
 }
 
 fun getTimeBySeconds(ms: Long): String {
     val sdf = SimpleDateFormat("HH:mm", Locale.US)
-    val date = Date(ms * 100)
+    val date = Date(ms * 1000)
     return sdf.format(date)
 }
 

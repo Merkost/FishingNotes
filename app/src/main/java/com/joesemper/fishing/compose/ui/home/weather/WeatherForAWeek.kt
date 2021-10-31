@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.home.PrimaryText
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
@@ -25,6 +26,7 @@ import com.joesemper.fishing.ui.theme.backgroundGreenColor
 import com.joesemper.fishing.ui.theme.primaryFigmaBackgroundTint
 import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
 import com.joesemper.fishing.utils.getDateByMilliseconds
+import com.joesemper.fishing.utils.getDateBySeconds
 import com.joesemper.fishing.utils.getTimeByMilliseconds
 import com.joesemper.fishing.utils.hPaToMmHg
 
@@ -59,11 +61,7 @@ fun WeatherParametersForAWeek(weather: WeatherForecast, scrollState: ScrollState
             modifier = Modifier.wrapContentWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                style = MaterialTheme.typography.subtitle1,
-                fontWeight = FontWeight.Bold,
-                text = "Date:"
-            )
+            PrimaryText(text = "Date:")
             Column(modifier = Modifier.verticalScroll(scrollState)) {
                 WeatherParameterItem(
                     color = primaryFigmaBackgroundTint,
@@ -140,12 +138,8 @@ fun WeatherParametersForAWeekMeanings(weather: WeatherForecast, scrollState: Scr
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        val date = getDateByMilliseconds(weather.daily[index].date)
-                        Text(
-                            style = MaterialTheme.typography.subtitle1,
-                            fontWeight = FontWeight.Bold,
-                            text = date
-                        )
+                        val date = getDateBySeconds(weather.daily[index].date)
+                        PrimaryText(text = date)
                         Column(modifier = Modifier.verticalScroll(scrollState)) {
                             WeatherParameterItemMeaning(
                                 color = primaryFigmaBackgroundTint,

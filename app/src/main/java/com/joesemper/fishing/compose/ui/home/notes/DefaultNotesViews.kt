@@ -357,7 +357,7 @@ fun ItemDate(text: String) {
             shape = RoundedCornerShape(24.dp), color = cardColor
         ) {
             SecondaryTextColored(
-                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                 text = text,
                 color = Color.White
             )

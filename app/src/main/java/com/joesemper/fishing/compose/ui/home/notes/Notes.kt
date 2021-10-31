@@ -89,7 +89,7 @@ fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
     // OR ScrollableTabRow()
     TabRow(
         selectedTabIndex = pagerState.currentPage,
-        backgroundColor = primaryFigmaLightColor,
+        backgroundColor = Color.White,
         contentColor = primaryFigmaTextColor,
         indicator = { tabPositions ->
             TabRowDefaults.Indicator(
