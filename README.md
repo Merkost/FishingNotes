@@ -24,6 +24,6 @@ Main features:
 
 Screenshots
 -----------
-<img src="screenshots/login.png" width="200" /> <img src="screenshots/map.png" width="200" /> <img src="screenshots/all_places.png" width="200" />
-<img src="screenshots/new_catch.png" width="200" /> <img src="screenshots/profile.png" width="200" /> <img src="screenshots/all_catches.png" width="200" />
-<img src="screenshots/new_place.png" width="200" />
+<img src="screenshots/login.jpg" width="200" /> <img src="screenshots/place_choosing.jpg" width="200" /> <img src="screenshots/map.jpg" width="200" />
+<img src="screenshots/place_info.jpg" width="200" /> <img src="screenshots/new_catch.jpg" width="200" /> <img src="screenshots/catch.jpg" width="200" />
+<img src="screenshots/place.jpg" width="200" /> <img src="screenshots/catches.jpg" width="200" />
