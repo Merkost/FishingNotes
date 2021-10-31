@@ -125,7 +125,7 @@ fun TabsContent(tabs: List<TabItem>, pagerState: PagerState, navController: NavC
 
 private fun onAddNewCatchClick(navController: NavController) {
     navController.navigate(
-        "${HomeSections.NOTES.route}/${MainDestinations.NEW_CATCH_ROUTE}",
+        MainDestinations.NEW_CATCH_ROUTE,
         Arguments.PLACE to UserMapMarker()
     )
 }
