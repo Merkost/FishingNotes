@@ -10,25 +10,25 @@ import com.joesemper.fishing.model.entity.weather.WeatherForecast
 
 typealias ComposableFun = @Composable (navController: NavController) -> Unit
 
-sealed class TabItem(var icon: Int, var title: String, var screen: ComposableFun) {
+sealed class TabItem(var icon: Int, var titleRes: Int, var screen: ComposableFun) {
 
     @ExperimentalAnimationApi
-    object Places : TabItem(R.drawable.ic_baseline_location_on_24, "Places", { navController ->
+    object Places : TabItem(R.drawable.ic_baseline_location_on_24, R.string.places, { navController ->
         UserPlacesScreen(navController = navController)
     })
 
     @ExperimentalAnimationApi
-    object Catches : TabItem(R.drawable.ic_fish, "Catches", { navController ->
+    object Catches : TabItem(R.drawable.ic_fish, R.string.catches, { navController ->
         UserCatchesScreen(navController = navController)
     })
 
     class ForADay(weatherForecast: WeatherForecast) :
-        TabItem(R.drawable.ic_baseline_today_24, "For a day", { navController ->
+        TabItem(R.drawable.ic_baseline_today_24, R.string.for_today, { navController ->
             WeatherForADay(weather = weatherForecast)
         })
 
     class ForAWeek(weatherForecast: WeatherForecast) :
-        TabItem(R.drawable.calendar_week, "For a week", { navController ->
+        TabItem(R.drawable.calendar_week, R.string.for_a_week, { navController ->
             WeatherForAWeek(weather = weatherForecast)
         })
 }

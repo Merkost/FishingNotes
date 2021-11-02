@@ -164,8 +164,12 @@
 
     <string name="start_screen_title">Start Screen</string>
     <string name="signin_error">Произошла ошибка при входе, попробуйте еще раз!</string>
-    <string name="google_login_failed">google_login_failed</string>
+    <string name="google_login_failed">An error occured while Google Sign In. Try again!</string>
     <string name="add_place_success">Place added successfully</string>
+    <string name="for_today">Сегодня</string>
+    <string name="for_a_week">На неделю</string>
+    <string name="signing_in">Signing In</string>
+    <string name="sign_with_google">Sign In with Google</string>
     <string name="back_clicked">Do it again to close the app</string>
 
 

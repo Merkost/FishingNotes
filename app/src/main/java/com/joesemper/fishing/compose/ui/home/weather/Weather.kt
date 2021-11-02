@@ -2,7 +2,6 @@ package com.joesemper.fishing.compose.ui.home.weather
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.clickable
@@ -17,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -25,16 +25,15 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.google.accompanist.insets.navigationBarsHeight
 import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.map.FishLoading
 import com.joesemper.fishing.compose.ui.home.map.getCurrentLocation
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
 import com.joesemper.fishing.compose.ui.home.notes.TabItem
+import com.joesemper.fishing.compose.ui.home.notes.Tabs
 import com.joesemper.fishing.domain.WeatherViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
@@ -189,10 +188,13 @@ fun Weather(
                 ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize().systemBarsPadding(false),
+                        .fillMaxSize()
+                        .systemBarsPadding(false),
                      verticalArrangement = Arrangement.Center
                 ) {
-                WeatherLoading(modifier = Modifier.size(500.dp).align(Alignment.CenterHorizontally))
+                WeatherLoading(modifier = Modifier
+                    .size(500.dp)
+                    .align(Alignment.CenterHorizontally))
                     //Spacer(modifier = Modifier.size())
             }
         }
@@ -233,32 +235,7 @@ fun WeatherForecastLayout(
 @ExperimentalMaterialApi
 @Composable
 fun WeatherTabs(tabs: List<TabItem>, pagerState: PagerState) {
-    val scope = rememberCoroutineScope()
-    // OR ScrollableTabRow()
-    TabRow(
-        modifier = Modifier.fillMaxWidth(),
-        selectedTabIndex = pagerState.currentPage,
-        backgroundColor = Color.White,
-        contentColor = Color.Black,
-        indicator = { tabPositions ->
-            TabRowDefaults.Indicator(
-                Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
-            )
-        }) {
-        tabs.forEachIndexed { index, tab ->
-            // OR Tab()
-            LeadingIconTab(
-                icon = { Icon(painter = painterResource(id = tab.icon), contentDescription = "") },
-                text = { Text(tab.title) },
-                selected = pagerState.currentPage == index,
-                onClick = {
-                    scope.launch {
-                        pagerState.animateScrollToPage(index)
-                    }
-                },
-            )
-        }
-    }
+    Tabs(tabs = tabs, pagerState = pagerState)
 }
 
 @ExperimentalPagerApi
