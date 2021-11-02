@@ -1,19 +1,13 @@
 package com.joesemper.fishing.compose.ui.home
 
 import android.net.Uri
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.animateDp
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
@@ -31,15 +25,12 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -219,7 +210,6 @@ fun HeaderText(
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.h6,
-        maxLines = 1,
         textAlign = TextAlign.Start,
         color = primaryFigmaTextColor,
         text = text
@@ -240,7 +230,6 @@ fun SubtitleText(modifier: Modifier = Modifier, text: String) {
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.subtitle1,
-        maxLines = 1,
         color = secondaryFigmaTextColor,
         text = text
     )
@@ -257,7 +246,6 @@ fun PrimaryText(
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
         fontWeight = fontWeight,
-        maxLines = 1,
         color = primaryFigmaTextColor,
         text = text
     )
@@ -390,17 +378,17 @@ fun FullScreenPhoto(photo: MutableState<Uri?>) {
                     .clickable {
                         photo.value = null
                     }
-                    /*}.pointerInput(Unit) {
-                        detectTransformGestures { centroid, pan, zoom, rotation ->
-                            scale.value *= zoom
-                            rotationState.value += rotation
-                        }
-                    }.graphicsLayer(
-                        // adding some zoom limits (min 50%, max 200%)
-                        scaleX = maxOf(.5f, minOf(1f, scale.value)),
-                        scaleY = maxOf(.5f, minOf(1f, scale.value)),
-                        rotationZ = rotationState.value
-                    )*/,
+                /*}.pointerInput(Unit) {
+                    detectTransformGestures { centroid, pan, zoom, rotation ->
+                        scale.value *= zoom
+                        rotationState.value += rotation
+                    }
+                }.graphicsLayer(
+                    // adding some zoom limits (min 50%, max 200%)
+                    scaleX = maxOf(.5f, minOf(1f, scale.value)),
+                    scaleY = maxOf(.5f, minOf(1f, scale.value)),
+                    rotationZ = rotationState.value
+                )*/,
                 painter = rememberImagePainter(data = photo.value),
                 contentDescription = stringResource(id = R.string.catch_photo)
             )
@@ -452,6 +440,107 @@ fun SimpleUnderlineTextField(
                     .padding(top = 4.dp, end = 8.dp)
                     .align(Alignment.End),
                 text = it
+            )
+        }
+    }
+}
+
+
+@Composable
+fun DefaultButton(
+    modifier: Modifier = Modifier,
+    text: String,
+    icon: Int? = null,
+    onClick: () -> Unit
+) {
+    Button(
+        modifier = modifier,
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier.wrapContentSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            icon?.let {
+                Icon(
+                    painterResource(id = R.drawable.ic_baseline_shortcut_24),
+                    "",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(horizontal = 4.dp)
+                )
+            }
+            SecondaryTextColored(
+                color = Color.White,
+                text = text,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun DefaultButtonOutlined(
+    modifier: Modifier = Modifier,
+    text: String,
+    icon: Int? = null,
+    onClick: () -> Unit
+) {
+    OutlinedButton(
+        modifier = modifier,
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier.wrapContentSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            icon?.let {
+                Icon(
+                    painterResource(id = R.drawable.ic_baseline_shortcut_24),
+                    "",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(horizontal = 4.dp)
+                )
+            }
+            PrimaryText(
+                text = text,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun DefaultButtonText(
+    modifier: Modifier = Modifier,
+    text: String,
+    icon: Int? = null,
+    onClick: () -> Unit
+) {
+    TextButton(
+        modifier = modifier,
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier.wrapContentSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            icon?.let {
+                Icon(
+                    painterResource(id = R.drawable.ic_baseline_shortcut_24),
+                    "",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(horizontal = 4.dp)
+                )
+            }
+            SecondaryTextColored(
+                text = text,
+                modifier = Modifier.padding(horizontal = 4.dp)
             )
         }
     }

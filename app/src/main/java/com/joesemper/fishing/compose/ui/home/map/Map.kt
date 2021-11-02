@@ -26,7 +26,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -50,17 +49,22 @@ import com.google.android.libraries.maps.model.LatLng
 import com.google.android.libraries.maps.model.MarkerOptions
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.*
+import com.joesemper.fishing.compose.ui.Arguments
+import com.joesemper.fishing.compose.ui.MainActivity
+import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.MyCard
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.UiState
+import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.ui.theme.Shapes
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.utils.showToast
-import kotlinx.coroutines.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.vponomarenko.compose.shimmer.shimmer
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
@@ -570,7 +574,8 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?, onDescriptionClick: (UserMap
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(horizontal = 8.dp).padding(bottom = 8.dp)
+            .padding(horizontal = 8.dp)
+            .padding(bottom = 8.dp)
             .clip(Shapes.large)
     ) {
         marker?.let {
@@ -604,10 +609,12 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?, onDescriptionClick: (UserMap
                 Text(
                     text = marker.title,
                     style = MaterialTheme.typography.h5,
-                    modifier = Modifier.padding(end = 56.dp).constrainAs(title) {
-                        top.linkTo(parent.top, 16.dp)
-                        absoluteLeft.linkTo(locationIcon.absoluteRight, 8.dp)
-                    }
+                    modifier = Modifier
+                        .padding(end = 56.dp)
+                        .constrainAs(title) {
+                            top.linkTo(parent.top, 16.dp)
+                            absoluteLeft.linkTo(locationIcon.absoluteRight, 8.dp)
+                        }
                 )
 
                 Text(
@@ -680,11 +687,15 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?, onDescriptionClick: (UserMap
 @Composable
 fun BottomSheetLine(modifier: Modifier = Modifier) {
     Row(
-        modifier = modifier.fillMaxWidth().padding(2.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(2.dp),
         horizontalArrangement = Arrangement.Center
     ) {
         Box(
-            modifier = Modifier.size(width = 25.dp, height = 3.dp).clip(CircleShape)
+            modifier = Modifier
+                .size(width = 25.dp, height = 3.dp)
+                .clip(CircleShape)
                 .background(Color.Gray)
         ) {}
     }
@@ -838,7 +849,8 @@ fun DialogOnPlaceChoosing(
         shape = RoundedCornerShape(size = 20.dp),
         modifier = modifier
             .heightIn(min = 40.dp, max = 80.dp)
-            .widthIn(max = 240.dp).animateContentSize(
+            .widthIn(max = 240.dp)
+            .animateContentSize(
                 animationSpec = tween(
                     durationMillis = 300,
                     easing = LinearOutSlowInEasing
@@ -995,40 +1007,4 @@ fun GrantPermissionsDialog(permissionsState: MultiplePermissionsState) {
             }
         }
     }
-}
-
-@Composable
-fun rememberMapViewWithLifecycle(): MapView {
-    val context = LocalContext.current
-    val mapView: MapView = remember { MapView(context).apply { id = R.id.map } }
-
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    DisposableEffect(lifecycle, mapView) {
-        // Make MapView follow the current lifecycle
-        val lifecycleObserver = getMapLifecycleObserver(mapView)
-        lifecycle.addObserver(lifecycleObserver)
-        onDispose {
-            lifecycle.removeObserver(lifecycleObserver)
-        }
-    }
-    return mapView
-}
-
-@Composable
-fun IconButton(image: Painter, name: String, click: () -> Unit, modifier: Modifier) {
-    OutlinedButton(
-        onClick = click,
-        modifier = modifier
-            .wrapContentSize()
-            .padding(4.dp),
-        content = {
-            Row(
-                modifier = Modifier.wrapContentSize(),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(image, name, modifier = Modifier.size(25.dp))
-                Text(name, modifier = Modifier.padding(start = 10.dp))
-            }
-        })
 }

@@ -48,10 +48,9 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
-import com.joesemper.fishing.compose.ui.home.map.Map
+import com.joesemper.fishing.compose.ui.home.map.MapScreen
 import com.joesemper.fishing.compose.ui.home.notes.Notes
 import com.joesemper.fishing.compose.ui.home.weather.Weather
-import com.joesemper.fishing.ui.theme.FigmaTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 
@@ -73,7 +72,7 @@ fun NavGraphBuilder.addHomeGraph(
     ) { from ->
         val addPlace = requireNotNull(from.arguments).getBoolean(Arguments.MAP_NEW_PLACE, false)
         //from.arguments?.getBoolean(Arguments.MAP_NEW_PLACE)!!
-        Map(modifier, navController, addPlace)
+        MapScreen(modifier, navController, addPlace)
     }
     composable(HomeSections.NOTES.route) { from ->
         Notes(onSnackClick = { id -> onSnackSelected(id, from) }, modifier, navController)

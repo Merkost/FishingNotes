@@ -6,7 +6,22 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.BottomSheetScaffold
+import androidx.compose.material.BottomSheetScaffoldState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -19,6 +34,13 @@ import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.LatLng
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.MainActivity
+import com.joesemper.fishing.compose.ui.home.DefaultButton
+import com.joesemper.fishing.compose.ui.home.DefaultButtonText
+import com.joesemper.fishing.compose.ui.home.DefaultCard
+import com.joesemper.fishing.compose.ui.home.PrimaryText
+import com.joesemper.fishing.ui.theme.Shapes
+import com.joesemper.fishing.utils.showToast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
@@ -43,13 +65,35 @@ val locationPermissionsList = listOf(
     Manifest.permission.ACCESS_COARSE_LOCATION
 )
 
-fun moveCameraToLocation(coroutineScope: CoroutineScope, map: MapView, location: LatLng) {
+fun moveCameraToLocation(
+    coroutineScope: CoroutineScope,
+    map: MapView,
+    location: LatLng,
+    zoom: Float = DEFAULT_ZOOM
+) {
     coroutineScope.launch {
         val googleMap = map.awaitMap()
         googleMap.animateCamera(
             CameraUpdateFactory.newLatLngZoom(
                 location,
-                DEFAULT_ZOOM
+                zoom
+            )
+        )
+    }
+}
+
+fun setCameraPosition(
+    coroutineScope: CoroutineScope,
+    map: MapView,
+    location: LatLng,
+    zoom: Float = DEFAULT_ZOOM
+) {
+    coroutineScope.launch {
+        val googleMap = map.awaitMap()
+        googleMap.moveCamera(
+            CameraUpdateFactory.newLatLngZoom(
+                location,
+                zoom
             )
         )
     }
@@ -77,7 +121,6 @@ fun getMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
             else -> throw IllegalStateException()
         }
     }
-
 
 
 @ExperimentalCoroutinesApi
@@ -149,6 +192,104 @@ fun getCurrentLocation(
         }
     }
     result
+}
+
+@Composable
+@ExperimentalPermissionsApi
+fun GrantPermissionsDialog(
+    onDismiss: () -> Unit,
+    onPositiveClick: () -> Unit,
+    onNegativeClick: () -> Unit,
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        DefaultCard() {
+            Column(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(8.dp)
+            ) {
+                PrimaryText(text = "For convenient use this application needs the location permission.\nAllow this app to receive location data?")
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    DefaultButtonText(
+                        text = stringResource(id = R.string.cancel),
+                        onClick = onNegativeClick
+                    )
+                    DefaultButton(
+                        text = stringResource(id = R.string.ok),
+                        onClick = onPositiveClick
+                    )
+//                        { permissionsState.launchMultiplePermissionRequest() })
+                    Spacer(Modifier.width(8.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BackPressHandler(
+    mapUiState: MapUiState,
+    onBackPressedCallback: () -> Unit
+) {
+    val context = LocalContext.current
+    var lastPressed: Long = 0
+    BackHandler(onBack = {
+        when (mapUiState) {
+            MapUiState.NormalMode -> {
+                val currentMillis = System.currentTimeMillis()
+                if (currentMillis - lastPressed < 2000) {
+                    (context as MainActivity).finish()
+                } else {
+                    showToast(context, "Do it again to close the app")
+                }
+                lastPressed = currentMillis
+            }
+            else -> onBackPressedCallback()
+        }
+    })
+}
+
+@Composable
+fun rememberMapViewWithLifecycle(): MapView {
+    val context = LocalContext.current
+    val mapView: MapView = remember { MapView(context).apply { id = R.id.map } }
+
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle, mapView) {
+        // Make MapView follow the current lifecycle
+        val lifecycleObserver = getMapLifecycleObserver(mapView)
+        lifecycle.addObserver(lifecycleObserver)
+        onDispose {
+            lifecycle.removeObserver(lifecycleObserver)
+        }
+    }
+    return mapView
+}
+
+@ExperimentalMaterialApi
+@Composable
+fun MapScaffold(
+    modifier: Modifier = Modifier,
+    scaffoldState: BottomSheetScaffoldState,
+    fab: @Composable() (() -> Unit)?,
+    bottomSheet: @Composable() (ColumnScope.() -> Unit),
+    content: @Composable (PaddingValues) -> Unit
+) {
+    BottomSheetScaffold(
+        modifier = modifier.fillMaxSize(),
+        scaffoldState = scaffoldState,
+        sheetShape = Shapes.large,
+        sheetBackgroundColor = Color.White.copy(0f),
+        sheetElevation = 0.dp,
+        sheetPeekHeight = 0.dp,
+        floatingActionButton = fab,
+        sheetContent = bottomSheet,
+        content = content
+    )
 }
 
 const val DEFAULT_ZOOM = 15f
