@@ -971,7 +971,7 @@ fun PermissionDialog(
 @ExperimentalPermissionsApi
 fun GrantPermissionsDialog(permissionsState: MultiplePermissionsState) {
     Dialog(onDismissRequest = {}) {
-        Card(
+        Card(shape = RoundedCornerShape(25.dp),
             modifier = Modifier
                 .wrapContentSize()
                 .padding(8.dp)
