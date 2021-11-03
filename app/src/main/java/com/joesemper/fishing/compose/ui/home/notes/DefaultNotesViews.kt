@@ -265,7 +265,7 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
 
             Icon(
                 modifier = Modifier
-                    .padding(5.dp)
+                    .padding(5.dp).padding(horizontal = 5.dp)
                     .size(32.dp)
                     .constrainAs(icon) {
                         top.linkTo(parent.top)
@@ -298,6 +298,7 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
                 modifier = Modifier.constrainAs(description) {
                     top.linkTo(title.bottom)
                     absoluteLeft.linkTo(title.absoluteLeft)
+                    bottom.linkTo(parent.bottom, 4.dp)
                 },
                 text = if (place.description.isNotBlank()) {
                     place.description

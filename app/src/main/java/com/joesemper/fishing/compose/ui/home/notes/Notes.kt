@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -61,12 +62,8 @@ fun Notes(
                 )
             )
         },
-        modifier = Modifier.background(color = Color.Transparent)
     ) {
-        Column(
-            modifier = Modifier
-                .background(color = Color.Transparent)
-        ) {
+        Column() {
             Tabs(tabs = tabs, pagerState = pagerState)
             Box(modifier = Modifier.fillMaxSize()) {
                 BackgroundImage()
@@ -86,18 +83,20 @@ fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
     // OR ScrollableTabRow()
     TabRow(
         selectedTabIndex = pagerState.currentPage,
-        backgroundColor = Color.White,
+        backgroundColor = MaterialTheme.colors.surface,
         contentColor = primaryFigmaTextColor,
         indicator = { tabPositions ->
             TabRowDefaults.Indicator(
-                Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
+                color = MaterialTheme.colors.onSurface,
+                modifier = Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
             )
         }) {
         tabs.forEachIndexed { index, tab ->
             // OR Tab()
             LeadingIconTab(
-                icon = { Icon(painter = painterResource(id = tab.icon), contentDescription = "") },
-                text = { Text(stringResource(tab.titleRes)) },
+                icon = { Icon(painter = painterResource(id = tab.icon), contentDescription = "",
+                    tint = MaterialTheme.colors.primaryVariant ) },
+                text = { Text(stringResource(tab.titleRes), color = MaterialTheme.colors.onSurface) },
                 selected = pagerState.currentPage == index,
                 onClick = {
                     scope.launch {

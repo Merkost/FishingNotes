@@ -16,6 +16,7 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -56,6 +57,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
+
 @Composable
 fun MyCardNoPadding(content: @Composable () -> Unit) {
     Card(
@@ -81,7 +83,6 @@ fun DefaultCard(
     Card(
         shape = RoundedCornerShape(4.dp),
         elevation = 8.dp,
-        backgroundColor = Color.White,
         modifier = modifier
             .zIndex(1.0f)
             .fillMaxWidth()
@@ -177,6 +178,8 @@ fun PlaceInfo(user: User?, place: UserMapMarker, placeClicked: (UserMapMarker) -
 
 @Composable
 fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
+    val darkTheme = isSystemInDarkTheme()
+
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
@@ -185,7 +188,7 @@ fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
         Icon(
             painter = painterResource(id = icon),
             contentDescription = stringResource(R.string.place),
-            tint = secondaryFigmaTextColor,
+            tint = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
             modifier = Modifier.size(30.dp)
         )
         Spacer(Modifier.size(8.dp))
@@ -236,11 +239,13 @@ fun HeaderTextSecondary(
 
 @Composable
 fun SubtitleText(modifier: Modifier = Modifier, text: String) {
+    val darkTheme = isSystemInDarkTheme()
+
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.subtitle1,
         maxLines = 1,
-        color = secondaryFigmaTextColor,
+        color = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
         text = text
     )
 }
@@ -257,7 +262,7 @@ fun PrimaryText(
         fontSize = 18.sp,
         fontWeight = fontWeight,
         maxLines = 1,
-        color = primaryFigmaTextColor,
+        color = MaterialTheme.colors.onSurface,
         text = text
     )
 }
@@ -273,12 +278,14 @@ fun PrimaryTextBold(modifier: Modifier = Modifier, text: String) {
 
 @Composable
 fun SecondaryText(modifier: Modifier = Modifier, text: String) {
+    val darkTheme = isSystemInDarkTheme()
+
     Text(
         textAlign = TextAlign.Center,
         modifier = modifier,
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
-        color = secondaryFigmaTextColor,
+        color = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
         text = text
     )
 }
@@ -415,8 +422,10 @@ fun SimpleUnderlineTextField(
     label: String = "",
     trailingIcon: @Composable() (() -> Unit)? = null,
     leadingIcon: @Composable() (() -> Unit)? = null,
+    onClick: () -> Unit = { },
     helperText: String? = null
 ) {
+    val darkTheme = isSystemInDarkTheme()
     Column(modifier = modifier) {
         Text(
             text = label,
@@ -424,7 +433,7 @@ fun SimpleUnderlineTextField(
                 .fillMaxWidth()
                 .padding(bottom = 4.dp, start = 8.dp),
             textAlign = TextAlign.Start,
-            color = secondaryFigmaTextColor,
+            color = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
             style = MaterialTheme.typography.body2,
         )
         TextField(
@@ -432,15 +441,15 @@ fun SimpleUnderlineTextField(
             readOnly = true,
             value = text,
             textStyle = MaterialTheme.typography.body1.copy(fontSize = 18.sp),
-            colors = TextFieldDefaults.textFieldColors(
+            /*colors = TextFieldDefaults.textFieldColors(
                 textColor = primaryFigmaTextColor,
                 backgroundColor = backgroundGreenColor,
                 cursorColor = Color.Black,
                 focusedIndicatorColor = primaryFigmaTextColor,
                 unfocusedIndicatorColor = primaryFigmaTextColor
-            ),
+            ),*/
             onValueChange = { },
-//            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(2.dp),
             singleLine = true,
             trailingIcon = trailingIcon,
             leadingIcon = leadingIcon
@@ -489,7 +498,7 @@ fun FabWithMenu(
         }) {
             Icon(
                 modifier = Modifier.rotate(rotation.value),
-                tint = Color.White,
+                tint = MaterialTheme.colors.onPrimary,
                 painter = painterResource(id = R.drawable.ic_baseline_plus),
                 contentDescription = ""
             )
@@ -505,7 +514,7 @@ fun FabMenuItem(item: FabMenuItem, modifier: Modifier = Modifier) {
         onClick = item.onClick
     ) {
         Icon(
-            tint = Color.White,
+            tint = MaterialTheme.colors.onPrimary,
             painter = painterResource(id = item.icon),
             contentDescription = ""
         )

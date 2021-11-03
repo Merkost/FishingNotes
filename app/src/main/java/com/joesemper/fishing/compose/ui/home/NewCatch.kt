@@ -140,9 +140,10 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
             verticalArrangement = Arrangement.spacedBy(30.dp),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
                 .verticalScroll(state = scrollState, enabled = true),
         ) {
+
             Places(stringResource(R.string.place), viewModel)  //Выпадающий список мест
             FishAndWeight(viewModel.fishAmount, viewModel.weight)
             Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
