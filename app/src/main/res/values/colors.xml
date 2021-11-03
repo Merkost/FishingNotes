@@ -34,5 +34,6 @@
     <color name="text_support_color">#42000000</color>
 
     <color name="blue">#FF4D5EFF</color>
+    <color name="dark_gray">#0F0E0F</color>
 
 </resources>

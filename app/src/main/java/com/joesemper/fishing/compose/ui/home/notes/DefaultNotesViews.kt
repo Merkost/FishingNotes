@@ -35,9 +35,10 @@ import androidx.core.net.toUri
 import coil.compose.rememberImagePainter
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.*
+import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.theme.*
+import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.utils.getTimeByMilliseconds
 
 @ExperimentalComposeUiApi

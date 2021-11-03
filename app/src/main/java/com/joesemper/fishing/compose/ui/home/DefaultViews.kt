@@ -49,9 +49,9 @@ import androidx.compose.ui.zIndex
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.theme.*
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -65,12 +65,11 @@ fun MyCardNoPadding(content: @Composable () -> Unit) {
 }
 
 @Composable
-fun MyCard(shape: CornerBasedShape = RoundedCornerShape(8.dp), content: @Composable () -> Unit) {
+fun MyCard(shape: CornerBasedShape = RoundedCornerShape(8.dp), modifier: Modifier = Modifier,
+           content: @Composable () -> Unit) {
     Card(
         elevation = 8.dp, shape = shape,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(4.dp), content = content
+        modifier = Modifier.fillMaxWidth(), content = content
     )
 }
 

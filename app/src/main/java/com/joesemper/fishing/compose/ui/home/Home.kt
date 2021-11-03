@@ -9,6 +9,7 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,7 +52,7 @@ import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.home.map.Map
 import com.joesemper.fishing.compose.ui.home.notes.Notes
 import com.joesemper.fishing.compose.ui.home.weather.Weather
-import com.joesemper.fishing.ui.theme.FigmaTheme
+import com.joesemper.fishing.compose.ui.theme.primaryFigmaLightColor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 
@@ -63,7 +64,6 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @ExperimentalMaterialApi
 @InternalCoroutinesApi
 fun NavGraphBuilder.addHomeGraph(
-    onSnackSelected: (Long, NavBackStackEntry) -> Unit,
     navController: NavController,
     modifier: Modifier = Modifier,
 ) {
@@ -76,10 +76,10 @@ fun NavGraphBuilder.addHomeGraph(
         Map(modifier, navController, addPlace)
     }
     composable(HomeSections.NOTES.route) { from ->
-        Notes(onSnackClick = { id -> onSnackSelected(id, from) }, modifier, navController)
+        Notes(modifier, navController)
     }
     composable(HomeSections.WEATHER.route) { from ->
-        Weather(onSnackClick = { id -> onSnackSelected(id, from) }, modifier, navController)
+        Weather(modifier, navController)
         { navController.popBackStack() }
     }
     composable(HomeSections.PROFILE.route) {
@@ -108,10 +108,11 @@ fun FishingNotesBottomBar(
 ) {
     val routes = remember { tabs.map { it.route } }
     val currentSection = tabs.first { it.route == currentRoute }
+    val darkTheme = isSystemInDarkTheme()
 
     Surface(
-//        color = primaryFigmaLightColor,
-//        contentColor = Color.White,
+        color = MaterialTheme.colors.surface,
+        contentColor = MaterialTheme.colors.onSurface,
         elevation = 8.dp
     ) {
         val springSpec = SpringSpec<Float>(
@@ -130,9 +131,9 @@ fun FishingNotesBottomBar(
                 val selected = section == currentSection
                 val tint by animateColorAsState(
                     if (selected) {
-                        Color.Black
+                        MaterialTheme.colors.onSurface
                     } else {
-                        Color.Black
+                        if (darkTheme) Color.LightGray else Color.Black
                     }
                 )
 

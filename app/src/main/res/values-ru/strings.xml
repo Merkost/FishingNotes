@@ -167,6 +167,9 @@
     <string name="marker_icon" translatable="false">Иконка маркера</string>
     <string name="sign_with_google">Войти через Google</string>
     <string name="signing_in">Выполняется вход...</string>
+    <string name="searching">Searching...</string>
+    <string name="unnamed_place">Место без названия</string>
+    <string name="cant_recognize_place">Не удалось определить место</string>
 
 
 </resources>

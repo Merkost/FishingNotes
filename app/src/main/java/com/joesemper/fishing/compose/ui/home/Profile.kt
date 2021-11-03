@@ -38,7 +38,7 @@ import com.joesemper.fishing.domain.UserViewModel
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.model.entity.content.UserCatch
-import com.joesemper.fishing.ui.theme.FigmaTheme
+import com.joesemper.fishing.compose.ui.theme.FishingNotesTheme
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -51,7 +51,6 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun Profile(navController: NavController, modifier: Modifier = Modifier) {
     val viewModel = getViewModel<UserViewModel>()
-
 
     val uiState = viewModel.uiState
     Scaffold(
@@ -326,7 +325,7 @@ private fun startLoginActivity(context: Context) {
 @Preview("large font", fontScale = 2f)
 @Composable
 fun ProfilePreview() {
-    FigmaTheme {
+    FishingNotesTheme {
         Profile(rememberNavController())
     }
 }

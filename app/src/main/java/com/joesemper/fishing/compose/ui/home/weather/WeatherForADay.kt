@@ -24,9 +24,9 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.PrimaryText
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
-import com.joesemper.fishing.ui.theme.backgroundGreenColor
-import com.joesemper.fishing.ui.theme.primaryFigmaBackgroundTint
-import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
+import com.joesemper.fishing.compose.ui.theme.backgroundGreenColor
+import com.joesemper.fishing.compose.ui.theme.primaryFigmaBackgroundTint
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
 import com.joesemper.fishing.utils.*
 
 @Composable

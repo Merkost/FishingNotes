@@ -170,6 +170,9 @@
     <string name="for_a_week">На неделю</string>
     <string name="signing_in">Signing In</string>
     <string name="sign_with_google">Sign In with Google</string>
+    <string name="searching">Searching...</string>
+    <string name="unnamed_place">Место без названия</string>
+    <string name="cant_recognize_place">Не удалось определить место</string>
 
 
 </resources>

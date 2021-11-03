@@ -24,7 +24,7 @@ import com.joesemper.fishing.compose.ui.home.FabMenuItem
 import com.joesemper.fishing.compose.ui.home.FabWithMenu
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.theme.primaryFigmaTextColor
+import com.joesemper.fishing.compose.ui.theme.primaryFigmaTextColor
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
@@ -32,7 +32,6 @@ import kotlinx.coroutines.launch
 @ExperimentalAnimationApi
 @Composable
 fun Notes(
-    onSnackClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavController,
 //    state: SearchState = rememberSearchState()

@@ -7,30 +7,33 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -47,6 +50,7 @@ import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.LatLng
+import com.google.android.libraries.maps.model.MapStyleOptions
 import com.google.android.libraries.maps.model.MarkerOptions
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
@@ -57,8 +61,8 @@ import com.joesemper.fishing.compose.ui.home.UiState
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
-import com.joesemper.fishing.ui.theme.Shapes
-import com.joesemper.fishing.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.Shapes
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.utils.showToast
 import kotlinx.coroutines.*
 import me.vponomarenko.compose.shimmer.shimmer
@@ -85,6 +89,7 @@ fun Map(
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val darkMode = isSystemInDarkTheme()
 
     val mapView = rememberMapViewWithLifecycle()/*.apply {
         //viewModel.mapView.value = this
@@ -93,8 +98,7 @@ fun Map(
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     // Track if the user doesn't want to see the rationale any more.
     val doNotShowRationale = rememberSaveable { mutableStateOf(false) }
-    val arePermissonsGiven =
-        rememberSaveable { mutableStateOf(permissionsState.allPermissionsGranted) }
+    val arePermissonsGiven = rememberSaveable { mutableStateOf(permissionsState.allPermissionsGranted) }
 
     val scaffoldState = rememberBottomSheetScaffoldState()
 
@@ -119,7 +123,8 @@ fun Map(
 
     ///val currentMarker = remember { mutableStateOf<UserMapMarker?>(null) }
 
-    val mapType = rememberSaveable { mutableStateOf(MapTypes.roadmap) }
+    val mapType = rememberSaveable { mutableStateOf(MapTypes.hybrid) }
+
     val mapLayersSelection = rememberSaveable { mutableStateOf(false) }
 
     val currentPosition = remember {
@@ -244,6 +249,7 @@ fun Map(
                 layersSelectionMode = mapLayersSelection,
             )
 
+            //MyLocationButton
             if (lastKnownLocationState is LocationState.LocationGranted) {
                 MyLocationButton(coroutineScope, mapView,
                     (lastKnownLocationState as LocationState.LocationGranted).location,
@@ -254,9 +260,6 @@ fun Map(
                             absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                         })
             }
-
-            //MyLocationButton
-
 
             //DialogOnAddPlace
             if (dialogAddPlaceIsShowing.value)
@@ -383,6 +386,7 @@ fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name:
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalMaterialApi
 @Composable
 fun AddMarkerDialog(
@@ -395,12 +399,10 @@ fun AddMarkerDialog(
     val coroutineScope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsState()
 
-    MyCard(shape = Shapes.large) {
+    MyCard(shape = Shapes.large, modifier = Modifier.wrapContentHeight()) {
         ConstraintLayout(
             modifier = Modifier
-                .wrapContentSize()
-                .background(Color.White)
-            /*.requiredHeight(250.dp).requiredWidth(300.dp)*/
+                .wrapContentHeight().padding(4.dp)
         ) {
             val (progress, name, locationIcon, title, description, saveButton, cancelButton) = createRefs()
 
@@ -424,10 +426,10 @@ fun AddMarkerDialog(
                             SnackbarManager.showMessage(R.string.add_place_success)
                         }
                     }
-                    else -> {
-                    }
+                    else -> { }
                 }
             }
+
             val descriptionValue = remember { mutableStateOf("") }
             val titleValue = remember { mutableStateOf(/*chosenPlace.value ?:*/ "") }
             LaunchedEffect(chosenPlace.value) {
@@ -437,17 +439,17 @@ fun AddMarkerDialog(
             }
 
             Icon(painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                contentDescription = "Marker",
+                contentDescription = stringResource(R.string.marker_icon),
                 tint = secondaryFigmaColor,
                 modifier = Modifier.constrainAs(locationIcon) {
-                    absoluteRight.linkTo(name.absoluteLeft, 8.dp)
+                    absoluteRight.linkTo(name.absoluteLeft, 14.dp)
                     top.linkTo(name.top)
                     bottom.linkTo(name.bottom)
                 })
 
             Text(
                 text = stringResource(R.string.new_place),
-                style = MaterialTheme.typography.subtitle1,
+                style = MaterialTheme.typography.h6,
                 modifier = Modifier.constrainAs(name) {
                     top.linkTo(parent.top, 16.dp)
                     absoluteLeft.linkTo(parent.absoluteLeft, 4.dp)
@@ -455,21 +457,29 @@ fun AddMarkerDialog(
                 }
             )
 
+            val (textField1, textField2) = remember { FocusRequester.createRefs() }
+            val keyboardController = LocalSoftwareKeyboardController.current
+
             OutlinedTextField(
                 value = titleValue.value,
                 onValueChange = { titleValue.value = it },
                 label = { Text(text = stringResource(R.string.title)) },
                 singleLine = true,
+                visualTransformation = VisualTransformation.None,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Next
                 ),
+                keyboardActions = KeyboardActions(
+                    onNext = { textField2.requestFocus() }
+                ),
                 modifier = Modifier.constrainAs(title) {
-                    top.linkTo(name.bottom, 2.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 2.dp)
-                    absoluteRight.linkTo(parent.absoluteRight, 2.dp)
-                }/*.navigationBarsWithImePadding(),*/
+                    top.linkTo(name.bottom, 12.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    absoluteRight.linkTo(parent.absoluteRight)
+                }.focusRequester(textField1).padding(horizontal = 8.dp).fillMaxWidth()
             )
+
             OutlinedTextField(
                 value = descriptionValue.value,
                 onValueChange = {
@@ -479,19 +489,22 @@ fun AddMarkerDialog(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Next
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { keyboardController?.hide() }
                 ),
                 modifier = Modifier.constrainAs(description) {
                     top.linkTo(title.bottom, 2.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 4.dp)
-                    absoluteRight.linkTo(parent.absoluteRight, 4.dp)
-                }/*.navigationBarsWithImePadding()*/
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    absoluteRight.linkTo(parent.absoluteRight)
+                }.focusRequester(textField2).padding(horizontal = 8.dp).fillMaxWidth()
             )
 
             OutlinedButton(modifier = Modifier.constrainAs(cancelButton) {
                 absoluteRight.linkTo(parent.absoluteRight, 4.dp)
-                top.linkTo(description.bottom, 12.dp)
-                bottom.linkTo(parent.bottom, 12.dp)
+                top.linkTo(description.bottom, 14.dp)
+                bottom.linkTo(parent.bottom, 14.dp)
             },
                 shape = RoundedCornerShape(24.dp), onClick = {
                     coroutineScope.launch {
@@ -499,7 +512,6 @@ fun AddMarkerDialog(
                     }
                 }) {
                 Row(
-                    modifier = Modifier.wrapContentSize(),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -510,7 +522,7 @@ fun AddMarkerDialog(
                     )*/
                     Text(
                         stringResource(id = R.string.cancel),
-                        modifier = Modifier.padding(start = 8.dp)
+                        //modifier = Modifier.padding(start = 8.dp)
                     )
                 }
             }
@@ -530,22 +542,21 @@ fun AddMarkerDialog(
                 )
             }) {
                 Row(
-                    modifier = Modifier.wrapContentSize(),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    /*Icon(
-                        painterResource(id = R.drawable.ic_baseline_navigation_24),
-                        "",
-                        modifier = Modifier.size(24.dp)
-                    )*/
                     Text(
                         stringResource(id = R.string.save),
-                        modifier = Modifier.padding(start = 8.dp)
+                        //modifier = Modifier.padding(start = 8.dp)
                     )
                 }
             }
+            DisposableEffect(Unit) {
+                textField1.requestFocus()
+                onDispose { }
+            }
         }
+
     }
 }
 
@@ -705,6 +716,7 @@ fun GoogleMapLayout(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val markers = viewModel.getAllMarkers().collectAsState()
+    val darkTheme = isSystemInDarkTheme()
 
     AndroidView(
         { map },
@@ -728,7 +740,12 @@ fun GoogleMapLayout(
             googleMap.setOnCameraIdleListener {
                 cameraMoveCallback(CameraMoveState.MoveFinish)
             }
+
+            //Map styles: https://mapstyle.withgoogle.com
+            if (darkTheme) googleMap.setMapStyle(MapStyleOptions
+                .loadRawResourceStyle(context, R.raw.mapstyle_night))
             googleMap.uiSettings.isMyLocationButtonEnabled = false
+
             //googleMap.uiSettings.isCompassEnabled = true
 
 //            if (viewModel.lastLocation.value == null) {
@@ -791,6 +808,9 @@ fun DialogOnPlaceChoosing(
     val coroutineScope = rememberCoroutineScope()
     val geocoder = Geocoder(context)
 
+    val unnamedPlaceStr = stringResource(R.string.unnamed_place)
+    val cantRecognizePlace = stringResource(R.string.cant_recognize_place)
+
     when (cameraMoveState) {
         CameraMoveState.MoveStart -> {
             viewModel.chosenPlace.value = null
@@ -813,23 +833,23 @@ fun DialogOnPlaceChoosing(
                                     it.subAdminArea
                             } else if (!it.adminArea.isNullOrBlank()) {
                                 viewModel.chosenPlace.value = it.adminArea
-                            } else viewModel.chosenPlace.value = "Место без названия"
+                            } else viewModel.chosenPlace.value = unnamedPlaceStr
                         }
                     } catch (e: Throwable) {
-                        viewModel.chosenPlace.value = "Не удалось определить место"
+                        viewModel.chosenPlace.value = cantRecognizePlace
                     }
                 }
             }
         }
     }
 
-    val placeName = viewModel.chosenPlace.value ?: "Searching..."
+    val placeName = viewModel.chosenPlace.value ?: stringResource(R.string.searching)
     val pointerIconColor by animateColorAsState(
         if (viewModel.chosenPlace.value != null) secondaryFigmaColor
         else Color.LightGray
     )
     val textColor by animateColorAsState(
-        if (viewModel.chosenPlace.value != null) Color.Black
+        if (viewModel.chosenPlace.value != null) MaterialTheme.colors.onSurface
         else Color.LightGray
     )
     val shimmerModifier = if (viewModel.chosenPlace.value != null) Modifier else Modifier.shimmer()
@@ -841,9 +861,7 @@ fun DialogOnPlaceChoosing(
             .widthIn(max = 240.dp).animateContentSize(
                 animationSpec = tween(
                     durationMillis = 300,
-                    easing = LinearOutSlowInEasing
-                )
-            ),
+                    easing = LinearOutSlowInEasing)),
     ) {
         Row(
             modifier = Modifier
@@ -854,7 +872,7 @@ fun DialogOnPlaceChoosing(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                contentDescription = "Marker",
+                contentDescription = stringResource(R.string.marker_icon),
                 tint = pointerIconColor,
                 modifier = Modifier
                     .size(30.dp)
@@ -864,7 +882,7 @@ fun DialogOnPlaceChoosing(
                 placeName,
                 overflow = TextOverflow.Ellipsis,
                 color = textColor,
-                modifier = shimmerModifier
+                modifier = shimmerModifier.padding(end = 2.dp)
             )
             Spacer(Modifier.size(4.dp))
         }
@@ -874,7 +892,9 @@ fun DialogOnPlaceChoosing(
 @Composable
 fun PointerIcon(cameraMoveState: CameraMoveState, modifier: Modifier = Modifier) {
     val coroutineScope = rememberCoroutineScope()
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.another_marker))
+    val darkTheme = isSystemInDarkTheme()
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(
+        if (darkTheme) R.raw.marker_night else R.raw.marker))
     val lottieAnimatable = rememberLottieAnimatable()
     var minMaxFrame by remember {
         mutableStateOf(LottieClipSpec.Frame(0, 30))
@@ -946,7 +966,7 @@ fun FabOnMap(state: MapUiState, onClick: () -> Unit) {
         Icon(
             painter = painterResource(id = fabImg.value),
             contentDescription = "Add new location",
-            tint = Color.White,
+            tint = MaterialTheme.colors.onPrimary,
         )
     }
 }
