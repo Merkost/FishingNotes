@@ -2,7 +2,6 @@ package com.joesemper.fishing.compose.ui.home.map
 
 import android.content.Context
 import android.location.Geocoder
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -40,6 +39,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
+import com.airbnb.lottie.LottieComposition
+import com.airbnb.lottie.LottieProperty
 import com.airbnb.lottie.compose.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
@@ -60,7 +61,10 @@ import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.ui.theme.Shapes
 import com.joesemper.fishing.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.utils.showToast
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.vponomarenko.compose.shimmer.shimmer
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
@@ -101,6 +105,7 @@ fun Map(
 
     val dialogAddPlaceIsShowing = remember { mutableStateOf(false) }
 
+
 //    val lastKnownLocation = getCurrentLocation(
 //        context = context,
 //        permissionsState = permissionsState
@@ -132,18 +137,23 @@ fun Map(
         else mutableStateOf(viewModel.mapUiState)
     }
 
+    var pointerState: MutableState<PointerState> = remember {
+        mutableStateOf(PointerState.HideMarker)
+    }
+
     var lastPressed: Long = 0
     BackHandler(onBack = {
         when (mapUiState) {
             MapUiState.NormalMode -> {
                 val currentMillis = System.currentTimeMillis()
-                    if (currentMillis - lastPressed < 2000) {
-                        (context as MainActivity).finish()
-                    } else {
-                        showToast(context, "Do it again to close the app")
-                    }
+                if (currentMillis - lastPressed < 2000) {
+                    (context as MainActivity).finish()
+                } else {
+                    showToast(context, "Do it again to close the app")
+                }
                 lastPressed = currentMillis
-            } else -> mapUiState = MapUiState.NormalMode
+            }
+            else -> mapUiState = MapUiState.NormalMode
         }
     })
 
@@ -296,7 +306,7 @@ fun Map(
             ) {
                 DialogOnPlaceChoosing(
                     context, cameraMoveState, mapView, currentPosition,
-                    modifier = Modifier.wrapContentSize()
+                    modifier = Modifier.wrapContentSize(), pointerState
                 )
             }
 
@@ -308,7 +318,7 @@ fun Map(
                     absoluteLeft.linkTo(parent.absoluteLeft)
                     absoluteRight.linkTo(parent.absoluteRight)
                 }) {
-                PointerIcon(cameraMoveState = cameraMoveState)
+                PointerIcon(cameraMoveState = cameraMoveState, pointerState)
             }
 
             PermissionDialog(modifier = Modifier.constrainAs(permissionDialog) {
@@ -773,39 +783,51 @@ fun DialogOnPlaceChoosing(
     cameraMoveState: CameraMoveState,
     mapView: MapView,
     currentPosition: MutableState<LatLng?>,
-    modifier: Modifier
+    modifier: Modifier,
+    pointerState: MutableState<PointerState>
 ) {
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
     val geocoder = Geocoder(context)
+    var selectedPlace by remember { mutableStateOf<String?>(null) }
 
     when (cameraMoveState) {
         CameraMoveState.MoveStart -> {
+            pointerState.value = PointerState.ShowMarker
+            selectedPlace = null
             viewModel.chosenPlace.value = null
+            viewModel.showMarker.value = false
         }
         CameraMoveState.MoveFinish -> {
             LaunchedEffect(cameraMoveState) {
                 delay(1200)
                 mapView.getMapAsync { googleMap ->
                     val target = googleMap.cameraPosition.target
+
                     currentPosition.value = LatLng(target.latitude, target.longitude)
-                    try {
-                        val position = geocoder.getFromLocation(
-                            currentPosition.value!!.latitude,
-                            currentPosition.value!!.longitude,
-                            1
-                        )
-                        position?.first()?.let {
-                            if (!it.subAdminArea.isNullOrBlank()) {
-                                viewModel.chosenPlace.value =
-                                    it.subAdminArea
-                            } else if (!it.adminArea.isNullOrBlank()) {
-                                viewModel.chosenPlace.value = it.adminArea
-                            } else viewModel.chosenPlace.value = "Место без названия"
+                    coroutineScope.launch(Dispatchers.Default) {
+                        try {
+                            val position = geocoder.getFromLocation(
+                                currentPosition.value!!.latitude,
+                                currentPosition.value!!.longitude,
+                                5
+                            )
+                            position?.first()?.let {
+                                viewModel.showMarker.value = true
+                                if (!it.subAdminArea.isNullOrBlank()) {
+                                    viewModel.chosenPlace.value =
+                                        it.subAdminArea
+                                } else if (!it.adminArea.isNullOrBlank()) {
+                                    viewModel.chosenPlace.value = it.adminArea
+                                } else viewModel.chosenPlace.value = "Место без названия"
+                            }
+                        } catch (e: Throwable) {
+                            viewModel.chosenPlace.value = "Не удалось определить место"
                         }
-                    } catch (e: Throwable) {
-                        viewModel.chosenPlace.value = "Не удалось определить место"
+                        pointerState.value = PointerState.HideMarker
+                        selectedPlace = viewModel.chosenPlace.value
                     }
+
                 }
             }
         }
@@ -813,11 +835,11 @@ fun DialogOnPlaceChoosing(
 
     val placeName = viewModel.chosenPlace.value ?: "Searching..."
     val pointerIconColor by animateColorAsState(
-        if (viewModel.chosenPlace.value != null) secondaryFigmaColor
+        if (selectedPlace != null) secondaryFigmaColor
         else Color.LightGray
     )
     val textColor by animateColorAsState(
-        if (viewModel.chosenPlace.value != null) Color.Black
+        if (selectedPlace != null) Color.Black
         else Color.LightGray
     )
     val shimmerModifier = if (viewModel.chosenPlace.value != null) Modifier else Modifier.shimmer()
@@ -860,35 +882,41 @@ fun DialogOnPlaceChoosing(
 }
 
 @Composable
-fun PointerIcon(cameraMoveState: CameraMoveState, modifier: Modifier = Modifier) {
+fun PointerIcon(
+    cameraMoveState: CameraMoveState,
+    pointerState: MutableState<PointerState>,
+    modifier: Modifier = Modifier,
+) {
+    var isFirstTimeCalled = remember { true }
     val coroutineScope = rememberCoroutineScope()
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.another_marker))
+
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.another_marker))
+
     val lottieAnimatable = rememberLottieAnimatable()
-    var minMaxFrame by remember {
-        mutableStateOf(LottieClipSpec.Frame(0, 30))
+
+    val startMinMaxFrame by remember {
+        mutableStateOf(LottieClipSpec.Frame(0, 50))
     }
-    when (cameraMoveState) {
-        CameraMoveState.MoveFinish -> {
-            minMaxFrame = LottieClipSpec.Frame(30, 82).also { Log.d("MAP", "MoveFinish") }
-            LaunchedEffect(Unit) {
-                lottieAnimatable.animate(
-                    composition,
-                    iteration = 1,
-                    continueFromPreviousAnimate = true,
-                    clipSpec = minMaxFrame,
-                )
-            }
-        }
-        CameraMoveState.MoveStart -> {
-            minMaxFrame = LottieClipSpec.Frame(0, 50).also { Log.d("MAP", "MoveStart") }
-            LaunchedEffect(Unit) {
-                lottieAnimatable.animate(
-                    composition,
-                    iteration = 1,
-                    continueFromPreviousAnimate = true,
-                    clipSpec = minMaxFrame,
-                )
-            }
+    val finishMinMaxFrame by remember {
+        mutableStateOf(LottieClipSpec.Frame(50, 82))
+    }
+
+    LaunchedEffect(pointerState.value) {
+        if (pointerState.value == PointerState.ShowMarker) {
+            lottieAnimatable.animate(
+                composition,
+                iteration = 1,
+                continueFromPreviousAnimate = true,
+                clipSpec = startMinMaxFrame,
+            )
+        } else {
+            lottieAnimatable.animate(
+                composition,
+                iteration = 1,
+                continueFromPreviousAnimate = false,
+                clipSpec = finishMinMaxFrame,
+            )
         }
     }
 

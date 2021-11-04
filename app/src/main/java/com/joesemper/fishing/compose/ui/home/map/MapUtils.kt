@@ -38,6 +38,11 @@ sealed class CameraMoveState {
     object MoveFinish : CameraMoveState()
 }
 
+sealed class PointerState {
+    object HideMarker : PointerState()
+    object ShowMarker : PointerState()
+}
+
 val locationPermissionsList = listOf(
     Manifest.permission.ACCESS_FINE_LOCATION,
     Manifest.permission.ACCESS_COARSE_LOCATION
