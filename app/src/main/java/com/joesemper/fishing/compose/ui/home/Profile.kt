@@ -1,13 +1,20 @@
 package com.joesemper.fishing.compose.ui.home
 
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -17,77 +24,241 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
-import androidx.navigation.NavOptions
 import androidx.navigation.compose.rememberNavController
 
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.MainActivity
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.domain.UserViewModel
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.ui.theme.FigmaTheme
+import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import me.vponomarenko.compose.shimmer.shimmer
 import org.koin.androidx.compose.getViewModel
 
+@ExperimentalAnimationApi
 @InternalCoroutinesApi
 @ExperimentalMaterialApi
 @ExperimentalCoilApi
 @Composable
 fun Profile(navController: NavController, modifier: Modifier = Modifier) {
     val viewModel = getViewModel<UserViewModel>()
+    var visible by remember { mutableStateOf(false) }
+    val user by viewModel.currentUser.collectAsState()
+    val userPlacesNum by viewModel.currentPlaces.collectAsState()
+    val userCatchesNum by viewModel.currentCatches.collectAsState()
 
+    val imgSize: Dp = 120.dp
+    val bgHeight: Dp = 180.dp
 
     val uiState = viewModel.uiState
-    Scaffold(
-        topBar = { AppBar(navController) },
-        content = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceAround,
-                modifier = Modifier.fillMaxWidth(),
+    Scaffold(modifier = Modifier.fillMaxSize(),
+        topBar = { PlaceAppBar(navController) }) {
+        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+            val (background, card, image, name, places, catches, stats, box, logout) = createRefs()
+            val bgGl = createGuidelineFromTop(120.dp)
+            val verticalCenterGl = createGuidelineFromAbsoluteLeft(0.5f)
+            val logoutButtonGl = createGuidelineFromBottom(60.dp)
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = visible,
+                enter = slideInVertically(
+                    initialOffsetY = {
+                        // Slide in from top
+                        -it
+                    },
+                    animationSpec = tween(
+                        durationMillis = MainActivity.splashFadeDurationMillis * 4,
+
+                        easing = CubicBezierEasing(0f, 0f, 0f, 1f)
+                    )
+                ),
+                exit = slideOutVertically(
+                    targetOffsetY = {
+                        // Slide to top
+                        -it
+                    },
+                    animationSpec = tween(
+                        durationMillis = MainActivity.splashFadeDurationMillis * 2,
+                        //delayMillis = MainActivity.splashFadeDurationMillis / 2,
+                        easing = CubicBezierEasing(0f, 0f, 0f, 1f)
+                    )
+                )
             ) {
-                Card(
-                    elevation = 10.dp,
-                    modifier = Modifier.padding(25.dp),
-                    shape = RoundedCornerShape(25.dp),
-                    backgroundColor = MaterialTheme.colors.surface
-                ) {
-                    Column() {
-                        val user by viewModel.getCurrentUser().collectAsState(null)
-                        UserInfo(user)
-
-                        val userPlacesNum by viewModel.getUserPlaces().collectAsState(null)
-                        val userCatchesNum by viewModel.getUserCatches().collectAsState(null)
-                        UserStats(userPlacesNum, userCatchesNum)
-                    }
-
-                }
-                UserButtons(navController)
+                Surface(//shape = RoundedCornerShape(0.dp,0.dp,15.dp,15.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(bgHeight)
+                        .constrainAs(background) {
+                            top.linkTo(parent.top)
+                            absoluteLeft.linkTo(parent.absoluteLeft)
+                            absoluteRight.linkTo(parent.absoluteRight)
+                        }, color = primaryFigmaColor
+                ) {}
             }
-        })
+
+            UserImage(user, imgSize, modifier = Modifier.constrainAs(image) {
+                top.linkTo(parent.top)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+                bottom.linkTo(parent.bottom)
+                centerAround(bgGl)
+            }.zIndex(2f))
+            UserText(user, modifier = Modifier.constrainAs(name) {
+                top.linkTo(image.bottom)
+                absoluteLeft.linkTo(card.absoluteLeft)
+                absoluteRight.linkTo(card.absoluteRight)
+            }.zIndex(2f))
+
+            Card(
+                modifier = Modifier.constrainAs(card) {
+                    top.linkTo(parent.top)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 20.dp)
+                    absoluteRight.linkTo(parent.absoluteRight, 20.dp)
+                    //bottom.linkTo(parent.bottom)
+                }.fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 120.dp).zIndex(1f),
+                shape = RoundedCornerShape(25.dp),
+                elevation = 10.dp,
+                backgroundColor = MaterialTheme.colors.surface
+            ) {
+                Column(modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                    Spacer(modifier = Modifier.size(150.dp))
+                    Text("The menu is in development")
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Text("Thank you for testing!")
+                    Spacer(modifier = Modifier.size(100.dp))
+                }
+
+
+                /*UserStats(userPlacesNum, userCatchesNum, modifier = Modifier.constrainAs(stats) {
+                    top.linkTo(bl)
+                    //absoluteLeft.linkTo(card.absoluteLeft, 250.dp)
+                    //absoluteRight.linkTo(card.absoluteRight, 250.dp)
+                    bottom.linkTo(name.top)
+                }.padding(horizontal = 10.dp))*/
+                //UserButtons(navController)
+            }
+
+            LogoutButton(navController, modifier = Modifier.constrainAs(logout) {
+                centerAround(logoutButtonGl)
+                centerHorizontallyTo(parent)
+            })
+
+            /*Box(modifier.constrainAs(catches){
+                top.linkTo(bgGl)
+                absoluteLeft.linkTo(parent.absoluteLeft, 20.dp)
+                absoluteRight.linkTo(verticalCenterGl, imgSize)
+                bottom.linkTo(name.top)
+            }.zIndex(3f).background(Color.Blue)) {
+                CatchesNumber(userCatchesNum, Modifier.background(Color.Green))
+            }*/
+
+
+
+            PlacesNumber(userPlacesNum, Modifier.constrainAs(places) {
+                top.linkTo(bgGl)
+                absoluteLeft.linkTo(verticalCenterGl, imgSize / 2)
+                absoluteRight.linkTo(parent.absoluteRight, 20.dp)
+                bottom.linkTo(image.bottom)
+            }.zIndex(3f))
+            CatchesNumber(userCatchesNum, Modifier.constrainAs(catches) {
+                top.linkTo(bgGl)
+                absoluteLeft.linkTo(parent.absoluteLeft, 20.dp)
+                absoluteRight.linkTo(verticalCenterGl, imgSize / 2)
+                bottom.linkTo(image.bottom)
+            }.zIndex(3f))
+
+        }
+        LaunchedEffect(true) {
+            visible = true
+        }
+    }
+}
+
+@ExperimentalMaterialApi
+@InternalCoroutinesApi
+@Composable
+fun LogoutButton(navController: NavController, modifier: Modifier) {
+    val dialogOnLogout = rememberSaveable { mutableStateOf(false) }
+
+
+    //Google button
+    Card(
+        shape = RoundedCornerShape(20.dp), elevation = 10.dp,
+        onClickLabel = stringResource(R.string.logout),
+        onClick = { dialogOnLogout.value = true },
+        modifier = modifier
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Image(
+                painterResource(R.drawable.logout),
+                stringResource(R.string.logout),
+                modifier = Modifier.size(25.dp)
+            )
+            Text(text = stringResource(R.string.logout))
+            //Text("Sign in with Google", style = Typography.body1)
+        }
+    }
+
+
+
+    if (dialogOnLogout.value) LogoutDialog(dialogOnLogout, navController)
+
 }
 
 @Composable
-fun UserStats(userPlacesNum: List<MapMarker>?, userCatchesNum: List<UserCatch>?) {
+fun UserText(user: User?, modifier: Modifier) {
+    user?.let {
+        Text(
+            modifier = modifier,
+            text = when (user.isAnonymous) {
+                true -> stringResource(R.string.anonymous)
+                false -> user.userName
+            }, style = MaterialTheme.typography.h6,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+fun UserStats(
+    userPlacesNum: List<MapMarker>?,
+    userCatchesNum: List<UserCatch>?,
+    modifier: Modifier = Modifier
+) {
     Row(
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        modifier = Modifier.padding(5.dp).fillMaxWidth().height(50.dp)
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = modifier.padding(5.dp).fillMaxWidth().height(50.dp)
     ) {
         PlacesNumber(userPlacesNum)
         CatchesNumber(userCatchesNum)
@@ -95,12 +266,12 @@ fun UserStats(userPlacesNum: List<MapMarker>?, userCatchesNum: List<UserCatch>?)
 }
 
 @Composable
-fun PlacesNumber(userPlacesNum: List<MapMarker>?) {
+fun PlacesNumber(userPlacesNum: List<MapMarker>?, modifier: Modifier = Modifier) {
     //val userPlacesNum by viewModel.getUserPlaces().collectAsState(null)
     userPlacesNum?.let {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)
+            verticalArrangement = Arrangement.Center, modifier = modifier
         ) {
             Icon(
                 Icons.Default.Place, stringResource(R.string.place),
@@ -110,7 +281,7 @@ fun PlacesNumber(userPlacesNum: List<MapMarker>?) {
         }
     } ?: Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)
+        verticalArrangement = Arrangement.Center, modifier = modifier
     ) {
         Icon(
             Icons.Default.Place, stringResource(R.string.place),
@@ -127,12 +298,12 @@ fun PlacesNumber(userPlacesNum: List<MapMarker>?) {
 }
 
 @Composable
-fun CatchesNumber(userCatchesNum: List<UserCatch>?) {
+fun CatchesNumber(userCatchesNum: List<UserCatch>?, modifier: Modifier = Modifier) {
 //    val userCatchesNum by viewModel.getUserCatches().collectAsState(null)
     userCatchesNum?.let {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)
+            verticalArrangement = Arrangement.Center, modifier = modifier
         ) {
             Icon(
                 painterResource(R.drawable.ic_fishing), stringResource(R.string.place),
@@ -142,7 +313,7 @@ fun CatchesNumber(userCatchesNum: List<UserCatch>?) {
         }
     } ?: Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center, modifier = Modifier.size(50.dp)
+        verticalArrangement = Arrangement.Center, modifier = modifier
     ) {
         Icon(
             painterResource(R.drawable.ic_fishing), stringResource(R.string.place),
@@ -161,7 +332,7 @@ fun CatchesNumber(userCatchesNum: List<UserCatch>?) {
 @ExperimentalMaterialApi
 @Composable
 fun UserButtons(navController: NavController) {
-    val dialogOnLogout = rememberSaveable { mutableStateOf(false) }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize().padding(horizontal = 80.dp),
@@ -186,12 +357,6 @@ fun UserButtons(navController: NavController) {
 //                UserFragmentDirections.actionUserFragmentToSettingsFragment()
 //            findNavController().navigate(action)
         }
-        Spacer(modifier = Modifier.size(15.dp))
-        OutlinedButton(onClick = {
-            dialogOnLogout.value = true
-        }) { Text(stringResource(R.string.logout)) }
-        Spacer(modifier = Modifier.size(30.dp))
-        if (dialogOnLogout.value) LogoutDialog(dialogOnLogout, navController)
     }
 }
 
@@ -210,11 +375,11 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
                 onClick = {
                     scope.launch {
                         viewModel.logoutCurrentUser().collect { isLogout ->
-                        if (isLogout) {
-                            dialogOnLogout.value = false
-                            navController.navigate(MainDestinations.LOGIN_ROUTE)
-                        }
-                        //startLoginActivity(context)
+                            if (isLogout) {
+                                dialogOnLogout.value = false
+                                navController.navigate(MainDestinations.LOGIN_ROUTE)
+                            }
+                            //startLoginActivity(context)
                         }
                     }
                 },
@@ -249,9 +414,9 @@ fun ColumnButton(image: Painter, name: String, click: () -> Unit) {
 fun UserInfo(user: User?) {
     //val user by
     user?.let { nutNullUser ->
-        Crossfade(nutNullUser, animationSpec = tween(500)) { animatedUser ->
-            UserNameAndImage(animatedUser)
-        }
+        //Crossfade(nutNullUser, animationSpec = tween(500)) { animatedUser ->
+        //UserImage(animatedUser, imgSize)
+        //}
     } ?: Row(
         modifier = Modifier.fillMaxWidth().height(150.dp).padding(20.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -264,50 +429,69 @@ fun UserInfo(user: User?) {
 
 @ExperimentalCoilApi
 @Composable
-fun UserNameAndImage(user: User) {
-    Row(
-        modifier = Modifier.fillMaxWidth().height(150.dp).padding(20.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Image(
-            painter = if (user.userPic.isNullOrEmpty() or user.isAnonymous)
-                painterResource(R.drawable.ic_fisher)
-            else rememberImagePainter(
-                data = user.userPic,
-                builder = {
-                    transformations(CircleCropTransformation())
-                    //crossfade(500)
-                }
-            ),
-            contentDescription = stringResource(R.string.fisher),
-            modifier = Modifier.size(125.dp),
-        )
-        Text(
-            text = when (user.isAnonymous) {
-                true -> stringResource(R.string.anonymous)
-                false -> user.userName
-            }, style = MaterialTheme.typography.h6,
-            textAlign = TextAlign.Center
-        )
+fun UserImage(user: User?, imgSize: Dp, modifier: Modifier = Modifier) {
+    val linearGradientBrush = Brush.linearGradient(
+        colors = listOf(Color(0xFFED2939), Color(0xFFFFFF66))
+    )
+    user?.let {
+        Column(
+            modifier = modifier.fillMaxWidth().wrapContentHeight().padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Image(
+                painter = if (user.userPic.isNullOrEmpty() or user.isAnonymous)
+                    painterResource(R.drawable.ic_fisher)
+                else rememberImagePainter(
+                    data = user.userPic,
+                    builder = {
+                        transformations(CircleCropTransformation())
+                        //crossfade(500)
+                    }
+                ),
+                contentDescription = stringResource(R.string.fisher),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(imgSize).clip(CircleShape)
+                    .border(2.dp, linearGradientBrush, CircleShape)
+            )
+
+        }
     }
+
 }
 
 @Composable
-fun AppBar(navController: NavController) {
-        TopAppBar(
-            title = { Text(text = "User") },
-            navigationIcon = {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.back)
-                    )
-                }
-            },
-            elevation = 2.dp
-        )
+fun PlaceAppBar(navController: NavController) {
+    /*Row(modifier = Modifier.fillMaxWidth()
+        .height(AppBarHeight).padding(horizontal = AppBarHorizontalPadding)) {
+        Row(TitleIconModifier, verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back)
+                )
+            }
+        }
+    }*/
+    TopAppBar(
+        title = { Text(text = stringResource(R.string.profile)) },
+        navigationIcon = {
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back)
+                )
+            }
+        },
+        elevation = 0.dp
+    )
 }
+
+private val AppBarHeight = 56.dp
+private val AppBarHorizontalPadding = 4.dp
+private val TitleIconModifier = Modifier.fillMaxHeight()
+    .width(72.dp - AppBarHorizontalPadding)
+
 
 private fun startLoginActivity(context: Context) {
     /*val activity = (context as Activity)
@@ -318,6 +502,7 @@ private fun startLoginActivity(context: Context) {
 
 }
 
+@ExperimentalAnimationApi
 @ExperimentalCoilApi
 @ExperimentalMaterialApi
 @InternalCoroutinesApi

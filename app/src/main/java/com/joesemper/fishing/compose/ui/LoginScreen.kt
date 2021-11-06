@@ -1,5 +1,6 @@
 package com.joesemper.fishing.compose.ui.home
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -27,12 +28,14 @@ import com.google.accompanist.insets.systemBarsPadding
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.MainActivity
 import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.home.map.MapUiState
 import com.joesemper.fishing.compose.ui.resources
 import com.joesemper.fishing.domain.LoginViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.ui.theme.Typography
 import com.joesemper.fishing.ui.theme.primaryFigmaColor
+import com.joesemper.fishing.utils.showToast
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -45,6 +48,7 @@ fun LoginScreen(navController: NavController) {
 
     val coroutineScope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
+    val context = LocalContext.current
     var isLoading by remember { mutableStateOf(false) }
     var isSuccess by remember { mutableStateOf(false) }
     var visible by remember { mutableStateOf(false) }
@@ -54,7 +58,16 @@ fun LoginScreen(navController: NavController) {
     val activity = LocalContext.current as MainActivity
     val uiState = loginViewModel.subscribe().collectAsState()
     val errorString = stringResource(R.string.signin_error)
+    val backToast = stringResource(R.string.back_clicked)
     val resources = resources()
+
+    var lastPressed: Long = 0
+    BackHandler(onBack = {
+        val currentMillis = System.currentTimeMillis()
+        if (currentMillis - lastPressed < 2000) (context as MainActivity).finish()
+        else showToast(context, backToast)
+        lastPressed = currentMillis
+    })
 
     LaunchedEffect(uiState.value) {
         when (uiState.value) {
@@ -104,9 +117,11 @@ fun LoginScreen(navController: NavController) {
             )
         },
     ) {
-        ConstraintLayout(modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)) {
+        ConstraintLayout(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+        ) {
             val (background, card, lottieSuccess, cardColumn) = createRefs()
 
             AnimatedVisibility(
@@ -139,7 +154,8 @@ fun LoginScreen(navController: NavController) {
                     .height(450.dp)
                     .constrainAs(background) {
                         top.linkTo(parent.top)
-                    }, color = primaryFigmaColor) {}
+                    }, color = primaryFigmaColor
+                ) {}
             }
 
             AnimatedVisibility(
@@ -225,11 +241,11 @@ fun LoginScreen(navController: NavController) {
                         //LottieLoading
                         //AnimatedVisibility(isLoading,) { LottieLoading(modifier = Modifier.size(140.dp)) }
                         //AnimatedVisibility(!isLoading) {
-                            Spacer(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(30.dp)
-                            )
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(30.dp)
+                        )
                         //}
 
                         //Google button
@@ -257,8 +273,7 @@ fun LoginScreen(navController: NavController) {
                                     stringResource(R.string.google_login),
                                     modifier = Modifier.size(25.dp)
                                 )
-                                Text(text = if (clicked) stringResource(R.string.signing_in)
-                                else stringResource(R.string.sign_with_google))
+                                Text(text = if (clicked) "Signing In" else "Sign in with Google")
                                 if (clicked) {
                                     //Spacer(modifier = Modifier.width(16.dp))
                                     CircularProgressIndicator(
@@ -280,9 +295,11 @@ fun LoginScreen(navController: NavController) {
                         )*/
 
                         //Space
-                        Spacer(modifier = Modifier
-                            .fillMaxWidth()
-                            .height(30.dp))
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(30.dp)
+                        )
                     }
 
 
