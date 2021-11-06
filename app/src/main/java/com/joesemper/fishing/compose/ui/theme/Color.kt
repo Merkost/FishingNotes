@@ -1,4 +1,4 @@
-package com.joesemper.fishing.ui.theme
+package com.joesemper.fishing.compose.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

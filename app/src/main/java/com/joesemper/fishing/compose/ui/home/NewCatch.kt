@@ -60,8 +60,8 @@ import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
-import com.joesemper.fishing.ui.theme.primaryFigmaColor
-import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
+import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
 import com.joesemper.fishing.utils.*
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -140,9 +140,10 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
             verticalArrangement = Arrangement.spacedBy(30.dp),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
                 .verticalScroll(state = scrollState, enabled = true),
         ) {
+
             Places(stringResource(R.string.place), viewModel)  //Выпадающий список мест
             FishAndWeight(viewModel.fishAmount, viewModel.weight)
             Fishing(viewModel.rod, viewModel.bite, viewModel.lure)

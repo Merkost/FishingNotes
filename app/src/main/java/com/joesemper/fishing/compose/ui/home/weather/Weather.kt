@@ -37,7 +37,7 @@ import com.joesemper.fishing.compose.ui.home.notes.Tabs
 import com.joesemper.fishing.domain.WeatherViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
-import com.joesemper.fishing.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -49,7 +49,6 @@ import org.koin.androidx.compose.getViewModel
 @ExperimentalPermissionsApi
 @Composable
 fun Weather(
-    onSnackClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavController,
     upPress: () -> Unit,

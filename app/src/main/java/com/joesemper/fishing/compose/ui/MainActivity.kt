@@ -107,11 +107,10 @@ class MainActivity : ComponentActivity() {
         } else {
             setTheme(R.style.Theme_SplashScreen)
             setContent {
-                if ((user.value as BaseViewState.Success<*>).data as User? != null)
-                    FishingNotesApp()
-                else Navigation()
+                Navigation()
             }
         }
+
         auth = FirebaseAuth.getInstance()
     }
 
@@ -121,66 +120,6 @@ class MainActivity : ComponentActivity() {
         //light тема
         //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
-
-    @ExperimentalAnimationApi
-    @Composable
-    fun StartScreen() {
-        var visible by remember { mutableStateOf(false) }
-
-        Scaffold(
-            content = {
-                Box(
-                    modifier = Modifier
-                        .background(colorResource(id = R.color.blue))
-                        .fillMaxSize(),
-                ) {
-                    AnimatedVisibility(
-                        visible = visible,
-                        enter = slideInVertically(
-                            initialOffsetY = {
-                                // Slide in from top
-                                -it
-                            },
-                            animationSpec = tween(
-                                durationMillis = splashFadeDurationMillis,
-                                easing = CubicBezierEasing(0f, 0f, 0f, 1f)
-
-                            )
-                        ),
-                    ) {
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .padding(0.dp, 0.dp, 0.dp, 0.dp)
-                                .background(colorResource(id = R.color.blue))
-                                .fillMaxSize()
-                        ) {
-                            Text(
-                                stringResource(id = R.string.start_screen_title),
-                                fontSize = 36.sp,
-                                modifier = Modifier.padding(bottom = dimensionResource(R.dimen.start_content_title_margin_bottom)),
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .height(dimensionResource(R.dimen.start_content_size))
-                                    .width(dimensionResource(R.dimen.start_content_size))
-                                    .clip(
-                                        RoundedCornerShape(8.dp)
-                                    )
-                                    .background(color = Color.White)
-                            )
-                        }
-                    }
-                }
-                LaunchedEffect(true) {
-                    visible = true
-                }
-            }
-        )
-    }
 
     @InternalCoroutinesApi
     @ExperimentalMaterialApi

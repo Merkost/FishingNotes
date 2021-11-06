@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.runtime.*
@@ -18,8 +19,10 @@ import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.joesemper.fishing.compose.ui.home.*
-import com.joesemper.fishing.ui.theme.FigmaTheme
+import com.joesemper.fishing.compose.ui.theme.FishingNotesTheme
+import com.joesemper.fishing.compose.ui.theme.primaryFigmaDarkColor
 import kotlinx.coroutines.InternalCoroutinesApi
 
 @ExperimentalPermissionsApi
@@ -30,7 +33,7 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @Composable
 fun FishingNotesApp() {
     ProvideWindowInsets {
-        FigmaTheme {
+        FishingNotesTheme {
             val appStateHolder = rememberAppStateHolder()
             var visible by remember { mutableStateOf(false) }
 
@@ -75,7 +78,6 @@ fun FishingNotesApp() {
                         ) {
                             NavGraph(
                                 navController = appStateHolder.navController,
-                                onSnackSelected = appStateHolder::navigateToSnackDetail,
                                 upPress = appStateHolder::upPress,
                             )
                         }
@@ -96,7 +98,6 @@ fun FishingNotesApp() {
 @InternalCoroutinesApi
 @ExperimentalMaterialApi
 private fun NavGraphBuilder.NavGraph(
-    onSnackSelected: (Long, NavBackStackEntry) -> Unit,
     upPress: () -> Unit,
     navController: NavController,
 ) {
@@ -104,7 +105,7 @@ private fun NavGraphBuilder.NavGraph(
         route = MainDestinations.HOME_ROUTE,
         startDestination = HomeSections.MAP.route
     ) {
-        addHomeGraph(onSnackSelected, navController)
+        addHomeGraph(navController)
     }
 
     composable(MainDestinations.LOGIN_ROUTE) {

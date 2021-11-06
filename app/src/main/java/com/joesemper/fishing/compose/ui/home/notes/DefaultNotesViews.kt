@@ -35,9 +35,10 @@ import androidx.core.net.toUri
 import coil.compose.rememberImagePainter
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.*
+import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.theme.*
+import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.utils.getTimeByMilliseconds
 
 @ExperimentalComposeUiApi
@@ -264,7 +265,7 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
 
             Icon(
                 modifier = Modifier
-                    .padding(5.dp)
+                    .padding(5.dp).padding(horizontal = 5.dp)
                     .size(32.dp)
                     .constrainAs(icon) {
                         top.linkTo(parent.top)
@@ -297,6 +298,7 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
                 modifier = Modifier.constrainAs(description) {
                     top.linkTo(title.bottom)
                     absoluteLeft.linkTo(title.absoluteLeft)
+                    bottom.linkTo(parent.bottom, 4.dp)
                 },
                 text = if (place.description.isNotBlank()) {
                     place.description
