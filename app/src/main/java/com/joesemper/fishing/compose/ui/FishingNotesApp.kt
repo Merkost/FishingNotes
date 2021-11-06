@@ -1,12 +1,10 @@
 package com.joesemper.fishing.compose.ui
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.runtime.*
@@ -19,10 +17,8 @@ import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.theme.FishingNotesTheme
-import com.joesemper.fishing.compose.ui.theme.primaryFigmaDarkColor
 import kotlinx.coroutines.InternalCoroutinesApi
 
 @ExperimentalPermissionsApi

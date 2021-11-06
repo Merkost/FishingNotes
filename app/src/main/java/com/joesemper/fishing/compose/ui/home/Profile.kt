@@ -47,12 +47,11 @@ import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.MainActivity
 import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.domain.UserViewModel
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.model.entity.content.UserCatch
-import com.joesemper.fishing.ui.theme.FigmaTheme
-import com.joesemper.fishing.ui.theme.primaryFigmaColor
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -511,8 +510,8 @@ private fun startLoginActivity(context: Context) {
 @Preview("large font", fontScale = 2f)
 @Composable
 fun ProfilePreview() {
-    FigmaTheme {
+    //FigmaTheme {
         Profile(rememberNavController())
-    }
+    //}
 }
 

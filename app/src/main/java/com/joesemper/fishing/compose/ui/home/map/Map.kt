@@ -128,7 +128,7 @@ fun Map(
 
     ///val currentMarker = remember { mutableStateOf<UserMapMarker?>(null) }
 
-    val mapType = rememberSaveable { mutableStateOf(MapTypes.hybrid) }
+    val mapType = rememberSaveable { mutableStateOf(MapTypes.roadmap) }
 
     val mapLayersSelection = rememberSaveable { mutableStateOf(false) }
 
@@ -141,10 +141,11 @@ fun Map(
         else mutableStateOf(viewModel.mapUiState)
     }
 
-    var pointerState: MutableState<PointerState> = remember {
+    val pointerState: MutableState<PointerState> = remember {
         mutableStateOf(PointerState.HideMarker)
     }
 
+    val backClicked = stringResource(R.string.back_clicked)
     var lastPressed: Long = 0
     BackHandler(onBack = {
         when (mapUiState) {
@@ -153,7 +154,7 @@ fun Map(
                 if (currentMillis - lastPressed < 2000) {
                     (context as MainActivity).finish()
                 } else {
-                    showToast(context, "Do it again to close the app")
+                    showToast(context, backClicked)
                 }
                 lastPressed = currentMillis
             }
@@ -920,7 +921,8 @@ fun PointerIcon(
     var isFirstTimeCalled = remember { true }
     val coroutineScope = rememberCoroutineScope()
 
-val darkTheme = isSystemInDarkTheme()    val composition by rememberLottieComposition(
+val darkTheme = isSystemInDarkTheme()
+    val composition by rememberLottieComposition(
         LottieCompositionSpec.RawRes(if (darkTheme) R.raw.marker_night else R.raw.marker))
     val lottieAnimatable = rememberLottieAnimatable()
 

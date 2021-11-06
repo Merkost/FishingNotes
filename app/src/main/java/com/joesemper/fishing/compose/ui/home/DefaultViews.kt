@@ -71,7 +71,7 @@ fun MyCard(shape: CornerBasedShape = RoundedCornerShape(8.dp), modifier: Modifie
            content: @Composable () -> Unit) {
     Card(
         elevation = 8.dp, shape = shape,
-        modifier = Modifier.fillMaxWidth(), content = content
+        modifier = modifier.fillMaxWidth(), content = content
     )
 }
 
