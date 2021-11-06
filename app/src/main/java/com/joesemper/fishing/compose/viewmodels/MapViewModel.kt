@@ -24,6 +24,7 @@ class MapViewModel(
     private val snackbarManager: SnackbarManager,
 ) : ViewModel() {
 
+    val showMarker: MutableState<Boolean> = mutableStateOf(false)
     private val viewStateFlow: MutableStateFlow<BaseViewState> =
         MutableStateFlow(BaseViewState.Loading(null))
 
