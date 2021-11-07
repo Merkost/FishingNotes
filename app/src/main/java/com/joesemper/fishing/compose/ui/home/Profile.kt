@@ -165,8 +165,9 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
 
             LogoutButton(navController, modifier = Modifier.constrainAs(logout) {
                 centerAround(logoutButtonGl)
-                centerHorizontallyTo(parent)
-            })
+                absoluteLeft.linkTo(parent.absoluteLeft, 20.dp)
+                absoluteRight.linkTo(parent.absoluteRight, 20.dp)
+            }.fillMaxWidth().padding(horizontal = 20.dp))
 
             /*Box(modifier.constrainAs(catches){
                 top.linkTo(bgGl)

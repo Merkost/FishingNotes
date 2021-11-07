@@ -61,9 +61,9 @@ fun CatchTopBar(navController: NavController, viewModel: UserCatchViewModel) {
         title = stringResource(id = R.string.user_catch),
         onNavClick = { navController.popBackStack() }
     ) {
-        IconButton(onClick = { }) {
+        /*IconButton(onClick = { }) {
             Icon(imageVector = Icons.Filled.Edit, contentDescription = "", tint = Color.White)
-        }
+        }*/
         IconButton(modifier = Modifier.padding(horizontal = 4.dp),
             onClick = {
                 viewModel.deleteCatch()

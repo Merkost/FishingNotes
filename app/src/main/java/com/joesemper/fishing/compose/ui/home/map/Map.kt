@@ -1,7 +1,11 @@
 package com.joesemper.fishing.compose.ui.home.map
 
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.location.Geocoder
+import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -41,6 +45,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
 import com.airbnb.lottie.LottieComposition
 import com.airbnb.lottie.LottieProperty
@@ -72,6 +77,7 @@ import kotlinx.coroutines.launch
 import me.vponomarenko.compose.shimmer.shimmer
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
+import java.util.*
 
 
 sealed class LocationState() {
@@ -326,6 +332,7 @@ fun Map(
                 PointerIcon(cameraMoveState = cameraMoveState, pointerState)
             }
 
+            //PermissionDialog
             PermissionDialog(modifier = Modifier.constrainAs(permissionDialog) {
                 top.linkTo(parent.top)
                 bottom.linkTo(parent.bottom)
@@ -585,6 +592,7 @@ fun FishLoading(modifier: Modifier) {
 @ExperimentalMaterialApi
 @Composable
 fun BottomSheetMarkerDialog(marker: UserMapMarker?, onDescriptionClick: (UserMapMarker) -> Unit) {
+    val context = LocalContext.current
 
     Spacer(modifier = Modifier.size(6.dp))
     Card(
@@ -676,7 +684,9 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?, onDescriptionClick: (UserMap
                     absoluteRight.linkTo(detailsButton.absoluteLeft, 8.dp)
                     top.linkTo(detailsButton.top)
                     bottom.linkTo(detailsButton.bottom)
-                }, shape = RoundedCornerShape(24.dp), onClick = { /*TODO*/ }) {
+                }, shape = RoundedCornerShape(24.dp), onClick = {
+                    startMapsActivityForNavigation(marker, context)
+                }) {
                     Row(
                         modifier = Modifier.wrapContentSize(),
                         horizontalArrangement = Arrangement.Start,

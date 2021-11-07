@@ -302,9 +302,9 @@ fun UserPlaceAppBar(navController: NavController, viewModel: UserPlaceViewModel)
         title = stringResource(id = R.string.place),
         onNavClick = { navController.popBackStack() }
     ) {
-        IconButton(onClick = { }) {
+        /*IconButton(onClick = { }) {
             Icon(imageVector = Icons.Filled.Edit, contentDescription = "", tint = Color.White)
-        }
+        }*/
         IconButton(
             onClick = {
                 viewModel.deletePlace()
@@ -312,9 +312,9 @@ fun UserPlaceAppBar(navController: NavController, viewModel: UserPlaceViewModel)
             }) {
             Icon(imageVector = Icons.Filled.Delete, contentDescription = "", tint = Color.White)
         }
-        IconButton(onClick = { }) {
+        /*IconButton(onClick = { }) {
             Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "", tint = Color.White)
-        }
+        }*/
     }
 }
 

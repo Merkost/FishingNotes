@@ -1,13 +1,17 @@
 package com.joesemper.fishing.compose.ui.home.map
 
 import android.Manifest
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -19,12 +23,14 @@ import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.LatLng
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
+import com.joesemper.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.util.*
 
 object MapTypes {
     const val roadmap = GoogleMap.MAP_TYPE_NORMAL
@@ -154,6 +160,29 @@ fun getCurrentLocation(
         }
     }
     result
+}
+
+fun startMapsActivityForNavigation(mapMarker: UserMapMarker, context: Context) {
+    val uri = String.format(
+        Locale.ENGLISH,
+        "http://maps.google.com/maps?daddr=%f,%f (%s)",
+        mapMarker.latitude,
+        mapMarker.longitude,
+        mapMarker.title
+    )
+    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+    intent.setPackage("com.google.android.apps.maps")
+    try {
+        ContextCompat.startActivity(context, intent, null)
+    } catch (e: ActivityNotFoundException) {
+        try {
+            val unrestrictedIntent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+            ContextCompat.startActivity(context, unrestrictedIntent, null)
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(context, context.getString(R.string.install_maps_app), Toast.LENGTH_LONG)
+                .show()
+        }
+    }
 }
 
 const val DEFAULT_ZOOM = 15f

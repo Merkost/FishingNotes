@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -416,7 +417,7 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_baseline_minus),
-                            tint = secondaryFigmaTextColor,
+                            tint = primaryFigmaColor,
                             contentDescription = ""
                         )
                     }
@@ -434,7 +435,7 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_baseline_plus),
-                            tint = secondaryFigmaTextColor,
+                            tint = primaryFigmaColor,
                             contentDescription = ""
                         )
                     }
@@ -480,7 +481,7 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_baseline_minus),
-                            tint = secondaryFigmaTextColor,
+                            tint = primaryFigmaColor,
                             contentDescription = ""
                         )
                     }
@@ -499,7 +500,7 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_baseline_plus),
-                            tint = secondaryFigmaTextColor,
+                            tint = primaryFigmaColor,
                             contentDescription = ""
                         )
                     }
@@ -635,9 +636,12 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
             Crossfade(targetState = weather) { weatherForecast ->
                 Column() {
                     Spacer(Modifier.size(8.dp))
+
+                    //Main weather title
                     OutlinedTextField(
                         readOnly = true,
-                        value = weatherForecast.hourly[hour].weather.first().description,
+                        value = weatherForecast.hourly[hour].weather
+                            .first().description.replaceFirstChar {it.uppercase()},
                         leadingIcon = {
                             Icon(
                                 modifier = Modifier.size(32.dp),
@@ -645,7 +649,7 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
                                     id = getWeatherIconByName(weatherForecast.hourly.first().weather.first().icon)
                                 ),
                                 contentDescription = "",
-                                tint = secondaryFigmaTextColor
+                                tint = MaterialTheme.colors.primary
                             )
                         },
                         onValueChange = { },
@@ -659,6 +663,7 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
 
                     Spacer(Modifier.size(8.dp))
 
+                    //Temperature
                     Row(modifier = Modifier.fillMaxWidth()) {
                         OutlinedTextField(
                             readOnly = true,
@@ -667,7 +672,7 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_thermometer),
                                     contentDescription = "",
-                                    tint = secondaryFigmaTextColor
+                                    tint = MaterialTheme.colors.primary
                                 )
                             },
                             trailingIcon = {
@@ -684,6 +689,7 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
 
                         Spacer(modifier = Modifier.padding(4.dp))
 
+                        //Pressure
                         OutlinedTextField(
                             readOnly = true,
                             value = hPaToMmHg(weatherForecast.hourly[hour].pressure).toString(),
@@ -691,12 +697,12 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_gauge),
                                     contentDescription = "",
-                                    tint = secondaryFigmaTextColor
+                                    tint = MaterialTheme.colors.primary
                                 )
                             },
                             trailingIcon = {
                                 Text(
-                                    modifier = Modifier.padding(horizontal = 4.dp),
+                                    modifier = Modifier.padding(horizontal = 8.dp),
                                     text = stringResource(R.string.pressure_units)
                                 )
                             },
@@ -721,7 +727,7 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
                                     modifier = Modifier.rotate(weatherForecast.hourly[hour].windDeg.toFloat()),
                                     painter = painterResource(id = R.drawable.ic_arrow_up),
                                     contentDescription = "",
-                                    tint = secondaryFigmaTextColor,
+                                    tint = MaterialTheme.colors.primary,
                                 )
                             },
                             trailingIcon = {
@@ -747,7 +753,7 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
                                         id = getMoonIconByPhase(viewModel.moonPhase.value)
                                     ),
                                     contentDescription = "",
-                                    tint = secondaryFigmaTextColor
+                                    tint = MaterialTheme.colors.primary
                                 )
                             },
                             onValueChange = { },
@@ -776,6 +782,7 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
 
 @Composable
 fun DateAndTime(date: MutableState<Long>) {
+    val viewModel: NewCatchViewModel = getViewModel()
     val dateSetState = remember { mutableStateOf(false) }
     val timeSetState = remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -791,10 +798,15 @@ fun DateAndTime(date: MutableState<Long>) {
             modifier = Modifier
                 .fillMaxWidth(),
             trailingIcon = {
-                Icon(painter = painterResource(R.drawable.ic_baseline_event_24),
-                    tint = primaryFigmaColor,
-                    contentDescription = stringResource(R.string.date),
-                    modifier = Modifier.clickable { dateSetState.value = true })
+                IconButton(onClick = {
+                    if (viewModel.noErrors.value) dateSetState.value = true
+                    else { SnackbarManager.showMessage(R.string.choose_place_first) }
+                }){
+                    Icon(painter = painterResource(R.drawable.ic_baseline_event_24),
+                        tint = primaryFigmaColor,
+                        contentDescription = stringResource(R.string.date))
+                }
+
             })
         OutlinedTextField(
             value = getTimeByMilliseconds(date.value),
@@ -804,12 +816,15 @@ fun DateAndTime(date: MutableState<Long>) {
             modifier = Modifier
                 .fillMaxWidth(),
             trailingIcon = {
-                Icon(painter = painterResource(R.drawable.ic_baseline_access_time_24),
-                    tint = primaryFigmaColor,
-                    contentDescription = stringResource(R.string.time),
-                    modifier = Modifier.clickable {
-                        timeSetState.value = true
-                    })
+                IconButton(onClick = {
+                    if (viewModel.noErrors.value) timeSetState.value = true
+                    else { SnackbarManager.showMessage(R.string.choose_place_first) }
+                }) {
+                    Icon(painter = painterResource(R.drawable.ic_baseline_access_time_24),
+                        tint = primaryFigmaColor,
+                        contentDescription = stringResource(R.string.time))
+                }
+
             })
     }
 }

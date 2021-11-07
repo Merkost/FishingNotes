@@ -22,9 +22,9 @@ fun AppSnackbar(
     modifier: Modifier = Modifier,
     actionOnNewLine: Boolean = false,
     shape: Shape = CircleShape,
-    /*backgroundColor: Color = JetsnackTheme.colors.uiBackground,
-    contentColor: Color = JetsnackTheme.colors.textSecondary,
-    actionColor: Color = JetsnackTheme.colors.brand,*/
+    backgroundColor: Color = MaterialTheme.colors.surface,
+    contentColor: Color = MaterialTheme.colors.onSurface,
+    //actionColor: Color = JetsnackTheme.colors.brand,
     elevation: Dp = 6.dp
 ) {
     Snackbar(
@@ -32,9 +32,9 @@ fun AppSnackbar(
         modifier = modifier,
         actionOnNewLine = actionOnNewLine,
         shape = shape,
-        backgroundColor = /*backgroundColor*/Color.LightGray,
-        /*contentColor = contentColor,
-        actionColor = actionColor,*/
+        backgroundColor = backgroundColor,
+        contentColor = contentColor,
+        //actionColor = actionColor,
         elevation = elevation
     )
 }
