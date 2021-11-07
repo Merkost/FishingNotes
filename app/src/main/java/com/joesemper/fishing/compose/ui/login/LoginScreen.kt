@@ -1,4 +1,4 @@
-package com.joesemper.fishing.compose.ui
+package com.joesemper.fishing.compose.ui.login
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.CubicBezierEasing
@@ -18,11 +18,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.airbnb.lottie.compose.*
 import com.google.accompanist.insets.systemBarsPadding
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.MainActivity
+import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.AppSnackbar
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
+import com.joesemper.fishing.compose.ui.resources
 import com.joesemper.fishing.compose.ui.theme.FishingNotesTheme
 import com.joesemper.fishing.domain.LoginViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
@@ -62,7 +66,12 @@ fun LoginScreen(navController: NavController) {
                 if ((uiState.value as BaseViewState.Success<*>).data as User? != null) {
                     visible = false
                     delay((MainActivity.splashFadeDurationMillis * 2).toLong())
-                    navController.navigate(MainDestinations.HOME_ROUTE)
+
+                    navController.navigate(MainDestinations.HOME_ROUTE){
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                    }
                 }
             }
             is BaseViewState.Loading -> isLoading = true

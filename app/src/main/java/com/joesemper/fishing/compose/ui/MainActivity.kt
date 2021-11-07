@@ -32,6 +32,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
+import com.joesemper.fishing.compose.ui.login.LoginScreen
 import com.joesemper.fishing.compose.viewmodels.MainViewModel
 import org.koin.android.ext.android.get
 
@@ -87,7 +88,7 @@ class MainActivity : ComponentActivity() {
         } else {
             setTheme(R.style.Theme_SplashScreen)
             setContent {
-                Navigation()
+                FishingNotesApp()
             }
         }
 

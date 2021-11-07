@@ -18,6 +18,7 @@ import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.compose.ui.home.*
+import com.joesemper.fishing.compose.ui.login.LoginScreen
 import com.joesemper.fishing.compose.ui.theme.FishingNotesTheme
 import kotlinx.coroutines.InternalCoroutinesApi
 

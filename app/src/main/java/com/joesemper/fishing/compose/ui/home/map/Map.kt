@@ -533,11 +533,6 @@ fun AddMarkerDialog(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    /*Icon(
-                        painterResource(id = R.drawable.ic_baseline_shortcut_24),
-                        "",
-                        modifier = Modifier.size(24.dp)
-                    )*/
                     Text(
                         stringResource(id = R.string.cancel),
                         //modifier = Modifier.padding(start = 8.dp)

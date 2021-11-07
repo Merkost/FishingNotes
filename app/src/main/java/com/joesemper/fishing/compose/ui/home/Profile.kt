@@ -377,9 +377,12 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
                         viewModel.logoutCurrentUser().collect { isLogout ->
                             if (isLogout) {
                                 dialogOnLogout.value = false
-                                navController.navigate(MainDestinations.LOGIN_ROUTE)
+                                navController.navigate(MainDestinations.LOGIN_ROUTE) {
+                                    popUpTo(0) {
+                                        inclusive = true
+                                    }
+                                }
                             }
-                            //startLoginActivity(context)
                         }
                     }
                 },
