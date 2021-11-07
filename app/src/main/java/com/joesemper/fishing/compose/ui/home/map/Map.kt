@@ -846,17 +846,18 @@ fun DialogOnPlaceChoosing(
                     coroutineScope.launch(Dispatchers.Default) {
                         try {
                             val position = geocoder.getFromLocation(
-                                currentPosition.value!!.latitude,
-                                currentPosition.value!!.longitude,
+                                target.latitude,
+                                target.longitude,
                                 5
                             )
-                            position?.first()?.let {
+                            position?.first()?.let { address ->
                                 viewModel.showMarker.value = true
-                                if (!it.subAdminArea.isNullOrBlank()) {
+                                if (!address.subAdminArea.isNullOrBlank()) {
                                     viewModel.chosenPlace.value =
-                                        it.subAdminArea
-                                } else if (!it.adminArea.isNullOrBlank()) {
-                                    viewModel.chosenPlace.value = it.adminArea
+                                        address.subAdminArea.replaceFirstChar { it.uppercase() }
+                                } else if (!address.adminArea.isNullOrBlank()) {
+                                    viewModel.chosenPlace.value = address.adminArea
+                                        .replaceFirstChar { it.uppercase() }
                                 } else viewModel.chosenPlace.value = "Место без названия"
                             }
                         } catch (e: Throwable) {
