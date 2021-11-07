@@ -2,8 +2,8 @@
 <resources>
     <string name="app_name">Дневник рыболова</string>
     <string name="groups">Группы</string>
-    <string name="logout_dialog_title">Выйти из аккаунта?</string>
-    <string name="logout_dialog_message">All data will be saved</string>
+    <string name="logout_dialog_title">Выход из аккаунта</string>
+    <string name="logout_dialog_message">Вы уверены, что хотите выйти из своего аккаунта?</string>
     <string name="ok_button">OK</string>
     <string name="logout_dialog_cancel">Закрыть</string>
     <string name="title">Название</string>

@@ -367,8 +367,8 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
     val context = LocalContext.current
     val viewModel = getViewModel<UserViewModel>()
     AlertDialog(
-        title = { Text("Выход из аккаунта") },
-        text = { Text("Вы уверены, что хотите выйти из своего аккаунта?") },
+        title = { Text(stringResource(R.string.logout_dialog_title)) },
+        text = { Text(stringResource(R.string.logout_dialog_message)) },
         onDismissRequest = { dialogOnLogout.value = false },
         confirmButton = {
             OutlinedButton(
