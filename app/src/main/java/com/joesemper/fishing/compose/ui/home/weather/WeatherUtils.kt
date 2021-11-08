@@ -14,8 +14,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.joesemper.fishing.ui.theme.backgroundWhiteColor
-import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
+import com.joesemper.fishing.compose.ui.theme.backgroundWhiteColor
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
 
 @Composable
 fun WeatherParameterItem(

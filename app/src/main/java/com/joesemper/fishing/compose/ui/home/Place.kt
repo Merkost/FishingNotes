@@ -30,8 +30,8 @@ import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserPlaceViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.theme.secondaryFigmaColor
-import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalMaterialApi
@@ -302,9 +302,9 @@ fun UserPlaceAppBar(navController: NavController, viewModel: UserPlaceViewModel)
         title = stringResource(id = R.string.place),
         onNavClick = { navController.popBackStack() }
     ) {
-        IconButton(onClick = { }) {
+        /*IconButton(onClick = { }) {
             Icon(imageVector = Icons.Filled.Edit, contentDescription = "", tint = Color.White)
-        }
+        }*/
         IconButton(
             onClick = {
                 viewModel.deletePlace()
@@ -312,9 +312,9 @@ fun UserPlaceAppBar(navController: NavController, viewModel: UserPlaceViewModel)
             }) {
             Icon(imageVector = Icons.Filled.Delete, contentDescription = "", tint = Color.White)
         }
-        IconButton(onClick = { }) {
+        /*IconButton(onClick = { }) {
             Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "", tint = Color.White)
-        }
+        }*/
     }
 }
 

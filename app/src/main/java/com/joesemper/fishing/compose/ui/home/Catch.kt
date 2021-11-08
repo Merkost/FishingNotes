@@ -1,6 +1,7 @@
 package com.joesemper.fishing.compose.ui.home
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -24,14 +25,16 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.Arguments
+import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
 import com.joesemper.fishing.domain.UserCatchViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
-import com.joesemper.fishing.ui.theme.secondaryFigmaColor
-import com.joesemper.fishing.ui.theme.secondaryFigmaTextColor
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
 import com.joesemper.fishing.utils.getDateAndTimeByMilliseconds
 import com.joesemper.fishing.utils.hPaToMmHg
 import org.koin.androidx.compose.getViewModel
@@ -58,9 +61,9 @@ fun CatchTopBar(navController: NavController, viewModel: UserCatchViewModel) {
         title = stringResource(id = R.string.user_catch),
         onNavClick = { navController.popBackStack() }
     ) {
-        IconButton(onClick = { }) {
+        /*IconButton(onClick = { }) {
             Icon(imageVector = Icons.Filled.Edit, contentDescription = "", tint = Color.White)
-        }
+        }*/
         IconButton(modifier = Modifier.padding(horizontal = 4.dp),
             onClick = {
                 viewModel.deleteCatch()
@@ -128,7 +131,7 @@ fun CatchContent(navController: NavController, viewModel: UserCatchViewModel) {
                     },
                     trailingIcon = {
                         Row(modifier = Modifier.padding(end = 2.dp)) {
-                            PrimaryText(text = catch.fishWeight.toString())
+                            PrimaryText(text = catch.fishWeight.toString() + " ")
                             SecondaryText(text = stringResource(id = R.string.kg))
                         }
 
@@ -152,7 +155,7 @@ fun CatchContent(navController: NavController, viewModel: UserCatchViewModel) {
                 SimpleUnderlineTextField(modifier = Modifier.constrainAs(place) {
                     top.linkTo(photos.bottom, 16.dp)
                     absoluteLeft.linkTo(parent.absoluteLeft)
-                },
+                }.clickable { /*navController.navigate(MainDestinations.PLACE_ROUTE, Arguments.PLACE to catch.userMarkerId)*/ },
                     text = catch.placeTitle,
                     label = stringResource(id = R.string.place),
                     leadingIcon = {

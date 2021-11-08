@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,12 +41,13 @@ import androidx.compose.ui.zIndex
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.theme.*
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
+
 
 @Composable
 fun MyCardNoPadding(content: @Composable () -> Unit) {
@@ -56,12 +58,11 @@ fun MyCardNoPadding(content: @Composable () -> Unit) {
 }
 
 @Composable
-fun MyCard(shape: CornerBasedShape = RoundedCornerShape(8.dp), content: @Composable () -> Unit) {
+fun MyCard(shape: CornerBasedShape = RoundedCornerShape(8.dp), modifier: Modifier = Modifier,
+           content: @Composable () -> Unit) {
     Card(
         elevation = 8.dp, shape = shape,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(4.dp), content = content
+        modifier = modifier.fillMaxWidth(), content = content
     )
 }
 
@@ -169,6 +170,8 @@ fun PlaceInfo(user: User?, place: UserMapMarker, placeClicked: (UserMapMarker) -
 
 @Composable
 fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
+    val darkTheme = isSystemInDarkTheme()
+
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
@@ -177,7 +180,7 @@ fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
         Icon(
             painter = painterResource(id = icon),
             contentDescription = stringResource(R.string.place),
-            tint = secondaryFigmaTextColor,
+            tint = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
             modifier = Modifier.size(30.dp)
         )
         Spacer(Modifier.size(8.dp))
@@ -210,6 +213,7 @@ fun HeaderText(
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.h6,
+        maxLines = 1,
         textAlign = TextAlign.Start,
         color = primaryFigmaTextColor,
         text = text
@@ -227,10 +231,13 @@ fun HeaderTextSecondary(
 
 @Composable
 fun SubtitleText(modifier: Modifier = Modifier, text: String) {
+    val darkTheme = isSystemInDarkTheme()
+
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.subtitle1,
-        color = secondaryFigmaTextColor,
+        maxLines = 1,
+        color = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
         text = text
     )
 }
@@ -246,7 +253,8 @@ fun PrimaryText(
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
         fontWeight = fontWeight,
-        color = primaryFigmaTextColor,
+        maxLines = 1,
+        color = MaterialTheme.colors.onSurface,
         text = text
     )
 }
@@ -267,7 +275,7 @@ fun SecondaryText(modifier: Modifier = Modifier, text: String) {
         modifier = modifier,
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
-        color = secondaryFigmaTextColor,
+        color = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
         text = text
     )
 }
@@ -404,8 +412,10 @@ fun SimpleUnderlineTextField(
     label: String = "",
     trailingIcon: @Composable() (() -> Unit)? = null,
     leadingIcon: @Composable() (() -> Unit)? = null,
+    onClick: () -> Unit = { },
     helperText: String? = null
 ) {
+    val darkTheme = isSystemInDarkTheme()
     Column(modifier = modifier) {
         Text(
             text = label,
@@ -413,7 +423,7 @@ fun SimpleUnderlineTextField(
                 .fillMaxWidth()
                 .padding(bottom = 4.dp, start = 8.dp),
             textAlign = TextAlign.Start,
-            color = secondaryFigmaTextColor,
+            color = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
             style = MaterialTheme.typography.body2,
         )
         TextField(
@@ -421,15 +431,15 @@ fun SimpleUnderlineTextField(
             readOnly = true,
             value = text,
             textStyle = MaterialTheme.typography.body1.copy(fontSize = 18.sp),
-            colors = TextFieldDefaults.textFieldColors(
+            /*colors = TextFieldDefaults.textFieldColors(
                 textColor = primaryFigmaTextColor,
                 backgroundColor = backgroundGreenColor,
                 cursorColor = Color.Black,
                 focusedIndicatorColor = primaryFigmaTextColor,
                 unfocusedIndicatorColor = primaryFigmaTextColor
-            ),
+            ),*/
             onValueChange = { },
-//            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(2.dp),
             singleLine = true,
             trailingIcon = trailingIcon,
             leadingIcon = leadingIcon
@@ -579,7 +589,7 @@ fun FabWithMenu(
         }) {
             Icon(
                 modifier = Modifier.rotate(rotation.value),
-                tint = Color.White,
+                tint = MaterialTheme.colors.onPrimary,
                 painter = painterResource(id = R.drawable.ic_baseline_plus),
                 contentDescription = ""
             )
@@ -595,7 +605,7 @@ fun FabMenuItem(item: FabMenuItem, modifier: Modifier = Modifier) {
         onClick = item.onClick
     ) {
         Icon(
-            tint = Color.White,
+            tint = MaterialTheme.colors.onPrimary,
             painter = painterResource(id = item.icon),
             contentDescription = ""
         )

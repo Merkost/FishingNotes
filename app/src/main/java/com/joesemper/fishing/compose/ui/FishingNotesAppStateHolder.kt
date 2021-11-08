@@ -133,13 +133,6 @@ class AppStateHolder(
             }
         }
     }
-
-    fun navigateToSnackDetail(snackId: Long, from: NavBackStackEntry) {
-        // In order to discard duplicated navigation events, we check the Lifecycle
-        if (from.lifecycleIsResumed()) {
-            navController.navigate("${MainDestinations.SNACK_DETAIL_ROUTE}/$snackId")
-        }
-    }
 }
 
 fun NavController.navigate(route: String, vararg args: Pair<String, Parcelable>) {

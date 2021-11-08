@@ -2,8 +2,8 @@
 <resources>
     <string name="app_name">Дневник рыболова</string>
     <string name="groups">Группы</string>
-    <string name="logout_dialog_title">Выйти из аккаунта?</string>
-    <string name="logout_dialog_message">All data will be saved</string>
+    <string name="logout_dialog_title">Выход из аккаунта</string>
+    <string name="logout_dialog_message">Вы уверены, что хотите выйти из своего аккаунта?</string>
     <string name="ok_button">OK</string>
     <string name="logout_dialog_cancel">Закрыть</string>
     <string name="title">Название</string>
@@ -100,7 +100,7 @@
     <string name="navigate">Маршрут</string>
 
     <string name="test_description">"Ловля судака, как и, впрочем, ловля любой рыбы, очень интересное и захватывающее занятие. Получите хороший и удачный улов. "</string>
-    <string name="location">Местоположение:</string>
+    <string name="location">Местоположение</string>
     <string name="calculating">Вычисляем…</string>
     <string name="new_place">Новое место</string>
     <string name="details">Подробнее</string>
@@ -122,12 +122,12 @@
     <string name="map_delete_confirmation">Вы уверены, что хотите удалить данную точку?</string>
     <string name="catch_deletion">Удаление улова</string>
     <string name="catch_delete_confirmantion">Вы уверены, что хотите удалить данный улов?</string>
-    <string name="map_types">Map types</string>
-    <string name="not_specified">Not specified</string>
-    <string name="catch_description">Catch description</string>
+    <string name="map_types">Тип карты</string>
+    <string name="not_specified">Не указано</string>
+    <string name="catch_description">Описание улова</string>
     <string name="note">Заметка</string>
     <string name="user_catch">Улов</string>
-    <string name="cant_get_current_location">Can\'t get current location</string>
+    <string name="cant_get_current_location">Не удается получить текущее местоположение</string>
     <string name="my_location">Моё местоположение</string>
     <string name="layers">Слои</string>
     <string name="terrain">Рельеф</string>
@@ -148,25 +148,32 @@
     <string name="moon_phase">Фаза луны</string>
     <string name="wind">Ветер</string>
     <string name="saving_new_catch">Сохраняем улов</string>
-    <string name="no_added_photos">No added photos</string>
+    <string name="no_added_photos">Нет добавленных фото</string>
     <string name="main">Основное</string>
     <string name="icon">Icon</string>
     <string name="google_login">Вход с помощью google</string>
-    <string name="start_screen_title">Start Screen</string>
+    <string name="start_screen_title">Стартовый экран</string>
     <string name="signin_error">Произошла ошибка при входе, попробуйте еще раз!</string>
     <string name="google_login_failed">Вход через Google не удался. Попробуйте еще раз!</string>
-    <string name="add_place_success">Place added successfully</string>
-    <string name="no_cathces_added">No catches added</string>
+    <string name="add_place_success">Место сохранено на карте</string>
+    <string name="no_cathces_added">Уловы не добавлены</string>
     <string name="add_catch_text">+ Add new catch</string>
     <string name="no_places_added">No places added</string>
     <string name="new_place_text">+ Add new place</string>
     <string name="for_today">Сегодня</string>
     <string name="for_a_week">На неделю</string>
     <string name="login_title">Давайте начнём!</string>
-    <string name="catch_photo" translatable="false">Фото улова</string>
-    <string name="marker_icon" translatable="false">Иконка маркера</string>
+    <string name="catch_photo">Фото улова</string>
+    <string name="marker_icon">Иконка маркера</string>
     <string name="sign_with_google">Войти через Google</string>
-    <string name="signing_in">Выполняется вход...</string>
+    <string name="signing_in">Выполняется вход…</string>
+    <string name="searching">Поиск…</string>
+    <string name="unnamed_place">Место без названия</string>
+    <string name="cant_recognize_place">Не удалось определить место</string>
 
+    <string name="back_clicked">Нажмите еще раз для выхода</string>
+    <string name="current_location">Текущее местоположение</string>
+    <string name="install_maps_app">Please install a maps application</string>
+    <string name="choose_place_first">Для начала выберите место!</string>
 
 </resources>

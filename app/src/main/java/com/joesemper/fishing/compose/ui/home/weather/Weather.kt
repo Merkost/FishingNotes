@@ -19,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.LottieAnimation
@@ -37,7 +38,7 @@ import com.joesemper.fishing.compose.ui.home.notes.Tabs
 import com.joesemper.fishing.domain.WeatherViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
-import com.joesemper.fishing.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -49,7 +50,6 @@ import org.koin.androidx.compose.getViewModel
 @ExperimentalPermissionsApi
 @Composable
 fun Weather(
-    onSnackClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavController,
     upPress: () -> Unit,
@@ -66,10 +66,12 @@ fun Weather(
         getCurrentLocation(context = context, permissionsState = permissionsState)
     }
 
+    val currentlocation = stringResource(R.string.current_location)
+
     val userPlaces by remember {
         val currentPlace =
             UserMapMarker(
-                title = "Current location",
+                title = currentlocation,
                 latitude = lastKnownLocation.value.latitude,
                 longitude = lastKnownLocation.value.longitude
             )
@@ -135,7 +137,7 @@ fun Weather(
                         Icon(imageVector = Icons.Filled.ArrowDropDown, "")
 
                         DropdownMenu(
-                            modifier = Modifier.width(200.dp),
+                            modifier = Modifier.requiredWidthIn(200.dp, 400.dp),
                             expanded = isExpanded,
                             onDismissRequest = {
                                 isExpanded = !isExpanded
@@ -145,7 +147,9 @@ fun Weather(
                                     selectedPlace = userPlaces[index]
                                     isExpanded = !isExpanded
                                 }) {
-                                    Row() {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
+                                    verticalAlignment = Alignment.CenterVertically,) {
                                         Icon(
                                             painter = painterResource(
                                                 id =
@@ -157,10 +161,11 @@ fun Weather(
                                             ),
                                             tint = secondaryFigmaColor,
                                             contentDescription = "Location icon",
-                                            modifier = Modifier.padding(4.dp)
+                                            modifier = Modifier.padding(2.dp)
                                         )
                                         Text(
                                             maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
                                             text = userMapMarker.title
                                         )
                                     }

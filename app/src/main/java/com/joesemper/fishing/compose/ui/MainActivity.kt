@@ -1,36 +1,17 @@
 package com.joesemper.fishing.compose.ui
 
-import android.animation.TimeInterpolator
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
-import android.view.animation.BounceInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -50,8 +31,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.joesemper.fishing.compose.ui.home.LoginScreen
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
+import com.joesemper.fishing.compose.ui.login.LoginScreen
 import com.joesemper.fishing.compose.viewmodels.MainViewModel
 import org.koin.android.ext.android.get
 
@@ -107,11 +88,10 @@ class MainActivity : ComponentActivity() {
         } else {
             setTheme(R.style.Theme_SplashScreen)
             setContent {
-                if ((user.value as BaseViewState.Success<*>).data as User? != null)
-                    FishingNotesApp()
-                else Navigation()
+                FishingNotesApp()
             }
         }
+
         auth = FirebaseAuth.getInstance()
     }
 
@@ -121,66 +101,6 @@ class MainActivity : ComponentActivity() {
         //light тема
         //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
-
-    @ExperimentalAnimationApi
-    @Composable
-    fun StartScreen() {
-        var visible by remember { mutableStateOf(false) }
-
-        Scaffold(
-            content = {
-                Box(
-                    modifier = Modifier
-                        .background(colorResource(id = R.color.blue))
-                        .fillMaxSize(),
-                ) {
-                    AnimatedVisibility(
-                        visible = visible,
-                        enter = slideInVertically(
-                            initialOffsetY = {
-                                // Slide in from top
-                                -it
-                            },
-                            animationSpec = tween(
-                                durationMillis = splashFadeDurationMillis,
-                                easing = CubicBezierEasing(0f, 0f, 0f, 1f)
-
-                            )
-                        ),
-                    ) {
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .padding(0.dp, 0.dp, 0.dp, 0.dp)
-                                .background(colorResource(id = R.color.blue))
-                                .fillMaxSize()
-                        ) {
-                            Text(
-                                stringResource(id = R.string.start_screen_title),
-                                fontSize = 36.sp,
-                                modifier = Modifier.padding(bottom = dimensionResource(R.dimen.start_content_title_margin_bottom)),
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .height(dimensionResource(R.dimen.start_content_size))
-                                    .width(dimensionResource(R.dimen.start_content_size))
-                                    .clip(
-                                        RoundedCornerShape(8.dp)
-                                    )
-                                    .background(color = Color.White)
-                            )
-                        }
-                    }
-                }
-                LaunchedEffect(true) {
-                    visible = true
-                }
-            }
-        )
-    }
 
     @InternalCoroutinesApi
     @ExperimentalMaterialApi
