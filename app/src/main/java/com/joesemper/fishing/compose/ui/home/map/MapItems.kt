@@ -11,15 +11,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.android.libraries.maps.MapView
-import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
 
 @ExperimentalPermissionsApi
@@ -60,7 +57,6 @@ fun MapLayersButton(layersSelectionMode: MutableState<Boolean>, modifier: Modifi
 
 @Composable
 fun LayersView(
-    mapView: MapView,
     mapLayersSelection: MutableState<Boolean>,
     mapType: MutableState<Int>
 ) {
@@ -111,11 +107,6 @@ fun LayersView(
                     painter = painterResource(R.drawable.ic_map_terrain),
                     name = stringResource(R.string.terrain)
                 )
-
-                LaunchedEffect(mapType.value) {
-                    val googleMap = mapView.awaitMap()
-                    googleMap.mapType = mapType.value
-                }
             }
         }
     }

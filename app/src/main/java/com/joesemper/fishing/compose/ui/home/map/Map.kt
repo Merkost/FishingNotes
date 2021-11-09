@@ -1,6 +1,5 @@
 package com.joesemper.fishing.compose.ui.home.map
 
-import android.content.Context
 import android.location.Geocoder
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
@@ -102,7 +101,8 @@ fun Map(
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     // Track if the user doesn't want to see the rationale any more.
     val doNotShowRationale = rememberSaveable { mutableStateOf(false) }
-    val arePermissonsGiven = rememberSaveable { mutableStateOf(permissionsState.allPermissionsGranted) }
+    val arePermissonsGiven =
+        rememberSaveable { mutableStateOf(permissionsState.allPermissionsGranted) }
 
     val scaffoldState = rememberBottomSheetScaffoldState()
 
@@ -274,17 +274,17 @@ fun Map(
 
             //DialogOnAddPlace
             if (dialogAddPlaceIsShowing.value)
-                Dialog(onDismissRequest = { dialogAddPlaceIsShowing.value = false }) {
-                    AddMarkerDialog(currentPosition, dialogAddPlaceIsShowing, viewModel.chosenPlace)
-                }
+//                Dialog(onDismissRequest = { dialogAddPlaceIsShowing.value = false }) {
+//                    AddMarkerDialog(currentPosition, dialogAddPlaceIsShowing, viewModel.chosenPlace)
+//                }
 
             //LayersSelectionView
-            if (mapLayersSelection.value) Surface(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(0f)
-                    .clickable { mapLayersSelection.value = false }, color = Color.White
-            ) { }
+                if (mapLayersSelection.value) Surface(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .alpha(0f)
+                        .clickable { mapLayersSelection.value = false }, color = Color.White
+                ) { }
             AnimatedVisibility(mapLayersSelection.value,
                 enter = expandIn(Alignment.TopStart) + fadeIn(),
                 exit = shrinkOut(
@@ -296,7 +296,7 @@ fun Map(
                     top.linkTo(parent.top, 16.dp)
                     absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
                 }) {
-                LayersView(mapView, mapLayersSelection, mapType)
+//                LayersView(mapView, mapLayersSelection, mapType)
             }
 
             //PlaceName while PlaceSelectMode is active
@@ -309,10 +309,10 @@ fun Map(
                     absoluteRight.linkTo(mapMyLocationButton.absoluteLeft, 8.dp)
                 }
             ) {
-                DialogOnPlaceChoosing(
-                    context, cameraMoveState, mapView, currentPosition,
-                    modifier = Modifier.wrapContentSize(), pointerState
-                )
+//                DialogOnPlaceChoosing(
+//                    context, cameraMoveState, mapView, currentPosition,
+//                    modifier = Modifier.wrapContentSize(), pointerState
+//                )
             }
 
             //PointerIcon
@@ -402,7 +402,7 @@ fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name:
 @ExperimentalMaterialApi
 @Composable
 fun AddMarkerDialog(
-    currentPosition: MutableState<LatLng?>,
+    currentCameraPosition: MutableState<Pair<LatLng, Float>>,
     dialogState: MutableState<Boolean>,
     chosenPlace: MutableState<String?>,
 ) {
@@ -439,7 +439,8 @@ fun AddMarkerDialog(
                             SnackbarManager.showMessage(R.string.add_place_success)
                         }
                     }
-                    else -> { }
+                    else -> {
+                    }
                 }
             }
 
@@ -552,8 +553,8 @@ fun AddMarkerDialog(
                     RawMapMarker(
                         titleValue.value,
                         descriptionValue.value,
-                        currentPosition.value?.latitude ?: 0.0,
-                        currentPosition.value?.longitude ?: 0.0
+                        currentCameraPosition.component1().first.latitude,
+                        currentCameraPosition.component1().first.longitude
                     )
                 )
             }) {
@@ -768,8 +769,10 @@ fun GoogleMapLayout(
             }
 
             //Map styles: https://mapstyle.withgoogle.com
-            if (darkTheme) googleMap.setMapStyle(MapStyleOptions
-                .loadRawResourceStyle(context, R.raw.mapstyle_night))
+            if (darkTheme) googleMap.setMapStyle(
+                MapStyleOptions
+                    .loadRawResourceStyle(context, R.raw.mapstyle_night)
+            )
             googleMap.uiSettings.isMyLocationButtonEnabled = false
 
             //googleMap.uiSettings.isCompassEnabled = true
@@ -791,7 +794,7 @@ fun GoogleMapLayout(
                     location = LatLng(it.latitude, it.longitude) //here we got 0.0
                 )
             }
-        } else /*(mapUiState != MapUiState.BottomSheetInfoMode) */{
+        } else /*(mapUiState != MapUiState.BottomSheetInfoMode) */ {
             moveCameraToLocation(
                 coroutineScope = coroutineScope,
                 map = map,
@@ -824,13 +827,12 @@ fun GoogleMapLayout(
 @ExperimentalAnimationApi
 @Composable
 fun DialogOnPlaceChoosing(
-    context: Context,
-    cameraMoveState: CameraMoveState,
-    mapView: MapView,
-    currentPosition: MutableState<LatLng?>,
     modifier: Modifier,
+    cameraMoveState: CameraMoveState,
+    currentCameraPosition: MutableState<Pair<LatLng, Float>>,
     pointerState: MutableState<PointerState>
 ) {
+    val context = LocalContext.current
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
     val geocoder = Geocoder(context)
@@ -849,34 +851,28 @@ fun DialogOnPlaceChoosing(
         CameraMoveState.MoveFinish -> {
             LaunchedEffect(cameraMoveState) {
                 delay(1200)
-                mapView.getMapAsync { googleMap ->
-                    val target = googleMap.cameraPosition.target
-
-                    currentPosition.value = LatLng(target.latitude, target.longitude)
-                    coroutineScope.launch(Dispatchers.Default) {
-                        try {
-                            val position = geocoder.getFromLocation(
-                                target.latitude,
-                                target.longitude,
-                                5
-                            )
-                            position?.first()?.let { address ->
-                                viewModel.showMarker.value = true
-                                if (!address.subAdminArea.isNullOrBlank()) {
-                                    viewModel.chosenPlace.value =
-                                        address.subAdminArea.replaceFirstChar { it.uppercase() }
-                                } else if (!address.adminArea.isNullOrBlank()) {
-                                    viewModel.chosenPlace.value = address.adminArea
-                                        .replaceFirstChar { it.uppercase() }
-                                } else viewModel.chosenPlace.value = "Место без названия"
-                            }
-                        } catch (e: Throwable) {
-                            viewModel.chosenPlace.value = "Не удалось определить место"
+                coroutineScope.launch(Dispatchers.Default) {
+                    try {
+                        val position = geocoder.getFromLocation(
+                            currentCameraPosition.component1().first.latitude,
+                            currentCameraPosition.component1().first.longitude,
+                            1
+                        )
+                        position?.first()?.let { address ->
+                            viewModel.showMarker.value = true
+                            if (!address.subAdminArea.isNullOrBlank()) {
+                                viewModel.chosenPlace.value =
+                                    address.subAdminArea.replaceFirstChar { it.uppercase() }
+                            } else if (!address.adminArea.isNullOrBlank()) {
+                                viewModel.chosenPlace.value = address.adminArea
+                                    .replaceFirstChar { it.uppercase() }
+                            } else viewModel.chosenPlace.value = "Место без названия"
                         }
-                        pointerState.value = PointerState.HideMarker
-                        selectedPlace = viewModel.chosenPlace.value
+                    } catch (e: Throwable) {
+                        viewModel.chosenPlace.value = "Не удалось определить место"
                     }
-
+                    pointerState.value = PointerState.HideMarker
+                    selectedPlace = viewModel.chosenPlace.value
                 }
             }
         }
@@ -940,9 +936,10 @@ fun PointerIcon(
     var isFirstTimeCalled = remember { true }
     val coroutineScope = rememberCoroutineScope()
 
-val darkTheme = isSystemInDarkTheme()
+    val darkTheme = isSystemInDarkTheme()
     val composition by rememberLottieComposition(
-        LottieCompositionSpec.RawRes(if (darkTheme) R.raw.marker_night else R.raw.marker))
+        LottieCompositionSpec.RawRes(if (darkTheme) R.raw.marker_night else R.raw.marker)
+    )
     val lottieAnimatable = rememberLottieAnimatable()
 
     val startMinMaxFrame by remember {
@@ -1037,7 +1034,8 @@ fun PermissionDialog(
 @ExperimentalPermissionsApi
 fun GrantPermissionsDialog(permissionsState: MultiplePermissionsState) {
     Dialog(onDismissRequest = {}) {
-        Card(shape = RoundedCornerShape(25.dp),
+        Card(
+            shape = RoundedCornerShape(25.dp),
             modifier = Modifier
                 .wrapContentSize()
                 .padding(8.dp)

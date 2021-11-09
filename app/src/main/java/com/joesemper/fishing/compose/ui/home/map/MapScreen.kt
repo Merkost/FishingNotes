@@ -1,9 +1,9 @@
 package com.joesemper.fishing.compose.ui.home.map
 
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -18,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
@@ -58,6 +60,7 @@ fun MapScreen(
     val dialogAddPlaceIsShowing = remember { mutableStateOf(false) }
 
     val mapLayersSelection = rememberSaveable { mutableStateOf(false) }
+    val mapType = rememberSaveable { mutableStateOf(MapTypes.roadmap) }
 
     var mapUiState: MapUiState by remember {
         if (addPlaceOnStart) mutableStateOf(MapUiState.PlaceSelectMode)
@@ -70,6 +73,10 @@ fun MapScreen(
 
     val pointerState: MutableState<PointerState> = remember {
         mutableStateOf(PointerState.HideMarker)
+    }
+
+    val currentCameraPosition = remember {
+        mutableStateOf(Pair(LatLng(0.0, 0.0), 20f))
     }
 
     LaunchedEffect(mapUiState) {
@@ -147,9 +154,9 @@ fun MapScreen(
                     viewModel.currentMarker.value = it
                     mapUiState = MapUiState.BottomSheetInfoMode
                 },
-                cameraMoveCallback = {
-                    cameraMoveState = it
-                }
+                cameraMoveCallback = { state -> cameraMoveState = state },
+                currentCameraPosition = currentCameraPosition,
+                mapType = mapType
             )
 
             MapLayersButton(
@@ -159,6 +166,26 @@ fun MapScreen(
                 },
                 layersSelectionMode = mapLayersSelection,
             )
+
+            if (mapLayersSelection.value) Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(0f)
+                    .clickable { mapLayersSelection.value = false }, color = Color.White
+            ) { }
+            AnimatedVisibility(mapLayersSelection.value,
+                enter = expandIn(Alignment.TopStart) + fadeIn(),
+                exit = shrinkOut(
+                    Alignment.TopStart,
+                    animationSpec = tween(380)
+                )
+                        + fadeOut(animationSpec = tween(280)),
+                modifier = Modifier.constrainAs(mapLayersView) {
+                    top.linkTo(parent.top, 16.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                }) {
+                LayersView(mapLayersSelection, mapType)
+            }
 
             AnimatedVisibility(
                 modifier = modifier.constrainAs(mapMyLocationButton) {
@@ -185,6 +212,32 @@ fun MapScreen(
                 }) {
                 PointerIcon(cameraMoveState = cameraMoveState, pointerState)
             }
+
+            AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection.value,
+                enter = fadeIn(animationSpec = tween(300)),
+                exit = fadeOut(animationSpec = tween(300)),
+                modifier = Modifier.constrainAs(addMarkerFragment) {
+                    top.linkTo(parent.top, 16.dp)
+                    absoluteLeft.linkTo(mapLayersButton.absoluteRight, 8.dp)
+                    absoluteRight.linkTo(mapMyLocationButton.absoluteLeft, 8.dp)
+                }
+            ) {
+                DialogOnPlaceChoosing(
+                    modifier = Modifier.wrapContentSize(),
+                    cameraMoveState = cameraMoveState,
+                    currentCameraPosition = currentCameraPosition,
+                    pointerState = pointerState
+                )
+            }
+
+            if (dialogAddPlaceIsShowing.value)
+                Dialog(onDismissRequest = { dialogAddPlaceIsShowing.value = false }) {
+                    AddMarkerDialog(
+                        currentCameraPosition = currentCameraPosition,
+                        dialogState = dialogAddPlaceIsShowing,
+                        chosenPlace = viewModel.chosenPlace
+                    )
+                }
         }
     }
 }
@@ -196,8 +249,9 @@ fun MapScreen(
 fun MapLayout(
     modifier: Modifier = Modifier,
     onMarkerClick: (marker: UserMapMarker) -> Unit,
-    cameraMoveCallback: (state: CameraMoveState) -> Unit
-
+    cameraMoveCallback: (state: CameraMoveState) -> Unit,
+    currentCameraPosition: MutableState<Pair<LatLng, Float>>,
+    mapType: MutableState<Int>
 ) {
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
@@ -205,10 +259,6 @@ fun MapLayout(
     val markers = viewModel.getAllMarkers().collectAsState()
     val map = rememberMapViewWithLifecycle()
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
-
-    var lastCameraPosition by remember() {
-        mutableStateOf(Pair(LatLng(0.0, 0.0), DEFAULT_ZOOM))
-    }
 
     var isMapVisible by remember {
         mutableStateOf(false)
@@ -238,7 +288,7 @@ fun MapLayout(
                 }
                 googleMap.setOnCameraIdleListener {
                     cameraMoveCallback(CameraMoveState.MoveFinish)
-                    lastCameraPosition =
+                    currentCameraPosition.value =
                         Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom)
                 }
                 googleMap.setOnMarkerClickListener { marker ->
@@ -279,9 +329,14 @@ fun MapLayout(
         }
     }
 
+    LaunchedEffect(mapType.value) {
+        val googleMap = map.awaitMap()
+        googleMap.mapType = mapType.value
+    }
+
     DisposableEffect(map) {
         onDispose {
-            viewModel.lastMapCameraPosition.value = lastCameraPosition
+            viewModel.lastMapCameraPosition.value = currentCameraPosition.value
         }
     }
 }
