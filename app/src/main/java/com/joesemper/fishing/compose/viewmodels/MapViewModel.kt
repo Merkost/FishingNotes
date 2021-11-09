@@ -5,9 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.maps.model.LatLng
-import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.UiState
-import com.joesemper.fishing.compose.ui.home.map.LocationState
 import com.joesemper.fishing.compose.ui.home.map.MapUiState
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.Progress
@@ -21,7 +19,6 @@ import kotlinx.coroutines.launch
 
 class MapViewModel(
     private val repository: UserContentRepository,
-    private val snackbarManager: SnackbarManager,
 ) : ViewModel() {
 
     val showMarker: MutableState<Boolean> = mutableStateOf(false)
@@ -38,8 +35,6 @@ class MapViewModel(
 
     val firstLaunchLocation = mutableStateOf(true)
 
-    val lastKnownUserLocation = mutableStateOf<LocationState>(LocationState.LocationNotGranted)
-
     val lastKnownLocation = mutableStateOf<LatLng?>(null)
     val lastMapCameraPosition = mutableStateOf<Pair<LatLng, Float>?>(null)
 
@@ -52,9 +47,6 @@ class MapViewModel(
     }
 
     fun getAllMarkers(): StateFlow<List<UserMapMarker>> = mapMarkers
-
-    fun subscribe(): StateFlow<BaseViewState> = viewStateFlow //not Used in Compose screens
-
 
     override fun onCleared() {
         super.onCleared()
@@ -88,5 +80,4 @@ class MapViewModel(
     private fun onError(error: Throwable) {
         viewStateFlow.value = BaseViewState.Error(error)
     }
-
 }

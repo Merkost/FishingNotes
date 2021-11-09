@@ -213,7 +213,6 @@ fun HeaderText(
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.h6,
-        maxLines = 1,
         textAlign = TextAlign.Start,
         color = primaryFigmaTextColor,
         text = text
@@ -236,7 +235,6 @@ fun SubtitleText(modifier: Modifier = Modifier, text: String) {
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.subtitle1,
-        maxLines = 1,
         color = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
         text = text
     )
@@ -253,7 +251,6 @@ fun PrimaryText(
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
         fontWeight = fontWeight,
-        maxLines = 1,
         color = MaterialTheme.colors.onSurface,
         text = text
     )

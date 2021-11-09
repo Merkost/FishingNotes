@@ -10,21 +10,12 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.BottomSheetScaffold
-import androidx.compose.material.BottomSheetScaffoldState
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -39,11 +30,6 @@ import com.google.android.libraries.maps.model.LatLng
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.MainActivity
-import com.joesemper.fishing.compose.ui.home.DefaultButton
-import com.joesemper.fishing.compose.ui.home.DefaultButtonText
-import com.joesemper.fishing.compose.ui.home.DefaultCard
-import com.joesemper.fishing.compose.ui.home.PrimaryText
-import com.joesemper.fishing.compose.ui.theme.Shapes
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.utils.showToast
 import kotlinx.coroutines.CoroutineScope
@@ -70,6 +56,20 @@ sealed class PointerState {
     object HideMarker : PointerState()
     object ShowMarker : PointerState()
 }
+
+sealed class LocationState() {
+    object NoPermission : LocationState()
+    class LocationGranted(val location: LatLng) : LocationState()
+    object LocationNotGranted : LocationState()
+}
+
+sealed class MapUiState {
+    object NormalMode : MapUiState()
+    object PlaceSelectMode : MapUiState()
+    object BottomSheetInfoMode : MapUiState()
+}
+
+const val DEFAULT_ZOOM = 15f
 
 val locationPermissionsList = listOf(
     Manifest.permission.ACCESS_FINE_LOCATION,
@@ -230,42 +230,6 @@ fun startMapsActivityForNavigation(mapMarker: UserMapMarker, context: Context) {
 }
 
 @Composable
-@ExperimentalPermissionsApi
-fun GrantPermissionsDialog(
-    onDismiss: () -> Unit,
-    onPositiveClick: () -> Unit,
-    onNegativeClick: () -> Unit,
-) {
-    Dialog(onDismissRequest = onDismiss) {
-        DefaultCard() {
-            Column(
-                modifier = Modifier
-                    .wrapContentSize()
-                    .padding(8.dp)
-            ) {
-                PrimaryText(text = "For convenient use this application needs the location permission.\nAllow this app to receive location data?")
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    DefaultButtonText(
-                        text = stringResource(id = R.string.cancel),
-                        onClick = onNegativeClick
-                    )
-                    DefaultButton(
-                        text = stringResource(id = R.string.ok),
-                        onClick = onPositiveClick
-                    )
-//                        { permissionsState.launchMultiplePermissionRequest() })
-                    Spacer(Modifier.width(8.dp))
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun BackPressHandler(
     mapUiState: MapUiState,
     onBackPressedCallback: () -> Unit
@@ -304,27 +268,3 @@ fun rememberMapViewWithLifecycle(): MapView {
     }
     return mapView
 }
-
-@ExperimentalMaterialApi
-@Composable
-fun MapScaffold(
-    modifier: Modifier = Modifier,
-    scaffoldState: BottomSheetScaffoldState,
-    fab: @Composable() (() -> Unit)?,
-    bottomSheet: @Composable() (ColumnScope.() -> Unit),
-    content: @Composable (PaddingValues) -> Unit
-) {
-    BottomSheetScaffold(
-        modifier = modifier.fillMaxSize(),
-        scaffoldState = scaffoldState,
-        sheetShape = Shapes.large,
-        sheetBackgroundColor = Color.White.copy(0f),
-        sheetElevation = 0.dp,
-        sheetPeekHeight = 0.dp,
-        floatingActionButton = fab,
-        sheetContent = bottomSheet,
-        content = content
-    )
-}
-
-const val DEFAULT_ZOOM = 15f

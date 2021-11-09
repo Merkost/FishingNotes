@@ -38,7 +38,6 @@ import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.utils.getTimeByMilliseconds
 
 @ExperimentalComposeUiApi
