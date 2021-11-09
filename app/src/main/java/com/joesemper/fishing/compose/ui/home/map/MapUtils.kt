@@ -38,13 +38,13 @@ import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.LatLng
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.compose.ui.MainActivity
 import com.joesemper.fishing.compose.ui.home.DefaultButton
 import com.joesemper.fishing.compose.ui.home.DefaultButtonText
 import com.joesemper.fishing.compose.ui.home.DefaultCard
 import com.joesemper.fishing.compose.ui.home.PrimaryText
-import com.joesemper.fishing.ui.theme.Shapes
+import com.joesemper.fishing.compose.ui.theme.Shapes
+import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.utils.showToast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -84,6 +84,7 @@ fun moveCameraToLocation(
 ) {
     coroutineScope.launch {
         val googleMap = map.awaitMap()
+        googleMap.stopAnimation()
         googleMap.animateCamera(
             CameraUpdateFactory.newLatLngZoom(
                 location,

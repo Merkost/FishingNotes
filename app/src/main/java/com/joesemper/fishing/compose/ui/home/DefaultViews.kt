@@ -275,7 +275,7 @@ fun SecondaryText(modifier: Modifier = Modifier, text: String) {
         modifier = modifier,
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
-        color = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
+        color = secondaryFigmaTextColor,
         text = text
     )
 }

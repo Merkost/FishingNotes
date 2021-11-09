@@ -10,34 +10,34 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.android.libraries.maps.MapView
-import com.google.android.libraries.maps.model.LatLng
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
-import kotlinx.coroutines.CoroutineScope
 
 @ExperimentalPermissionsApi
 @Composable
 fun MyLocationButton(
-    coroutineScope: CoroutineScope,
-    mapView: MapView,
-    lastKnownLocation: LatLng,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
-    Card(shape = CircleShape, modifier = modifier) {
-        androidx.compose.material.IconButton(modifier = Modifier
-            .padding(8.dp)
-            .fillMaxSize(),
-            onClick = { lastKnownLocation?.let {
-                moveCameraToLocation(coroutineScope, mapView, lastKnownLocation)
-            } }) {
+    Card(
+        shape = CircleShape,
+        modifier = modifier.size(40.dp)
+    ) {
+        IconButton(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxSize(),
+            onClick = onClick
+        ) {
             Icon(Icons.Default.MyLocation, stringResource(R.string.my_location))
         }
     }
@@ -45,7 +45,10 @@ fun MyLocationButton(
 
 @Composable
 fun MapLayersButton(layersSelectionMode: MutableState<Boolean>, modifier: Modifier) {
-    Card(shape = CircleShape, modifier = modifier) {
+    Card(
+        shape = CircleShape,
+        modifier = modifier.size(40.dp)
+    ) {
         IconButton(modifier = Modifier
             .padding(8.dp)
             .fillMaxSize(),

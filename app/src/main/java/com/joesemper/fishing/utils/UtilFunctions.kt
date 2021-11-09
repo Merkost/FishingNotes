@@ -5,7 +5,9 @@ import android.net.Uri
 import android.view.View
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.google.android.libraries.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.joesemper.fishing.compose.ui.home.map.DEFAULT_ZOOM
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.pow
@@ -132,5 +134,11 @@ fun showToast(context: Context, text: String) {
 
 fun readBytes(context: Context, uri: Uri): ByteArray? =
     context.contentResolver.openInputStream(uri)?.buffered()?.use { it.readBytes() }
+
+fun getCameraPosition(latLng: LatLng): Pair<LatLng, Float> {
+    val lat = latLng.latitude + ((-100..100).random() * 0.000000001)
+    val lng = latLng.longitude + ((-100..100).random() * 0.000000001)
+    return Pair(LatLng(lat, lng), DEFAULT_ZOOM)
+}
 
 

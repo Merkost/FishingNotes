@@ -1,11 +1,7 @@
 package com.joesemper.fishing.compose.ui.home.map
 
-import android.content.ActivityNotFoundException
 import android.content.Context
-import android.content.Intent
 import android.location.Geocoder
-import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -30,7 +26,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -45,10 +40,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
-import com.airbnb.lottie.LottieComposition
-import com.airbnb.lottie.LottieProperty
 import com.airbnb.lottie.compose.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
@@ -67,15 +59,12 @@ import com.joesemper.fishing.compose.ui.home.MyCard
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.UiState
 import com.joesemper.fishing.compose.ui.navigate
+import com.joesemper.fishing.compose.ui.theme.Shapes
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
-import com.joesemper.fishing.compose.ui.theme.Shapes
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.utils.showToast
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -83,7 +72,6 @@ import kotlinx.coroutines.launch
 import me.vponomarenko.compose.shimmer.shimmer
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
-import java.util.*
 
 
 sealed class LocationState() {
@@ -274,14 +262,14 @@ fun Map(
 
             //MyLocationButton
             if (lastKnownLocationState is LocationState.LocationGranted) {
-                MyLocationButton(coroutineScope, mapView,
-                    (lastKnownLocationState as LocationState.LocationGranted).location,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .constrainAs(mapMyLocationButton) {
-                            top.linkTo(parent.top, 16.dp)
-                            absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-                        })
+//                MyLocationButton(coroutineScope, mapView,
+//                    (lastKnownLocationState as LocationState.LocationGranted).location,
+//                    modifier = Modifier
+//                        .size(40.dp)
+//                        .constrainAs(mapMyLocationButton) {
+//                            top.linkTo(parent.top, 16.dp)
+//                            absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+//                        })
             }
 
             //DialogOnAddPlace
@@ -426,7 +414,8 @@ fun AddMarkerDialog(
     MyCard(shape = Shapes.large, modifier = Modifier.wrapContentHeight()) {
         ConstraintLayout(
             modifier = Modifier
-                .wrapContentHeight().padding(4.dp)
+                .wrapContentHeight()
+                .padding(4.dp)
         ) {
             val (progress, name, locationIcon, title, description, saveButton, cancelButton) = createRefs()
 
@@ -497,11 +486,15 @@ fun AddMarkerDialog(
                 keyboardActions = KeyboardActions(
                     onNext = { textField2.requestFocus() }
                 ),
-                modifier = Modifier.constrainAs(title) {
-                    top.linkTo(name.bottom, 12.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                    absoluteRight.linkTo(parent.absoluteRight)
-                }.focusRequester(textField1).padding(horizontal = 8.dp).fillMaxWidth()
+                modifier = Modifier
+                    .constrainAs(title) {
+                        top.linkTo(name.bottom, 12.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                    }
+                    .focusRequester(textField1)
+                    .padding(horizontal = 8.dp)
+                    .fillMaxWidth()
             )
 
             OutlinedTextField(
@@ -518,11 +511,15 @@ fun AddMarkerDialog(
                 keyboardActions = KeyboardActions(
                     onDone = { keyboardController?.hide() }
                 ),
-                modifier = Modifier.constrainAs(description) {
-                    top.linkTo(title.bottom, 2.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                    absoluteRight.linkTo(parent.absoluteRight)
-                }.focusRequester(textField2).padding(horizontal = 8.dp).fillMaxWidth()
+                modifier = Modifier
+                    .constrainAs(description) {
+                        top.linkTo(title.bottom, 2.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                    }
+                    .focusRequester(textField2)
+                    .padding(horizontal = 8.dp)
+                    .fillMaxWidth()
             )
 
             OutlinedButton(modifier = Modifier.constrainAs(cancelButton) {
@@ -601,7 +598,8 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?, onDescriptionClick: (UserMap
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(horizontal = 8.dp).padding(bottom = 8.dp)
+            .padding(horizontal = 8.dp)
+            .padding(bottom = 8.dp)
             .clip(Shapes.large)
     ) {
         marker?.let {
@@ -635,10 +633,12 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?, onDescriptionClick: (UserMap
                 Text(
                     text = marker.title,
                     style = MaterialTheme.typography.h5,
-                    modifier = Modifier.padding(end = 56.dp).constrainAs(title) {
-                        top.linkTo(parent.top, 16.dp)
-                        absoluteLeft.linkTo(locationIcon.absoluteRight, 8.dp)
-                    }
+                    modifier = Modifier
+                        .padding(end = 56.dp)
+                        .constrainAs(title) {
+                            top.linkTo(parent.top, 16.dp)
+                            absoluteLeft.linkTo(locationIcon.absoluteRight, 8.dp)
+                        }
                 )
 
                 Text(
@@ -713,11 +713,15 @@ fun BottomSheetMarkerDialog(marker: UserMapMarker?, onDescriptionClick: (UserMap
 @Composable
 fun BottomSheetLine(modifier: Modifier = Modifier) {
     Row(
-        modifier = modifier.fillMaxWidth().padding(2.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(2.dp),
         horizontalArrangement = Arrangement.Center
     ) {
         Box(
-            modifier = Modifier.size(width = 25.dp, height = 3.dp).clip(CircleShape)
+            modifier = Modifier
+                .size(width = 25.dp, height = 3.dp)
+                .clip(CircleShape)
                 .background(Color.Gray)
         ) {}
     }
@@ -893,10 +897,13 @@ fun DialogOnPlaceChoosing(
         shape = RoundedCornerShape(size = 20.dp),
         modifier = modifier
             .heightIn(min = 40.dp, max = 80.dp)
-            .widthIn(max = 240.dp).animateContentSize(
+            .widthIn(max = 240.dp)
+            .animateContentSize(
                 animationSpec = tween(
                     durationMillis = 300,
-                    easing = LinearOutSlowInEasing)),
+                    easing = LinearOutSlowInEasing
+                )
+            ),
     ) {
         Row(
             modifier = Modifier
@@ -1054,23 +1061,6 @@ fun GrantPermissionsDialog(permissionsState: MultiplePermissionsState) {
             }
         }
     }
-}
-
-@Composable
-fun rememberMapViewWithLifecycle(): MapView {
-    val context = LocalContext.current
-    val mapView: MapView = remember { MapView(context).apply { id = R.id.map } }
-
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    DisposableEffect(lifecycle, mapView) {
-        // Make MapView follow the current lifecycle
-        val lifecycleObserver = getMapLifecycleObserver(mapView)
-        lifecycle.addObserver(lifecycleObserver)
-        onDispose {
-            lifecycle.removeObserver(lifecycleObserver)
-        }
-    }
-    return mapView
 }
 
 @Composable

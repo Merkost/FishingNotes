@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,9 +32,10 @@ import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.DefaultCard
 import com.joesemper.fishing.compose.ui.navigate
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.utils.getCameraPosition
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -55,14 +57,23 @@ fun MapScreen(
     val scaffoldState = rememberBottomSheetScaffoldState()
     val dialogAddPlaceIsShowing = remember { mutableStateOf(false) }
 
+    val mapLayersSelection = rememberSaveable { mutableStateOf(false) }
+
     var mapUiState: MapUiState by remember {
         if (addPlaceOnStart) mutableStateOf(MapUiState.PlaceSelectMode)
         else mutableStateOf(viewModel.mapUiState)
     }
 
+    var cameraMoveState: CameraMoveState by remember {
+        mutableStateOf(CameraMoveState.MoveFinish)
+    }
+
+    val pointerState: MutableState<PointerState> = remember {
+        mutableStateOf(PointerState.HideMarker)
+    }
+
     LaunchedEffect(mapUiState) {
         viewModel.mapUiState = mapUiState
-
         when (mapUiState) {
             MapUiState.NormalMode -> {
                 scaffoldState.bottomSheetState.collapse()
@@ -120,18 +131,61 @@ fun MapScreen(
             }
         }
     ) {
-
         LocationPermissionDialog()
+        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+            val (mapLayout, addMarkerFragment, mapMyLocationButton, mapLayersButton,
+                mapLayersView, pointer) = createRefs()
 
-        MapLayout(
-            onMarkerClick = {
-                viewModel.currentMarker.value = it
-                mapUiState = MapUiState.BottomSheetInfoMode
-            },
-            cameraMoveCallback = {
+            MapLayout(
+                modifier = Modifier.constrainAs(mapLayout) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    absoluteRight.linkTo(parent.absoluteRight)
+                },
+                onMarkerClick = {
+                    viewModel.currentMarker.value = it
+                    mapUiState = MapUiState.BottomSheetInfoMode
+                },
+                cameraMoveCallback = {
+                    cameraMoveState = it
+                }
+            )
 
+            MapLayersButton(
+                modifier = Modifier.constrainAs(mapLayersButton) {
+                    top.linkTo(parent.top, 16.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                },
+                layersSelectionMode = mapLayersSelection,
+            )
+
+            AnimatedVisibility(
+                modifier = modifier.constrainAs(mapMyLocationButton) {
+                    top.linkTo(parent.top, 16.dp)
+                    absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+                },
+                visible = (viewModel.lastKnownLocation.value != null)
+            ) {
+                MyLocationButton(
+                    onClick = {
+                        viewModel.lastKnownLocation.value?.let {
+                            viewModel.lastMapCameraPosition.value = getCameraPosition(it)
+                        }
+                    }
+                )
             }
-        )
+
+            AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode,
+                modifier = Modifier.constrainAs(pointer) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom, 65.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    absoluteRight.linkTo(parent.absoluteRight)
+                }) {
+                PointerIcon(cameraMoveState = cameraMoveState, pointerState)
+            }
+        }
     }
 }
 
