@@ -8,33 +8,35 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.joesemper.fishing.R
-import com.joesemper.fishing.domain.viewstates.BaseViewState
-import com.joesemper.fishing.model.entity.common.User
-import com.joesemper.fishing.utils.Logger
-import kotlinx.coroutines.InternalCoroutinesApi
-import org.koin.android.ext.android.inject
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.login.LoginScreen
 import com.joesemper.fishing.compose.viewmodels.MainViewModel
+import com.joesemper.fishing.domain.viewstates.BaseViewState
+import com.joesemper.fishing.model.entity.common.User
+import com.joesemper.fishing.utils.Logger
+import kotlinx.coroutines.InternalCoroutinesApi
 import org.koin.android.ext.android.get
+import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
 
@@ -52,6 +54,7 @@ class MainActivity : ComponentActivity() {
         const val splashFadeDurationMillis = 300
     }
 
+    @ExperimentalComposeUiApi
     @ExperimentalPermissionsApi
     @ExperimentalPagerApi
     @ExperimentalAnimationApi
@@ -102,6 +105,7 @@ class MainActivity : ComponentActivity() {
         //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
 
+    @ExperimentalComposeUiApi
     @InternalCoroutinesApi
     @ExperimentalMaterialApi
     @ExperimentalPagerApi

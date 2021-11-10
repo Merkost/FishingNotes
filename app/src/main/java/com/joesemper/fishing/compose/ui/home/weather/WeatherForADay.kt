@@ -2,46 +2,57 @@ package com.joesemper.fishing.compose.ui.home.weather
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.*
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.MaterialTheme
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.PrimaryText
-import com.joesemper.fishing.model.entity.weather.WeatherForecast
-import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.compose.ui.theme.backgroundGreenColor
 import com.joesemper.fishing.compose.ui.theme.primaryFigmaBackgroundTint
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
-import com.joesemper.fishing.utils.*
+import com.joesemper.fishing.model.entity.weather.WeatherForecast
+import com.joesemper.fishing.model.mappers.getWeatherIconByName
+import com.joesemper.fishing.utils.getDateBySeconds
+import com.joesemper.fishing.utils.getTimeBySeconds
+import com.joesemper.fishing.utils.hPaToMmHg
 
 @Composable
 fun WeatherForADay(weather: WeatherForecast) {
-    Scaffold(modifier = Modifier.fillMaxSize()) {
-        Surface(border = BorderStroke(0.1.dp, secondaryFigmaTextColor)) {
-            Row {
-                val verticalScrollState = rememberScrollState()
-                WeatherParametersForADay(weather = weather, scrollState = verticalScrollState)
-                WeatherParametersForADayMeanings(
-                    weather = weather,
-                    scrollState = verticalScrollState
-                )
+    Scaffold(
+        backgroundColor = Color.Transparent,
+        modifier = Modifier.fillMaxSize()
+    ) {
+
+        LazyColumn() {
+            items(weather.hourly.size) { index ->
+                HourlyWeatherItem(forecast = weather.hourly[index])
             }
         }
+
+//        Surface(border = BorderStroke(0.1.dp, secondaryFigmaTextColor)) {
+//            Row {
+//                val verticalScrollState = rememberScrollState()
+//                WeatherParametersForADay(weather = weather, scrollState = verticalScrollState)
+//                WeatherParametersForADayMeanings(
+//                    weather = weather,
+//                    scrollState = verticalScrollState
+//                )
+//            }
+//        }
     }
 }
 

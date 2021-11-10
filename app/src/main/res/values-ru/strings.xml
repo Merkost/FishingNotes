@@ -175,5 +175,6 @@
     <string name="current_location">Текущее местоположение</string>
     <string name="install_maps_app">Please install a maps application</string>
     <string name="choose_place_first">Для начала выберите место!</string>
+    <string name="precipitation">Осадки</string>
 
 </resources>

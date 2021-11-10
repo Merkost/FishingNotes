@@ -35,6 +35,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.map.getCurrentLocation
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
+import com.joesemper.fishing.compose.ui.home.notes.BackgroundImage
 import com.joesemper.fishing.compose.ui.home.notes.TabItem
 import com.joesemper.fishing.compose.ui.home.notes.Tabs
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
@@ -247,9 +248,13 @@ fun WeatherTabs(tabs: List<TabItem>, pagerState: PagerState) {
 @ExperimentalPagerApi
 @Composable
 fun WeatherTabsContent(tabs: List<TabItem>, pagerState: PagerState, navController: NavController) {
-    HorizontalPager(state = pagerState) { page ->
-        tabs[page].screen(navController)
+    Box {
+        BackgroundImage()
+        HorizontalPager(state = pagerState) { page ->
+            tabs[page].screen(navController)
+        }
     }
+
 }
 
 

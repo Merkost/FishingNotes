@@ -58,8 +58,10 @@ fun MyCardNoPadding(content: @Composable () -> Unit) {
 }
 
 @Composable
-fun MyCard(shape: CornerBasedShape = RoundedCornerShape(8.dp), modifier: Modifier = Modifier,
-           content: @Composable () -> Unit) {
+fun MyCard(
+    shape: CornerBasedShape = RoundedCornerShape(8.dp), modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
     Card(
         elevation = 8.dp, shape = shape,
         modifier = modifier.fillMaxWidth(), content = content
@@ -212,8 +214,8 @@ fun HeaderText(
 ) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.h6,
-        textAlign = TextAlign.Start,
+        style = MaterialTheme.typography.h5,
+        textAlign = textAlign,
         color = primaryFigmaTextColor,
         text = text
     )
@@ -244,6 +246,7 @@ fun SubtitleText(modifier: Modifier = Modifier, text: String) {
 fun PrimaryText(
     modifier: Modifier = Modifier,
     fontWeight: FontWeight? = null,
+    textAlign: TextAlign? = null,
     text: String
 ) {
     Text(
@@ -251,6 +254,7 @@ fun PrimaryText(
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
         fontWeight = fontWeight,
+        textAlign = textAlign,
         color = MaterialTheme.colors.onSurface,
         text = text
     )
@@ -272,6 +276,22 @@ fun SecondaryText(modifier: Modifier = Modifier, text: String) {
         modifier = modifier,
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
+        color = secondaryFigmaTextColor,
+        text = text
+    )
+}
+
+@Composable
+fun SecondaryTextSmall(
+    modifier: Modifier = Modifier,
+    text: String,
+    textAlign: TextAlign? = null
+) {
+    Text(
+        textAlign = textAlign,
+        modifier = modifier,
+        style = MaterialTheme.typography.body1,
+        fontSize = 14.sp,
         color = secondaryFigmaTextColor,
         text = text
     )

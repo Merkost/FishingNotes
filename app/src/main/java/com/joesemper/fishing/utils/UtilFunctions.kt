@@ -53,6 +53,12 @@ fun getTimeBySeconds(ms: Long): String {
     return sdf.format(date)
 }
 
+fun getDateBySecondsTextMonth(ms: Long): String {
+    val sdf = SimpleDateFormat("dd MMM yyyy", Locale.US)
+    val date = Date(ms * 1000)
+    return sdf.format(date)
+}
+
 fun getHoursByMilliseconds(ms: Long): String {
     val sdf = SimpleDateFormat("HH", Locale.US)
     val date = Date(ms)
