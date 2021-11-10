@@ -214,7 +214,7 @@ fun HeaderText(
 ) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.h5,
+        style = MaterialTheme.typography.h4,
         textAlign = textAlign,
         color = primaryFigmaTextColor,
         text = text

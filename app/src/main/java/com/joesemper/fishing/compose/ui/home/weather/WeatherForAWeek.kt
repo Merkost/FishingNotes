@@ -1,199 +1,141 @@
 package com.joesemper.fishing.compose.ui.home.weather
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.home.DefaultCard
 import com.joesemper.fishing.compose.ui.home.PrimaryText
+import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
-import com.joesemper.fishing.compose.ui.theme.backgroundGreenColor
-import com.joesemper.fishing.compose.ui.theme.primaryFigmaBackgroundTint
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
-import com.joesemper.fishing.utils.getDateByMilliseconds
-import com.joesemper.fishing.utils.getDateBySeconds
-import com.joesemper.fishing.utils.getTimeByMilliseconds
+import com.joesemper.fishing.utils.getDateBySecondsTextMonth
+import com.joesemper.fishing.utils.getTimeBySeconds
 import com.joesemper.fishing.utils.hPaToMmHg
 
 @Composable
 fun WeatherForAWeek(weather: WeatherForecast) {
-    Surface(border = BorderStroke(0.1.dp, secondaryFigmaTextColor)) {
-        Row {
-            val verticalScrollState = rememberScrollState()
-            WeatherParametersForAWeek(weather = weather, scrollState = verticalScrollState)
-            WeatherParametersForAWeekMeanings(weather = weather, scrollState = verticalScrollState)
+
+    LazyColumn() {
+        items(weather.daily.size) { index ->
+            DailyWeatherItem(forecast = weather.daily[index])
         }
     }
 }
 
 @Composable
-fun WeatherParametersForAWeek(weather: WeatherForecast, scrollState: ScrollState) {
+fun DailyWeatherItem(forecast: Daily) {
+    DefaultCard(modifier = Modifier
+        .clickable {
 
-    val isExpanded = remember {
-        mutableStateOf(true)
-    }
-
-    Surface(
-        modifier = Modifier
-            .clickable {
-                isExpanded.value = !isExpanded.value
-            }
-            .wrapContentWidth()
-            .animateContentSize(),
-        elevation = 8.dp
-    ) {
-        Column(
-            modifier = Modifier.wrapContentWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+        }) {
+        ConstraintLayout(
+            modifier = Modifier.padding(8.dp)
         ) {
-            PrimaryText(text = "Date:")
-            Column(modifier = Modifier.verticalScroll(scrollState)) {
-                WeatherParameterItem(
-                    color = primaryFigmaBackgroundTint,
-                    icon = R.drawable.weather_sunny,
-                    text = "Weather",
-                    isExpanded = isExpanded.value
-                )
-                WeatherParameterItem(
-                    color = backgroundGreenColor,
-                    icon = R.drawable.ic_thermometer,
-                    text = "Temperature",
-                    isExpanded = isExpanded.value
-                )
-                WeatherParameterItem(
-                    color = primaryFigmaBackgroundTint,
-                    icon = R.drawable.ic_gauge,
-                    text = "Pressure",
-                    isExpanded = isExpanded.value
-                )
-                WeatherParameterItem(
-                    color = backgroundGreenColor,
-                    icon = R.drawable.weather_windy,
-                    text = "Wind",
-                    isExpanded = isExpanded.value
-                )
-                WeatherParameterItem(
-                    color = primaryFigmaBackgroundTint,
-                    icon = R.drawable.weather_cloudy,
-                    text = "Cloudiness",
-                    isExpanded = isExpanded.value
-                )
-                WeatherParameterItem(
-                    color = backgroundGreenColor,
-                    icon = R.drawable.ic_baseline_umbrella_24,
-                    text = "Probability of \nprecipitation",
-                    isExpanded = isExpanded.value
-                )
-                WeatherParameterItem(
-                    color = primaryFigmaBackgroundTint,
-                    icon = R.drawable.ic_baseline_opacity_24,
-                    text = "Humidity",
-                    isExpanded = isExpanded.value
-                )
-                WeatherParameterItem(
-                    color = backgroundGreenColor,
-                    icon = R.drawable.ic_moon_waning_crescent,
-                    text = "Moon phase",
-                    isExpanded = isExpanded.value
-                )
-                WeatherParameterItem(
-                    color = primaryFigmaBackgroundTint,
-                    icon = R.drawable.weather_sunset_up,
-                    text = "Sunrise",
-                    isExpanded = isExpanded.value
-                )
-                WeatherParameterItem(
-                    color = backgroundGreenColor,
-                    icon = R.drawable.weather_sunset_down,
-                    text = "Sunset",
-                    isExpanded = isExpanded.value
-                )
-            }
-
+            val (date, divider, weather, temp, wind, pressure, precipitation, moon, humidity, sunrise) = createRefs()
+            PrimaryText(
+                modifier = Modifier.constrainAs(date) {
+                    top.linkTo(parent.top, 4.dp)
+                    absoluteRight.linkTo(parent.absoluteRight)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                },
+                text = getDateBySecondsTextMonth(forecast.date)
+            )
+            Divider(
+                modifier = Modifier.constrainAs(divider) {
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    absoluteRight.linkTo(parent.absoluteRight)
+                    top.linkTo(date.bottom)
+                })
+            WeatherTemperatureMeaning(
+                modifier = Modifier.constrainAs(temp) {
+                    top.linkTo(divider.bottom, 4.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                },
+                temperature = forecast.temperature.day.toInt().toString(),
+                maxTemperature = forecast.temperature.max.toInt()
+                    .toString() + stringResource(id = R.string.celsius),
+                minTemperature = forecast.temperature.min.toInt()
+                    .toString() + stringResource(id = R.string.celsius),
+            )
+            PrimaryWeatherParameterMeaning(
+                modifier = Modifier.constrainAs(weather) {
+                    top.linkTo(temp.bottom)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                },
+                icon = getWeatherIconByName(forecast.weather.first().icon),
+                text = forecast.weather.first().description
+            )
+            WeatherParameterMeaning(
+                modifier = Modifier.constrainAs(wind) {
+                    top.linkTo(temp.top)
+                    absoluteLeft.linkTo(temp.absoluteRight, 2.dp)
+                },
+                title = stringResource(id = R.string.wind),
+                text = forecast.windSpeed.toString()
+                        + stringResource(R.string.wind_speed_units),
+                primaryIconId = R.drawable.weather_windy,
+                iconId = R.drawable.ic_arrow_up,
+                iconRotation = forecast.windDeg
+            )
+            WeatherParameterMeaning(
+                modifier = Modifier.constrainAs(pressure) {
+                    top.linkTo(wind.bottom)
+                    absoluteLeft.linkTo(wind.absoluteLeft)
+                },
+                title = stringResource(id = R.string.pressure),
+                text = hPaToMmHg(forecast.pressure).toString()
+                        + stringResource(R.string.pressure_units),
+                primaryIconId = R.drawable.ic_gauge
+            )
+            WeatherParameterMeaning(
+                modifier = Modifier.constrainAs(precipitation) {
+                    top.linkTo(pressure.bottom)
+                    absoluteLeft.linkTo(pressure.absoluteLeft)
+                },
+                title = stringResource(R.string.precipitation),
+                text = (forecast.probabilityOfPrecipitation * 100).toString()
+                        + stringResource(R.string.percent),
+                primaryIconId = R.drawable.ic_baseline_umbrella_24
+            )
+            WeatherParameterMeaning(
+                modifier = Modifier.constrainAs(moon) {
+                    top.linkTo(wind.top)
+                    absoluteLeft.linkTo(wind.absoluteRight)
+                    absoluteRight.linkTo(parent.absoluteRight)
+                },
+                title = stringResource(R.string.moon_phase),
+                text = (forecast.moonPhase * 100).toInt()
+                    .toString() + stringResource(id = R.string.percent),
+                primaryIconId = getMoonIconByPhase(forecast.moonPhase)
+            )
+            WeatherParameterMeaning(
+                modifier = Modifier.constrainAs(humidity) {
+                    top.linkTo(moon.bottom)
+                    absoluteLeft.linkTo(moon.absoluteLeft)
+                    absoluteRight.linkTo(moon.absoluteRight)
+                },
+                title = stringResource(R.string.humidity),
+                text = forecast.humidity.toString() + stringResource(id = R.string.percent),
+                primaryIconId = R.drawable.ic_baseline_opacity_24
+            )
+            WeatherParameterMeaning(
+                modifier = Modifier.constrainAs(sunrise) {
+                    top.linkTo(humidity.bottom)
+                    absoluteLeft.linkTo(moon.absoluteLeft)
+                    absoluteRight.linkTo(moon.absoluteRight)
+                },
+                title = stringResource(R.string.sunrise_sunset),
+                text = getTimeBySeconds(forecast.sunrise) + "/" + getTimeBySeconds(forecast.sunset),
+                primaryIconId = R.drawable.weather_sunset_up
+            )
         }
-    }
-}
-
-@Composable
-fun WeatherParametersForAWeekMeanings(weather: WeatherForecast, scrollState: ScrollState) {
-    Column {
-        LazyRow(
-            content = {
-                items(weather.daily.size) { index ->
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        val date = getDateBySeconds(weather.daily[index].date)
-                        PrimaryText(text = date)
-                        Column(modifier = Modifier.verticalScroll(scrollState)) {
-                            WeatherParameterItemMeaning(
-                                color = primaryFigmaBackgroundTint,
-                                icon = getWeatherIconByName(weather.daily[index].weather.first().icon),
-                                text = weather.daily[index].weather.first().description
-                            )
-                            WeatherParameterItemMeaning(
-                                color = backgroundGreenColor,
-                                text = weather.daily[index].temperature.day.toString()
-                                        + stringResource(R.string.celsius),
-                            )
-                            WeatherParameterItemMeaning(
-                                color = primaryFigmaBackgroundTint,
-                                text = hPaToMmHg(weather.daily[index].pressure).toString()
-                                        + stringResource(R.string.pressure_units),
-                            )
-                            WeatherParameterItemMeaning(
-                                color = backgroundGreenColor,
-                                text = weather.daily[index].windSpeed.toString()
-                                        + stringResource(R.string.wind_speed_units),
-                                icon = R.drawable.ic_arrow_up,
-                                iconRotation = weather.daily[index].windDeg
-                            )
-                            WeatherParameterItemMeaning(
-                                color = primaryFigmaBackgroundTint,
-                                text = weather.daily[index].clouds.toString()
-                                        + stringResource(R.string.percent)
-                            )
-                            WeatherParameterItemMeaning(
-                                color = backgroundGreenColor,
-                                text = (weather.daily[index].probabilityOfPrecipitation * 100).toString()
-                                        + stringResource(R.string.percent),
-                            )
-                            WeatherParameterItemMeaning(
-                                color = primaryFigmaBackgroundTint,
-                                text = weather.daily[index].humidity.toString()
-                                        + stringResource(R.string.percent)
-                            )
-                            WeatherParameterItemMeaning(
-                                color = backgroundGreenColor,
-                                icon = getMoonIconByPhase(weather.daily[index].moonPhase),
-                            )
-                            WeatherParameterItemMeaning(
-                                color = primaryFigmaBackgroundTint,
-                                text = getTimeByMilliseconds(weather.daily[index].sunrise)
-                            )
-                            WeatherParameterItemMeaning(
-                                color = backgroundGreenColor,
-                                text = getTimeByMilliseconds(weather.daily[index].sunset)
-                            )
-                        }
-
-                    }
-                }
-            })
     }
 }

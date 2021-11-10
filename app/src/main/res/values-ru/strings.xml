@@ -176,5 +176,7 @@
     <string name="install_maps_app">Please install a maps application</string>
     <string name="choose_place_first">Для начала выберите место!</string>
     <string name="precipitation">Осадки</string>
+    <string name="humidity">Влажность</string>
+    <string name="sunrise_sunset">Восход/Закат</string>
 
 </resources>
