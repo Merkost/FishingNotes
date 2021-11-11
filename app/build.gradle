@@ -47,13 +47,7 @@ android {
     }
 
     buildFeatures {
-        viewBinding true
-        compose true
-    }
-
-    composeOptions {
-        kotlinCompilerVersion "1.5.21"
-        kotlinCompilerExtensionVersion '1.0.1'
+          compose true
     }
 
 }
@@ -63,70 +57,51 @@ dependencies {
 
     implementation 'androidx.work:work-runtime-ktx:2.7.0'
 
-    implementation "com.airbnb.android:lottie-compose:4.0.0"
-
-    implementation "androidx.core:core-splashscreen:1.0.0-alpha02"
-    implementation "com.google.accompanist:accompanist-systemuicontroller:0.17.0"
-
-    //implementation 'com.google.android.gms:play-services-ads:20.4.0'
-
-    // Preferences DataStore
-    //implementation "androidx.datastore:datastore-preferences:1.0.0"
-
-    // Proto DataStore
-    //implementation  "androidx.datastore:datastore-core:1.0.0"
-
     //Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.5.21"
-    implementation 'androidx.core:core-ktx:1.5.0'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.21'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0'
+//    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.5.21"
+//    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.21'
 
-    //Lifecycle and ViewModel
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1'
+//    //Lifecycle and ViewModel
+//    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+//    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1'
 
-    //Design
-    implementation 'androidx.appcompat:appcompat:1.3.1'
-    implementation 'com.google.android.material:material:1.4.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
-    implementation 'com.android.support:multidex:1.0.3'
-
-    //Maps
-    implementation 'com.google.android.gms:play-services-maps:17.0.1'
-    implementation 'com.google.android.gms:play-services-location:18.0.0'
-
-    //Navigation
-    implementation "androidx.navigation:navigation-compose:2.4.0-alpha10"
-    implementation "androidx.navigation:navigation-fragment-ktx:2.3.5"
-    implementation "androidx.navigation:navigation-ui-ktx:2.3.5"
-    implementation "androidx.navigation:navigation-dynamic-features-fragment:2.3.5"
-    implementation "androidx.navigation:navigation-testing:2.3.5"
+//    //Design
+//    implementation 'androidx.appcompat:appcompat:1.3.1'
+//    implementation 'com.google.android.material:material:1.4.0'
+//    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
+//    implementation 'com.android.support:multidex:1.0.3'
 
     //Retrofit
-    implementation "com.squareup.retrofit2:retrofit:2.9.0"
-    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
-    implementation "com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2"
-    implementation "com.squareup.okhttp3:logging-interceptor:4.9.1"
-
-    //Koin
-    implementation "io.insert-koin:koin-android:3.1.2"
+    implementation Libs.Retrofit.main
+    implementation Libs.Retrofit.converterGson
+    implementation Libs.Retrofit.coroutinesAdapter
+    implementation Libs.Retrofit.logging
 
     //Compressor
     implementation 'id.zelory:compressor:3.0.1'
 
-    //Сoil
-    implementation("io.coil-kt:coil:1.3.2")
+    //Maps
+    //implementation 'com.google.android.gms:play-services-maps:18.0.0'
+    //implementation 'com.google.android.gms:play-services-location:18.0.0'
+
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
 
     //Firebase
-    implementation platform('com.google.firebase:firebase-bom:28.0.1')
-    implementation 'com.google.firebase:firebase-core:19.0.1'
-    implementation 'com.google.firebase:firebase-analytics-ktx'
-    implementation 'com.google.firebase:firebase-firestore-ktx'
-    implementation 'com.firebaseui:firebase-ui-auth:7.1.1'
-    implementation 'com.google.firebase:firebase-storage-ktx'
-    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    //implementation platform('com.google.firebase:firebase-bom:28.0.1')
+    //implementation 'com.google.firebase:firebase-core'
+    //implementation 'com.google.firebase:firebase-analytics-ktx'
+    //implementation 'com.google.firebase:firebase-firestore-ktx'
+    //implementation 'com.firebaseui:firebase-ui-auth:8.0.0'
+    //implementation 'com.google.firebase:firebase-storage-ktx'
+    //implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+
+    implementation platform(Libs.Firebase.platform)
+    implementation Libs.Firebase.core
+    implementation Libs.Firebase.analytics
+    implementation Libs.Firebase.auth
+    implementation Libs.Firebase.authUi
+    implementation Libs.Firebase.firestore
+    implementation Libs.Firebase.storage
 
     implementation Libs.Kotlin.stdlib
     implementation Libs.Coroutines.android
@@ -135,11 +110,18 @@ dependencies {
     implementation Libs.GoogleMaps.maps
     implementation Libs.GoogleMaps.mapsKtx
 
+    implementation Libs.PlayServices.maps
+    implementation Libs.PlayServices.location
+    //implementation Libs.PlayServices.ads
+    //implementation Libs.PlayServices.auth
+
     implementation Libs.AndroidX.coreKtx
+    implementation Libs.AndroidX.splashScreen
     implementation Libs.AndroidX.Activity.activityCompose
     implementation Libs.AndroidX.Lifecycle.viewModelCompose
     implementation Libs.AndroidX.Navigation.navigationCompose
     implementation Libs.AndroidX.ConstraintLayout.constraintLayoutCompose
+    implementation Libs.AndroidX.Datastore.datastorePreferences
 
     implementation Libs.AndroidX.Compose.runtime
     implementation Libs.AndroidX.Compose.foundation
@@ -150,6 +132,8 @@ dependencies {
     implementation Libs.AndroidX.Compose.animation
     implementation Libs.AndroidX.Compose.iconsExtended
     implementation Libs.AndroidX.Compose.tooling
+    implementation Libs.AndroidX.Compose.theme
+    implementation Libs.AndroidX.Compose.lottie
 
     implementation Libs.AndroidX.DependencyInjection.koinMain
     implementation Libs.AndroidX.DependencyInjection.koinJava
@@ -162,8 +146,10 @@ dependencies {
     implementation Libs.Accompanist.pager
     implementation Libs.Accompanist.pagerindicators
     implementation Libs.Accompanist.permissions
+    implementation Libs.Accompanist.appCompatTheme
 
     implementation Libs.Coil.coilCompose
+    implementation Libs.Shimmer.shimmer
 
     androidTestImplementation Libs.JUnit.junit
     androidTestImplementation Libs.AndroidX.Test.core
@@ -173,35 +159,6 @@ dependencies {
     androidTestImplementation Libs.AndroidX.Test.Ext.junit
     androidTestImplementation Libs.Coroutines.test
     androidTestImplementation Libs.AndroidX.Compose.uiTest
-
-    //Jetpack Compose
-    // Integration with activities
-    implementation 'androidx.activity:activity-compose:1.3.1'
-    // Tooling support (Previews, etc.)
-    implementation 'androidx.compose.ui:ui-tooling:1.0.2'
-    // Integration with ViewModels
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:1.0.0-alpha07'
-    // UI Tests
-    androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.0.2'
-
-    //Themes
-    // When using a MDC theme
-    implementation "com.google.android.material:compose-theme-adapter:1.0.2"
-    // When using a AppCompat theme
-    implementation "com.google.accompanist:accompanist-appcompat-theme:0.16.0"
-
-    //Coil
-    implementation("io.coil-kt:coil-compose:1.3.2")
-
-    //Shimmer
-    implementation "me.vponomarenko:compose-shimmer:1.0.0"
-
-    //Preferences
-    // Kotlin
-    implementation "androidx.preference:preference-ktx:1.1.1"
-
-    //Lottie
-    implementation "com.airbnb.android:lottie:3.3.1"
 
     //Test
     testImplementation 'junit:junit:4.13.2'

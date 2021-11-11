@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import android.view.View
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import java.text.SimpleDateFormat
 import java.util.*
@@ -100,30 +99,6 @@ fun getDateAndTimeByMilliseconds(ms: Long): String {
 
 fun hPaToMmHg(pressure: Int): Int {
     return (pressure * 0.75006375541921).toInt()
-}
-
-fun View.hide() {
-    this.visibility = View.GONE
-}
-
-fun View.show() {
-    this.visibility = View.VISIBLE
-}
-
-fun BottomSheetBehavior<ConstraintLayout>.expand() {
-    this.state = BottomSheetBehavior.STATE_EXPANDED
-}
-
-fun BottomSheetBehavior<ConstraintLayout>.halfExpand() {
-    this.state = BottomSheetBehavior.STATE_HALF_EXPANDED
-}
-
-fun BottomSheetBehavior<ConstraintLayout>.hide() {
-    this.state = BottomSheetBehavior.STATE_HIDDEN
-}
-
-fun BottomSheetBehavior<ConstraintLayout>.collapse() {
-    this.state = BottomSheetBehavior.STATE_COLLAPSED
 }
 
 fun showToast(context: Context, text: String) {
