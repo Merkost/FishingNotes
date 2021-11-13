@@ -27,6 +27,7 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.android.libraries.maps.model.BitmapDescriptorFactory
 import com.google.android.libraries.maps.model.LatLng
 import com.google.android.libraries.maps.model.MarkerOptions
 import com.google.maps.android.ktx.awaitMap
@@ -275,11 +276,14 @@ fun MapLayout(
                 val googleMap = mapView.awaitMap()
                 markers.value.forEach {
                     val position = LatLng(it.latitude, it.longitude)
+                    val markerColor = Color(it.markerColor)
+                    val hue = getHue(markerColor.red, markerColor.green, markerColor.blue)
                     val marker = googleMap
                         .addMarker(
                             MarkerOptions()
                                 .position(position)
                                 .title(it.title)
+                                .icon(BitmapDescriptorFactory.defaultMarker(hue))
                         )
                     marker.tag = it.id
                 }
