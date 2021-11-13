@@ -181,7 +181,7 @@ fun NewPlaceDialog(
                 ColorPicker(
                     pickerColors,
                     selectedColor,
-                    (onColorSelected as (Color?) -> Unit).apply { markerColor.value = selectedColor.value.toInt() },
+                    (onColorSelected as (Color?) -> Unit).apply { markerColor.value = selectedColor.value.hashCode() },
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
             }

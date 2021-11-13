@@ -16,6 +16,7 @@ class MapMarkerMapper {
             longitude = newMarker.longitude.toDouble(),
             title = newMarker.title,
             description = newMarker.description,
+            markerColor = newMarker.markerColor,
             isPublic = newMarker.isPublic
         )
     }
