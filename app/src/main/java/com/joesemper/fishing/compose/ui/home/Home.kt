@@ -74,6 +74,7 @@ fun NavGraphBuilder.addHomeGraph(
         arguments = listOf(navArgument(Arguments.MAP_NEW_PLACE) { defaultValue = false })
     ) { from ->
         val addPlace = requireNotNull(from.arguments).getBoolean(Arguments.MAP_NEW_PLACE, false)
+        requireNotNull(from.arguments).clear()
         //from.arguments?.getBoolean(Arguments.MAP_NEW_PLACE)!!
         MapScreen(modifier, navController, addPlace)
     }

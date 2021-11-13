@@ -32,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,17 +70,19 @@ fun MyCard(shape: CornerBasedShape = RoundedCornerShape(8.dp), modifier: Modifie
 @Composable
 fun DefaultCard(
     modifier: Modifier = Modifier,
+    shape: CornerBasedShape = RoundedCornerShape(8.dp),
+    padding: Dp = 4.dp,
     content: @Composable () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(4.dp),
+        shape = RoundedCornerShape(24.dp),
         elevation = 8.dp,
         backgroundColor = Color.White,
         modifier = modifier
             .zIndex(1.0f)
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(4.dp), content = content
+            .padding(padding), content = content
     )
 }
 

@@ -54,6 +54,8 @@ fun MapScreen(
     navController: NavController,
     addPlaceOnStart: Boolean = false
 ) {
+    var addingPlace by remember { mutableStateOf(addPlaceOnStart) }
+
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
 
@@ -86,8 +88,10 @@ fun MapScreen(
             MapUiState.NormalMode -> {
                 scaffoldState.bottomSheetState.collapse()
                 viewModel.currentMarker.value = null
+                addingPlace = false
             }
             MapUiState.BottomSheetInfoMode -> {
+                addingPlace = false
                 scaffoldState.bottomSheetState.expand()
             }
             MapUiState.PlaceSelectMode -> {
@@ -97,9 +101,11 @@ fun MapScreen(
     }
 
     LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
-        mapUiState = when (scaffoldState.bottomSheetState.currentValue) {
-            BottomSheetValue.Collapsed -> MapUiState.NormalMode
-            BottomSheetValue.Expanded -> MapUiState.BottomSheetInfoMode
+        if (!addingPlace) {
+            mapUiState = when (scaffoldState.bottomSheetState.currentValue) {
+                BottomSheetValue.Collapsed -> MapUiState.NormalMode
+                BottomSheetValue.Expanded -> MapUiState.BottomSheetInfoMode
+            }
         }
     }
 
