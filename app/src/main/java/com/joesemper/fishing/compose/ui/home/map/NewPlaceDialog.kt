@@ -52,30 +52,7 @@ fun NewPlaceDialog(
     val coroutineScope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsState()
 
-    val colors = listOf(
-        MaterialTheme.colors.secondary,
-        //null,
-        //Color(0xFF000000),
-        //Color(0xFFFFFFFF),
-        //Color(0xFFFAFAFA),
-        //Color(0x80FF4444),
-        //Color(0xFFEF5350),
-        Color(0xFFEC407A),
-        Color(0xFFAB47BC),
-        Color(0xFF7E57C2),
-        Color(0xFF5C6BC0),
-        Color(0xFF42A5F5),
-        Color(0xFF29B6F6),
-        Color(0xFF26C6DA),
-        Color(0xFF26A69A),
-        Color(0xFF66BB6A),
-        Color(0xFF9CCC65),
-        Color(0xFFD4E157),
-        Color(0xFFFFEE58),
-        Color(0xFFFFCA28),
-        Color(0xFFFFA726),
-        Color(0xFFFF7043)
-    )
+
 
     MyCard(shape = Shapes.large, modifier = Modifier.wrapContentHeight()) {
         ConstraintLayout(
@@ -112,6 +89,7 @@ fun NewPlaceDialog(
 
             val descriptionValue = remember { mutableStateOf("") }
             val titleValue = remember { mutableStateOf(/*chosenPlace.value ?:*/ "") }
+            val markerColor = remember { mutableStateOf(Color(0xFFEC407A).hashCode()) }
             LaunchedEffect(chosenPlace.value) {
                 chosenPlace.value?.let {
                     titleValue.value = it
@@ -180,7 +158,7 @@ fun NewPlaceDialog(
                     .fillMaxWidth()
             )
 
-            val (selectedColor, onColorSelected) = remember { mutableStateOf(colors[0]) }
+            val (selectedColor, onColorSelected) = remember { mutableStateOf(pickerColors[0]) }
 
             Row(modifier = Modifier
                 .constrainAs(locationIcon) {
@@ -201,9 +179,9 @@ fun NewPlaceDialog(
                     modifier = Modifier.fillMaxSize().padding(top = 2.dp))
                 }
                 ColorPicker(
-                    colors,
+                    pickerColors,
                     selectedColor,
-                    onColorSelected as (Color?) -> Unit,
+                    (onColorSelected as (Color?) -> Unit).apply { markerColor.value = selectedColor.value.toInt() },
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
             }
@@ -239,7 +217,8 @@ fun NewPlaceDialog(
                         titleValue.value,
                         descriptionValue.value,
                         currentCameraPosition.component1().first.latitude,
-                        currentCameraPosition.component1().first.longitude
+                        currentCameraPosition.component1().first.longitude,
+                        markerColor.value
                     )
                 )
             }) {
@@ -261,4 +240,28 @@ fun NewPlaceDialog(
 
     }
 }
+
+val pickerColors = listOf(
+    //null,
+    //Color(0xFF000000),
+    //Color(0xFFFFFFFF),
+    //Color(0xFFFAFAFA),
+    //Color(0x80FF4444),
+    //Color(0xFFEF5350),
+    Color(0xFFEC407A),
+    Color(0xFFAB47BC),
+    Color(0xFF7E57C2),
+    Color(0xFF5C6BC0),
+    Color(0xFF42A5F5),
+    Color(0xFF29B6F6),
+    Color(0xFF26C6DA),
+    Color(0xFF26A69A),
+    Color(0xFF66BB6A),
+    Color(0xFF9CCC65),
+    Color(0xFFD4E157),
+    Color(0xFFFFEE58),
+    Color(0xFFFFCA28),
+    Color(0xFFFFA726),
+    Color(0xFFFF7043)
+)
 
