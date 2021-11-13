@@ -20,14 +20,14 @@ private val LightColorPalette = lightColors(
     primaryVariant = Purple700,
     secondary = Teal200
 
-    /* Other default colors to override
-background = Color.White,
+     //Other default colors to override
+/*background = Color.White,
 surface = Color.White,
 onPrimary = Color.White,
 onSecondary = Color.Black,
 onBackground = Color.Black,
-onSurface = Color.Black,
-*/
+onSurface = Color.Black,*/
+
 )
 
 private val GreenLightColorPalette = lightColors(
@@ -42,7 +42,13 @@ private val GreenDarkColorPalette = darkColors(
     primaryVariant = primaryFigmaColor,
     secondary = secondaryFigmaDarkColor,
     secondaryVariant = secondaryFigmaColor,
+)
 
+private val TestLightColorPalette = lightColors(
+    primary = primaryColor,
+    primaryVariant = primaryDarkColor,
+    secondary = secondaryColor,
+    secondaryVariant = secondaryDarkColor,
 )
 
 @Composable
@@ -51,7 +57,7 @@ fun FishingNotesTheme(
     content: @Composable() () -> Unit
 ) {
     val systemUiController = rememberSystemUiController()
-    val colors = if (darkTheme) GreenDarkColorPalette else GreenLightColorPalette
+    val colors = if (darkTheme) TestLightColorPalette else TestLightColorPalette
 
     if (darkTheme) {
         systemUiController.setSystemBarsColor(

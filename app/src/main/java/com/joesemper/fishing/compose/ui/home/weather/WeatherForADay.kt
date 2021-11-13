@@ -66,7 +66,9 @@ fun HourlyWeatherItem(forecast: Hourly) {
                     absoluteLeft.linkTo(parent.absoluteLeft)
                 },
                 icon = getWeatherIconByName(forecast.weather.first().icon),
-                text = forecast.weather.first().description
+                text = forecast.weather.first().description.replaceFirstChar {
+                    it.uppercaseChar()
+                }
             )
             WeatherParameterMeaning(
                 modifier = Modifier.constrainAs(temp) {

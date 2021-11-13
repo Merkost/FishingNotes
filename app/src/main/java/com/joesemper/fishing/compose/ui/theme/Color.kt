@@ -23,3 +23,13 @@ val backgroundWhiteColor = Color(0xFFFFFFFF)
 val backgroundGreenColor = Color(0x2043A047)
 val surfaceGreenColor = Color(0x8F79B97B)
 val cardColor = Color(0xFF8FA590)
+
+// Figma colors
+val primaryColor = Color(0xFF42a5f5)
+val primaryLightColor = Color(0xFF80d6ff)
+val primaryDarkColor = Color(0xFF0077c2)
+val secondaryColor = Color(0xFFa5f542)
+val secondaryLightColor = Color(0xFFdaff77)
+val secondaryDarkColor = Color(0xFF70c200)
+val primaryTextColor = Color(0xFF000000)
+val secondaryTextColor = Color(0xFF000000)
