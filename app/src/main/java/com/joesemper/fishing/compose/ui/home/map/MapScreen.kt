@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
@@ -29,6 +30,7 @@ import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.libraries.maps.model.BitmapDescriptorFactory
 import com.google.android.libraries.maps.model.LatLng
+import com.google.android.libraries.maps.model.MapStyleOptions
 import com.google.android.libraries.maps.model.MarkerOptions
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
@@ -263,6 +265,7 @@ fun MapLayout(
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val darkTheme = isSystemInDarkTheme()
     val markers = viewModel.getAllMarkers().collectAsState()
     val map = rememberMapViewWithLifecycle()
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
@@ -306,6 +309,10 @@ fun MapLayout(
                     viewModel.lastMapCameraPosition.value = Pair(marker.position, DEFAULT_ZOOM)
                     true
                 }
+
+                //Map styles: https://mapstyle.withgoogle.com
+                if (darkTheme) googleMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(context, R.raw.mapstyle_night))
                 googleMap.uiSettings.isMyLocationButtonEnabled = false
 
                 getCurrentLocationFlow(context, permissionsState).collect { state ->
