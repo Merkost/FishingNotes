@@ -55,7 +55,7 @@ fun FishingNotesTheme(
 
     if (darkTheme) {
         systemUiController.setSystemBarsColor(
-            color = primaryFigmaDarkColor
+            color = Color.Transparent
         )
     } else systemUiController.setSystemBarsColor(
         color = primaryFigmaColor
