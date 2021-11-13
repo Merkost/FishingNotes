@@ -1,6 +1,8 @@
 package com.joesemper.fishing.compose.ui.home.map
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -9,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -22,11 +25,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.google.android.libraries.maps.model.LatLng
+import com.google.android.material.color.MaterialColors
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.MyCard
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.UiState
 import com.joesemper.fishing.compose.ui.theme.Shapes
+import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
@@ -44,6 +49,31 @@ fun NewPlaceDialog(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsState()
+
+    val colors = listOf(
+        MaterialTheme.colors.secondary,
+        //null,
+        //Color(0xFF000000),
+        //Color(0xFFFFFFFF),
+        //Color(0xFFFAFAFA),
+        //Color(0x80FF4444),
+        //Color(0xFFEF5350),
+        Color(0xFFEC407A),
+        Color(0xFFAB47BC),
+        Color(0xFF7E57C2),
+        Color(0xFF5C6BC0),
+        Color(0xFF42A5F5),
+        Color(0xFF29B6F6),
+        Color(0xFF26C6DA),
+        Color(0xFF26A69A),
+        Color(0xFF66BB6A),
+        Color(0xFF9CCC65),
+        Color(0xFFD4E157),
+        Color(0xFFFFEE58),
+        Color(0xFFFFCA28),
+        Color(0xFFFFA726),
+        Color(0xFFFF7043)
+    )
 
     MyCard(shape = Shapes.large, modifier = Modifier.wrapContentHeight()) {
         ConstraintLayout(
@@ -86,20 +116,11 @@ fun NewPlaceDialog(
                 }
             }
 
-            Icon(painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                contentDescription = stringResource(R.string.marker_icon),
-                tint = secondaryFigmaColor,
-                modifier = Modifier.constrainAs(locationIcon) {
-                    absoluteRight.linkTo(name.absoluteLeft, 14.dp)
-                    top.linkTo(name.top)
-                    bottom.linkTo(name.bottom)
-                })
-
             Text(
                 text = stringResource(R.string.new_place),
                 style = MaterialTheme.typography.h6,
                 modifier = Modifier.constrainAs(name) {
-                    top.linkTo(parent.top, 16.dp)
+                    top.linkTo(parent.top, 8.dp)
                     absoluteLeft.linkTo(parent.absoluteLeft, 4.dp)
                     absoluteRight.linkTo(parent.absoluteRight)
                 }
@@ -123,7 +144,7 @@ fun NewPlaceDialog(
                 ),
                 modifier = Modifier
                     .constrainAs(title) {
-                        top.linkTo(name.bottom, 12.dp)
+                        top.linkTo(name.bottom, 8.dp)
                         absoluteLeft.linkTo(parent.absoluteLeft)
                         absoluteRight.linkTo(parent.absoluteRight)
                     }
@@ -157,9 +178,35 @@ fun NewPlaceDialog(
                     .fillMaxWidth()
             )
 
+            val (selectedColor, onColorSelected) = remember { mutableStateOf(colors[0]) }
+
+            Row(modifier = Modifier
+                .constrainAs(locationIcon) {
+                    top.linkTo(description.bottom, 6.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    absoluteRight.linkTo(parent.absoluteRight)
+                }.padding(horizontal = 8.dp)) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .requiredSize(40.dp))
+                {
+                    Icon(painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+                        contentDescription = stringResource(R.string.marker_icon),
+                        tint = selectedColor ?: secondaryFigmaColor,)
+                }
+                ColorPicker(
+                    colors,
+                    selectedColor,
+                    onColorSelected as (Color?) -> Unit,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
+            }
+
             OutlinedButton(modifier = Modifier.constrainAs(cancelButton) {
                 absoluteRight.linkTo(parent.absoluteRight, 4.dp)
-                top.linkTo(description.bottom, 14.dp)
+                top.linkTo(locationIcon.bottom, 14.dp)
                 bottom.linkTo(parent.bottom, 14.dp)
             },
                 shape = RoundedCornerShape(24.dp), onClick = {
