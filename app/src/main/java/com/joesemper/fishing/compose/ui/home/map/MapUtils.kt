@@ -39,12 +39,46 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.*
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.roundToInt
 
 object MapTypes {
     const val roadmap = GoogleMap.MAP_TYPE_NORMAL
     const val satellite = GoogleMap.MAP_TYPE_SATELLITE
     const val hybrid = GoogleMap.MAP_TYPE_HYBRID
     const val terrain = GoogleMap.MAP_TYPE_TERRAIN
+}
+
+fun getHue(red: Float, green: Float, blue: Float): Float {
+    val min = min(min(red, green), blue)
+    val max = max(max(red, green), blue)
+    val c = max-min
+    if (min == max) {
+        return 0f
+    }
+    var hue = 0f
+    when (max) {
+        red -> {
+            val segment = (green - blue) / c;
+            var shift = 0 / 60;       // R° / (360° / hex sides)
+            if (segment < 0) {          // hue > 180, full rotation
+                shift = 360 / 60;         // R° / (360° / hex sides)
+            }
+            hue = segment + shift;
+        }
+        green -> {
+            val segment = (blue - red) / c;
+            val shift = 120 / 60;     // G° / (360° / hex sides)
+            hue = segment + shift;
+        }
+        blue -> {
+            val segment = (red - green) / c;
+            val shift = 240 / 60;     // B° / (360° / hex sides)
+            hue = segment + shift;
+        }
+    }
+    return hue * 60; // hue is in [0,6], scale it up
 }
 
 sealed class CameraMoveState {
