@@ -264,7 +264,8 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
 
             Icon(
                 modifier = Modifier
-                    .padding(5.dp).padding(horizontal = 5.dp)
+                    .padding(5.dp)
+                    .padding(horizontal = 5.dp)
                     .size(32.dp)
                     .constrainAs(icon) {
                         top.linkTo(parent.top)
@@ -595,7 +596,7 @@ fun BackgroundImage(modifier: Modifier = Modifier) {
     Image(
         modifier = modifier.fillMaxSize(),
         colorFilter = ColorFilter.tint(
-            surfaceGreenColor,
+            primaryLightColorTransparent,
             BlendMode.ColorDodge
         ),
         painter = painterResource(id = R.drawable.ic_pattern_background),

@@ -150,8 +150,12 @@ fun Weather(
                                     isExpanded = !isExpanded
                                 }) {
                                     Row(
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
-                                    verticalAlignment = Alignment.CenterVertically,) {
+                                        horizontalArrangement = Arrangement.spacedBy(
+                                            12.dp,
+                                            Alignment.Start
+                                        ),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
                                         Icon(
                                             painter = painterResource(
                                                 id =
@@ -179,8 +183,10 @@ fun Weather(
             }
         }
     ) {
-        AnimatedVisibility (currentWeather.value != null,
-                enter = fadeIn() + expandIn(expandFrom = Alignment.BottomStart)) {
+        AnimatedVisibility(
+            currentWeather.value != null,
+            enter = fadeIn() + expandIn(expandFrom = Alignment.BottomStart)
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -191,18 +197,21 @@ fun Weather(
                 WeatherForecastLayout(navController, currentWeather.value!!)
             }
         }
-            AnimatedVisibility (currentWeather.value == null,
-                ) {
-                Column(
+        AnimatedVisibility(
+            currentWeather.value == null,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .systemBarsPadding(false),
+                verticalArrangement = Arrangement.Center
+            ) {
+                WeatherLoading(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .systemBarsPadding(false),
-                     verticalArrangement = Arrangement.Center
-                ) {
-                WeatherLoading(modifier = Modifier
-                    .size(500.dp)
-                    .align(Alignment.CenterHorizontally))
-                    //Spacer(modifier = Modifier.size())
+                        .size(500.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+                //Spacer(modifier = Modifier.size())
             }
         }
     }

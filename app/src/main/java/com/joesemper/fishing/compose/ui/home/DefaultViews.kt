@@ -214,9 +214,9 @@ fun HeaderText(
 ) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.h4,
+        style = MaterialTheme.typography.h3,
         textAlign = textAlign,
-        color = primaryFigmaTextColor,
+        color = textColor,
         text = text
     )
 }
@@ -247,7 +247,8 @@ fun PrimaryText(
     modifier: Modifier = Modifier,
     fontWeight: FontWeight? = null,
     textAlign: TextAlign? = null,
-    text: String
+    text: String,
+    textColor: Color = MaterialTheme.colors.onSurface
 ) {
     Text(
         modifier = modifier,
@@ -255,7 +256,7 @@ fun PrimaryText(
         fontSize = 18.sp,
         fontWeight = fontWeight,
         textAlign = textAlign,
-        color = MaterialTheme.colors.onSurface,
+        color = textColor,
         text = text
     )
 }
@@ -285,14 +286,15 @@ fun SecondaryText(modifier: Modifier = Modifier, text: String) {
 fun SecondaryTextSmall(
     modifier: Modifier = Modifier,
     text: String,
-    textAlign: TextAlign? = null
+    textAlign: TextAlign? = null,
+    color: Color = secondaryFigmaTextColor
 ) {
     Text(
         textAlign = textAlign,
         modifier = modifier,
-        style = MaterialTheme.typography.body1,
+        style = MaterialTheme.typography.h5,
         fontSize = 14.sp,
-        color = secondaryFigmaTextColor,
+        color = color,
         text = text
     )
 }
@@ -306,6 +308,7 @@ fun SecondaryTextColored(
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.body1,
+        textAlign = TextAlign.Center,
         color = color,
         text = text
     )
@@ -448,13 +451,13 @@ fun SimpleUnderlineTextField(
             readOnly = true,
             value = text,
             textStyle = MaterialTheme.typography.body1.copy(fontSize = 18.sp),
-            /*colors = TextFieldDefaults.textFieldColors(
+            colors = TextFieldDefaults.textFieldColors(
                 textColor = primaryFigmaTextColor,
-                backgroundColor = backgroundGreenColor,
+                backgroundColor = Color.White,
                 cursorColor = Color.Black,
-                focusedIndicatorColor = primaryFigmaTextColor,
-                unfocusedIndicatorColor = primaryFigmaTextColor
-            ),*/
+                focusedIndicatorColor = supportFigmaTextColor,
+                unfocusedIndicatorColor = supportFigmaTextColor
+            ),
             onValueChange = { },
             shape = RoundedCornerShape(2.dp),
             singleLine = true,

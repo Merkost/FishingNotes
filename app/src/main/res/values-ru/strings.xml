@@ -178,5 +178,6 @@
     <string name="precipitation">Осадки</string>
     <string name="humidity">Влажность</string>
     <string name="sunrise_sunset">Восход/Закат</string>
+    <string name="hourly">Hourly</string>
 
 </resources>

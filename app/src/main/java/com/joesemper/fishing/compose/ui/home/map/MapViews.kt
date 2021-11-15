@@ -381,7 +381,7 @@ fun GrantPermissionsDialog(
                         onClick = onNegativeClick
                     )
                     DefaultButton(
-                        text = stringResource(id = R.string.ok),
+                        text = stringResource(id = R.string.apply),
                         onClick = onPositiveClick
                     )
 //                        { permissionsState.launchMultiplePermissionRequest() })

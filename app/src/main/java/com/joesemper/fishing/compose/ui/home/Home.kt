@@ -51,7 +51,7 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.home.map.MapScreen
 import com.joesemper.fishing.compose.ui.home.notes.Notes
-import com.joesemper.fishing.compose.ui.home.weather.Weather
+import com.joesemper.fishing.compose.ui.home.weather.WeatherScreen
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 
@@ -79,7 +79,7 @@ fun NavGraphBuilder.addHomeGraph(
         Notes(modifier, navController)
     }
     composable(HomeSections.WEATHER.route) { from ->
-        Weather(modifier, navController)
+        WeatherScreen(modifier, navController)
         { navController.popBackStack() }
     }
     composable(HomeSections.PROFILE.route) {

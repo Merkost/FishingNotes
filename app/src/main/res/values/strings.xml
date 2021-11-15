@@ -179,6 +179,7 @@
     <string name="precipitation">Precipitation</string>
     <string name="humidity">Humidity</string>
     <string name="sunrise_sunset">Sunrise/Sunset</string>
+    <string name="hourly">Hourly</string>
 
 
 </resources>

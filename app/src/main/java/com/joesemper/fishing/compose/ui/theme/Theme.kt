@@ -1,12 +1,10 @@
 package com.joesemper.fishing.compose.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val DarkColorPalette = darkColors(
@@ -47,8 +45,8 @@ private val GreenDarkColorPalette = darkColors(
 private val TestLightColorPalette = lightColors(
     primary = primaryColor,
     primaryVariant = primaryDarkColor,
-    secondary = secondaryColor,
-    secondaryVariant = secondaryDarkColor,
+    secondary = secondaryFigmaColor,
+    secondaryVariant = secondaryFigmaDarkColor,
 )
 
 @Composable
@@ -60,11 +58,11 @@ fun FishingNotesTheme(
     val colors = if (darkTheme) TestLightColorPalette else TestLightColorPalette
 
     if (darkTheme) {
-        systemUiController.setSystemBarsColor(
-            color = primaryFigmaDarkColor
+        systemUiController.setStatusBarColor(
+            color = primaryDarkColor
         )
-    } else systemUiController.setSystemBarsColor(
-        color = primaryFigmaColor
+    } else systemUiController.setStatusBarColor(
+        color = primaryDarkColor
     )
 
     MaterialTheme(

@@ -38,7 +38,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -56,13 +55,13 @@ import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
+import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
-import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
 import com.joesemper.fishing.utils.*
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -593,7 +592,7 @@ fun ItemAddPhoto() {
 private fun addPhoto(
     permissionState: PermissionState,
     addPhotoState: MutableState<Boolean>,
-    choosePhotoLauncher: ManagedActivityResultLauncher<Array<String>, MutableList<Uri>>
+    choosePhotoLauncher: ManagedActivityResultLauncher<Array<String>, List<Uri>>
 ) {
     when {
         permissionState.hasPermission -> {
