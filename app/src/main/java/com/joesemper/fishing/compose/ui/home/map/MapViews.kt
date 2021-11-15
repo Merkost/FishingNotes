@@ -362,30 +362,43 @@ fun GrantPermissionsDialog(
     onDismiss: () -> Unit,
     onPositiveClick: () -> Unit,
     onNegativeClick: () -> Unit,
+    onDontAskClick: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
         DefaultCard() {
             Column(
                 modifier = Modifier
                     .wrapContentSize()
-                    .padding(8.dp)
+                    .padding(12.dp)
             ) {
                 PrimaryText(text = "For convenient use this application needs the location permission.\nAllow this app to receive location data?")
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     DefaultButtonText(
-                        text = stringResource(id = R.string.cancel),
-                        onClick = onNegativeClick
+                        text = stringResource(id = R.string.dont_ask_again),
+                        onClick = onDontAskClick
                     )
-                    DefaultButton(
-                        text = stringResource(id = R.string.ok),
-                        onClick = onPositiveClick
-                    )
+                    Row(
+
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        DefaultButtonText(
+                            text = stringResource(id = R.string.cancel),
+                            onClick = onNegativeClick
+                        )
+                        DefaultButton(
+                            text = stringResource(id = R.string.ok_button),
+                            onClick = onPositiveClick
+                        )
 //                        { permissionsState.launchMultiplePermissionRequest() })
-                    Spacer(Modifier.width(8.dp))
+                        Spacer(Modifier.width(8.dp))
+                    }
+
+//                        { permissionsState.launchMultiplePermissionRequest() })
+
                 }
             }
         }
