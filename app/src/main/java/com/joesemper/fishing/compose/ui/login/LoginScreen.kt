@@ -87,7 +87,7 @@ fun LoginScreen(navController: NavController) {
                 if (currentMessages.isNotEmpty()) {
                     val message = currentMessages[0]
                     val text = resources.getText(message.messageId)
-
+                    clicked = false
                     // Display the snackbar on the screen. `showSnackbar` is a function
                     // that suspends until the snackbar disappears from the screen
                     scaffoldState.snackbarHostState.showSnackbar(text.toString())
@@ -211,7 +211,6 @@ fun LoginScreen(navController: NavController) {
                                     )
                                 )
                         ) {
-
                             //AppIcon
                             Image(
                                 painterResource(R.mipmap.ic_launcher), stringResource(R.string.icon),
@@ -247,7 +246,7 @@ fun LoginScreen(navController: NavController) {
                             ) {
                                 Row(
                                     modifier = Modifier
-                                        .padding(10.dp)
+                                        .padding(10.dp).padding(end = 2.dp)
                                         .animateContentSize(
                                             animationSpec = tween(
                                                 durationMillis = 300,
