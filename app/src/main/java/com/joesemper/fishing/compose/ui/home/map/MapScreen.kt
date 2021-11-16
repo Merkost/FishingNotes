@@ -34,15 +34,19 @@ import com.google.android.libraries.maps.model.MapStyleOptions
 import com.google.android.libraries.maps.model.MarkerOptions
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.utils.getCameraPosition
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalComposeUiApi
@@ -60,6 +64,7 @@ fun MapScreen(
 
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
+    val userPreferences: UserPreferences = get()
 
     val scaffoldState = rememberBottomSheetScaffoldState()
     val dialogAddPlaceIsShowing = remember { mutableStateOf(false) }
@@ -147,7 +152,10 @@ fun MapScreen(
             }
         }
     ) {
-
+      
+        val shouldShowPermissions by userPreferences.shouldShowLocationPermission.collectAsState(false)
+        if (shouldShowPermissions) LocationPermissionDialog(userPreferences = userPreferences)
+        
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (mapLayout, addMarkerFragment, mapMyLocationButton, mapLayersButton,
                 mapLayersView, pointer) = createRefs()
@@ -249,7 +257,6 @@ fun MapScreen(
                     )
                 }
         }
-        LocationPermissionDialog()
     }
 }
 
@@ -364,14 +371,14 @@ fun MapLayout(
 @ExperimentalPermissionsApi
 @Composable
 fun LocationPermissionDialog(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    userPreferences: UserPreferences
 ) {
     val context = LocalContext.current
     var isDialogOpen by remember {
         mutableStateOf(true)
     }
-
-
+    val coroutineScope = rememberCoroutineScope()
 
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     PermissionsRequired(
@@ -390,7 +397,10 @@ fun LocationPermissionDialog(
                         permissionsState.launchMultiplePermissionRequest()
                     },
                     onDontAskClick = {
-
+                        SnackbarManager.showMessage(R.string.location_dont_ask)
+                        coroutineScope.launch {
+                            userPreferences.saveLocationPermissionStatus(false)
+                        }
                     }
                 )
             }

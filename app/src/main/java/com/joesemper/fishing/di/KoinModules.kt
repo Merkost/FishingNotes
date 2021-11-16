@@ -1,5 +1,6 @@
 package com.joesemper.fishing.di
 
+import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.viewmodels.MainViewModel
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
@@ -21,6 +22,7 @@ val appModule = module {
     single<WeatherRepository> { WeatherRepositoryRetrofitImpl() }
     single { Logger() }
     single { SnackbarManager }
+    single { UserPreferences(androidContext()) }
 
 }
 

@@ -175,6 +175,7 @@
     <string name="install_maps_app">Please install a maps application</string>
     <string name="choose_place_first">Для начала выберите место!</string>
     <string name="transparent">Прозрачный</string>
+    <string name="location_dont_ask">Запрос на доступ к вашему местоположению больше не будет показываться</string>
     <string name="location_permission_denied">Вы отказали в доступе к вашему местоположению</string>
     <string name="location_permission">Разрешите определять ваше местоположение?</string>
     <string name="dont_ask_again">Не спрашивать</string>
