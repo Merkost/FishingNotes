@@ -19,13 +19,13 @@ class UserPreferences(private val context: Context) {
         val USER_LOCATION_PERMISSION_KEY = booleanPreferencesKey("should_show_location_permission")
     }
 
-    //get the saved email
+    //get the saved value
     val shouldShowLocationPermission: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
             preferences[USER_LOCATION_PERMISSION_KEY] ?: true
         }
 
-    //save email into datastore
+    //save into datastore
     suspend fun saveLocationPermissionStatus(shouldShow: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[USER_LOCATION_PERMISSION_KEY] = shouldShow
