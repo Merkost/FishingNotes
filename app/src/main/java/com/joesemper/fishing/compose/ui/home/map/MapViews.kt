@@ -1,7 +1,6 @@
 package com.joesemper.fishing.compose.ui.home.map
 
 import android.location.Geocoder
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
@@ -32,15 +31,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.airbnb.lottie.LottieComposition
 import com.airbnb.lottie.compose.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.DefaultButton
+import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.home.DefaultButtonText
-import com.joesemper.fishing.compose.ui.home.DefaultCard
-import com.joesemper.fishing.compose.ui.home.PrimaryText
 import com.joesemper.fishing.compose.ui.theme.Shapes
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
@@ -373,19 +369,20 @@ fun GrantLocationPermissionsDialog(
     Dialog(onDismissRequest = onDismiss) {
         DefaultCard() {
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier
                     .wrapContentSize()
-                    .padding(18.dp)
+                    .padding(14.dp)
             ) {
-                PrimaryText(text = stringResource(R.string.location_permission))
+                PrimaryText(text = stringResource(R.string.location_permission),
+                modifier = Modifier.padding(4.dp))
                 LottieMyLocation(modifier = Modifier.fillMaxWidth().height(180.dp))
-                Spacer(Modifier.size(8.dp))
+                Spacer(Modifier.size(6.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    DefaultButtonText(
+                    DefaultButtonSecondaryText(
                         text = stringResource(id = R.string.dont_ask_again),
                         onClick = onDontAskClick
                     )
