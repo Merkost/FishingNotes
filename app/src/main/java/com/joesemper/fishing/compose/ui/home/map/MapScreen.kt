@@ -151,6 +151,7 @@ fun MapScreen(
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (mapLayout, addMarkerFragment, mapMyLocationButton, mapLayersButton,
                 mapLayersView, pointer) = createRefs()
+            val verticalMyLocationButtonGl = createGuidelineFromAbsoluteRight(56.dp)
 
             MapLayout(
                 modifier = Modifier.constrainAs(mapLayout) {
@@ -228,7 +229,7 @@ fun MapScreen(
                 modifier = Modifier.constrainAs(addMarkerFragment) {
                     top.linkTo(parent.top, 16.dp)
                     absoluteLeft.linkTo(mapLayersButton.absoluteRight, 8.dp)
-                    absoluteRight.linkTo(mapMyLocationButton.absoluteLeft, 8.dp)
+                    absoluteRight.linkTo(verticalMyLocationButtonGl, 8.dp)
                 }
             ) {
                 PlaceTileView(
@@ -312,7 +313,8 @@ fun MapLayout(
 
                 //Map styles: https://mapstyle.withgoogle.com
                 if (darkTheme) googleMap.setMapStyle(
-                    MapStyleOptions.loadRawResourceStyle(context, R.raw.mapstyle_night))
+                    MapStyleOptions.loadRawResourceStyle(context, R.raw.mapstyle_night)
+                )
                 googleMap.uiSettings.isMyLocationButtonEnabled = false
 
                 getCurrentLocationFlow(context, permissionsState).collect { state ->
@@ -382,6 +384,9 @@ fun LocationPermissionDialog(
                     onPositiveClick = {
                         isDialogOpen = false
                         permissionsState.launchMultiplePermissionRequest()
+                    },
+                    onDontAskClick = {
+
                     }
                 )
             }
