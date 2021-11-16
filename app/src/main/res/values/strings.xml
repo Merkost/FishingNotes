@@ -179,6 +179,8 @@
     <string name="transparent">Прозрачный</string>
     <string name="dont_ask_again">Don\'t ask</string>
     <string name="location_dont_ask">Запрос больше не будт показываться. Чтобы дать необходимые разрешения - пройдите в настройки вашего устройства</string>
+    <string name="location_permission_denied">Вы отказали в доступе к вашему местоположению</string>
+    <string name="location_permission">Allow app to determine your location?</string>
 
 
 </resources>

@@ -35,10 +35,8 @@ import com.airbnb.lottie.compose.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.DefaultButton
+import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.home.DefaultButtonText
-import com.joesemper.fishing.compose.ui.home.DefaultCard
-import com.joesemper.fishing.compose.ui.home.PrimaryText
 import com.joesemper.fishing.compose.ui.theme.Shapes
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
@@ -356,28 +354,35 @@ fun PlaceTileView(
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 @ExperimentalPermissionsApi
-fun GrantPermissionsDialog(
+fun GrantLocationPermissionsDialog(
     onDismiss: () -> Unit,
     onPositiveClick: () -> Unit,
     onNegativeClick: () -> Unit,
     onDontAskClick: () -> Unit
 ) {
+    var visible = remember { false }
+
+
     Dialog(onDismissRequest = onDismiss) {
         DefaultCard() {
             Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier
                     .wrapContentSize()
-                    .padding(12.dp)
+                    .padding(14.dp)
             ) {
-                PrimaryText(text = "For convenient use this application needs the location permission.\nAllow this app to receive location data?")
-                Spacer(modifier = Modifier.height(16.dp))
+                PrimaryText(text = stringResource(R.string.location_permission),
+                modifier = Modifier.padding(4.dp))
+                LottieMyLocation(modifier = Modifier.fillMaxWidth().height(180.dp))
+                Spacer(Modifier.size(6.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    DefaultButtonText(
+                    DefaultButtonSecondaryText(
                         text = stringResource(id = R.string.dont_ask_again),
                         onClick = onDontAskClick
                     )
@@ -403,6 +408,20 @@ fun GrantPermissionsDialog(
             }
         }
     }
+}
+
+@Composable
+fun LottieMyLocation(modifier: Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.my_location))
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever,
+    )
+    LottieAnimation(
+        composition,
+        progress,
+        modifier = modifier
+    )
 }
 
 @Composable

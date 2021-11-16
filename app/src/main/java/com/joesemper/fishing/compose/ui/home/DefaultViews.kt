@@ -59,8 +59,10 @@ fun MyCardNoPadding(content: @Composable () -> Unit) {
 }
 
 @Composable
-fun MyCard(shape: CornerBasedShape = RoundedCornerShape(8.dp), modifier: Modifier = Modifier,
-           content: @Composable () -> Unit) {
+fun MyCard(
+    shape: CornerBasedShape = RoundedCornerShape(8.dp), modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
     Card(
         elevation = 8.dp, shape = shape,
         modifier = modifier.fillMaxWidth(), content = content
@@ -269,38 +271,48 @@ fun PrimaryTextBold(modifier: Modifier = Modifier, text: String) {
 }
 
 @Composable
-fun SecondaryText(modifier: Modifier = Modifier, text: String) {
+fun SecondaryTextColored(
+    modifier: Modifier = Modifier,
+    text: String,
+    color: Color = primaryFigmaColor,
+    maxLines: Int = Int.MAX_VALUE
+) {
+    Text(
+        modifier = modifier,
+        style = MaterialTheme.typography.body1,
+        color = color,
+        text = text,
+        maxLines = maxLines
+    )
+}
+
+@Composable
+fun SecondaryText(
+    modifier: Modifier = Modifier, text: String,
+    maxLines: Int = Int.MAX_VALUE
+) {
     Text(
         textAlign = TextAlign.Center,
         modifier = modifier,
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
         color = secondaryFigmaTextColor,
-        text = text
+        text = text,
+        maxLines = maxLines
     )
 }
 
 @Composable
-fun SecondaryTextColored(
-    modifier: Modifier = Modifier,
-    text: String,
-    color: Color = primaryFigmaColor
+fun SupportText(
+    modifier: Modifier = Modifier, text: String,
+    maxLines: Int = Int.MAX_VALUE
 ) {
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.body1,
-        color = color,
-        text = text
-    )
-}
-
-@Composable
-fun SupportText(modifier: Modifier = Modifier, text: String) {
-    Text(
-        modifier = modifier,
-        style = MaterialTheme.typography.body1,
         color = supportFigmaTextColor,
-        text = text
+        text = text,
+        maxLines = 1
     )
 }
 
@@ -484,7 +496,8 @@ fun DefaultButton(
             SecondaryTextColored(
                 color = Color.White,
                 text = text,
-                modifier = Modifier.padding(horizontal = 4.dp)
+                modifier = Modifier.padding(horizontal = 4.dp),
+                maxLines = 1
             )
         }
     }
@@ -550,7 +563,42 @@ fun DefaultButtonText(
             }
             SecondaryTextColored(
                 text = text,
-                modifier = Modifier.padding(horizontal = 4.dp)
+                modifier = Modifier.padding(horizontal = 4.dp),
+                maxLines = 1
+            )
+        }
+    }
+}
+
+@Composable
+fun DefaultButtonSecondaryText(
+    modifier: Modifier = Modifier,
+    text: String,
+    icon: Int? = null,
+    onClick: () -> Unit
+) {
+    TextButton(
+        modifier = modifier,
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier.wrapContentSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            icon?.let {
+                Icon(
+                    painterResource(id = R.drawable.ic_baseline_shortcut_24),
+                    "",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(horizontal = 4.dp)
+                )
+            }
+            SupportText(
+                text = text,
+                modifier = Modifier.padding(horizontal = 4.dp),
+                maxLines = 1
             )
         }
     }
