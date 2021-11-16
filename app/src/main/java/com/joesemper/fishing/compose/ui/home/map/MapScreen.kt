@@ -147,7 +147,7 @@ fun MapScreen(
             }
         }
     ) {
-        LocationPermissionDialog()
+
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (mapLayout, addMarkerFragment, mapMyLocationButton, mapLayersButton,
                 mapLayersView, pointer) = createRefs()
@@ -249,6 +249,7 @@ fun MapScreen(
                     )
                 }
         }
+        LocationPermissionDialog()
     }
 }
 
@@ -369,12 +370,15 @@ fun LocationPermissionDialog(
     var isDialogOpen by remember {
         mutableStateOf(true)
     }
+
+
+
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     PermissionsRequired(
         multiplePermissionsState = permissionsState,
         permissionsNotGrantedContent = {
             if (isDialogOpen) {
-                GrantPermissionsDialog(
+                GrantLocationPermissionsDialog(
                     onDismiss = {
                         isDialogOpen = false
                     },

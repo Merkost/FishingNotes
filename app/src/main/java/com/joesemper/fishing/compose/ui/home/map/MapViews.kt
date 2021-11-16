@@ -1,6 +1,7 @@
 package com.joesemper.fishing.compose.ui.home.map
 
 import android.location.Geocoder
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
@@ -31,6 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.airbnb.lottie.LottieComposition
 import com.airbnb.lottie.compose.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.libraries.maps.model.LatLng
@@ -356,23 +358,29 @@ fun PlaceTileView(
     }
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 @ExperimentalPermissionsApi
-fun GrantPermissionsDialog(
+fun GrantLocationPermissionsDialog(
     onDismiss: () -> Unit,
     onPositiveClick: () -> Unit,
     onNegativeClick: () -> Unit,
     onDontAskClick: () -> Unit
 ) {
+    var visible = remember { false }
+
+
     Dialog(onDismissRequest = onDismiss) {
         DefaultCard() {
             Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .wrapContentSize()
-                    .padding(12.dp)
+                    .padding(18.dp)
             ) {
-                PrimaryText(text = "For convenient use this application needs the location permission.\nAllow this app to receive location data?")
-                Spacer(modifier = Modifier.height(16.dp))
+                PrimaryText(text = stringResource(R.string.location_permission))
+                LottieMyLocation(modifier = Modifier.fillMaxWidth().height(180.dp))
+                Spacer(Modifier.size(8.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -403,6 +411,20 @@ fun GrantPermissionsDialog(
             }
         }
     }
+}
+
+@Composable
+fun LottieMyLocation(modifier: Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.my_location))
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever,
+    )
+    LottieAnimation(
+        composition,
+        progress,
+        modifier = modifier
+    )
 }
 
 @Composable
