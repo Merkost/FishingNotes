@@ -16,9 +16,9 @@
 
     <!-- Base application theme. -->
     <style name="Theme.AnimatedSplashScreen" parent="Theme.Fishing.Figma">
-        <item name="colorPrimary">@color/primaryFigmaColor</item>-->
+        <item name="colorPrimary">@color/primaryFigmaColor</item>
         <item name="colorOnPrimary">@color/colorOnPrimary</item>
-        <item name="android:statusBarColor" tools:targetApi="l">@color/primaryFigmaColor</item>-->
+        <item name="android:statusBarColor" tools:targetApi="l">@color/primaryFigmaColor</item>
     </style>
 
     <style name="Theme.AppSplash" parent="Theme.SplashScreen">
@@ -50,6 +50,7 @@
         <item name="android:textColorSecondary">@color/secondaryFigmaTextColor</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <item name="android:navigationBarColor">@color/primaryFigmaColor</item>
         <!-- Customize your theme here. -->
         <item name="colorOnBackgroundTint">@color/primaryFigmaBackgroundTint</item>
         <item name="colorControlNormal">@color/colorOnPrimary</item>

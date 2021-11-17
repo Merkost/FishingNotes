@@ -34,6 +34,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.login.LoginScreen
 import com.joesemper.fishing.compose.viewmodels.MainViewModel
+import kotlinx.coroutines.flow.StateFlow
 import org.koin.android.ext.android.get
 
 class MainActivity : ComponentActivity() {
@@ -42,6 +43,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var auth: FirebaseAuth
+    private lateinit var user: StateFlow<BaseViewState?>
 
     private val registeredActivity =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -61,13 +63,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val viewModel: MainViewModel = get()
-        val user = viewModel.subscribe()
+        user = viewModel.subscribe()
 
         val splashWasDisplayed = savedInstanceState != null
         if (!splashWasDisplayed) {
             val splashScreen = installSplashScreen()
 
-            splashScreen.setKeepVisibleCondition { user.value is BaseViewState.Success<*> }
+            splashScreen.setKeepVisibleCondition { user.value !is BaseViewState.Success<*> }
 
             splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
                 // Get icon instance and start a fade out animation
@@ -88,11 +90,17 @@ class MainActivity : ComponentActivity() {
         } else {
             setTheme(R.style.Theme_SplashScreen)
             setContent {
-                FishingNotesApp()
+                //if ((user.value as BaseViewState.Success<*>).data as User? != null)
+                    FishingNotesApp()
+                //else Navigation()
             }
         }
 
         auth = FirebaseAuth.getInstance()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 
         // This app draws behind the system bars, so we want to handle fitting system windows
