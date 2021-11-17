@@ -369,7 +369,7 @@ fun GrantLocationPermissionsDialog(
     Dialog(onDismissRequest = onDismiss) {
         DefaultCard() {
             Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
                 modifier = Modifier
                     .wrapContentSize()
                     .padding(14.dp)
@@ -377,7 +377,7 @@ fun GrantLocationPermissionsDialog(
                 PrimaryText(text = stringResource(R.string.location_permission),
                 modifier = Modifier.padding(4.dp))
                 LottieMyLocation(modifier = Modifier.fillMaxWidth().height(180.dp))
-                Spacer(Modifier.size(6.dp))
+                Spacer(modifier = Modifier.size(6.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween

@@ -405,13 +405,7 @@ fun LocationPermissionDialog(
                 )
             }
         },
-        permissionsNotAvailableContent = {
-            Toast.makeText(
-                context,
-                "Your current location is not available",
-                Toast.LENGTH_SHORT
-            ).show()
-        })
+        permissionsNotAvailableContent = { SnackbarManager.showMessage(R.string.location_permission_denied) })
     { checkPermission(context) }
 }
 

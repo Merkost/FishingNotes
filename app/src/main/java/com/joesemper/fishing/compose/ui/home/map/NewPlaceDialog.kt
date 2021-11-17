@@ -1,8 +1,6 @@
 package com.joesemper.fishing.compose.ui.home.map
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,14 +25,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.google.android.libraries.maps.model.LatLng
-import com.google.android.material.color.MaterialColors
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.MyCard
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.UiState
 import com.joesemper.fishing.compose.ui.theme.Shapes
-import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.compose.ui.utils.ColorPicker
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import kotlinx.coroutines.launch
@@ -170,7 +167,7 @@ fun NewPlaceDialog(
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier.padding(8.dp)
-                        .requiredSize(40.dp))
+                        .requiredSize(40.dp).clip(CircleShape))
                 {
                     Image(painterResource(R.drawable.transparent), stringResource(R.string.transparent),)
                     Icon(painter = painterResource(id = R.drawable.ic_baseline_location_on_24),

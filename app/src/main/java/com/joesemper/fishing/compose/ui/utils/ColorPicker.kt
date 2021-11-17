@@ -1,4 +1,4 @@
-package com.joesemper.fishing.compose.ui.home.map
+package com.joesemper.fishing.compose.ui.utils
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
