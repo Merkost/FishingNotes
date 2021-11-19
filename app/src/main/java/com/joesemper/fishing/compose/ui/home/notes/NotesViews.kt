@@ -161,10 +161,7 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
         null
     }
 
-    DefaultCard(modifier = Modifier
-        .clickable {
-            userCatchClicked(userCatch)
-        }) {
+    DefaultCardClickable(onClick = { userCatchClicked(userCatch) }) {
         ConstraintLayout(modifier = Modifier.padding(8.dp)) {
             val (photos, fish, weight, kg, description, icon, place, date) = createRefs()
             val guideline = createGuidelineFromAbsoluteLeft(110.dp)
