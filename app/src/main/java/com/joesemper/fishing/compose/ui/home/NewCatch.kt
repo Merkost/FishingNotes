@@ -593,7 +593,7 @@ fun ItemAddPhoto() {
 private fun addPhoto(
     permissionState: PermissionState,
     addPhotoState: MutableState<Boolean>,
-    choosePhotoLauncher: ManagedActivityResultLauncher<Array<String>, MutableList<Uri>>
+    choosePhotoLauncher: ManagedActivityResultLauncher<Array<String>, List<Uri>>
 ) {
     when {
         permissionState.hasPermission -> {

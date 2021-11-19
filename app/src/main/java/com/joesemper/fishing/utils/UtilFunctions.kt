@@ -106,30 +106,6 @@ fun hPaToMmHg(pressure: Int): Int {
     return (pressure * 0.75006375541921).toInt()
 }
 
-fun View.hide() {
-    this.visibility = View.GONE
-}
-
-fun View.show() {
-    this.visibility = View.VISIBLE
-}
-
-fun BottomSheetBehavior<ConstraintLayout>.expand() {
-    this.state = BottomSheetBehavior.STATE_EXPANDED
-}
-
-fun BottomSheetBehavior<ConstraintLayout>.halfExpand() {
-    this.state = BottomSheetBehavior.STATE_HALF_EXPANDED
-}
-
-fun BottomSheetBehavior<ConstraintLayout>.hide() {
-    this.state = BottomSheetBehavior.STATE_HIDDEN
-}
-
-fun BottomSheetBehavior<ConstraintLayout>.collapse() {
-    this.state = BottomSheetBehavior.STATE_COLLAPSED
-}
-
 fun showToast(context: Context, text: String) {
     Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
 }
