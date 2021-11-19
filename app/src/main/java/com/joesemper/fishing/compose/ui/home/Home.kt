@@ -24,6 +24,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -49,13 +50,14 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
-import com.joesemper.fishing.compose.ui.home.map.Map
+import com.joesemper.fishing.compose.ui.home.map.MapScreen
 import com.joesemper.fishing.compose.ui.home.notes.Notes
 import com.joesemper.fishing.compose.ui.home.weather.Weather
 import com.joesemper.fishing.compose.ui.theme.primaryFigmaLightColor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 
+@OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalCoroutinesApi
 @ExperimentalPermissionsApi
 @ExperimentalAnimationApi
@@ -72,8 +74,9 @@ fun NavGraphBuilder.addHomeGraph(
         arguments = listOf(navArgument(Arguments.MAP_NEW_PLACE) { defaultValue = false })
     ) { from ->
         val addPlace = requireNotNull(from.arguments).getBoolean(Arguments.MAP_NEW_PLACE, false)
+        requireNotNull(from.arguments).clear()
         //from.arguments?.getBoolean(Arguments.MAP_NEW_PLACE)!!
-        Map(modifier, navController, addPlace)
+        MapScreen(modifier, navController, addPlace)
     }
     composable(HomeSections.NOTES.route) { from ->
         Notes(modifier, navController)

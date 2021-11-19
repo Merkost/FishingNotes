@@ -1,19 +1,13 @@
 package com.joesemper.fishing.compose.ui.home
 
 import android.net.Uri
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.animateDp
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -32,9 +26,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -67,8 +59,10 @@ fun MyCardNoPadding(content: @Composable () -> Unit) {
 }
 
 @Composable
-fun MyCard(shape: CornerBasedShape = RoundedCornerShape(8.dp), modifier: Modifier = Modifier,
-           content: @Composable () -> Unit) {
+fun MyCard(
+    shape: CornerBasedShape = RoundedCornerShape(8.dp), modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
     Card(
         elevation = 8.dp, shape = shape,
         modifier = modifier.fillMaxWidth(), content = content
@@ -78,16 +72,41 @@ fun MyCard(shape: CornerBasedShape = RoundedCornerShape(8.dp), modifier: Modifie
 @Composable
 fun DefaultCard(
     modifier: Modifier = Modifier,
+    shape: CornerBasedShape = RoundedCornerShape(6.dp),
+    padding: Dp = 4.dp,
     content: @Composable () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(4.dp),
+        shape = RoundedCornerShape(24.dp),
         elevation = 8.dp,
+        backgroundColor = Color.White,
         modifier = modifier
             .zIndex(1.0f)
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(4.dp), content = content
+            .padding(padding), content = content
+    )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun DefaultCardClickable(
+    modifier: Modifier = Modifier,
+    shape: CornerBasedShape = RoundedCornerShape(6.dp),
+    padding: Dp = 4.dp,
+    onClick: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(24.dp),
+        elevation = 8.dp,
+        backgroundColor = Color.White,
+        onClick = onClick,
+        modifier = modifier
+            .zIndex(1.0f)
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(padding), content = content
     )
 }
 
@@ -221,7 +240,6 @@ fun HeaderText(
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.h6,
-        maxLines = 1,
         textAlign = TextAlign.Start,
         color = primaryFigmaTextColor,
         text = text
@@ -244,7 +262,6 @@ fun SubtitleText(modifier: Modifier = Modifier, text: String) {
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.subtitle1,
-        maxLines = 1,
         color = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
         text = text
     )
@@ -261,7 +278,6 @@ fun PrimaryText(
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
         fontWeight = fontWeight,
-        maxLines = 1,
         color = MaterialTheme.colors.onSurface,
         text = text
     )
@@ -277,40 +293,48 @@ fun PrimaryTextBold(modifier: Modifier = Modifier, text: String) {
 }
 
 @Composable
-fun SecondaryText(modifier: Modifier = Modifier, text: String) {
-    val darkTheme = isSystemInDarkTheme()
-
-    Text(
-        textAlign = TextAlign.Center,
-        modifier = modifier,
-        style = MaterialTheme.typography.body1,
-        fontSize = 18.sp,
-        color = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
-        text = text
-    )
-}
-
-@Composable
 fun SecondaryTextColored(
     modifier: Modifier = Modifier,
     text: String,
-    color: Color = primaryFigmaColor
+    color: Color = primaryFigmaColor,
+    maxLines: Int = Int.MAX_VALUE
 ) {
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.body1,
         color = color,
-        text = text
+        text = text,
+        maxLines = maxLines
     )
 }
 
 @Composable
-fun SupportText(modifier: Modifier = Modifier, text: String) {
+fun SecondaryText(
+    modifier: Modifier = Modifier, text: String,
+    maxLines: Int = Int.MAX_VALUE
+) {
+    Text(
+        textAlign = TextAlign.Center,
+        modifier = modifier,
+        style = MaterialTheme.typography.body1,
+        fontSize = 18.sp,
+        color = secondaryFigmaTextColor,
+        text = text,
+        maxLines = maxLines
+    )
+}
+
+@Composable
+fun SupportText(
+    modifier: Modifier = Modifier, text: String,
+    maxLines: Int = Int.MAX_VALUE
+) {
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.body1,
         color = supportFigmaTextColor,
-        text = text
+        text = text,
+        maxLines = 1
     )
 }
 
@@ -396,17 +420,17 @@ fun FullScreenPhoto(photo: MutableState<Uri?>) {
                     .clickable {
                         photo.value = null
                     }
-                    /*}.pointerInput(Unit) {
-                        detectTransformGestures { centroid, pan, zoom, rotation ->
-                            scale.value *= zoom
-                            rotationState.value += rotation
-                        }
-                    }.graphicsLayer(
-                        // adding some zoom limits (min 50%, max 200%)
-                        scaleX = maxOf(.5f, minOf(1f, scale.value)),
-                        scaleY = maxOf(.5f, minOf(1f, scale.value)),
-                        rotationZ = rotationState.value
-                    )*/,
+                /*}.pointerInput(Unit) {
+                    detectTransformGestures { centroid, pan, zoom, rotation ->
+                        scale.value *= zoom
+                        rotationState.value += rotation
+                    }
+                }.graphicsLayer(
+                    // adding some zoom limits (min 50%, max 200%)
+                    scaleX = maxOf(.5f, minOf(1f, scale.value)),
+                    scaleY = maxOf(.5f, minOf(1f, scale.value)),
+                    rotationZ = rotationState.value
+                )*/,
                 painter = rememberImagePainter(data = photo.value),
                 contentDescription = stringResource(id = R.string.catch_photo)
             )
@@ -460,6 +484,143 @@ fun SimpleUnderlineTextField(
                     .padding(top = 4.dp, end = 8.dp)
                     .align(Alignment.End),
                 text = it
+            )
+        }
+    }
+}
+
+
+@Composable
+fun DefaultButton(
+    modifier: Modifier = Modifier,
+    text: String,
+    icon: Int? = null,
+    onClick: () -> Unit
+) {
+    Button(
+        modifier = modifier,
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier.wrapContentSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            icon?.let {
+                Icon(
+                    painterResource(id = R.drawable.ic_baseline_shortcut_24),
+                    "",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(horizontal = 4.dp)
+                )
+            }
+            SecondaryTextColored(
+                color = Color.White,
+                text = text,
+                modifier = Modifier.padding(horizontal = 4.dp),
+                maxLines = 1
+            )
+        }
+    }
+}
+
+@Composable
+fun DefaultButtonOutlined(
+    modifier: Modifier = Modifier,
+    text: String,
+    icon: Int? = null,
+    onClick: () -> Unit
+) {
+    OutlinedButton(
+        modifier = modifier,
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier.wrapContentSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            icon?.let {
+                Icon(
+                    painterResource(id = R.drawable.ic_baseline_shortcut_24),
+                    "",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(horizontal = 4.dp)
+                )
+            }
+            PrimaryText(
+                text = text,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun DefaultButtonText(
+    modifier: Modifier = Modifier,
+    text: String,
+    icon: Int? = null,
+    onClick: () -> Unit
+) {
+    TextButton(
+        modifier = modifier,
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier.wrapContentSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            icon?.let {
+                Icon(
+                    painterResource(id = R.drawable.ic_baseline_shortcut_24),
+                    "",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(horizontal = 4.dp)
+                )
+            }
+            SecondaryTextColored(
+                text = text,
+                modifier = Modifier.padding(horizontal = 4.dp),
+                maxLines = 1
+            )
+        }
+    }
+}
+
+@Composable
+fun DefaultButtonSecondaryText(
+    modifier: Modifier = Modifier,
+    text: String,
+    icon: Int? = null,
+    onClick: () -> Unit
+) {
+    TextButton(
+        modifier = modifier,
+        onClick = onClick
+    ) {
+        Row(
+            modifier = Modifier.wrapContentSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            icon?.let {
+                Icon(
+                    painterResource(id = R.drawable.ic_baseline_shortcut_24),
+                    "",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .padding(horizontal = 4.dp)
+                )
+            }
+            SupportText(
+                text = text,
+                modifier = Modifier.padding(horizontal = 4.dp),
+                maxLines = 1
             )
         }
     }

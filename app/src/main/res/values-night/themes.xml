@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Base application theme. -->
-    <style name="Theme.AnimatedSplashScreen" parent="Theme.Fishing.Figma">
+    <!-- Figma application theme. -->
+    <style name="Theme.Fishing.FigmaNight" parent="Theme.Fishing.Figma">
+        <!-- Primary brand color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">@color/fui_transparent</item>
+        <item name="android:navigationBarColor">@color/fui_transparent</item>
+
+    </style>
+
+
+    <style name="Theme.AnimatedSplashScreen" parent="Theme.Fishing.FigmaNight">
         <item name="colorPrimary">@color/primaryFigmaDarkColor</item>-->
         <item name="colorOnPrimary">@color/dark_gray</item>
-        <item name="android:statusBarColor" tools:targetApi="l">@color/primaryFigmaDarkColor</item>-->
+<!--        <item name="android:statusBarColor" tools:targetApi="l">@color/primaryFigmaDarkColor</item>&ndash;&gt;-->
     </style>
 
     <style name="Theme.AppSplash" parent="Theme.SplashScreen">

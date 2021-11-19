@@ -4,7 +4,10 @@ import android.content.Context
 import android.net.Uri
 import android.view.View
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
+import com.google.android.libraries.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.joesemper.fishing.compose.ui.home.map.DEFAULT_ZOOM
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.pow
@@ -15,9 +18,11 @@ const val SECONDS_IN_DAY = 86400L
 const val MILLISECONDS_IN_SECOND = 1000L
 const val MOON_PHASE_INCREMENT_IN_DAY = 0.03f
 
-fun getNewCatchId() = getRandomString(10)
-fun getNewMarkerId() = getRandomString(15)
-fun getNewPhotoId() = getRandomString(12)
+fun getNewCatchId() = getUUID()
+fun getNewMarkerId() = getUUID()
+fun getNewPhotoId() = getUUID()
+
+fun getUUID() = UUID.randomUUID().toString()
 
 fun getRandomString(length: Int): String {
     val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
@@ -107,5 +112,11 @@ fun showToast(context: Context, text: String) {
 
 fun readBytes(context: Context, uri: Uri): ByteArray? =
     context.contentResolver.openInputStream(uri)?.buffered()?.use { it.readBytes() }
+
+fun getCameraPosition(latLng: LatLng): Pair<LatLng, Float> {
+    val lat = latLng.latitude + ((-100..100).random() * 0.000000001)
+    val lng = latLng.longitude + ((-100..100).random() * 0.000000001)
+    return Pair(LatLng(lat, lng), DEFAULT_ZOOM)
+}
 
 

@@ -108,7 +108,6 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
                 }
             }
         }
-
     }
 
     DisposableEffect(key1 = dateAndTime) {

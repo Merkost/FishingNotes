@@ -38,7 +38,6 @@ import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.utils.getTimeByMilliseconds
 
 @ExperimentalComposeUiApi
@@ -162,10 +161,7 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
         null
     }
 
-    DefaultCard(modifier = Modifier
-        .clickable {
-            userCatchClicked(userCatch)
-        }) {
+    DefaultCardClickable(onClick = { userCatchClicked(userCatch) }) {
         ConstraintLayout(modifier = Modifier.padding(8.dp)) {
             val (photos, fish, weight, kg, description, icon, place, date) = createRefs()
             val guideline = createGuidelineFromAbsoluteLeft(110.dp)
@@ -252,9 +248,7 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
 
 @Composable
 fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Unit) {
-    DefaultCard(modifier = Modifier.clickable {
-        userPlaceClicked(place)
-    }) {
+    DefaultCardClickable(onClick = { userPlaceClicked(place) }) {
         ConstraintLayout(
             modifier = Modifier
                 .height(75.dp)
@@ -274,7 +268,7 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
                     },
                 painter = painterResource(R.drawable.ic_baseline_location_on_24),
                 contentDescription = stringResource(R.string.place),
-                tint = secondaryFigmaColor
+                tint = Color(place.markerColor)
             )
 
             PrimaryText(

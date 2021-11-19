@@ -57,6 +57,22 @@ dependencies {
 
     implementation 'androidx.work:work-runtime-ktx:2.7.0'
 
+    //CoilImage
+    implementation "com.github.skydoves:landscapist-coil:1.4.2"
+
+    implementation "com.airbnb.android:lottie-compose:4.0.0"
+
+    implementation "androidx.core:core-splashscreen:1.0.0-alpha02"
+    implementation "com.google.accompanist:accompanist-systemuicontroller:0.17.0"
+
+    //implementation 'com.google.android.gms:play-services-ads:20.4.0'
+
+    // Preferences DataStore
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
+
+    // Proto DataStore
+    //implementation  "androidx.datastore:datastore-core:1.0.0"
+
     //Kotlin
 //    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.5.21"
 //    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.21'

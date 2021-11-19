@@ -52,6 +52,8 @@ import com.joesemper.fishing.domain.UserViewModel
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.model.entity.content.UserCatch
+import com.skydoves.landscapist.ShimmerParams
+import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -442,20 +444,25 @@ fun UserImage(user: User?, imgSize: Dp, modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Image(
-                painter = if (user.userPic.isNullOrEmpty() or user.isAnonymous)
-                    painterResource(R.drawable.ic_fisher)
-                else rememberImagePainter(
-                    data = user.userPic,
-                    builder = {
-                        transformations(CircleCropTransformation())
-                        //crossfade(500)
-                    }
-                ),
-                contentDescription = stringResource(R.string.fisher),
+
+
+            CoilImage(
+                imageModel = if (user.userPic.isNullOrEmpty() or user.isAnonymous)
+                    painterResource(R.drawable.ic_fisher) else user.userPic,
                 contentScale = ContentScale.Crop,
+                shimmerParams = ShimmerParams(
+                    baseColor = Color.LightGray,
+                    highlightColor = Color.White,
+                    durationMillis = 650,
+                    dropOff = 0.65f,
+                    tilt = 20f,
+                ),
+                failure = {
+                    Text("Image request failed")
+                },
                 modifier = Modifier.size(imgSize).clip(CircleShape)
                     .border(2.dp, linearGradientBrush, CircleShape)
+
             )
 
         }
