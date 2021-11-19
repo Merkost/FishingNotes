@@ -79,7 +79,7 @@ fun DefaultCard(
     Card(
         shape = RoundedCornerShape(24.dp),
         elevation = 8.dp,
-        backgroundColor = Color.White,
+        backgroundColor = MaterialTheme.colors.surface,
         modifier = modifier
             .zIndex(1.0f)
             .fillMaxWidth()
@@ -100,7 +100,7 @@ fun DefaultCardClickable(
     Card(
         shape = RoundedCornerShape(24.dp),
         elevation = 8.dp,
-        backgroundColor = Color.White,
+        backgroundColor = MaterialTheme.colors.surface,
         onClick = onClick,
         modifier = modifier
             .zIndex(1.0f)
