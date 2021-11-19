@@ -228,7 +228,7 @@ fun MapScreen(
                     absoluteLeft.linkTo(parent.absoluteLeft)
                     absoluteRight.linkTo(parent.absoluteRight)
                 }) {
-                PointerIcon(cameraMoveState = cameraMoveState, pointerState)
+                PointerIcon(pointerState)
             }
 
             AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection.value,

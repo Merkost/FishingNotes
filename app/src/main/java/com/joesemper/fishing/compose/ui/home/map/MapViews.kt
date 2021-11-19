@@ -196,12 +196,10 @@ fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name:
 
 @Composable
 fun PointerIcon(
-    cameraMoveState: CameraMoveState,
     pointerState: MutableState<PointerState>,
     modifier: Modifier = Modifier,
 ) {
     var isFirstTimeCalled by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
 
     val darkTheme = isSystemInDarkTheme()
     val composition by rememberLottieComposition(

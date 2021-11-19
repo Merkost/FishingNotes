@@ -12,11 +12,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/**
- * An alternative to [androidx.compose.material.Snackbar] utilizing
- * [com.example.jetsnack.ui.theme.JetsnackColors]
- */
-@Composable
+re@Composable
 fun AppSnackbar(
     snackbarData: SnackbarData,
     modifier: Modifier = Modifier,
