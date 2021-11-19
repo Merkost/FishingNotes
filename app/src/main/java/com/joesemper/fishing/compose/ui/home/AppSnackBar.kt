@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-re@Composable
+@Composable
 fun AppSnackbar(
     snackbarData: SnackbarData,
     modifier: Modifier = Modifier,

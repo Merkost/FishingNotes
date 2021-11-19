@@ -65,7 +65,7 @@ fun UserPlaceScreen(navController: NavController, place: UserMapMarker?) {
                         },
                     painter = painterResource(R.drawable.ic_baseline_location_on_24),
                     contentDescription = stringResource(R.string.place),
-                    tint = secondaryFigmaColor
+                    tint = Color(userPlace.markerColor)
                 )
 
                 PrimaryTextBold(
