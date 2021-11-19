@@ -72,7 +72,7 @@ fun MyCard(
 @Composable
 fun DefaultCard(
     modifier: Modifier = Modifier,
-    shape: CornerBasedShape = RoundedCornerShape(8.dp),
+    shape: CornerBasedShape = RoundedCornerShape(6.dp),
     padding: Dp = 4.dp,
     content: @Composable () -> Unit
 ) {
@@ -80,6 +80,28 @@ fun DefaultCard(
         shape = RoundedCornerShape(24.dp),
         elevation = 8.dp,
         backgroundColor = Color.White,
+        modifier = modifier
+            .zIndex(1.0f)
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(padding), content = content
+    )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun DefaultCardClickable(
+    modifier: Modifier = Modifier,
+    shape: CornerBasedShape = RoundedCornerShape(6.dp),
+    padding: Dp = 4.dp,
+    onClick: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(24.dp),
+        elevation = 8.dp,
+        backgroundColor = Color.White,
+        onClick = onClick,
         modifier = modifier
             .zIndex(1.0f)
             .fillMaxWidth()

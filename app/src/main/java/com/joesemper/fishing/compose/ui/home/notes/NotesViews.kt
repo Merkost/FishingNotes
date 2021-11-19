@@ -251,9 +251,7 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
 
 @Composable
 fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Unit) {
-    DefaultCard(modifier = Modifier.clickable {
-        userPlaceClicked(place)
-    }) {
+    DefaultCardClickable(onClick = { userPlaceClicked(place) }) {
         ConstraintLayout(
             modifier = Modifier
                 .height(75.dp)
@@ -273,7 +271,7 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
                     },
                 painter = painterResource(R.drawable.ic_baseline_location_on_24),
                 contentDescription = stringResource(R.string.place),
-                tint = secondaryFigmaColor
+                tint = Color(place.markerColor)
             )
 
             PrimaryText(
