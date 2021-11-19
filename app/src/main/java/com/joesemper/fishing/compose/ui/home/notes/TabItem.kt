@@ -4,31 +4,29 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.weather.WeatherForADay
-import com.joesemper.fishing.compose.ui.home.weather.WeatherForAWeek
-import com.joesemper.fishing.model.entity.weather.WeatherForecast
 
 typealias ComposableFun = @Composable (navController: NavController) -> Unit
 
 sealed class TabItem(var icon: Int, var titleRes: Int, var screen: ComposableFun) {
 
     @ExperimentalAnimationApi
-    object Places : TabItem(R.drawable.ic_baseline_location_on_24, R.string.places, { navController ->
-        UserPlacesScreen(navController = navController)
-    })
+    object Places :
+        TabItem(R.drawable.ic_baseline_location_on_24, R.string.places, { navController ->
+            UserPlacesScreen(navController = navController)
+        })
 
     @ExperimentalAnimationApi
     object Catches : TabItem(R.drawable.ic_fish, R.string.catches, { navController ->
         UserCatchesScreen(navController = navController)
     })
 
-    class ForADay(weatherForecast: WeatherForecast) :
-        TabItem(R.drawable.ic_baseline_today_24, R.string.for_today, { navController ->
-            WeatherForADay(weather = weatherForecast)
-        })
-
-    class ForAWeek(weatherForecast: WeatherForecast) :
-        TabItem(R.drawable.calendar_week, R.string.for_a_week, { navController ->
-            WeatherForAWeek(weather = weatherForecast)
-        })
+//    class ForADay(weatherForecast: WeatherForecast) :
+//        TabItem(R.drawable.ic_baseline_today_24, R.string.for_today, { navController ->
+//            WeatherForADay(weather = weatherForecast)
+//        })
+//
+//    class ForAWeek(weatherForecast: WeatherForecast) :
+//        TabItem(R.drawable.calendar_week, R.string.for_a_week, { navController ->
+//            WeatherForAWeek(weather = weatherForecast)
+//        })
 }

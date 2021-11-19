@@ -40,7 +40,7 @@ import com.joesemper.fishing.compose.ui.home.DefaultButtonText
 import com.joesemper.fishing.compose.ui.home.DefaultCard
 import com.joesemper.fishing.compose.ui.home.PrimaryText
 import com.joesemper.fishing.compose.ui.theme.Shapes
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryColor
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -309,7 +309,7 @@ fun PlaceTileView(
 
     val placeName = viewModel.chosenPlace.value ?: stringResource(R.string.searching)
     val pointerIconColor by animateColorAsState(
-        if (selectedPlace != null) secondaryFigmaColor
+        if (selectedPlace != null) secondaryColor
         else Color.LightGray
     )
     val textColor by animateColorAsState(

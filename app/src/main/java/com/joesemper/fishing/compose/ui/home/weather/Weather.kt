@@ -2,13 +2,12 @@ package com.joesemper.fishing.compose.ui.home.weather
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,12 +17,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -35,10 +34,10 @@ import com.joesemper.fishing.compose.ui.home.SecondaryText
 import com.joesemper.fishing.compose.ui.home.map.LocationState
 import com.joesemper.fishing.compose.ui.home.map.getCurrentLocationFlow
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
-import com.joesemper.fishing.compose.ui.theme.primaryColor
-import com.joesemper.fishing.compose.ui.theme.primaryFigmaTextColor
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
+import com.joesemper.fishing.compose.ui.theme.primaryDarkColor
+import com.joesemper.fishing.compose.ui.theme.primaryDarkColorTransparent
+import com.joesemper.fishing.compose.ui.theme.primaryTextColor
+import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.WeatherViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.Daily
@@ -69,87 +68,47 @@ fun WeatherScreen(
 
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
 
-    val userPlaces = remember {
-        mutableStateOf<MutableList<UserMapMarker>>(mutableListOf())
-    }
-
-    val currentLocation = stringResource(R.string.current_location)
-
     val selectedPlace = remember {
         mutableStateOf<UserMapMarker?>(null)
-    }
-
-    val currentWeather = remember {
-        mutableStateOf<WeatherForecast?>(null)
     }
 
     LaunchedEffect(permissionsState.allPermissionsGranted) {
         getCurrentLocationFlow(context, permissionsState).collect { locationState ->
             if (locationState is LocationState.LocationGranted) {
-                userPlaces.value.add(
+                viewModel.markersList.value.add(
                     index = 0,
                     element = createCurrentPlaceItem(locationState.location, context)
                 )
-                selectedPlace.value = userPlaces.value.first()
+                selectedPlace.value = viewModel.markersList.value.first()
             }
-        }
-    }
-
-    LaunchedEffect(viewModel) {
-        viewModel.getAllMarkers().collect { places ->
-            userPlaces.value.addAll(places as List<UserMapMarker>)
         }
     }
 
     LaunchedEffect(selectedPlace.value) {
         selectedPlace.value?.let { place ->
-            viewModel.getWeather(place.latitude, place.longitude).collect {
-                currentWeather.value = it
-            }
+            viewModel.getWeather(place.latitude, place.longitude)
         }
     }
 
-    val scrollState = rememberLazyListState()
-
-    val topBarColor = animateColorAsState(
-        targetValue = if (scrollState.firstVisibleItemScrollOffset > 0) {
-            Color.White
-        } else {
-            primaryColor
-        },
-        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
-    )
-
-    val iconColor = animateColorAsState(
-        targetValue = if (scrollState.firstVisibleItemScrollOffset > 0) {
-            secondaryFigmaColor
-        } else {
-            Color.White
-        },
-        animationSpec = tween(durationMillis = 300, easing = LinearEasing)
-    )
-
-    val topBarElevation = animateDpAsState(
-        targetValue = if (scrollState.firstVisibleItemScrollOffset > 0) {
-            4.dp
-        } else {
-            0.dp
-        }
-    )
+    val scrollState = rememberScrollState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
+            val elevation =
+                animateDpAsState(targetValue = if (scrollState.value > 0) 4.dp else 0.dp)
+            val color =
+                animateColorAsState(targetValue = if (scrollState.value > 0) primaryDarkColor else primaryDarkColorTransparent)
+
             TopAppBar(
-                elevation = topBarElevation.value,
-                backgroundColor = topBarColor.value
+                elevation = elevation.value,
+                backgroundColor = color.value
             ) {
-                WeatherLocationIcon(color = iconColor.value)
+                WeatherLocationIcon(color = Color.White)
                 selectedPlace.value?.let {
                     WeatherPlaceSelectItem(
                         selectedPlace = it,
-                        userPlaces = userPlaces.value,
-                        scrollState = scrollState,
+                        userPlaces = viewModel.markersList.value,
                         onItemClick = { clickedItem ->
                             selectedPlace.value = clickedItem
                         }
@@ -158,109 +117,18 @@ fun WeatherScreen(
             }
         }
     ) {
-        LazyColumn(
-            state = scrollState
+        Column(
+            modifier = Modifier.verticalScroll(scrollState)
         ) {
-            currentWeather.value?.let { forecast ->
+            viewModel.currentWeather.value?.let { forecast ->
 
-                item {
+                CurrentWeather(forecast = forecast)
 
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
-                        color = primaryColor
-                    ) {
+                HourlyWeather(forecast = forecast.hourly)
 
-                        ConstraintLayout {
-                            val (primary, temp, wind, pressure, humidity) = createRefs()
-                            PrimaryWeatherParameterMeaning(
-                                modifier = Modifier.constrainAs(primary) {
-                                    top.linkTo(parent.top, 4.dp)
-                                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                                    absoluteRight.linkTo(temp.absoluteLeft)
-                                },
-                                icon = getWeatherIconByName(forecast.hourly.first().weather.first().icon),
-                                text = forecast.hourly.first().weather.first().description
-                            )
-
-                            WeatherTemperatureMeaning(
-                                modifier = Modifier.constrainAs(temp) {
-                                    top.linkTo(primary.top)
-                                    absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-                                    absoluteLeft.linkTo(primary.absoluteRight)
-                                },
-                                temperature = forecast.hourly.first().temperature.toInt()
-                                    .toString(),
-                                minTemperature = forecast.daily.first().temperature.min.toInt()
-                                    .toString(),
-                                maxTemperature = forecast.daily.first().temperature.max.toInt()
-                                    .toString()
-                            )
-                            WeatherParameterMeaning(
-                                modifier = Modifier.constrainAs(wind) {
-                                    top.linkTo(primary.bottom, 4.dp)
-                                    bottom.linkTo(parent.bottom)
-                                    absoluteLeft.linkTo(parent.absoluteLeft, 2.dp)
-                                },
-                                title = stringResource(id = R.string.wind),
-                                text = forecast.hourly.first().windSpeed.toString()
-                                        + stringResource(R.string.wind_speed_units),
-                                primaryIconId = R.drawable.weather_windy,
-                                iconId = R.drawable.ic_arrow_up,
-                                iconRotation = forecast.hourly.first().windDeg,
-                                lightTint = true
-                            )
-                            WeatherParameterMeaning(
-                                modifier = Modifier.constrainAs(pressure) {
-                                    top.linkTo(wind.top)
-                                    bottom.linkTo(wind.bottom)
-                                    absoluteRight.linkTo(humidity.absoluteLeft)
-                                    absoluteLeft.linkTo(wind.absoluteRight)
-                                },
-                                title = stringResource(id = R.string.pressure),
-                                text = hPaToMmHg(forecast.hourly.first().pressure).toString() + " "
-                                        + stringResource(R.string.pressure_units),
-                                primaryIconId = R.drawable.ic_gauge,
-                                lightTint = true
-                            )
-                            WeatherParameterMeaning(
-                                modifier = Modifier.constrainAs(humidity) {
-                                    top.linkTo(wind.top)
-                                    bottom.linkTo(wind.bottom)
-                                    absoluteRight.linkTo(parent.absoluteRight, 2.dp)
-                                },
-                                title = stringResource(id = R.string.humidity),
-                                text = forecast.hourly.first().humidity.toString()
-                                        + stringResource(R.string.percent),
-                                primaryIconId = R.drawable.ic_baseline_opacity_24,
-                                lightTint = true
-                            )
-                        }
-
-                    }
+                forecast.daily.forEach {
+                    DailyWeatherItem(forecast = it)
                 }
-
-                item {
-                    Column {
-                        WeatherHeaderText(
-                            modifier = Modifier.padding(8.dp),
-                            text = stringResource(id = R.string.hourly)
-                        )
-                        LazyRow() {
-                            items(forecast.hourly.size) { index ->
-                                HourlyItem(forecast = forecast.hourly[index])
-                            }
-                        }
-                        Spacer(modifier = Modifier.padding(4.dp))
-                        Divider()
-                    }
-                }
-
-                items(forecast.daily.size) { index ->
-                    DailyItem(forecast = forecast.daily[index])
-                }
-
             }
         }
 
@@ -269,7 +137,120 @@ fun WeatherScreen(
 }
 
 @Composable
-fun HourlyItem(
+fun CurrentWeather(
+    modifier: Modifier = Modifier,
+    forecast: WeatherForecast,
+) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(200.dp),
+        color = primaryDarkColorTransparent
+    ) {
+
+        Image(
+            modifier = modifier
+                .fillMaxSize()
+                .zIndex(-1f),
+            painter = painterResource(id = R.drawable.ic_fish_background),
+            contentDescription = "",
+            alpha = 0.08f,
+            contentScale = ContentScale.Fit
+        )
+
+        ConstraintLayout {
+            val (primary, temp, wind, pressure, humidity) = createRefs()
+            PrimaryWeatherParameterMeaning(
+                modifier = Modifier.constrainAs(primary) {
+                    top.linkTo(parent.top, 4.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                    absoluteRight.linkTo(temp.absoluteLeft)
+                },
+                icon = getWeatherIconByName(forecast.hourly.first().weather.first().icon),
+                text = forecast.hourly.first().weather.first().description
+            )
+
+            WeatherTemperatureMeaning(
+                modifier = Modifier.constrainAs(temp) {
+                    top.linkTo(primary.top)
+                    absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+                    absoluteLeft.linkTo(primary.absoluteRight)
+                },
+                temperature = forecast.hourly.first().temperature.toInt()
+                    .toString(),
+                minTemperature = forecast.daily.first().temperature.min.toInt()
+                    .toString(),
+                maxTemperature = forecast.daily.first().temperature.max.toInt()
+                    .toString()
+            )
+            WeatherParameterMeaning(
+                modifier = Modifier.constrainAs(wind) {
+                    top.linkTo(primary.bottom, 4.dp)
+                    bottom.linkTo(parent.bottom)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 2.dp)
+                },
+                title = stringResource(id = R.string.wind),
+                text = forecast.hourly.first().windSpeed.toString()
+                        + stringResource(R.string.wind_speed_units),
+                primaryIconId = R.drawable.weather_windy,
+                iconId = R.drawable.ic_arrow_up,
+                iconRotation = forecast.hourly.first().windDeg,
+                lightTint = true
+            )
+            WeatherParameterMeaning(
+                modifier = Modifier.constrainAs(pressure) {
+                    top.linkTo(wind.top)
+                    bottom.linkTo(wind.bottom)
+                    absoluteRight.linkTo(humidity.absoluteLeft)
+                    absoluteLeft.linkTo(wind.absoluteRight)
+                },
+                title = stringResource(id = R.string.pressure),
+                text = hPaToMmHg(forecast.hourly.first().pressure).toString() + " "
+                        + stringResource(R.string.pressure_units),
+                primaryIconId = R.drawable.ic_gauge,
+                lightTint = true
+            )
+            WeatherParameterMeaning(
+                modifier = Modifier.constrainAs(humidity) {
+                    top.linkTo(wind.top)
+                    bottom.linkTo(wind.bottom)
+                    absoluteRight.linkTo(parent.absoluteRight, 2.dp)
+                },
+                title = stringResource(id = R.string.humidity),
+                text = forecast.hourly.first().humidity.toString()
+                        + stringResource(R.string.percent),
+                primaryIconId = R.drawable.ic_baseline_opacity_24,
+                lightTint = true
+            )
+        }
+
+    }
+}
+
+@Composable
+fun HourlyWeather(
+    modifier: Modifier = Modifier,
+    forecast: List<Hourly>
+) {
+    Column(modifier = modifier) {
+        WeatherHeaderText(
+            modifier = Modifier.padding(8.dp),
+            text = stringResource(id = R.string.hourly)
+        )
+        LazyRow() {
+            items(forecast.size) { index ->
+                HourlyWeatherItem(forecast = forecast[index])
+            }
+        }
+        Spacer(modifier = Modifier.padding(4.dp))
+        Divider()
+    }
+
+}
+
+
+@Composable
+fun HourlyWeatherItem(
     modifier: Modifier = Modifier,
     forecast: Hourly
 ) {
@@ -300,7 +281,7 @@ fun HourlyItem(
 }
 
 @Composable
-fun DailyItem(
+fun DailyWeatherItem(
     modifier: Modifier = Modifier,
     forecast: Daily
 ) {
@@ -309,7 +290,7 @@ fun DailyItem(
             .fillMaxWidth()
             .height(80.dp)
     ) {
-        val (date, day, divider, temp, tempUnits, weatherIcon, pressure, pressureUnits) = createRefs()
+        val (date, day, divider, temp, tempUnits, weatherIcon, pressure, pressureUnits, pop) = createRefs()
         val guideline = createGuidelineFromAbsoluteLeft(0.4f)
         WeatherHeaderText(
             modifier = Modifier.constrainAs(date) {
@@ -356,7 +337,7 @@ fun DailyItem(
                 absoluteRight.linkTo(pressure.absoluteLeft, 16.dp)
             },
             text = stringResource(id = R.string.celsius),
-            textColor = secondaryFigmaTextColor
+            textColor = secondaryTextColor
         )
         WeatherPrimaryText(
             modifier = Modifier.constrainAs(temp) {
@@ -378,39 +359,24 @@ fun DailyItem(
                 id = getWeatherIconByName(forecast.weather.first().icon)
             ),
             contentDescription = "",
-            tint = primaryFigmaTextColor
+            tint = primaryTextColor
         )
-
-
+        if (forecast.probabilityOfPrecipitation > 0.3) {
+            SecondaryText(
+                modifier = Modifier.constrainAs(pop) {
+                    top.linkTo(weatherIcon.top)
+                    bottom.linkTo(weatherIcon.bottom)
+                    absoluteLeft.linkTo(weatherIcon.absoluteRight, 2.dp)
+                },
+                text = (forecast.probabilityOfPrecipitation * 100).toInt()
+                    .toString() + stringResource(
+                    id = R.string.percent
+                )
+            )
+        }
     }
 }
 
-@Composable
-fun WeatherHeaderText(
-    modifier: Modifier = Modifier,
-    text: String
-) {
-    Text(
-        modifier = modifier,
-        text = text,
-        style = MaterialTheme.typography.body1,
-        fontWeight = FontWeight.Bold
-    )
-}
-
-@Composable
-fun WeatherPrimaryText(
-    modifier: Modifier = Modifier,
-    text: String,
-    textColor: Color = primaryFigmaTextColor
-) {
-    Text(
-        modifier = modifier,
-        text = text,
-        color = textColor,
-        fontSize = 24.sp
-    )
-}
 
 
 

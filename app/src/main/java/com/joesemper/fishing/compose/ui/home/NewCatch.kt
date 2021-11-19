@@ -56,7 +56,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
 import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
+import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -572,7 +572,7 @@ fun ItemAddPhoto() {
             Icon(
                 painterResource(R.drawable.ic_baseline_add_photo_alternate_24), //Or we can use Icons.Default.Add
                 contentDescription = Constants.ITEM_ADD_PHOTO,
-                tint = secondaryFigmaTextColor,
+                tint = secondaryTextColor,
                 modifier = Modifier.size(48.dp)
             )
             SecondaryText(text = stringResource(id = R.string.add_photo))

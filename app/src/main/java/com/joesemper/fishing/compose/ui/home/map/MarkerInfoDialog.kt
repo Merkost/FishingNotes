@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.DefaultCard
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryColor
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 
 @ExperimentalMaterialApi
@@ -42,7 +42,7 @@ fun MarkerInfoDialog(
                 Icon(
                     painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
                     contentDescription = "Marker",
-                    tint = secondaryFigmaColor,
+                    tint = secondaryColor,
                     modifier = Modifier
                         .size(32.dp)
                         .constrainAs(locationIcon) {

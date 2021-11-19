@@ -31,22 +31,22 @@ onSurface = Color.Black,*/
 private val GreenLightColorPalette = lightColors(
     primary = primaryFigmaColor,
     primaryVariant = primaryFigmaDarkColor,
-    secondary = secondaryFigmaColor,
-    secondaryVariant = secondaryFigmaDarkColor,
+    secondary = secondaryColor,
+    secondaryVariant = secondaryDarkColor,
 )
 
 private val GreenDarkColorPalette = darkColors(
     primary = primaryFigmaDarkColor,
     primaryVariant = primaryFigmaColor,
-    secondary = secondaryFigmaDarkColor,
-    secondaryVariant = secondaryFigmaColor,
+    secondary = secondaryDarkColor,
+    secondaryVariant = secondaryColor,
 )
 
 private val TestLightColorPalette = lightColors(
     primary = primaryColor,
     primaryVariant = primaryDarkColor,
-    secondary = secondaryFigmaColor,
-    secondaryVariant = secondaryFigmaDarkColor,
+    secondary = secondaryColor,
+    secondaryVariant = secondaryDarkColor,
 )
 
 @Composable

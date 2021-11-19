@@ -158,7 +158,7 @@ fun PlaceInfo(user: User?, place: UserMapMarker, placeClicked: (UserMapMarker) -
                 Icon(
                     Icons.Default.Place,
                     stringResource(R.string.place),
-                    tint = secondaryFigmaColor
+                    tint = secondaryColor
                 )
                 Spacer(modifier = Modifier.width(150.dp))
                 UserProfile(user)
@@ -182,7 +182,7 @@ fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
         Icon(
             painter = painterResource(id = icon),
             contentDescription = stringResource(R.string.place),
-            tint = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
+            tint = if (darkTheme) Color.LightGray else secondaryTextColor,
             modifier = Modifier.size(30.dp)
         )
         Spacer(Modifier.size(8.dp))
@@ -210,7 +210,7 @@ fun HeaderText(
     modifier: Modifier = Modifier,
     text: String,
     textAlign: TextAlign = TextAlign.Start,
-    textColor: Color = primaryFigmaTextColor
+    textColor: Color = primaryTextColor
 ) {
     Text(
         modifier = modifier,
@@ -227,7 +227,7 @@ fun HeaderTextSecondary(
     text: String,
     textAlign: TextAlign = TextAlign.Start
 ) {
-    HeaderText(modifier, text, textAlign, secondaryFigmaTextColor)
+    HeaderText(modifier, text, textAlign, secondaryTextColor)
 }
 
 @Composable
@@ -237,7 +237,7 @@ fun SubtitleText(modifier: Modifier = Modifier, text: String) {
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.subtitle1,
-        color = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
+        color = if (darkTheme) Color.LightGray else secondaryTextColor,
         text = text
     )
 }
@@ -277,7 +277,7 @@ fun SecondaryText(modifier: Modifier = Modifier, text: String) {
         modifier = modifier,
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
-        color = secondaryFigmaTextColor,
+        color = secondaryTextColor,
         text = text
     )
 }
@@ -287,7 +287,7 @@ fun SecondaryTextSmall(
     modifier: Modifier = Modifier,
     text: String,
     textAlign: TextAlign? = null,
-    color: Color = secondaryFigmaTextColor
+    color: Color = secondaryTextColor
 ) {
     Text(
         textAlign = textAlign,
@@ -319,7 +319,7 @@ fun SupportText(modifier: Modifier = Modifier, text: String) {
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.body1,
-        color = supportFigmaTextColor,
+        color = supportTextColor,
         text = text
     )
 }
@@ -443,7 +443,7 @@ fun SimpleUnderlineTextField(
                 .fillMaxWidth()
                 .padding(bottom = 4.dp, start = 8.dp),
             textAlign = TextAlign.Start,
-            color = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
+            color = if (darkTheme) Color.LightGray else secondaryTextColor,
             style = MaterialTheme.typography.body2,
         )
         TextField(
@@ -452,11 +452,11 @@ fun SimpleUnderlineTextField(
             value = text,
             textStyle = MaterialTheme.typography.body1.copy(fontSize = 18.sp),
             colors = TextFieldDefaults.textFieldColors(
-                textColor = primaryFigmaTextColor,
-                backgroundColor = Color.White,
+                textColor = primaryTextColor,
+                backgroundColor = primaryLightColorTransparent,
                 cursorColor = Color.Black,
-                focusedIndicatorColor = supportFigmaTextColor,
-                unfocusedIndicatorColor = supportFigmaTextColor
+                focusedIndicatorColor = supportTextColor,
+                unfocusedIndicatorColor = supportTextColor
             ),
             onValueChange = { },
             shape = RoundedCornerShape(2.dp),

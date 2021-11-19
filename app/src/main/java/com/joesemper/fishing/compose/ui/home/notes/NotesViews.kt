@@ -125,7 +125,7 @@ fun ItemCatchPhotos(
                 Icon(
                     painter = painterResource(id = R.drawable.ic_no_photo_vector),
                     contentDescription = Constants.ITEM_PHOTO,
-                    tint = secondaryFigmaTextColor,
+                    tint = secondaryTextColor,
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(RoundedCornerShape(5.dp))
@@ -226,7 +226,7 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
                     id = R.drawable.ic_baseline_location_on_24
                 ),
                 contentDescription = stringResource(R.string.icon),
-                tint = secondaryFigmaTextColor
+                tint = secondaryTextColor
             )
 
             SecondaryTextColored(
@@ -274,7 +274,7 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
                     },
                 painter = painterResource(R.drawable.ic_baseline_location_on_24),
                 contentDescription = stringResource(R.string.place),
-                tint = secondaryFigmaColor
+                tint = secondaryColor
             )
 
             PrimaryText(
@@ -415,7 +415,7 @@ fun ItemPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Unit) {
                 },
             painter = painterResource(R.drawable.ic_baseline_location_on_24),
             contentDescription = stringResource(R.string.place),
-            tint = secondaryFigmaColor
+            tint = secondaryColor
         )
 
         PrimaryText(
@@ -433,7 +433,7 @@ fun ItemPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Unit) {
                 bottom.linkTo(title.bottom)
             },
             painter = painterResource(id = R.drawable.ic_fish),
-            tint = secondaryFigmaTextColor,
+            tint = secondaryTextColor,
             contentDescription = stringResource(id = R.string.fish_catch)
         )
 
@@ -543,7 +543,7 @@ fun ItemCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
                     id = R.drawable.ic_baseline_location_on_24
                 ),
                 contentDescription = stringResource(R.string.icon),
-                tint = secondaryFigmaTextColor
+                tint = secondaryTextColor
             )
 
             SecondaryTextColored(
@@ -581,7 +581,7 @@ fun ItemCounter(
 ) {
     Row(modifier = modifier.padding(2.dp)) {
         Icon(
-            tint = secondaryFigmaTextColor,
+            tint = secondaryTextColor,
             painter = painterResource(id = icon),
             contentDescription = "",
             modifier = Modifier.padding(horizontal = 4.dp)

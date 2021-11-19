@@ -27,7 +27,7 @@ import com.joesemper.fishing.compose.ui.home.MyCard
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.UiState
 import com.joesemper.fishing.compose.ui.theme.Shapes
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryColor
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import kotlinx.coroutines.launch
@@ -88,7 +88,7 @@ fun NewPlaceDialog(
 
             Icon(painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
                 contentDescription = stringResource(R.string.marker_icon),
-                tint = secondaryFigmaColor,
+                tint = secondaryColor,
                 modifier = Modifier.constrainAs(locationIcon) {
                     absoluteRight.linkTo(name.absoluteLeft, 14.dp)
                     top.linkTo(name.top)

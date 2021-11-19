@@ -10,8 +10,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,11 +25,11 @@ import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.notes.ItemUserCatch
 import com.joesemper.fishing.compose.ui.navigate
+import com.joesemper.fishing.compose.ui.theme.secondaryColor
+import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.UserPlaceViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalMaterialApi
@@ -65,7 +63,7 @@ fun UserPlaceScreen(navController: NavController, place: UserMapMarker?) {
                         },
                     painter = painterResource(R.drawable.ic_baseline_location_on_24),
                     contentDescription = stringResource(R.string.place),
-                    tint = secondaryFigmaColor
+                    tint = secondaryColor
                 )
 
                 PrimaryTextBold(
@@ -83,7 +81,7 @@ fun UserPlaceScreen(navController: NavController, place: UserMapMarker?) {
                         bottom.linkTo(title.bottom)
                     },
                     painter = painterResource(id = R.drawable.ic_fish),
-                    tint = secondaryFigmaTextColor,
+                    tint = secondaryTextColor,
                     contentDescription = stringResource(id = R.string.fish_catch)
                 )
 
@@ -138,7 +136,7 @@ fun UserPlaceScreen(navController: NavController, place: UserMapMarker?) {
 @Composable
 fun AddNewCatchFab(onClick: () -> Unit) {
     FloatingActionButton(
-        backgroundColor = secondaryFigmaColor,
+        backgroundColor = secondaryColor,
         onClick = { onClick() }
     ) {
         Icon(
