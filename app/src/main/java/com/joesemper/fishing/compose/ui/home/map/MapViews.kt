@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import coil.decode.withInterruptibleSource
 import com.airbnb.lottie.compose.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.libraries.maps.model.LatLng
@@ -199,7 +200,7 @@ fun PointerIcon(
     pointerState: MutableState<PointerState>,
     modifier: Modifier = Modifier,
 ) {
-    var isFirstTimeCalled = remember { true }
+    var isFirstTimeCalled by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     val darkTheme = isSystemInDarkTheme()
@@ -213,6 +214,15 @@ fun PointerIcon(
     }
     val finishMinMaxFrame by remember {
         mutableStateOf(LottieClipSpec.Frame(50, 82))
+    }
+
+    LaunchedEffect(isFirstTimeCalled) {
+        lottieAnimatable.animate(
+            composition,
+            iteration = 1,
+            continueFromPreviousAnimate = true,
+            clipSpec = startMinMaxFrame,
+        )
     }
 
     LaunchedEffect(pointerState.value) {
@@ -238,6 +248,9 @@ fun PointerIcon(
         composition = composition,
         progress = lottieAnimatable.progress
     )
+
+    isFirstTimeCalled = true
+
 }
 
 @Composable
