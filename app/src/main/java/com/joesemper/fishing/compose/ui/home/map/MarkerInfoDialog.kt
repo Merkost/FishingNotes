@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -23,7 +24,7 @@ fun MarkerInfoDialog(
     marker: UserMapMarker?,
     onDescriptionClick: (UserMapMarker) -> Unit
 ) {
-
+    val context = LocalContext.current
     Spacer(modifier = Modifier.size(6.dp))
     DefaultCard(shape = RoundedCornerShape(12.dp),
     padding = 8.dp) {
@@ -110,7 +111,8 @@ fun MarkerInfoDialog(
                     absoluteRight.linkTo(detailsButton.absoluteLeft, 8.dp)
                     top.linkTo(detailsButton.top)
                     bottom.linkTo(detailsButton.bottom)
-                }, shape = RoundedCornerShape(24.dp), onClick = { /*TODO*/ }) {
+                }, shape = RoundedCornerShape(24.dp), onClick = {
+                    startMapsActivityForNavigation(it, context) }) {
                     Row(
                         modifier = Modifier.wrapContentSize(),
                         horizontalArrangement = Arrangement.Start,
