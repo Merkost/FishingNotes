@@ -50,6 +50,7 @@ import com.joesemper.fishing.utils.getTimeBySeconds
 import com.joesemper.fishing.utils.hPaToMmHg
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.take
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalCoroutinesApi
@@ -108,7 +109,7 @@ fun WeatherScreen(
                 selectedPlace.value?.let {
                     WeatherPlaceSelectItem(
                         selectedPlace = it,
-                        userPlaces = viewModel.markersList.value,
+                        userPlaces = viewModel.markersList.value.take(8),
                         onItemClick = { clickedItem ->
                             selectedPlace.value = clickedItem
                         }

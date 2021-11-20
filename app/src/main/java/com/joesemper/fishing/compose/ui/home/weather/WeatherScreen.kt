@@ -134,7 +134,7 @@ fun Weather(
                         Icon(imageVector = Icons.Filled.ArrowDropDown, "")
 
                         DropdownMenu(
-                            modifier = Modifier.requiredWidthIn(200.dp, 400.dp),
+                            modifier = Modifier.requiredWidthIn(200.dp, 500.dp),
                             expanded = isExpanded,
                             onDismissRequest = {
                                 isExpanded = !isExpanded
