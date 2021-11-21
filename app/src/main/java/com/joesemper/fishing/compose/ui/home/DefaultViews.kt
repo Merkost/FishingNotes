@@ -198,6 +198,7 @@ fun PlaceInfo(user: User?, place: UserMapMarker, placeClicked: (UserMapMarker) -
 @Composable
 fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
     val darkTheme = isSystemInDarkTheme()
+    //TODO: Remove dark theme checking
 
     Row(
         modifier = modifier,
@@ -239,9 +240,9 @@ fun HeaderText(
 ) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.h6,
-        textAlign = TextAlign.Start,
-        color = primaryFigmaTextColor,
+        style = MaterialTheme.typography.h3,
+        textAlign = textAlign,
+        color = textColor,
         text = text
     )
 }
@@ -271,14 +272,17 @@ fun SubtitleText(modifier: Modifier = Modifier, text: String) {
 fun PrimaryText(
     modifier: Modifier = Modifier,
     fontWeight: FontWeight? = null,
-    text: String
+    textAlign: TextAlign? = null,
+    text: String,
+    textColor: Color = MaterialTheme.colors.onSurface
 ) {
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
         fontWeight = fontWeight,
-        color = MaterialTheme.colors.onSurface,
+        textAlign = textAlign,
+        color = textColor,
         text = text
     )
 }
@@ -309,6 +313,23 @@ fun SecondaryTextColored(
 }
 
 @Composable
+fun SecondaryTextSmall(
+    modifier: Modifier = Modifier,
+    text: String,
+    textAlign: TextAlign? = null,
+    color: Color = secondaryTextColor
+) {
+    Text(
+        textAlign = textAlign,
+        modifier = modifier,
+        style = MaterialTheme.typography.h5,
+        fontSize = 14.sp,
+        color = color,
+        text = text
+    )
+}
+
+@Composable
 fun SecondaryText(
     modifier: Modifier = Modifier, text: String,
     maxLines: Int = Int.MAX_VALUE
@@ -332,7 +353,7 @@ fun SupportText(
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.body1,
-        color = supportFigmaTextColor,
+        color = supportTextColor,
         text = text,
         maxLines = 1
     )
@@ -460,6 +481,7 @@ fun SimpleUnderlineTextField(
             color = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
             style = MaterialTheme.typography.body2,
         )
+        //TODO: Refactoring in Theme.kt
         TextField(
             modifier = Modifier.fillMaxWidth(),
             readOnly = true,

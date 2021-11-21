@@ -99,10 +99,6 @@ class MainActivity : ComponentActivity() {
         auth = FirebaseAuth.getInstance()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
         // This app draws behind the system bars, so we want to handle fitting system windows
         // WindowCompat.setDecorFitsSystemWindows(window, false)
 

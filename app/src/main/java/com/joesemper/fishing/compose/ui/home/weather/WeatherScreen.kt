@@ -29,20 +29,18 @@ import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
-import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.map.getCurrentLocation
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
+import com.joesemper.fishing.compose.ui.home.notes.BackgroundImage
 import com.joesemper.fishing.compose.ui.home.notes.TabItem
 import com.joesemper.fishing.compose.ui.home.notes.Tabs
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryColor
 import com.joesemper.fishing.domain.WeatherViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
@@ -79,11 +77,9 @@ fun Weather(
         mutableStateOf(mutableListOf(currentPlace))
     }
 
-    LaunchedEffect(viewModel) {
-        viewModel.getAllMarkers().collect { places ->
-            userPlaces.addAll(places as List<UserMapMarker>)
-        }
-    }
+//    LaunchedEffect(viewModel) {
+//        viewModel.getAllMarkers()
+//    }
 
     var selectedPlace by remember {
         mutableStateOf(userPlaces.first())
@@ -93,13 +89,13 @@ fun Weather(
         mutableStateOf<WeatherForecast?>(null)
     }
 
-    LaunchedEffect(selectedPlace) {
-        val start = System.currentTimeMillis()
-        viewModel.getWeather(selectedPlace.latitude, selectedPlace.longitude).collect {
-            if (System.currentTimeMillis() - start < 400) delay(400)
-            currentWeather.value = it
-        }
-    }
+//    LaunchedEffect(selectedPlace) {
+//        val start = System.currentTimeMillis()
+//        viewModel.getWeather(selectedPlace.latitude, selectedPlace.longitude).collect {
+//            if (System.currentTimeMillis() - start < 400) delay(400)
+//            currentWeather.value = it
+//        }
+//    }
 
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -138,7 +134,7 @@ fun Weather(
                         Icon(imageVector = Icons.Filled.ArrowDropDown, "")
 
                         DropdownMenu(
-                            modifier = Modifier.requiredWidthIn(200.dp, 400.dp),
+                            modifier = Modifier.requiredWidthIn(200.dp, 500.dp),
                             expanded = isExpanded,
                             onDismissRequest = {
                                 isExpanded = !isExpanded
@@ -149,8 +145,12 @@ fun Weather(
                                     isExpanded = !isExpanded
                                 }) {
                                     Row(
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
-                                    verticalAlignment = Alignment.CenterVertically,) {
+                                        horizontalArrangement = Arrangement.spacedBy(
+                                            12.dp,
+                                            Alignment.Start
+                                        ),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
                                         Icon(
                                             painter = painterResource(
                                                 id =
@@ -160,7 +160,7 @@ fun Weather(
                                                     R.drawable.ic_baseline_location_on_24
                                                 }
                                             ),
-                                            tint = secondaryFigmaColor,
+                                            tint = secondaryColor,
                                             contentDescription = "Location icon",
                                             modifier = Modifier.padding(2.dp)
                                         )
@@ -178,8 +178,10 @@ fun Weather(
             }
         }
     ) {
-        AnimatedVisibility (currentWeather.value != null,
-                enter = fadeIn() + expandIn(expandFrom = Alignment.BottomStart)) {
+        AnimatedVisibility(
+            currentWeather.value != null,
+            enter = fadeIn() + expandIn(expandFrom = Alignment.BottomStart)
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth(),
@@ -190,18 +192,21 @@ fun Weather(
                 WeatherForecastLayout(navController, currentWeather.value!!)
             }
         }
-            AnimatedVisibility (currentWeather.value == null,
-                ) {
-                Column(
+        AnimatedVisibility(
+            currentWeather.value == null,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .systemBarsPadding(false),
+                verticalArrangement = Arrangement.Center
+            ) {
+                WeatherLoading(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .systemBarsPadding(false),
-                     verticalArrangement = Arrangement.Center
-                ) {
-                WeatherLoading(modifier = Modifier
-                    .size(500.dp)
-                    .align(Alignment.CenterHorizontally))
-                    //Spacer(modifier = Modifier.size())
+                        .size(500.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+                //Spacer(modifier = Modifier.size())
             }
         }
     }
@@ -225,16 +230,16 @@ fun WeatherForecastLayout(
     navController: NavController,
     weatherForecast: WeatherForecast
 ) {
-    val tabs by remember(weatherForecast) {
-        mutableStateOf(listOf(TabItem.ForADay(weatherForecast), TabItem.ForAWeek(weatherForecast)))
-    }
+//    val tabs by remember(weatherForecast) {
+//        mutableStateOf(listOf(TabItem.ForADay(weatherForecast), TabItem.ForAWeek(weatherForecast)))
+//    }
 
-    val pagerState = rememberPagerState(pageCount = tabs.size)
-
-    WeatherTabs(tabs = tabs, pagerState = pagerState)
+//    val pagerState = rememberPagerState(pageCount = tabs.size)
+//
+//    WeatherTabs(tabs = tabs, pagerState = pagerState)
     Spacer(modifier = Modifier.height(8.dp))
 
-    WeatherTabsContent(tabs = tabs, pagerState = pagerState, navController)
+//    WeatherTabsContent(tabs = tabs, pagerState = pagerState, navController)
 }
 
 @ExperimentalPagerApi
@@ -247,9 +252,13 @@ fun WeatherTabs(tabs: List<TabItem>, pagerState: PagerState) {
 @ExperimentalPagerApi
 @Composable
 fun WeatherTabsContent(tabs: List<TabItem>, pagerState: PagerState, navController: NavController) {
-    HorizontalPager(state = pagerState) { page ->
-        tabs[page].screen(navController)
+    Box {
+        BackgroundImage()
+        HorizontalPager(state = pagerState) { page ->
+            tabs[page].screen(navController)
+        }
     }
+
 }
 
 

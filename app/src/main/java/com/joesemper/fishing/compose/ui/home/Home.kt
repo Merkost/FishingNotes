@@ -354,15 +354,3 @@ private val BottomNavHeight = 56.dp
 private val BottomNavLabelTransformOrigin = TransformOrigin(0f, 0.5f)
 private val BottomNavIndicatorShape = RoundedCornerShape(percent = 50)
 private val BottomNavigationItemPadding = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-
-/*@Preview
-@Composable
-private fun FishingNotesBottomNavPreview() {
-    FigmaTheme {
-        FishingNotesBottomBar(
-            tabs = HomeSections.values(),
-            currentRoute = "home/map",
-            navigateToRoute = { }
-        )
-    }
-}*/

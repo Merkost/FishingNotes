@@ -14,7 +14,31 @@
       },
       "oauth_client": [
         {
-          "client_id": "767301429798-282i57h2qhip95p3umeqg9dm2143etv6.apps.googleusercontent.com",
+          "client_id": "767301429798-5037kaol1g39c8p07rkvful7u6ksdcg8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.joesemper.fishing",
+            "certificate_hash": "c0d088b9c0a8fe4ebf285d0408e2a5080c63188a"
+          }
+        },
+        {
+          "client_id": "767301429798-dvhppqkqrebm29n7lfnm2t3kg9r1fs0n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.joesemper.fishing",
+            "certificate_hash": "c8ff5cdd354b65daaca40097600d41069572472c"
+          }
+        },
+        {
+          "client_id": "767301429798-esk4k7k6c7fk4i0dgcilg46kmtfpco15.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.joesemper.fishing",
+            "certificate_hash": "dbb44d1d8cea7a75cca501de1b6fab1f10159304"
+          }
+        },
+        {
+          "client_id": "767301429798-kon5111lbee10bde7q8n3l9inslq530n.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.joesemper.fishing",
@@ -22,19 +46,19 @@
           }
         },
         {
-          "client_id": "767301429798-9buaviu09dg1vj4fm98geamu7dmta990.apps.googleusercontent.com",
+          "client_id": "767301429798-m9sflo8758nmf64rjjro770v82c5u6c1.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.joesemper.fishing",
-            "certificate_hash": "c1e2b37768b8c21bc2dc7313edb62e0438b4bcf3"
+            "certificate_hash": "b5b0153f6b2f7151d8048417aa1542c270f9b3c6"
           }
         },
         {
-          "client_id": "767301429798-tk3j5abkkkfp3drreun5kr8vq4moo3mt.apps.googleusercontent.com",
+          "client_id": "767301429798-ssmrmuckcmfad3gvaclrnvdb59f60tpk.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.joesemper.fishing",
-            "certificate_hash": "686be155b7bf47f57f0fdd2d41155aba226b5595"
+            "certificate_hash": "0af3cb2a3ba054dba7cb72a64212faec5c23ff56"
           }
         },
         {

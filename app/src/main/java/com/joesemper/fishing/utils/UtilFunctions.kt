@@ -2,11 +2,8 @@ package com.joesemper.fishing.utils
 
 import android.content.Context
 import android.net.Uri
-import android.view.View
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
 import com.google.android.libraries.maps.model.LatLng
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.joesemper.fishing.compose.ui.home.map.DEFAULT_ZOOM
 import java.text.SimpleDateFormat
 import java.util.*
@@ -18,9 +15,9 @@ const val SECONDS_IN_DAY = 86400L
 const val MILLISECONDS_IN_SECOND = 1000L
 const val MOON_PHASE_INCREMENT_IN_DAY = 0.03f
 
-fun getNewCatchId() = getUUID()
-fun getNewMarkerId() = getUUID()
-fun getNewPhotoId() = getUUID()
+fun getNewCatchId() = getRandomString(10)
+fun getNewMarkerId() = getRandomString(15)
+fun getNewPhotoId() = getRandomString(12)
 
 fun getUUID() = UUID.randomUUID().toString()
 
@@ -51,6 +48,18 @@ fun getDateBySeconds(ms: Long): String {
 
 fun getTimeBySeconds(ms: Long): String {
     val sdf = SimpleDateFormat("HH:mm", Locale.US)
+    val date = Date(ms * 1000)
+    return sdf.format(date)
+}
+
+fun getDateBySecondsTextMonth(ms: Long): String {
+    val sdf = SimpleDateFormat("dd MMM yyyy", Locale.US)
+    val date = Date(ms * 1000)
+    return sdf.format(date)
+}
+
+fun getDayOfWeekBySeconds(ms: Long): String {
+    val sdf = SimpleDateFormat("EEE", Locale.US)
     val date = Date(ms * 1000)
     return sdf.format(date)
 }

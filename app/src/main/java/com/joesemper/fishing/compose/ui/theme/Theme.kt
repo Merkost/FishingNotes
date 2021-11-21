@@ -43,6 +43,11 @@ private val GreenDarkColorPalette = darkColors(
     secondary = secondaryFigmaDarkColor,
     secondaryVariant = secondaryFigmaColor,
 
+private val TestLightColorPalette = lightColors(
+    primary = primaryColor,
+    primaryVariant = primaryDarkColor,
+    secondary = secondaryColor,
+    secondaryVariant = secondaryDarkColor,
 )
 
 @Composable
@@ -55,7 +60,7 @@ fun FishingNotesTheme(
 
     if (darkTheme) {
         systemUiController.setSystemBarsColor(
-            color = Color.Transparent
+            color = primaryFigmaDarkColor
         )
     } else systemUiController.setSystemBarsColor(
         color = primaryFigmaColor

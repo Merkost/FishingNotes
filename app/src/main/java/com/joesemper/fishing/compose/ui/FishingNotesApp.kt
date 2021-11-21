@@ -1,17 +1,22 @@
 package com.joesemper.fishing.compose.ui
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.navigation.*
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navigation
 import coil.annotation.ExperimentalCoilApi
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.systemBarsPadding
@@ -22,6 +27,7 @@ import com.joesemper.fishing.compose.ui.login.LoginScreen
 import com.joesemper.fishing.compose.ui.theme.FishingNotesTheme
 import kotlinx.coroutines.InternalCoroutinesApi
 
+@ExperimentalComposeUiApi
 @ExperimentalPermissionsApi
 @ExperimentalAnimationApi
 @ExperimentalPagerApi
@@ -88,6 +94,7 @@ fun FishingNotesApp() {
     }
 }
 
+@ExperimentalComposeUiApi
 @ExperimentalPermissionsApi
 @ExperimentalCoilApi
 @ExperimentalPagerApi

@@ -12,7 +12,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -25,16 +24,14 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.Arguments
-import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
+import com.joesemper.fishing.compose.ui.theme.secondaryColor
+import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.UserCatchViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
 import com.joesemper.fishing.utils.getDateAndTimeByMilliseconds
 import com.joesemper.fishing.utils.hPaToMmHg
 import org.koin.androidx.compose.getViewModel
@@ -152,16 +149,18 @@ fun CatchContent(navController: NavController, viewModel: UserCatchViewModel) {
                     label = stringResource(id = R.string.note)
                 )
 
-                SimpleUnderlineTextField(modifier = Modifier.constrainAs(place) {
-                    top.linkTo(photos.bottom, 16.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                }.clickable { /*navController.navigate(MainDestinations.PLACE_ROUTE, Arguments.PLACE to catch.userMarkerId)*/ },
+                SimpleUnderlineTextField(modifier = Modifier
+                    .constrainAs(place) {
+                        top.linkTo(photos.bottom, 16.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                    }
+                    .clickable { /*navController.navigate(MainDestinations.PLACE_ROUTE, Arguments.PLACE to catch.userMarkerId)*/ },
                     text = catch.placeTitle,
                     label = stringResource(id = R.string.place),
                     leadingIcon = {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                            tint = secondaryFigmaColor,
+                            tint = secondaryColor,
                             contentDescription = ""
                         )
                     },
@@ -170,7 +169,7 @@ fun CatchContent(navController: NavController, viewModel: UserCatchViewModel) {
                             onClick = { /*TODO*/ }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_baseline_chevron_right_24),
-                                tint = secondaryFigmaTextColor,
+                                tint = secondaryTextColor,
                                 contentDescription = ""
                             )
                         }

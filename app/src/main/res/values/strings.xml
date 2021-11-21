@@ -181,6 +181,10 @@
     <string name="location_dont_ask">Запрос больше не будт показываться. Чтобы дать необходимые разрешения - пройдите в настройки вашего устройства</string>
     <string name="location_permission_denied">Вы отказали в доступе к вашему местоположению</string>
     <string name="location_permission">Allow app to determine your location?</string>
+    <string name="precipitation">Precipitation</string>
+    <string name="humidity">Humidity</string>
+    <string name="sunrise_sunset">Sunrise/Sunset</string>
+    <string name="hourly">Hourly</string>
 
 
 </resources>

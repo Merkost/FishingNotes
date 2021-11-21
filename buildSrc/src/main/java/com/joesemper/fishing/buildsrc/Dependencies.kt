@@ -10,7 +10,8 @@ object Libs {
     object Accompanist {
         private const val version = "0.18.0"
         const val insets = "com.google.accompanist:accompanist-insets:$version"
-        const val systemuicontroller = "com.google.accompanist:accompanist-systemuicontroller:$version"
+        const val systemuicontroller =
+            "com.google.accompanist:accompanist-systemuicontroller:$version"
         const val flowlayouts = "com.google.accompanist:accompanist-flowlayout:$version"
         const val pager = "com.google.accompanist:accompanist-pager:$version"
         const val pagerindicators = "com.google.accompanist:accompanist-pager-indicators:$version"
@@ -27,6 +28,7 @@ object Libs {
         private const val version = "18.0.0"
         const val auth = "com.google.android.gms:play-services-auth:$version"
         const val ads = "com.google.android.gms:play-services-ads:20.4.0"
+
         //Maps
         const val maps = "com.google.android.gms:play-services-maps:$version"
         const val location = "com.google.android.gms:play-services-location:$version"
@@ -60,12 +62,15 @@ object Libs {
             const val runtime = "androidx.compose.runtime:runtime:${version}"
             const val material = "androidx.compose.material:material:${version}"
             const val animation = "androidx.compose.animation:animation:${version}"
+
             //Theme
             const val theme = "com.google.android.material:compose-theme-adapter:${version}"
             const val lottie = "com.airbnb.android:lottie-compose:4.2.0"
+
             // Tooling support (Previews, etc.)
             const val tooling = "androidx.compose.ui:ui-tooling:${version}"
             const val iconsExtended = "androidx.compose.material:material-icons-extended:$version"
+
             // UI Tests
             const val uiTest = "androidx.compose.ui:ui-test-junit4:$version"
         }
@@ -92,7 +97,7 @@ object Libs {
         }
 
         object Datastore {
-            const val datastorePreferences =  "androidx.datastore:datastore-preferences:1.0.0"
+            const val datastorePreferences = "androidx.datastore:datastore-preferences:1.0.0"
         }
 
         object DependencyInjection {
@@ -110,10 +115,12 @@ object Libs {
             const val core = "androidx.test:core:$version"
             const val runner = "androidx.test:runner:$version"
             const val rules = "androidx.test:rules:$version"
+
             object Ext {
                 private const val version = "1.1.2"
                 const val junit = "androidx.test.ext:junit-ktx:$version"
             }
+
             const val espressoCore = "androidx.test.espresso:espresso-core:3.2.0"
         }
     }
@@ -123,6 +130,7 @@ object Libs {
 
         // Import the Firebase BoM
         const val platform = "com.google.firebase:firebase-bom:29.0.0"
+
         // When using the BoM, you don't specify versions in Firebase library dependencies
         const val auth = "com.google.firebase:firebase-auth-ktx"
         const val analytics = "com.google.firebase:firebase-analytics-ktx"
@@ -150,8 +158,9 @@ object Libs {
 
     object Retrofit {
         const val main = "com.squareup.retrofit2:retrofit:2.9.0"
-        const val converterGson =  "com.squareup.retrofit2:converter-gson:2.9.0"
-        const val coroutinesAdapter = "com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2"
+        const val converterGson = "com.squareup.retrofit2:converter-gson:2.9.0"
+        const val coroutinesAdapter =
+            "com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2"
         const val logging = "com.squareup.okhttp3:logging-interceptor:4.9.1"
     }
 }
