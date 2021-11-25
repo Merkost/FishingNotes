@@ -55,6 +55,9 @@ android {
 dependencies {
     //implementation "com.github.ben-manes:gradle-versions-plugin:0.39.0"
 
+    //Settings
+    implementation 'com.github.alorma:compose-settings-ui:0.7.2'
+
     implementation 'androidx.work:work-runtime-ktx:2.7.0'
 
     //CoilImage
