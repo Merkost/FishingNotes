@@ -1,7 +1,7 @@
 package com.joesemper.fishing.compose.ui.home
 
 import android.content.Context
-import androidx.compose.animation.AnimatedVisibility
+import android.content.res.Configuration
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
@@ -10,15 +10,15 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.rememberScrollableState
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.AbsoluteCutCornerShape
+import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -42,8 +42,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 
 import coil.annotation.ExperimentalCoilApi
-import coil.compose.rememberImagePainter
-import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.MainActivity
 import com.joesemper.fishing.compose.ui.MainDestinations
@@ -77,12 +75,11 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
 
     val uiState = viewModel.uiState
     Scaffold(modifier = Modifier.fillMaxSize(),
-        topBar = { PlaceAppBar(navController) }) {
+        topBar = { PlaceAppBar(navController, viewModel) }) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (background, card, image, name, places, catches, stats, box, logout) = createRefs()
             val bgGl = createGuidelineFromTop(120.dp)
             val verticalCenterGl = createGuidelineFromAbsoluteLeft(0.5f)
-            val logoutButtonGl = createGuidelineFromBottom(60.dp)
 
             androidx.compose.animation.AnimatedVisibility(
                 visible = visible,
@@ -139,10 +136,10 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
                     top.linkTo(parent.top)
                     absoluteLeft.linkTo(parent.absoluteLeft, 20.dp)
                     absoluteRight.linkTo(parent.absoluteRight, 20.dp)
-                    //bottom.linkTo(parent.bottom)
-                }.fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 120.dp).zIndex(1f),
-                shape = RoundedCornerShape(25.dp),
+
+                }.fillMaxWidth().fillMaxSize()
+                    .padding(top = 120.dp).zIndex(1f),
+                shape = AbsoluteRoundedCornerShape(25.dp, 25.dp),
                 elevation = 10.dp,
                 backgroundColor = MaterialTheme.colors.surface
             ) {
@@ -164,12 +161,6 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
                 }.padding(horizontal = 10.dp))*/
                 //UserButtons(navController)
             }
-
-            LogoutButton(navController, modifier = Modifier.constrainAs(logout) {
-                centerAround(logoutButtonGl)
-                absoluteLeft.linkTo(parent.absoluteLeft, 20.dp)
-                absoluteRight.linkTo(parent.absoluteRight, 20.dp)
-            }.fillMaxWidth().padding(horizontal = 20.dp))
 
             /*Box(modifier.constrainAs(catches){
                 top.linkTo(bgGl)
@@ -202,42 +193,6 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
     }
 }
 
-@ExperimentalMaterialApi
-@InternalCoroutinesApi
-@Composable
-fun LogoutButton(navController: NavController, modifier: Modifier) {
-    val dialogOnLogout = rememberSaveable { mutableStateOf(false) }
-
-
-    //Google button
-    Card(
-        shape = RoundedCornerShape(20.dp), elevation = 10.dp,
-        onClickLabel = stringResource(R.string.logout),
-        onClick = { dialogOnLogout.value = true },
-        modifier = modifier
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(10.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Image(
-                painterResource(R.drawable.logout),
-                stringResource(R.string.logout),
-                modifier = Modifier.size(25.dp)
-            )
-            Text(text = stringResource(R.string.logout))
-            //Text("Sign in with Google", style = Typography.body1)
-        }
-    }
-
-
-
-    if (dialogOnLogout.value) LogoutDialog(dialogOnLogout, navController)
-
-}
-
 @Composable
 fun UserText(user: User?, modifier: Modifier) {
     user?.let {
@@ -249,21 +204,6 @@ fun UserText(user: User?, modifier: Modifier) {
             }, style = MaterialTheme.typography.h6,
             textAlign = TextAlign.Center
         )
-    }
-}
-
-@Composable
-fun UserStats(
-    userPlacesNum: List<MapMarker>?,
-    userCatchesNum: List<UserCatch>?,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = modifier.padding(5.dp).fillMaxWidth().height(50.dp)
-    ) {
-        PlacesNumber(userPlacesNum)
-        CatchesNumber(userCatchesNum)
     }
 }
 
@@ -366,7 +306,7 @@ fun UserButtons(navController: NavController) {
 @Composable
 fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavController) {
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
+
     val viewModel = getViewModel<UserViewModel>()
     AlertDialog(
         title = { Text(stringResource(R.string.logout_dialog_title)) },
@@ -414,23 +354,6 @@ fun ColumnButton(image: Painter, name: String, click: () -> Unit) {
         })
 }
 
-@ExperimentalCoilApi
-@Composable
-fun UserInfo(user: User?) {
-    //val user by
-    user?.let { nutNullUser ->
-        //Crossfade(nutNullUser, animationSpec = tween(500)) { animatedUser ->
-        //UserImage(animatedUser, imgSize)
-        //}
-    } ?: Row(
-        modifier = Modifier.fillMaxWidth().height(150.dp).padding(20.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
 
 @ExperimentalCoilApi
 @Composable
@@ -470,19 +393,10 @@ fun UserImage(user: User?, imgSize: Dp, modifier: Modifier = Modifier) {
 
 }
 
+@OptIn(InternalCoroutinesApi::class)
 @Composable
-fun PlaceAppBar(navController: NavController) {
-    /*Row(modifier = Modifier.fillMaxWidth()
-        .height(AppBarHeight).padding(horizontal = AppBarHorizontalPadding)) {
-        Row(TitleIconModifier, verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.back)
-                )
-            }
-        }
-    }*/
+fun PlaceAppBar(navController: NavController, viewModel: UserViewModel) {
+    val dialogOnLogout = rememberSaveable { mutableStateOf(false) }
     TopAppBar(
         title = { Text(text = stringResource(R.string.profile)) },
         navigationIcon = {
@@ -493,23 +407,17 @@ fun PlaceAppBar(navController: NavController) {
                 )
             }
         },
+        actions = {
+            IconButton(onClick = { dialogOnLogout.value = true }) {
+                Icon(
+                    imageVector = Icons.Filled.ExitToApp,
+                    contentDescription = stringResource(R.string.logout)
+                )
+            }
+        },
         elevation = 0.dp
     )
-}
-
-private val AppBarHeight = 56.dp
-private val AppBarHorizontalPadding = 4.dp
-private val TitleIconModifier = Modifier.fillMaxHeight()
-    .width(72.dp - AppBarHorizontalPadding)
-
-
-private fun startLoginActivity(context: Context) {
-    /*val activity = (context as Activity)
-    val intent = Intent(context, SplashActivity::class.java)
-    context.startActivity(intent)
-    activity.finish()*/
-
-
+    if (dialogOnLogout.value) LogoutDialog(dialogOnLogout, navController)
 }
 
 @ExperimentalAnimationApi
@@ -517,7 +425,7 @@ private fun startLoginActivity(context: Context) {
 @ExperimentalMaterialApi
 @InternalCoroutinesApi
 @Preview("default")
-//@Preview("dark theme", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview("dark theme", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview("large font", fontScale = 2f)
 @Composable
 fun ProfilePreview() {

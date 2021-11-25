@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
@@ -54,7 +55,7 @@ class MainActivity : ComponentActivity() {
         const val splashFadeDurationMillis = 300
     }
 
-    @ExperimentalPermissionsApi
+    @OptIn(ExperimentalComposeUiApi::class,ExperimentalPermissionsApi::class)
     @ExperimentalPagerApi
     @ExperimentalAnimationApi
     @InternalCoroutinesApi
@@ -106,6 +107,7 @@ class MainActivity : ComponentActivity() {
         //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
 
+    @OptIn(ExperimentalComposeUiApi::class)
     @InternalCoroutinesApi
     @ExperimentalMaterialApi
     @ExperimentalPagerApi

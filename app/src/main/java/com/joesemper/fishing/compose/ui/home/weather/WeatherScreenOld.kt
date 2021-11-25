@@ -48,7 +48,7 @@ import org.koin.androidx.compose.getViewModel
 @ExperimentalPagerApi
 @ExperimentalPermissionsApi
 @Composable
-fun Weather(
+fun WeatherScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     upPress: () -> Unit,
