@@ -116,6 +116,10 @@ private fun NavGraphBuilder.NavGraph(
         LoginScreen(navController = navController)
     }
 
+    composable(MainDestinations.SETTINGS) {
+        SettingsScreen(upPress)
+    }
+
     composable(
         route = MainDestinations.NEW_CATCH_ROUTE,
     ) {

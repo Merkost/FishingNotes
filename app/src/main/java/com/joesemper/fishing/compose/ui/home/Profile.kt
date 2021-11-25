@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -77,35 +78,9 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = { PlaceAppBar(navController, viewModel) }) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (background, card, image, name, places, catches, stats, box, logout) = createRefs()
+            val (background, card, image, name, places, catches, stats, box, logout, settings) = createRefs()
             val bgGl = createGuidelineFromTop(120.dp)
             val verticalCenterGl = createGuidelineFromAbsoluteLeft(0.5f)
-
-            androidx.compose.animation.AnimatedVisibility(
-                visible = visible,
-                enter = slideInVertically(
-                    initialOffsetY = {
-                        // Slide in from top
-                        -it
-                    },
-                    animationSpec = tween(
-                        durationMillis = MainActivity.splashFadeDurationMillis * 4,
-
-                        easing = CubicBezierEasing(0f, 0f, 0f, 1f)
-                    )
-                ),
-                exit = slideOutVertically(
-                    targetOffsetY = {
-                        // Slide to top
-                        -it
-                    },
-                    animationSpec = tween(
-                        durationMillis = MainActivity.splashFadeDurationMillis * 2,
-                        //delayMillis = MainActivity.splashFadeDurationMillis / 2,
-                        easing = CubicBezierEasing(0f, 0f, 0f, 1f)
-                    )
-                )
-            ) {
                 Surface(//shape = RoundedCornerShape(0.dp,0.dp,15.dp,15.dp),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -116,7 +91,7 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
                             absoluteRight.linkTo(parent.absoluteRight)
                         }, color = primaryFigmaColor
                 ) {}
-            }
+
 
             UserImage(user, imgSize, modifier = Modifier.constrainAs(image) {
                 top.linkTo(parent.top)
@@ -133,63 +108,57 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
 
             Card(
                 modifier = Modifier.constrainAs(card) {
-                    top.linkTo(parent.top)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 20.dp)
-                    absoluteRight.linkTo(parent.absoluteRight, 20.dp)
+                    top.linkTo(parent.top, 120.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    absoluteRight.linkTo(parent.absoluteRight)
 
                 }.fillMaxWidth().fillMaxSize()
-                    .padding(top = 120.dp).zIndex(1f),
+                    .zIndex(1f),
                 shape = AbsoluteRoundedCornerShape(25.dp, 25.dp),
                 elevation = 10.dp,
                 backgroundColor = MaterialTheme.colors.surface
             ) {
-                Column(modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally) {
-                    Spacer(modifier = Modifier.size(150.dp))
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(top = 100.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    IconButton(onClick = { navController.navigate(MainDestinations.SETTINGS) }, modifier = modifier) {
+                        Icon(Icons.Default.Settings, stringResource(R.string.settings))
+                    }
                     Text("The menu is in development")
                     Spacer(modifier = Modifier.size(10.dp))
                     Text("Thank you for testing!")
                     Spacer(modifier = Modifier.size(100.dp))
                 }
-
-
-                /*UserStats(userPlacesNum, userCatchesNum, modifier = Modifier.constrainAs(stats) {
-                    top.linkTo(bl)
-                    //absoluteLeft.linkTo(card.absoluteLeft, 250.dp)
-                    //absoluteRight.linkTo(card.absoluteRight, 250.dp)
-                    bottom.linkTo(name.top)
-                }.padding(horizontal = 10.dp))*/
-                //UserButtons(navController)
             }
-
-            /*Box(modifier.constrainAs(catches){
-                top.linkTo(bgGl)
-                absoluteLeft.linkTo(parent.absoluteLeft, 20.dp)
-                absoluteRight.linkTo(verticalCenterGl, imgSize)
-                bottom.linkTo(name.top)
-            }.zIndex(3f).background(Color.Blue)) {
-                CatchesNumber(userCatchesNum, Modifier.background(Color.Green))
-            }*/
-
-
 
             PlacesNumber(userPlacesNum, Modifier.constrainAs(places) {
                 top.linkTo(bgGl)
                 absoluteLeft.linkTo(verticalCenterGl, imgSize / 2)
-                absoluteRight.linkTo(parent.absoluteRight, 20.dp)
+                absoluteRight.linkTo(parent.absoluteRight)
                 bottom.linkTo(image.bottom)
             }.zIndex(3f))
             CatchesNumber(userCatchesNum, Modifier.constrainAs(catches) {
                 top.linkTo(bgGl)
-                absoluteLeft.linkTo(parent.absoluteLeft, 20.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
                 absoluteRight.linkTo(verticalCenterGl, imgSize / 2)
                 bottom.linkTo(image.bottom)
             }.zIndex(3f))
+            /*SettingsIcon(Modifier.constrainAs(settings) {
+                top.linkTo(parent.top, 60.dp)
+                absoluteLeft.linkTo(verticalCenterGl, imgSize / 2)
+                absoluteRight.linkTo(parent.absoluteRight)
+                bottom.linkTo(card.top)
+            }) { navController.popBackStack() }*/
+        }
 
-        }
-        LaunchedEffect(true) {
-            visible = true
-        }
+    }
+}
+
+@Composable
+fun SettingsIcon(modifier: Modifier, settingsClicked: () -> Unit) {
+    IconButton(onClick = settingsClicked, modifier = modifier) {
+        Icon(Icons.Default.Settings, stringResource(R.string.settings))
     }
 }
 

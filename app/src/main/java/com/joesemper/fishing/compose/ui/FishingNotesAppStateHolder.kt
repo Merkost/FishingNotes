@@ -26,8 +26,10 @@ import kotlinx.coroutines.launch
  * Destinations used in the [FishingNotesApp].
  */
 object MainDestinations {
+
     const val LOGIN_ROUTE = "login"
     const val HOME_ROUTE = "home"
+    const val SETTINGS = "settings"
 
     const val NEW_CATCH_ROUTE = "new_catch"
     const val PLACE_ROUTE = "place"
