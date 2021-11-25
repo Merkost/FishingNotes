@@ -38,7 +38,8 @@ import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.utils.getTimeByMilliseconds
+import com.joesemper.fishing.utils.get14hTimeByMilliseconds
+import com.joesemper.fishing.utils.get24hTimeByMilliseconds
 
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
@@ -154,7 +155,11 @@ fun ItemCatchPhotos(
 
 @ExperimentalAnimationApi
 @Composable
-fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
+fun ItemUserCatch(
+    userCatch: UserCatch,
+    use12hTimeFormat: Boolean,
+    userCatchClicked: (UserCatch) -> Unit
+) {
     val photo = if (userCatch.downloadPhotoLinks.isNotEmpty()) {
         userCatch.downloadPhotoLinks.first()
     } else {
@@ -240,7 +245,8 @@ fun ItemUserCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
                     absoluteRight.linkTo(parent.absoluteRight, 4.dp)
                     top.linkTo(place.top)
                 },
-                text = getTimeByMilliseconds(userCatch.date)
+                text = if (use12hTimeFormat) get14hTimeByMilliseconds(userCatch.date)
+                else get24hTimeByMilliseconds(userCatch.date)
             )
         }
     }
@@ -554,7 +560,7 @@ fun ItemCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
                     absoluteRight.linkTo(parent.absoluteRight, 4.dp)
                     top.linkTo(place.top)
                 },
-                text = getTimeByMilliseconds(userCatch.date)
+                text = get24hTimeByMilliseconds(userCatch.date)
             )
 
             Divider(

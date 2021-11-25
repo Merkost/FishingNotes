@@ -807,7 +807,7 @@ fun DateAndTime(date: MutableState<Long>) {
 
             })
         OutlinedTextField(
-            value = getTimeByMilliseconds(date.value),
+            value = get24hTimeByMilliseconds(date.value),
             onValueChange = {},
             label = { Text(text = stringResource(R.string.time)) },
             readOnly = true,

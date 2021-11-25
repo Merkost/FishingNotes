@@ -45,14 +45,14 @@ fun SettingsScreen(backPress: () -> Unit) {
     {
         if (checkPermission(context)) SettingsMenuLink(
             icon = { Icon(imageVector = Icons.Default.LocationOn, contentDescription = "LocationOn") },
-            title = { Text(text = "Location permission") },
-            subtitle = { Text(text = "Provide location permission to the app") },
+            title = { Text(text = stringResource(R.string.location_permission)) },
+            subtitle = { Text(text = stringResource(R.string.provide_location_permission)) },
             onClick = { isPermissionDialogOpen.value = true },
         )
         SettingsCheckbox(
-            icon = { Icon(imageVector = Icons.Default.AccessTime, contentDescription = "Wifi") },
-            title = { if (use12hTimeFormat) Text(text = "12h time format") else Text(text = "24h time format")},
-            subtitle = { if (use12hTimeFormat) Text(text = "Use 24 hours time format instead") else Text(text = "Use 12 hours time format instead") },
+            icon = { Icon(imageVector = Icons.Default.AccessTime, contentDescription = "AccessTime") },
+            title = { Text(text = stringResource(R.string.time_format))},
+            subtitle = { Text(text = stringResource(R.string.use_12h)) },
             onCheckedChange = { use12h ->
                 coroutineScope.launch {
                     userPreferences.saveTimeFormatStatus(use12h)

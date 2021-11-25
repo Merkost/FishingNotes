@@ -31,7 +31,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import coil.decode.withInterruptibleSource
 import com.airbnb.lottie.compose.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.libraries.maps.model.LatLng
@@ -385,7 +384,7 @@ fun GrantLocationPermissionsDialog(
                     .wrapContentSize()
                     .padding(14.dp)
             ) {
-                PrimaryText(text = stringResource(R.string.location_permission),
+                PrimaryText(text = stringResource(R.string.location_permission_dialog),
                 modifier = Modifier.padding(4.dp))
                 LottieMyLocation(modifier = Modifier.fillMaxWidth().height(180.dp))
                 Spacer(modifier = Modifier.size(6.dp))

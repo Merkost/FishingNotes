@@ -99,14 +99,26 @@ fun calcMoonPhase(currentPhase: Float, currentDate: Long, requiredDate: Long): F
     return result
 }
 
-fun getTimeByMilliseconds(ms: Long): String {
+fun get24hTimeByMilliseconds(ms: Long): String {
     val sdf = SimpleDateFormat("HH:mm", Locale.US)
     val date = Date(ms)
     return sdf.format(date)
 }
 
-fun getDateAndTimeByMilliseconds(ms: Long): String {
+fun get14hTimeByMilliseconds(ms: Long): String {
+    val sdf = SimpleDateFormat("HH:mm aa", Locale.US)
+    val date = Date(ms)
+    return sdf.format(date)
+}
+
+fun getDateAnd24hTimeByMilliseconds(ms: Long): String {
     val sdf = SimpleDateFormat("dd.MM.yy HH:mm", Locale.US)
+    val date = Date(ms)
+    return sdf.format(date)
+}
+
+fun getDateAnd14hTimeByMilliseconds(ms: Long): String {
+    val sdf = SimpleDateFormat("dd.MM.yy HH:mm aa", Locale.US)
     val date = Date(ms)
     return sdf.format(date)
 }

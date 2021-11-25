@@ -182,7 +182,11 @@
     <string name="transparent">Прозрачный</string>
     <string name="location_dont_ask">Запрос на доступ к вашему местоположению больше не будет показываться</string>
     <string name="location_permission_denied">Вы отказали в доступе к вашему местоположению. Предоставьте разрешения в настройках вашего устройства.</string>
-    <string name="location_permission">Разрешите определять ваше местоположение?</string>
+    <string name="location_permission_dialog">Разрешите определять ваше местоположение?</string>
     <string name="dont_ask_again">Не спрашивать</string>
+    <string name="location_permission">Location permission</string>
+    <string name="provide_location_permission">Provide location permission to the app</string>
+    <string name="time_format">Time format</string>
+    <string name="use_12h">Use 12 hours time format</string>
 
 </resources>

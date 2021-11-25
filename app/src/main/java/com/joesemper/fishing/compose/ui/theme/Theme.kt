@@ -42,6 +42,7 @@ private val GreenDarkColorPalette = darkColors(
     primaryVariant = primaryFigmaColor,
     secondary = secondaryFigmaDarkColor,
     secondaryVariant = secondaryFigmaColor,
+)
 
 private val TestLightColorPalette = lightColors(
     primary = primaryColor,

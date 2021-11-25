@@ -24,6 +24,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
 import com.joesemper.fishing.compose.ui.theme.secondaryColor
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
@@ -32,8 +33,10 @@ import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
-import com.joesemper.fishing.utils.getDateAndTimeByMilliseconds
+import com.joesemper.fishing.utils.getDateAnd14hTimeByMilliseconds
+import com.joesemper.fishing.utils.getDateAnd24hTimeByMilliseconds
 import com.joesemper.fishing.utils.hPaToMmHg
+import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 
@@ -45,10 +48,13 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch?) {
         viewModel.catch.value = it
     }
 
+    val userPreferences: UserPreferences = get()
+    val use12hTimeFormat by userPreferences.use12hTimeFormat.collectAsState(false)
+
     Scaffold(topBar = {
         CatchTopBar(navController, viewModel)
     }) {
-        CatchContent(navController, viewModel = viewModel)
+        CatchContent(navController, viewModel = viewModel, use12hTimeFormat)
     }
 }
 
@@ -74,7 +80,11 @@ fun CatchTopBar(navController: NavController, viewModel: UserCatchViewModel) {
 @OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalAnimationApi
 @Composable
-fun CatchContent(navController: NavController, viewModel: UserCatchViewModel) {
+fun CatchContent(
+    navController: NavController,
+    viewModel: UserCatchViewModel,
+    use12hTimeFormat: Boolean
+) {
     viewModel.catch.value?.let { catch ->
         Column(
             modifier = Modifier
@@ -110,7 +120,7 @@ fun CatchContent(navController: NavController, viewModel: UserCatchViewModel) {
                         top.linkTo(parent.top)
                         absoluteRight.linkTo(parent.absoluteRight)
                     },
-                    text = getDateAndTimeByMilliseconds(catch.date)
+                    text = if (use12hTimeFormat) getDateAnd14hTimeByMilliseconds(catch.date) else getDateAnd24hTimeByMilliseconds(catch.date)
                 )
 
                 SimpleUnderlineTextField(
