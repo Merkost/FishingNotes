@@ -1,20 +1,12 @@
 package com.joesemper.fishing.compose.ui.home
 
-import android.content.Context
 import android.content.res.Configuration
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.AbsoluteCutCornerShape
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -30,7 +22,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -44,7 +35,6 @@ import androidx.navigation.compose.rememberNavController
 
 import coil.annotation.ExperimentalCoilApi
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.MainActivity
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.domain.UserViewModel
@@ -76,7 +66,7 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
 
     val uiState = viewModel.uiState
     Scaffold(modifier = Modifier.fillMaxSize(),
-        topBar = { PlaceAppBar(navController, viewModel) }) {
+        topBar = { ProfileAppBar(navController, viewModel) }) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (background, card, image, name, places, catches, stats, box, logout, settings) = createRefs()
             val bgGl = createGuidelineFromTop(120.dp)
@@ -89,7 +79,7 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
                             top.linkTo(parent.top)
                             absoluteLeft.linkTo(parent.absoluteLeft)
                             absoluteRight.linkTo(parent.absoluteRight)
-                        }, color = primaryFigmaColor
+                        }, color = MaterialTheme.colors.primary
                 ) {}
 
 
@@ -364,7 +354,7 @@ fun UserImage(user: User?, imgSize: Dp, modifier: Modifier = Modifier) {
 
 @OptIn(InternalCoroutinesApi::class)
 @Composable
-fun PlaceAppBar(navController: NavController, viewModel: UserViewModel) {
+fun ProfileAppBar(navController: NavController, viewModel: UserViewModel) {
     val dialogOnLogout = rememberSaveable { mutableStateOf(false) }
     TopAppBar(
         title = { Text(text = stringResource(R.string.profile)) },
@@ -384,7 +374,8 @@ fun PlaceAppBar(navController: NavController, viewModel: UserViewModel) {
                 )
             }
         },
-        elevation = 0.dp
+        elevation = 0.dp,
+        backgroundColor = MaterialTheme.colors.primary
     )
     if (dialogOnLogout.value) LogoutDialog(dialogOnLogout, navController)
 }

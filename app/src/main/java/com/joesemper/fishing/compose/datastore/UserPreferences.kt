@@ -17,6 +17,7 @@ class UserPreferences(private val context: Context) {
         private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("userSettings")
 
         val USER_LOCATION_PERMISSION_KEY = booleanPreferencesKey("should_show_location_permission")
+        val TIME_FORMAT_KEY = booleanPreferencesKey("use_12h_time_format")
     }
 
     //get the saved value
@@ -29,6 +30,19 @@ class UserPreferences(private val context: Context) {
     suspend fun saveLocationPermissionStatus(shouldShow: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[USER_LOCATION_PERMISSION_KEY] = shouldShow
+        }
+    }
+
+    //get the saved value
+    val use12hTimeFormat: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[TIME_FORMAT_KEY] ?: false
+        }
+
+    //save into datastore
+    suspend fun saveTimeFormatStatus(use12hFormat: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[TIME_FORMAT_KEY] = use12hFormat
         }
     }
 
