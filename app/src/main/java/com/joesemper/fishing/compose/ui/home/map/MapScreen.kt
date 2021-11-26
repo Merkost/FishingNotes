@@ -3,12 +3,12 @@ package com.joesemper.fishing.compose.ui.home.map
 import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.*
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -16,9 +16,11 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -42,9 +44,9 @@ import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.utils.getCameraPosition
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -142,7 +144,22 @@ fun MapScreen(
                             onAddNewCatchClick(navController, viewModel)
                         }
                     }
-                })
+                },
+            onLongPress = {
+                when (mapUiState) {
+                    MapUiState.NormalMode -> {
+                        viewModel.lastKnownLocation.value?.let {
+                            viewModel.addNewMarker(
+                                RawMapMarker(
+                                    "Без названия",
+                                    latitude = viewModel.lastKnownLocation.value!!.latitude,
+                                    longitude = viewModel.lastKnownLocation.value!!.longitude,
+                                )
+                            )
+                        }
+                    }
+                }
+            })
         },
         bottomSheet = {
             MarkerInfoDialog(viewModel.currentMarker.value) { marker ->
@@ -412,9 +429,10 @@ fun LocationPermissionDialog(
 
 @ExperimentalMaterialApi
 @Composable
-fun MapFab(state: MapUiState, onClick: () -> Unit) {
+fun MapFab(state: MapUiState, onClick: () -> Unit, onLongPress: () -> Unit,) {
     val fabImg = remember { mutableStateOf(R.drawable.ic_baseline_add_location_24) }
     val defaultBottomPadding: Dp = 128.dp
+    val context = LocalContext.current
     val paddingBottom = remember { mutableStateOf(defaultBottomPadding) } //128
     val paddingTop = remember { mutableStateOf(0.dp) }
 
@@ -436,7 +454,7 @@ fun MapFab(state: MapUiState, onClick: () -> Unit) {
         }
     }
 
-    FloatingActionButton(
+    /*FloatingActionButton(
         modifier = Modifier
             .animateContentSize()
             .padding(bottom = paddingBottom.value, top = paddingTop.value),
@@ -447,8 +465,67 @@ fun MapFab(state: MapUiState, onClick: () -> Unit) {
             contentDescription = stringResource(R.string.new_place),
             tint = Color.White,
         )
+    }*/
+
+    FishingFab(
+        modifier = Modifier
+            .animateContentSize()
+            .padding(bottom = paddingBottom.value, top = paddingTop.value),
+        onClick = onClick,
+        onLongPress = {
+            Toast.makeText(context, "Adding place on your location", Toast.LENGTH_SHORT).show()
+            onLongPress()
+        }
+    ) {
+        Icon(
+            painter = painterResource(id = fabImg.value),
+            contentDescription = stringResource(R.string.new_place),
+            tint = Color.White,
+        )
     }
 }
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun FishingFab(onClick: () -> Unit,
+               onLongPress: () -> Unit,
+               modifier: Modifier = Modifier,
+               interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+               shape: Shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
+               backgroundColor: Color = MaterialTheme.colors.secondary,
+               contentColor: Color = contentColorFor(backgroundColor),
+               elevation: FloatingActionButtonElevation = FloatingActionButtonDefaults.elevation(),
+               content: @Composable () -> Unit)
+{
+    Surface(
+        modifier = modifier,
+        shape = shape,
+        color = backgroundColor,
+        contentColor = contentColor.copy(alpha = 1f),
+
+        elevation = elevation.elevation(interactionSource).value,
+    ) {
+        CompositionLocalProvider(LocalContentAlpha provides contentColor.alpha) {
+            ProvideTextStyle(MaterialTheme.typography.button) {
+                Box(
+                    modifier = Modifier
+                        .defaultMinSize(minWidth = FabSize, minHeight = FabSize)
+                        .combinedClickable(
+                            interactionSource = interactionSource,
+                            indication = rememberRipple(),
+                            enabled = true,
+                            role = Role.Button,
+                            onClick = onClick,
+                            onDoubleClick = { },
+                            onLongClick = onLongPress
+                        ),
+                    contentAlignment = Alignment.Center
+                ) { content() }
+            }
+        }
+    }
+}
+private val FabSize = 56.dp
 
 private fun onAddNewCatchClick(navController: NavController, viewModel: MapViewModel) {
     val marker: UserMapMarker? = viewModel.currentMarker.value
