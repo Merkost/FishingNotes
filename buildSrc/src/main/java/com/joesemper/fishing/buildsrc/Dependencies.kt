@@ -93,7 +93,7 @@ object Libs {
 
         object ConstraintLayout {
             const val constraintLayoutCompose =
-                "androidx.constraintlayout:constraintlayout-compose:1.0.0-rc01"
+                "androidx.constraintlayout:constraintlayout-compose:1.0.0-rc02"
         }
 
         object Datastore {

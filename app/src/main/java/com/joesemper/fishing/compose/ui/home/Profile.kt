@@ -21,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -115,6 +116,10 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
                     IconButton(onClick = { navController.navigate(MainDestinations.SETTINGS) }, modifier = modifier) {
                         Icon(Icons.Default.Settings, stringResource(R.string.settings))
                     }
+//                    ColumnButton(
+//                        Icons.Default.Settings,
+//                        stringResource(R.string.settings)
+//                    ) { navController.navigate(MainDestinations.SETTINGS) }
                     Text("The menu is in development")
                     Spacer(modifier = Modifier.size(10.dp))
                     Text("Thank you for testing!")
@@ -239,25 +244,25 @@ fun UserButtons(navController: NavController) {
         modifier = Modifier.fillMaxSize().padding(horizontal = 80.dp),
         verticalArrangement = Arrangement.spacedBy(15.dp, Alignment.Bottom)
     ) {
-        ColumnButton(painterResource(R.drawable.ic_friends), stringResource(R.string.friends)) {
-            //notReadyYetToast()
-        }
-
-        ColumnButton(
-            painterResource(R.drawable.ic_edit),
-            stringResource(R.string.edit_profile)
-        ) {
-            //notReadyYetToast()
-        }
-
-        ColumnButton(
-            painterResource(R.drawable.ic_settings),
-            stringResource(R.string.settings)
-        ) {
+//        ColumnButton(painterResource(R.drawable.ic_friends), stringResource(R.string.friends)) {
+//            //notReadyYetToast()
+//        }
+//
+//        ColumnButton(
+//            painterResource(R.drawable.ic_edit),
+//            stringResource(R.string.edit_profile)
+//        ) {
+//            //notReadyYetToast()
+//        }
+//
+//        ColumnButton(
+//            painterResource(R.drawable.ic_settings),
+//            stringResource(R.string.settings)
+//        ) {
 //            val action =
 //                UserFragmentDirections.actionUserFragmentToSettingsFragment()
 //            findNavController().navigate(action)
-        }
+//        }
     }
 }
 
@@ -297,8 +302,8 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
 }
 
 @Composable
-fun ColumnButton(image: Painter, name: String, click: () -> Unit) {
-    OutlinedButton(
+fun ColumnButton(image: ImageVector, name: String, click: () -> Unit) {
+    DefaultCardClickable (
         onClick = click,
         modifier = Modifier.fillMaxWidth(),
         content = {
@@ -307,7 +312,7 @@ fun ColumnButton(image: Painter, name: String, click: () -> Unit) {
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(image, name, modifier = Modifier.size(25.dp))
+                Icon(image, name)
                 Text(name, modifier = Modifier.padding(start = 10.dp))
             }
         })
