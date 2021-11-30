@@ -4,11 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.repository.UserContentRepository
+import com.joesemper.fishing.model.repository.app.MarkersRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class UserPlacesViewModel(private val repository: UserContentRepository) : ViewModel() {
+class UserPlacesViewModel(private val repository: MarkersRepository) : ViewModel() {
 
     val currentContent = MutableStateFlow<List<UserMapMarker>?>(null)
 

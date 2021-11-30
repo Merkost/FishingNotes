@@ -12,7 +12,9 @@ import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawUserCatch
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.repository.UserContentRepository
-import com.joesemper.fishing.model.repository.WeatherRepository
+import com.joesemper.fishing.model.repository.app.CatchesRepository
+import com.joesemper.fishing.model.repository.app.MarkersRepository
+import com.joesemper.fishing.model.repository.app.WeatherRepository
 import com.joesemper.fishing.utils.getHoursByMilliseconds
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +24,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class NewCatchViewModel(
-    private val repository: UserContentRepository,
+    private val markersRepo: MarkersRepository,
+    private val catchesRepo: CatchesRepository,
     private val weatherRepository: WeatherRepository
 ) : ViewModel() {
 
@@ -67,13 +70,13 @@ class NewCatchViewModel(
         images.remove(uri)
     }
 
-    fun getAllUserMarkersList() = repository.getAllUserMarkersList() as Flow<List<UserMapMarker>>
+    fun getAllUserMarkersList() = markersRepo.getAllUserMarkersList() as Flow<List<UserMapMarker>>
 
     private fun saveNewCatch(newCatch: RawUserCatch) {
         _uiState.value = BaseViewState.Loading(0)
         viewModelScope.launch {
             marker.value?.let { userMapMarker ->
-                repository.addNewCatch(userMapMarker.id, newCatch).collect { progress ->
+                catchesRepo.addNewCatch(userMapMarker.id, newCatch).collect { progress ->
                     when (progress) {
                         is Progress.Complete -> {
                             _uiState.value = BaseViewState.Success(progress)

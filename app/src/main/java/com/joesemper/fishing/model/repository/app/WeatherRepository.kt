@@ -1,4 +1,4 @@
-package com.joesemper.fishing.model.repository
+package com.joesemper.fishing.model.repository.app
 
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import kotlinx.coroutines.flow.Flow

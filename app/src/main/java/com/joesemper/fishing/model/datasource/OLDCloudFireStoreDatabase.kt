@@ -25,7 +25,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 
 
-class CloudFireStoreDatabase(private val cloudPhotoStorage: PhotoStorage) : UserContentRepository {
+class OLDCloudFireStoreDatabase(private val cloudPhotoStorage: PhotoStorage) : UserContentRepository {
 
     private val db = Firebase.firestore
 

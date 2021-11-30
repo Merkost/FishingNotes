@@ -2,7 +2,7 @@ package com.joesemper.fishing.model.datasource
 
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.joesemper.fishing.model.api.WeatherApiService
-import com.joesemper.fishing.model.repository.WeatherRepository
+import com.joesemper.fishing.model.repository.app.WeatherRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import okhttp3.OkHttpClient

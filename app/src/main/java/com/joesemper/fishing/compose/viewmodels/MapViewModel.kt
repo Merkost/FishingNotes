@@ -12,13 +12,14 @@ import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.model.repository.UserContentRepository
+import com.joesemper.fishing.model.repository.app.MarkersRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class MapViewModel(
-    private val repository: UserContentRepository,
+    private val repository: MarkersRepository,
 ) : ViewModel() {
 
     val showMarker: MutableState<Boolean> = mutableStateOf(false)

@@ -9,6 +9,8 @@ import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.repository.UserContentRepository
 import com.joesemper.fishing.model.repository.UserRepository
+import com.joesemper.fishing.model.repository.app.CatchesRepository
+import com.joesemper.fishing.model.repository.app.MarkersRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -16,7 +18,8 @@ import kotlinx.coroutines.launch
 
 class UserViewModel(
     private val userRepository: UserRepository,
-    private val repository: UserContentRepository
+    private val markersRepo: MarkersRepository,
+    private val catchesRepo: CatchesRepository
 ) : ViewModel() {
 
     val currentUser = MutableStateFlow<User?>(null)
@@ -43,7 +46,7 @@ class UserViewModel(
 
     fun getUserPlaces() = viewModelScope.run {
         viewModelScope.launch {
-            repository.getAllUserMarkersList().collect {
+            markersRepo.getAllUserMarkersList().collect {
                 currentPlaces.value = it as List<UserMapMarker>?
             }
         }
@@ -51,7 +54,7 @@ class UserViewModel(
 
     fun getUserCatches() = viewModelScope.run {
         viewModelScope.launch {
-            repository.getAllUserCatchesList().collect {
+            catchesRepo.getAllUserCatchesList().collect {
                 currentCatches.value = it
             }
         }
