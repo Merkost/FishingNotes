@@ -277,6 +277,7 @@ fun CatchContent(
                     label = stringResource(id = R.string.description),
                     trailingIcon = {
                         Icon(
+                            modifier = Modifier.size(24.dp),
                             painter = painterResource(getWeatherIconByName(catch.weatherIcon)),
                             contentDescription = ""
                         )

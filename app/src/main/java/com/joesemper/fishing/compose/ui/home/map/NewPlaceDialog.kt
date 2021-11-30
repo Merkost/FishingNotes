@@ -1,6 +1,5 @@
 package com.joesemper.fishing.compose.ui.home.map
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -160,18 +159,23 @@ fun NewPlaceDialog(
                     top.linkTo(description.bottom, 6.dp)
                     absoluteLeft.linkTo(parent.absoluteLeft)
                     absoluteRight.linkTo(parent.absoluteRight)
-                }.padding(horizontal = 8.dp),
+                }
+                .padding(horizontal = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.padding(8.dp)
-                        .requiredSize(40.dp).clip(CircleShape))
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .requiredSize(40.dp)
+                        .clip(CircleShape))
                 {
-                    Image(painterResource(R.drawable.transparent), stringResource(R.string.transparent),)
+//                    Image(painterResource(R.drawable.transparent), stringResource(R.string.transparent),)
                     Icon(painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
                         contentDescription = stringResource(R.string.marker_icon),
                         tint = selectedColor ?: secondaryFigmaColor,
-                    modifier = Modifier.fillMaxSize().padding(top = 2.dp))
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 2.dp))
                 }
                 ColorPicker(
                     pickerColors,

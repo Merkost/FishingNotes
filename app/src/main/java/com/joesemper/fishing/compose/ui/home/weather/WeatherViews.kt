@@ -293,13 +293,14 @@ fun WeatherLocationIcon(
 @Composable
 fun WeatherHeaderText(
     modifier: Modifier = Modifier,
+    color: Color = primaryTextColor,
     text: String
 ) {
     Text(
         modifier = modifier,
         text = text,
         style = MaterialTheme.typography.body1,
-        color = primaryTextColor
+        color = color
     )
 }
 
