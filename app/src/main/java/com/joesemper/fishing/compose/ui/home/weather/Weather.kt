@@ -150,11 +150,11 @@ fun CurrentWeather(
 
             PrimaryWeatherParameterMeaning(
                 modifier = Modifier.constrainAs(primary) {
-                    top.linkTo(parent.top, 4.dp)
+                    top.linkTo(parent.top, 2.dp)
                     absoluteRight.linkTo(guideline, 16.dp)
                 },
                 icon = getWeatherIconByName(forecast.hourly.first().weather.first().icon),
-                text = forecast.hourly.first().weather.first().description
+                text = forecast.hourly.first().weather.first().description.replaceFirstChar { it.uppercase() }
             )
 
             WeatherTemperatureMeaning(
@@ -175,8 +175,8 @@ fun CurrentWeather(
                     absoluteRight.linkTo(guideline, 32.dp)
                 },
                 title = stringResource(id = R.string.wind),
-                text = forecast.hourly.first().windSpeed.toString()
-                        + stringResource(R.string.wind_speed_units),
+                text = String.format("%.1f", forecast.hourly.first().windSpeed)
+                        + " ${stringResource(R.string.wind_speed_units)}",
                 primaryIconId = R.drawable.weather_windy,
                 iconId = R.drawable.ic_arrow_up,
                 iconRotation = forecast.hourly.first().windDeg,
@@ -196,14 +196,18 @@ fun CurrentWeather(
                 lightTint = true
             )
 
+            /*Divider(modifier = Modifier.fillMaxWidth().size(1.dp).constrainAs(divider) {
+                  top.linkTo(humidity.bottom)
+                bottom.linkTo(pressureTitle.top)
+            }, color = Color.Black)*/
 
             WeatherHeaderText(
                 modifier = Modifier.constrainAs(pressureTitle) {
-                    absoluteLeft.linkTo(parent.absoluteLeft, 32.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
                     top.linkTo(wind.bottom, 16.dp)
                 },
                 color = primaryWhiteColor,
-                text = stringResource(id = R.string.pressure) + ", мм рт. ст."
+                text = stringResource(id = R.string.pressure) + ", " + stringResource(R.string.pressure_mm) + ":"
             )
 
             BarChartExample(

@@ -46,7 +46,8 @@ fun PrimaryWeatherParameterMeaning(modifier: Modifier = Modifier, icon: Int, tex
         )
         SecondaryTextColored(
             text = text,
-            color = secondaryWhiteColor
+            color = secondaryWhiteColor,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -183,7 +184,9 @@ fun WeatherPlaceSelectItem(
     val isExpanded = remember { mutableStateOf(false) }
 
     Box(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().clickable {
+            isExpanded.value = !isExpanded.value
+        },
         contentAlignment = Alignment.Center
     ) {
 
@@ -191,9 +194,7 @@ fun WeatherPlaceSelectItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
-                .clickable {
-                    isExpanded.value = !isExpanded.value
-                },
+                ,
             horizontalArrangement = Arrangement.Center
         ) {
             WeatherAppBarText(

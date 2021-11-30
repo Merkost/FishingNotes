@@ -189,6 +189,7 @@
     <string name="provide_location_permission">Provide location permission to the app</string>
     <string name="time_format">Time format</string>
     <string name="use_12h">Use 12 hours time format</string>
+    <string name="pressure_mm">mm Hg</string>
 
 
 </resources>

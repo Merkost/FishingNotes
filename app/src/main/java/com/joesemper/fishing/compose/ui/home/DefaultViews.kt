@@ -301,14 +301,16 @@ fun SecondaryTextColored(
     modifier: Modifier = Modifier,
     text: String,
     color: Color = primaryFigmaColor,
-    maxLines: Int = Int.MAX_VALUE
+    maxLines: Int = Int.MAX_VALUE,
+    textAlign: TextAlign? = null,
 ) {
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.body1,
         color = color,
         text = text,
-        maxLines = maxLines
+        maxLines = maxLines,
+        textAlign = textAlign
     )
 }
 
