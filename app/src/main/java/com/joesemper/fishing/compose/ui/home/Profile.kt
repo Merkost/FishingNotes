@@ -111,11 +111,10 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize().padding(top = 100.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
                 ) {
-                    IconButton(onClick = { navController.navigate(MainDestinations.SETTINGS) }, modifier = modifier) {
-                        Icon(Icons.Default.Settings, stringResource(R.string.settings))
-                    }
+
 //                    ColumnButton(
 //                        Icons.Default.Settings,
 //                        stringResource(R.string.settings)
@@ -160,14 +159,14 @@ fun SettingsIcon(modifier: Modifier, settingsClicked: () -> Unit) {
 @Composable
 fun UserText(user: User?, modifier: Modifier) {
     user?.let {
-        Text(
-            modifier = modifier,
-            text = when (user.isAnonymous) {
-                true -> stringResource(R.string.anonymous)
-                false -> user.userName
-            }, style = MaterialTheme.typography.h6,
-            textAlign = TextAlign.Center
-        )
+            Text(
+                modifier = modifier,
+                text = when (user.isAnonymous) {
+                    true -> stringResource(R.string.anonymous)
+                    false -> user.userName
+                }, style = MaterialTheme.typography.h6,
+                textAlign = TextAlign.Center
+            )
     }
 }
 
@@ -377,6 +376,9 @@ fun ProfileAppBar(navController: NavController, viewModel: UserViewModel) {
                     imageVector = Icons.Filled.ExitToApp,
                     contentDescription = stringResource(R.string.logout)
                 )
+            }
+            IconButton(onClick = { navController.navigate(MainDestinations.SETTINGS) }) {
+                Icon(Icons.Default.Settings, stringResource(R.string.settings))
             }
         },
         elevation = 0.dp,
