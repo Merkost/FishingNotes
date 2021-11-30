@@ -1,5 +1,6 @@
 package com.joesemper.fishing.compose.ui.home
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
@@ -39,27 +40,44 @@ fun SettingsScreen(backPress: () -> Unit) {
 
     GetLocationPermission(isPermissionDialogOpen)
 
-    Scaffold (
+    Scaffold(
         topBar = { SettingsTopAppBar(backPress) },
-        modifier = Modifier.fillMaxSize())
+        modifier = Modifier.fillMaxSize()
+    )
     {
-        if (checkPermission(context)) SettingsMenuLink(
-            icon = { Icon(imageVector = Icons.Default.LocationOn, contentDescription = "LocationOn") },
-            title = { Text(text = stringResource(R.string.location_permission)) },
-            subtitle = { Text(text = stringResource(R.string.provide_location_permission)) },
-            onClick = { isPermissionDialogOpen.value = true },
-        )
-        SettingsCheckbox(
-            icon = { Icon(imageVector = Icons.Default.AccessTime, contentDescription = "AccessTime") },
-            title = { Text(text = stringResource(R.string.time_format))},
-            subtitle = { Text(text = stringResource(R.string.use_12h)) },
-            onCheckedChange = { use12h ->
-                coroutineScope.launch {
-                    userPreferences.saveTimeFormatStatus(use12h)
-                }
-            },
-            state = if (use12hTimeFormat) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
-        )
+        Column {
+            if (checkPermission(context))
+            SettingsMenuLink(
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = "LocationOn"
+                    )
+                },
+                title = { Text(text = stringResource(R.string.location_permission)) },
+                subtitle = { Text(text = stringResource(R.string.provide_location_permission)) },
+                onClick = { isPermissionDialogOpen.value = true },
+            )
+            SettingsCheckbox(
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.AccessTime,
+                        contentDescription = "AccessTime"
+                    )
+                },
+                title = { Text(text = stringResource(R.string.time_format)) },
+                subtitle = { Text(text = stringResource(R.string.use_12h)) },
+                onCheckedChange = { use12h ->
+                    coroutineScope.launch {
+                        userPreferences.saveTimeFormatStatus(use12h)
+                    }
+                },
+                state = if (use12hTimeFormat) rememberBooleanSettingState(true) else rememberBooleanSettingState(
+                    false
+                )
+            )
+        }
+
 
     }
 }
