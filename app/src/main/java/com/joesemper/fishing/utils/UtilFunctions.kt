@@ -105,8 +105,8 @@ fun get24hTimeByMilliseconds(ms: Long): String {
     return sdf.format(date)
 }
 
-fun get14hTimeByMilliseconds(ms: Long): String {
-    val sdf = SimpleDateFormat("HH:mm aa", Locale.US)
+fun get12hTimeByMilliseconds(ms: Long): String {
+    val sdf = SimpleDateFormat("hh:mm aa", Locale.US)
     val date = Date(ms)
     return sdf.format(date)
 }
@@ -117,8 +117,8 @@ fun getDateAnd24hTimeByMilliseconds(ms: Long): String {
     return sdf.format(date)
 }
 
-fun getDateAnd14hTimeByMilliseconds(ms: Long): String {
-    val sdf = SimpleDateFormat("dd.MM.yy HH:mm aa", Locale.US)
+fun getDateAnd12hTimeByMilliseconds(ms: Long): String {
+    val sdf = SimpleDateFormat("dd.MM.yy hh:mm aa", Locale.US)
     val date = Date(ms)
     return sdf.format(date)
 }

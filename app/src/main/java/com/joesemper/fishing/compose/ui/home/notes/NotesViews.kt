@@ -38,7 +38,7 @@ import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.utils.get14hTimeByMilliseconds
+import com.joesemper.fishing.utils.get12hTimeByMilliseconds
 import com.joesemper.fishing.utils.get24hTimeByMilliseconds
 
 @ExperimentalComposeUiApi
@@ -245,7 +245,7 @@ fun ItemUserCatch(
                     absoluteRight.linkTo(parent.absoluteRight, 4.dp)
                     top.linkTo(place.top)
                 },
-                text = if (use12hTimeFormat) get14hTimeByMilliseconds(userCatch.date)
+                text = if (use12hTimeFormat) get12hTimeByMilliseconds(userCatch.date)
                 else get24hTimeByMilliseconds(userCatch.date)
             )
         }

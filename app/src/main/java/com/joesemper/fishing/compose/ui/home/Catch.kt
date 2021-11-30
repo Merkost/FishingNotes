@@ -33,7 +33,7 @@ import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
-import com.joesemper.fishing.utils.getDateAnd14hTimeByMilliseconds
+import com.joesemper.fishing.utils.getDateAnd12hTimeByMilliseconds
 import com.joesemper.fishing.utils.getDateAnd24hTimeByMilliseconds
 import com.joesemper.fishing.utils.hPaToMmHg
 import org.koin.androidx.compose.get
@@ -120,7 +120,7 @@ fun CatchContent(
                         top.linkTo(parent.top)
                         absoluteRight.linkTo(parent.absoluteRight)
                     },
-                    text = if (use12hTimeFormat) getDateAnd14hTimeByMilliseconds(catch.date) else getDateAnd24hTimeByMilliseconds(catch.date)
+                    text = if (use12hTimeFormat) getDateAnd12hTimeByMilliseconds(catch.date) else getDateAnd24hTimeByMilliseconds(catch.date)
                 )
 
                 SimpleUnderlineTextField(
