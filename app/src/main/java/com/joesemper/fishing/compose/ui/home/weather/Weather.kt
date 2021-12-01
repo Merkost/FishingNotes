@@ -195,8 +195,6 @@ fun CurrentWeather(
     temperatureUnit: String,
     pressureUnit: String,
 ) {
-
-
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -204,7 +202,7 @@ fun CurrentWeather(
         color = primaryDarkColor
     ) {
         ConstraintLayout {
-            val (primary, temp, wind, pressure, humidity, pressureTitle, divider) = createRefs()
+            val (primary, temp, wind, pressure, humidity, pressureTitle) = createRefs()
 
             val guideline = createGuidelineFromStart(0.5f)
 
@@ -285,7 +283,6 @@ fun CurrentWeather(
     }
 }
 
-
 @Composable
 fun HourlyWeather(
     modifier: Modifier = Modifier,
@@ -307,7 +304,6 @@ fun HourlyWeather(
     }
 
 }
-
 
 @Composable
 fun HourlyWeatherItem(
@@ -427,7 +423,6 @@ private fun PressureChart(
     weather: List<Daily>,
     pressureUnit: String,
 ) {
-
     val x = remember { Animatable(0f) }
     val yValues = remember(weather) { mutableStateOf(getPressureList(weather, pressureUnit)) }
     val xTarget = (yValues.value.size - 1).toFloat()

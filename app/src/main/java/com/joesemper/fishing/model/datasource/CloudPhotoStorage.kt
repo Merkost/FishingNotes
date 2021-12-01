@@ -2,15 +2,16 @@ package com.joesemper.fishing.model.datasource
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build
-import android.provider.MediaStore
+import androidx.core.net.toUri
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.utils.getNewPhotoId
+import id.zelory.compressor.Compressor
+import id.zelory.compressor.constraint.format
+import id.zelory.compressor.constraint.quality
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
@@ -18,7 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.take
-import java.io.ByteArrayOutputStream
+import java.io.File.createTempFile
 
 class CloudPhotoStorage(private val context: Context) : PhotoStorage {
 
@@ -45,34 +46,45 @@ class CloudPhotoStorage(private val context: Context) : PhotoStorage {
     }
 
     @ExperimentalCoroutinesApi
-    private fun savePhotosToDb(photoByteArrays: List<Uri>, context: Context) = callbackFlow {
+    private fun savePhotosToDb(images: List<Uri>, context: Context) = callbackFlow {
         val uploadTasks = mutableListOf<UploadTask>()
 
-        photoByteArrays.forEach { uri ->
+        images.forEach { uri ->
             val riversRef = storageRef.child("markerImages/${getNewPhotoId()}")
 
-            val reducedImage = compressImage(uri)
+            val stream = context.contentResolver.openInputStream(uri)
 
-            val uploadTask = riversRef.putBytes(reducedImage)
-            uploadTasks.add(uploadTask)
+            stream?.let {
+                val file = createTempFile("123", "123")
+                file.writeBytes(it.readBytes())
 
-            val callback = uploadTask.continueWithTask { task ->
-                if (!task.isSuccessful) {
-                    task.exception?.let {
-                        throw it
+                val compressedImageFile = Compressor.compress(context, file) {
+                    quality(40)
+                    format(Bitmap.CompressFormat.JPEG)
+                }
+
+                val uploadTask = riversRef.putFile(compressedImageFile.toUri())
+                uploadTasks.add(uploadTask)
+
+                val callback = uploadTask.continueWithTask { task ->
+                    if (!task.isSuccessful) {
+                        task.exception?.let {
+                            throw it
+                        }
+                    }
+                    riversRef.downloadUrl
+                }
+
+                callback.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val downloadUri = task.result
+                        trySend(downloadUri.toString())
                     }
                 }
-                riversRef.downloadUrl
-            }
 
-            callback.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val downloadUri = task.result
-                    trySend(downloadUri.toString())
-                }
+                file.delete()
             }
         }
-
         awaitClose { uploadTasks.onEach { cancel() } }
     }
 
@@ -80,19 +92,7 @@ class CloudPhotoStorage(private val context: Context) : PhotoStorage {
         val desertRef = storage.getReferenceFromUrl(url)
         desertRef.delete()
     }
-
-    private fun compressImage(uri: Uri): ByteArray {
-        val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri))
-        } else {
-            MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-        }
-
-        val byteArrayOutputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 40, byteArrayOutputStream)
-
-        return byteArrayOutputStream.toByteArray()
-    }
-
 }
+
+
 
