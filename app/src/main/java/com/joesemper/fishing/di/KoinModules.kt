@@ -2,6 +2,7 @@ package com.joesemper.fishing.di
 
 import com.firebase.ui.auth.data.model.User
 import com.joesemper.fishing.compose.datastore.UserPreferences
+import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.viewmodels.MainViewModel
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
@@ -27,6 +28,7 @@ val appModule = module {
     single { Logger() }
     single { SnackbarManager }
     single { UserPreferences(androidContext()) }
+    single { WeatherPreferences(androidContext()) }
     single { RepositoryCollections() }
 
 }

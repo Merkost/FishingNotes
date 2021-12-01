@@ -7,6 +7,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Compress
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -20,9 +21,11 @@ import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.UserPreferences
+import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.map.GrantLocationPermissionsDialog
 import com.joesemper.fishing.compose.ui.home.map.checkPermission
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
+import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
@@ -30,15 +33,21 @@ import org.koin.androidx.compose.get
 fun SettingsScreen(backPress: () -> Unit) {
 
     val userPreferences: UserPreferences = get()
+    val weatherPreferences: WeatherPreferences = get()
     val isPermissionDialogOpen = remember {
+        mutableStateOf(false)
+    }
+    val isPressureDialogOpen = remember {
         mutableStateOf(false)
     }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
     val use12hTimeFormat by userPreferences.use12hTimeFormat.collectAsState(false)
+    val pressureUnit by weatherPreferences.getPressureUnit.collectAsState(PressureValues.mmHg.name)
 
     GetLocationPermission(isPermissionDialogOpen)
+    GetPressureUnit(isPressureDialogOpen)
 
     Scaffold(
         topBar = { SettingsTopAppBar(backPress) },
@@ -47,17 +56,17 @@ fun SettingsScreen(backPress: () -> Unit) {
     {
         Column {
             if (checkPermission(context))
-            SettingsMenuLink(
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = "LocationOn"
-                    )
-                },
-                title = { Text(text = stringResource(R.string.location_permission)) },
-                subtitle = { Text(text = stringResource(R.string.provide_location_permission)) },
-                onClick = { isPermissionDialogOpen.value = true },
-            )
+                SettingsMenuLink(
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = "LocationOn"
+                        )
+                    },
+                    title = { Text(text = stringResource(R.string.location_permission)) },
+                    subtitle = { Text(text = stringResource(R.string.provide_location_permission)) },
+                    onClick = { isPermissionDialogOpen.value = true },
+                )
             SettingsCheckbox(
                 icon = {
                     Icon(
@@ -76,10 +85,36 @@ fun SettingsScreen(backPress: () -> Unit) {
                     false
                 )
             )
+            SettingsMenuLink(
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Compress,
+                        contentDescription = Icons.Default.Compress.name
+                    )
+                },
+                title = { Text(text = "Pressure unit") },
+                subtitle = { Text(text = "use Pa instead of mm Hg") },
+                onClick = { isPressureDialogOpen.value = true },
+                /*onCheckedChange = { usePa ->
+                    coroutineScope.launch {
+                        if (usePa)
+                            weatherPreferences.savePressureUnit(PressureValues.Pa)
+                        else weatherPreferences.savePressureUnit(PressureValues.mmHg)
+                    }
+                },
+                state = if (pressureUnit == PressureValues.Pa.name) rememberBooleanSettingState(true) else rememberBooleanSettingState(
+                    false
+                )*/
+            )
         }
 
 
     }
+}
+
+@Composable
+fun GetPressureUnit(pressureDialogOpen: MutableState<Boolean>) {
+
 }
 
 @Composable

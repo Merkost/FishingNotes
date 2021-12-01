@@ -11,10 +11,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -31,6 +28,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.PrimaryText
 import com.joesemper.fishing.compose.ui.home.SecondaryText
 import com.joesemper.fishing.compose.ui.home.map.LocationState
@@ -48,6 +46,7 @@ import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.utils.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
+import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import kotlin.math.min
 
@@ -90,6 +89,9 @@ fun Weather(
     }
 
     val scrollState = rememberScrollState()
+
+
+
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -137,6 +139,9 @@ fun CurrentWeather(
     modifier: Modifier = Modifier,
     forecast: WeatherForecast,
 ) {
+    val weatherPrefs: WeatherPreferences = get()
+    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg.name)
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -207,7 +212,7 @@ fun CurrentWeather(
                     top.linkTo(wind.bottom, 16.dp)
                 },
                 color = primaryWhiteColor,
-                text = stringResource(id = R.string.pressure) + ", " + stringResource(R.string.pressure_mm) + ":"
+                text = stringResource(id = R.string.pressure) + ", " + pressureUnit + ":"
             )
 
             BarChartExample(
@@ -221,7 +226,8 @@ fun CurrentWeather(
                         absoluteLeft.linkTo(parent.absoluteLeft)
                         absoluteRight.linkTo(parent.absoluteRight)
                     },
-                weather = forecast.daily
+                weather = forecast.daily,
+                pressureUnit = pressureUnit
             )
         }
     }
@@ -361,10 +367,12 @@ fun DailyWeatherItem(
 @Composable
 private fun BarChartExample(
     modifier: Modifier = Modifier,
-    weather: List<Daily>
+    weather: List<Daily>,
+    pressureUnit: String,
 ) {
+
     val x = remember { Animatable(0f) }
-    val yValues = remember(weather) { mutableStateOf(getPressureList(weather)) }
+    val yValues = remember(weather) { mutableStateOf(getPressureList(weather, pressureUnit)) }
     val xTarget = (yValues.value.size - 1).toFloat()
     LaunchedEffect(weather) {
         x.animateTo(
@@ -402,7 +410,7 @@ private fun BarChartExample(
             )
 
             drawContext.canvas.nativeCanvas.drawText(
-                hPaToMmHg(weather[index].pressure).toString(),
+                getPressure(weather[index].pressure, PressureValues.valueOf(pressureUnit))/*hPaToMmHg(weather[index].pressure)*/,
                 pointX, pointY - 48f, paint
             )
 
@@ -428,9 +436,10 @@ private fun BarChartExample(
 }
 
 private fun getPressureList(
-    forecast: List<Daily>
+    forecast: List<Daily>,
+    pressureUnit: String
 ): List<Int> {
-    return forecast.map { hPaToMmHg(it.pressure) }
+    return forecast.map { getPressureInt(it.pressure, PressureValues.valueOf(pressureUnit)) }
 }
 
 private fun getBounds(list: List<Int>): Pair<Int, Int> {
