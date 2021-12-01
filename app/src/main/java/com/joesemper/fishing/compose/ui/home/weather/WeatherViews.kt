@@ -18,10 +18,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
+import com.airbnb.lottie.compose.*
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.HeaderText
 import com.joesemper.fishing.compose.ui.home.PrimaryText
@@ -334,7 +331,10 @@ fun WeatherLoading(modifier: Modifier) {
 @Composable
 fun WeatherEmptyView(modifier: Modifier) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.empty_status))
-    val progress by animateLottieCompositionAsState(composition)
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever,
+    )
     LottieAnimation(
         composition,
         progress,

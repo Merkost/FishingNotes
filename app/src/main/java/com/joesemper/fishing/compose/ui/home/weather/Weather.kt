@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
@@ -142,19 +143,20 @@ fun Weather(
         AnimatedVisibility(viewModel.currentWeather.value == null) {
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .systemBarsPadding(false),
-                verticalArrangement = Arrangement.Center
+                    .systemBarsPadding(false).fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceAround,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (checkPermission(context) && viewModel.markersList.value.isEmpty()) {
                     SecondaryText(text = "No places yet. \nAdd new place now!")
-                    WeatherEmptyView( modifier = Modifier
-                        .size(500.dp)
-                        .align(Alignment.CenterHorizontally))
+                    WeatherEmptyView(
+                        modifier = Modifier
+                            .size(300.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
                     DefaultButtonOutlined(text = "Add", onClick = {
                         navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${true}")
-                    }
-                    )
+                    })
                     //TODO: No places yet view
                 } else {
                     WeatherLoading(
