@@ -22,7 +22,6 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
@@ -190,11 +189,12 @@ fun CurrentWeather(
 ) {
     val weatherPrefs: WeatherPreferences = get()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg.name)
+    val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
 
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(370.dp),
+            .height(320.dp),
         color = primaryDarkColor
     ) {
         ConstraintLayout {
@@ -216,12 +216,10 @@ fun CurrentWeather(
                     top.linkTo(primary.top)
                     absoluteLeft.linkTo(guideline, 16.dp)
                 },
-                temperature = forecast.hourly.first().temperature.toInt()
-                    .toString(),
-                minTemperature = forecast.daily.first().temperature.min.toInt()
-                    .toString(),
-                maxTemperature = forecast.daily.first().temperature.max.toInt()
-                    .toString()
+                temperature = getTemperature(forecast.hourly.first().temperature, TemperatureValues.valueOf(temperatureUnit)),
+                minTemperature = getTemperature(forecast.daily.first().temperature.min, TemperatureValues.valueOf(temperatureUnit)),
+                maxTemperature = getTemperature(forecast.daily.first().temperature.max, TemperatureValues.valueOf(temperatureUnit)),
+                icon = getTemperatureIcon(TemperatureValues.valueOf(temperatureUnit)),
             )
             WeatherParameterMeaning(
                 modifier = Modifier.constrainAs(wind) {
@@ -229,7 +227,7 @@ fun CurrentWeather(
                     absoluteRight.linkTo(guideline, 32.dp)
                 },
                 title = stringResource(id = R.string.wind),
-                text = String.format("%.1f", forecast.hourly.first().windSpeed)
+                text = String.format("%.0f", forecast.hourly.first().windSpeed)
                         + " ${stringResource(R.string.wind_speed_units)}",
                 primaryIconId = R.drawable.weather_windy,
                 iconId = R.drawable.ic_arrow_up,
@@ -268,7 +266,7 @@ fun CurrentWeather(
                 Modifier
                     .horizontalScroll(rememberScrollState())
                     .width(500.dp)
-                    .height(160.dp)
+                    .height(120.dp)
                     .padding(top = 4.dp)
                     .constrainAs(pressure) {
                         top.linkTo(pressureTitle.bottom, 16.dp)
@@ -281,6 +279,7 @@ fun CurrentWeather(
         }
     }
 }
+
 
 @Composable
 fun HourlyWeather(
@@ -433,7 +432,7 @@ private fun BarChartExample(
         )
     }
 
-    Canvas(modifier = modifier.padding(start = 32.dp, end = 32.dp, bottom = 16.dp, top = 32.dp)) {
+    Canvas(modifier = modifier.padding(start = 32.dp, end = 32.dp, bottom = 18.dp, top = 32.dp)) {
         val xbounds = Pair(0f, xTarget)
         val ybounds = getBounds(yValues.value)
         val scaleX = size.width / (xbounds.second - xbounds.first)

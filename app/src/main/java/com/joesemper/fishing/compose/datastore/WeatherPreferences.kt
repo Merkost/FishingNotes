@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
+import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -18,6 +19,7 @@ class WeatherPreferences(private val context: Context) {
         private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("weatherSettings")
 
         val PRESSURE_UNIT = stringPreferencesKey("pressure_unit")
+        val TEMPERATURE_UNIT = stringPreferencesKey("temperature_unit")
     }
 
     //get the saved value
@@ -30,6 +32,19 @@ class WeatherPreferences(private val context: Context) {
     suspend fun savePressureUnit(pressureValues: PressureValues) {
         context.dataStore.edit { preferences ->
             preferences[PRESSURE_UNIT] = pressureValues.name
+        }
+    }
+
+    //get the saved value
+    val getTemperatureUnit: Flow<String> = context.dataStore.data
+        .map { preferences ->
+            preferences[TEMPERATURE_UNIT] ?: TemperatureValues.C.name
+        }
+
+    //save into datastore
+    suspend fun saveTemperatureUnit(temperatureValues: TemperatureValues) {
+        context.dataStore.edit { preferences ->
+            preferences[TEMPERATURE_UNIT] = temperatureValues.name
         }
     }
 

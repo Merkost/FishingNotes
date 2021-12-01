@@ -33,6 +33,7 @@ import com.joesemper.fishing.compose.ui.home.map.GrantLocationPermissionsDialog
 import com.joesemper.fishing.compose.ui.home.map.checkPermission
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
+import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -48,11 +49,15 @@ fun SettingsScreen(backPress: () -> Unit) {
     val isPressureDialogOpen = remember {
         mutableStateOf(false)
     }
+    val isTemperatureDialogOpen = remember {
+        mutableStateOf(false)
+    }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
     val use12hTimeFormat by userPreferences.use12hTimeFormat.collectAsState(false)
     val pressureUnit = weatherPreferences.getPressureUnit.collectAsState(PressureValues.mmHg.name)
+    val temperatureUnit = weatherPreferences.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
 
     GetLocationPermission(isPermissionDialogOpen)
     GetPressureUnit(isPressureDialogOpen, pressureUnit) { newValue ->
@@ -62,7 +67,13 @@ fun SettingsScreen(backPress: () -> Unit) {
             isPressureDialogOpen.value = false
         }
     }
-    //GetTemperatureUnit()
+    GetTemperatureUnit(isTemperatureDialogOpen, temperatureUnit) { newValue ->
+        coroutineScope.launch {
+            weatherPreferences.saveTemperatureUnit(newValue)
+            delay(200)
+            isTemperatureDialogOpen.value = false
+        }
+    }
 
     Scaffold(
         topBar = { SettingsTopAppBar(backPress) },
@@ -106,20 +117,86 @@ fun SettingsScreen(backPress: () -> Unit) {
                 subtitle = { Text(text = "Choose another pressure unit (Current is: ${pressureUnit.value})") },
                 onClick = { isPressureDialogOpen.value = true }
             )
-            /*SettingsMenuLink(
+            SettingsMenuLink(
                 icon = { Icon(imageVector = Icons.Default.Thermostat, contentDescription = Icons.Default.Thermostat.name) },
                 title = { Text(text = stringResource(R.string.temperature_unit)) },
                 subtitle = { Text(text = "Choose another temperature unit (Current is: ${temperatureUnit.value})") },
                 onClick = { isTemperatureDialogOpen.value = true }
-            )*/
+            )
         }
 
 
     }
 }
 
-fun GetTemperatureUnit() {
-    TODO("Not yet implemented")
+@Composable
+fun GetTemperatureUnit(
+    isTemperatureDialogOpen: MutableState<Boolean>,
+    currentTemperatureUnit: State<String>,
+    onSelectedValue: (temperatureValues: TemperatureValues) -> Unit
+) {
+    val radioOptions = TemperatureValues.values().asList()
+    val context = LocalContext.current
+
+    if (isTemperatureDialogOpen.value) {
+        val (selectedOption, onOptionSelected) = remember {
+            mutableStateOf(
+                TemperatureValues.valueOf(
+                    currentTemperatureUnit.value
+                )
+            )
+        }
+        Dialog(onDismissRequest = { isTemperatureDialogOpen.value = false }) {
+            DefaultCard {
+                Column(
+                    modifier = Modifier.padding(bottom = 12.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Row(
+                        modifier = Modifier.padding(14.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        PrimaryText(text = stringResource(R.string.choose_pressure_unit))
+                    }
+
+                    radioOptions.forEach { temperatureValue ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = (temperatureValue == selectedOption),
+                                    onClick = {
+                                        onOptionSelected(temperatureValue)
+                                        onSelectedValue(temperatureValue)
+                                    }
+                                )
+                                .padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(
+                                selected = (temperatureValue == selectedOption),
+                                modifier = Modifier.padding(all = Dp(value = 8F)),
+                                onClick = {
+                                    onOptionSelected(temperatureValue)
+                                    onSelectedValue(temperatureValue)
+                                    Toast.makeText(context, temperatureValue.name, Toast.LENGTH_LONG)
+                                        .show()
+                                }
+                            )
+                            Text(
+                                text = temperatureValue.name,
+                                modifier = Modifier.padding(start = 16.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+        }
+    }
 }
 
 @Composable
