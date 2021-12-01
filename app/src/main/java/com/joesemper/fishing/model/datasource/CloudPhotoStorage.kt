@@ -1,6 +1,11 @@
 package com.joesemper.fishing.model.datasource
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
+import android.provider.MediaStore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
@@ -13,8 +18,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.take
+import java.io.ByteArrayOutputStream
 
-class CloudPhotoStorage : PhotoStorage {
+class CloudPhotoStorage(private val context: Context) : PhotoStorage {
 
     private val storage = Firebase.storage
     private var storageRef = storage.reference
@@ -27,7 +33,7 @@ class CloudPhotoStorage : PhotoStorage {
         val downloadLinks = mutableListOf<String>()
         if (photos.isNotEmpty()) {
             val progressPoint = 100 / photos.size
-            savePhotosToDb(photos)
+            savePhotosToDb(photos, context)
                 .take(photos.size)
                 .collect { downloadLink ->
                     downloadLinks.add(downloadLink)
@@ -39,13 +45,15 @@ class CloudPhotoStorage : PhotoStorage {
     }
 
     @ExperimentalCoroutinesApi
-    private fun savePhotosToDb(photoByteArrays: List<Uri>) = callbackFlow {
+    private fun savePhotosToDb(photoByteArrays: List<Uri>, context: Context) = callbackFlow {
         val uploadTasks = mutableListOf<UploadTask>()
 
-        photoByteArrays.forEach { photo ->
+        photoByteArrays.forEach { uri ->
             val riversRef = storageRef.child("markerImages/${getNewPhotoId()}")
 
-            val uploadTask = riversRef.putFile(photo)
+            val reducedImage = compressImage(uri)
+
+            val uploadTask = riversRef.putBytes(reducedImage)
             uploadTasks.add(uploadTask)
 
             val callback = uploadTask.continueWithTask { task ->
@@ -73,6 +81,18 @@ class CloudPhotoStorage : PhotoStorage {
         desertRef.delete()
     }
 
+    private fun compressImage(uri: Uri): ByteArray {
+        val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, uri))
+        } else {
+            MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
+        }
+
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 40, byteArrayOutputStream)
+
+        return byteArrayOutputStream.toByteArray()
+    }
 
 }
 

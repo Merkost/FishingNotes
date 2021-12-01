@@ -49,7 +49,10 @@ import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.model.entity.weather.Hourly
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
-import com.joesemper.fishing.utils.*
+import com.joesemper.fishing.utils.getDateBySecondsTextMonth
+import com.joesemper.fishing.utils.getDayOfWeekAndDate
+import com.joesemper.fishing.utils.getDayOfWeekBySeconds
+import com.joesemper.fishing.utils.getTimeBySeconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.get
@@ -144,7 +147,8 @@ fun Weather(
         AnimatedVisibility(viewModel.currentWeather.value == null) {
             Column(
                 modifier = Modifier
-                    .systemBarsPadding(false).fillMaxSize(),
+                    .systemBarsPadding(false)
+                    .fillMaxSize(),
                 verticalArrangement = Arrangement.SpaceAround,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -263,7 +267,7 @@ fun CurrentWeather(
                 text = stringResource(id = R.string.pressure) + ", " + pressureUnit + ":"
             )
 
-            BarChartExample(
+            PressureChart(
                 Modifier
                     .horizontalScroll(rememberScrollState())
                     .width(500.dp)
@@ -418,7 +422,7 @@ fun DailyWeatherItem(
 }
 
 @Composable
-private fun BarChartExample(
+private fun PressureChart(
     modifier: Modifier = Modifier,
     weather: List<Daily>,
     pressureUnit: String,

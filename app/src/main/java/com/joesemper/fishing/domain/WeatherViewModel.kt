@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
-import com.joesemper.fishing.model.repository.UserContentRepository
 import com.joesemper.fishing.model.repository.app.MarkersRepository
 import com.joesemper.fishing.model.repository.app.WeatherRepository
 import kotlinx.coroutines.flow.collect

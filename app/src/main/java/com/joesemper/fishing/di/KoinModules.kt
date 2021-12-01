@@ -1,6 +1,5 @@
 package com.joesemper.fishing.di
 
-import com.firebase.ui.auth.data.model.User
 import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
@@ -8,7 +7,6 @@ import com.joesemper.fishing.compose.viewmodels.MainViewModel
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.domain.*
 import com.joesemper.fishing.model.datasource.*
-import com.joesemper.fishing.model.repository.UserContentRepository
 import com.joesemper.fishing.model.repository.UserRepository
 import com.joesemper.fishing.model.repository.app.CatchesRepository
 import com.joesemper.fishing.model.repository.app.MarkersRepository
@@ -23,7 +21,7 @@ val appModule = module {
     single<UserRepository> { FirebaseUserRepositoryImpl(androidContext()) }
     single<CatchesRepository> { FirebaseCatchesRepositoryImpl(get(), get()) }
     single<MarkersRepository> { FirebaseMarkersRepositoryImpl(get(), get()) }
-    single<PhotoStorage> { CloudPhotoStorage() }
+    single<PhotoStorage> { CloudPhotoStorage(androidContext()) }
     single<WeatherRepository> { WeatherRepositoryRetrofitImpl() }
     single { Logger() }
     single { SnackbarManager }
