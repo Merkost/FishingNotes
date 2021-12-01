@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -38,6 +39,17 @@ data class Point(
     val x: Float,
     val y: Float
 )
+
+
+@Composable
+fun getTemperatureFromUnit(temperatureUnit: String): String {
+    return when (temperatureUnit) {
+        TemperatureValues.C.name -> stringResource(R.string.celsius)
+        TemperatureValues.F.name -> stringResource(R.string.fahrenheit)
+        TemperatureValues.K.name -> stringResource(R.string.kelvin)
+        else -> {""}
+    }
+}
 
 fun getPressure(hPa: Int, pressureValue: PressureValues): String {
     return when (pressureValue) {

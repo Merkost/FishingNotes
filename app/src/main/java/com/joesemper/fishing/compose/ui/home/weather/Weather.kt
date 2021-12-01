@@ -95,7 +95,9 @@ fun Weather(
     }
 
     val scrollState = rememberScrollState()
-
+    val weatherPrefs: WeatherPreferences = get()
+    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg.name)
+    val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -130,12 +132,12 @@ fun Weather(
                 modifier = Modifier.verticalScroll(scrollState)
             ) {
 
-                CurrentWeather(forecast = forecast)
+                CurrentWeather(forecast = forecast, pressureUnit = pressureUnit, temperatureUnit = temperatureUnit)
 
-                HourlyWeather(forecast = forecast.hourly)
+                HourlyWeather(forecast = forecast.hourly, temperatureUnit = temperatureUnit)
 
                 forecast.daily.forEach {
-                    DailyWeatherItem(forecast = it)
+                    DailyWeatherItem(forecast = it, temperatureUnit = temperatureUnit)
                 }
             }
         }
@@ -186,10 +188,10 @@ fun NoPlacesView() {
 fun CurrentWeather(
     modifier: Modifier = Modifier,
     forecast: WeatherForecast,
+    temperatureUnit: String,
+    pressureUnit: String,
 ) {
-    val weatherPrefs: WeatherPreferences = get()
-    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg.name)
-    val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
+
 
     Surface(
         modifier = modifier
@@ -284,7 +286,8 @@ fun CurrentWeather(
 @Composable
 fun HourlyWeather(
     modifier: Modifier = Modifier,
-    forecast: List<Hourly>
+    forecast: List<Hourly>,
+    temperatureUnit: String
 ) {
     Column(modifier = modifier) {
         WeatherHeaderText(
@@ -293,7 +296,7 @@ fun HourlyWeather(
         )
         LazyRow() {
             items(forecast.size) { index ->
-                HourlyWeatherItem(forecast = forecast[index])
+                HourlyWeatherItem(forecast = forecast[index], temperatureUnit = temperatureUnit)
             }
         }
         Spacer(modifier = Modifier.padding(4.dp))
@@ -306,7 +309,8 @@ fun HourlyWeather(
 @Composable
 fun HourlyWeatherItem(
     modifier: Modifier = Modifier,
-    forecast: Hourly
+    forecast: Hourly,
+    temperatureUnit: String
 ) {
     Column(
         modifier = modifier.padding(horizontal = 12.dp),
@@ -320,7 +324,8 @@ fun HourlyWeatherItem(
             contentDescription = ""
         )
         PrimaryText(
-            text = forecast.temperature.toInt().toString() + stringResource(id = R.string.celsius)
+            text = getTemperature(forecast.temperature, TemperatureValues.valueOf(temperatureUnit)) +
+                    getTemperatureFromUnit(temperatureUnit)
         )
         Row() {
             PrimaryText(text = forecast.windSpeed.toInt().toString())
@@ -336,7 +341,8 @@ fun HourlyWeatherItem(
 @Composable
 fun DailyWeatherItem(
     modifier: Modifier = Modifier,
-    forecast: Daily
+    forecast: Daily,
+    temperatureUnit: String
 ) {
     ConstraintLayout(
         modifier = modifier
@@ -372,7 +378,7 @@ fun DailyWeatherItem(
                 bottom.linkTo(parent.bottom)
                 absoluteRight.linkTo(parent.absoluteRight, 16.dp)
             },
-            text = stringResource(id = R.string.celsius),
+            text = getTemperatureFromUnit(temperatureUnit),
             textColor = secondaryTextColor
         )
         WeatherPrimaryText(
@@ -381,7 +387,7 @@ fun DailyWeatherItem(
                 bottom.linkTo(tempUnits.bottom)
                 absoluteRight.linkTo(tempUnits.absoluteLeft, 2.dp)
             },
-            text = forecast.temperature.day.toInt().toString(),
+            text = getTemperature(forecast.temperature.day, TemperatureValues.valueOf(temperatureUnit)) ,
         )
         Image(
             modifier = Modifier
