@@ -94,7 +94,7 @@ fun SettingsScreen(backPress: () -> Unit) {
                 },
                 title = { Text(text = "Pressure unit") },
                 subtitle = { Text(text = "use Pa instead of mm Hg") },
-                onClick = { isPressureDialogOpen.value = true },
+                onClick = { isPressureDialogOpen.value = true }//TODO Make pressure choosing dialog
                 /*onCheckedChange = { usePa ->
                     coroutineScope.launch {
                         if (usePa)

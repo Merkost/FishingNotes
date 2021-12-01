@@ -32,6 +32,7 @@ import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.PrimaryText
 import com.joesemper.fishing.compose.ui.home.SecondaryText
 import com.joesemper.fishing.compose.ui.home.map.LocationState
+import com.joesemper.fishing.compose.ui.home.map.checkPermission
 import com.joesemper.fishing.compose.ui.home.map.getCurrentLocationFlow
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
 import com.joesemper.fishing.compose.ui.theme.primaryDarkColor
@@ -91,19 +92,21 @@ fun Weather(
     val scrollState = rememberScrollState()
 
 
-
-
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             val elevation =
                 animateDpAsState(targetValue = if (scrollState.value > 0) 4.dp else 0.dp)
+            if (checkPermission(context) && viewModel.markersList.value.isNotEmpty())
+                selectedPlace.value = viewModel.markersList.value.first()
+
             TopAppBar(
                 elevation = elevation.value,
                 backgroundColor = primaryDarkColor
             ) {
                 WeatherLocationIcon(color = Color.White)
                 selectedPlace.value?.let {
+
                     WeatherPlaceSelectItem(
                         selectedPlace = it,
                         userPlaces = viewModel.markersList.value,
@@ -112,6 +115,7 @@ fun Weather(
                         }
                     )
                 }
+
             }
         }
     ) {

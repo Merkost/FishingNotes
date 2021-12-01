@@ -182,7 +182,6 @@ fun WeatherPlaceSelectItem(
     onItemClick: (UserMapMarker) -> Unit
 ) {
     val isExpanded = remember { mutableStateOf(false) }
-
     Box(
         modifier = modifier.fillMaxWidth().clickable {
             isExpanded.value = !isExpanded.value
@@ -198,7 +197,7 @@ fun WeatherPlaceSelectItem(
             horizontalArrangement = Arrangement.Center
         ) {
             WeatherAppBarText(
-                text = selectedPlace.title,
+                text = selectedPlace?.title ?: "Не удалось определить местоположение",
                 textColor = Color.White
             )
             Icon(imageVector = Icons.Filled.ArrowDropDown, "", tint = Color.White)
@@ -219,7 +218,7 @@ fun WeatherDropdownMenu(
 ) {
 
     DropdownMenu(
-        modifier = Modifier.requiredWidthIn(200.dp, 400.dp),
+        modifier = Modifier.requiredWidthIn(200.dp, 500.dp),
         expanded = isExpanded.value,
         onDismissRequest = {
             isExpanded.value = !isExpanded.value
@@ -274,7 +273,8 @@ fun WeatherAppBarText(
         color = textColor,
         maxLines = 1,
         softWrap = true,
-        text = text
+        text = text,
+        overflow = TextOverflow.Ellipsis,
     )
 }
 
