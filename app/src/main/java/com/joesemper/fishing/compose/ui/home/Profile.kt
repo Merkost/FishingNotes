@@ -35,10 +35,10 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 
 import coil.annotation.ExperimentalCoilApi
+import com.airbnb.lottie.compose.*
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.map.LottieMyLocation
-import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.domain.UserViewModel
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.MapMarker
@@ -294,6 +294,9 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
             }
         },
         onDismiss = { dialogOnLogout.value = false },
+        content = {
+            LottieLogout(modifier = Modifier.fillMaxWidth().height(180.dp))
+        }
     )
 /*
     AlertDialog(
@@ -323,6 +326,20 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
                 content = { Text(stringResource(R.string.No)) })
         }
     )*/
+}
+
+@Composable
+fun LottieLogout(modifier: Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.bye_bye))
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever,
+    )
+    LottieAnimation(
+        composition,
+        progress,
+        modifier = modifier
+    )
 }
 
 @Composable
