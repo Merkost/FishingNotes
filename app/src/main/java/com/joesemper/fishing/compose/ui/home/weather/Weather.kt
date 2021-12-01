@@ -227,7 +227,7 @@ fun CurrentWeather(
                     absoluteRight.linkTo(guideline, 32.dp)
                 },
                 title = stringResource(id = R.string.wind),
-                text = String.format("%.0f", forecast.hourly.first().windSpeed)
+                text = String.format("%.1g", forecast.hourly.first().windSpeed)
                         + " ${stringResource(R.string.wind_speed_units)}",
                 primaryIconId = R.drawable.weather_windy,
                 iconId = R.drawable.ic_arrow_up,
@@ -486,27 +486,7 @@ private fun BarChartExample(
     }
 }
 
-private fun getPressureList(
-    forecast: List<Daily>,
-    pressureUnit: String
-): List<Int> {
-    return forecast.map { getPressureInt(it.pressure, PressureValues.valueOf(pressureUnit)) }
-}
 
-private fun getBounds(list: List<Int>): Pair<Int, Int> {
-    var min = Int.MAX_VALUE
-    var max = -Int.MAX_VALUE
-    list.forEach {
-        min = min.coerceAtMost(it)
-        max = max.coerceAtLeast(it)
-    }
-    return Pair(min, max)
-}
-
-data class Point(
-    val x: Float,
-    val y: Float
-)
 
 
 
