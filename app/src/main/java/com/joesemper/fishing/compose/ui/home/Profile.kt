@@ -37,6 +37,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.home.map.LottieMyLocation
 import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
 import com.joesemper.fishing.domain.UserViewModel
 import com.joesemper.fishing.model.entity.common.User
@@ -72,16 +73,16 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
             val (background, card, image, name, places, catches, stats, box, logout, settings) = createRefs()
             val bgGl = createGuidelineFromTop(120.dp)
             val verticalCenterGl = createGuidelineFromAbsoluteLeft(0.5f)
-                Surface(//shape = RoundedCornerShape(0.dp,0.dp,15.dp,15.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(bgHeight)
-                        .constrainAs(background) {
-                            top.linkTo(parent.top)
-                            absoluteLeft.linkTo(parent.absoluteLeft)
-                            absoluteRight.linkTo(parent.absoluteRight)
-                        }, color = MaterialTheme.colors.primary
-                ) {}
+            Surface(//shape = RoundedCornerShape(0.dp,0.dp,15.dp,15.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(bgHeight)
+                    .constrainAs(background) {
+                        top.linkTo(parent.top)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                    }, color = MaterialTheme.colors.primary
+            ) {}
 
 
             UserImage(user, imgSize, modifier = Modifier.constrainAs(image) {
@@ -159,14 +160,14 @@ fun SettingsIcon(modifier: Modifier, settingsClicked: () -> Unit) {
 @Composable
 fun UserText(user: User?, modifier: Modifier) {
     user?.let {
-            Text(
-                modifier = modifier,
-                text = when (user.isAnonymous) {
-                    true -> stringResource(R.string.anonymous)
-                    false -> user.userName
-                }, style = MaterialTheme.typography.h6,
-                textAlign = TextAlign.Center
-            )
+        Text(
+            modifier = modifier,
+            text = when (user.isAnonymous) {
+                true -> stringResource(R.string.anonymous)
+                false -> user.userName
+            }, style = MaterialTheme.typography.h6,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
@@ -271,6 +272,30 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
     val scope = rememberCoroutineScope()
 
     val viewModel = getViewModel<UserViewModel>()
+
+    DefaultDialog(
+        primaryText = stringResource(R.string.logout_dialog_title),
+        secondaryText = stringResource(R.string.logout_dialog_message),
+        negativeButtonText = stringResource(id = R.string.No),
+        onNegativeClick = { dialogOnLogout.value = false },
+        positiveButtonText = stringResource(id = R.string.Yes),
+        onPositiveClick = {
+            scope.launch {
+                viewModel.logoutCurrentUser().collect { isLogout ->
+                    if (isLogout) {
+                        dialogOnLogout.value = false
+                        navController.navigate(MainDestinations.LOGIN_ROUTE) {
+                            popUpTo(0) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        onDismiss = { dialogOnLogout.value = false },
+    )
+/*
     AlertDialog(
         title = { Text(stringResource(R.string.logout_dialog_title)) },
         text = { Text(stringResource(R.string.logout_dialog_message)) },
@@ -297,12 +322,12 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
                 onClick = { dialogOnLogout.value = false },
                 content = { Text(stringResource(R.string.No)) })
         }
-    )
+    )*/
 }
 
 @Composable
 fun ColumnButton(image: ImageVector, name: String, click: () -> Unit) {
-    DefaultCardClickable (
+    DefaultCardClickable(
         onClick = click,
         modifier = Modifier.fillMaxWidth(),
         content = {
@@ -397,7 +422,7 @@ fun ProfileAppBar(navController: NavController, viewModel: UserViewModel) {
 @Composable
 fun ProfilePreview() {
     //FigmaTheme {
-        Profile(rememberNavController())
+    Profile(rememberNavController())
     //}
 }
 

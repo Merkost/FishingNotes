@@ -30,13 +30,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import com.airbnb.lottie.compose.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.*
-import com.joesemper.fishing.compose.ui.home.DefaultButtonText
 import com.joesemper.fishing.compose.ui.theme.Shapes
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
@@ -375,8 +373,21 @@ fun GrantLocationPermissionsDialog(
 ) {
     var visible = remember { false }
 
+    DefaultDialog(
+        primaryText = stringResource(R.string.location_permission_dialog),
+        neutralButtonText = stringResource(id = R.string.dont_ask_again),
+        onNeutralClick = onDontAskClick,
+        negativeButtonText = stringResource(id = R.string.cancel),
+        onNegativeClick = onNegativeClick,
+        positiveButtonText = stringResource(id = R.string.ok_button),
+        onPositiveClick = onPositiveClick,
+        onDismiss = onDismiss,
+        content = {
+            LottieMyLocation(modifier = Modifier.fillMaxWidth().height(180.dp))
+        }
+    )
 
-    Dialog(onDismissRequest = onDismiss) {
+    /*Dialog(onDismissRequest = onDismiss) {
         DefaultCard() {
             Column(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -416,8 +427,8 @@ fun GrantLocationPermissionsDialog(
 
                 }
             }
-        }
-    }
+        }*/
+    //}
 }
 
 @Composable

@@ -26,6 +26,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -49,6 +50,75 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
+
+@Composable
+fun DefaultDialog(
+    primaryText: String,
+    secondaryText: String? = null,
+    neutralButtonText: String = "",
+    onNeutralClick: (() -> Unit) = { },
+    negativeButtonText: String = "",
+    onNegativeClick: () -> Unit = { },
+    positiveButtonText: String = "",
+    onPositiveClick: () -> Unit,
+    onDismiss: () -> Unit,
+    content: @Composable() (() -> Unit)? = null
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        DefaultCard() {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(14.dp)
+            ) {
+                PrimaryText(
+                    text = primaryText,
+                    modifier = Modifier.padding(4.dp)
+                )
+                secondaryText?.let {
+                    SecondaryText(text = secondaryText, textAlign = TextAlign.Start)
+                }
+                if (content != null) {
+                    Column {
+                        content()
+                    }
+                }
+                Spacer(modifier = Modifier.size(6.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    if (neutralButtonText.isNotEmpty()) {
+                        DefaultButtonSecondaryText(
+                            text = neutralButtonText,
+                            onClick = onNeutralClick,
+                            shape = RoundedCornerShape(24.dp)
+                        )
+                    } else Spacer(modifier = Modifier.size(1.dp))
+                    Row(
+
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        if (negativeButtonText.isNotEmpty()) {
+                            DefaultButtonText(
+                                text = negativeButtonText,
+                                onClick = onNegativeClick,
+                                shape = RoundedCornerShape(24.dp)
+                            )
+                        }
+                        DefaultButton(
+                            text = positiveButtonText,
+                            onClick = onPositiveClick,
+                            shape = RoundedCornerShape(24.dp)
+                        )
+
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun MyCardNoPadding(content: @Composable () -> Unit) {
@@ -332,10 +402,11 @@ fun SecondaryTextSmall(
 @Composable
 fun SecondaryText(
     modifier: Modifier = Modifier, text: String,
-    maxLines: Int = Int.MAX_VALUE
+    maxLines: Int = Int.MAX_VALUE,
+    textAlign: TextAlign = TextAlign.Center
 ) {
     Text(
-        textAlign = TextAlign.Center,
+        textAlign = textAlign,
         modifier = modifier,
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
@@ -517,10 +588,12 @@ fun DefaultButton(
     modifier: Modifier = Modifier,
     text: String,
     icon: Int? = null,
+    shape: Shape = MaterialTheme.shapes.small,
     onClick: () -> Unit
 ) {
     Button(
         modifier = modifier,
+        shape = shape,
         onClick = onClick
     ) {
         Row(
@@ -585,10 +658,12 @@ fun DefaultButtonText(
     modifier: Modifier = Modifier,
     text: String,
     icon: Int? = null,
+    shape: Shape = MaterialTheme.shapes.small,
     onClick: () -> Unit
 ) {
     TextButton(
         modifier = modifier,
+        shape = shape,
         onClick = onClick
     ) {
         Row(
@@ -619,10 +694,12 @@ fun DefaultButtonSecondaryText(
     modifier: Modifier = Modifier,
     text: String,
     icon: Int? = null,
+    shape: Shape = MaterialTheme.shapes.small,
     onClick: () -> Unit
 ) {
     TextButton(
         modifier = modifier,
+        shape = shape,
         onClick = onClick
     ) {
         Row(
