@@ -221,7 +221,6 @@ fun CurrentWeather(
                 temperature = getTemperature(forecast.hourly.first().temperature, TemperatureValues.valueOf(temperatureUnit)),
                 minTemperature = getTemperature(forecast.daily.first().temperature.min, TemperatureValues.valueOf(temperatureUnit)),
                 maxTemperature = getTemperature(forecast.daily.first().temperature.max, TemperatureValues.valueOf(temperatureUnit)),
-                icon = getTemperatureIcon(TemperatureValues.valueOf(temperatureUnit)),
             )
             WeatherParameterMeaning(
                 modifier = Modifier.constrainAs(wind) {

@@ -122,7 +122,6 @@ fun WeatherTemperatureMeaning(
     temperature: String,
     minTemperature: String,
     maxTemperature: String,
-    icon: Painter,
 ) {
     ConstraintLayout(
         modifier = modifier
@@ -148,7 +147,7 @@ fun WeatherTemperatureMeaning(
                     bottom.linkTo(main.bottom)
                     absoluteLeft.linkTo(main.absoluteRight)
                 },
-            painter = icon,
+            painter = painterResource(R.drawable.ic_temperature_celsius),
             contentDescription = stringResource(id = R.string.temperature),
             tint = secondaryWhiteColor
         )

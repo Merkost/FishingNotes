@@ -78,11 +78,6 @@ fun getTemperature(temperature: Float, temperatureValue: TemperatureValues): Str
     }
 }
 
-@Composable
-fun getTemperatureIcon(valueOf: TemperatureValues): Painter {
-    return painterResource(R.drawable.ic_temperature_celsius)
-}
-
 enum class PressureValues {
     Pa,
     Bar,
