@@ -16,9 +16,9 @@ fun createCurrentPlaceItem(latLng: LatLng, context: Context): UserMapMarker {
 fun getPressure(hPa: Int, pressureValue: PressureValues): String {
     return when (pressureValue) {
         PressureValues.Pa -> (hPa * 100).toString()
-        PressureValues.bar -> (hPa / 1000f).toString()
+        PressureValues.Bar -> (hPa / 1000f).toString()
         PressureValues.mmHg -> (hPa * 0.75006375541921).toInt().toString()
-        PressureValues.psi -> (hPa * 0.0145037738).toString()
+        PressureValues.Psi -> (hPa * 0.0145037738).toString()
         else -> {
             (hPa * 0.75006375541921).toInt().toString()
         }
@@ -28,9 +28,9 @@ fun getPressure(hPa: Int, pressureValue: PressureValues): String {
 fun getPressureInt(hPa: Int, pressureValue: PressureValues): Int {
     return when (pressureValue) {
         PressureValues.Pa -> (hPa * 100)
-        PressureValues.bar -> (hPa / 1000f).toInt()
+        PressureValues.Bar -> (hPa / 1000f).toInt()
         PressureValues.mmHg -> (hPa * 0.75006375541921).toInt()
-        PressureValues.psi -> (hPa * 0.0145037738).toInt()
+        PressureValues.Psi -> (hPa * 0.0145037738).toInt()
         else -> {
             (hPa * 0.75006375541921).toInt().toInt()
         }
@@ -39,7 +39,7 @@ fun getPressureInt(hPa: Int, pressureValue: PressureValues): Int {
 
 enum class PressureValues {
     Pa,
-    bar,
+    Bar,
     mmHg,
-    psi
+    Psi
 }
