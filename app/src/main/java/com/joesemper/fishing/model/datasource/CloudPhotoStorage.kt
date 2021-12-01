@@ -93,6 +93,3 @@ class CloudPhotoStorage(private val context: Context) : PhotoStorage {
         desertRef.delete()
     }
 }
-
-
-

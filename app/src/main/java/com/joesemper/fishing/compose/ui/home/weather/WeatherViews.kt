@@ -10,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +26,53 @@ import com.joesemper.fishing.compose.ui.home.SecondaryTextColored
 import com.joesemper.fishing.compose.ui.home.SecondaryTextSmall
 import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.model.entity.weather.Hourly
+import com.joesemper.fishing.model.mappers.getWeatherIconByName
+
+@Composable
+fun PrimaryWeatherItem(modifier: Modifier = Modifier, forecast: Hourly, temperatureUnit: String) {
+
+    ConstraintLayout(modifier = modifier
+        .fillMaxWidth()
+        .wrapContentHeight()) {
+        val (temp, icon, description) = createRefs()
+
+        val guideline = createGuidelineFromAbsoluteLeft(0.5f)
+
+        HeaderText(
+            modifier = Modifier
+                .constrainAs(temp) {
+                    top.linkTo(parent.top)
+                    absoluteRight.linkTo(guideline, 4.dp)
+                },
+            text = getTemperature(
+                forecast.temperature,
+                TemperatureValues.valueOf(temperatureUnit)
+            ) + getTemperatureFromUnit(temperatureUnit),
+            textColor = primaryWhiteColor
+        )
+        Icon(
+            modifier = Modifier
+                .size(64.dp)
+                .constrainAs(icon) {
+                    top.linkTo(parent.top)
+                    absoluteLeft.linkTo(guideline, 4.dp)
+                },
+            painter = painterResource(id = getWeatherIconByName(forecast.weather.first().icon)),
+            contentDescription = stringResource(id = R.string.weather),
+            tint = Color.White
+        )
+        PrimaryText(
+            modifier = Modifier.constrainAs(description) {
+                top.linkTo(temp.bottom, 4.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            text = forecast.weather.first().description,
+            textColor = secondaryWhiteColor
+        )
+    }
+}
 
 @Composable
 fun PrimaryWeatherParameterMeaning(modifier: Modifier = Modifier, icon: Int, text: String) {
@@ -182,17 +228,18 @@ fun WeatherPlaceSelectItem(
 ) {
     val isExpanded = remember { mutableStateOf(false) }
     Box(
-        modifier = modifier.fillMaxWidth().clickable {
-            isExpanded.value = !isExpanded.value
-        },
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable {
+                isExpanded.value = !isExpanded.value
+            },
         contentAlignment = Alignment.Center
     ) {
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-                ,
+                .padding(horizontal = 8.dp),
             horizontalArrangement = Arrangement.Center
         ) {
             WeatherAppBarText(
