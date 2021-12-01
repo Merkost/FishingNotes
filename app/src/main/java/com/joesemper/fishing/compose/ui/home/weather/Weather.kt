@@ -1,42 +1,47 @@
 package com.joesemper.fishing.compose.ui.home.weather
 
+import android.graphics.Paint
+import android.graphics.Typeface
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.Image
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
+import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.datastore.WeatherPreferences
+import com.joesemper.fishing.compose.ui.Arguments
+import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.home.DefaultButtonOutlined
 import com.joesemper.fishing.compose.ui.home.PrimaryText
 import com.joesemper.fishing.compose.ui.home.SecondaryText
 import com.joesemper.fishing.compose.ui.home.map.LocationState
+import com.joesemper.fishing.compose.ui.home.map.checkPermission
 import com.joesemper.fishing.compose.ui.home.map.getCurrentLocationFlow
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
 import com.joesemper.fishing.compose.ui.theme.primaryDarkColor
-import com.joesemper.fishing.compose.ui.theme.primaryDarkColorTransparent
-import com.joesemper.fishing.compose.ui.theme.primaryTextColor
+import com.joesemper.fishing.compose.ui.theme.primaryWhiteColor
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.WeatherViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -44,14 +49,12 @@ import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.model.entity.weather.Hourly
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
-import com.joesemper.fishing.utils.getDateBySecondsTextMonth
-import com.joesemper.fishing.utils.getDayOfWeekBySeconds
-import com.joesemper.fishing.utils.getTimeBySeconds
-import com.joesemper.fishing.utils.hPaToMmHg
+import com.joesemper.fishing.utils.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.take
+import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
+import kotlin.math.min
 
 @ExperimentalCoroutinesApi
 @ExperimentalAnimationApi
@@ -92,43 +95,82 @@ fun Weather(
     }
 
     val scrollState = rememberScrollState()
+    val weatherPrefs: WeatherPreferences = get()
+    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg.name)
+    val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             val elevation =
                 animateDpAsState(targetValue = if (scrollState.value > 0) 4.dp else 0.dp)
-            val color =
-                animateColorAsState(targetValue = if (scrollState.value > 0) primaryDarkColor else primaryDarkColorTransparent)
+            if (checkPermission(context) && viewModel.markersList.value.isNotEmpty())
+                selectedPlace.value = viewModel.markersList.value.first()
 
             TopAppBar(
                 elevation = elevation.value,
-                backgroundColor = color.value
+                backgroundColor = primaryDarkColor
             ) {
                 WeatherLocationIcon(color = Color.White)
                 selectedPlace.value?.let {
+
                     WeatherPlaceSelectItem(
                         selectedPlace = it,
-                        userPlaces = viewModel.markersList.value.take(8),
+                        userPlaces = viewModel.markersList.value,
                         onItemClick = { clickedItem ->
                             selectedPlace.value = clickedItem
                         }
                     )
                 }
+
             }
         }
     ) {
-        Column(
-            modifier = Modifier.verticalScroll(scrollState)
-        ) {
-            viewModel.currentWeather.value?.let { forecast ->
+        AnimatedVisibility(viewModel.currentWeather.value != null) {
+            val forecast = viewModel.currentWeather.value!!
+            Column(
+                modifier = Modifier.verticalScroll(scrollState)
+            ) {
 
-                CurrentWeather(forecast = forecast)
+                CurrentWeather(forecast = forecast, pressureUnit = pressureUnit, temperatureUnit = temperatureUnit)
 
-                HourlyWeather(forecast = forecast.hourly)
+                HourlyWeather(forecast = forecast.hourly, temperatureUnit = temperatureUnit)
 
                 forecast.daily.forEach {
-                    DailyWeatherItem(forecast = it)
+                    DailyWeatherItem(forecast = it, temperatureUnit = temperatureUnit)
+                }
+            }
+        }
+        AnimatedVisibility(viewModel.currentWeather.value == null) {
+            Column(
+                modifier = Modifier
+                    .systemBarsPadding(false).fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceAround,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (checkPermission(context) && viewModel.markersList.value.isEmpty()) {
+                    SecondaryText(text = "No places yet. \nAdd new place now!")
+                    WeatherEmptyView(
+                        modifier = Modifier
+                            .size(300.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+                    DefaultButtonOutlined(text = "Add", onClick = {
+                        navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${true}")
+                    })
+                    //TODO: No places yet view
+                } else {
+                    /*WeatherLoading(
+                        modifier = Modifier
+                            .size(500.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )*/
+                    WeatherEmptyView(
+                        modifier = Modifier
+                            .size(300.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+                    //Spacer(modifier = Modifier.size())
                 }
             }
         }
@@ -138,84 +180,67 @@ fun Weather(
 }
 
 @Composable
+fun NoPlacesView() {
+    TODO("Not yet implemented")
+}
+
+@Composable
 fun CurrentWeather(
     modifier: Modifier = Modifier,
     forecast: WeatherForecast,
+    temperatureUnit: String,
+    pressureUnit: String,
 ) {
+
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(200.dp),
-        color = primaryDarkColorTransparent
+            .height(320.dp),
+        color = primaryDarkColor
     ) {
-
-        Image(
-            modifier = modifier
-                .fillMaxSize()
-                .zIndex(-1f),
-            painter = painterResource(id = R.drawable.ic_fish_background),
-            contentDescription = "",
-            alpha = 0.08f,
-            contentScale = ContentScale.Fit
-        )
-
         ConstraintLayout {
-            val (primary, temp, wind, pressure, humidity) = createRefs()
+            val (primary, temp, wind, pressure, humidity, pressureTitle, divider) = createRefs()
+
+            val guideline = createGuidelineFromStart(0.5f)
+
             PrimaryWeatherParameterMeaning(
                 modifier = Modifier.constrainAs(primary) {
-                    top.linkTo(parent.top, 4.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                    absoluteRight.linkTo(temp.absoluteLeft)
+                    top.linkTo(parent.top, 2.dp)
+                    absoluteRight.linkTo(guideline, 16.dp)
                 },
                 icon = getWeatherIconByName(forecast.hourly.first().weather.first().icon),
-                text = forecast.hourly.first().weather.first().description
+                text = forecast.hourly.first().weather.first().description.replaceFirstChar { it.uppercase() }
             )
 
             WeatherTemperatureMeaning(
                 modifier = Modifier.constrainAs(temp) {
                     top.linkTo(primary.top)
-                    absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-                    absoluteLeft.linkTo(primary.absoluteRight)
+                    absoluteLeft.linkTo(guideline, 16.dp)
                 },
-                temperature = forecast.hourly.first().temperature.toInt()
-                    .toString(),
-                minTemperature = forecast.daily.first().temperature.min.toInt()
-                    .toString(),
-                maxTemperature = forecast.daily.first().temperature.max.toInt()
-                    .toString()
+                temperature = getTemperature(forecast.hourly.first().temperature, TemperatureValues.valueOf(temperatureUnit)),
+                minTemperature = getTemperature(forecast.daily.first().temperature.min, TemperatureValues.valueOf(temperatureUnit)),
+                maxTemperature = getTemperature(forecast.daily.first().temperature.max, TemperatureValues.valueOf(temperatureUnit)),
             )
             WeatherParameterMeaning(
                 modifier = Modifier.constrainAs(wind) {
-                    top.linkTo(primary.bottom, 4.dp)
-                    bottom.linkTo(parent.bottom)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 2.dp)
+                    top.linkTo(primary.bottom)
+                    absoluteRight.linkTo(guideline, 32.dp)
                 },
                 title = stringResource(id = R.string.wind),
-                text = forecast.hourly.first().windSpeed.toString()
-                        + stringResource(R.string.wind_speed_units),
+                text = String.format("%.1g", forecast.hourly.first().windSpeed)
+                        + " ${stringResource(R.string.wind_speed_units)}",
                 primaryIconId = R.drawable.weather_windy,
                 iconId = R.drawable.ic_arrow_up,
                 iconRotation = forecast.hourly.first().windDeg,
                 lightTint = true
             )
-            WeatherParameterMeaning(
-                modifier = Modifier.constrainAs(pressure) {
-                    top.linkTo(wind.top)
-                    bottom.linkTo(wind.bottom)
-                    absoluteRight.linkTo(humidity.absoluteLeft)
-                    absoluteLeft.linkTo(wind.absoluteRight)
-                },
-                title = stringResource(id = R.string.pressure),
-                text = hPaToMmHg(forecast.hourly.first().pressure).toString() + " "
-                        + stringResource(R.string.pressure_units),
-                primaryIconId = R.drawable.ic_gauge,
-                lightTint = true
-            )
+
             WeatherParameterMeaning(
                 modifier = Modifier.constrainAs(humidity) {
                     top.linkTo(wind.top)
                     bottom.linkTo(wind.bottom)
-                    absoluteRight.linkTo(parent.absoluteRight, 2.dp)
+                    absoluteLeft.linkTo(guideline, 32.dp)
                 },
                 title = stringResource(id = R.string.humidity),
                 text = forecast.hourly.first().humidity.toString()
@@ -223,15 +248,45 @@ fun CurrentWeather(
                 primaryIconId = R.drawable.ic_baseline_opacity_24,
                 lightTint = true
             )
-        }
 
+            /*Divider(modifier = Modifier.fillMaxWidth().size(1.dp).constrainAs(divider) {
+                  top.linkTo(humidity.bottom)
+                bottom.linkTo(pressureTitle.top)
+            }, color = Color.Black)*/
+
+            WeatherHeaderText(
+                modifier = Modifier.constrainAs(pressureTitle) {
+                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                    top.linkTo(wind.bottom, 16.dp)
+                },
+                color = primaryWhiteColor,
+                text = stringResource(id = R.string.pressure) + ", " + pressureUnit + ":"
+            )
+
+            BarChartExample(
+                Modifier
+                    .horizontalScroll(rememberScrollState())
+                    .width(500.dp)
+                    .height(120.dp)
+                    .padding(top = 4.dp)
+                    .constrainAs(pressure) {
+                        top.linkTo(pressureTitle.bottom, 16.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                    },
+                weather = forecast.daily,
+                pressureUnit = pressureUnit
+            )
+        }
     }
 }
+
 
 @Composable
 fun HourlyWeather(
     modifier: Modifier = Modifier,
-    forecast: List<Hourly>
+    forecast: List<Hourly>,
+    temperatureUnit: String
 ) {
     Column(modifier = modifier) {
         WeatherHeaderText(
@@ -240,7 +295,7 @@ fun HourlyWeather(
         )
         LazyRow() {
             items(forecast.size) { index ->
-                HourlyWeatherItem(forecast = forecast[index])
+                HourlyWeatherItem(forecast = forecast[index], temperatureUnit = temperatureUnit)
             }
         }
         Spacer(modifier = Modifier.padding(4.dp))
@@ -253,7 +308,8 @@ fun HourlyWeather(
 @Composable
 fun HourlyWeatherItem(
     modifier: Modifier = Modifier,
-    forecast: Hourly
+    forecast: Hourly,
+    temperatureUnit: String
 ) {
     Column(
         modifier = modifier.padding(horizontal = 12.dp),
@@ -261,13 +317,14 @@ fun HourlyWeatherItem(
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         SecondaryText(text = getTimeBySeconds(forecast.date))
-        Icon(
+        Image(
             modifier = Modifier.size(32.dp),
             painter = painterResource(id = getWeatherIconByName(forecast.weather.first().icon)),
             contentDescription = ""
         )
         PrimaryText(
-            text = forecast.temperature.toInt().toString() + stringResource(id = R.string.celsius)
+            text = getTemperature(forecast.temperature, TemperatureValues.valueOf(temperatureUnit)) +
+                    getTemperatureFromUnit(temperatureUnit)
         )
         Row() {
             PrimaryText(text = forecast.windSpeed.toInt().toString())
@@ -277,22 +334,22 @@ fun HourlyWeatherItem(
                 contentDescription = ""
             )
         }
-        PrimaryText(text = hPaToMmHg(forecast.pressure).toString())
     }
 }
 
 @Composable
 fun DailyWeatherItem(
     modifier: Modifier = Modifier,
-    forecast: Daily
+    forecast: Daily,
+    temperatureUnit: String
 ) {
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()
             .height(80.dp)
     ) {
-        val (date, day, divider, temp, tempUnits, weatherIcon, pressure, pressureUnits, pop) = createRefs()
-        val guideline = createGuidelineFromAbsoluteLeft(0.4f)
+        val (date, day, divider, temp, tempUnits, weatherIcon, pop) = createRefs()
+        val guideline = createGuidelineFromAbsoluteLeft(0.5f)
         WeatherHeaderText(
             modifier = Modifier.constrainAs(date) {
                 top.linkTo(parent.top, 8.dp)
@@ -314,30 +371,13 @@ fun DailyWeatherItem(
                 bottom.linkTo(parent.bottom)
             }
         )
-        SecondaryText(
-            modifier = Modifier.constrainAs(pressureUnits) {
-                top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
-                absoluteRight.linkTo(parent.absoluteRight, 8.dp)
-            },
-            text = stringResource(id = R.string.pressure_units),
-        )
-        WeatherPrimaryText(
-            modifier = Modifier.constrainAs(pressure) {
-                top.linkTo(pressureUnits.top)
-                bottom.linkTo(pressureUnits.bottom)
-                absoluteRight.linkTo(pressureUnits.absoluteLeft, 2.dp)
-            },
-            text = hPaToMmHg(forecast.pressure).toString(),
-        )
-
         WeatherPrimaryText(
             modifier = Modifier.constrainAs(tempUnits) {
                 top.linkTo(parent.top)
                 bottom.linkTo(parent.bottom)
-                absoluteRight.linkTo(pressure.absoluteLeft, 16.dp)
+                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
             },
-            text = stringResource(id = R.string.celsius),
+            text = getTemperatureFromUnit(temperatureUnit),
             textColor = secondaryTextColor
         )
         WeatherPrimaryText(
@@ -346,9 +386,9 @@ fun DailyWeatherItem(
                 bottom.linkTo(tempUnits.bottom)
                 absoluteRight.linkTo(tempUnits.absoluteLeft, 2.dp)
             },
-            text = forecast.temperature.day.toInt().toString(),
+            text = getTemperature(forecast.temperature.day, TemperatureValues.valueOf(temperatureUnit)) ,
         )
-        Icon(
+        Image(
             modifier = Modifier
                 .size(42.dp)
                 .constrainAs(weatherIcon) {
@@ -360,7 +400,6 @@ fun DailyWeatherItem(
                 id = getWeatherIconByName(forecast.weather.first().icon)
             ),
             contentDescription = "",
-            tint = primaryTextColor
         )
         if (forecast.probabilityOfPrecipitation > 0.3) {
             SecondaryText(
@@ -377,6 +416,82 @@ fun DailyWeatherItem(
         }
     }
 }
+
+@Composable
+private fun BarChartExample(
+    modifier: Modifier = Modifier,
+    weather: List<Daily>,
+    pressureUnit: String,
+) {
+
+    val x = remember { Animatable(0f) }
+    val yValues = remember(weather) { mutableStateOf(getPressureList(weather, pressureUnit)) }
+    val xTarget = (yValues.value.size - 1).toFloat()
+    LaunchedEffect(weather) {
+        x.animateTo(
+            targetValue = xTarget,
+            animationSpec = tween(
+                durationMillis = 500,
+                easing = LinearEasing
+            ),
+        )
+    }
+
+    Canvas(modifier = modifier.padding(start = 32.dp, end = 32.dp, bottom = 18.dp, top = 32.dp)) {
+        val xbounds = Pair(0f, xTarget)
+        val ybounds = getBounds(yValues.value)
+        val scaleX = size.width / (xbounds.second - xbounds.first)
+        val scaleY = size.height / (ybounds.second - ybounds.first)
+        val yMove = ybounds.first * scaleY
+
+        val paint = Paint()
+        paint.textAlign = Paint.Align.CENTER
+        paint.textSize = 42f
+        paint.typeface = Typeface.DEFAULT_BOLD
+        paint.color = 0xFFFFFFFF.toInt()
+
+        val linesList = mutableListOf<Point>()
+
+        (0..min(yValues.value.size - 1, x.value.toInt())).forEach { index ->
+            val pointX = index * scaleX
+            val pointY = size.height - (yValues.value[index] * scaleY) + yMove - 52f
+
+            drawCircle(
+                color = Color.White,
+                center = Offset(x = pointX, y = pointY),
+                radius = 12f
+            )
+
+            drawContext.canvas.nativeCanvas.drawText(
+                getPressure(
+                    weather[index].pressure,
+                    PressureValues.valueOf(pressureUnit)
+                )/*hPaToMmHg(weather[index].pressure)*/,
+                pointX, pointY - 48f, paint
+            )
+
+            drawContext.canvas.nativeCanvas.drawText(
+                getDayOfWeekAndDate(weather[index].date),
+                pointX, size.height, paint
+            )
+
+            linesList.add(Point(pointX, pointY))
+        }
+
+        linesList.forEachIndexed { index, value ->
+            if (index > 0) {
+                drawLine(
+                    start = Offset(x = linesList[index - 1].x, linesList[index - 1].y),
+                    end = Offset(x = value.x, y = value.y),
+                    color = Color.White,
+                    strokeWidth = 5F
+                )
+            }
+        }
+    }
+}
+
+
 
 
 

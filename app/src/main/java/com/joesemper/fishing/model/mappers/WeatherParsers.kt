@@ -5,34 +5,34 @@ import com.joesemper.fishing.R
 fun getWeatherIconByName(name: String): Int {
     return when (true) {
         name.startsWith("01", true) -> {
-            R.drawable.weather_sunny
+            R.drawable.ic_weather_sun
         }
         name.startsWith("02", true) -> {
-            R.drawable.weather_partly_cloudy
+            R.drawable.ic_weather_cloudly
         }
         name.startsWith("03", true) -> {
-            R.drawable.weather_cloudy
+            R.drawable.ic_weaether_clouds
         }
         name.startsWith("04", true) -> {
-            R.drawable.weather_cloudy
+            R.drawable.ic_weather_broken_clouds
         }
         name.startsWith("09", true) -> {
-            R.drawable.weather_pouring
+            R.drawable.ic_weather_hevy_rain
         }
         name.startsWith("10", true) -> {
-            R.drawable.weather_partly_rainy
+            R.drawable.ic_weather_light_rain
         }
         name.startsWith("11", true) -> {
-            R.drawable.weather_lightning
+            R.drawable.ic_weather_ligtning
         }
         name.startsWith("13", true) -> {
-            R.drawable.weather_snowy
+            R.drawable.ic_weather_snow
         }
         name.startsWith("50", true) -> {
-            R.drawable.weather_hazy
+            R.drawable.ic_weather_mist
         }
         else -> {
-            R.drawable.weather_sunny
+            R.drawable.ic_weather_sun
         }
     }
 }

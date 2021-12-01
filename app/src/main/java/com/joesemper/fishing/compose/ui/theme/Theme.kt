@@ -1,7 +1,6 @@
 package com.joesemper.fishing.compose.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
@@ -63,9 +62,12 @@ fun FishingNotesTheme(
         systemUiController.setSystemBarsColor(
             color = primaryFigmaDarkColor
         )
-    } else systemUiController.setSystemBarsColor(
-        color = primaryFigmaColor
-    )
+    } else {
+        systemUiController.apply {
+            setStatusBarColor(color = primaryColor)
+            setNavigationBarColor(color = Color.White)
+        }
+    }
 
     MaterialTheme(
         colors = colors,

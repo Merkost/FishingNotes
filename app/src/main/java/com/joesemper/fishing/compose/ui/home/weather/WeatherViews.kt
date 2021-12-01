@@ -5,14 +5,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -21,6 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import com.airbnb.lottie.compose.*
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.HeaderText
 import com.joesemper.fishing.compose.ui.home.PrimaryText
@@ -46,7 +45,8 @@ fun PrimaryWeatherParameterMeaning(modifier: Modifier = Modifier, icon: Int, tex
         )
         SecondaryTextColored(
             text = text,
-            color = secondaryWhiteColor
+            color = secondaryWhiteColor,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -121,7 +121,7 @@ fun WeatherTemperatureMeaning(
     modifier: Modifier = Modifier,
     temperature: String,
     minTemperature: String,
-    maxTemperature: String
+    maxTemperature: String,
 ) {
     ConstraintLayout(
         modifier = modifier
@@ -147,7 +147,7 @@ fun WeatherTemperatureMeaning(
                     bottom.linkTo(main.bottom)
                     absoluteLeft.linkTo(main.absoluteRight)
                 },
-            painter = painterResource(id = R.drawable.ic_temperature_celsius),
+            painter = painterResource(R.drawable.ic_temperature_celsius),
             contentDescription = stringResource(id = R.string.temperature),
             tint = secondaryWhiteColor
         )
@@ -181,9 +181,10 @@ fun WeatherPlaceSelectItem(
     onItemClick: (UserMapMarker) -> Unit
 ) {
     val isExpanded = remember { mutableStateOf(false) }
-
     Box(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().clickable {
+            isExpanded.value = !isExpanded.value
+        },
         contentAlignment = Alignment.Center
     ) {
 
@@ -191,13 +192,11 @@ fun WeatherPlaceSelectItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
-                .clickable {
-                    isExpanded.value = !isExpanded.value
-                },
+                ,
             horizontalArrangement = Arrangement.Center
         ) {
             WeatherAppBarText(
-                text = selectedPlace.title,
+                text = selectedPlace?.title ?: "Не удалось определить местоположение",
                 textColor = Color.White
             )
             Icon(imageVector = Icons.Filled.ArrowDropDown, "", tint = Color.White)
@@ -218,7 +217,7 @@ fun WeatherDropdownMenu(
 ) {
 
     DropdownMenu(
-        modifier = Modifier.requiredWidthIn(200.dp, 400.dp),
+        modifier = Modifier.requiredWidthIn(200.dp, 500.dp),
         expanded = isExpanded.value,
         onDismissRequest = {
             isExpanded.value = !isExpanded.value
@@ -273,7 +272,8 @@ fun WeatherAppBarText(
         color = textColor,
         maxLines = 1,
         softWrap = true,
-        text = text
+        text = text,
+        overflow = TextOverflow.Ellipsis,
     )
 }
 
@@ -293,13 +293,14 @@ fun WeatherLocationIcon(
 @Composable
 fun WeatherHeaderText(
     modifier: Modifier = Modifier,
+    color: Color = primaryTextColor,
     text: String
 ) {
     Text(
         modifier = modifier,
         text = text,
         style = MaterialTheme.typography.body1,
-        color = primaryTextColor
+        color = color
     )
 }
 
@@ -314,6 +315,31 @@ fun WeatherPrimaryText(
         text = text,
         color = textColor,
         fontSize = 20.sp
+    )
+}
+
+@Composable
+fun WeatherLoading(modifier: Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.clouds))
+    val progress by animateLottieCompositionAsState(composition)
+    LottieAnimation(
+        composition,
+        progress,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun WeatherEmptyView(modifier: Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.empty_status))
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever,
+    )
+    LottieAnimation(
+        composition,
+        progress,
+        modifier = modifier
     )
 }
 

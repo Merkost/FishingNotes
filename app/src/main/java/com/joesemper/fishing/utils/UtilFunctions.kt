@@ -58,6 +58,12 @@ fun getDateBySecondsTextMonth(ms: Long): String {
     return sdf.format(date)
 }
 
+fun getDayOfWeekAndDate(ms: Long): String {
+    val sdf = SimpleDateFormat("EEE dd", Locale.US)
+    val date = Date(ms * 1000)
+    return sdf.format(date)
+}
+
 fun getDayOfWeekBySeconds(ms: Long): String {
     val sdf = SimpleDateFormat("EEE", Locale.US)
     val date = Date(ms * 1000)
