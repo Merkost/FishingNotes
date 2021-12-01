@@ -159,9 +159,14 @@ fun Weather(
                     })
                     //TODO: No places yet view
                 } else {
-                    WeatherLoading(
+                    /*WeatherLoading(
                         modifier = Modifier
                             .size(500.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )*/
+                    WeatherEmptyView(
+                        modifier = Modifier
+                            .size(300.dp)
                             .align(Alignment.CenterHorizontally)
                     )
                     //Spacer(modifier = Modifier.size())
