@@ -2,6 +2,7 @@ package com.joesemper.fishing.compose.ui.home.weather
 
 import android.graphics.Paint
 import android.graphics.Typeface
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
@@ -24,11 +25,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
+import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
+import com.joesemper.fishing.compose.ui.Arguments
+import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.home.DefaultButtonOutlined
 import com.joesemper.fishing.compose.ui.home.PrimaryText
 import com.joesemper.fishing.compose.ui.home.SecondaryText
 import com.joesemper.fishing.compose.ui.home.map.LocationState
@@ -119,10 +124,11 @@ fun Weather(
             }
         }
     ) {
-        Column(
-            modifier = Modifier.verticalScroll(scrollState)
-        ) {
-            viewModel.currentWeather.value?.let { forecast ->
+        AnimatedVisibility(viewModel.currentWeather.value != null) {
+            val forecast = viewModel.currentWeather.value!!
+            Column(
+                modifier = Modifier.verticalScroll(scrollState)
+            ) {
 
                 CurrentWeather(forecast = forecast)
 
@@ -133,9 +139,41 @@ fun Weather(
                 }
             }
         }
+        AnimatedVisibility(viewModel.currentWeather.value == null) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .systemBarsPadding(false),
+                verticalArrangement = Arrangement.Center
+            ) {
+                if (checkPermission(context) && viewModel.markersList.value.isEmpty()) {
+                    SecondaryText(text = "No places yet. \nAdd new place now!")
+                    WeatherEmptyView( modifier = Modifier
+                        .size(500.dp)
+                        .align(Alignment.CenterHorizontally))
+                    DefaultButtonOutlined(text = "Add", onClick = {
+                        navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${true}")
+                    }
+                    )
+                    //TODO: No places yet view
+                } else {
+                    WeatherLoading(
+                        modifier = Modifier
+                            .size(500.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+                    //Spacer(modifier = Modifier.size())
+                }
+            }
+        }
 
 
     }
+}
+
+@Composable
+fun NoPlacesView() {
+    TODO("Not yet implemented")
 }
 
 @Composable
@@ -414,7 +452,10 @@ private fun BarChartExample(
             )
 
             drawContext.canvas.nativeCanvas.drawText(
-                getPressure(weather[index].pressure, PressureValues.valueOf(pressureUnit))/*hPaToMmHg(weather[index].pressure)*/,
+                getPressure(
+                    weather[index].pressure,
+                    PressureValues.valueOf(pressureUnit)
+                )/*hPaToMmHg(weather[index].pressure)*/,
                 pointX, pointY - 48f, paint
             )
 

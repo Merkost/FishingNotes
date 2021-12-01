@@ -212,17 +212,6 @@ fun WeatherScreen(
     }
 }
 
-@Composable
-fun WeatherLoading(modifier: Modifier) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.clouds))
-    val progress by animateLottieCompositionAsState(composition)
-    LottieAnimation(
-        composition,
-        progress,
-        modifier = modifier
-    )
-}
-
 @ExperimentalMaterialApi
 @ExperimentalPagerApi
 @Composable

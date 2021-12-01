@@ -5,10 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -21,6 +18,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.HeaderText
 import com.joesemper.fishing.compose.ui.home.PrimaryText
@@ -316,6 +317,28 @@ fun WeatherPrimaryText(
         text = text,
         color = textColor,
         fontSize = 20.sp
+    )
+}
+
+@Composable
+fun WeatherLoading(modifier: Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.clouds))
+    val progress by animateLottieCompositionAsState(composition)
+    LottieAnimation(
+        composition,
+        progress,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun WeatherEmptyView(modifier: Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.empty_status))
+    val progress by animateLottieCompositionAsState(composition)
+    LottieAnimation(
+        composition,
+        progress,
+        modifier = modifier
     )
 }
 
