@@ -448,7 +448,6 @@ fun DailyWeatherItem(
             ),
             contentDescription = "",
         )
-
         Image(
             modifier = Modifier
                 .size(32.dp)
@@ -462,7 +461,6 @@ fun DailyWeatherItem(
             ),
             contentDescription = "",
         )
-
         SecondaryText(
             modifier = Modifier.constrainAs(pop) {
                 top.linkTo(popIcon.top)
@@ -472,7 +470,6 @@ fun DailyWeatherItem(
             text = (forecast.probabilityOfPrecipitation * 100).toInt()
                 .toString() + stringResource(id = R.string.percent)
         )
-
     }
 }
 
