@@ -56,7 +56,7 @@ fun FishingNotesTheme(
     content: @Composable() () -> Unit
 ) {
     val systemUiController = rememberSystemUiController()
-    val colors = if (darkTheme) GreenDarkColorPalette else GreenLightColorPalette
+    val colors = if (darkTheme) GreenDarkColorPalette else TestLightColorPalette
 
     if (darkTheme) {
         systemUiController.setSystemBarsColor(

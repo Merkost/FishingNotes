@@ -225,7 +225,10 @@ fun CurrentWeather(
         ) {
 
             PrimaryWeatherItem(
-                forecast = forecast.hourly.first(),
+                temperature = forecast.hourly.first().temperature,
+                weather = forecast.hourly.first().weather.first(),
+                textTint = primaryWhiteColor,
+                iconTint = primaryWhiteColor,
                 temperatureUnit = temperatureUnit
             )
 

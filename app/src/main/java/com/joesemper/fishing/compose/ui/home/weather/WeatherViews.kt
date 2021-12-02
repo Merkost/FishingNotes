@@ -8,7 +8,6 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -22,19 +21,27 @@ import com.airbnb.lottie.compose.*
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.HeaderText
 import com.joesemper.fishing.compose.ui.home.PrimaryText
-import com.joesemper.fishing.compose.ui.home.SecondaryTextColored
-import com.joesemper.fishing.compose.ui.home.SecondaryTextSmall
-import com.joesemper.fishing.compose.ui.theme.*
+import com.joesemper.fishing.compose.ui.theme.primaryTextColor
+import com.joesemper.fishing.compose.ui.theme.secondaryColor
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.model.entity.weather.Hourly
+import com.joesemper.fishing.model.entity.weather.Weather
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
 
 @Composable
-fun PrimaryWeatherItem(modifier: Modifier = Modifier, forecast: Hourly, temperatureUnit: String) {
+fun PrimaryWeatherItem(
+    modifier: Modifier = Modifier,
+    weather: Weather,
+    temperature: Float,
+    textTint: Color = MaterialTheme.colors.primaryVariant,
+    iconTint: Color = Color.Unspecified,
+    temperatureUnit: String
+) {
 
-    ConstraintLayout(modifier = modifier
-        .fillMaxWidth()
-        .wrapContentHeight()) {
+    ConstraintLayout(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+    ) {
         val (temp, icon, description) = createRefs()
 
         val guideline = createGuidelineFromAbsoluteLeft(0.5f)
@@ -46,10 +53,10 @@ fun PrimaryWeatherItem(modifier: Modifier = Modifier, forecast: Hourly, temperat
                     absoluteRight.linkTo(guideline, 4.dp)
                 },
             text = getTemperature(
-                forecast.temperature,
+                temperature,
                 TemperatureValues.valueOf(temperatureUnit)
             ) + getTemperatureFromUnit(temperatureUnit),
-            textColor = primaryWhiteColor
+            textColor = textTint
         )
         Icon(
             modifier = Modifier
@@ -58,9 +65,9 @@ fun PrimaryWeatherItem(modifier: Modifier = Modifier, forecast: Hourly, temperat
                     top.linkTo(parent.top)
                     absoluteLeft.linkTo(guideline, 4.dp)
                 },
-            painter = painterResource(id = getWeatherIconByName(forecast.weather.first().icon)),
+            painter = painterResource(id = getWeatherIconByName(weather.icon)),
             contentDescription = stringResource(id = R.string.weather),
-            tint = Color.White
+            tint = iconTint
         )
         PrimaryText(
             modifier = Modifier.constrainAs(description) {
@@ -68,154 +75,9 @@ fun PrimaryWeatherItem(modifier: Modifier = Modifier, forecast: Hourly, temperat
                 absoluteLeft.linkTo(parent.absoluteLeft)
                 absoluteRight.linkTo(parent.absoluteRight)
             },
-            text = forecast.weather.first().description,
-            textColor = secondaryWhiteColor
+            text = weather.description,
+            textColor = textTint
         )
-    }
-}
-
-@Composable
-fun PrimaryWeatherParameterMeaning(modifier: Modifier = Modifier, icon: Int, text: String) {
-    Column(
-        modifier = modifier
-            .height(100.dp)
-            .width(150.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            modifier = Modifier.size(56.dp),
-            painter = painterResource(id = icon),
-            contentDescription = stringResource(id = R.string.weather),
-            tint = Color.White
-        )
-        SecondaryTextColored(
-            text = text,
-            color = secondaryWhiteColor,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-@Composable
-fun WeatherParameterMeaning(
-    modifier: Modifier = Modifier,
-    title: String,
-    text: String,
-    primaryIconId: Int,
-    iconId: Int? = null,
-    iconRotation: Int = 0,
-    lightTint: Boolean = false
-) {
-    ConstraintLayout(
-        modifier = modifier
-            .height(50.dp)
-            .width(120.dp),
-    ) {
-        val (icon, header, meaning, unit) = createRefs()
-        Icon(
-            modifier = Modifier
-                .size(40.dp)
-                .padding(8.dp)
-                .constrainAs(icon) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                },
-            painter = painterResource(id = primaryIconId),
-            contentDescription = stringResource(id = R.string.temperature),
-            tint = if (lightTint) secondaryWhiteColor else secondaryTextColor
-        )
-        SecondaryTextSmall(
-            modifier = Modifier
-                .constrainAs(header) {
-                    top.linkTo(icon.top)
-                    absoluteLeft.linkTo(icon.absoluteRight)
-                },
-            text = title,
-            color = if (lightTint) secondaryWhiteColor else secondaryTextColor
-        )
-        PrimaryText(
-            modifier = Modifier
-                .constrainAs(meaning) {
-                    absoluteLeft.linkTo(header.absoluteLeft)
-                    bottom.linkTo(icon.bottom)
-                },
-            text = text,
-            textColor = if (lightTint) primaryWhiteColor else primaryTextColor
-        )
-        iconId?.let {
-            Icon(
-                modifier = Modifier
-                    .size(24.dp)
-                    .rotate(iconRotation.toFloat())
-                    .constrainAs(unit) {
-                        top.linkTo(meaning.top)
-                        bottom.linkTo(meaning.bottom)
-                        absoluteLeft.linkTo(meaning.absoluteRight, 4.dp)
-                    },
-                painter = painterResource(id = it),
-                contentDescription = stringResource(id = R.string.temperature),
-                tint = if (lightTint) primaryWhiteColor else primaryTextColor
-            )
-        }
-    }
-}
-
-@Composable
-fun WeatherTemperatureMeaning(
-    modifier: Modifier = Modifier,
-    temperature: String,
-    minTemperature: String,
-    maxTemperature: String,
-) {
-    ConstraintLayout(
-        modifier = modifier
-            .height(70.dp)
-            .width(100.dp),
-    ) {
-        val (main, param, min, max) = createRefs()
-        HeaderText(
-            modifier = Modifier
-                .constrainAs(main) {
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                },
-            text = temperature,
-            textColor = primaryWhiteColor
-        )
-        Icon(
-            modifier = Modifier
-                .size(48.dp)
-                .constrainAs(param) {
-                    top.linkTo(main.top)
-                    bottom.linkTo(main.bottom)
-                    absoluteLeft.linkTo(main.absoluteRight)
-                },
-            painter = painterResource(R.drawable.ic_temperature_celsius),
-            contentDescription = stringResource(id = R.string.temperature),
-            tint = secondaryWhiteColor
-        )
-        SecondaryTextSmall(
-            modifier = Modifier
-                .constrainAs(max) {
-                    absoluteLeft.linkTo(param.absoluteRight)
-                    top.linkTo(param.top)
-                },
-            text = maxTemperature,
-            color = primaryWhiteColor
-        )
-        SecondaryTextSmall(
-            modifier = Modifier
-                .constrainAs(min) {
-                    absoluteLeft.linkTo(param.absoluteRight)
-                    bottom.linkTo(param.bottom)
-                },
-            text = minTemperature,
-            color = primaryWhiteColor
-        )
-
     }
 }
 

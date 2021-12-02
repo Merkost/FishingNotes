@@ -6,16 +6,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.google.accompanist.pager.*
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.DefaultAppBar
 import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.utils.getDayOfWeekAndDate
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.get
 
 
 @ExperimentalAnimationApi
@@ -103,8 +108,24 @@ fun DailyWeatherScreen(
     modifier: Modifier = Modifier,
     forecast: Daily
 ) {
-    ConstraintLayout(modifier = modifier.fillMaxSize()) {
 
+    val weatherPrefs: WeatherPreferences = get()
+    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg.name)
+    val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
+
+    ConstraintLayout(modifier = modifier.fillMaxSize()) {
+        val (primary) = createRefs()
+
+        PrimaryWeatherItem(
+            modifier = Modifier.constrainAs(primary) {
+                top.linkTo(parent.top, 16.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            temperature = forecast.temperature.max,
+            weather = forecast.weather.first(),
+            temperatureUnit = temperatureUnit
+        )
     }
 }
 
