@@ -138,4 +138,10 @@ private fun NavGraphBuilder.NavGraph(
     composable(
         route = MainDestinations.CATCH_ROUTE,
     ) { UserCatchScreen(navController, it.requiredArg(Arguments.CATCH)) }
+
+    composable(
+        route = MainDestinations.DAILY_WEATHER_ROUTE,
+    ) { WeatherDaily(navController, it.requiredArg(Arguments.WEATHER_DATA)) }
+
+
 }

@@ -2,9 +2,11 @@ package com.joesemper.fishing.compose.ui.home.weather
 
 import android.graphics.Paint
 import android.graphics.Typeface
+import android.os.Parcelable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Animatable
+import com.joesemper.fishing.compose.ui.navigate
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -147,9 +149,22 @@ fun Weather(
                     pressureUnit = pressureUnit
                 )
 
-                forecast.daily.forEach {
-                    DailyWeatherItem(forecast = it, temperatureUnit = temperatureUnit)
+                forecast.daily.forEachIndexed { index, daily ->
+                DailyWeatherItem(forecast = daily, temperatureUnit = temperatureUnit) {
+                        navController.navigate(MainDestinations.DAILY_WEATHER_ROUTE,
+                            Arguments.WEATHER_DATA to daily)
+                    }
                 }
+            }
+        }
+    }
+
+    fun NavController.navigate(route: String, vararg args: Pair<String, Parcelable>) {
+        navigate(route)
+
+        requireNotNull(currentBackStackEntry?.arguments).apply {
+            args.forEach { (key: String, arg: Parcelable) ->
+                putParcelable(key, arg)
             }
         }
     }
@@ -383,12 +398,13 @@ fun CurrentWeatherItem(
 fun DailyWeatherItem(
     modifier: Modifier = Modifier,
     forecast: Daily,
-    temperatureUnit: String
+    temperatureUnit: String,
+    onDailyWeatherClick: () -> Unit,
 ) {
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()
-            .height(80.dp)
+            .height(80.dp).clickable { onDailyWeatherClick() }
     ) {
         val (date, day, divider, temp, tempUnits, weatherIcon, pop, popIcon) = createRefs()
         val guideline = createGuidelineFromAbsoluteLeft(0.6f)
