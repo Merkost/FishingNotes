@@ -109,8 +109,9 @@ fun Weather(
         topBar = {
             val elevation =
                 animateDpAsState(targetValue = if (scrollState.value > 0) 4.dp else 0.dp)
-            if (checkPermission(context) && viewModel.markersList.value.isNotEmpty())
+            if (checkPermission(context) && viewModel.markersList.value.isNotEmpty()) {
                 selectedPlace.value = viewModel.markersList.value.first()
+            }
 
             TopAppBar(
                 elevation = elevation.value,
@@ -126,7 +127,6 @@ fun Weather(
                         }
                     )
                 }
-
             }
         }
     ) {
@@ -184,7 +184,7 @@ fun Weather(
                         .size(300.dp)
                         .align(Alignment.CenterHorizontally)
                 )
-                //Spacer(modifier = Modifier.size())
+                // Spacer(modifier = Modifier.size())
             }
         }
     }
@@ -220,8 +220,10 @@ fun CurrentWeather(
             )
 
             HourlyWeather(
-                forecast = forecast.hourly,
-                temperatureUnit = temperatureUnit
+                forecastHourly = forecast.hourly,
+                forecastDaily = forecast.daily.first(),
+                temperatureUnit = temperatureUnit,
+                pressureUnit = pressureUnit
             )
         }
     }
@@ -230,12 +232,33 @@ fun CurrentWeather(
 @Composable
 fun HourlyWeather(
     modifier: Modifier = Modifier,
-    forecast: List<Hourly>,
-    temperatureUnit: String
+    forecastHourly: List<Hourly>,
+    forecastDaily: Daily,
+    temperatureUnit: String,
+    pressureUnit: String
 ) {
-    LazyRow() {
-        items(forecast.size) { index ->
-            HourlyWeatherItem(forecast = forecast[index], temperatureUnit = temperatureUnit)
+    LazyRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        item {
+            CurrentWeatherItem(
+                modifier = Modifier.padding(end = 16.dp),
+                forecastHourly = forecastHourly.first(),
+                forecastDaily = forecastDaily,
+                pressureUnit = pressureUnit
+            )
+        }
+        items(forecastHourly.size) { index ->
+            HourlyWeatherItem(
+                forecast = forecastHourly[index],
+                timeTitle = if (index == 0) {
+                    stringResource(R.string.now)
+                } else {
+                    getTimeBySeconds(forecastHourly[index].date)
+                },
+                temperatureUnit = temperatureUnit
+            )
         }
     }
 }
@@ -243,6 +266,7 @@ fun HourlyWeather(
 @Composable
 fun HourlyWeatherItem(
     modifier: Modifier = Modifier,
+    timeTitle: String,
     forecast: Hourly,
     temperatureUnit: String
 ) {
@@ -252,7 +276,7 @@ fun HourlyWeatherItem(
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         SecondaryText(
-            text = getTimeBySeconds(forecast.date),
+            text = timeTitle,
             textColor = secondaryWhiteColor
         )
         Image(
@@ -276,11 +300,82 @@ fun HourlyWeatherItem(
             )
             Icon(
                 modifier = Modifier.rotate(forecast.windDeg.toFloat()),
-                painter = painterResource(id = R.drawable.ic_arrow_up),
+                painter = painterResource(id = R.drawable.ic_baseline_navigation_24),
                 contentDescription = "",
                 tint = primaryWhiteColor
             )
         }
+    }
+}
+
+@Composable
+fun CurrentWeatherItem(
+    modifier: Modifier = Modifier,
+    forecastHourly: Hourly,
+    forecastDaily: Daily,
+    pressureUnit: String
+) {
+    ConstraintLayout(
+        modifier = modifier
+            .wrapContentSize()
+    ) {
+        val (popIcon, popMeaning, pressIcon, pressMeaning, humidityIcon, humidityMeaning) = createRefs()
+
+        Icon(
+            modifier = Modifier.constrainAs(popIcon) {
+                top.linkTo(parent.top, 32.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
+            },
+            painter = painterResource(id = R.drawable.ic_baseline_umbrella_24),
+            contentDescription = "",
+            tint = secondaryWhiteColor
+        )
+        PrimaryText(
+            modifier = Modifier.constrainAs(popMeaning) {
+                top.linkTo(popIcon.top)
+                bottom.linkTo(popIcon.bottom)
+                absoluteLeft.linkTo(popIcon.absoluteRight, 4.dp)
+            },
+            text = (forecastDaily.probabilityOfPrecipitation * 100).toInt().toString()
+                    + stringResource(id = R.string.percent),
+            textColor = primaryWhiteColor
+        )
+        Icon(
+            modifier = Modifier.constrainAs(pressIcon) {
+                top.linkTo(popIcon.bottom, 8.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
+            },
+            painter = painterResource(id = R.drawable.ic_gauge),
+            contentDescription = "",
+            tint = secondaryWhiteColor
+        )
+        PrimaryText(
+            modifier = Modifier.constrainAs(pressMeaning) {
+                top.linkTo(pressIcon.top)
+                bottom.linkTo(pressIcon.bottom)
+                absoluteLeft.linkTo(pressIcon.absoluteRight, 4.dp)
+            },
+            text = getPressure(forecastHourly.pressure, PressureValues.valueOf(pressureUnit)),
+            textColor = primaryWhiteColor
+        )
+        Icon(
+            modifier = Modifier.constrainAs(humidityIcon) {
+                top.linkTo(pressIcon.bottom, 8.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
+            },
+            painter = painterResource(id = R.drawable.ic_baseline_opacity_24),
+            contentDescription = "",
+            tint = secondaryWhiteColor
+        )
+        PrimaryText(
+            modifier = Modifier.constrainAs(humidityMeaning) {
+                top.linkTo(humidityIcon.top)
+                bottom.linkTo(humidityIcon.bottom)
+                absoluteLeft.linkTo(humidityIcon.absoluteRight, 4.dp)
+            },
+            text = forecastHourly.humidity.toString() + stringResource(id = R.string.percent),
+            textColor = primaryWhiteColor
+        )
     }
 }
 
@@ -295,8 +390,8 @@ fun DailyWeatherItem(
             .fillMaxWidth()
             .height(80.dp)
     ) {
-        val (date, day, divider, temp, tempUnits, weatherIcon, pop) = createRefs()
-        val guideline = createGuidelineFromAbsoluteLeft(0.5f)
+        val (date, day, divider, temp, tempUnits, weatherIcon, pop, popIcon) = createRefs()
+        val guideline = createGuidelineFromAbsoluteLeft(0.6f)
         WeatherHeaderText(
             modifier = Modifier.constrainAs(date) {
                 top.linkTo(parent.top, 8.dp)
@@ -346,26 +441,38 @@ fun DailyWeatherItem(
                 .constrainAs(weatherIcon) {
                     top.linkTo(parent.top)
                     bottom.linkTo(parent.bottom)
-                    absoluteLeft.linkTo(guideline)
+                    absoluteRight.linkTo(guideline, 48.dp)
                 },
             painter = painterResource(
                 id = getWeatherIconByName(forecast.weather.first().icon)
             ),
             contentDescription = "",
         )
-        if (forecast.probabilityOfPrecipitation > 0.3) {
-            SecondaryText(
-                modifier = Modifier.constrainAs(pop) {
-                    top.linkTo(weatherIcon.top)
-                    bottom.linkTo(weatherIcon.bottom)
-                    absoluteLeft.linkTo(weatherIcon.absoluteRight, 2.dp)
+
+        Image(
+            modifier = Modifier
+                .size(32.dp)
+                .constrainAs(popIcon) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    absoluteLeft.linkTo(guideline, 8.dp)
                 },
-                text = (forecast.probabilityOfPrecipitation * 100).toInt()
-                    .toString() + stringResource(
-                    id = R.string.percent
-                )
-            )
-        }
+            painter = painterResource(
+                id = R.drawable.ic_baseline_umbrella_24
+            ),
+            contentDescription = "",
+        )
+
+        SecondaryText(
+            modifier = Modifier.constrainAs(pop) {
+                top.linkTo(popIcon.top)
+                bottom.linkTo(popIcon.bottom)
+                absoluteLeft.linkTo(popIcon.absoluteRight, 4.dp)
+            },
+            text = (forecast.probabilityOfPrecipitation * 100).toInt()
+                .toString() + stringResource(id = R.string.percent)
+        )
+
     }
 }
 
@@ -420,7 +527,7 @@ fun PressureChart(
 
         val paint = Paint()
         paint.textAlign = Paint.Align.CENTER
-        paint.textSize = 42f
+        paint.textSize = 36f
         paint.typeface = Typeface.DEFAULT_BOLD
         paint.color = 0xDE000000.toInt()
 
@@ -464,41 +571,3 @@ fun PressureChart(
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -13,6 +13,7 @@ import kotlin.math.roundToInt
 const val MILLISECONDS_IN_DAY = 86400000L
 const val SECONDS_IN_DAY = 86400L
 const val MILLISECONDS_IN_SECOND = 1000L
+const val MILLISECONDS_IN_HOUR = 3600000L
 const val MOON_PHASE_INCREMENT_IN_DAY = 0.03f
 
 fun getNewCatchId() = getRandomString(10)
@@ -94,6 +95,14 @@ fun getDayByMilliseconds(ms: Long): String {
     return sdf.format(date)
 }
 
+fun getHourlyLabel(date: Long): String {
+    return if (date / MILLISECONDS_IN_HOUR == Date().time / MILLISECONDS_IN_HOUR) {
+        "Now"
+    } else {
+        getTimeBySeconds(date)
+    }
+}
+
 fun calcMoonPhase(currentPhase: Float, currentDate: Long, requiredDate: Long): Float {
     var result = currentPhase
     val dif = currentDate - requiredDate
@@ -136,7 +145,6 @@ fun hPaToMmHg(pressure: Int): Int {
 fun showToast(context: Context, text: String) {
     Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
 }
-
 fun readBytes(context: Context, uri: Uri): ByteArray? =
     context.contentResolver.openInputStream(uri)?.buffered()?.use { it.readBytes() }
 

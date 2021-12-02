@@ -139,5 +139,3 @@ private fun NavGraphBuilder.NavGraph(
         route = MainDestinations.CATCH_ROUTE,
     ) { UserCatchScreen(navController, it.requiredArg(Arguments.CATCH)) }
 }
-
-
