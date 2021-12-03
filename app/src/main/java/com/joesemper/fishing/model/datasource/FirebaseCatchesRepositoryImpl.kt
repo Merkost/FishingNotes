@@ -27,7 +27,6 @@ class FirebaseCatchesRepositoryImpl(
 ) : CatchesRepository {
 
 
-    @ExperimentalCoroutinesApi
     override fun getAllUserCatchesState() = channelFlow {
         val listeners = mutableListOf<Task<QuerySnapshot>>()
         listeners.add(
@@ -78,7 +77,6 @@ class FirebaseCatchesRepositoryImpl(
         awaitClose { }
     }
 
-    @ExperimentalCoroutinesApi
     override fun getAllUserCatchesList() = channelFlow {
         //val snapshot = await firestore.collection('events').get()
         val listeners = mutableListOf<Task<QuerySnapshot>>()
@@ -129,7 +127,6 @@ class FirebaseCatchesRepositoryImpl(
         awaitClose { }
     }
 
-    @ExperimentalCoroutinesApi
     override fun getCatchesByMarkerId(markerId: String) = channelFlow {
         val listener = dbCollections.getUserCatchesCollection(markerId)
             .addSnapshotListener(getCatchSnapshotListener(this))
@@ -156,7 +153,6 @@ class FirebaseCatchesRepositoryImpl(
         }
 
 
-    @ExperimentalCoroutinesApi
     override suspend fun addNewCatch(
         markerId: String,
         newCatch: RawUserCatch

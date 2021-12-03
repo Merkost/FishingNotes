@@ -19,7 +19,6 @@ class CloudPhotoStorage : PhotoStorage {
     private val storage = Firebase.storage
     private var storageRef = storage.reference
 
-    @ExperimentalCoroutinesApi
     override suspend fun uploadPhotos(
         photos: List<Uri>,
         progressFlow: MutableStateFlow<Progress>

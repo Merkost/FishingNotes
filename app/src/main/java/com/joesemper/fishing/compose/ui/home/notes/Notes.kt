@@ -36,7 +36,7 @@ fun Notes(
 ) {
     //val navController = rememberNavController()
     val tabs = listOf(TabItem.Places, TabItem.Catches)
-    val pagerState = rememberPagerState(pageCount = tabs.size)
+    val pagerState = rememberPagerState(1)
 
     Scaffold(
         topBar = {
@@ -109,7 +109,7 @@ fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
 @Composable
 fun TabsContent(tabs: List<TabItem>, pagerState: PagerState, navController: NavController) {
     HorizontalPager(
-        state = pagerState
+        state = pagerState, count = tabs.size
     ) { page ->
         tabs[page].screen(navController)
     }
@@ -139,7 +139,7 @@ fun TabsContentPreview() {
         TabItem.Places,
         TabItem.Catches,
     )
-    val pagerState = rememberPagerState(pageCount = tabs.size)
+    val pagerState = rememberPagerState(1)
     TabsContent(tabs = tabs, pagerState = pagerState, rememberNavController())
 }
 

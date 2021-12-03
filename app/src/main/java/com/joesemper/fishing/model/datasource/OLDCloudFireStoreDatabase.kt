@@ -29,7 +29,6 @@ class OLDCloudFireStoreDatabase(private val cloudPhotoStorage: PhotoStorage) : U
 
     private val db = Firebase.firestore
 
-    @ExperimentalCoroutinesApi
     override fun getAllUserCatchesState() = channelFlow {
         val listeners = mutableListOf<Task<QuerySnapshot>>()
         listeners.add(
@@ -80,7 +79,6 @@ class OLDCloudFireStoreDatabase(private val cloudPhotoStorage: PhotoStorage) : U
         awaitClose { }
     }
 
-    @ExperimentalCoroutinesApi
     override fun getAllUserCatchesList() = channelFlow {
         //val snapshot = await firestore.collection('events').get()
         val listeners = mutableListOf<Task<QuerySnapshot>>()
@@ -175,7 +173,6 @@ class OLDCloudFireStoreDatabase(private val cloudPhotoStorage: PhotoStorage) : U
 ////            }
 
 
-    @ExperimentalCoroutinesApi
     override fun getCatchesByMarkerId(markerId: String) = channelFlow {
         val listener = getUserCatchesCollection(markerId)
             .addSnapshotListener(getCatchSnapshotListener(this))
@@ -184,8 +181,6 @@ class OLDCloudFireStoreDatabase(private val cloudPhotoStorage: PhotoStorage) : U
         }
     }
 
-
-    @ExperimentalCoroutinesApi
     override fun getAllUserMarkers() = channelFlow<MapMarker> {
         val listeners = mutableListOf<ListenerRegistration>()
 
@@ -209,7 +204,6 @@ class OLDCloudFireStoreDatabase(private val cloudPhotoStorage: PhotoStorage) : U
         }
     }
 
-    @ExperimentalCoroutinesApi
     override fun getAllUserMarkersList() = channelFlow {
         val listeners = mutableListOf<ListenerRegistration>()
         listeners.add(
@@ -230,7 +224,6 @@ class OLDCloudFireStoreDatabase(private val cloudPhotoStorage: PhotoStorage) : U
     }
 
 
-    @ExperimentalCoroutinesApi
     override fun getMapMarker(markerId: String) = channelFlow {
         val listener = getUserMapMarkersCollection().document(markerId)
             .addSnapshotListener { value, error ->
@@ -307,7 +300,6 @@ class OLDCloudFireStoreDatabase(private val cloudPhotoStorage: PhotoStorage) : U
         }
 
 
-    @ExperimentalCoroutinesApi
     override suspend fun addNewCatch(
         markerId: String,
         newCatch: RawUserCatch
@@ -324,7 +316,6 @@ class OLDCloudFireStoreDatabase(private val cloudPhotoStorage: PhotoStorage) : U
         return flow
     }
 
-    @ExperimentalCoroutinesApi
     override suspend fun addNewMarker(newMarker: RawMapMarker): StateFlow<Progress> {
         val flow = MutableStateFlow<Progress>(Progress.Loading())
         val mapMarker = MapMarkerMapper().mapRawMapMarker(newMarker)

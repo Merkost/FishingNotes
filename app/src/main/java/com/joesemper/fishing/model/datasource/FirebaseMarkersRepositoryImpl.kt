@@ -34,7 +34,6 @@ class FirebaseMarkersRepositoryImpl(
     private val cloudPhotoStorage: PhotoStorage
 ) : MarkersRepository {
 
-    @ExperimentalCoroutinesApi
     override fun getAllUserMarkers() = channelFlow<MapMarker> {
         val listeners = mutableListOf<ListenerRegistration>()
 
@@ -58,7 +57,6 @@ class FirebaseMarkersRepositoryImpl(
         }
     }
 
-    @ExperimentalCoroutinesApi
     override fun getAllUserMarkersList() = channelFlow {
         val listeners = mutableListOf<ListenerRegistration>()
         listeners.add(
@@ -79,7 +77,6 @@ class FirebaseMarkersRepositoryImpl(
     }
 
 
-    @ExperimentalCoroutinesApi
     override fun getMapMarker(markerId: String) = channelFlow {
         val listener = dbCollections.getUserMapMarkersCollection().document(markerId)
             .addSnapshotListener { value, error ->
@@ -127,7 +124,6 @@ class FirebaseMarkersRepositoryImpl(
         }
 
 
-    @ExperimentalCoroutinesApi
     override suspend fun addNewMarker(newMarker: RawMapMarker): StateFlow<Progress> {
         val flow = MutableStateFlow<Progress>(Progress.Loading())
         val mapMarker = MapMarkerMapper().mapRawMapMarker(newMarker)

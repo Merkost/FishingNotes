@@ -242,7 +242,7 @@ fun WeatherTabs(tabs: List<TabItem>, pagerState: PagerState) {
 fun WeatherTabsContent(tabs: List<TabItem>, pagerState: PagerState, navController: NavController) {
     Box {
         BackgroundImage()
-        HorizontalPager(state = pagerState) { page ->
+        HorizontalPager(state = pagerState, count = tabs.size) { page ->
             tabs[page].screen(navController)
         }
     }

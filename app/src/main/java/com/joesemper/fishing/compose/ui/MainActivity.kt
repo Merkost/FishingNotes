@@ -2,6 +2,7 @@ package com.joesemper.fishing.compose.ui
 
 import android.content.Intent
 import android.content.res.Resources
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -26,16 +27,23 @@ import com.joesemper.fishing.utils.Logger
 import kotlinx.coroutines.InternalCoroutinesApi
 import org.koin.android.ext.android.inject
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.login.LoginScreen
+import com.joesemper.fishing.compose.ui.theme.AppThemeValues
+import com.joesemper.fishing.compose.ui.theme.FishingNotesTheme
 import com.joesemper.fishing.compose.viewmodels.MainViewModel
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.get
 
 class MainActivity : ComponentActivity() {
@@ -44,7 +52,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var auth: FirebaseAuth
-    private lateinit var user: StateFlow<BaseViewState?>
+    private lateinit var user: State<BaseViewState?>
 
     private val registeredActivity =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -55,46 +63,75 @@ class MainActivity : ComponentActivity() {
         const val splashFadeDurationMillis = 300
     }
 
-    @OptIn(ExperimentalComposeUiApi::class,ExperimentalPermissionsApi::class)
-    @ExperimentalPagerApi
-    @ExperimentalAnimationApi
-    @InternalCoroutinesApi
-    @ExperimentalMaterialApi
+    @OptIn(ExperimentalComposeUiApi::class,ExperimentalPermissionsApi::class,
+        ExperimentalAnimationApi::class, InternalCoroutinesApi::class,
+        ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        val userLiveData: MutableLiveData<BaseViewState> = MutableLiveData(BaseViewState.Loading(null))
         val viewModel: MainViewModel = get()
-        user = viewModel.subscribe()
 
-        val splashWasDisplayed = savedInstanceState != null
-        if (!splashWasDisplayed) {
-            val splashScreen = installSplashScreen()
+        val userPreferences: UserPreferences = get()
+        var appTheme = AppThemeValues.Blue.name
 
-            splashScreen.setKeepVisibleCondition { user.value !is BaseViewState.Success<*> }
-
-            splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
-                // Get icon instance and start a fade out animation
-                splashScreenViewProvider.iconView
-                    .animate()
-                    .setDuration(splashFadeDurationMillis.toLong())
-                    .alpha(0f)
-                    .withEndAction {
-                        // After the fade out, remove the splash and set content view
-                        splashScreenViewProvider.remove()
-                        setContent {
-                            if ((user.value as BaseViewState.Success<*>).data as User? != null)
-                                FishingNotesApp()
-                            else Navigation()
-                        }
-                    }.start()
+        lifecycleScope.launchWhenStarted {
+            userPreferences.appTheme.collect {
+                appTheme = it
             }
-        } else {
-            setTheme(R.style.Theme_SplashScreen)
-            setContent {
-                //if ((user.value as BaseViewState.Success<*>).data as User? != null)
-                    FishingNotesApp()
-                //else Navigation()
+            viewModel.subscribe().collect {
+                userLiveData.value = it
             }
+        }
+
+        if (Build.VERSION.SDK_INT < 31) {
+            //user = viewModel.subscribe().collect()
+
+            val splashWasDisplayed = savedInstanceState != null
+            if (!splashWasDisplayed) {
+                val splashScreen = installSplashScreen()
+
+                splashScreen.setKeepVisibleCondition { userLiveData.value !is BaseViewState.Success<*> }
+
+                splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
+                    // Get icon instance and start a fade out animation
+                    splashScreenViewProvider.iconView
+                        .animate()
+                        .setDuration(splashFadeDurationMillis.toLong())
+                        .alpha(0f)
+                        .withEndAction {
+                            // After the fade out, remove the splash and set content view
+                            splashScreenViewProvider.remove()
+                            setContent {
+                                FishingNotesTheme(appTheme) {
+                                    if ((userLiveData.value as BaseViewState.Success<*>).data as User? != null)
+                                        FishingNotesApp()
+                                    else Navigation()
+                                }
+
+                            }
+                        }.start()
+                }
+            } else {
+                setTheme(R.style.Theme_SplashScreen)
+                setContent {
+                    //if ((user.value as BaseViewState.Success<*>).data as User? != null)
+                    FishingNotesTheme(appTheme) { FishingNotesApp() }
+                    //else Navigation()
+                }
+            }
+        }
+        else {
+            userLiveData.observe(this) {
+                setContent {
+                    FishingNotesTheme {
+                        if (it is BaseViewState.Success<*> &&
+                            it.data as User? != null)
+                            FishingNotesApp()
+                        else Navigation()
+                    }
+                }
+            }
+
         }
 
         auth = FirebaseAuth.getInstance()
