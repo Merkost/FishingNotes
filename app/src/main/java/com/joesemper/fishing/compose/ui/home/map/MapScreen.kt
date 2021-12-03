@@ -152,8 +152,8 @@ fun MapScreen(
                             viewModel.addNewMarker(
                                 RawMapMarker(
                                     "Без названия",
-                                    latitude = viewModel.lastKnownLocation.value!!.latitude,
-                                    longitude = viewModel.lastKnownLocation.value!!.longitude,
+                                    latitude = it.latitude,
+                                    longitude = it.longitude,
                                 )
                             )
                         }

@@ -47,6 +47,7 @@ class UserViewModel(
     fun getUserPlaces() = viewModelScope.run {
         viewModelScope.launch {
             markersRepo.getAllUserMarkersList().collect {
+                if (it.isEmpty()) currentCatches.value = listOf()
                 currentPlaces.value = it as List<UserMapMarker>?
             }
         }

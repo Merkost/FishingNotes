@@ -7,7 +7,7 @@ val Purple500 = Color(0xFF6200EE)
 val Purple700 = Color(0xFF3700B3)
 val Teal200 = Color(0xFF03DAC5)
 
-// Figma colors
+// Green colors
 val primaryFigmaColor = Color(0xFF43a047)
 val primaryFigmaLightColor = Color(0xFF76d275)
 val primaryFigmaDarkColor = Color(0xFF00701a)
