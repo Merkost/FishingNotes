@@ -46,28 +46,15 @@ fun PrimaryWeatherItem(
         val (temp, icon, description) = createRefs()
 
         //val guideline = createGuidelineFromAbsoluteLeft(0.5f)
-        createHorizontalChain(temp, icon, chainStyle = ChainStyle.Spread)
-        HeaderText(
-            modifier = Modifier
-                .constrainAs(temp) {
-                    top.linkTo(parent.top)
-                    absoluteRight.linkTo(icon.absoluteLeft)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                    bottom.linkTo(parent.bottom)
-                },
-            text = getTemperature(
-                temperature,
-                TemperatureValues.valueOf(temperatureUnit)
-            ) + getTemperatureFromUnit(temperatureUnit),
-            textColor = textTint
-        )
+        createHorizontalChain(icon, temp, chainStyle = ChainStyle.Spread)
+
         Icon(
             modifier = Modifier
                 .size(64.dp)
                 .constrainAs(icon) {
-                    top.linkTo(parent.top)
-                    absoluteLeft.linkTo(temp.absoluteRight)
-                    absoluteRight.linkTo(parent.absoluteRight, 4.dp)
+                    top.linkTo(parent.top, 8.dp)
+                    absoluteRight.linkTo(temp.absoluteLeft)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
                 },
             painter = painterResource(id = getWeatherIconByName(weather.icon)),
             contentDescription = stringResource(id = R.string.weather),
@@ -82,6 +69,22 @@ fun PrimaryWeatherItem(
             text = weather.description.replaceFirstChar { it.uppercase() },
             textColor = textTint
         )
+
+        HeaderText(
+            modifier = Modifier
+                .constrainAs(temp) {
+                    top.linkTo(parent.top)
+                    absoluteLeft.linkTo(icon.absoluteRight)
+                    absoluteRight.linkTo(parent.absoluteRight,)
+                    bottom.linkTo(parent.bottom, 8.dp)
+                },
+            text = getTemperature(
+                temperature,
+                TemperatureValues.valueOf(temperatureUnit)
+            ) + getTemperatureFromUnit(temperatureUnit),
+            textColor = textTint
+        )
+
     }
 }
 

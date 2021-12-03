@@ -214,7 +214,7 @@ fun CurrentWeather(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(250.dp),
+            .height(260.dp),
         color = primaryDarkColor
     ) {
         Column(
