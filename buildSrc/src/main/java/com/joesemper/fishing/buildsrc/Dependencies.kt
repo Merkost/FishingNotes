@@ -102,7 +102,7 @@ object Libs {
         }
 
         object DependencyInjection {
-            private const val koin_version = "3.1.4"
+            private const val koin_version = "3.1.3"
 
             const val koinMain = "io.insert-koin:koin-android:${koin_version}"
             const val koinJava = "io.insert-koin:koin-android-compat:${koin_version}"
