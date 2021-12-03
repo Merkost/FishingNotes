@@ -1,11 +1,17 @@
 package com.joesemper.fishing.compose.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.joesemper.fishing.compose.datastore.UserPreferences
+import org.koin.androidx.compose.get
 
 private val DarkColorPalette = darkColors(
     primary = Purple200,
@@ -26,6 +32,13 @@ onSecondary = Color.Black,
 onBackground = Color.Black,
 onSurface = Color.Black,
 */
+)
+
+private val InitColorPalette = darkColors(
+    primary = Color.Transparent,
+    primaryVariant = Color.Transparent,
+    secondary = Color.Transparent,
+    secondaryVariant = Color.Transparent,
 )
 
 private val GreenLightColorPalette = lightColors(
@@ -50,35 +63,25 @@ private val BlueLightColorPalette = lightColors(
 )
 
 private val BlueDarkColorPalette = darkColors(
-    primary = primaryBlueColor,
-    primaryVariant = primaryBlueDarkColor,
+    primary = primaryBlueDarkColor,
+    primaryVariant = primaryBlueColor,
     secondary = secondaryBlueColor,
     secondaryVariant = secondaryBlueDarkColor,
 )
-
-/*val primaryBlueColor = Color(0xFF2196f3)
-val primaryBlueColorTransparent = Color(0xF22196F3)
-val primaryBlueLightColor = Color(0xFF6ec6ff)
-val primaryBlueLightColorTransparent = Color(0x4D6EC6FF)
-val primaryBlueDarkColor = Color(0xFF0069c0)
-val primaryBlueDarkColorTransparent = Color(0xE60069C0)
-val secondaryBlueColor = Color(0xFFff6d00)
-val secondaryBlueLightColor = Color(0xFFff9e40)
-val secondaryDarkBlueColor = Color(0xFFc43c00)
-val primaryBlueTextColor = Color(0xDE000000)
-val secondaryBlueTextColor = Color(0x8A000000)
-val supportBlueTextColor = Color(0x42000000)*/
-
-
 
 @Composable
 fun FishingNotesTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable() () -> Unit
 ) {
-    val systemUiController = rememberSystemUiController()
-    val colors = if (darkTheme) GreenDarkColorPalette else GreenLightColorPalette
+    val userPreferences: UserPreferences = get()
+    val appTheme = userPreferences.appTheme.collectAsState("null")
 
+
+
+    val colors = chooseTheme(appTheme, darkTheme)
+
+    val systemUiController = rememberSystemUiController()
     if (darkTheme) {
         systemUiController.apply {
             setSystemBarsColor(color = colors.primary)
@@ -98,4 +101,13 @@ fun FishingNotesTheme(
         shapes = Shapes,
         content = content
     )
+}
+
+
+fun chooseTheme(appTheme: State<String>, darkTheme: Boolean): Colors {
+    return when(appTheme.value) {
+        AppThemeValues.Blue.name -> if (darkTheme) BlueDarkColorPalette else BlueLightColorPalette
+        AppThemeValues.Green.name -> if (darkTheme) GreenDarkColorPalette else GreenLightColorPalette
+        else -> { InitColorPalette }
+    }
 }
