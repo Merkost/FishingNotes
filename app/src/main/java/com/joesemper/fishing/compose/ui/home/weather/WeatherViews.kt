@@ -16,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.airbnb.lottie.compose.*
 import com.joesemper.fishing.R
@@ -44,13 +45,15 @@ fun PrimaryWeatherItem(
     ) {
         val (temp, icon, description) = createRefs()
 
-        val guideline = createGuidelineFromAbsoluteLeft(0.5f)
-
+        //val guideline = createGuidelineFromAbsoluteLeft(0.5f)
+        createHorizontalChain(temp, icon, chainStyle = ChainStyle.Spread)
         HeaderText(
             modifier = Modifier
                 .constrainAs(temp) {
                     top.linkTo(parent.top)
-                    absoluteRight.linkTo(guideline, 4.dp)
+                    absoluteRight.linkTo(icon.absoluteLeft)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    bottom.linkTo(parent.bottom)
                 },
             text = getTemperature(
                 temperature,
@@ -63,7 +66,8 @@ fun PrimaryWeatherItem(
                 .size(64.dp)
                 .constrainAs(icon) {
                     top.linkTo(parent.top)
-                    absoluteLeft.linkTo(guideline, 4.dp)
+                    absoluteLeft.linkTo(temp.absoluteRight)
+                    absoluteRight.linkTo(parent.absoluteRight, 4.dp)
                 },
             painter = painterResource(id = getWeatherIconByName(weather.icon)),
             contentDescription = stringResource(id = R.string.weather),
@@ -71,11 +75,11 @@ fun PrimaryWeatherItem(
         )
         PrimaryText(
             modifier = Modifier.constrainAs(description) {
-                top.linkTo(temp.bottom, 4.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
+                top.linkTo(icon.bottom, 4.dp)
+                absoluteLeft.linkTo(icon.absoluteLeft)
+                absoluteRight.linkTo(icon.absoluteRight)
             },
-            text = weather.description,
+            text = weather.description.replaceFirstChar { it.uppercase() },
             textColor = textTint
         )
     }
