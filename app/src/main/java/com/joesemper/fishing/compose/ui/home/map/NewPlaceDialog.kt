@@ -1,11 +1,17 @@
 package com.joesemper.fishing.compose.ui.home.map
 
+Newimport androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -36,6 +42,7 @@ import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
+@ExperimentalAnimationApi
 @ExperimentalComposeUiApi
 @Composable
 fun NewPlaceDialog(
@@ -116,6 +123,17 @@ fun NewPlaceDialog(
                 keyboardActions = KeyboardActions(
                     onNext = { textField2.requestFocus() }
                 ),
+                trailingIcon = {
+                    AnimatedVisibility(
+                        titleValue.value.isNotEmpty(),
+                        enter = fadeIn(),
+                        exit = fadeOut()
+                    ) {
+                        IconButton(onClick = { titleValue.value = "" }) {
+                            Icon(Icons.Default.Delete, Icons.Default.Delete.name)
+                        }
+                    }
+                },
                 modifier = Modifier
                     .constrainAs(title) {
                         top.linkTo(name.bottom, 8.dp)
@@ -167,28 +185,33 @@ fun NewPlaceDialog(
                     modifier = Modifier
                         .padding(8.dp)
                         .requiredSize(40.dp)
-                        .clip(CircleShape))
+                        .clip(CircleShape)
+                )
                 {
 //                    Image(painterResource(R.drawable.transparent), stringResource(R.string.transparent),)
-                    Icon(painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
                         contentDescription = stringResource(R.string.marker_icon),
                         tint = selectedColor ?: secondaryFigmaColor,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 2.dp))
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 2.dp)
+                    )
                 }
                 ColorPicker(
                     pickerColors,
                     selectedColor,
-                    (onColorSelected as (Color?) -> Unit).apply { markerColor.value = selectedColor.value.hashCode() },
+                    (onColorSelected as (Color?) -> Unit).apply {
+                        markerColor.value = selectedColor.value.hashCode()
+                    },
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
             }
 
             OutlinedButton(modifier = Modifier.constrainAs(cancelButton) {
-                absoluteRight.linkTo(parent.absoluteRight, 4.dp)
-                top.linkTo(locationIcon.bottom, 14.dp)
-                bottom.linkTo(parent.bottom, 14.dp)
+                absoluteRight.linkTo(saveButton.absoluteLeft, 8.dp)
+                top.linkTo(saveButton.top)
+                bottom.linkTo(saveButton.bottom)
             },
                 shape = RoundedCornerShape(24.dp), onClick = {
                     coroutineScope.launch {
@@ -201,15 +224,17 @@ fun NewPlaceDialog(
                 ) {
                     Text(
                         stringResource(id = R.string.cancel),
-                        //modifier = Modifier.padding(start = 8.dp)
+                        style = MaterialTheme.typography.button
                     )
                 }
             }
 
             Button(modifier = Modifier.constrainAs(saveButton) {
-                absoluteRight.linkTo(cancelButton.absoluteLeft, 8.dp)
-                top.linkTo(cancelButton.top)
-                bottom.linkTo(cancelButton.bottom)
+
+
+                absoluteRight.linkTo(parent.absoluteRight, 8.dp)
+                top.linkTo(locationIcon.bottom, 14.dp)
+                bottom.linkTo(parent.bottom, 14.dp)
             }, shape = RoundedCornerShape(24.dp), onClick = {
                 viewModel.addNewMarker(
                     RawMapMarker(
@@ -227,7 +252,7 @@ fun NewPlaceDialog(
                 ) {
                     Text(
                         stringResource(id = R.string.save),
-                        //modifier = Modifier.padding(start = 8.dp)
+                        style = MaterialTheme.typography.button
                     )
                 }
             }
