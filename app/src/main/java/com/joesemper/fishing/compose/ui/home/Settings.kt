@@ -8,10 +8,7 @@ import androidx.compose.material.RadioButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.Compress
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Thermostat
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +31,7 @@ import com.joesemper.fishing.compose.ui.home.map.checkPermission
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
+import com.joesemper.fishing.compose.ui.theme.AppThemeValues
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -43,23 +41,28 @@ fun SettingsScreen(backPress: () -> Unit) {
 
     val userPreferences: UserPreferences = get()
     val weatherPreferences: WeatherPreferences = get()
-    val isPermissionDialogOpen = remember {
-        mutableStateOf(false)
-    }
-    val isPressureDialogOpen = remember {
-        mutableStateOf(false)
-    }
-    val isTemperatureDialogOpen = remember {
-        mutableStateOf(false)
-    }
+
+    val isPermissionDialogOpen = remember { mutableStateOf(false) }
+    val isAppThemeDialogOpen = remember { mutableStateOf(false) }
+    val isPressureDialogOpen = remember { mutableStateOf(false) }
+    val isTemperatureDialogOpen = remember { mutableStateOf(false) }
+
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
     val use12hTimeFormat by userPreferences.use12hTimeFormat.collectAsState(false)
     val pressureUnit = weatherPreferences.getPressureUnit.collectAsState(PressureValues.mmHg.name)
     val temperatureUnit = weatherPreferences.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
+    val appTheme = userPreferences.appTheme.collectAsState(AppThemeValues.Blue.name)
 
     GetLocationPermission(isPermissionDialogOpen)
+    GetAppTheme(isAppThemeDialogOpen, appTheme) { newValue ->
+        coroutineScope.launch {
+            userPreferences.saveAppTheme(newValue)
+            delay(200)
+            isAppThemeDialogOpen.value = false
+        }
+    }
     GetPressureUnit(isPressureDialogOpen, pressureUnit) { newValue ->
         coroutineScope.launch {
             weatherPreferences.savePressureUnit(newValue)
@@ -93,6 +96,17 @@ fun SettingsScreen(backPress: () -> Unit) {
                     subtitle = { Text(text = stringResource(R.string.provide_location_permission)) },
                     onClick = { isPermissionDialogOpen.value = true },
                 )
+            SettingsMenuLink(
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.ColorLens,
+                        contentDescription = Icons.Default.ColorLens.name
+                    )
+                },
+                title = { Text(text = "App theme") },
+                subtitle = { Text(text = "Choose app theme (Current is: ${appTheme.value})") },
+                onClick = { isAppThemeDialogOpen.value = true }
+            )
             SettingsCheckbox(
                 icon = {
                     Icon(
@@ -112,13 +126,23 @@ fun SettingsScreen(backPress: () -> Unit) {
                 )
             )
             SettingsMenuLink(
-                icon = { Icon(imageVector = Icons.Default.Compress, contentDescription = Icons.Default.Compress.name) },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Compress,
+                        contentDescription = Icons.Default.Compress.name
+                    )
+                },
                 title = { Text(text = stringResource(R.string.pressure_unit)) },
                 subtitle = { Text(text = "Choose another pressure unit (Current is: ${pressureUnit.value})") },
                 onClick = { isPressureDialogOpen.value = true }
             )
             SettingsMenuLink(
-                icon = { Icon(imageVector = Icons.Default.Thermostat, contentDescription = Icons.Default.Thermostat.name) },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Thermostat,
+                        contentDescription = Icons.Default.Thermostat.name
+                    )
+                },
                 title = { Text(text = stringResource(R.string.temperature_unit)) },
                 subtitle = { Text(text = "Choose another temperature unit (Current is: ${temperatureUnit.value})") },
                 onClick = { isTemperatureDialogOpen.value = true }
@@ -126,6 +150,80 @@ fun SettingsScreen(backPress: () -> Unit) {
         }
 
 
+    }
+}
+
+@Composable
+fun GetAppTheme(
+    isAppThemeDialogOpen: MutableState<Boolean>,
+    currentAppTheme: State<String>,
+    onSelectedValue: (appThemeValues: AppThemeValues) -> Unit
+) {
+    val radioOptions = AppThemeValues.values().asList()
+    val context = LocalContext.current
+
+    if (isAppThemeDialogOpen.value) {
+        val (selectedOption, onOptionSelected) = remember {
+            mutableStateOf(
+                AppThemeValues.valueOf(
+                    currentAppTheme.value
+                )
+            )
+        }
+        Dialog(onDismissRequest = { isAppThemeDialogOpen.value = false }) {
+            DefaultCard {
+                Column(
+                    modifier = Modifier.padding(bottom = 12.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Row(
+                        modifier = Modifier.padding(14.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        PrimaryText(text = "Choose app theme")
+                    }
+
+                    radioOptions.forEach { appThemeValue ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = (appThemeValue == selectedOption),
+                                    onClick = {
+                                        onOptionSelected(appThemeValue)
+                                        onSelectedValue(appThemeValue)
+                                    }
+                                )
+                                .padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(
+                                selected = (appThemeValue == selectedOption),
+                                modifier = Modifier.padding(all = Dp(value = 8F)),
+                                onClick = {
+                                    onOptionSelected(appThemeValue)
+                                    onSelectedValue(appThemeValue)
+                                    Toast.makeText(
+                                        context,
+                                        appThemeValue.name,
+                                        Toast.LENGTH_LONG
+                                    )
+                                        .show()
+                                }
+                            )
+                            Text(
+                                text = appThemeValue.name,
+                                modifier = Modifier.padding(start = 16.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+        }
     }
 }
 
@@ -158,7 +256,7 @@ fun GetTemperatureUnit(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        PrimaryText(text = stringResource(R.string.choose_pressure_unit))
+                        PrimaryText(text = stringResource(R.string.choose_temperature_unit))
                     }
 
                     radioOptions.forEach { temperatureValue ->
@@ -182,7 +280,11 @@ fun GetTemperatureUnit(
                                 onClick = {
                                     onOptionSelected(temperatureValue)
                                     onSelectedValue(temperatureValue)
-                                    Toast.makeText(context, temperatureValue.name, Toast.LENGTH_LONG)
+                                    Toast.makeText(
+                                        context,
+                                        temperatureValue.name,
+                                        Toast.LENGTH_LONG
+                                    )
                                         .show()
                                 }
                             )

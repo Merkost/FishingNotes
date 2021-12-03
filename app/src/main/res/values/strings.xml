@@ -196,6 +196,7 @@
     <string name="fahrenheit">°F</string>
     <string name="Kelvin">K</string>
     <string name="kelvin">K</string>
+    <string name="choose_temperature_unit">Choose temperature unit</string>
 
 
 </resources>
