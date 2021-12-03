@@ -9,6 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -26,8 +27,6 @@ import androidx.navigation.NavController
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
-import com.joesemper.fishing.compose.ui.theme.secondaryColor
-import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.UserCatchViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -170,7 +169,7 @@ fun CatchContent(
                     leadingIcon = {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                            tint = secondaryColor,
+                            tint = MaterialTheme.colors.secondary,
                             contentDescription = ""
                         )
                     },
@@ -179,7 +178,7 @@ fun CatchContent(
                             onClick = { /*TODO*/ }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_baseline_chevron_right_24),
-                                tint = secondaryTextColor,
+                                tint = MaterialTheme.colors.onSecondary,
                                 contentDescription = ""
                             )
                         }

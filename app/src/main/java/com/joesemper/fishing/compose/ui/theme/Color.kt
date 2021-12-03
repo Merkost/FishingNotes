@@ -25,18 +25,22 @@ val surfaceGreenColor = Color(0x8F79B97B)
 val cardColor = Color(0xFF8FA590)
 
 // Blue colors
-val primaryColor = Color(0xFF2196f3)
-val primaryColorTransparent = Color(0xF22196F3)
-val primaryLightColor = Color(0xFF6ec6ff)
-val primaryLightColorTransparent = Color(0x4D6EC6FF)
-val primaryDarkColor = Color(0xFF0069c0)
-val primaryDarkColorTransparent = Color(0xE60069C0)
-val secondaryColor = Color(0xFFff6d00)
-val secondaryLightColor = Color(0xFFff9e40)
-val secondaryDarkColor = Color(0xFFc43c00)
+val primaryBlueColor = Color(0xFF2196f3)
+val primaryBlueColorTransparent = Color(0xF22196F3)
+val primaryBlueLightColor = Color(0xFF6ec6ff)
+val primaryBlueLightColorTransparent = Color(0x4D6EC6FF)
+val primaryBlueDarkColor = Color(0xFF0069c0)
+val primaryBlueDarkColorTransparent = Color(0xE60069C0)
+val secondaryBlueColor = Color(0xFFff6d00)
+val secondaryBlueLightColor = Color(0xFFff9e40)
+val secondaryBlueDarkColor = Color(0xFFc43c00)
+
+
 val primaryTextColor = Color(0xDE000000)
 val secondaryTextColor = Color(0x8A000000)
 val supportTextColor = Color(0x42000000)
+
+
 val primaryWhiteColor = Color(0xFFFFFFFF)
 val secondaryWhiteColor = Color(0xFFF3F3F3)
 

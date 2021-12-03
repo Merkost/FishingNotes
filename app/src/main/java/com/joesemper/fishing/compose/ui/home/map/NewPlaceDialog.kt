@@ -1,6 +1,6 @@
 package com.joesemper.fishing.compose.ui.home.map
 
-Newimport androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -39,6 +39,7 @@ import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.compose.ui.utils.ColorPicker
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
@@ -72,8 +73,7 @@ fun NewPlaceDialog(
                                 absoluteLeft.linkTo(parent.absoluteLeft)
                                 absoluteRight.linkTo(parent.absoluteRight)
                                 bottom.linkTo(parent.bottom)
-                            }
-                            .size(100.dp)) {
+                            }.size(100.dp)) {
                             FishLoading(modifier = Modifier.size(150.dp))
                         }
                     }
@@ -230,8 +230,6 @@ fun NewPlaceDialog(
             }
 
             Button(modifier = Modifier.constrainAs(saveButton) {
-
-
                 absoluteRight.linkTo(parent.absoluteRight, 8.dp)
                 top.linkTo(locationIcon.bottom, 14.dp)
                 bottom.linkTo(parent.bottom, 14.dp)

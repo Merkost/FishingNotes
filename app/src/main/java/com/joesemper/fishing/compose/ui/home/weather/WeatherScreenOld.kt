@@ -37,7 +37,6 @@ import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
 import com.joesemper.fishing.compose.ui.home.notes.BackgroundImage
 import com.joesemper.fishing.compose.ui.home.notes.TabItem
 import com.joesemper.fishing.compose.ui.home.notes.Tabs
-import com.joesemper.fishing.compose.ui.theme.secondaryColor
 import com.joesemper.fishing.domain.WeatherViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
@@ -160,7 +159,7 @@ fun WeatherScreen(
                                                     R.drawable.ic_baseline_location_on_24
                                                 }
                                             ),
-                                            tint = secondaryColor,
+                                            tint = MaterialTheme.colors.secondary,
                                             contentDescription = "Location icon",
                                             modifier = Modifier.padding(2.dp)
                                         )

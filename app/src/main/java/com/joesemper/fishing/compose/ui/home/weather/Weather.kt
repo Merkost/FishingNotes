@@ -40,7 +40,6 @@ import com.joesemper.fishing.compose.ui.home.map.LocationState
 import com.joesemper.fishing.compose.ui.home.map.checkPermission
 import com.joesemper.fishing.compose.ui.home.map.getCurrentLocationFlow
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
-import com.joesemper.fishing.compose.ui.theme.primaryDarkColor
 import com.joesemper.fishing.compose.ui.theme.primaryWhiteColor
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.WeatherViewModel
@@ -109,7 +108,7 @@ fun Weather(
 
             TopAppBar(
                 elevation = elevation.value,
-                backgroundColor = primaryDarkColor
+                backgroundColor = MaterialTheme.colors.primary
             ) {
                 WeatherLocationIcon(color = Color.White)
                 selectedPlace.value?.let {
@@ -197,7 +196,7 @@ fun CurrentWeather(
         modifier = modifier
             .fillMaxWidth()
             .height(320.dp),
-        color = primaryDarkColor
+        color = MaterialTheme.colors.primary
     ) {
         ConstraintLayout {
             val (primary, temp, wind, pressure, humidity, pressureTitle, divider) = createRefs()

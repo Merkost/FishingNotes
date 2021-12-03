@@ -243,7 +243,7 @@ fun WeatherDropdownMenu(
                                 R.drawable.ic_baseline_location_on_24
                             }
                         ),
-                        tint = secondaryColor,
+                        tint = MaterialTheme.colors.secondary,
                         contentDescription = "Location icon",
                         modifier = Modifier.padding(2.dp)
                     )

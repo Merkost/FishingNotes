@@ -28,8 +28,6 @@ import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.notes.ItemUserCatch
 import com.joesemper.fishing.compose.ui.navigate
-import com.joesemper.fishing.compose.ui.theme.secondaryColor
-import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.UserPlaceViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
