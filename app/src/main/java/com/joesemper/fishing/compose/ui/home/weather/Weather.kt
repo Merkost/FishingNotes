@@ -4,7 +4,10 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -16,7 +19,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -223,7 +225,7 @@ fun CurrentWeather(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
 
-            PrimaryWeatherItem(
+            PrimaryWeatherItemView(
                 temperature = forecast.hourly.first().temperature,
                 weather = forecast.hourly.first().weather.first(),
                 textTint = primaryWhiteColor,
@@ -560,7 +562,7 @@ fun PressureChart(
                 getPressure(
                     weather[index].pressure,
                     PressureValues.valueOf(pressureUnit)
-                )/*hPaToMmHg(weather[index].pressure)*/,
+                ),
                 pointX, pointY - 48f, paint
             )
 

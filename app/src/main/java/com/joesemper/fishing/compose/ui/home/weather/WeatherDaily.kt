@@ -4,6 +4,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -21,7 +23,6 @@ import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.utils.getDayOfWeekAndDate
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
-
 
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
@@ -108,15 +109,18 @@ fun DailyWeatherScreen(
     modifier: Modifier = Modifier,
     forecast: Daily
 ) {
-
     val weatherPrefs: WeatherPreferences = get()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg.name)
     val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
 
-    ConstraintLayout(modifier = modifier.fillMaxSize()) {
-        val (primary) = createRefs()
+    ConstraintLayout(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        val (primary, temperature, sunriseSunset, weather, moonPhase) = createRefs()
 
-        PrimaryWeatherItem(
+        PrimaryWeatherItemView(
             modifier = Modifier.constrainAs(primary) {
                 top.linkTo(parent.top, 16.dp)
                 absoluteLeft.linkTo(parent.absoluteLeft)
@@ -126,6 +130,46 @@ fun DailyWeatherScreen(
             weather = forecast.weather.first(),
             temperatureUnit = temperatureUnit
         )
+
+        DayTemperatureView(
+            modifier = Modifier.constrainAs(temperature) {
+                top.linkTo(primary.bottom, 16.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            temperature = forecast.temperature,
+            temperatureUnit = temperatureUnit
+        )
+
+        SunriseSunsetView(
+            modifier = Modifier.constrainAs(sunriseSunset) {
+                top.linkTo(temperature.bottom, 24.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            sunrise = forecast.sunrise,
+            sunset = forecast.sunset
+        )
+
+        MoonPhaseView(
+            modifier = Modifier.constrainAs(moonPhase) {
+                top.linkTo(sunriseSunset.bottom, 32.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            moonPhase = forecast.moonPhase
+        )
+
+        DailyWeatherValuesView(
+            modifier = Modifier.constrainAs(weather) {
+                top.linkTo(moonPhase.bottom, 32.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            forecast = forecast,
+            pressureUnit = pressureUnit
+        )
+
     }
 }
 

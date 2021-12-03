@@ -14,6 +14,8 @@ const val MILLISECONDS_IN_DAY = 86400000L
 const val SECONDS_IN_DAY = 86400L
 const val MILLISECONDS_IN_SECOND = 1000L
 const val MILLISECONDS_IN_HOUR = 3600000L
+const val SECONDS_IN_HOUR = 3600L
+const val SECONDS_IN_MINUTE = 60L
 const val MOON_PHASE_INCREMENT_IN_DAY = 0.03f
 
 fun getNewCatchId() = getRandomString(10)
@@ -65,9 +67,9 @@ fun getDayOfWeekAndDate(ms: Long): String {
     return sdf.format(date)
 }
 
-fun getDayOfWeekBySeconds(ms: Long): String {
+fun getDayOfWeekBySeconds(s: Long): String {
     val sdf = SimpleDateFormat("EEE", Locale.US)
-    val date = Date(ms * 1000)
+    val date = Date(s * 1000)
     return sdf.format(date)
 }
 
@@ -75,6 +77,14 @@ fun getHoursByMilliseconds(ms: Long): String {
     val sdf = SimpleDateFormat("HH", Locale.US)
     val date = Date(ms)
     return sdf.format(date)
+}
+
+fun getHoursBySeconds(s: Long): String {
+    return (s / SECONDS_IN_HOUR).toString()
+}
+
+fun getMinutesBySeconds(s: Long): String {
+    return ((s % SECONDS_IN_HOUR) / SECONDS_IN_MINUTE).toString()
 }
 
 fun getDateByMilliseconds(ms: Long): String {
@@ -145,6 +155,7 @@ fun hPaToMmHg(pressure: Int): Int {
 fun showToast(context: Context, text: String) {
     Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
 }
+
 fun readBytes(context: Context, uri: Uri): ByteArray? =
     context.contentResolver.openInputStream(uri)?.buffered()?.use { it.readBytes() }
 
@@ -152,6 +163,16 @@ fun getCameraPosition(latLng: LatLng): Pair<LatLng, Float> {
     val lat = latLng.latitude + ((-100..100).random() * 0.000000001)
     val lng = latLng.longitude + ((-100..100).random() * 0.000000001)
     return Pair(LatLng(lat, lng), DEFAULT_ZOOM)
+}
+
+fun calculateDaylightHours(sunrise: Long, sunset: Long): String {
+    val daylightTime = sunset - sunrise
+    return getHoursBySeconds(daylightTime)
+}
+
+fun calculateDaylightMinutes(sunrise: Long, sunset: Long): String {
+    val daylightTime = sunset - sunrise
+    return getMinutesBySeconds(daylightTime)
 }
 
 

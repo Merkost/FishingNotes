@@ -200,5 +200,12 @@
     <string name="mode_place_selecting">You are in place selecting mode!</string>
     <string name="mode_place_selecting_off">Режим выбора места выключен!</string>
     <string name="mode_place_info">Вы в режиме просмотра информации о месте!</string>
+    <string name="morning">Утро</string>
+    <string name="day">День</string>
+    <string name="Evening">Вечер</string>
+    <string name="night">Ночь</string>
+    <string name="daylight_hours">Световой день</string>
+    <string name="hours">\ч\</string>
+    <string name="minutes">\м\</string>
 
 </resources>
