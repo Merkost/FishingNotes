@@ -593,7 +593,7 @@ fun ItemCounter(
 
 @Composable
 fun BackgroundImage(modifier: Modifier = Modifier) {
-    Image(
+    /*Image(
         modifier = modifier.fillMaxSize(),
         colorFilter = ColorFilter.tint(
             surfaceGreenColor,
@@ -603,5 +603,8 @@ fun BackgroundImage(modifier: Modifier = Modifier) {
         contentDescription = "",
         alpha = 0.1f,
         contentScale = ContentScale.FillWidth
-    )
+    )*/
+    Surface(modifier = modifier.fillMaxSize(), color = Color.LightGray) {
+
+    }
 }

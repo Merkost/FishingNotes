@@ -144,7 +144,7 @@ fun WeatherDropdownMenu(
 ) {
 
     DropdownMenu(
-        modifier = Modifier.requiredWidthIn(200.dp, 500.dp),
+        modifier = Modifier.requiredWidthIn(250.dp, 300.dp),
         expanded = isExpanded.value,
         onDismissRequest = {
             isExpanded.value = !isExpanded.value
