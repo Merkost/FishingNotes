@@ -24,7 +24,6 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.login.LoginScreen
-import com.joesemper.fishing.compose.ui.theme.FishingNotesTheme
 import kotlinx.coroutines.InternalCoroutinesApi
 
 @ExperimentalComposeUiApi
@@ -36,59 +35,57 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @Composable
 fun FishingNotesApp() {
     ProvideWindowInsets {
-        FishingNotesTheme {
-            val appStateHolder = rememberAppStateHolder()
-            var visible by remember { mutableStateOf(false) }
+        val appStateHolder = rememberAppStateHolder()
+        var visible by remember { mutableStateOf(false) }
 
-            Scaffold(
-                bottomBar = {
-                    if (appStateHolder.shouldShowBottomBar) {
-                        FishingNotesBottomBar(
-                            tabs = appStateHolder.bottomBarTabs,
-                            currentRoute = appStateHolder.currentRoute!!,
-                            navigateToRoute = appStateHolder::navigateToBottomBarRoute
-                        )
-                    }
-                },
-                snackbarHost = {
-                    SnackbarHost(
-                        hostState = it,
-                        modifier = Modifier.systemBarsPadding(),
-                        snackbar = { snackbarData -> AppSnackbar(snackbarData) }
+        Scaffold(
+            bottomBar = {
+                if (appStateHolder.shouldShowBottomBar) {
+                    FishingNotesBottomBar(
+                        tabs = appStateHolder.bottomBarTabs,
+                        currentRoute = appStateHolder.currentRoute!!,
+                        navigateToRoute = appStateHolder::navigateToBottomBarRoute
                     )
-                },
-                scaffoldState = appStateHolder.scaffoldState,
-                /*modifier = if (appStateHolder.currentRoute == HomeSections.MAP.route)
-                    Modifier.statusBarsHeight()
-                else Modifier*/
-            ) { innerPaddingModifier ->
-                Column() {
-                    AnimatedVisibility(
-                        visible = visible,
-                        enter = fadeIn(
-                            initialAlpha = 0f,
-                            animationSpec = tween(
-                                durationMillis = MainActivity.splashFadeDurationMillis
-                            )
+                }
+            },
+            snackbarHost = {
+                SnackbarHost(
+                    hostState = it,
+                    modifier = Modifier.systemBarsPadding(),
+                    snackbar = { snackbarData -> AppSnackbar(snackbarData) }
+                )
+            },
+            scaffoldState = appStateHolder.scaffoldState,
+            /*modifier = if (appStateHolder.currentRoute == HomeSections.MAP.route)
+                Modifier.statusBarsHeight()
+            else Modifier*/
+        ) { innerPaddingModifier ->
+            Column() {
+                AnimatedVisibility(
+                    visible = visible,
+                    enter = fadeIn(
+                        initialAlpha = 0f,
+                        animationSpec = tween(
+                            durationMillis = MainActivity.splashFadeDurationMillis
                         )
+                    )
+                ) {
+                    //Spacer(modifier = Modifier.statusBarsHeight())
+                    NavHost(
+                        navController = appStateHolder.navController,
+                        startDestination = MainDestinations.HOME_ROUTE,
+                        modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
+                        Modifier.padding(innerPaddingModifier) /*else Modifier*/
                     ) {
-                        //Spacer(modifier = Modifier.statusBarsHeight())
-                        NavHost(
+                        NavGraph(
                             navController = appStateHolder.navController,
-                            startDestination = MainDestinations.HOME_ROUTE,
-                            modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
-                            Modifier.padding(innerPaddingModifier) /*else Modifier*/
-                        ) {
-                            NavGraph(
-                                navController = appStateHolder.navController,
-                                upPress = appStateHolder::upPress,
-                            )
-                        }
+                            upPress = appStateHolder::upPress,
+                        )
                     }
                 }
-                LaunchedEffect(true) {
-                    visible = true
-                }
+            }
+            LaunchedEffect(true) {
+                visible = true
             }
         }
     }

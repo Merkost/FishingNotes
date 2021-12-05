@@ -72,10 +72,11 @@ private val BlueDarkColorPalette = darkColors(
 @Composable
 fun FishingNotesTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    initialAppTheme: String? = null,
     content: @Composable() () -> Unit
 ) {
     val userPreferences: UserPreferences = get()
-    val appTheme = userPreferences.appTheme.collectAsState("null")
+    val appTheme = userPreferences.appTheme.collectAsState(initialAppTheme ?: "null")
 
 
 
