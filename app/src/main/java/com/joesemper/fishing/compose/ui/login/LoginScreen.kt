@@ -18,7 +18,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.airbnb.lottie.compose.*
 import com.google.accompanist.insets.systemBarsPadding
 import com.joesemper.fishing.R
@@ -27,11 +26,10 @@ import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.AppSnackbar
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.resources
-import com.joesemper.fishing.compose.ui.theme.FishingNotesTheme
+import com.joesemper.fishing.compose.ui.theme.Typography
 import com.joesemper.fishing.domain.LoginViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.User
-import com.joesemper.fishing.compose.ui.theme.Typography
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -67,7 +65,7 @@ fun LoginScreen(navController: NavController) {
                     visible = false
                     delay((MainActivity.splashFadeDurationMillis * 2).toLong())
 
-                    navController.navigate(MainDestinations.HOME_ROUTE){
+                    navController.navigate(MainDestinations.HOME_ROUTE) {
                         popUpTo(0) {
                             inclusive = true
                         }
@@ -97,204 +95,209 @@ fun LoginScreen(navController: NavController) {
             }
         }
     }
-    FishingNotesTheme {
 
-        Scaffold(
-            scaffoldState = scaffoldState,
-            snackbarHost = {
-                SnackbarHost(
-                    hostState = it,
-                    modifier = Modifier.systemBarsPadding(),
-                    snackbar = { snackbarData -> AppSnackbar(snackbarData) }
-                )
-            },
+    Scaffold(
+        scaffoldState = scaffoldState,
+        snackbarHost = {
+            SnackbarHost(
+                hostState = it,
+                modifier = Modifier.systemBarsPadding(),
+                snackbar = { snackbarData -> AppSnackbar(snackbarData) }
+            )
+        },
+    ) {
+        ConstraintLayout(
+            modifier = Modifier
+                .fillMaxSize()
         ) {
-            ConstraintLayout(modifier = Modifier
-                .fillMaxSize()) {
-                val (background, card, lottieSuccess, cardColumn) = createRefs()
+            val (background, card, lottieSuccess, cardColumn) = createRefs()
 
-                AnimatedVisibility(
-                    visible = visible,
-                    enter = slideInVertically(
-                        initialOffsetY = {
-                            // Slide in from top
-                            -it
-                        },
-                        animationSpec = tween(
-                            durationMillis = MainActivity.splashFadeDurationMillis * 4,
+            AnimatedVisibility(
+                visible = visible,
+                enter = slideInVertically(
+                    initialOffsetY = {
+                        // Slide in from top
+                        -it
+                    },
+                    animationSpec = tween(
+                        durationMillis = MainActivity.splashFadeDurationMillis * 4,
 
-                            easing = CubicBezierEasing(0f, 0f, 0f, 1f)
-                        )
-                    ),
-                    exit = slideOutVertically(
-                        targetOffsetY = {
-                            // Slide to top
-                            -it
-                        },
-                        animationSpec = tween(
-                            durationMillis = MainActivity.splashFadeDurationMillis * 2,
-                            //delayMillis = MainActivity.splashFadeDurationMillis / 2,
-                            easing = CubicBezierEasing(0f, 0f, 0f, 1f)
-                        )
+                        easing = CubicBezierEasing(0f, 0f, 0f, 1f)
                     )
-                ) {
-                    Surface(modifier = Modifier
+                ),
+                exit = slideOutVertically(
+                    targetOffsetY = {
+                        // Slide to top
+                        -it
+                    },
+                    animationSpec = tween(
+                        durationMillis = MainActivity.splashFadeDurationMillis * 2,
+                        //delayMillis = MainActivity.splashFadeDurationMillis / 2,
+                        easing = CubicBezierEasing(0f, 0f, 0f, 1f)
+                    )
+                )
+            ) {
+                Surface(
+                    modifier = Modifier
                         .fillMaxWidth()
                         .height(450.dp)
                         .constrainAs(background) {
                             top.linkTo(parent.top)
                         }, color = MaterialTheme.colors.primary
-                    ) {}
-                }
+                ) {}
+            }
 
-                AnimatedVisibility(
-                    visible = visible,
-                    enter = slideInVertically(
-                        initialOffsetY = {
-                            // Slide in from top
-                            2 * it
-                        },
-                        animationSpec = tween(
-                            durationMillis = MainActivity.splashFadeDurationMillis * 4,
-                            //delayMillis = MainActivity.splashFadeDurationMillis / 2,
-                            //easing = CubicBezierEasing(0f, 0f, 0f, 1f)
-                        )
-                    ),
-                    exit = slideOutVertically(
-                        targetOffsetY = {
-                            // Slide in from top
-                            2 * it
-                        },
-                        animationSpec = tween(
-                            durationMillis = MainActivity.splashFadeDurationMillis * 2,
-                            //easing = CubicBezierEasing(0f, 0f, 0f, 1f)
-                        )
-                    ),
-                    modifier = Modifier.constrainAs(card) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                    }) {
-                    Card(
+            AnimatedVisibility(
+                visible = visible,
+                enter = slideInVertically(
+                    initialOffsetY = {
+                        // Slide in from top
+                        2 * it
+                    },
+                    animationSpec = tween(
+                        durationMillis = MainActivity.splashFadeDurationMillis * 4,
+                        //delayMillis = MainActivity.splashFadeDurationMillis / 2,
+                        //easing = CubicBezierEasing(0f, 0f, 0f, 1f)
+                    )
+                ),
+                exit = slideOutVertically(
+                    targetOffsetY = {
+                        // Slide in from top
+                        2 * it
+                    },
+                    animationSpec = tween(
+                        durationMillis = MainActivity.splashFadeDurationMillis * 2,
+                        //easing = CubicBezierEasing(0f, 0f, 0f, 1f)
+                    )
+                ),
+                modifier = Modifier.constrainAs(card) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                }) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(30.dp)
+                        .wrapContentHeight(),
+                    elevation = 10.dp,
+                    shape = RoundedCornerShape(30.dp)
+                ) {
+
+                    //LottieSuccess
+                    /*AnimatedVisibility(visible = isSuccess, modifier = Modifier.constrainAs(lottieSuccess) {
+                    top.linkTo(card.top)
+                    bottom.linkTo(card.bottom)
+                    absoluteLeft.linkTo(card.absoluteLeft)
+                    absoluteRight.linkTo(card.absoluteRight)
+                }) { LottieSuccess(modifier = Modifier.fillMaxSize()) {
+                    navController.navigate(MainDestinations.HOME_ROUTE)
+                } }*/
+
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(30.dp)
-                            .wrapContentHeight(),
-                        elevation = 10.dp,
-                        shape = RoundedCornerShape(30.dp)
-                    ) {
-
-                        //LottieSuccess
-                        /*AnimatedVisibility(visible = isSuccess, modifier = Modifier.constrainAs(lottieSuccess) {
-                        top.linkTo(card.top)
-                        bottom.linkTo(card.bottom)
-                        absoluteLeft.linkTo(card.absoluteLeft)
-                        absoluteRight.linkTo(card.absoluteRight)
-                    }) { LottieSuccess(modifier = Modifier.fillMaxSize()) {
-                        navController.navigate(MainDestinations.HOME_ROUTE)
-                    } }*/
-
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .constrainAs(cardColumn) {
-                                    top.linkTo(card.top)
-                                    bottom.linkTo(card.bottom)
-                                    absoluteLeft.linkTo(card.absoluteLeft)
-                                    absoluteRight.linkTo(card.absoluteRight)
-                                }
-                                .fillMaxWidth()
-                                .animateContentSize(
-                                    animationSpec = tween(
-                                        durationMillis = 300,
-                                        easing = LinearOutSlowInEasing
-                                    )
-                                )
-                        ) {
-                            //AppIcon
-                            Image(
-                                painterResource(R.mipmap.ic_launcher), stringResource(R.string.icon),
-                                modifier = Modifier
-                                    .padding(30.dp)
-                                    .size(140.dp)
-                            )
-
-                            //Title
-                            Text(
-                                stringResource(R.string.login_title),
-                                style = Typography.h5,
-                                //color = Color.DarkGray
-                            )
-
-                            //LottieLoading
-                            //AnimatedVisibility(isLoading,) { LottieLoading(modifier = Modifier.size(140.dp)) }
-                            //AnimatedVisibility(!isLoading) {
-                            Spacer(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(30.dp)
-                            )
-                            //}
-
-                            //Google button
-                            Card(
-                                shape = RoundedCornerShape(20.dp), elevation = 10.dp,
-                                onClickLabel = stringResource(
-                                    R.string.google_login
-                                ),
-                                onClick = { clicked = true; activity.startGoogleLogin() },
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .padding(10.dp).padding(end = 2.dp)
-                                        .animateContentSize(
-                                            animationSpec = tween(
-                                                durationMillis = 300,
-                                                easing = LinearOutSlowInEasing
-                                            )
-                                        ),
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Image(
-                                        painterResource(R.drawable.googleg_standard_color_18),
-                                        stringResource(R.string.google_login),
-                                        modifier = Modifier.size(25.dp)
-                                    )
-                                    Text(text = if (clicked) stringResource(R.string.signing_in)
-                                    else stringResource(R.string.sign_with_google))
-                                    if (clicked) {
-                                        //Spacer(modifier = Modifier.width(16.dp))
-                                        CircularProgressIndicator(
-                                            modifier = Modifier
-                                                .height(16.dp)
-                                                .width(16.dp),
-                                            strokeWidth = 2.dp,
-                                            color = MaterialTheme.colors.primary
-                                        )
-                                    }
-                                    //Text("Sign in with Google", style = Typography.body1)
-                                }
+                            .constrainAs(cardColumn) {
+                                top.linkTo(card.top)
+                                bottom.linkTo(card.bottom)
+                                absoluteLeft.linkTo(card.absoluteLeft)
+                                absoluteRight.linkTo(card.absoluteRight)
                             }
+                            .fillMaxWidth()
+                            .animateContentSize(
+                                animationSpec = tween(
+                                    durationMillis = 300,
+                                    easing = LinearOutSlowInEasing
+                                )
+                            )
+                    ) {
+                        //AppIcon
+                        Image(
+                            painterResource(R.mipmap.ic_launcher), stringResource(R.string.icon),
+                            modifier = Modifier
+                                .padding(30.dp)
+                                .size(140.dp)
+                        )
 
-                            /*GoogleButton(
-                                text = "Sign In with Google",
-                                loadingText = "Signing In...",
-                                onClicked = {activity.startGoogleLogin()}
-                            )*/
+                        //Title
+                        Text(
+                            stringResource(R.string.login_title),
+                            style = Typography.h5,
+                            //color = Color.DarkGray
+                        )
 
-                            //Space
-                            Spacer(modifier = Modifier
+                        //LottieLoading
+                        //AnimatedVisibility(isLoading,) { LottieLoading(modifier = Modifier.size(140.dp)) }
+                        //AnimatedVisibility(!isLoading) {
+                        Spacer(
+                            modifier = Modifier
                                 .fillMaxWidth()
-                                .height(30.dp))
+                                .height(30.dp)
+                        )
+                        //}
+
+                        //Google button
+                        Card(
+                            shape = RoundedCornerShape(20.dp), elevation = 10.dp,
+                            onClickLabel = stringResource(
+                                R.string.google_login
+                            ),
+                            onClick = { clicked = true; activity.startGoogleLogin() },
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .padding(10.dp).padding(end = 2.dp)
+                                    .animateContentSize(
+                                        animationSpec = tween(
+                                            durationMillis = 300,
+                                            easing = LinearOutSlowInEasing
+                                        )
+                                    ),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Image(
+                                    painterResource(R.drawable.googleg_standard_color_18),
+                                    stringResource(R.string.google_login),
+                                    modifier = Modifier.size(25.dp)
+                                )
+                                Text(
+                                    text = if (clicked) stringResource(R.string.signing_in)
+                                    else stringResource(R.string.sign_with_google)
+                                )
+                                if (clicked) {
+                                    //Spacer(modifier = Modifier.width(16.dp))
+                                    CircularProgressIndicator(
+                                        modifier = Modifier
+                                            .height(16.dp)
+                                            .width(16.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MaterialTheme.colors.primary
+                                    )
+                                }
+                                //Text("Sign in with Google", style = Typography.body1)
+                            }
                         }
 
+                        /*GoogleButton(
+                            text = "Sign In with Google",
+                            loadingText = "Signing In...",
+                            onClicked = {activity.startGoogleLogin()}
+                        )*/
 
+                        //Space
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(30.dp)
+                        )
                     }
+
+
                 }
-                LaunchedEffect(this) {
-                    visible = true
-                }
+            }
+            LaunchedEffect(this) {
+                visible = true
             }
         }
     }
