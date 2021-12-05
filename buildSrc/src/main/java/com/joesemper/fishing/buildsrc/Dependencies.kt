@@ -53,14 +53,14 @@ object Libs {
         const val splashScreen = "androidx.core:core-splashscreen:1.0.0-alpha02"
 
         object Compose {
-            const val version = "1.1.0-beta04"
+            const val version = "1.0.5"//"1.1.0-beta04"
             const val oldVersion = "1.0.5"
 
             const val foundation = "androidx.compose.foundation:foundation:${version}"
             const val layout = "androidx.compose.foundation:foundation-layout:${version}"
             const val ui = "androidx.compose.ui:ui:${version}"
             const val uiUtil = "androidx.compose.ui:ui-util:${version}"
-            const val runtime = "androidx.compose.runtime:runtime:${version}"
+            const val runtime = "androidx.compose.runtime:runtime:${oldVersion}"
             const val material = "androidx.compose.material:material:${version}"
             const val animation = "androidx.compose.animation:animation:${version}"
 
@@ -69,11 +69,11 @@ object Libs {
             const val lottie = "com.airbnb.android:lottie-compose:4.2.2"
 
             // Tooling support (Previews, etc.)
-            const val tooling = "androidx.compose.ui:ui-tooling:${version}"
-            const val iconsExtended = "androidx.compose.material:material-icons-extended:$version"
+            const val tooling = "androidx.compose.ui:ui-tooling:${oldVersion}"
+            const val iconsExtended = "androidx.compose.material:material-icons-extended:$oldVersion"
 
             // UI Tests
-            const val uiTest = "androidx.compose.ui:ui-test-junit4:$version"
+            const val uiTest = "androidx.compose.ui:ui-test-junit4:$oldVersion"
         }
 
         object Activity {
