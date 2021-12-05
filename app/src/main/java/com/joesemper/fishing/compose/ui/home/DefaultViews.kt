@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -74,17 +75,17 @@ fun DefaultDialog(
             ) {
                 PrimaryText(
                     text = primaryText,
-                    modifier = Modifier.padding(4.dp)
+                    modifier = Modifier.padding(6.dp)
                 )
                 secondaryText?.let {
                     SecondaryText(text = secondaryText, textAlign = TextAlign.Start)
                 }
                 if (content != null) {
-                    Column {
+                    Column(modifier = Modifier.padding(4.dp)) {
                         content()
                     }
                 }
-                Spacer(modifier = Modifier.size(6.dp))
+                Spacer(modifier = Modifier.size(2.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -104,6 +105,7 @@ fun DefaultDialog(
                             DefaultButtonText(
                                 text = negativeButtonText,
                                 onClick = onNegativeClick,
+
                                 shape = RoundedCornerShape(24.dp)
                             )
                         }
@@ -348,7 +350,7 @@ fun PrimaryText(
 ) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.body1,
+        style = MaterialTheme.typography.h4,
         fontSize = 18.sp,
         fontWeight = fontWeight,
         textAlign = textAlign,
@@ -370,13 +372,14 @@ fun PrimaryTextBold(modifier: Modifier = Modifier, text: String) {
 fun SecondaryTextColored(
     modifier: Modifier = Modifier,
     text: String,
-    color: Color = primaryFigmaColor,
+    style: TextStyle = TextStyle.Default,
+    color: Color = Color.Unspecified,
     maxLines: Int = Int.MAX_VALUE,
     textAlign: TextAlign? = null,
 ) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.body1,
+        style = style,
         color = color,
         text = text,
         maxLines = maxLines,
@@ -421,12 +424,13 @@ fun SecondaryText(
 @Composable
 fun SupportText(
     modifier: Modifier = Modifier, text: String,
+    style: TextStyle = MaterialTheme.typography.body1,
     maxLines: Int = Int.MAX_VALUE
 ) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.body1,
-        color = supportTextColor,
+        style = style,
+        color = Color.Gray,
         text = text,
         maxLines = 1
     )
@@ -590,6 +594,7 @@ fun DefaultButton(
     modifier: Modifier = Modifier,
     text: String,
     icon: Int? = null,
+    textStyle: TextStyle = MaterialTheme.typography.button,
     shape: Shape = MaterialTheme.shapes.small,
     onClick: () -> Unit
 ) {
@@ -616,6 +621,7 @@ fun DefaultButton(
                 color = Color.White,
                 text = text,
                 modifier = Modifier.padding(horizontal = 4.dp),
+                style = textStyle,
                 maxLines = 1
             )
         }
@@ -659,6 +665,7 @@ fun DefaultButtonOutlined(
 fun DefaultButtonText(
     modifier: Modifier = Modifier,
     text: String,
+    style: TextStyle = MaterialTheme.typography.button,
     icon: Int? = null,
     shape: Shape = MaterialTheme.shapes.small,
     onClick: () -> Unit
@@ -685,6 +692,7 @@ fun DefaultButtonText(
             SecondaryTextColored(
                 text = text,
                 modifier = Modifier.padding(horizontal = 4.dp),
+                style = style,
                 maxLines = 1
             )
         }
@@ -720,6 +728,7 @@ fun DefaultButtonSecondaryText(
             }
             SupportText(
                 text = text,
+                style = MaterialTheme.typography.button,
                 modifier = Modifier.padding(horizontal = 4.dp),
                 maxLines = 1
             )
