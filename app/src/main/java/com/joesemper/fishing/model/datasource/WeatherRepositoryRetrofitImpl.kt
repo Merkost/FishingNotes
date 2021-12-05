@@ -18,7 +18,6 @@ class WeatherRepositoryRetrofitImpl : WeatherRepository {
         private const val BASE_WEATHER_URL = "https://api.openweathermap.org/data/2.5/"
     }
 
-    @ExperimentalCoroutinesApi
     override fun getWeather(lat: Double, lon: Double) = flow {
         val weather = getService().getWeather(latitude = lat, longitude = lon,
             lang = locale)

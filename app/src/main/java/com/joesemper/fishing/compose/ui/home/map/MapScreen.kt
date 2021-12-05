@@ -210,9 +210,9 @@ fun MapScreen(
                     .clickable { mapLayersSelection.value = false }, color = Color.White
             ) { }
             AnimatedVisibility(mapLayersSelection.value,
-                enter = expandIn(Alignment.TopStart) + fadeIn(),
+                enter = expandIn(expandFrom = Alignment.TopStart) + fadeIn(),
                 exit = shrinkOut(
-                    Alignment.TopStart,
+                    shrinkTowards = Alignment.TopStart,
                     animationSpec = tween(380)
                 )
                         + fadeOut(animationSpec = tween(280)),

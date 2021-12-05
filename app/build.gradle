@@ -58,15 +58,13 @@ dependencies {
     //Settings
     implementation 'com.github.alorma:compose-settings-ui:0.7.2'
 
-    implementation 'androidx.work:work-runtime-ktx:2.7.0'
+    implementation 'androidx.work:work-runtime-ktx:2.7.1'
 
     //CoilImage
-    implementation "com.github.skydoves:landscapist-coil:1.4.2"
-
-    implementation "com.airbnb.android:lottie-compose:4.0.0"
+    implementation "com.github.skydoves:landscapist-coil:1.4.3"
 
     implementation "androidx.core:core-splashscreen:1.0.0-alpha02"
-    implementation "com.google.accompanist:accompanist-systemuicontroller:0.17.0"
+    implementation "com.google.accompanist:accompanist-systemuicontroller:0.18.0"
 
     //implementation 'com.google.android.gms:play-services-ads:20.4.0'
 
@@ -103,7 +101,7 @@ dependencies {
     //implementation 'com.google.android.gms:play-services-maps:18.0.0'
     //implementation 'com.google.android.gms:play-services-location:18.0.0'
 
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
 
     //Firebase
     //implementation platform('com.google.firebase:firebase-bom:28.0.1')

@@ -14,7 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.os.LocaleListCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -28,6 +27,7 @@ import com.joesemper.fishing.utils.Logger
 import kotlinx.coroutines.InternalCoroutinesApi
 import org.koin.android.ext.android.inject
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var auth: FirebaseAuth
-    private lateinit var user: StateFlow<BaseViewState?>
+    private lateinit var user: State<BaseViewState?>
 
     private val registeredActivity =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -63,11 +63,9 @@ class MainActivity : ComponentActivity() {
         const val splashFadeDurationMillis = 300
     }
 
-    @OptIn(ExperimentalComposeUiApi::class,ExperimentalPermissionsApi::class)
-    @ExperimentalPagerApi
-    @ExperimentalAnimationApi
-    @InternalCoroutinesApi
-    @ExperimentalMaterialApi
+    @OptIn(ExperimentalComposeUiApi::class,ExperimentalPermissionsApi::class,
+        ExperimentalAnimationApi::class, InternalCoroutinesApi::class,
+        ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val userLiveData: MutableLiveData<BaseViewState> = MutableLiveData(BaseViewState.Loading(null))
@@ -104,7 +102,7 @@ class MainActivity : ComponentActivity() {
                             // After the fade out, remove the splash and set content view
                             splashScreenViewProvider.remove()
                             setContent {
-                                FishingNotesTheme(initialAppTheme = appTheme) {
+                                FishingNotesTheme(appTheme) {
                                     if ((userLiveData.value as BaseViewState.Success<*>).data as User? != null)
                                         FishingNotesApp()
                                     else Navigation()
@@ -117,7 +115,7 @@ class MainActivity : ComponentActivity() {
                 setTheme(R.style.Theme_SplashScreen)
                 setContent {
                     //if ((user.value as BaseViewState.Success<*>).data as User? != null)
-                    FishingNotesTheme(initialAppTheme = appTheme) { FishingNotesApp() }
+                    FishingNotesTheme(appTheme) { FishingNotesApp() }
                     //else Navigation()
                 }
             }

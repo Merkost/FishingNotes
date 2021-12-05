@@ -23,7 +23,6 @@ class FirebaseUserRepositoryImpl(private val context: Context) : UserRepository 
     private val fireBaseAuth = FirebaseAuth.getInstance()
     private val db = Firebase.firestore
 
-    @ExperimentalCoroutinesApi
     override val currentUser: Flow<User?>
         get() = callbackFlow {
             val authListener = FirebaseAuth.AuthStateListener {
@@ -36,7 +35,6 @@ class FirebaseUserRepositoryImpl(private val context: Context) : UserRepository 
             awaitClose { fireBaseAuth.removeAuthStateListener(authListener) }
         }
 
-    @ExperimentalCoroutinesApi
     override suspend fun logoutCurrentUser() = callbackFlow {
         AuthUI.getInstance().signOut(context).addOnSuccessListener {
             trySend(true)
@@ -56,7 +54,6 @@ class FirebaseUserRepositoryImpl(private val context: Context) : UserRepository 
         TODO("change name")
     }
 
-    @ExperimentalCoroutinesApi
     override suspend fun addNewUser(user: User): StateFlow<Progress> {
         val flow = MutableStateFlow<Progress>(Progress.Loading())
         if (user.isAnonymous) {

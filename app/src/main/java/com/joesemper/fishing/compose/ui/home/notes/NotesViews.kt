@@ -9,10 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
@@ -596,7 +593,7 @@ fun BackgroundImage(modifier: Modifier = Modifier) {
     /*Image(
         modifier = modifier.fillMaxSize(),
         colorFilter = ColorFilter.tint(
-            surfaceGreenColor,
+            MaterialTheme.colors.surface,
             BlendMode.ColorDodge
         ),
         painter = painterResource(id = R.drawable.ic_pattern_background),
