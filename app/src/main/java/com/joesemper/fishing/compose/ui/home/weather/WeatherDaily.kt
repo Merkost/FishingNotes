@@ -34,7 +34,6 @@ fun WeatherDaily(
 ) {
 
     val pagerState = rememberPagerState(
-        pageCount = data?.dailyForecast?.size ?: 0,
         initialPage = data?.selectedDay ?: 0
     )
 
@@ -98,6 +97,7 @@ fun WeatherTabsContent(
 ) {
     HorizontalPager(
         state = pagerState,
+        count = forecast.size,
         modifier = modifier.fillMaxSize()
     ) { page ->
         DailyWeatherScreen(forecast = forecast[page])

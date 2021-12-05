@@ -79,7 +79,7 @@ class FirebaseMarkersRepositoryImpl(
 
     override fun getMapMarker(markerId: String) = channelFlow {
         val listener = dbCollections.getUserMapMarkersCollection().document(markerId)
-            .addSnapshotListener { value, error ->
+            .addSnapshotListener { value, _ ->
                 trySend(value?.toObject<UserMapMarker>())
             }
         awaitClose { listener.remove() }

@@ -4,7 +4,7 @@ import android.os.Parcelable
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.graphics.BlendMode.Companion.Color
 import androidx.compose.ui.graphics.Color
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 class UserMapMarker(

@@ -26,9 +26,7 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.HeaderText
 import com.joesemper.fishing.compose.ui.home.PrimaryText
 import com.joesemper.fishing.compose.ui.home.SecondaryText
-import com.joesemper.fishing.compose.ui.theme.primaryDarkColor
 import com.joesemper.fishing.compose.ui.theme.primaryTextColor
-import com.joesemper.fishing.compose.ui.theme.secondaryColor
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.model.entity.weather.Temperature
@@ -509,7 +507,7 @@ fun DailyWeatherValuesView(
                 },
             painter = painterResource(id = R.drawable.ic_gauge),
             contentDescription = stringResource(id = R.string.pressure),
-            colorFilter = ColorFilter.tint(color = primaryDarkColor)
+            colorFilter = ColorFilter.tint(color = MaterialTheme.colors.primaryVariant)
         )
         PrimaryText(
             modifier = Modifier.constrainAs(pressValue) {
@@ -568,7 +566,7 @@ fun DailyWeatherValuesView(
                 },
             painter = painterResource(id = R.drawable.ic_baseline_opacity_24),
             contentDescription = stringResource(id = R.string.humidity),
-            colorFilter = ColorFilter.tint(color = primaryDarkColor)
+            colorFilter = ColorFilter.tint(color = MaterialTheme.colors.primaryVariant)
         )
         PrimaryText(
             modifier = Modifier.constrainAs(humidValue) {

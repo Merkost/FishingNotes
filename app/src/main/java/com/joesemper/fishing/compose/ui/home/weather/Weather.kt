@@ -4,10 +4,7 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -18,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -300,7 +298,7 @@ fun HourlyWeatherItem(
             modifier = Modifier.size(32.dp),
             painter = painterResource(id = getWeatherIconByName(forecast.weather.first().icon)),
             contentDescription = "",
-            colorFilter = ColorFilter.tint(color = primaryWhiteColor)
+            colorFilter = ColorFilter.tint(color = Color.White)
         )
         PrimaryText(
             text = getTemperature(
@@ -535,6 +533,8 @@ fun PressureChart(
 
     }
 
+    val color = MaterialTheme.colors.primary
+
 
     Canvas(modifier = modifier.padding(start = 32.dp, end = 32.dp, bottom = 18.dp, top = 32.dp)) {
         val xbounds = Pair(0f, xTarget)
@@ -556,7 +556,7 @@ fun PressureChart(
             val pointY = size.height - (yValues.value[index] * scaleY) + yMove - 52f
 
             drawCircle(
-                color = MaterialTheme.colors.primary,
+                color = color,
                 center = Offset(x = pointX, y = pointY),
                 radius = 12f
             )
@@ -582,7 +582,7 @@ fun PressureChart(
                 drawLine(
                     start = Offset(x = linesList[index - 1].x, linesList[index - 1].y),
                     end = Offset(x = value.x, y = value.y),
-                    color = MaterialTheme.colors.primary,
+                    color = color,
                     strokeWidth = 5F
                 )
             }
