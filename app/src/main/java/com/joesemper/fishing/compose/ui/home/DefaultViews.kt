@@ -408,14 +408,15 @@ fun SecondaryTextSmall(
 fun SecondaryText(
     modifier: Modifier = Modifier, text: String,
     maxLines: Int = Int.MAX_VALUE,
-    textAlign: TextAlign = TextAlign.Center
+    textAlign: TextAlign = TextAlign.Center,
+    textColor: Color = secondaryTextColor
 ) {
     Text(
         textAlign = textAlign,
         modifier = modifier,
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
-        color = secondaryFigmaTextColor,
+        color = textColor,
         text = text,
         maxLines = maxLines
     )

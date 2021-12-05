@@ -2,11 +2,13 @@ package com.joesemper.fishing.compose.ui.home.weather
 
 import android.content.Context
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavController
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.Arguments
+import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.Daily
 
@@ -87,4 +89,19 @@ enum class PressureValues {
 
 enum class TemperatureValues {
     C, F, K
+}
+
+fun navigateToDailyWeatherScreen(
+    navController: NavController,
+    index: Int,
+    forecastDaily: List<Daily>
+) {
+    val argument = DailyWeatherData(
+        selectedDay = index,
+        dailyForecast = forecastDaily
+    )
+    navController.navigate(
+        MainDestinations.DAILY_WEATHER_ROUTE,
+        Arguments.WEATHER_DATA to argument
+    )
 }

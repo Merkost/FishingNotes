@@ -1,5 +1,6 @@
 package com.joesemper.fishing.compose.ui.home.weather
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -10,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -18,156 +19,81 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.airbnb.lottie.compose.*
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.HeaderText
 import com.joesemper.fishing.compose.ui.home.PrimaryText
-import com.joesemper.fishing.compose.ui.home.SecondaryTextColored
-import com.joesemper.fishing.compose.ui.home.SecondaryTextSmall
-import com.joesemper.fishing.compose.ui.theme.*
+import com.joesemper.fishing.compose.ui.home.SecondaryText
+import com.joesemper.fishing.compose.ui.theme.primaryDarkColor
+import com.joesemper.fishing.compose.ui.theme.primaryTextColor
+import com.joesemper.fishing.compose.ui.theme.secondaryColor
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.model.entity.weather.Daily
+import com.joesemper.fishing.model.entity.weather.Temperature
+import com.joesemper.fishing.model.entity.weather.Weather
+import com.joesemper.fishing.model.mappers.getMoonIconByPhase
+import com.joesemper.fishing.model.mappers.getWeatherIconByName
+import com.joesemper.fishing.utils.calculateDaylightHours
+import com.joesemper.fishing.utils.calculateDaylightMinutes
+import com.joesemper.fishing.utils.getTimeBySeconds
 
 @Composable
-fun PrimaryWeatherParameterMeaning(modifier: Modifier = Modifier, icon: Int, text: String) {
-    Column(
-        modifier = modifier
-            .height(100.dp)
-            .width(150.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            modifier = Modifier.size(56.dp),
-            painter = painterResource(id = icon),
-            contentDescription = stringResource(id = R.string.weather),
-            tint = Color.White
-        )
-        SecondaryTextColored(
-            text = text,
-            color = secondaryWhiteColor,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-@Composable
-fun WeatherParameterMeaning(
+fun PrimaryWeatherItemView(
     modifier: Modifier = Modifier,
-    title: String,
-    text: String,
-    primaryIconId: Int,
-    iconId: Int? = null,
-    iconRotation: Int = 0,
-    lightTint: Boolean = false
+    weather: Weather,
+    temperature: Float,
+    textTint: Color = MaterialTheme.colors.primaryVariant,
+    iconTint: Color = Color.Unspecified,
+    temperatureUnit: String
 ) {
+
     ConstraintLayout(
         modifier = modifier
-            .height(50.dp)
-            .width(120.dp),
+            .fillMaxWidth()
+            .wrapContentHeight()
     ) {
-        val (icon, header, meaning, unit) = createRefs()
+        val (temp, icon, description) = createRefs()
+
+        //val guideline = createGuidelineFromAbsoluteLeft(0.5f)
+        createHorizontalChain(icon, temp, chainStyle = ChainStyle.Spread)
+
         Icon(
             modifier = Modifier
-                .size(40.dp)
-                .padding(8.dp)
+                .size(64.dp)
                 .constrainAs(icon) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
+                    top.linkTo(parent.top, 8.dp)
+                    absoluteRight.linkTo(temp.absoluteLeft)
                     absoluteLeft.linkTo(parent.absoluteLeft)
                 },
-            painter = painterResource(id = primaryIconId),
-            contentDescription = stringResource(id = R.string.temperature),
-            tint = if (lightTint) secondaryWhiteColor else secondaryTextColor
-        )
-        SecondaryTextSmall(
-            modifier = Modifier
-                .constrainAs(header) {
-                    top.linkTo(icon.top)
-                    absoluteLeft.linkTo(icon.absoluteRight)
-                },
-            text = title,
-            color = if (lightTint) secondaryWhiteColor else secondaryTextColor
+            painter = painterResource(id = getWeatherIconByName(weather.icon)),
+            contentDescription = stringResource(id = R.string.weather),
+            tint = iconTint
         )
         PrimaryText(
-            modifier = Modifier
-                .constrainAs(meaning) {
-                    absoluteLeft.linkTo(header.absoluteLeft)
-                    bottom.linkTo(icon.bottom)
-                },
-            text = text,
-            textColor = if (lightTint) primaryWhiteColor else primaryTextColor
+            modifier = Modifier.constrainAs(description) {
+                top.linkTo(icon.bottom, 4.dp)
+                absoluteLeft.linkTo(icon.absoluteLeft)
+                absoluteRight.linkTo(icon.absoluteRight)
+            },
+            text = weather.description.replaceFirstChar { it.uppercase() },
+            textColor = textTint
         )
-        iconId?.let {
-            Icon(
-                modifier = Modifier
-                    .size(24.dp)
-                    .rotate(iconRotation.toFloat())
-                    .constrainAs(unit) {
-                        top.linkTo(meaning.top)
-                        bottom.linkTo(meaning.bottom)
-                        absoluteLeft.linkTo(meaning.absoluteRight, 4.dp)
-                    },
-                painter = painterResource(id = it),
-                contentDescription = stringResource(id = R.string.temperature),
-                tint = if (lightTint) primaryWhiteColor else primaryTextColor
-            )
-        }
-    }
-}
 
-@Composable
-fun WeatherTemperatureMeaning(
-    modifier: Modifier = Modifier,
-    temperature: String,
-    minTemperature: String,
-    maxTemperature: String,
-) {
-    ConstraintLayout(
-        modifier = modifier
-            .height(70.dp)
-            .width(100.dp),
-    ) {
-        val (main, param, min, max) = createRefs()
         HeaderText(
             modifier = Modifier
-                .constrainAs(main) {
-                    absoluteLeft.linkTo(parent.absoluteLeft)
+                .constrainAs(temp) {
                     top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
+                    absoluteLeft.linkTo(icon.absoluteRight)
+                    absoluteRight.linkTo(parent.absoluteRight)
+                    bottom.linkTo(parent.bottom, 8.dp)
                 },
-            text = temperature,
-            textColor = primaryWhiteColor
-        )
-        Icon(
-            modifier = Modifier
-                .size(48.dp)
-                .constrainAs(param) {
-                    top.linkTo(main.top)
-                    bottom.linkTo(main.bottom)
-                    absoluteLeft.linkTo(main.absoluteRight)
-                },
-            painter = painterResource(R.drawable.ic_temperature_celsius),
-            contentDescription = stringResource(id = R.string.temperature),
-            tint = secondaryWhiteColor
-        )
-        SecondaryTextSmall(
-            modifier = Modifier
-                .constrainAs(max) {
-                    absoluteLeft.linkTo(param.absoluteRight)
-                    top.linkTo(param.top)
-                },
-            text = maxTemperature,
-            color = primaryWhiteColor
-        )
-        SecondaryTextSmall(
-            modifier = Modifier
-                .constrainAs(min) {
-                    absoluteLeft.linkTo(param.absoluteRight)
-                    bottom.linkTo(param.bottom)
-                },
-            text = minTemperature,
-            color = primaryWhiteColor
+            text = getTemperature(
+                temperature,
+                TemperatureValues.valueOf(temperatureUnit)
+            ) + getTemperatureFromUnit(temperatureUnit),
+            textColor = textTint
         )
 
     }
@@ -182,17 +108,18 @@ fun WeatherPlaceSelectItem(
 ) {
     val isExpanded = remember { mutableStateOf(false) }
     Box(
-        modifier = modifier.fillMaxWidth().clickable {
-            isExpanded.value = !isExpanded.value
-        },
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable {
+                isExpanded.value = !isExpanded.value
+            },
         contentAlignment = Alignment.Center
     ) {
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp)
-                ,
+                .padding(horizontal = 8.dp),
             horizontalArrangement = Arrangement.Center
         ) {
             WeatherAppBarText(
@@ -217,7 +144,7 @@ fun WeatherDropdownMenu(
 ) {
 
     DropdownMenu(
-        modifier = Modifier.requiredWidthIn(200.dp, 500.dp),
+        modifier = Modifier.requiredWidthIn(250.dp, 300.dp),
         expanded = isExpanded.value,
         onDismissRequest = {
             isExpanded.value = !isExpanded.value
@@ -343,19 +270,369 @@ fun WeatherEmptyView(modifier: Modifier) {
     )
 }
 
+@Composable
+fun DayTemperatureView(
+    modifier: Modifier,
+    temperature: Temperature,
+    temperatureUnit: String
+) {
+    ConstraintLayout(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+    ) {
+        val (morn, day, eve, night, mornMeaning, dayMeaning, eveMeaning, nightMeaning) = createRefs()
+        createHorizontalChain(morn, day, eve, night, chainStyle = ChainStyle.Spread)
+        SecondaryText(
+            modifier = Modifier.constrainAs(morn) {
+                absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                absoluteRight.linkTo(day.absoluteLeft)
+                top.linkTo(parent.top, 8.dp)
+            },
+            text = stringResource(R.string.morning)
+        )
+        SecondaryText(
+            modifier = Modifier.constrainAs(day) {
+                absoluteLeft.linkTo(morn.absoluteRight)
+                absoluteRight.linkTo(eve.absoluteLeft)
+                top.linkTo(parent.top, 8.dp)
+            },
+            text = stringResource(R.string.day)
+        )
+        SecondaryText(
+            modifier = Modifier.constrainAs(eve) {
+                absoluteLeft.linkTo(day.absoluteRight)
+                absoluteRight.linkTo(night.absoluteLeft)
+                top.linkTo(parent.top, 8.dp)
+            },
+            text = stringResource(R.string.Evening)
+        )
+        SecondaryText(
+            modifier = Modifier.constrainAs(night) {
+                absoluteLeft.linkTo(eve.absoluteRight)
+                absoluteRight.linkTo(parent.absoluteLeft, 16.dp)
+                top.linkTo(parent.top, 8.dp)
+            },
+            text = stringResource(R.string.night)
+        )
+        PrimaryText(
+            modifier = Modifier.constrainAs(mornMeaning) {
+                absoluteLeft.linkTo(morn.absoluteLeft)
+                absoluteRight.linkTo(morn.absoluteRight)
+                top.linkTo(morn.bottom, 4.dp)
+            },
+            text = getTemperature(
+                temperature.morning,
+                TemperatureValues.valueOf(temperatureUnit)
+            ) + getTemperatureFromUnit(temperatureUnit)
+        )
+        PrimaryText(
+            modifier = Modifier.constrainAs(dayMeaning) {
+                absoluteLeft.linkTo(day.absoluteLeft)
+                absoluteRight.linkTo(day.absoluteRight)
+                top.linkTo(day.bottom, 4.dp)
+            },
+            text = getTemperature(
+                temperature.day,
+                TemperatureValues.valueOf(temperatureUnit)
+            ) + getTemperatureFromUnit(temperatureUnit),
+        )
+        PrimaryText(
+            modifier = Modifier.constrainAs(eveMeaning) {
+                absoluteLeft.linkTo(eve.absoluteLeft)
+                absoluteRight.linkTo(eve.absoluteRight)
+                top.linkTo(eve.bottom, 4.dp)
+            },
+            text = getTemperature(
+                temperature.evening,
+                TemperatureValues.valueOf(temperatureUnit)
+            ) + getTemperatureFromUnit(temperatureUnit),
+        )
+        PrimaryText(
+            modifier = Modifier.constrainAs(nightMeaning) {
+                absoluteLeft.linkTo(night.absoluteLeft)
+                absoluteRight.linkTo(night.absoluteRight)
+                top.linkTo(night.bottom, 4.dp)
+            },
+            text = getTemperature(
+                temperature.night,
+                TemperatureValues.valueOf(temperatureUnit)
+            ) + getTemperatureFromUnit(temperatureUnit),
+        )
+    }
+}
 
+@Composable
+fun SunriseSunsetView(
+    modifier: Modifier = Modifier,
+    sunrise: Long,
+    sunset: Long,
+) {
+    ConstraintLayout(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+    ) {
+        val (sunriseValue, sunsetValue, sunriseIcon, sunsetIcon, day, dayValue) = createRefs()
 
+        createHorizontalChain(sunriseIcon, day, sunsetIcon, chainStyle = ChainStyle.Spread)
 
+        Image(
+            modifier = Modifier.constrainAs(sunriseIcon) {
+                absoluteLeft.linkTo(parent.absoluteLeft, 32.dp)
+                absoluteRight.linkTo(day.absoluteLeft)
+                top.linkTo(parent.top, 8.dp)
+            },
+            painter = painterResource(id = R.drawable.ic_sunrise_morning_svgrepo_com),
+            contentDescription = stringResource(
+                id = R.string.sunrise_sunset
+            )
+        )
 
+        SecondaryText(
+            modifier = Modifier.constrainAs(day) {
+                absoluteLeft.linkTo(sunriseIcon.absoluteRight)
+                absoluteRight.linkTo(sunsetIcon.absoluteLeft)
+                top.linkTo(sunriseIcon.top)
+                bottom.linkTo(sunriseIcon.bottom)
+            },
+            text = stringResource(R.string.daylight_hours)
+        )
 
+        Image(
+            modifier = Modifier.constrainAs(sunsetIcon) {
+                absoluteLeft.linkTo(parent.absoluteLeft, 32.dp)
+                absoluteRight.linkTo(day.absoluteLeft)
+                top.linkTo(parent.top, 8.dp)
+            },
+            painter = painterResource(id = R.drawable.ic_sunset_svgrepo_com),
+            contentDescription = stringResource(
+                id = R.string.sunrise_sunset
+            )
+        )
 
+        PrimaryText(
+            modifier = Modifier.constrainAs(sunriseValue) {
+                top.linkTo(sunriseIcon.bottom, 8.dp)
+                absoluteLeft.linkTo(sunriseIcon.absoluteLeft)
+                absoluteRight.linkTo(sunriseIcon.absoluteRight)
+            },
+            text = getTimeBySeconds(sunrise)
+        )
 
+        PrimaryText(
+            modifier = Modifier.constrainAs(dayValue) {
+                top.linkTo(sunriseIcon.bottom, 8.dp)
+                absoluteLeft.linkTo(day.absoluteLeft)
+                absoluteRight.linkTo(day.absoluteRight)
+            },
+            text = calculateDaylightHours(sunrise, sunset)
+                    + " "
+                    + stringResource(R.string.hours)
+                    + " "
+                    + calculateDaylightMinutes(sunrise, sunset)
+                    + " "
+                    + stringResource(R.string.minutes)
+        )
 
+        PrimaryText(
+            modifier = Modifier.constrainAs(sunsetValue) {
+                top.linkTo(sunsetIcon.bottom, 8.dp)
+                absoluteLeft.linkTo(sunsetIcon.absoluteLeft)
+                absoluteRight.linkTo(sunsetIcon.absoluteRight)
+            },
+            text = getTimeBySeconds(sunset)
+        )
 
+    }
+}
 
+@Composable
+fun DailyWeatherValuesView(
+    modifier: Modifier = Modifier,
+    forecast: Daily,
+    pressureUnit: String
+) {
+    ConstraintLayout(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+    ) {
+        val (
+            pressIcon, pressValue, pressText, windIcon, windValue, windText, windDeg,
+            humidIcon, humidValue, humidText, popIcon, popValue, popText,
+        ) = createRefs()
 
+        val guideline = createGuidelineFromAbsoluteLeft(0.5f)
 
+        SecondaryText(
+            modifier = Modifier.constrainAs(pressText) {
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(guideline)
+                top.linkTo(parent.top, 8.dp)
+            },
+            text = stringResource(id = R.string.pressure)
+        )
+        SecondaryText(
+            modifier = Modifier.constrainAs(windText) {
+                absoluteLeft.linkTo(guideline)
+                absoluteRight.linkTo(parent.absoluteRight)
+                top.linkTo(parent.top, 8.dp)
+            },
+            text = stringResource(id = R.string.wind)
+        )
 
+        SecondaryText(
+            modifier = Modifier.constrainAs(humidText) {
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(guideline)
+                top.linkTo(pressIcon.bottom, 24.dp)
+            },
+            text = stringResource(id = R.string.humidity)
+        )
+        SecondaryText(
+            modifier = Modifier.constrainAs(popText) {
+                absoluteLeft.linkTo(guideline)
+                absoluteRight.linkTo(parent.absoluteRight)
+                top.linkTo(humidText.top)
+            },
+            text = stringResource(id = R.string.precipitation)
+        )
+
+        Image(
+            modifier = Modifier
+                .size(24.dp)
+                .constrainAs(pressIcon) {
+                    top.linkTo(pressText.bottom, 4.dp)
+                    absoluteLeft.linkTo(pressText.absoluteLeft)
+                    absoluteRight.linkTo(pressValue.absoluteLeft, 2.dp)
+                },
+            painter = painterResource(id = R.drawable.ic_gauge),
+            contentDescription = stringResource(id = R.string.pressure),
+            colorFilter = ColorFilter.tint(color = primaryDarkColor)
+        )
+        PrimaryText(
+            modifier = Modifier.constrainAs(pressValue) {
+                top.linkTo(pressIcon.top)
+                bottom.linkTo(pressIcon.bottom)
+                absoluteLeft.linkTo(pressIcon.absoluteRight, 2.dp)
+                absoluteRight.linkTo(pressText.absoluteRight)
+            },
+            text = getPressure(
+                forecast.pressure,
+                PressureValues.valueOf(pressureUnit)
+            ) + " " + pressureUnit,
+        )
+
+        Image(
+            modifier = Modifier
+                .size(24.dp)
+                .constrainAs(windIcon) {
+                    top.linkTo(pressText.bottom, 4.dp)
+                    absoluteLeft.linkTo(windText.absoluteLeft)
+                    absoluteRight.linkTo(windValue.absoluteLeft, 2.dp)
+                },
+            painter = painterResource(id = R.drawable.ic_wind),
+            contentDescription = stringResource(id = R.string.wind),
+        )
+        PrimaryText(
+            modifier = Modifier.constrainAs(windValue) {
+                top.linkTo(windIcon.top)
+                bottom.linkTo(windIcon.bottom)
+                absoluteLeft.linkTo(windIcon.absoluteRight, 2.dp)
+                absoluteRight.linkTo(windDeg.absoluteLeft, 2.dp)
+            },
+            text = forecast.windSpeed.toInt()
+                .toString() + " " + stringResource(id = R.string.wind_speed_units)
+        )
+        Icon(
+            modifier = Modifier
+                .constrainAs(windDeg) {
+                    top.linkTo(windIcon.top)
+                    bottom.linkTo(windIcon.bottom)
+                    absoluteLeft.linkTo(windValue.absoluteRight, 4.dp)
+                    absoluteRight.linkTo(windText.absoluteRight)
+                }
+                .rotate(forecast.windDeg.toFloat()),
+            painter = painterResource(id = R.drawable.ic_baseline_navigation_24),
+            contentDescription = stringResource(id = R.string.wind),
+        )
+
+        Image(
+            modifier = Modifier
+                .size(24.dp)
+                .constrainAs(humidIcon) {
+                    top.linkTo(humidText.bottom, 4.dp)
+                    absoluteLeft.linkTo(humidText.absoluteLeft)
+                    absoluteRight.linkTo(humidValue.absoluteLeft, 2.dp)
+                },
+            painter = painterResource(id = R.drawable.ic_baseline_opacity_24),
+            contentDescription = stringResource(id = R.string.humidity),
+            colorFilter = ColorFilter.tint(color = primaryDarkColor)
+        )
+        PrimaryText(
+            modifier = Modifier.constrainAs(humidValue) {
+                top.linkTo(humidIcon.top)
+                bottom.linkTo(humidIcon.bottom)
+                absoluteLeft.linkTo(humidIcon.absoluteRight, 2.dp)
+                absoluteRight.linkTo(humidText.absoluteRight)
+            },
+            text = forecast.humidity.toString() + " " + stringResource(id = R.string.percent)
+        )
+
+        Image(
+            modifier = Modifier
+                .size(24.dp)
+                .constrainAs(popIcon) {
+                    top.linkTo(popText.bottom, 4.dp)
+                    absoluteLeft.linkTo(popText.absoluteLeft)
+                    absoluteRight.linkTo(popValue.absoluteLeft, 2.dp)
+                },
+            painter = painterResource(id = R.drawable.ic_baseline_umbrella_24),
+            contentDescription = stringResource(id = R.string.precipitation),
+        )
+        PrimaryText(
+            modifier = Modifier.constrainAs(popValue) {
+                top.linkTo(popIcon.top)
+                bottom.linkTo(popIcon.bottom)
+                absoluteLeft.linkTo(popIcon.absoluteRight, 2.dp)
+                absoluteRight.linkTo(popText.absoluteRight)
+            },
+            text = (forecast.probabilityOfPrecipitation * 100).toInt().toString()
+                    + " " + stringResource(id = R.string.percent)
+        )
+    }
+}
+
+@Composable
+fun MoonPhaseView(
+    modifier: Modifier = Modifier,
+    moonPhase: Float
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        SecondaryText(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            text = stringResource(id = R.string.moon_phase)
+        )
+        Icon(
+            modifier = Modifier
+                .size(32.dp)
+                .padding(horizontal = 4.dp),
+            painter = painterResource(id = getMoonIconByPhase(moonPhase)),
+            contentDescription = stringResource(id = R.string.moon_phase)
+        )
+        PrimaryText(
+            text = (moonPhase * 100).toInt().toString()
+                    + " " + stringResource(id = R.string.percent)
+        )
+    }
+}
 
 
 

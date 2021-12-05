@@ -23,6 +23,7 @@ import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.compose.ui.home.*
+import com.joesemper.fishing.compose.ui.home.weather.WeatherDaily
 import com.joesemper.fishing.compose.ui.login.LoginScreen
 import kotlinx.coroutines.InternalCoroutinesApi
 
@@ -135,6 +136,15 @@ private fun NavGraphBuilder.NavGraph(
     composable(
         route = MainDestinations.CATCH_ROUTE,
     ) { UserCatchScreen(navController, it.requiredArg(Arguments.CATCH)) }
+
+    composable(
+        route = MainDestinations.DAILY_WEATHER_ROUTE,
+    ) {
+        WeatherDaily(
+            upPress = { navController.popBackStack() },
+            data = it.requiredArg(Arguments.WEATHER_DATA)
+        )
+    }
+
+
 }
-
-

@@ -30,8 +30,6 @@ fun UserCatchesScreen(
     navController: NavController,
     viewModel: UserCatchesViewModel = getViewModel()
 ) {
-
-
     Scaffold(backgroundColor = Color.Transparent) {
         val catches by viewModel.currentContent.collectAsState()
         Crossfade(catches) { animatedUiState ->

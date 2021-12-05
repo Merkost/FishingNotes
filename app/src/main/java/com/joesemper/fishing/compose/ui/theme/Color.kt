@@ -42,5 +42,5 @@ val supportTextColor = Color(0x42000000)
 
 
 val primaryWhiteColor = Color(0xFFFFFFFF)
-val secondaryWhiteColor = Color(0xFFF3F3F3)
+val secondaryWhiteColor = Color(0xFFE9E9E9)
 

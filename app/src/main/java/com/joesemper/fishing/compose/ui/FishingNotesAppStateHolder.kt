@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
  */
 object MainDestinations {
 
+
     const val LOGIN_ROUTE = "login"
     const val HOME_ROUTE = "home"
     const val SETTINGS = "settings"
@@ -35,6 +36,8 @@ object MainDestinations {
     const val PLACE_ROUTE = "place"
 
     const val CATCH_ROUTE = "catch"
+    const val DAILY_WEATHER_ROUTE = "daily_weather"
+
 
     const val MAP_ROUTE = "map"
     //const val MAP_TO_PLACE_ROUTE = "${HOME_ROUTE}/${MAP_ROUTE}/${PLACE_ROUTE}"
@@ -51,6 +54,8 @@ object MainDestinations {
 object Arguments {
     const val PLACE = "place_arg"
     const val CATCH = "catch_arg"
+    const val WEATHER_DATA = "daily_weather_data_arg"
+    const val WEATHER_INDEX = "daily_weather_index_arg"
     const val MAP_NEW_PLACE = "map_new_place_arg"
 }
 

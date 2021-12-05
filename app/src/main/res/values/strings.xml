@@ -196,6 +196,14 @@
     <string name="fahrenheit">°F</string>
     <string name="Kelvin">K</string>
     <string name="kelvin">K</string>
+    <string name="now">Now</string>
+    <string name="morning">Morning</string>
+    <string name="day">Day</string>
+    <string name="Evening">Evening</string>
+    <string name="night">Night</string>
+    <string name="daylight_hours">Daylight hours</string>
+    <string name="hours">\h\</string>
+    <string name="minutes">\m\</string>
     <string name="choose_temperature_unit">Choose temperature unit</string>
 
 

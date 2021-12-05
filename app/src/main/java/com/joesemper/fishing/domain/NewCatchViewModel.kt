@@ -11,7 +11,6 @@ import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawUserCatch
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
-import com.joesemper.fishing.model.repository.UserContentRepository
 import com.joesemper.fishing.model.repository.app.CatchesRepository
 import com.joesemper.fishing.model.repository.app.MarkersRepository
 import com.joesemper.fishing.model.repository.app.WeatherRepository
@@ -98,38 +97,40 @@ class NewCatchViewModel(
         return fishType.value.isNotBlank() && !marker.value?.title.isNullOrEmpty() && noErrors.value
     }
 
-    fun createNewUserCatch(): Boolean {
-        if (isInputCorrect()) {
-            marker.value?.let { userMapMarker ->
-                val hour = getHoursByMilliseconds(date.value).toInt()
-                weather.value?.let { forecast ->
-                    saveNewCatch(
-                        RawUserCatch(
-                            fishType = fishType.value,
-                            description = description.value,
-                            date = date.value.toLong(),
-                            fishAmount = fishAmount.value.toInt(),
-                            fishWeight = weight.value.toDouble(),
-                            fishingRodType = rod.value,
-                            fishingBait = bite.value,
-                            fishingLure = lure.value,
-                            markerId = userMapMarker.id,
-                            placeTitle = userMapMarker.title,
-                            isPublic = false,
-                            photos = images,
-                            weatherPrimary = forecast.hourly[hour].weather.first().description,
-                            weatherIcon = forecast.hourly[hour].weather.first().icon,
-                            weatherTemperature = forecast.hourly[hour].temperature,
-                            weatherWindSpeed = forecast.hourly[hour].windSpeed,
-                            weatherWindDeg = forecast.hourly[hour].windDeg,
-                            weatherPressure = forecast.hourly[hour].pressure,
-                            weatherMoonPhase = moonPhase.value
+    fun createNewUserCatch() {
+        viewModelScope.launch {
+            if (isInputCorrect()) {
+                marker.value?.let { userMapMarker ->
+                    val hour = getHoursByMilliseconds(date.value).toInt()
+                    weather.value?.let { forecast ->
+                        saveNewCatch(
+                            RawUserCatch(
+                                fishType = fishType.value,
+                                description = description.value,
+                                date = date.value.toLong(),
+                                fishAmount = fishAmount.value.toInt(),
+                                fishWeight = weight.value.toDouble(),
+                                fishingRodType = rod.value,
+                                fishingBait = bite.value,
+                                fishingLure = lure.value,
+                                markerId = userMapMarker.id,
+                                placeTitle = userMapMarker.title,
+                                isPublic = false,
+                                photos = images,
+                                weatherPrimary = forecast.hourly[hour].weather.first().description,
+                                weatherIcon = forecast.hourly[hour].weather.first().icon,
+                                weatherTemperature = forecast.hourly[hour].temperature,
+                                weatherWindSpeed = forecast.hourly[hour].windSpeed,
+                                weatherWindDeg = forecast.hourly[hour].windDeg,
+                                weatherPressure = forecast.hourly[hour].pressure,
+                                weatherMoonPhase = moonPhase.value
+                            )
                         )
-                    )
+                    }
                 }
             }
-            return true
-        } else return false
+        }
+
     }
 
 }
