@@ -21,7 +21,7 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.DefaultAppBar
 import com.joesemper.fishing.model.entity.weather.Daily
-import com.joesemper.fishing.utils.getDayOfWeekAndDate
+import com.joesemper.fishing.utils.time.TimeManager
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
@@ -47,7 +47,7 @@ fun WeatherDaily(
         }
     ) {
         AnimatedVisibility(visible = data != null) {
-            Column() {
+            Column {
                 WeatherDaysTabs(forecast = data!!.dailyForecast, pagerState = pagerState)
                 WeatherTabsContent(forecast = data.dailyForecast, pagerState = pagerState)
             }
@@ -60,6 +60,7 @@ fun WeatherDaily(
 @Composable
 fun WeatherDaysTabs(forecast: List<Daily>, pagerState: PagerState) {
     val scope = rememberCoroutineScope()
+    val timeManager: TimeManager = get()
     ScrollableTabRow(
         selectedTabIndex = pagerState.currentPage,
         backgroundColor = MaterialTheme.colors.surface,
@@ -80,7 +81,7 @@ fun WeatherDaysTabs(forecast: List<Daily>, pagerState: PagerState) {
                 },
                 text = {
                     Text(
-                        text = getDayOfWeekAndDate(weather.date),
+                        text = timeManager.getDayOfWeekAndDate(weather.date),
                         color = MaterialTheme.colors.primary
                     )
                 },

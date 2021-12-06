@@ -20,7 +20,7 @@ import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserCatchesViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
-import com.joesemper.fishing.utils.getDateByMillisecondsTextMonth
+import com.joesemper.fishing.utils.time.TimeManager
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
@@ -48,23 +48,23 @@ fun UserCatches(
     catches: List<UserCatch>,
     userCatchClicked: (UserCatch) -> Unit
 ) {
+    val timeManager: TimeManager = get()
     val userPreferences: UserPreferences = get()
     val timeFormat by userPreferences.use12hTimeFormat.collectAsState(false)
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         when {
             catches.isNotEmpty() -> {
-                getDatesList(catches).forEach { catchDate ->
+                getDatesList(catches, timeManager).forEach { catchDate ->
                     item {
                         ItemDate(text = catchDate)
                     }
                     items(items = catches
                         .filter { userCatch ->
-                            getDateByMillisecondsTextMonth(userCatch.date) == catchDate
+                            timeManager.getDate(userCatch.date) == catchDate
                         }
                         .sortedByDescending { it.date }) {
                         ItemUserCatch(
                             userCatch = it,
-                            timeFormat,
                             userCatchClicked = userCatchClicked
                         )
                     }
@@ -84,10 +84,10 @@ fun UserCatches(
     }
 }
 
-private fun getDatesList(catches: List<UserCatch>): List<String> {
+private fun getDatesList(catches: List<UserCatch>, timeManager: TimeManager): List<String> {
     val dates = mutableListOf<String>()
     catches.sortedByDescending { it.date }.forEach { userCatch ->
-        val date = getDateByMillisecondsTextMonth(userCatch.date)
+        val date = timeManager.getDate(userCatch.date)
         if (!dates.contains(date)) {
             dates.add(date)
         }

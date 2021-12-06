@@ -32,11 +32,9 @@ import kotlinx.coroutines.launch
 fun Notes(
     modifier: Modifier = Modifier,
     navController: NavController,
-//    state: SearchState = rememberSearchState()
 ) {
-    //val navController = rememberNavController()
     val tabs = listOf(TabItem.Places, TabItem.Catches)
-    val pagerState = rememberPagerState(1)
+    val pagerState = rememberPagerState(0)
 
     Scaffold(
         topBar = {
@@ -77,7 +75,6 @@ fun Notes(
 @Composable
 fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
     val scope = rememberCoroutineScope()
-    // OR ScrollableTabRow()
     TabRow(
         selectedTabIndex = pagerState.currentPage,
         backgroundColor = MaterialTheme.colors.surface,
@@ -89,7 +86,6 @@ fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
             )
         }) {
         tabs.forEachIndexed { index, tab ->
-            // OR Tab()
             LeadingIconTab(
                 icon = { Icon(painter = painterResource(id = tab.icon), contentDescription = "",
                     tint = MaterialTheme.colors.primaryVariant ) },

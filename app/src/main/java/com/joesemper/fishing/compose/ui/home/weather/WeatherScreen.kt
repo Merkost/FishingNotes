@@ -49,10 +49,7 @@ import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.model.entity.weather.Hourly
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
-import com.joesemper.fishing.utils.getDateBySecondsTextMonth
-import com.joesemper.fishing.utils.getDayOfWeekAndDate
-import com.joesemper.fishing.utils.getDayOfWeekBySeconds
-import com.joesemper.fishing.utils.getTimeBySeconds
+import com.joesemper.fishing.utils.time.TimeManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.get
@@ -65,7 +62,7 @@ import kotlin.math.min
 @ExperimentalPagerApi
 @ExperimentalPermissionsApi
 @Composable
-fun Weather(
+fun WeatherScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     upPress: () -> Unit,
@@ -78,6 +75,8 @@ fun Weather(
     val selectedPlace = remember {
         mutableStateOf<UserMapMarker?>(null)
     }
+
+    val timeManager: TimeManager = get()
 
     LaunchedEffect(permissionsState.allPermissionsGranted) {
         getCurrentLocationFlow(context, permissionsState).collect { locationState ->
@@ -139,18 +138,21 @@ fun Weather(
                 CurrentWeather(
                     forecast = forecast,
                     pressureUnit = pressureUnit,
-                    temperatureUnit = temperatureUnit
+                    temperatureUnit = temperatureUnit,
+                    timeManager = timeManager
                 )
 
                 PressureChartItem(
                     forecast = forecast.daily,
-                    pressureUnit = pressureUnit
+                    pressureUnit = pressureUnit,
+                    timeManager = timeManager
                 )
 
                 forecast.daily.forEachIndexed { index, daily ->
                     DailyWeatherItem(
                         forecast = daily,
                         temperatureUnit = temperatureUnit,
+                        timeManager = timeManager,
                         onDailyWeatherClick = {
                             navigateToDailyWeatherScreen(
                                 navController = navController,
@@ -213,6 +215,7 @@ fun CurrentWeather(
     forecast: WeatherForecast,
     temperatureUnit: String,
     pressureUnit: String,
+    timeManager: TimeManager
 ) {
     Surface(
         modifier = modifier
@@ -242,6 +245,7 @@ fun CurrentWeather(
             HourlyWeather(
                 forecastHourly = forecast.hourly,
                 temperatureUnit = temperatureUnit,
+                timeManager = timeManager
             )
         }
     }
@@ -252,6 +256,7 @@ fun HourlyWeather(
     modifier: Modifier = Modifier,
     forecastHourly: List<Hourly>,
     temperatureUnit: String,
+    timeManager: TimeManager
 ) {
     LazyRow(
         modifier = modifier,
@@ -263,7 +268,7 @@ fun HourlyWeather(
                 timeTitle = if (index == 0) {
                     stringResource(R.string.now)
                 } else {
-                    getTimeBySeconds(forecastHourly[index].date)
+                    timeManager.getTime(forecastHourly[index].date)
                 },
                 temperatureUnit = temperatureUnit
             )
@@ -331,6 +336,7 @@ fun DailyWeatherItem(
     modifier: Modifier = Modifier,
     forecast: Daily,
     temperatureUnit: String,
+    timeManager: TimeManager,
     onDailyWeatherClick: () -> Unit,
 ) {
     ConstraintLayout(
@@ -347,7 +353,7 @@ fun DailyWeatherItem(
                 bottom.linkTo(day.top)
                 absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
             },
-            text = getDateBySecondsTextMonth(forecast.date)
+            text = timeManager.getDateTextMonth(forecast.date)
         )
         SecondaryText(
             modifier = Modifier.constrainAs(day) {
@@ -355,7 +361,7 @@ fun DailyWeatherItem(
                 top.linkTo(date.bottom)
                 bottom.linkTo(parent.bottom, 8.dp)
             },
-            text = getDayOfWeekBySeconds(forecast.date)
+            text = timeManager.getDayOfWeek(forecast.date)
         )
         Divider(
             modifier = Modifier.constrainAs(divider) {
@@ -425,7 +431,12 @@ fun DailyWeatherItem(
 }
 
 @Composable
-fun PressureChartItem(modifier: Modifier = Modifier, forecast: List<Daily>, pressureUnit: String) {
+fun PressureChartItem(
+    modifier: Modifier = Modifier,
+    forecast: List<Daily>,
+    pressureUnit: String,
+    timeManager: TimeManager
+) {
     Column(
         modifier = modifier
     ) {
@@ -440,7 +451,8 @@ fun PressureChartItem(modifier: Modifier = Modifier, forecast: List<Daily>, pres
                 .height(120.dp)
                 .padding(top = 16.dp),
             weather = forecast,
-            pressureUnit = pressureUnit
+            pressureUnit = pressureUnit,
+            timeManager = timeManager
         )
         Spacer(modifier = Modifier.padding(4.dp))
         Divider()
@@ -452,6 +464,7 @@ fun PressureChart(
     modifier: Modifier = Modifier,
     weather: List<Daily>,
     pressureUnit: String,
+    timeManager: TimeManager
 ) {
     val x = remember { Animatable(0f) }
     val yValues = remember(weather) { mutableStateOf(getPressureList(weather, pressureUnit)) }
@@ -504,7 +517,7 @@ fun PressureChart(
             )
 
             drawContext.canvas.nativeCanvas.drawText(
-                getDayOfWeekAndDate(weather[index].date),
+                timeManager.getDayOfWeekAndDate(weather[index].date),
                 pointX, size.height, paint
             )
 

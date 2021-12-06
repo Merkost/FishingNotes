@@ -33,9 +33,8 @@ import com.joesemper.fishing.model.entity.weather.Temperature
 import com.joesemper.fishing.model.entity.weather.Weather
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
-import com.joesemper.fishing.utils.calculateDaylightHours
-import com.joesemper.fishing.utils.calculateDaylightMinutes
-import com.joesemper.fishing.utils.getTimeBySeconds
+import com.joesemper.fishing.utils.time.TimeManager
+import org.koin.androidx.compose.get
 
 @Composable
 fun PrimaryWeatherItemView(
@@ -366,6 +365,8 @@ fun SunriseSunsetView(
     sunrise: Long,
     sunset: Long,
 ) {
+    val timeManager: TimeManager = get()
+
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()
@@ -415,7 +416,7 @@ fun SunriseSunsetView(
                 absoluteLeft.linkTo(sunriseIcon.absoluteLeft)
                 absoluteRight.linkTo(sunriseIcon.absoluteRight)
             },
-            text = getTimeBySeconds(sunrise)
+            text = timeManager.getTime(sunrise)
         )
 
         PrimaryText(
@@ -424,11 +425,11 @@ fun SunriseSunsetView(
                 absoluteLeft.linkTo(day.absoluteLeft)
                 absoluteRight.linkTo(day.absoluteRight)
             },
-            text = calculateDaylightHours(sunrise, sunset)
+            text = timeManager.calculateDaylightHours(sunrise, sunset)
                     + " "
                     + stringResource(R.string.hours)
                     + " "
-                    + calculateDaylightMinutes(sunrise, sunset)
+                    + timeManager.calculateDaylightMinutes(sunrise, sunset)
                     + " "
                     + stringResource(R.string.minutes)
         )
@@ -439,7 +440,7 @@ fun SunriseSunsetView(
                 absoluteLeft.linkTo(sunsetIcon.absoluteLeft)
                 absoluteRight.linkTo(sunsetIcon.absoluteRight)
             },
-            text = getTimeBySeconds(sunset)
+            text = timeManager.getTime(sunset)
         )
 
     }

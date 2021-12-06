@@ -63,8 +63,10 @@ import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.utils.*
+import com.joesemper.fishing.utils.time.TimeManager
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
+import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import java.util.*
 
@@ -89,6 +91,8 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
     val context = LocalContext.current
     val notAllFieldsFilled = stringResource(R.string.not_all_fields_are_filled)
 
+    val timeManager: TimeManager = get()
+
     viewModel.date.value = dateAndTime.timeInMillis
 
     if (place.id.isNotEmpty()) {
@@ -97,7 +101,7 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
 
     LaunchedEffect(key1 = viewModel.marker.value, key2 = viewModel.date.value) {
         viewModel.marker.value?.let {
-            if (getDateByMilliseconds(viewModel.date.value) != getDateByMilliseconds(Date().time)) {
+            if (timeManager.getDate(viewModel.date.value) != timeManager.getDate(Date().time)) {
                 viewModel.getHistoricalWeather()?.collect {
                     viewModel.weather.value = it
                 }
@@ -146,8 +150,8 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
             Places(stringResource(R.string.place), viewModel)  //Выпадающий список мест
             FishAndWeight(viewModel.fishAmount, viewModel.weight)
             Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
-            DateAndTime(viewModel.date)
-            NewCatchWeather(viewModel)
+            DateAndTime(viewModel.date, timeManager)
+            NewCatchWeather(viewModel, timeManager)
             Photos(
                 { clicked -> { } },
                 { deleted -> viewModel.deletePhoto(deleted) })
@@ -603,7 +607,10 @@ private fun addPhoto(
 }
 
 @Composable
-fun NewCatchWeather(viewModel: NewCatchViewModel) {
+fun NewCatchWeather(
+    viewModel: NewCatchViewModel,
+    timeManager: TimeManager
+) {
 
     val weather = viewModel.weather.value
 
@@ -628,7 +635,7 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
             )
 
             val hour by remember(dateAndTime.timeInMillis) {
-                mutableStateOf(getHoursByMilliseconds(dateAndTime.timeInMillis).toInt())
+                mutableStateOf(timeManager.getHours(dateAndTime.timeInMillis).toInt())
             }
 
             Crossfade(targetState = weather) { weatherForecast ->
@@ -779,7 +786,10 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
 }
 
 @Composable
-fun DateAndTime(date: MutableState<Long>) {
+fun DateAndTime(
+    date: MutableState<Long>,
+    timeManager: TimeManager
+) {
     val viewModel: NewCatchViewModel = getViewModel()
     val dateSetState = remember { mutableStateOf(false) }
     val timeSetState = remember { mutableStateOf(false) }
@@ -789,7 +799,8 @@ fun DateAndTime(date: MutableState<Long>) {
     if (timeSetState.value) TimePicker(date, timeSetState, context)
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedTextField(value = getDateByMilliseconds(date.value),
+        OutlinedTextField(
+            value = timeManager.getDate(date.value),
             onValueChange = {},
             label = { Text(text = stringResource(R.string.date)) },
             readOnly = true,
@@ -798,8 +809,10 @@ fun DateAndTime(date: MutableState<Long>) {
             trailingIcon = {
                 IconButton(onClick = {
                     if (viewModel.noErrors.value) dateSetState.value = true
-                    else { SnackbarManager.showMessage(R.string.choose_place_first) }
-                }){
+                    else {
+                        SnackbarManager.showMessage(R.string.choose_place_first)
+                    }
+                }) {
                     Icon(painter = painterResource(R.drawable.ic_baseline_event_24),
                         tint = primaryFigmaColor,
                         contentDescription = stringResource(R.string.date))
@@ -807,7 +820,7 @@ fun DateAndTime(date: MutableState<Long>) {
 
             })
         OutlinedTextField(
-            value = get24hTimeByMilliseconds(date.value),
+            value = timeManager.getTime(date.value),
             onValueChange = {},
             label = { Text(text = stringResource(R.string.time)) },
             readOnly = true,
@@ -816,7 +829,9 @@ fun DateAndTime(date: MutableState<Long>) {
             trailingIcon = {
                 IconButton(onClick = {
                     if (viewModel.noErrors.value) timeSetState.value = true
-                    else { SnackbarManager.showMessage(R.string.choose_place_first) }
+                    else {
+                        SnackbarManager.showMessage(R.string.choose_place_first)
+                    }
                 }) {
                     Icon(painter = painterResource(R.drawable.ic_baseline_access_time_24),
                         tint = primaryFigmaColor,

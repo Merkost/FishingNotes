@@ -25,16 +25,14 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
 import com.joesemper.fishing.domain.UserCatchViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
-import com.joesemper.fishing.utils.getDateAnd12hTimeByMilliseconds
-import com.joesemper.fishing.utils.getDateAnd24hTimeByMilliseconds
 import com.joesemper.fishing.utils.hPaToMmHg
+import com.joesemper.fishing.utils.time.TimeManager
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
@@ -47,13 +45,19 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch?) {
         viewModel.catch.value = it
     }
 
-    val userPreferences: UserPreferences = get()
-    val use12hTimeFormat by userPreferences.use12hTimeFormat.collectAsState(false)
+    val timeManager: TimeManager = get()
 
     Scaffold(topBar = {
-        CatchTopBar(navController, viewModel)
+        CatchTopBar(
+            navController = navController,
+            viewModel = viewModel
+        )
     }) {
-        CatchContent(navController, viewModel = viewModel, use12hTimeFormat)
+        CatchContent(
+            navController = navController,
+            viewModel = viewModel,
+            timeManager = timeManager
+        )
     }
 }
 
@@ -63,9 +67,6 @@ fun CatchTopBar(navController: NavController, viewModel: UserCatchViewModel) {
         title = stringResource(id = R.string.user_catch),
         onNavClick = { navController.popBackStack() }
     ) {
-        /*IconButton(onClick = { }) {
-            Icon(imageVector = Icons.Filled.Edit, contentDescription = "", tint = Color.White)
-        }*/
         IconButton(modifier = Modifier.padding(horizontal = 4.dp),
             onClick = {
                 viewModel.deleteCatch()
@@ -82,7 +83,7 @@ fun CatchTopBar(navController: NavController, viewModel: UserCatchViewModel) {
 fun CatchContent(
     navController: NavController,
     viewModel: UserCatchViewModel,
-    use12hTimeFormat: Boolean
+    timeManager: TimeManager
 ) {
     viewModel.catch.value?.let { catch ->
         Column(
@@ -119,7 +120,7 @@ fun CatchContent(
                         top.linkTo(parent.top)
                         absoluteRight.linkTo(parent.absoluteRight)
                     },
-                    text = if (use12hTimeFormat) getDateAnd12hTimeByMilliseconds(catch.date) else getDateAnd24hTimeByMilliseconds(catch.date)
+                    text = timeManager.getDateAndTime(catch.date)
                 )
 
                 SimpleUnderlineTextField(
