@@ -27,7 +27,6 @@ import kotlinx.coroutines.launch
  */
 object MainDestinations {
 
-
     const val LOGIN_ROUTE = "login"
     const val HOME_ROUTE = "home"
     const val SETTINGS = "settings"
@@ -40,15 +39,11 @@ object MainDestinations {
 
 
     const val MAP_ROUTE = "map"
-    //const val MAP_TO_PLACE_ROUTE = "${HOME_ROUTE}/${MAP_ROUTE}/${PLACE_ROUTE}"
-    //const val MAP_TO_NEW_CATCH_ROUTE = "${HOME_ROUTE}/${MAP_ROUTE}/${NEW_CATCH_ROUTE}"
 
     const val NOTES_ROUTE = "notes"
     const val NOTES_TO_NEW_CATCH_ROUTE = "${HOME_ROUTE}/${NOTES_ROUTE}/${NEW_CATCH_ROUTE}"
     const val NOTES_TO_PLACE_ROUTE = "${HOME_ROUTE}/${NOTES_ROUTE}/${PLACE_ROUTE}"
 
-    const val SNACK_DETAIL_ROUTE = "notes"
-    const val SNACK_ID_KEY = "snackId"
 }
 
 object Arguments {
@@ -70,12 +65,12 @@ fun rememberAppStateHolder(
     resources: Resources = resources(),
     coroutineScope: CoroutineScope = rememberCoroutineScope()
 ) =
-    remember(scaffoldState, navController, /*snackbarManager,*/ resources, coroutineScope) {
+    remember(scaffoldState, navController, snackbarManager, resources, coroutineScope) {
         AppStateHolder(scaffoldState, navController, snackbarManager, resources, coroutineScope)
     }
 
 /**
- * Responsible for holding state related to [App] and containing UI-related logic.
+ * Responsible for holding state related to [FishingNotesApp] and containing UI-related logic.
  */
 @Stable
 class AppStateHolder(
@@ -85,7 +80,6 @@ class AppStateHolder(
     private val resources: Resources,
     coroutineScope: CoroutineScope
 ) {
-    var current: Any? = null
 
     // Process snackbars coming from SnackbarManager
     init {
@@ -116,9 +110,11 @@ class AppStateHolder(
     // Not all routes need to show the bottom bar.
     val shouldShowBottomBar: Boolean
         @Composable get() = navController
-            .currentBackStackEntryAsState().value?.destination?.route.apply {
-                current = this
-            } in bottomBarRoutes
+            .currentBackStackEntryAsState().value?.destination?.route in bottomBarRoutes
+
+    // ----------------------------------------------------------
+    // Navigation state source of truth
+    // ----------------------------------------------------------
 
     val currentRoute: String?
         get() = navController.currentDestination?.route
@@ -177,17 +173,3 @@ private val NavGraph.startDestination: NavDestination?
 private tailrec fun findStartDestination(graph: NavDestination): NavDestination {
     return if (graph is NavGraph) findStartDestination(graph.startDestination!!) else graph
 }
-
-
-/*
-/**
- * A composable function that returns the [Resources]. It will be recomposed when `Configuration`
- * gets updated.
- */
-@Composable
-@ReadOnlyComposable
-private fun resources(): Resources {
-    LocalConfiguration.current
-    return LocalContext.current.resources
-}
-*/

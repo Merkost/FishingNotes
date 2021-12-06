@@ -43,7 +43,7 @@ class MainViewModelTest {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        mainViewModel = MainViewModel()
+        mainViewModel = MainViewModel(repository)
     }
 
     @Test
