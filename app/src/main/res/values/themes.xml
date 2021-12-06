@@ -10,15 +10,16 @@
         <item name="colorOnSecondary">@color/text_secondary_color</item>
         <item name="android:textColorSecondary">@color/text_secondary_color</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryDark</item>
+        <item name="android:statusBarColor" tools:targetApi="l">@color/fui_transparent</item>
+        <item name="android:navigationBarColor">@color/fui_transparent</item>
         <!-- Customize your theme here. -->
     </style>
 
     <!-- Base application theme. -->
-    <style name="Theme.AnimatedSplashScreen" parent="Theme.Fishing.Figma">
-        <item name="colorPrimary">@color/primaryFigmaColor</item>
-        <item name="colorOnPrimary">@color/colorOnPrimary</item>
-        <item name="android:statusBarColor" tools:targetApi="l">@color/primaryFigmaColor</item>
+    <style name="Theme.AnimatedSplashScreen" parent="Theme.Fishing">
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="android:statusBarColor" tools:targetApi="l">@color/white</item>
     </style>
 
     <style name="Theme.AppSplash" parent="Theme.SplashScreen">

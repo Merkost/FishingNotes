@@ -11,7 +11,7 @@
 
 
     <style name="Theme.AnimatedSplashScreen" parent="Theme.Fishing.FigmaNight">
-        <item name="colorPrimary">@color/primaryFigmaDarkColor</item>-->
+        <item name="colorPrimary">@color/dark_gray</item>-->
         <item name="colorOnPrimary">@color/dark_gray</item>
 <!--        <item name="android:statusBarColor" tools:targetApi="l">@color/primaryFigmaDarkColor</item>&ndash;&gt;-->
     </style>

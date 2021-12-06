@@ -601,7 +601,7 @@ fun BackgroundImage(modifier: Modifier = Modifier) {
         alpha = 0.1f,
         contentScale = ContentScale.FillWidth
     )*/
-    Surface(modifier = modifier.fillMaxSize(), color = Color.LightGray) {
+    Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
 
     }
 }

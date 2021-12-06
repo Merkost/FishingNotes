@@ -71,14 +71,12 @@ private val BlueDarkColorPalette = darkColors(
 
 @Composable
 fun FishingNotesTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
     initialAppTheme: String? = null,
+    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable() () -> Unit
 ) {
     val userPreferences: UserPreferences = get()
     val appTheme = userPreferences.appTheme.collectAsState(initialAppTheme ?: "null")
-
-
 
     val colors = chooseTheme(appTheme, darkTheme)
 
@@ -92,7 +90,6 @@ fun FishingNotesTheme(
         systemUiController.apply {
             setSystemBarsColor(color = colors.primary)
             //setStatusBarColor(color = colors.primary)
-
         }
     }
 
