@@ -3,12 +3,15 @@ package com.joesemper.fishing.model.datasource
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
+import android.provider.MediaStore
+import androidx.core.net.toFile
 import androidx.core.net.toUri
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.utils.getNewPhotoId
+import getPathFromURI
 import id.zelory.compressor.Compressor
 import id.zelory.compressor.constraint.format
 import id.zelory.compressor.constraint.quality
@@ -19,7 +22,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.take
-import java.io.File.createTempFile
+import java.io.File
+import java.lang.Exception
+
 
 class CloudPhotoStorage(private val context: Context) : PhotoStorage {
 
@@ -51,7 +56,38 @@ class CloudPhotoStorage(private val context: Context) : PhotoStorage {
         images.forEach { uri ->
             val riversRef = storageRef.child("markerImages/${getNewPhotoId()}")
 
-            val stream = context.contentResolver.openInputStream(uri)
+            val realPath = getPathFromURI(context, uri)
+            val realFile: File
+            try {
+                realFile = File(realPath)
+
+                val compressedImageFile = Compressor.compress(context, realFile) {
+                    quality(40)
+                    format(Bitmap.CompressFormat.JPEG)
+                }
+                val uploadTask = riversRef.putFile(compressedImageFile.toUri())
+                uploadTasks.add(uploadTask)
+
+                val callback = uploadTask.continueWithTask { task ->
+                    if (!task.isSuccessful) {
+                        task.exception?.let {
+                            throw it
+                        }
+                    }
+                    riversRef.downloadUrl
+                }
+
+                callback.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val downloadUri = task.result
+                        trySend(downloadUri.toString())
+                    }
+                }
+            } catch (e: Exception) {
+                e.fillInStackTrace()
+            }
+
+            /*val stream = context.contentResolver.openInputStream(uri)
 
             stream?.let {
                 val file = createTempFile("123", "123")
@@ -82,7 +118,7 @@ class CloudPhotoStorage(private val context: Context) : PhotoStorage {
                 }
 
                 file.delete()
-            }
+            }*/
         }
         awaitClose { uploadTasks.onEach { cancel() } }
     }
