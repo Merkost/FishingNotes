@@ -13,10 +13,14 @@ import kotlinx.coroutines.launch
 
 class MainViewModel(private val repository: UserRepository) : ViewModel() {
 
-    private val mutableStateFlow: MutableStateFlow<BaseViewState> =
+    init {
+        loadCurrentUser()
+    }
+
+    val mutableStateFlow: MutableStateFlow<BaseViewState> =
         MutableStateFlow(BaseViewState.Loading(null))
 
-    fun subscribe(): StateFlow<BaseViewState> = mutableStateFlow.apply { loadCurrentUser() }
+    fun subscribe(): StateFlow<BaseViewState> = mutableStateFlow
 
     private fun loadCurrentUser() {
         viewModelScope.launch {

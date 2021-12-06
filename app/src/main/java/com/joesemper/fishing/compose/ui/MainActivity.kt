@@ -9,42 +9,40 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.joesemper.fishing.R
-import com.joesemper.fishing.domain.viewstates.BaseViewState
-import com.joesemper.fishing.model.entity.common.User
-import com.joesemper.fishing.utils.Logger
-import kotlinx.coroutines.InternalCoroutinesApi
-import org.koin.android.ext.android.inject
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.login.LoginScreen
-import com.joesemper.fishing.compose.ui.theme.AppThemeValues
 import com.joesemper.fishing.compose.ui.theme.FishingNotesTheme
 import com.joesemper.fishing.compose.viewmodels.MainViewModel
+import com.joesemper.fishing.domain.viewstates.BaseViewState
+import com.joesemper.fishing.model.entity.common.User
+import com.joesemper.fishing.utils.Logger
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.get
+import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
 
@@ -52,7 +50,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var auth: FirebaseAuth
-    private lateinit var user: State<BaseViewState?>
+    //private lateinit var user: State<BaseViewState?>
 
     private val registeredActivity =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -63,34 +61,40 @@ class MainActivity : ComponentActivity() {
         const val splashFadeDurationMillis = 300
     }
 
-    @OptIn(ExperimentalComposeUiApi::class,ExperimentalPermissionsApi::class,
+    @OptIn(
+        ExperimentalComposeUiApi::class, ExperimentalPermissionsApi::class,
         ExperimentalAnimationApi::class, InternalCoroutinesApi::class,
-        ExperimentalPagerApi::class, ExperimentalMaterialApi::class)
+        ExperimentalPagerApi::class, ExperimentalMaterialApi::class
+    )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val userLiveData: MutableLiveData<BaseViewState> = MutableLiveData(BaseViewState.Loading(null))
         val viewModel: MainViewModel = get()
+        val userStateFlow: StateFlow<BaseViewState> = viewModel.subscribe()
+        var user: User? = null
 
         val userPreferences: UserPreferences = get()
-        var appTheme = AppThemeValues.Blue.name
+        var appTheme: String? = null
 
         lifecycleScope.launchWhenStarted {
             userPreferences.appTheme.collect {
                 appTheme = it
             }
-            viewModel.subscribe().collect {
-                userLiveData.value = it
+            userStateFlow.collect {
+                user = if (viewModel.subscribe() is BaseViewState.Success<*>)
+                    (viewModel.subscribe() as BaseViewState.Success<*>).data as User?
+                else User()
             }
         }
 
         if (Build.VERSION.SDK_INT < 31) {
-            //user = viewModel.subscribe().collect()
-
             val splashWasDisplayed = savedInstanceState != null
             if (!splashWasDisplayed) {
                 val splashScreen = installSplashScreen()
 
-                splashScreen.setKeepVisibleCondition { userLiveData.value !is BaseViewState.Success<*> }
+                splashScreen.setKeepVisibleCondition {
+                    viewModel.subscribe() !is BaseViewState.Success<*>
+                            && appTheme == null
+                }
 
                 splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
                     // Get icon instance and start a fade out animation
@@ -103,45 +107,38 @@ class MainActivity : ComponentActivity() {
                             splashScreenViewProvider.remove()
                             setContent {
                                 FishingNotesTheme(appTheme) {
-                                    if ((userLiveData.value as BaseViewState.Success<*>).data as User? != null)
-                                        FishingNotesApp()
-                                    else Navigation()
+                                    if (user == null) Navigation()
+                                    else FishingNotesApp()
                                 }
-
                             }
                         }.start()
                 }
             } else {
                 setTheme(R.style.Theme_SplashScreen)
                 setContent {
-                    //if ((user.value as BaseViewState.Success<*>).data as User? != null)
-                    FishingNotesTheme(appTheme) { FishingNotesApp() }
-                    //else Navigation()
-                }
-            }
-        }
-        else {
-            userLiveData.observe(this) {
-                setContent {
-                    FishingNotesTheme {
-                        if (it is BaseViewState.Success<*> &&
-                            it.data as User? != null)
-                            FishingNotesApp()
-                        else Navigation()
+                    FishingNotesTheme(appTheme) {
+                        if (user == null) Navigation()
+                        else FishingNotesApp()
                     }
                 }
             }
-
+        } else {
+            setContent {
+                FishingNotesTheme(appTheme) {
+                    if (user == null) Navigation()
+                    else FishingNotesApp()
+                }
+            }
         }
 
         auth = FirebaseAuth.getInstance()
     }
 
-        // This app draws behind the system bars, so we want to handle fitting system windows
-        // WindowCompat.setDecorFitsSystemWindows(window, false)
+    // This app draws behind the system bars, so we want to handle fitting system windows
+    // WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        //light тема
-        //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+    //light тема
+    //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
 
     @OptIn(ExperimentalComposeUiApi::class)
