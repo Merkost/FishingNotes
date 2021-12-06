@@ -2,8 +2,10 @@ package com.joesemper.fishing.compose.ui.home.weather
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -14,7 +16,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
 import com.google.accompanist.pager.*
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
@@ -113,62 +114,46 @@ fun DailyWeatherScreen(
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg.name)
     val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
 
-    ConstraintLayout(
+    Column(
         modifier = modifier
-            .fillMaxSize()
             .verticalScroll(rememberScrollState())
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        val (primary, temperature, sunriseSunset, weather, moonPhase) = createRefs()
 
         PrimaryWeatherItemView(
-            modifier = Modifier.constrainAs(primary) {
-                top.linkTo(parent.top, 16.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
-            },
             temperature = forecast.temperature.max,
             weather = forecast.weather.first(),
             temperatureUnit = temperatureUnit
         )
 
         DayTemperatureView(
-            modifier = Modifier.constrainAs(temperature) {
-                top.linkTo(primary.bottom, 16.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
-            },
             temperature = forecast.temperature,
             temperatureUnit = temperatureUnit
         )
 
+        Divider(
+            modifier = Modifier.fillMaxWidth()
+        )
+
         SunriseSunsetView(
-            modifier = Modifier.constrainAs(sunriseSunset) {
-                top.linkTo(temperature.bottom, 24.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
-            },
             sunrise = forecast.sunrise,
             sunset = forecast.sunset
         )
 
         MoonPhaseView(
-            modifier = Modifier.constrainAs(moonPhase) {
-                top.linkTo(sunriseSunset.bottom, 32.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
-            },
             moonPhase = forecast.moonPhase
         )
 
+        Divider(
+            modifier = Modifier.fillMaxWidth()
+        )
+
         DailyWeatherValuesView(
-            modifier = Modifier.constrainAs(weather) {
-                top.linkTo(moonPhase.bottom, 32.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
-            },
             forecast = forecast,
             pressureUnit = pressureUnit
         )
+
 
     }
 }

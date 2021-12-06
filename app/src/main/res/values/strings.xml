@@ -4,6 +4,7 @@
     <string name="logout_dialog_title">Logout</string>
     <string name="logout_dialog_message">Are you sure to logout? Your data will be saved</string>
     <string name="ok_button">OK</string>
+    <string name="logout_dialog_cancel">Close</string>
     <string name="title">Title</string>
     <string name="description">Description</string>
     <string name="kind_of_fish">Kind of fish</string>
@@ -205,6 +206,7 @@
     <string name="hours">\h\</string>
     <string name="minutes">\m\</string>
     <string name="choose_temperature_unit">Choose temperature unit</string>
+    <string name="temp">Temp.</string>
 
 
 </resources>

@@ -207,5 +207,7 @@
     <string name="daylight_hours">Световой день</string>
     <string name="hours">\ч\</string>
     <string name="minutes">\м\</string>
+    <string name="choose_temperature_unit">Choose temperature unit</string>
+    <string name="temp">Temp.</string>
 
 </resources>

@@ -270,7 +270,7 @@ fun WeatherEmptyView(modifier: Modifier) {
 
 @Composable
 fun DayTemperatureView(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     temperature: Temperature,
     temperatureUnit: String
 ) {

@@ -4,7 +4,10 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -14,13 +17,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import com.google.accompanist.insets.systemBarsPadding
@@ -40,7 +43,6 @@ import com.joesemper.fishing.compose.ui.home.map.getCurrentLocationFlow
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
 import com.joesemper.fishing.compose.ui.theme.primaryWhiteColor
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
-import com.joesemper.fishing.compose.ui.theme.secondaryWhiteColor
 import com.joesemper.fishing.domain.WeatherViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.Daily
@@ -111,9 +113,9 @@ fun Weather(
 
             TopAppBar(
                 elevation = elevation.value,
-                backgroundColor = MaterialTheme.colors.primary
+                backgroundColor = MaterialTheme.colors.primaryVariant
             ) {
-                WeatherLocationIcon(color = Color.White)
+                WeatherLocationIcon(color = MaterialTheme.colors.onPrimary)
                 selectedPlace.value?.let {
 
                     WeatherPlaceSelectItem(
@@ -212,18 +214,16 @@ fun CurrentWeather(
     temperatureUnit: String,
     pressureUnit: String,
 ) {
-
-
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(260.dp),
-        color = MaterialTheme.colors.primary
+            .height(350.dp),
+        color = MaterialTheme.colors.primaryVariant
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.spacedBy(32.dp)
         ) {
 
             PrimaryWeatherItemView(
@@ -234,11 +234,14 @@ fun CurrentWeather(
                 temperatureUnit = temperatureUnit
             )
 
+            CurrentWeatherValuesView(
+                forecast = forecast.hourly.first(),
+                pressureUnit = pressureUnit
+            )
+
             HourlyWeather(
                 forecastHourly = forecast.hourly,
-                forecastDaily = forecast.daily.first(),
                 temperatureUnit = temperatureUnit,
-                pressureUnit = pressureUnit
             )
         }
     }
@@ -248,22 +251,12 @@ fun CurrentWeather(
 fun HourlyWeather(
     modifier: Modifier = Modifier,
     forecastHourly: List<Hourly>,
-    forecastDaily: Daily,
     temperatureUnit: String,
-    pressureUnit: String
 ) {
     LazyRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        item {
-            CurrentWeatherItem(
-                modifier = Modifier.padding(end = 16.dp),
-                forecastHourly = forecastHourly.first(),
-                forecastDaily = forecastDaily,
-                pressureUnit = pressureUnit
-            )
-        }
         items(forecastHourly.size) { index ->
             HourlyWeatherItem(
                 forecast = forecastHourly[index],
@@ -288,109 +281,48 @@ fun HourlyWeatherItem(
     Column(
         modifier = modifier.padding(horizontal = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         SecondaryText(
             text = timeTitle,
-            textColor = secondaryWhiteColor
+            textColor = MaterialTheme.colors.onPrimary
         )
-        Image(
-            modifier = Modifier.size(32.dp),
-            painter = painterResource(id = getWeatherIconByName(forecast.weather.first().icon)),
-            contentDescription = "",
-            colorFilter = ColorFilter.tint(color = Color.White)
-        )
-        PrimaryText(
-            text = getTemperature(
-                forecast.temperature,
-                TemperatureValues.valueOf(temperatureUnit)
-            ) +
-                    getTemperatureFromUnit(temperatureUnit),
-            textColor = primaryWhiteColor
-        )
-        Row() {
-            PrimaryText(
-                text = forecast.windSpeed.toInt().toString(),
-                textColor = primaryWhiteColor
-            )
-            Icon(
-                modifier = Modifier.rotate(forecast.windDeg.toFloat()),
-                painter = painterResource(id = R.drawable.ic_baseline_navigation_24),
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                modifier = Modifier.size(32.dp),
+                painter = painterResource(id = getWeatherIconByName(forecast.weather.first().icon)),
                 contentDescription = "",
-                tint = primaryWhiteColor
+                colorFilter = ColorFilter.tint(color = MaterialTheme.colors.onPrimary)
+            )
+            PrimaryText(
+                text = getTemperature(
+                    forecast.temperature,
+                    TemperatureValues.valueOf(temperatureUnit)
+                ) + getTemperatureFromUnit(temperatureUnit),
+                textColor = MaterialTheme.colors.onPrimary
             )
         }
-    }
-}
 
-@Composable
-fun CurrentWeatherItem(
-    modifier: Modifier = Modifier,
-    forecastHourly: Hourly,
-    forecastDaily: Daily,
-    pressureUnit: String
-) {
-    ConstraintLayout(
-        modifier = modifier
-            .wrapContentSize()
-    ) {
-        val (popIcon, popMeaning, pressIcon, pressMeaning, humidityIcon, humidityMeaning) = createRefs()
-
-        Icon(
-            modifier = Modifier.constrainAs(popIcon) {
-                top.linkTo(parent.top, 32.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-            },
-            painter = painterResource(id = R.drawable.ic_baseline_umbrella_24),
-            contentDescription = "",
-            tint = secondaryWhiteColor
-        )
-        PrimaryText(
-            modifier = Modifier.constrainAs(popMeaning) {
-                top.linkTo(popIcon.top)
-                bottom.linkTo(popIcon.bottom)
-                absoluteLeft.linkTo(popIcon.absoluteRight, 4.dp)
-            },
-            text = (forecastDaily.probabilityOfPrecipitation * 100).toInt().toString()
-                    + stringResource(id = R.string.percent),
-            textColor = primaryWhiteColor
-        )
-        Icon(
-            modifier = Modifier.constrainAs(pressIcon) {
-                top.linkTo(popIcon.bottom, 8.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-            },
-            painter = painterResource(id = R.drawable.ic_gauge),
-            contentDescription = "",
-            tint = secondaryWhiteColor
-        )
-        PrimaryText(
-            modifier = Modifier.constrainAs(pressMeaning) {
-                top.linkTo(pressIcon.top)
-                bottom.linkTo(pressIcon.bottom)
-                absoluteLeft.linkTo(pressIcon.absoluteRight, 4.dp)
-            },
-            text = getPressure(forecastHourly.pressure, PressureValues.valueOf(pressureUnit)),
-            textColor = primaryWhiteColor
-        )
-        Icon(
-            modifier = Modifier.constrainAs(humidityIcon) {
-                top.linkTo(pressIcon.bottom, 8.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-            },
-            painter = painterResource(id = R.drawable.ic_baseline_opacity_24),
-            contentDescription = "",
-            tint = secondaryWhiteColor
-        )
-        PrimaryText(
-            modifier = Modifier.constrainAs(humidityMeaning) {
-                top.linkTo(humidityIcon.top)
-                bottom.linkTo(humidityIcon.bottom)
-                absoluteLeft.linkTo(humidityIcon.absoluteRight, 4.dp)
-            },
-            text = forecastHourly.humidity.toString() + stringResource(id = R.string.percent),
-            textColor = primaryWhiteColor
-        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            PrimaryText(
+                text = forecast.windSpeed.toInt()
+                    .toString() + " " + stringResource(id = R.string.wind_speed_units),
+                textColor = MaterialTheme.colors.onPrimary
+            )
+            Icon(
+                modifier = Modifier
+                    .rotate(forecast.windDeg.toFloat()),
+                painter = painterResource(id = R.drawable.ic_baseline_navigation_24),
+                contentDescription = "",
+                tint = MaterialTheme.colors.onPrimary
+            )
+        }
     }
 }
 
@@ -465,28 +397,30 @@ fun DailyWeatherItem(
             ),
             contentDescription = "",
         )
-        Image(
-            modifier = Modifier
-                .size(32.dp)
-                .constrainAs(popIcon) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    absoluteLeft.linkTo(guideline, 8.dp)
+        if (forecast.probabilityOfPrecipitation >= 0.2f) {
+            Image(
+                modifier = Modifier
+                    .size(24.dp)
+                    .constrainAs(popIcon) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        absoluteLeft.linkTo(guideline, 8.dp)
+                    },
+                painter = painterResource(
+                    id = R.drawable.ic_baseline_umbrella_24
+                ),
+                contentDescription = "",
+            )
+            SecondaryText(
+                modifier = Modifier.constrainAs(pop) {
+                    top.linkTo(popIcon.top)
+                    bottom.linkTo(popIcon.bottom)
+                    absoluteLeft.linkTo(popIcon.absoluteRight, 4.dp)
                 },
-            painter = painterResource(
-                id = R.drawable.ic_baseline_umbrella_24
-            ),
-            contentDescription = "",
-        )
-        SecondaryText(
-            modifier = Modifier.constrainAs(pop) {
-                top.linkTo(popIcon.top)
-                bottom.linkTo(popIcon.bottom)
-                absoluteLeft.linkTo(popIcon.absoluteRight, 4.dp)
-            },
-            text = (forecast.probabilityOfPrecipitation * 100).toInt()
-                .toString() + stringResource(id = R.string.percent)
-        )
+                text = (forecast.probabilityOfPrecipitation * 100).toInt()
+                    .toString() + stringResource(id = R.string.percent)
+            )
+        }
     }
 }
 
@@ -533,7 +467,7 @@ fun PressureChart(
 
     }
 
-    val color = MaterialTheme.colors.primary
+    val color = MaterialTheme.colors.primaryVariant
 
 
     Canvas(modifier = modifier.padding(start = 32.dp, end = 32.dp, bottom = 18.dp, top = 32.dp)) {
@@ -587,5 +521,128 @@ fun PressureChart(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun CurrentWeatherValuesView(
+    modifier: Modifier = Modifier,
+    forecast: Hourly,
+    pressureUnit: String,
+) {
+    ConstraintLayout(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+    ) {
+        val (
+            pressIcon, pressValue, pressText, humidIcon, humidValue,
+            humidText, popIcon, popValue, popText, divider
+        ) = createRefs()
+
+        createHorizontalChain(pressText, humidText, popText, chainStyle = ChainStyle.Spread)
+
+        SecondaryText(
+            modifier = Modifier.constrainAs(pressText) {
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(humidText.absoluteLeft)
+                top.linkTo(parent.top, 4.dp)
+            },
+            text = stringResource(id = R.string.pressure),
+            textColor = MaterialTheme.colors.onPrimary
+        )
+
+        SecondaryText(
+            modifier = Modifier.constrainAs(humidText) {
+                absoluteLeft.linkTo(pressText.absoluteRight)
+                absoluteRight.linkTo(popText.absoluteLeft)
+                top.linkTo(pressText.top)
+            },
+            text = stringResource(id = R.string.humidity),
+            textColor = MaterialTheme.colors.onPrimary
+        )
+        SecondaryText(
+            modifier = Modifier.constrainAs(popText) {
+                absoluteLeft.linkTo(humidText.absoluteRight)
+                absoluteRight.linkTo(parent.absoluteRight)
+                top.linkTo(pressText.top)
+            },
+            text = stringResource(id = R.string.precipitation),
+            textColor = MaterialTheme.colors.onPrimary
+        )
+
+        Icon(
+            modifier = Modifier
+                .size(24.dp)
+                .constrainAs(pressIcon) {
+                    top.linkTo(pressText.bottom, 4.dp)
+                    absoluteLeft.linkTo(pressText.absoluteLeft)
+                    absoluteRight.linkTo(pressValue.absoluteLeft, 2.dp)
+                },
+            painter = painterResource(id = R.drawable.ic_gauge),
+            contentDescription = stringResource(id = R.string.pressure),
+            tint = MaterialTheme.colors.onPrimary
+        )
+        PrimaryText(
+            modifier = Modifier.constrainAs(pressValue) {
+                top.linkTo(pressIcon.top)
+                bottom.linkTo(pressIcon.bottom)
+                absoluteLeft.linkTo(pressIcon.absoluteRight, 2.dp)
+                absoluteRight.linkTo(pressText.absoluteRight)
+            },
+            text = getPressure(
+                forecast.pressure,
+                PressureValues.valueOf(pressureUnit)
+            ) + " " + pressureUnit,
+            textColor = MaterialTheme.colors.onPrimary
+        )
+
+        Icon(
+            modifier = Modifier
+                .size(24.dp)
+                .constrainAs(humidIcon) {
+                    top.linkTo(humidText.bottom, 4.dp)
+                    absoluteLeft.linkTo(humidText.absoluteLeft)
+                    absoluteRight.linkTo(humidValue.absoluteLeft, 2.dp)
+                },
+            painter = painterResource(id = R.drawable.ic_baseline_opacity_24),
+            contentDescription = stringResource(id = R.string.humidity),
+            tint = MaterialTheme.colors.onPrimary
+        )
+        PrimaryText(
+            modifier = Modifier.constrainAs(humidValue) {
+                top.linkTo(humidIcon.top)
+                bottom.linkTo(humidIcon.bottom)
+                absoluteLeft.linkTo(humidIcon.absoluteRight, 2.dp)
+                absoluteRight.linkTo(humidText.absoluteRight)
+            },
+            text = forecast.humidity.toString() + " " + stringResource(id = R.string.percent),
+            textColor = MaterialTheme.colors.onPrimary
+        )
+
+        Icon(
+            modifier = Modifier
+                .size(24.dp)
+                .constrainAs(popIcon) {
+                    top.linkTo(popText.bottom, 4.dp)
+                    absoluteLeft.linkTo(popText.absoluteLeft)
+                    absoluteRight.linkTo(popValue.absoluteLeft, 2.dp)
+                },
+            painter = painterResource(id = R.drawable.ic_baseline_umbrella_24),
+            contentDescription = stringResource(id = R.string.precipitation),
+            tint = MaterialTheme.colors.onPrimary
+        )
+        PrimaryText(
+            modifier = Modifier.constrainAs(popValue) {
+                top.linkTo(popIcon.top)
+                bottom.linkTo(popIcon.bottom)
+                absoluteLeft.linkTo(popIcon.absoluteRight, 2.dp)
+                absoluteRight.linkTo(popText.absoluteRight)
+            },
+            text = (forecast.probabilityOfPrecipitation * 100).toInt().toString()
+                    + " " + stringResource(id = R.string.percent),
+            textColor = MaterialTheme.colors.onPrimary
+        )
+
     }
 }
