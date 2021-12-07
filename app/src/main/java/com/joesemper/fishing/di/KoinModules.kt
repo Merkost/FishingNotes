@@ -39,7 +39,7 @@ val mainActivity = module {
     viewModel { MainViewModel(get()) }
     viewModel { LoginViewModel(get()) }
 
-    viewModel { MapViewModel(get()) }
+    viewModel { MapViewModel(get(), get()) }
     viewModel { NewCatchViewModel(get(), get(), get()) }
     viewModel { UserViewModel(get(), get(), get()) }
     viewModel { NewPlaceViewModel(get()) }

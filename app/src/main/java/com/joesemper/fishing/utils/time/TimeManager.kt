@@ -1,7 +1,6 @@
 package com.joesemper.fishing.utils.time
 
 interface TimeManager {
-    fun set12hTimeFormat(isSet: Boolean)
     fun getTime(time: Long): String
     fun getDate(time: Long): String
     fun getDateTextMonth(time: Long): String

@@ -1,9 +1,6 @@
 package com.joesemper.fishing.compose.ui
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
@@ -64,21 +61,19 @@ fun FishingNotesApp() {
         ) { innerPaddingModifier ->
             Column() {
 
-                    //Spacer(modifier = Modifier.statusBarsHeight())
-                    NavHost(
+                //Spacer(modifier = Modifier.statusBarsHeight())
+                NavHost(
+                    navController = appStateHolder.navController,
+                    startDestination = MainDestinations.HOME_ROUTE,
+                    modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
+                    Modifier.padding(innerPaddingModifier) /*else Modifier*/
+                ) {
+                    NavGraph(
                         navController = appStateHolder.navController,
-                        startDestination = MainDestinations.HOME_ROUTE,
-                        modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
-                        Modifier.padding(innerPaddingModifier) /*else Modifier*/
-                    ) {
-                        NavGraph(
-                            navController = appStateHolder.navController,
-                            upPress = appStateHolder::upPress,
-                        )
-                    }
-
+                        upPress = appStateHolder::upPress,
+                    )
+                }
             }
-
         }
     }
 }
@@ -98,7 +93,7 @@ private fun NavGraphBuilder.NavGraph(
         route = MainDestinations.HOME_ROUTE,
         startDestination = HomeSections.MAP.route
     ) {
-        addHomeGraph()
+        addHomeGraph(navController)
     }
 
     composable(MainDestinations.LOGIN_ROUTE) {

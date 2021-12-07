@@ -14,11 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -32,6 +32,7 @@ import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.MainActivity
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.utils.showToast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -42,7 +43,6 @@ import kotlinx.coroutines.runBlocking
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.roundToInt
 
 object MapTypes {
     const val roadmap = GoogleMap.MAP_TYPE_NORMAL
@@ -303,4 +303,20 @@ fun rememberMapViewWithLifecycle(): MapView {
         }
     }
     return mapView
+}
+
+fun getIconRotationByWeatherIn8H(forecast: WeatherForecast): Float {
+    return if (forecast.hourly.first().pressure > forecast.hourly[7].pressure) 180f else 0f
+}
+
+fun getIconRotationByWeatherIn16H(forecast: WeatherForecast): Float {
+    return if (forecast.hourly[7].pressure > forecast.hourly[15].pressure) 180f else 0f
+}
+
+fun getIconTintByWeatherIn8H(forecast: WeatherForecast): Color {
+    return if (forecast.hourly.first().pressure > forecast.hourly[7].pressure) Color.Red else Color.Green
+}
+
+fun getIconTintByWeatherIn16H(forecast: WeatherForecast): Color {
+    return if (forecast.hourly[7].pressure > forecast.hourly[15].pressure) Color.Red else Color.Green
 }

@@ -360,6 +360,25 @@ fun PrimaryText(
 }
 
 @Composable
+fun PrimaryTextSmall(
+    modifier: Modifier = Modifier,
+    fontWeight: FontWeight? = null,
+    textAlign: TextAlign? = null,
+    text: String,
+    textColor: Color = MaterialTheme.colors.onSurface
+) {
+    Text(
+        modifier = modifier,
+        style = MaterialTheme.typography.h4,
+        fontSize = 14.sp,
+        fontWeight = fontWeight,
+        textAlign = textAlign,
+        color = textColor,
+        text = text
+    )
+}
+
+@Composable
 fun PrimaryTextBold(modifier: Modifier = Modifier, text: String) {
     PrimaryText(
         modifier = modifier,
@@ -388,23 +407,6 @@ fun SecondaryTextColored(
 }
 
 @Composable
-fun SecondaryTextSmall(
-    modifier: Modifier = Modifier,
-    text: String,
-    textAlign: TextAlign? = null,
-    color: Color = secondaryTextColor
-) {
-    Text(
-        textAlign = textAlign,
-        modifier = modifier,
-        style = MaterialTheme.typography.h5,
-        fontSize = 14.sp,
-        color = color,
-        text = text
-    )
-}
-
-@Composable
 fun SecondaryText(
     modifier: Modifier = Modifier, text: String,
     maxLines: Int = Int.MAX_VALUE,
@@ -416,6 +418,24 @@ fun SecondaryText(
         modifier = modifier,
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
+        color = textColor,
+        text = text,
+        maxLines = maxLines
+    )
+}
+
+@Composable
+fun SecondaryTextSmall(
+    modifier: Modifier = Modifier, text: String,
+    maxLines: Int = Int.MAX_VALUE,
+    textAlign: TextAlign = TextAlign.Center,
+    textColor: Color = secondaryTextColor
+) {
+    Text(
+        textAlign = textAlign,
+        modifier = modifier,
+        style = MaterialTheme.typography.body1,
+        fontSize = 14.sp,
         color = textColor,
         text = text,
         maxLines = maxLines

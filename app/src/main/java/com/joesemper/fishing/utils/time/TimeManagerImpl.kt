@@ -27,14 +27,9 @@ class TimeManagerImpl(
                 is12HoursFormat = it
             }
         }
-
     }
 
     private var is12HoursFormat = false
-
-    override fun set12hTimeFormat(isSet: Boolean) {
-        is12HoursFormat = isSet
-    }
 
     override fun getTime(time: Long): String {
         val date = Date(formatToMilliseconds(time))

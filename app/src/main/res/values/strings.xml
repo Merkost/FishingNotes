@@ -207,6 +207,9 @@
     <string name="minutes">\m\</string>
     <string name="choose_temperature_unit">Choose temperature unit</string>
     <string name="temp">Temp.</string>
+    <string name="in_8h">8h</string>
+    <string name="in_16h">16h</string>
+    <string name="no_internet_connection">No Internet connection</string>
 
 
 </resources>
