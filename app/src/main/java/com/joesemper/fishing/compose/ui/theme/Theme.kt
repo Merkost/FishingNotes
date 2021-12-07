@@ -6,6 +6,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
@@ -82,15 +83,17 @@ fun FishingNotesTheme(
     val colors = chooseTheme(appTheme, darkTheme)
 
     val systemUiController = rememberSystemUiController()
-    if (darkTheme) {
-        systemUiController.apply {
-            setSystemBarsColor(color = colors.primary)
-            //setStatusBarColor(color = colors.primaryVariant)
-        }
-    } else {
-        systemUiController.apply {
-            setSystemBarsColor(color = colors.primary)
-            //setStatusBarColor(color = colors.primary)
+    SideEffect {
+        if (darkTheme) {
+            systemUiController.apply {
+                setSystemBarsColor(color = colors.primary)
+                //setStatusBarColor(color = colors.primaryVariant)
+            }
+        } else {
+            systemUiController.apply {
+                setSystemBarsColor(color = colors.primary)
+                //setStatusBarColor(color = colors.primary)
+            }
         }
     }
 

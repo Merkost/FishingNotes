@@ -17,6 +17,9 @@ class MainViewModel(private val repository: UserRepository) : ViewModel() {
         loadCurrentUser()
     }
 
+    //val userState: MutableStateFlow<User?> = MutableStateFlow(null)
+    var user: User? = null
+
     val mutableStateFlow: MutableStateFlow<BaseViewState> =
         MutableStateFlow(BaseViewState.Loading(null))
 
@@ -31,6 +34,7 @@ class MainViewModel(private val repository: UserRepository) : ViewModel() {
     }
 
     private fun onSuccess(user: User?) {
+        this.user = user
         mutableStateFlow.value = BaseViewState.Success(user)
     }
 

@@ -35,6 +35,7 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @InternalCoroutinesApi
 @Composable
 fun FishingNotesApp() {
+
     ProvideWindowInsets {
         val appStateHolder = rememberAppStateHolder()
         var visible by remember { mutableStateOf(false) }
@@ -62,15 +63,7 @@ fun FishingNotesApp() {
             else Modifier*/
         ) { innerPaddingModifier ->
             Column() {
-                AnimatedVisibility(
-                    visible = visible,
-                    enter = fadeIn(
-                        initialAlpha = 0f,
-                        animationSpec = tween(
-                            durationMillis = MainActivity.splashFadeDurationMillis
-                        )
-                    )
-                ) {
+
                     //Spacer(modifier = Modifier.statusBarsHeight())
                     NavHost(
                         navController = appStateHolder.navController,
@@ -83,11 +76,9 @@ fun FishingNotesApp() {
                             upPress = appStateHolder::upPress,
                         )
                     }
-                }
+
             }
-            LaunchedEffect(true) {
-                visible = true
-            }
+
         }
     }
 }
@@ -107,7 +98,7 @@ private fun NavGraphBuilder.NavGraph(
         route = MainDestinations.HOME_ROUTE,
         startDestination = HomeSections.MAP.route
     ) {
-        addHomeGraph(navController)
+        addHomeGraph()
     }
 
     composable(MainDestinations.LOGIN_ROUTE) {

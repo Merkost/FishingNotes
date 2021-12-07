@@ -70,7 +70,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val viewModel: MainViewModel = get()
         val userStateFlow: StateFlow<BaseViewState> = viewModel.subscribe()
-        var user: User? = null
 
         val userPreferences: UserPreferences = get()
         var appTheme: String? = null
@@ -78,11 +77,6 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launchWhenStarted {
             userPreferences.appTheme.collect {
                 appTheme = it
-            }
-            userStateFlow.collect {
-                user = if (viewModel.subscribe() is BaseViewState.Success<*>)
-                    (viewModel.subscribe() as BaseViewState.Success<*>).data as User?
-                else User()
             }
         }
 
@@ -92,8 +86,8 @@ class MainActivity : ComponentActivity() {
                 val splashScreen = installSplashScreen()
 
                 splashScreen.setKeepVisibleCondition {
-                    viewModel.subscribe() !is BaseViewState.Success<*>
-                            && appTheme == null
+                    userStateFlow.value is BaseViewState.Loading
+                            //&& appTheme == null
                 }
 
                 splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
@@ -107,8 +101,7 @@ class MainActivity : ComponentActivity() {
                             splashScreenViewProvider.remove()
                             setContent {
                                 FishingNotesTheme(appTheme) {
-                                    if (user == null) Navigation()
-                                    else FishingNotesApp()
+                                    FishingNotesApp()
                                 }
                             }
                         }.start()
@@ -117,15 +110,14 @@ class MainActivity : ComponentActivity() {
                 setTheme(R.style.Theme_SplashScreen)
                 setContent {
                     FishingNotesTheme(appTheme) {
-                        if (user == null) Navigation()
-                        else FishingNotesApp()
+                        FishingNotesApp()
                     }
                 }
             }
         } else {
             setContent {
                 FishingNotesTheme(appTheme) {
-                    if (user == null) Navigation()
+                    if (viewModel.user == null) Navigation()
                     else FishingNotesApp()
                 }
             }
