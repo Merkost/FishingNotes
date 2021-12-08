@@ -90,7 +90,7 @@ fun SettingsScreen(backPress: () -> Unit) {
                     icon = {
                         Icon(
                             imageVector = Icons.Default.LocationOn,
-                            contentDescription = "LocationOn"
+                            contentDescription = Icons.Default.LocationOn.name
                         )
                     },
                     title = { Text(text = stringResource(R.string.location_permission)) },
@@ -138,7 +138,7 @@ fun SettingsScreen(backPress: () -> Unit) {
                 icon = {
                     Icon(
                         imageVector = Icons.Default.AccessTime,
-                        contentDescription = "AccessTime"
+                        contentDescription = Icons.Default.AccessTime.name
                     )
                 },
                 title = { Text(text = stringResource(R.string.time_format)) },
@@ -160,7 +160,7 @@ fun SettingsScreen(backPress: () -> Unit) {
                     )
                 },
                 title = { Text(text = stringResource(R.string.pressure_unit)) },
-                subtitle = { Text(text = "Choose another pressure unit (Current is: ${pressureUnit.value})") },
+                subtitle = { Text(text = stringResource(R.string.choose_pressure_unit)/* (Current is: ${pressureUnit.value})*/) },
                 onClick = { isPressureDialogOpen.value = true }
             )
             SettingsMenuLink(
@@ -171,7 +171,7 @@ fun SettingsScreen(backPress: () -> Unit) {
                     )
                 },
                 title = { Text(text = stringResource(R.string.temperature_unit)) },
-                subtitle = { Text(text = "Choose another temperature unit (Current is: ${temperatureUnit.value})") },
+                subtitle = { Text(text = stringResource(R.string.choose_temperature_unit)/*(Current is: ${temperatureUnit.value})*/) },
                 onClick = { isTemperatureDialogOpen.value = true }
             )
         }
