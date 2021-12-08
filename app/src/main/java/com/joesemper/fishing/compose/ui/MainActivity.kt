@@ -82,7 +82,7 @@ class MainActivity : ComponentActivity() {
 
         if (Build.VERSION.SDK_INT < 31) {
             val splashWasDisplayed = savedInstanceState != null
-            if (!splashWasDisplayed) {
+            if (true /*!splashWasDisplayed*/) {
                 val splashScreen = installSplashScreen()
 
                 splashScreen.setKeepVisibleCondition {
