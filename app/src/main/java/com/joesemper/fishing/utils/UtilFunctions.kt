@@ -4,7 +4,6 @@ import android.content.Context
 import android.widget.Toast
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.compose.ui.home.map.DEFAULT_ZOOM
-import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -40,12 +39,6 @@ fun Double.roundTo(numFractionDigits: Int): Double {
 fun Float.roundTo(numFractionDigits: Int): Float {
     val factor = 10.0.pow(numFractionDigits.toDouble())
     return (this * factor).roundToInt() / factor.toFloat()
-}
-
-fun getHoursByMilliseconds(ms: Long): String {
-    val sdf = SimpleDateFormat("HH", Locale.US)
-    val date = Date(ms)
-    return sdf.format(date)
 }
 
 fun calcMoonPhase(currentPhase: Float, currentDate: Long, requiredDate: Long): Float {

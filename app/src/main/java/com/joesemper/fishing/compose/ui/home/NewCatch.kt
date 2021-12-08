@@ -63,10 +63,11 @@ import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.utils.*
-import com.joesemper.fishing.utils.time.TimeManager
+import com.joesemper.fishing.utils.time.toDate
+import com.joesemper.fishing.utils.time.toHours
+import com.joesemper.fishing.utils.time.toTime
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
-import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import java.util.*
 
@@ -91,8 +92,6 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
     val context = LocalContext.current
     val notAllFieldsFilled = stringResource(R.string.not_all_fields_are_filled)
 
-    val timeManager: TimeManager = get()
-
     viewModel.date.value = dateAndTime.timeInMillis
 
     if (place.id.isNotEmpty()) {
@@ -101,7 +100,7 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
 
     LaunchedEffect(key1 = viewModel.marker.value, key2 = viewModel.date.value) {
         viewModel.marker.value?.let {
-            if (timeManager.getDate(viewModel.date.value) != timeManager.getDate(Date().time)) {
+            if (viewModel.date.value.toDate() != Date().time.toDate()) {
                 viewModel.getHistoricalWeather()?.collect {
                     viewModel.weather.value = it
                 }
@@ -150,8 +149,8 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
             Places(stringResource(R.string.place), viewModel)  //Выпадающий список мест
             FishAndWeight(viewModel.fishAmount, viewModel.weight)
             Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
-            DateAndTime(viewModel.date, timeManager)
-            NewCatchWeather(viewModel, timeManager)
+            DateAndTime(viewModel.date)
+            NewCatchWeather(viewModel)
             Photos(
                 { clicked -> { } },
                 { deleted -> viewModel.deletePhoto(deleted) })
@@ -609,7 +608,6 @@ private fun addPhoto(
 @Composable
 fun NewCatchWeather(
     viewModel: NewCatchViewModel,
-    timeManager: TimeManager
 ) {
 
     val weather = viewModel.weather.value
@@ -635,7 +633,7 @@ fun NewCatchWeather(
             )
 
             val hour by remember(dateAndTime.timeInMillis) {
-                mutableStateOf(timeManager.getHours(dateAndTime.timeInMillis).toInt())
+                mutableStateOf(dateAndTime.timeInMillis.toHours().toInt())
             }
 
             Crossfade(targetState = weather) { weatherForecast ->
@@ -788,7 +786,6 @@ fun NewCatchWeather(
 @Composable
 fun DateAndTime(
     date: MutableState<Long>,
-    timeManager: TimeManager
 ) {
     val viewModel: NewCatchViewModel = getViewModel()
     val dateSetState = remember { mutableStateOf(false) }
@@ -800,7 +797,7 @@ fun DateAndTime(
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         OutlinedTextField(
-            value = timeManager.getDate(date.value),
+            value = date.value.toDate(),
             onValueChange = {},
             label = { Text(text = stringResource(R.string.date)) },
             readOnly = true,
@@ -820,7 +817,7 @@ fun DateAndTime(
 
             })
         OutlinedTextField(
-            value = timeManager.getTime(date.value),
+            value = date.value.toTime(),
             onValueChange = {},
             label = { Text(text = stringResource(R.string.time)) },
             readOnly = true,

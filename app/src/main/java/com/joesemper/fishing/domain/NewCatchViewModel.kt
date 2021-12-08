@@ -14,7 +14,7 @@ import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.repository.app.CatchesRepository
 import com.joesemper.fishing.model.repository.app.MarkersRepository
 import com.joesemper.fishing.model.repository.app.WeatherRepository
-import com.joesemper.fishing.utils.getHoursByMilliseconds
+import com.joesemper.fishing.utils.time.toHours
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -101,7 +101,7 @@ class NewCatchViewModel(
         viewModelScope.launch {
             if (isInputCorrect()) {
                 marker.value?.let { userMapMarker ->
-                    val hour = getHoursByMilliseconds(date.value).toInt()
+                    val hour = date.value.toHours().toInt()
                     weather.value?.let { forecast ->
                         saveNewCatch(
                             RawUserCatch(

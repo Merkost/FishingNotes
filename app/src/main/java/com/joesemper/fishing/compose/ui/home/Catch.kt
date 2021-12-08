@@ -32,8 +32,7 @@ import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.utils.hPaToMmHg
-import com.joesemper.fishing.utils.time.TimeManager
-import org.koin.androidx.compose.get
+import com.joesemper.fishing.utils.time.toDate
 import org.koin.androidx.compose.getViewModel
 
 
@@ -45,8 +44,6 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch?) {
         viewModel.catch.value = it
     }
 
-    val timeManager: TimeManager = get()
-
     Scaffold(topBar = {
         CatchTopBar(
             navController = navController,
@@ -56,7 +53,6 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch?) {
         CatchContent(
             navController = navController,
             viewModel = viewModel,
-            timeManager = timeManager
         )
     }
 }
@@ -83,7 +79,6 @@ fun CatchTopBar(navController: NavController, viewModel: UserCatchViewModel) {
 fun CatchContent(
     navController: NavController,
     viewModel: UserCatchViewModel,
-    timeManager: TimeManager
 ) {
     viewModel.catch.value?.let { catch ->
         Column(
@@ -120,7 +115,7 @@ fun CatchContent(
                         top.linkTo(parent.top)
                         absoluteRight.linkTo(parent.absoluteRight)
                     },
-                    text = timeManager.getDateAndTime(catch.date)
+                    text = catch.date.toDate()
                 )
 
                 SimpleUnderlineTextField(

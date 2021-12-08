@@ -31,6 +31,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
@@ -49,7 +50,10 @@ import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.model.entity.weather.Hourly
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
-import com.joesemper.fishing.utils.time.TimeManager
+import com.joesemper.fishing.utils.time.toDateTextMonth
+import com.joesemper.fishing.utils.time.toDayOfWeek
+import com.joesemper.fishing.utils.time.toDayOfWeekAndDate
+import com.joesemper.fishing.utils.time.toTime
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.get
@@ -75,8 +79,6 @@ fun WeatherScreen(
     val selectedPlace = remember {
         mutableStateOf<UserMapMarker?>(null)
     }
-
-    val timeManager: TimeManager = get()
 
     LaunchedEffect(permissionsState.allPermissionsGranted) {
         getCurrentLocationFlow(context, permissionsState).collect { locationState ->
@@ -139,20 +141,17 @@ fun WeatherScreen(
                     forecast = forecast,
                     pressureUnit = pressureUnit,
                     temperatureUnit = temperatureUnit,
-                    timeManager = timeManager
                 )
 
                 PressureChartItem(
                     forecast = forecast.daily,
                     pressureUnit = pressureUnit,
-                    timeManager = timeManager
                 )
 
                 forecast.daily.forEachIndexed { index, daily ->
                     DailyWeatherItem(
                         forecast = daily,
                         temperatureUnit = temperatureUnit,
-                        timeManager = timeManager,
                         onDailyWeatherClick = {
                             navigateToDailyWeatherScreen(
                                 navController = navController,
@@ -199,8 +198,6 @@ fun WeatherScreen(
                 // Spacer(modifier = Modifier.size())
             }
         }
-
-
     }
 }
 
@@ -215,7 +212,6 @@ fun CurrentWeather(
     forecast: WeatherForecast,
     temperatureUnit: String,
     pressureUnit: String,
-    timeManager: TimeManager
 ) {
     Surface(
         modifier = modifier
@@ -245,7 +241,6 @@ fun CurrentWeather(
             HourlyWeather(
                 forecastHourly = forecast.hourly,
                 temperatureUnit = temperatureUnit,
-                timeManager = timeManager
             )
         }
     }
@@ -256,8 +251,10 @@ fun HourlyWeather(
     modifier: Modifier = Modifier,
     forecastHourly: List<Hourly>,
     temperatureUnit: String,
-    timeManager: TimeManager
 ) {
+    val preferences: UserPreferences = get()
+    val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
+
     LazyRow(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -268,7 +265,7 @@ fun HourlyWeather(
                 timeTitle = if (index == 0) {
                     stringResource(R.string.now)
                 } else {
-                    timeManager.getTime(forecastHourly[index].date)
+                    forecastHourly[index].date.toTime(is12hTimeFormat)
                 },
                 temperatureUnit = temperatureUnit
             )
@@ -336,7 +333,6 @@ fun DailyWeatherItem(
     modifier: Modifier = Modifier,
     forecast: Daily,
     temperatureUnit: String,
-    timeManager: TimeManager,
     onDailyWeatherClick: () -> Unit,
 ) {
     ConstraintLayout(
@@ -353,7 +349,7 @@ fun DailyWeatherItem(
                 bottom.linkTo(day.top)
                 absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
             },
-            text = timeManager.getDateTextMonth(forecast.date)
+            text = forecast.date.toDateTextMonth()
         )
         SecondaryText(
             modifier = Modifier.constrainAs(day) {
@@ -361,7 +357,7 @@ fun DailyWeatherItem(
                 top.linkTo(date.bottom)
                 bottom.linkTo(parent.bottom, 8.dp)
             },
-            text = timeManager.getDayOfWeek(forecast.date)
+            text = forecast.date.toDayOfWeek()
         )
         Divider(
             modifier = Modifier.constrainAs(divider) {
@@ -435,7 +431,6 @@ fun PressureChartItem(
     modifier: Modifier = Modifier,
     forecast: List<Daily>,
     pressureUnit: String,
-    timeManager: TimeManager
 ) {
     Column(
         modifier = modifier
@@ -452,7 +447,6 @@ fun PressureChartItem(
                 .padding(top = 16.dp),
             weather = forecast,
             pressureUnit = pressureUnit,
-            timeManager = timeManager
         )
         Spacer(modifier = Modifier.padding(4.dp))
         Divider()
@@ -463,8 +457,7 @@ fun PressureChartItem(
 fun PressureChart(
     modifier: Modifier = Modifier,
     weather: List<Daily>,
-    pressureUnit: String,
-    timeManager: TimeManager
+    pressureUnit: String
 ) {
     val x = remember { Animatable(0f) }
     val yValues = remember(weather) { mutableStateOf(getPressureList(weather, pressureUnit)) }
@@ -517,7 +510,7 @@ fun PressureChart(
             )
 
             drawContext.canvas.nativeCanvas.drawText(
-                timeManager.getDayOfWeekAndDate(weather[index].date),
+                weather[index].date.toDayOfWeekAndDate(),
                 pointX, size.height, paint
             )
 

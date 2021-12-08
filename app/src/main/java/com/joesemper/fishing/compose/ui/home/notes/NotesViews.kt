@@ -12,9 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -25,10 +23,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.net.toUri
 import coil.compose.rememberImagePainter
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.theme.cardColor
 import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
@@ -36,7 +36,7 @@ import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.utils.time.TimeManager
+import com.joesemper.fishing.utils.time.toTime
 import org.koin.androidx.compose.get
 
 @ExperimentalComposeUiApi
@@ -163,7 +163,8 @@ fun ItemUserCatch(
         null
     }
 
-    val timeManager: TimeManager = get()
+    val preferences: UserPreferences = get()
+    val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
 
     DefaultCardClickable(onClick = { userCatchClicked(userCatch) }) {
         ConstraintLayout(modifier = Modifier.padding(8.dp)) {
@@ -244,7 +245,7 @@ fun ItemUserCatch(
                     absoluteRight.linkTo(parent.absoluteRight, 4.dp)
                     top.linkTo(place.top)
                 },
-                text = timeManager.getTime(userCatch.date)
+                text = userCatch.date.toTime(is12hTimeFormat)
             )
         }
     }
@@ -352,6 +353,7 @@ fun ItemDate(text: String) {
         modifier = Modifier
             .wrapContentHeight()
             .fillMaxWidth()
+            .zIndex(1f)
     ) {
         Surface(
             modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),

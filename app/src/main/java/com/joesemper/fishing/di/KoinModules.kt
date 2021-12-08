@@ -12,8 +12,6 @@ import com.joesemper.fishing.model.repository.app.CatchesRepository
 import com.joesemper.fishing.model.repository.app.MarkersRepository
 import com.joesemper.fishing.model.repository.app.WeatherRepository
 import com.joesemper.fishing.utils.Logger
-import com.joesemper.fishing.utils.time.TimeManager
-import com.joesemper.fishing.utils.time.TimeManagerImpl
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -25,7 +23,6 @@ val appModule = module {
     single<MarkersRepository> { FirebaseMarkersRepositoryImpl(get(), get()) }
     single<PhotoStorage> { CloudPhotoStorage(androidContext()) }
     single<WeatherRepository> { WeatherRepositoryRetrofitImpl() }
-    single<TimeManager> { TimeManagerImpl(get()) }
     single { Logger() }
     single { SnackbarManager }
     single { UserPreferences(androidContext()) }

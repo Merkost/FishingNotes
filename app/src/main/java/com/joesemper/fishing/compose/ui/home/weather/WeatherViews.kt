@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -23,6 +24,7 @@ import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.airbnb.lottie.compose.*
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.HeaderText
 import com.joesemper.fishing.compose.ui.home.PrimaryText
 import com.joesemper.fishing.compose.ui.home.SecondaryText
@@ -33,7 +35,8 @@ import com.joesemper.fishing.model.entity.weather.Temperature
 import com.joesemper.fishing.model.entity.weather.Weather
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
-import com.joesemper.fishing.utils.time.TimeManager
+import com.joesemper.fishing.utils.time.calculateDaylightTime
+import com.joesemper.fishing.utils.time.toTime
 import org.koin.androidx.compose.get
 
 @Composable
@@ -365,7 +368,9 @@ fun SunriseSunsetView(
     sunrise: Long,
     sunset: Long,
 ) {
-    val timeManager: TimeManager = get()
+
+    val preferences: UserPreferences = get()
+    val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
 
     ConstraintLayout(
         modifier = modifier
@@ -416,7 +421,7 @@ fun SunriseSunsetView(
                 absoluteLeft.linkTo(sunriseIcon.absoluteLeft)
                 absoluteRight.linkTo(sunriseIcon.absoluteRight)
             },
-            text = timeManager.getTime(sunrise)
+            text = sunrise.toTime(is12hTimeFormat)
         )
 
         PrimaryText(
@@ -425,13 +430,11 @@ fun SunriseSunsetView(
                 absoluteLeft.linkTo(day.absoluteLeft)
                 absoluteRight.linkTo(day.absoluteRight)
             },
-            text = timeManager.calculateDaylightHours(sunrise, sunset)
-                    + " "
-                    + stringResource(R.string.hours)
-                    + " "
-                    + timeManager.calculateDaylightMinutes(sunrise, sunset)
-                    + " "
-                    + stringResource(R.string.minutes)
+            text = calculateDaylightTime(
+                context = LocalContext.current,
+                sunrise = sunrise,
+                sunset = sunset
+            )
         )
 
         PrimaryText(
@@ -440,7 +443,7 @@ fun SunriseSunsetView(
                 absoluteLeft.linkTo(sunsetIcon.absoluteLeft)
                 absoluteRight.linkTo(sunsetIcon.absoluteRight)
             },
-            text = timeManager.getTime(sunset)
+            text = sunset.toTime(is12hTimeFormat)
         )
 
     }
