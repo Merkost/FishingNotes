@@ -1,6 +1,7 @@
 package com.joesemper.fishing.compose.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
@@ -22,6 +23,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.home.weather.WeatherDaily
 import com.joesemper.fishing.compose.ui.login.LoginScreen
+import com.joesemper.fishing.compose.ui.theme.FishingNotesTheme
 import kotlinx.coroutines.InternalCoroutinesApi
 
 @ExperimentalComposeUiApi
@@ -61,18 +63,19 @@ fun FishingNotesApp() {
         ) { innerPaddingModifier ->
             Column() {
 
-                //Spacer(modifier = Modifier.statusBarsHeight())
-                NavHost(
-                    navController = appStateHolder.navController,
-                    startDestination = MainDestinations.HOME_ROUTE,
-                    modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
-                    Modifier.padding(innerPaddingModifier) /*else Modifier*/
-                ) {
-                    NavGraph(
+                    //Spacer(modifier = Modifier.statusBarsHeight())
+                    NavHost(
                         navController = appStateHolder.navController,
-                        upPress = appStateHolder::upPress,
-                    )
-                }
+                        startDestination = MainDestinations.HOME_ROUTE,
+                        modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
+                        Modifier.padding(innerPaddingModifier) /*else Modifier*/
+                    ) {
+                        NavGraph(
+                            navController = appStateHolder.navController,
+                            upPress = appStateHolder::upPress,
+                        )
+                    }
+
             }
         }
     }

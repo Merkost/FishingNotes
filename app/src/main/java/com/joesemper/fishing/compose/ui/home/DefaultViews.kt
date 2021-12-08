@@ -308,7 +308,7 @@ fun HeaderText(
     modifier: Modifier = Modifier,
     text: String,
     textAlign: TextAlign = TextAlign.Start,
-    textColor: Color = primaryFigmaTextColor
+    textColor: Color = MaterialTheme.colors.onSurface
 ) {
     Text(
         modifier = modifier,

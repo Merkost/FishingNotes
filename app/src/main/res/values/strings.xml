@@ -210,6 +210,9 @@
     <string name="in_8h">8h</string>
     <string name="in_16h">16h</string>
     <string name="no_internet_connection">No Internet connection</string>
+    <string name="app_theme">App theme</string>
+    <string name="choose_app_theme">"Choose app theme "</string>
+    <string name="logout_dialog_cancel">Cancel</string>
 
 
 </resources>

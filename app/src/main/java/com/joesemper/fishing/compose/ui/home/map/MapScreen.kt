@@ -480,7 +480,7 @@ fun MapFab(state: MapUiState, onClick: () -> Unit, onLongPress: () -> Unit,) {
         Icon(
             painter = painterResource(id = fabImg.value),
             contentDescription = stringResource(R.string.new_place),
-            tint = Color.White,
+            tint = MaterialTheme.colors.onPrimary,
         )
     }
 }

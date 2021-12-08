@@ -173,7 +173,7 @@
 
     <string name="back_clicked">Нажмите еще раз для выхода</string>
     <string name="current_location">Текущее местоположение</string>
-    <string name="install_maps_app">Please install a maps application</string>
+    <string name="install_maps_app">Пожалуйста, установите приложение Google Карты</string>
     <string name="choose_place_first">Для начала выберите место!</string>
     <string name="precipitation">Осадки</string>
     <string name="humidity">Влажность</string>
@@ -184,20 +184,20 @@
     <string name="location_permission_denied">Вы отказали в доступе к вашему местоположению. Предоставьте разрешения в настройках вашего устройства.</string>
     <string name="location_permission_dialog">Разрешите определять ваше местоположение?</string>
     <string name="dont_ask_again">Не спрашивать</string>
-    <string name="location_permission">Location permission</string>
-    <string name="provide_location_permission">Provide location permission to the app</string>
-    <string name="time_format">Time format</string>
-    <string name="use_12h">Use 12 hours time format</string>
+    <string name="location_permission">Определение местоположения</string>
+    <string name="provide_location_permission">Предоставьте приложению доступ к вашему местоположению</string>
+    <string name="time_format">Формат времени</string>
+    <string name="use_12h">Использовать 12-часовой формат</string>
     <string name="pressure_mm">мм рт. ст.</string>
     <string name="choose_pressure_unit">Выберите единицу измерения давления</string>
     <string name="pressure_unit">Единица измерения давления</string>
-    <string name="temperature_unit">Temperature unit</string>
+    <string name="temperature_unit">Единица измерения температуры</string>
     <string name="fahrenheit">°F</string>
     <string name="Kelvin">K</string>
     <string name="kelvin">K</string>
     <string name="now">Сейчас</string>
 
-    <string name="mode_place_selecting">You are in place selecting mode!</string>
+    <string name="mode_place_selecting">Режим выбора места включен!</string>
     <string name="mode_place_selecting_off">Режим выбора места выключен!</string>
     <string name="mode_place_info">Вы в режиме просмотра информации о месте!</string>
     <string name="morning">Утро</string>
@@ -207,6 +207,9 @@
     <string name="daylight_hours">Световой день</string>
     <string name="hours">\ч\</string>
     <string name="minutes">\м\</string>
+    <string name="choose_temperature_unit">Выберите единицу измерения температуры</string>
+    <string name="app_theme">Тема приложения</string>
+    <string name="choose_app_theme">Выберите цветовую тему приложения</string>
     <string name="choose_temperature_unit">Choose temperature unit</string>
     <string name="temp">Temp.</string>
     <string name="in_8h">8ч</string>

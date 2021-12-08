@@ -1,6 +1,7 @@
 package com.joesemper.fishing.compose.ui.home
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.Icon
@@ -12,11 +13,13 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.airbnb.lottie.compose.*
 import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
 import com.alorma.compose.settings.ui.SettingsCheckbox
 import com.alorma.compose.settings.ui.SettingsMenuLink
@@ -26,12 +29,12 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
-import com.joesemper.fishing.compose.ui.home.map.GrantLocationPermissionsDialog
-import com.joesemper.fishing.compose.ui.home.map.checkPermission
-import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
+import com.joesemper.fishing.compose.ui.home.map.*
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
 import com.joesemper.fishing.compose.ui.theme.AppThemeValues
+import com.joesemper.fishing.compose.ui.theme.getAppThemeValueFromColor
+import com.joesemper.fishing.compose.ui.utils.ColorPicker
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -42,8 +45,7 @@ fun SettingsScreen(backPress: () -> Unit) {
     val userPreferences: UserPreferences = get()
     val weatherPreferences: WeatherPreferences = get()
 
-    val isPermissionDialogOpen = remember { mutableStateOf(false) }
-    val isAppThemeDialogOpen = remember { mutableStateOf(false) }
+
     val isPressureDialogOpen = remember { mutableStateOf(false) }
     val isTemperatureDialogOpen = remember { mutableStateOf(false) }
 
@@ -53,16 +55,7 @@ fun SettingsScreen(backPress: () -> Unit) {
     val use12hTimeFormat by userPreferences.use12hTimeFormat.collectAsState(false)
     val pressureUnit = weatherPreferences.getPressureUnit.collectAsState(PressureValues.mmHg.name)
     val temperatureUnit = weatherPreferences.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
-    val appTheme = userPreferences.appTheme.collectAsState(AppThemeValues.Blue.name)
 
-    GetLocationPermission(isPermissionDialogOpen)
-    GetAppTheme(isAppThemeDialogOpen, appTheme) { newValue ->
-        coroutineScope.launch {
-            userPreferences.saveAppTheme(newValue)
-            delay(200)
-            isAppThemeDialogOpen.value = false
-        }
-    }
     GetPressureUnit(isPressureDialogOpen, pressureUnit) { newValue ->
         coroutineScope.launch {
             weatherPreferences.savePressureUnit(newValue)
@@ -80,38 +73,16 @@ fun SettingsScreen(backPress: () -> Unit) {
 
     Scaffold(
         topBar = { SettingsTopAppBar(backPress) },
-        modifier = Modifier.fillMaxSize()
-    )
+        modifier = Modifier.fillMaxSize())
     {
         Column {
-            if (checkPermission(context))
-                SettingsMenuLink(
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = "LocationOn"
-                        )
-                    },
-                    title = { Text(text = stringResource(R.string.location_permission)) },
-                    subtitle = { Text(text = stringResource(R.string.provide_location_permission)) },
-                    onClick = { isPermissionDialogOpen.value = true },
-                )
-            SettingsMenuLink(
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.ColorLens,
-                        contentDescription = Icons.Default.ColorLens.name
-                    )
-                },
-                title = { Text(text = "App theme") },
-                subtitle = { Text(text = "Choose app theme (Current is: ${appTheme.value})") },
-                onClick = { isAppThemeDialogOpen.value = true }
-            )
+            MainAppSettings(userPreferences)
+            //HeaderText(modifier = Modifier.padding(start = 12.dp), text = "Weather settings")
             SettingsCheckbox(
                 icon = {
                     Icon(
                         imageVector = Icons.Default.AccessTime,
-                        contentDescription = "AccessTime"
+                        contentDescription = Icons.Default.AccessTime.name
                     )
                 },
                 title = { Text(text = stringResource(R.string.time_format)) },
@@ -128,104 +99,137 @@ fun SettingsScreen(backPress: () -> Unit) {
             SettingsMenuLink(
                 icon = {
                     Icon(
-                        imageVector = Icons.Default.Compress,
-                        contentDescription = Icons.Default.Compress.name
-                    )
-                },
-                title = { Text(text = stringResource(R.string.pressure_unit)) },
-                subtitle = { Text(text = "Choose another pressure unit (Current is: ${pressureUnit.value})") },
-                onClick = { isPressureDialogOpen.value = true }
-            )
-            SettingsMenuLink(
-                icon = {
-                    Icon(
                         imageVector = Icons.Default.Thermostat,
                         contentDescription = Icons.Default.Thermostat.name
                     )
                 },
                 title = { Text(text = stringResource(R.string.temperature_unit)) },
-                subtitle = { Text(text = "Choose another temperature unit (Current is: ${temperatureUnit.value})") },
+                subtitle = { Text(text = stringResource(R.string.choose_temperature_unit)/*(Current is: ${temperatureUnit.value})*/) },
                 onClick = { isTemperatureDialogOpen.value = true }
+            )
+            SettingsMenuLink(
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Compress,
+                        contentDescription = Icons.Default.Compress.name
+                    )
+                },
+                title = { Text(text = stringResource(R.string.pressure_unit)) },
+                subtitle = { Text(text = stringResource(R.string.choose_pressure_unit)/* (Current is: ${pressureUnit.value})*/) },
+                onClick = { isPressureDialogOpen.value = true }
             )
         }
 
 
     }
+
+
 }
 
 @Composable
-fun GetAppTheme(
-    isAppThemeDialogOpen: MutableState<Boolean>,
-    currentAppTheme: State<String>,
-    onSelectedValue: (appThemeValues: AppThemeValues) -> Unit
-) {
-    val radioOptions = AppThemeValues.values().asList()
+fun MainAppSettings(userPreferences: UserPreferences) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
-    if (isAppThemeDialogOpen.value) {
-        val (selectedOption, onOptionSelected) = remember {
-            mutableStateOf(
-                AppThemeValues.valueOf(
-                    currentAppTheme.value
-                )
+    val appTheme = userPreferences.appTheme.collectAsState(AppThemeValues.Blue.name)
+
+    var isPermissionDialogOpen by remember { mutableStateOf(false) }
+    var isAppThemeDialogOpen by remember { mutableStateOf(false) }
+
+    if (isPermissionDialogOpen) GetLocationPermission() { isPermissionDialogOpen = false }
+
+    Column {
+        if (checkPermission(context)) {
+            SettingsMenuLink(
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = Icons.Default.LocationOn.name
+                    )
+                },
+                title = { Text(text = stringResource(R.string.location_permission)) },
+                subtitle = { Text(text = stringResource(R.string.provide_location_permission)) },
+                onClick = { isPermissionDialogOpen = true },
             )
         }
-        Dialog(onDismissRequest = { isAppThemeDialogOpen.value = false }) {
-            DefaultCard {
-                Column(
-                    modifier = Modifier.padding(bottom = 12.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Row(
-                        modifier = Modifier.padding(14.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        PrimaryText(text = "Choose app theme")
-                    }
-
-                    radioOptions.forEach { appThemeValue ->
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .selectable(
-                                    selected = (appThemeValue == selectedOption),
-                                    onClick = {
-                                        onOptionSelected(appThemeValue)
-                                        onSelectedValue(appThemeValue)
-                                    }
-                                )
-                                .padding(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.Start,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            RadioButton(
-                                selected = (appThemeValue == selectedOption),
-                                modifier = Modifier.padding(all = Dp(value = 8F)),
-                                onClick = {
-                                    onOptionSelected(appThemeValue)
-                                    onSelectedValue(appThemeValue)
-                                    Toast.makeText(
-                                        context,
-                                        appThemeValue.name,
-                                        Toast.LENGTH_LONG
-                                    )
-                                        .show()
-                                }
-                            )
-                            Text(
-                                text = appThemeValue.name,
-                                modifier = Modifier.padding(start = 16.dp)
-                            )
-                        }
-                    }
-                }
+        //HeaderText(modifier = Modifier.padding(start = 12.dp), text = "Main app settings")
+        SettingsMenuLink(
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.ColorLens,
+                    contentDescription = Icons.Default.ColorLens.name
+                )
+            },
+            title = { Text(text = stringResource(R.string.app_theme)) },
+            subtitle = { Text(text = stringResource(R.string.choose_app_theme)/* + "Current is: " + "${appTheme.value}"*/) },
+            onClick = { isAppThemeDialogOpen = !isAppThemeDialogOpen }
+        )
+        AnimatedVisibility(isAppThemeDialogOpen) {
+            val (selectedColor, onColorSelected) = remember {
+                mutableStateOf(AppThemeValues.valueOf(appTheme.value).color)
             }
 
+            Row(
+                modifier = Modifier.fillMaxWidth().wrapContentHeight()
+                    .padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+
+                ) {
+                ColorPicker(
+                    colors = AppThemeValues.values().map { it.color },
+                    selectedColor,
+                    (onColorSelected as (Color?) -> Unit).apply {
+                        coroutineScope.launch {
+                            userPreferences.saveAppTheme(getAppThemeValueFromColor(selectedColor))
+                        }
+                    },
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
+                /*DarkModeLottieSwitch(modifier = Modifier
+                    .clip(CircleShape)
+                    .requiredSize(48.dp))*/
+            }
         }
     }
 }
+
+
+/*@Composable
+fun DarkModeLottieSwitch(modifier: Modifier = Modifier) {
+    var animate by remember { mutableStateOf(false) }
+    val darkTheme = isSystemInDarkTheme()
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.light_dark_mode_button)
+    )
+    val lottieAnimatable = rememberLottieAnimatable()
+
+    val minMaxFrame by remember {
+        mutableStateOf(
+            when (darkTheme) {
+                true -> LottieClipSpec.Frame(180)
+                false -> LottieClipSpec.Frame(0)
+            }
+        )
+    }
+
+    LaunchedEffect(animate) {
+        lottieAnimatable.animate(
+            composition,
+            iteration = 1,
+            continueFromPreviousAnimate = true,
+            clipSpec = minMaxFrame,
+        )
+    }
+
+    Box(modifier = Modifier.padding(4.dp)) {
+        LottieAnimation(
+            modifier = modifier.fillMaxSize().clickable { animate = !animate },
+            composition = composition,
+            progress = lottieAnimatable.progress
+        )
+    }
+
+}*/
 
 @Composable
 fun GetTemperatureUnit(
@@ -373,29 +377,18 @@ fun GetPressureUnit(
 
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
-fun GetLocationPermission(isPermissionDialogOpen: MutableState<Boolean>) {
+fun GetLocationPermission(closeDialog: () -> Unit) {
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     val context = LocalContext.current
     PermissionsRequired(
         multiplePermissionsState = permissionsState,
         permissionsNotGrantedContent = {
-            if (isPermissionDialogOpen.value) {
                 GrantLocationPermissionsDialog(
-                    onDismiss = {
-                        isPermissionDialogOpen.value = false
-                    },
-                    onNegativeClick = {
-                        isPermissionDialogOpen.value = false
-                    },
-                    onPositiveClick = {
-                        isPermissionDialogOpen.value = false
-                        permissionsState.launchMultiplePermissionRequest()
-                    },
-                    onDontAskClick = {
-                        isPermissionDialogOpen.value
-                    }
+                    onDismiss = closeDialog,
+                    onNegativeClick = closeDialog,
+                    onPositiveClick = closeDialog,
+                    onDontAskClick = closeDialog
                 )
-            }
         },
         permissionsNotAvailableContent = { SnackbarManager.showMessage(R.string.location_permission_denied) })
     { checkPermission(context) }
