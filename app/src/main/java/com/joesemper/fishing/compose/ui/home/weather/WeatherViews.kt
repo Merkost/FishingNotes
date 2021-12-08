@@ -204,7 +204,7 @@ fun WeatherAppBarText(
 
 @Composable
 fun WeatherLocationIcon(
-    color: Color
+    color: Color = MaterialTheme.colors.onSurface
 ) {
     Icon(
         modifier = Modifier
@@ -218,7 +218,7 @@ fun WeatherLocationIcon(
 @Composable
 fun WeatherHeaderText(
     modifier: Modifier = Modifier,
-    color: Color = primaryTextColor,
+    color: Color = MaterialTheme.colors.onSurface,
     text: String
 ) {
     Text(
@@ -233,7 +233,7 @@ fun WeatherHeaderText(
 fun WeatherPrimaryText(
     modifier: Modifier = Modifier,
     text: String,
-    textColor: Color = primaryTextColor
+    textColor: Color = MaterialTheme.colors.onSurface
 ) {
     Text(
         modifier = modifier,
