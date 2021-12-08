@@ -104,8 +104,8 @@ fun SettingsScreen(backPress: () -> Unit) {
                         contentDescription = Icons.Default.ColorLens.name
                     )
                 },
-                title = { Text(text = "App theme") },
-                subtitle = { Text(text = "Choose app theme (Current is: ${appTheme.value})") },
+                title = { Text(text = stringResource(R.string.app_theme)) },
+                subtitle = { Text(text = stringResource(R.string.choose_app_theme)/* + "Current is: " + "${appTheme.value}"*/) },
                 onClick = { isAppThemeDialogOpen.value = !isAppThemeDialogOpen.value }
             )
             AnimatedVisibility(isAppThemeDialogOpen.value) {
