@@ -128,7 +128,7 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
                         notAllFieldsFilled
                     )
                 }) {
-                Icon(Icons.Filled.Done, stringResource(R.string.create), tint = Color.White)
+                Icon(Icons.Filled.Done, stringResource(R.string.create), tint = MaterialTheme.colors.onPrimary)
             }
         }
     ) {
@@ -240,7 +240,7 @@ private fun Places(label: String, viewModel: NewCatchViewModel) {
                                 modifier = Modifier.clickable {
                                     textFieldValue = ""; isDropMenuOpen = true
                                 },
-                                tint = primaryFigmaColor
+                                tint = MaterialTheme.colors.primary
                             )
                         } else {
                             Icon(
@@ -249,7 +249,7 @@ private fun Places(label: String, viewModel: NewCatchViewModel) {
                                 modifier = Modifier.clickable {
                                     if (!isDropMenuOpen) isDropMenuOpen = true
                                 },
-                                tint = primaryFigmaColor
+                                tint = MaterialTheme.colors.primary
                             )
                         }
                     } else Icon(
@@ -415,7 +415,7 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_baseline_minus),
-                            tint = primaryFigmaColor,
+                            tint = MaterialTheme.colors.primary,
                             contentDescription = ""
                         )
                     }
@@ -433,7 +433,7 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_baseline_plus),
-                            tint = primaryFigmaColor,
+                            tint = MaterialTheme.colors.primary,
                             contentDescription = ""
                         )
                     }
@@ -479,7 +479,7 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_baseline_minus),
-                            tint = primaryFigmaColor,
+                            tint = MaterialTheme.colors.primary,
                             contentDescription = ""
                         )
                     }
@@ -498,7 +498,7 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_baseline_plus),
-                            tint = primaryFigmaColor,
+                            tint = MaterialTheme.colors.primary,
                             contentDescription = ""
                         )
                     }
@@ -562,17 +562,18 @@ fun ItemAddPhoto() {
             .clip(RoundedCornerShape(5.dp))
             .clickable { addPhotoState.value = true },
         elevation = 8.dp,
-        border = BorderStroke(1.dp, primaryFigmaColor)
+        border = BorderStroke(1.dp, MaterialTheme.colors.primary)
     ) {
 
         Column(
+            modifier = Modifier.padding(8.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
                 painterResource(R.drawable.ic_baseline_add_photo_alternate_24), //Or we can use Icons.Default.Add
                 contentDescription = Constants.ITEM_ADD_PHOTO,
-                tint = secondaryTextColor,
+                tint = MaterialTheme.colors.onSurface,
                 modifier = Modifier.size(48.dp)
             )
             SecondaryText(text = stringResource(id = R.string.add_photo))
@@ -801,7 +802,7 @@ fun DateAndTime(date: MutableState<Long>) {
                     else { SnackbarManager.showMessage(R.string.choose_place_first) }
                 }){
                     Icon(painter = painterResource(R.drawable.ic_baseline_event_24),
-                        tint = primaryFigmaColor,
+                        tint = MaterialTheme.colors.primary,
                         contentDescription = stringResource(R.string.date))
                 }
 
@@ -819,7 +820,7 @@ fun DateAndTime(date: MutableState<Long>) {
                     else { SnackbarManager.showMessage(R.string.choose_place_first) }
                 }) {
                     Icon(painter = painterResource(R.drawable.ic_baseline_access_time_24),
-                        tint = primaryFigmaColor,
+                        tint = MaterialTheme.colors.primary,
                         contentDescription = stringResource(R.string.time))
                 }
 
