@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
 
                 splashScreen.setKeepVisibleCondition {
                     userStateFlow.value is BaseViewState.Loading
-                            //&& appTheme == null
+                            && appTheme == null
                 }
 
                 splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
@@ -101,7 +101,10 @@ class MainActivity : ComponentActivity() {
                             splashScreenViewProvider.remove()
                             setContent {
                                 FishingNotesTheme(appTheme) {
-                                    FishingNotesApp()
+                                    if (viewModel.user == null)
+                                        Navigation()
+                                    else
+                                        FishingNotesApp()
                                 }
                             }
                         }.start()
@@ -110,15 +113,20 @@ class MainActivity : ComponentActivity() {
                 setTheme(R.style.Theme_SplashScreen)
                 setContent {
                     FishingNotesTheme(appTheme) {
-                        FishingNotesApp()
+                        if (viewModel.user == null)
+                            Navigation()
+                        else
+                            FishingNotesApp()
                     }
                 }
             }
         } else {
             setContent {
                 FishingNotesTheme(appTheme) {
-                    if (viewModel.user == null) Navigation()
-                    else FishingNotesApp()
+                    if (viewModel.user == null)
+                        Navigation()
+                    else
+                        FishingNotesApp()
                 }
             }
         }
