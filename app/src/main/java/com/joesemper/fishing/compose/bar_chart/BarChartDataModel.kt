@@ -26,32 +26,32 @@ class BarChartDataModel {
         BarChartData(
             bars = listOf(
                 BarChartData.Bar(
-                    label = "Bar1",
+                    label = "Jul",
                     value = randomValue(),
                     color = randomColor()
                 ),
                 BarChartData.Bar(
-                    label = "Bar2",
+                    label = "Aug",
                     value = randomValue(),
                     color = randomColor()
                 ),
                 BarChartData.Bar(
-                    label = "Bar3",
+                    label = "Sep",
                     value = randomValue(),
                     color = randomColor()
                 ),
                 BarChartData.Bar(
-                    label = "Bar1",
+                    label = "Oct",
                     value = randomValue(),
                     color = randomColor()
                 ),
                 BarChartData.Bar(
-                    label = "Bar2",
+                    label = "Nov",
                     value = randomValue(),
                     color = randomColor()
                 ),
                 BarChartData.Bar(
-                    label = "Bar3",
+                    label = "Dec",
                     value = randomValue(),
                     color = randomColor()
                 )
@@ -63,7 +63,7 @@ class BarChartDataModel {
     val bars: List<BarChartData.Bar>
         get() = barChartData.bars
 
-    private fun randomValue(): Float = (100 * Math.random() + 25).toFloat()
+    private fun randomValue(): Float = (10 * Math.random() + 1).toFloat()
 
     private fun randomColor(): Color {
         val randomIndex = (Math.random() * colors.size).toInt()
