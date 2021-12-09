@@ -1,7 +1,11 @@
 package com.joesemper.fishing.compose.ui.home
 
 import android.content.res.Configuration
+import android.graphics.Point
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.FloatTweenSpec
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
@@ -21,6 +25,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -40,6 +46,9 @@ import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import com.airbnb.lottie.compose.*
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.bar_chart.BarChart
+import com.joesemper.fishing.compose.bar_chart.BarChartDataModel
+import com.joesemper.fishing.compose.bar_chart.BarChartUtils.axisAreas
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.map.LottieMyLocation
 import com.joesemper.fishing.domain.UserViewModel
@@ -160,7 +169,11 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
 
 @Composable
 fun CatchesChart() {
-    //TODO("Not yet implemented")
+    val barChartDataModel = BarChartDataModel()
+    BarChart(
+        barChartData = barChartDataModel.barChartData,
+        modifier = Modifier.fillMaxWidth().height(250.dp)
+    )
 }
 
 @Composable
