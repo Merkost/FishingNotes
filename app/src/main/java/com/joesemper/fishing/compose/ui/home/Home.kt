@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.core.os.ConfigurationCompat
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -55,7 +54,6 @@ import com.joesemper.fishing.compose.ui.home.map.MapScreen
 import com.joesemper.fishing.compose.ui.home.notes.Notes
 import com.joesemper.fishing.compose.ui.home.weather.WeatherScreen
 import com.joesemper.fishing.compose.ui.theme.FishingNotesTheme
-import com.joesemper.fishing.compose.ui.theme.primaryFigmaLightColor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 
@@ -97,7 +95,11 @@ enum class HomeSections(
     val icon: ImageVector,
     val route: String
 ) {
-    MAP(R.string.map, Icons.Outlined.Map, "home/map?${Arguments.MAP_NEW_PLACE}={${Arguments.MAP_NEW_PLACE}}"),
+    MAP(
+        R.string.map,
+        Icons.Outlined.Map,
+        "home/map?${Arguments.MAP_NEW_PLACE}={${Arguments.MAP_NEW_PLACE}}"
+    ),
     NOTES(R.string.notes, Icons.Outlined.Menu, "home/notes"),
     WEATHER(R.string.weather, Icons.Outlined.WbSunny, "home/weather"),
     PROFILE(R.string.profile, Icons.Outlined.VerifiedUser, "home/profile")

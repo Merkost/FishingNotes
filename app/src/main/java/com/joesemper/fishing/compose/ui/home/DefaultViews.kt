@@ -44,7 +44,10 @@ import androidx.compose.ui.zIndex
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.theme.*
+import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
+import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.launch
@@ -276,14 +279,14 @@ fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Spacer(Modifier.size(8.dp))
         Icon(
             painter = painterResource(id = icon),
             contentDescription = stringResource(R.string.place),
             tint = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
-            modifier = Modifier.size(30.dp)
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .size(24.dp)
         )
-        Spacer(Modifier.size(8.dp))
         SubtitleText(text = text)
     }
 }
@@ -312,7 +315,7 @@ fun HeaderText(
 ) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.h3,
+        style = MaterialTheme.typography.h5,
         textAlign = textAlign,
         color = textColor,
         text = text
@@ -463,10 +466,23 @@ fun DefaultAppBar(
     navIcon: ImageVector = Icons.Default.ArrowBack,
     onNavClick: () -> Unit,
     title: String,
+    subtitle: String? = null,
     actions: @Composable() (RowScope.() -> Unit) = {}
 ) {
     TopAppBar(
-        title = { Text(text = title) },
+        title = {
+            Column() {
+                Text(text = title)
+                if (subtitle != null) {
+                    SecondaryTextSmall(
+                        text = subtitle,
+                        textColor = MaterialTheme.colors.onPrimary
+                    )
+                }
+
+            }
+
+        },
         navigationIcon = {
             IconButton(onClick = { onNavClick() }) {
                 Icon(

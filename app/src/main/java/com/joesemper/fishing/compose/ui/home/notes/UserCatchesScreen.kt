@@ -15,15 +15,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserCatchesViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
-import com.joesemper.fishing.utils.time.toDate
 import com.joesemper.fishing.utils.time.toDateTextMonth
-import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalFoundationApi
@@ -52,8 +49,6 @@ fun UserCatches(
     catches: List<UserCatch>,
     userCatchClicked: (UserCatch) -> Unit
 ) {
-    val userPreferences: UserPreferences = get()
-    val is12hTimeFormat by userPreferences.use12hTimeFormat.collectAsState(false)
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         when {
             catches.isNotEmpty() -> {
@@ -63,9 +58,13 @@ fun UserCatches(
                     }
                     items(items = catches
                         .filter { userCatch ->
-                            userCatch.date.toDate() == catchDate
+                            userCatch.date.toDateTextMonth() == catchDate
                         }
-                        .sortedByDescending { it.date }) {
+                        .sortedByDescending { it.date },
+                        key = {
+                            it
+                        }
+                    ) {
                         ItemUserCatch(
                             userCatch = it,
                             userCatchClicked = userCatchClicked

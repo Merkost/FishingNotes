@@ -210,7 +210,6 @@
     <string name="choose_temperature_unit">Выберите единицу измерения температуры</string>
     <string name="app_theme">Тема приложения</string>
     <string name="choose_app_theme">Выберите цветовую тему приложения</string>
-    <string name="choose_temperature_unit">Choose temperature unit</string>
     <string name="temp">Temp.</string>
     <string name="in_8h">8ч</string>
     <string name="in_16h">16ч</string>

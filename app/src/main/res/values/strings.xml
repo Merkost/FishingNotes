@@ -212,7 +212,6 @@
     <string name="no_internet_connection">No Internet connection</string>
     <string name="app_theme">App theme</string>
     <string name="choose_app_theme">"Choose app theme "</string>
-    <string name="logout_dialog_cancel">Cancel</string>
 
 
 </resources>
