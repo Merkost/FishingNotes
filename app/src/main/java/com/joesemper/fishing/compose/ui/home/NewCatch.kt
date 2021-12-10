@@ -226,37 +226,43 @@ private fun Places(label: String, viewModel: NewCatchViewModel) {
                     },
                 label = { Text(text = label) },
                 trailingIcon = {
+
                     if (isNull) {
                         if (textFieldValue.isNotEmpty()) {
-                            Icon(
-                                Icons.Default.Close,
-                                "",
-                                modifier = Modifier.clickable {
-                                    textFieldValue = ""; isDropMenuOpen = true
-                                },
-                                tint = MaterialTheme.colors.primary
-                            )
-                        } else {
-                            Icon(
-                                Icons.Default.KeyboardArrowDown,
-                                "",
-                                modifier = Modifier.clickable {
-                                    if (!isDropMenuOpen) isDropMenuOpen = true
-                                },
-                                tint = MaterialTheme.colors.primary
-                            )
-                        }
-                    } else Icon(
-                        Icons.Default.Lock,
-                        stringResource(R.string.locked),
-                        tint = primaryFigmaColor,
-                        modifier = Modifier.clickable {
-                            showToast(
-                                context,
-                                changePlaceError
-                            )
+                            IconButton(onClick = {
+                                textFieldValue = ""; isDropMenuOpen = true
+                            }) {
+                                Icon(
+                                    Icons.Default.Close,
+                                    "",
+                                    tint = MaterialTheme.colors.primary
+                                )
+                            }
 
-                        })
+                        } else {
+                            IconButton(onClick = {
+                                if (!isDropMenuOpen) isDropMenuOpen = true
+                            }) {
+                                Icon(
+                                    Icons.Default.KeyboardArrowDown,
+                                    "",
+                                    tint = MaterialTheme.colors.primary
+                                )
+                            }
+                        }
+                    } else IconButton(onClick = {
+                        showToast(
+                            context,
+                            changePlaceError
+                        )
+
+                    }) {
+                        Icon(
+                            Icons.Default.Lock,
+                            stringResource(R.string.locked),
+                            tint = MaterialTheme.colors.primary,
+                        )
+                    }
                 },
                 isError = !isThatPlaceInList(
                     textFieldValue,
