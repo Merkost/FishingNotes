@@ -210,5 +210,6 @@
     <string name="choose_temperature_unit">Выберите единицу измерения температуры</string>
     <string name="app_theme">Тема приложения</string>
     <string name="choose_app_theme">Выберите цветовую тему приложения</string>
+    <string name="no_name_place">New place</string>
 
 </resources>

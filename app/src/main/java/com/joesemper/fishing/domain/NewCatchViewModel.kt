@@ -35,7 +35,7 @@ class NewCatchViewModel(
     val noErrors = mutableStateOf(true)
 
     val marker: MutableState<UserMapMarker?> = mutableStateOf(null)
-    val weather: MutableState<WeatherForecast?> = mutableStateOf(null)
+    val weather: MutableStateFlow<WeatherForecast?> = MutableStateFlow(null)
 
     val fishType = mutableStateOf("")
     val description = mutableStateOf("")
@@ -49,88 +49,93 @@ class NewCatchViewModel(
 
     val images = mutableStateListOf<Uri>()
 
-    fun getWeather() = runBlocking {
-        marker.value?.run {
-            weatherRepository.getWeather(latitude, longitude)
-        }
-    }
-
-    fun getHistoricalWeather() = runBlocking {
-        marker.value?.run {
-            weatherRepository.getHistoricalWeather(latitude, longitude, (date.value / 1000))
-        }
-    }
-
-    fun addPhoto(uri: Uri) {
-        images.add(uri)
-    }
-
-    fun deletePhoto(uri: Uri) {
-        images.remove(uri)
-    }
-
-    fun getAllUserMarkersList() = markersRepo.getAllUserMarkersList() as Flow<List<UserMapMarker>>
-
-    private fun saveNewCatch(newCatch: RawUserCatch) {
-        _uiState.value = BaseViewState.Loading(0)
+    fun getWeather() {
         viewModelScope.launch {
-            marker.value?.let { userMapMarker ->
-                catchesRepo.addNewCatch(userMapMarker.id, newCatch).collect { progress ->
-                    when (progress) {
-                        is Progress.Complete -> {
-                            _uiState.value = BaseViewState.Success(progress)
-                        }
-                        is Progress.Loading -> {
-                            _uiState.value = BaseViewState.Loading(progress.percents)
-                        }
-                        is Progress.Error -> {
-                            _uiState.value =
-                                BaseViewState.Error(progress.error)
-                        }
-                    }
+            marker.value?.run {
+                //TODO: Weather Loading State
+                weatherRepository.getWeather(latitude, longitude).collect {
+                    weather.value = it
                 }
             }
         }
     }
 
-    fun isInputCorrect(): Boolean {
-        return fishType.value.isNotBlank() && !marker.value?.title.isNullOrEmpty() && noErrors.value
-    }
 
-    fun createNewUserCatch() {
-        viewModelScope.launch {
-            if (isInputCorrect()) {
+        fun getHistoricalWeather() = runBlocking {
+            marker.value?.run {
+                weatherRepository.getHistoricalWeather(latitude, longitude, (date.value / 1000))
+            }
+        }
+
+        fun addPhoto(uri: Uri) {
+            images.add(uri)
+        }
+
+        fun deletePhoto(uri: Uri) {
+            images.remove(uri)
+        }
+
+        fun getAllUserMarkersList() = markersRepo.getAllUserMarkersList() as Flow<List<UserMapMarker>>
+
+        private fun saveNewCatch(newCatch: RawUserCatch) {
+            _uiState.value = BaseViewState.Loading(0)
+            viewModelScope.launch {
                 marker.value?.let { userMapMarker ->
-                    val hour = getHoursByMilliseconds(date.value).toInt()
-                    weather.value?.let { forecast ->
-                        saveNewCatch(
-                            RawUserCatch(
-                                fishType = fishType.value,
-                                description = description.value,
-                                date = date.value.toLong(),
-                                fishAmount = fishAmount.value.toInt(),
-                                fishWeight = weight.value.toDouble(),
-                                fishingRodType = rod.value,
-                                fishingBait = bite.value,
-                                fishingLure = lure.value,
-                                markerId = userMapMarker.id,
-                                placeTitle = userMapMarker.title,
-                                isPublic = false,
-                                photos = images,
-                                weatherPrimary = forecast.hourly[hour].weather.first().description,
-                                weatherIcon = forecast.hourly[hour].weather.first().icon,
-                                weatherTemperature = forecast.hourly[hour].temperature,
-                                weatherWindSpeed = forecast.hourly[hour].windSpeed,
-                                weatherWindDeg = forecast.hourly[hour].windDeg,
-                                weatherPressure = forecast.hourly[hour].pressure,
-                                weatherMoonPhase = moonPhase.value
-                            )
-                        )
+                    catchesRepo.addNewCatch(userMapMarker.id, newCatch).collect { progress ->
+                        when (progress) {
+                            is Progress.Complete -> {
+                                _uiState.value = BaseViewState.Success(progress)
+                            }
+                            is Progress.Loading -> {
+                                _uiState.value = BaseViewState.Loading(progress.percents)
+                            }
+                            is Progress.Error -> {
+                                _uiState.value =
+                                    BaseViewState.Error(progress.error)
+                            }
+                        }
                     }
                 }
             }
         }
 
-    }
+        fun isInputCorrect(): Boolean {
+            return fishType.value.isNotBlank() && !marker.value?.title.isNullOrEmpty() && noErrors.value
+        }
 
-}
+        fun createNewUserCatch() {
+            viewModelScope.launch {
+                if (isInputCorrect()) {
+                    marker.value?.let { userMapMarker ->
+                        val hour = getHoursByMilliseconds(date.value).toInt()
+                        weather.value?.let { forecast ->
+                            saveNewCatch(
+                                RawUserCatch(
+                                    fishType = fishType.value,
+                                    description = description.value,
+                                    date = date.value.toLong(),
+                                    fishAmount = fishAmount.value.toInt(),
+                                    fishWeight = weight.value.toDouble(),
+                                    fishingRodType = rod.value,
+                                    fishingBait = bite.value,
+                                    fishingLure = lure.value,
+                                    markerId = userMapMarker.id,
+                                    placeTitle = userMapMarker.title,
+                                    isPublic = false,
+                                    photos = images,
+                                    weatherPrimary = forecast.hourly[hour].weather.first().description,
+                                    weatherIcon = forecast.hourly[hour].weather.first().icon,
+                                    weatherTemperature = forecast.hourly[hour].temperature,
+                                    weatherWindSpeed = forecast.hourly[hour].windSpeed,
+                                    weatherWindDeg = forecast.hourly[hour].windDeg,
+                                    weatherPressure = forecast.hourly[hour].pressure,
+                                    weatherMoonPhase = moonPhase.value
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+
+        }
+    }

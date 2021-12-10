@@ -22,10 +22,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -102,9 +99,7 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
                     viewModel.weather.value = it
                 }
             } else {
-                viewModel.getWeather()?.collect {
-                    viewModel.weather.value = it
-                }
+                viewModel.getWeather()
             }
         }
     }
@@ -113,7 +108,6 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
         onDispose {
             dateAndTime.timeInMillis = Date().time
         }
-
     }
 
     Scaffold(
@@ -606,39 +600,48 @@ private fun addPhoto(
 @Composable
 fun NewCatchWeather(viewModel: NewCatchViewModel) {
 
-    val weather = viewModel.weather.value
+    val weather by viewModel.weather.collectAsState()
 
     Column(modifier = Modifier.fillMaxWidth()) {
 
-        SubtitleWithIcon(
-            modifier = Modifier.align(Alignment.Start),
-            icon = R.drawable.weather_sunny,
-            text = stringResource(id = R.string.weather)
-        )
+        Row(horizontalArrangement = Arrangement.SpaceBetween.also { Arrangement.Start },
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()) {
+            SubtitleWithIcon(
+                //modifier = Modifier.align(Alignment.Start),
+                icon = R.drawable.weather_sunny,
+                text = stringResource(id = R.string.weather)
+            )
+            Button(onClick = { viewModel.getWeather() }) {
+                Text("Обновить")
+                //Icon(Icons.Default.Refresh, "", tint = MaterialTheme.colors.primary)
+            }
+        }
 
-        if (weather != null && weather.hourly.isNotEmpty()) {
+
+        weather?.let {
 
             val currentMoonPhase = remember {
-                weather.daily.first().moonPhase
+                it.daily.first().moonPhase
             }
 
             viewModel.moonPhase.value = calcMoonPhase(
                 currentMoonPhase,
                 Date().time / MILLISECONDS_IN_SECOND,
-                weather.hourly.first().date
+                it.hourly.first().date
             )
 
             val hour by remember(dateAndTime.timeInMillis) {
                 mutableStateOf(getHoursByMilliseconds(dateAndTime.timeInMillis).toInt())
             }
 
-            Crossfade(targetState = weather) { weatherForecast ->
+            Crossfade(targetState = it) { weatherForecast ->
                 Column() {
                     Spacer(Modifier.size(8.dp))
 
                     //Main weather title
                     OutlinedTextField(
-                        readOnly = true,
+                        readOnly = false,
                         value = weatherForecast.hourly[hour].weather
                             .first().description.replaceFirstChar {it.uppercase()},
                         leadingIcon = {
@@ -651,7 +654,7 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
                                 tint = MaterialTheme.colors.primary
                             )
                         },
-                        onValueChange = { },
+                        onValueChange = {  },
                         label = { Text(text = stringResource(id = R.string.weather)) },
                         modifier = Modifier.fillMaxWidth(),
                         keyboardOptions = KeyboardOptions(
@@ -665,8 +668,8 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
                     //Temperature
                     Row(modifier = Modifier.fillMaxWidth()) {
                         OutlinedTextField(
-                            readOnly = true,
-                            value = weatherForecast.hourly[hour].temperature.toString(),
+                            readOnly = false,
+                            value = weatherForecast.hourly[hour].temperature.toInt().toString(),
                             leadingIcon = {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_thermometer),
@@ -677,7 +680,7 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
                             trailingIcon = {
                                 Text(text = stringResource(R.string.celsius))
                             },
-                            onValueChange = { },
+                            onValueChange = {  },
                             label = { Text(text = stringResource(R.string.temperature)) },
                             modifier = Modifier.weight(1f, true),
                             keyboardOptions = KeyboardOptions(
@@ -691,7 +694,7 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
                         //Pressure
                         OutlinedTextField(
                             readOnly = true,
-                            value = hPaToMmHg(weatherForecast.hourly[hour].pressure).toString(),
+                            value = hPaToMmHg(it.hourly[hour].pressure).toString(),
                             leadingIcon = {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_gauge),
@@ -720,10 +723,10 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
                     Row(modifier = Modifier.fillMaxWidth()) {
                         OutlinedTextField(
                             readOnly = true,
-                            value = weatherForecast.hourly[hour].windSpeed.toString(),
+                            value = it.hourly[hour].windSpeed.toString(),
                             leadingIcon = {
                                 Icon(
-                                    modifier = Modifier.rotate(weatherForecast.hourly[hour].windDeg.toFloat()),
+                                    modifier = Modifier.rotate(it.hourly[hour].windDeg.toFloat()),
                                     painter = painterResource(id = R.drawable.ic_arrow_up),
                                     contentDescription = "",
                                     tint = MaterialTheme.colors.primary,
@@ -770,12 +773,10 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
                 }
 
             }
-        } else {
-            SecondaryText(
+        } ?: SecondaryText(
                 modifier = Modifier.padding(vertical = 8.dp),
-                text = "Select place to load weather"
+                text = "Select a place to load weather!"
             )
-        }
     }
 }
 
