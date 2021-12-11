@@ -165,7 +165,7 @@ fun Weather(
     AnimatedVisibility(viewModel.currentWeather.value == null) {
         Column(
             modifier = Modifier
-                .systemBarsPadding(false)
+                .systemBarsPadding(true)
                 .fillMaxSize(),
             verticalArrangement = Arrangement.SpaceAround,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -174,7 +174,7 @@ fun Weather(
                 SecondaryText(text = "No places yet. \nAdd new place now!")
                 WeatherEmptyView(
                     modifier = Modifier
-                        .size(300.dp)
+                        .size(250.dp)
                         .align(Alignment.CenterHorizontally)
                 )
                 DefaultButtonOutlined(text = "Add", onClick = {

@@ -22,7 +22,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -31,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -52,11 +54,10 @@ import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
-import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
-import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.utils.*
@@ -122,7 +123,11 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
                         notAllFieldsFilled
                     )
                 }) {
-                Icon(Icons.Filled.Done, stringResource(R.string.create), tint = MaterialTheme.colors.onPrimary)
+                Icon(
+                    Icons.Filled.Done,
+                    stringResource(R.string.create),
+                    tint = MaterialTheme.colors.onPrimary
+                )
             }
         }
     ) {
@@ -141,7 +146,7 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
             FishAndWeight(viewModel.fishAmount, viewModel.weight)
             Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
             DateAndTime(viewModel.date)
-            NewCatchWeather(viewModel)
+            NewCatchWeatherItem(viewModel)
             Photos(
                 { clicked -> { } },
                 { deleted -> viewModel.deletePhoto(deleted) })
@@ -604,15 +609,18 @@ private fun addPhoto(
 }
 
 @Composable
-fun NewCatchWeather(viewModel: NewCatchViewModel) {
+fun NewCatchWeatherItem(viewModel: NewCatchViewModel) {
 
     val weather by viewModel.weather.collectAsState()
+    val weatherState by viewModel.weatherState.collectAsState()
 
     Column(modifier = Modifier.fillMaxWidth()) {
 
-        Row(horizontalArrangement = Arrangement.SpaceBetween.also { Arrangement.Start },
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween.also { Arrangement.Start },
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             SubtitleWithIcon(
                 //modifier = Modifier.align(Alignment.Start),
                 icon = R.drawable.weather_sunny,
@@ -624,167 +632,225 @@ fun NewCatchWeather(viewModel: NewCatchViewModel) {
             }
         }
 
+        when (weatherState) {
+            is BaseViewState.Success<*> -> {
 
-        weather?.let {
+                WeatherLayout(weather, viewModel)
+            }
+            is BaseViewState.Loading -> {
 
-            val currentMoonPhase = remember {
-                it.daily.first().moonPhase
+            }
+            is BaseViewState.Error -> {
+
             }
 
-            viewModel.moonPhase.value = calcMoonPhase(
-                currentMoonPhase,
-                Date().time / MILLISECONDS_IN_SECOND,
-                it.hourly.first().date
-            )
+        }
+    }
 
-            val hour by remember(dateAndTime.timeInMillis) {
-                mutableStateOf(getHoursByMilliseconds(dateAndTime.timeInMillis).toInt())
-            }
 
-            Crossfade(targetState = it) { weatherForecast ->
-                Column() {
-                    Spacer(Modifier.size(8.dp))
+}
 
-                    //Main weather title
+@Composable
+fun WeatherLayout(weatherForecast: WeatherForecast?, viewModel: NewCatchViewModel) =
+    weatherForecast?.let { weather ->
+
+        val currentMoonPhase = remember {
+            weather.daily.first().moonPhase
+        }
+        viewModel.moonPhase.value = calcMoonPhase(
+            currentMoonPhase,
+            Date().time / MILLISECONDS_IN_SECOND,
+            weather.hourly.first().date
+        )
+        val hour by remember(dateAndTime.timeInMillis) {
+            mutableStateOf(getHoursByMilliseconds(dateAndTime.timeInMillis).toInt())
+        }
+        var weatherDescription by remember(hour, weather) {
+            mutableStateOf(weather.hourly[hour].weather
+                .first().description.replaceFirstChar { it.uppercase() })
+        }
+        var temperature by remember(hour, weather) {
+            mutableStateOf(weather.hourly[hour].temperature.toInt().toString())
+        }
+        var pressure by remember(hour, weather) {
+            mutableStateOf(hPaToMmHg(weather.hourly[hour].pressure).toString())
+        }
+        var wind by remember(hour, weather) {
+            mutableStateOf(weather.hourly[hour].windSpeed.toInt().toString())
+        }
+        var moonPhase by remember(hour, weather) {
+            mutableStateOf((viewModel.moonPhase.value * 100).toInt().toString())
+        }
+
+
+        Crossfade(targetState = weather) { animatedWeather ->
+            Column() {
+                Spacer(Modifier.size(8.dp))
+
+                //Main weather title
+                OutlinedTextField(
+                    readOnly = false,
+                    value = weatherDescription,
+                    leadingIcon = {
+                        Icon(
+                            modifier = Modifier.size(32.dp),
+                            painter = painterResource(
+                                id = getWeatherIconByName(weather.hourly.first().weather.first().icon)
+                            ),
+                            contentDescription = "",
+                            tint = MaterialTheme.colors.primary
+                        )
+                    },
+                    onValueChange = {
+                        weatherDescription = when (it.matches(Regex("[a-zA-Z]+"))) {
+                            false -> weatherDescription //old value
+                            true -> it   //new value
+                        }
+                    },
+                    label = { Text(text = stringResource(id = R.string.weather)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next
+                    ),
+                    singleLine = true
+                )
+
+                Spacer(Modifier.size(8.dp))
+
+                //Temperature
+                Row(modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
                         readOnly = false,
-                        value = weatherForecast.hourly[hour].weather
-                            .first().description.replaceFirstChar {it.uppercase()},
+                        value = temperature,
                         leadingIcon = {
                             Icon(
-                                modifier = Modifier.size(32.dp),
+                                painter = painterResource(id = R.drawable.ic_thermometer),
+                                contentDescription = "",
+                                tint = MaterialTheme.colors.primary
+                            )
+                        },
+                        trailingIcon = {
+                            Text(text = stringResource(R.string.celsius))
+                        },
+                        onValueChange = { newValue ->
+                            temperature = when (newValue.toIntOrNull()) {
+                                null -> temperature.toInt().let {
+                                    if (it in -300..300) newValue else temperature
+                                } //old value
+                                else -> newValue   //new value
+                            }
+                        },
+                        label = { Text(text = stringResource(R.string.temperature)) },
+                        modifier = Modifier.weight(1f, true),
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Next,
+                            keyboardType = KeyboardType.Number
+                        ),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.padding(4.dp))
+
+                    //Pressure
+                    OutlinedTextField(
+                        readOnly = false,
+                        value = pressure,
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_gauge),
+                                contentDescription = "",
+                                tint = MaterialTheme.colors.primary
+                            )
+                        },
+                        trailingIcon = {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                text = stringResource(R.string.pressure_units)
+                            )
+                        },
+                        onValueChange = { pressure = it },
+                        label = { Text(text = stringResource(R.string.pressure)) },
+                        modifier = Modifier.weight(1f, true),
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Next,
+                            keyboardType = KeyboardType.Number
+                        ),
+                        singleLine = true
+                    )
+                }
+
+                Spacer(Modifier.size(8.dp))
+
+                //Wind and Moon
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        readOnly = false,
+                        value = wind,
+                        leadingIcon = {
+                            Icon(
+                                modifier = Modifier.rotate(animatedWeather.hourly[hour].windDeg.toFloat()),
+                                painter = painterResource(id = R.drawable.ic_arrow_up),
+                                contentDescription = "",
+                                tint = MaterialTheme.colors.primary,
+                            )
+                        },
+                        trailingIcon = {
+                            Text(text = stringResource(R.string.wind_speed_units))
+                        },
+                        onValueChange = { wind = when (it.toIntOrNull()) {
+                            null -> wind //old value
+                            else -> it   //new value
+                        } },
+                        label = { Text(text = stringResource(R.string.wind)) },
+                        modifier = Modifier.weight(1f, true),
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Next,
+                            keyboardType = KeyboardType.Number
+                        ),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.padding(4.dp))
+
+                    OutlinedTextField(
+                        readOnly = false,
+                        value = moonPhase,
+                        leadingIcon = {
+                            Icon(
                                 painter = painterResource(
-                                    id = getWeatherIconByName(weatherForecast.hourly.first().weather.first().icon)
+                                    id = getMoonIconByPhase(viewModel.moonPhase.value)
                                 ),
                                 contentDescription = "",
                                 tint = MaterialTheme.colors.primary
                             )
                         },
-                        onValueChange = {  },
-                        label = { Text(text = stringResource(id = R.string.weather)) },
-                        modifier = Modifier.fillMaxWidth(),
+                        onValueChange = { newValue ->
+                            moonPhase = when (newValue.toIntOrNull()) {
+                                null -> moonPhase //old value
+                                else -> newValue.toInt().let {
+                                    if (it in 0..100) newValue else moonPhase
+                                }
+                            }
+                        },
+                        trailingIcon = {
+                            Text(text = stringResource(R.string.percent))
+                        },
+                        label = { Text(text = stringResource(R.string.moon_phase)) },
+                        modifier = Modifier.weight(1f, true),
                         keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Next
+                            imeAction = ImeAction.Next,
+                            keyboardType = KeyboardType.Number
                         ),
                         singleLine = true
                     )
-
-                    Spacer(Modifier.size(8.dp))
-
-                    //Temperature
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        OutlinedTextField(
-                            readOnly = false,
-                            value = weatherForecast.hourly[hour].temperature.toInt().toString(),
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_thermometer),
-                                    contentDescription = "",
-                                    tint = MaterialTheme.colors.primary
-                                )
-                            },
-                            trailingIcon = {
-                                Text(text = stringResource(R.string.celsius))
-                            },
-                            onValueChange = {  },
-                            label = { Text(text = stringResource(R.string.temperature)) },
-                            modifier = Modifier.weight(1f, true),
-                            keyboardOptions = KeyboardOptions(
-                                imeAction = ImeAction.Next
-                            ),
-                            singleLine = true
-                        )
-
-                        Spacer(modifier = Modifier.padding(4.dp))
-
-                        //Pressure
-                        OutlinedTextField(
-                            readOnly = true,
-                            value = hPaToMmHg(it.hourly[hour].pressure).toString(),
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_gauge),
-                                    contentDescription = "",
-                                    tint = MaterialTheme.colors.primary
-                                )
-                            },
-                            trailingIcon = {
-                                Text(
-                                    modifier = Modifier.padding(horizontal = 8.dp),
-                                    text = stringResource(R.string.pressure_units)
-                                )
-                            },
-                            onValueChange = { },
-                            label = { Text(text = stringResource(R.string.pressure)) },
-                            modifier = Modifier.weight(1f, true),
-                            keyboardOptions = KeyboardOptions(
-                                imeAction = ImeAction.Next
-                            ),
-                            singleLine = true
-                        )
-                    }
-
-                    Spacer(Modifier.size(8.dp))
-
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        OutlinedTextField(
-                            readOnly = true,
-                            value = it.hourly[hour].windSpeed.toString(),
-                            leadingIcon = {
-                                Icon(
-                                    modifier = Modifier.rotate(it.hourly[hour].windDeg.toFloat()),
-                                    painter = painterResource(id = R.drawable.ic_arrow_up),
-                                    contentDescription = "",
-                                    tint = MaterialTheme.colors.primary,
-                                )
-                            },
-                            trailingIcon = {
-                                Text(text = stringResource(R.string.wind_speed_units))
-                            },
-                            onValueChange = { },
-                            label = { Text(text = stringResource(R.string.wind)) },
-                            modifier = Modifier.weight(1f, true),
-                            keyboardOptions = KeyboardOptions(
-                                imeAction = ImeAction.Next
-                            ),
-                            singleLine = true
-                        )
-
-                        Spacer(modifier = Modifier.padding(4.dp))
-
-                        OutlinedTextField(
-                            readOnly = true,
-                            value = (viewModel.moonPhase.value * 100).toInt().toString(),
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(
-                                        id = getMoonIconByPhase(viewModel.moonPhase.value)
-                                    ),
-                                    contentDescription = "",
-                                    tint = MaterialTheme.colors.primary
-                                )
-                            },
-                            onValueChange = { },
-                            trailingIcon = {
-                                Text(text = stringResource(R.string.percent))
-                            },
-                            label = { Text(text = stringResource(R.string.moon_phase)) },
-                            modifier = Modifier.weight(1f, true),
-                            keyboardOptions = KeyboardOptions(
-                                imeAction = ImeAction.Next
-                            ),
-                            singleLine = true
-                        )
-                    }
                 }
-
             }
-        } ?: SecondaryText(
-                modifier = Modifier.padding(vertical = 8.dp),
-                text = "Select a place to load weather!"
-            )
-    }
-}
+
+        }
+    } ?: SecondaryText(
+        modifier = Modifier.padding(vertical = 8.dp),
+        text = "Select a place to load weather!"
+    )
 
 @Composable
 fun DateAndTime(date: MutableState<Long>) {
@@ -806,11 +872,15 @@ fun DateAndTime(date: MutableState<Long>) {
             trailingIcon = {
                 IconButton(onClick = {
                     if (viewModel.noErrors.value) dateSetState.value = true
-                    else { SnackbarManager.showMessage(R.string.choose_place_first) }
-                }){
-                    Icon(painter = painterResource(R.drawable.ic_baseline_event_24),
+                    else {
+                        SnackbarManager.showMessage(R.string.choose_place_first)
+                    }
+                }) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_baseline_event_24),
                         tint = MaterialTheme.colors.primary,
-                        contentDescription = stringResource(R.string.date))
+                        contentDescription = stringResource(R.string.date)
+                    )
                 }
 
             })
@@ -824,11 +894,15 @@ fun DateAndTime(date: MutableState<Long>) {
             trailingIcon = {
                 IconButton(onClick = {
                     if (viewModel.noErrors.value) timeSetState.value = true
-                    else { SnackbarManager.showMessage(R.string.choose_place_first) }
+                    else {
+                        SnackbarManager.showMessage(R.string.choose_place_first)
+                    }
                 }) {
-                    Icon(painter = painterResource(R.drawable.ic_baseline_access_time_24),
+                    Icon(
+                        painter = painterResource(R.drawable.ic_baseline_access_time_24),
                         tint = MaterialTheme.colors.primary,
-                        contentDescription = stringResource(R.string.time))
+                        contentDescription = stringResource(R.string.time)
+                    )
                 }
 
             })
