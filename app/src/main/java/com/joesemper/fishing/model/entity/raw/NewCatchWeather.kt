@@ -1,10 +1,10 @@
 package com.joesemper.fishing.model.entity.raw
 
 data class NewCatchWeather(
-    val weatherDescription: String,
-    val icon: String,
-    val temperatureInC: Int,
-    val pressureInMmhg: Float,
-    val windInMs: Int,
-    val moonPhase: Int
+    var weatherDescription: String = "",
+    var icon: String = "",
+    var temperatureInC: Int = 0,
+    var pressureInMmhg: Int = 0,
+    var windInMs: Int = 0,
+    var moonPhase: Float = 0f
     )

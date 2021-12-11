@@ -612,10 +612,8 @@ private fun addPhoto(
 fun NewCatchWeatherItem(viewModel: NewCatchViewModel) {
 
     val weather by viewModel.weather.collectAsState()
-    val weatherState by viewModel.weatherState.collectAsState()
 
     Column(modifier = Modifier.fillMaxWidth()) {
-
         Row(
             horizontalArrangement = Arrangement.SpaceBetween.also { Arrangement.Start },
             verticalAlignment = Alignment.CenterVertically,
@@ -632,19 +630,7 @@ fun NewCatchWeatherItem(viewModel: NewCatchViewModel) {
             }
         }
 
-        when (weatherState) {
-            is BaseViewState.Success<*> -> {
-
-                WeatherLayout(weather, viewModel)
-            }
-            is BaseViewState.Loading -> {
-
-            }
-            is BaseViewState.Error -> {
-
-            }
-
-        }
+        WeatherLayout(weather, viewModel)
     }
 
 
@@ -662,25 +648,27 @@ fun WeatherLayout(weatherForecast: WeatherForecast?, viewModel: NewCatchViewMode
             Date().time / MILLISECONDS_IN_SECOND,
             weather.hourly.first().date
         )
+
         val hour by remember(dateAndTime.timeInMillis) {
             mutableStateOf(getHoursByMilliseconds(dateAndTime.timeInMillis).toInt())
         }
+
         var weatherDescription by remember(hour, weather) {
             mutableStateOf(weather.hourly[hour].weather
                 .first().description.replaceFirstChar { it.uppercase() })
-        }
+        }.also { viewModel.weatherToSave.value.weatherDescription = it.value }
         var temperature by remember(hour, weather) {
             mutableStateOf(weather.hourly[hour].temperature.toInt().toString())
-        }
+        }.also { viewModel.weatherToSave.value.temperatureInC = it.value.toInt() }
         var pressure by remember(hour, weather) {
             mutableStateOf(hPaToMmHg(weather.hourly[hour].pressure).toString())
-        }
+        }.also { viewModel.weatherToSave.value.pressureInMmhg = it.value.toInt() }
         var wind by remember(hour, weather) {
             mutableStateOf(weather.hourly[hour].windSpeed.toInt().toString())
-        }
+        }.also { viewModel.weatherToSave.value.windInMs = it.value.toInt() }
         var moonPhase by remember(hour, weather) {
             mutableStateOf((viewModel.moonPhase.value * 100).toInt().toString())
-        }
+        }.also { viewModel.weatherToSave.value.moonPhase = it.value.toInt() / 100f }
 
 
         Crossfade(targetState = weather) { animatedWeather ->
@@ -696,16 +684,17 @@ fun WeatherLayout(weatherForecast: WeatherForecast?, viewModel: NewCatchViewMode
                             modifier = Modifier.size(32.dp),
                             painter = painterResource(
                                 id = getWeatherIconByName(weather.hourly.first().weather.first().icon)
+                                    .also { viewModel.weatherToSave.value.icon = it.toString() }
                             ),
                             contentDescription = "",
                             tint = MaterialTheme.colors.primary
                         )
                     },
                     onValueChange = {
-                        weatherDescription = when (it.matches(Regex("[a-zA-Z]+"))) {
+                        weatherDescription = it/*when (it.matches(Regex("[a-zA-Z]+"))) {
                             false -> weatherDescription //old value
                             true -> it   //new value
-                        }
+                        }*/
                     },
                     label = { Text(text = stringResource(id = R.string.weather)) },
                     modifier = Modifier.fillMaxWidth(),
@@ -734,11 +723,11 @@ fun WeatherLayout(weatherForecast: WeatherForecast?, viewModel: NewCatchViewMode
                         },
                         onValueChange = { newValue ->
                             temperature = when (newValue.toIntOrNull()) {
-                                null -> temperature.toInt().let {
-                                    if (it in -300..300) newValue else temperature
-                                } //old value
-                                else -> newValue   //new value
-                            }
+                                null -> temperature
+                                //old value
+                                else -> newValue.toInt().let {
+                            if (it in -300..300) newValue else temperature   //new value
+                            }}
                         },
                         label = { Text(text = stringResource(R.string.temperature)) },
                         modifier = Modifier.weight(1f, true),

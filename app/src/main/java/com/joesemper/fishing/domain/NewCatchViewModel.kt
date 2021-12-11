@@ -15,14 +15,13 @@ import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.repository.app.CatchesRepository
 import com.joesemper.fishing.model.repository.app.MarkersRepository
 import com.joesemper.fishing.model.repository.app.WeatherRepository
-import com.joesemper.fishing.utils.MILLISECONDS_IN_SECOND
-import com.joesemper.fishing.utils.calcMoonPhase
 import com.joesemper.fishing.utils.getHoursByMilliseconds
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import okhttp3.internal.notify
-import java.util.*
 
 class NewCatchViewModel(
     private val markersRepo: MarkersRepository,
@@ -33,10 +32,6 @@ class NewCatchViewModel(
     private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
     val uiState: StateFlow<BaseViewState>
         get() = _uiState
-
-    private val _weatherState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
-    val weatherState: StateFlow<BaseViewState>
-        get() = _weatherState
 
     val noErrors = mutableStateOf(true)
 
@@ -51,6 +46,8 @@ class NewCatchViewModel(
     val rod = mutableStateOf("")
     val bite = mutableStateOf("")
     val lure = mutableStateOf("")
+
+    val weatherToSave = mutableStateOf(NewCatchWeather())
     val moonPhase = mutableStateOf(0.0f)
 
     val images = mutableStateListOf<Uri>()
@@ -59,19 +56,11 @@ class NewCatchViewModel(
         viewModelScope.launch {
             //if (weather.value != null) weather.tryEmit(weather.value)
             //else
+            //TODO: Weather Loading State
             marker.value?.run {
-                //TODO: Weather Loading State
+
                 weatherRepository.getWeather(latitude, longitude).collect {
-                    weather.value = it/*NewCatchWeather(
-
-                        moonPhase = calcMoonPhase(
-                            it.daily.first().moonPhase,
-                            Date().time / MILLISECONDS_IN_SECOND,
-                            it.hourly.first().date
-                        ).toInt(),
-
-
-                        )//it*/
+                    weather.value = it
                 }
             }
         }
@@ -140,13 +129,13 @@ class NewCatchViewModel(
                                 placeTitle = userMapMarker.title,
                                 isPublic = false,
                                 photos = images,
-                                weatherPrimary = forecast.hourly[hour].weather.first().description,
-                                weatherIcon = forecast.hourly[hour].weather.first().icon,
-                                weatherTemperature = forecast.hourly[hour].temperature,
-                                weatherWindSpeed = forecast.hourly[hour].windSpeed,
+                                weatherPrimary = weatherToSave.value.weatherDescription,
+                                weatherIcon = weatherToSave.value.icon,
+                                weatherTemperature = weatherToSave.value.temperatureInC.toFloat(),
+                                weatherWindSpeed = weatherToSave.value.windInMs.toFloat(),
                                 weatherWindDeg = forecast.hourly[hour].windDeg,
-                                weatherPressure = forecast.hourly[hour].pressure,
-                                weatherMoonPhase = moonPhase.value
+                                weatherPressure = weatherToSave.value.pressureInMmhg,
+                                weatherMoonPhase = weatherToSave.value.moonPhase
                             )
                         )
                     }
