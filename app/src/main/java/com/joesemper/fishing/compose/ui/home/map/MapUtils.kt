@@ -290,7 +290,7 @@ fun BackPressHandler(
 
 @Composable
 fun rememberMapViewWithLifecycle(): MapView {
-    val context = LocalContext.current
+    val context = (LocalContext.current as MainActivity)
     val mapView: MapView = remember { MapView(context).apply { id = R.id.map } }
 
     val lifecycle = LocalLifecycleOwner.current.lifecycle

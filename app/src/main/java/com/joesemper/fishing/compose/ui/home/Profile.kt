@@ -1,10 +1,17 @@
 package com.joesemper.fishing.compose.ui.home
 
 import android.content.res.Configuration
+import android.graphics.Point
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.FloatTweenSpec
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
@@ -18,6 +25,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -37,6 +46,9 @@ import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import com.airbnb.lottie.compose.*
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.bar_chart.BarChart
+import com.joesemper.fishing.compose.bar_chart.BarChartDataModel
+import com.joesemper.fishing.compose.bar_chart.BarChartUtils.axisAreas
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.map.LottieMyLocation
 import com.joesemper.fishing.domain.UserViewModel
@@ -69,8 +81,10 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
     val uiState = viewModel.uiState
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = { ProfileAppBar(navController, viewModel) }) {
-        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (background, card, image, name, places, catches, stats, box, logout, settings) = createRefs()
+        ConstraintLayout(modifier = Modifier.fillMaxSize()
+            .scrollable(rememberScrollState(0), Orientation.Vertical,true,)) {
+
+            val (background, card, image, name, places, catches, content, stats, box, logout, settings) = createRefs()
             val bgGl = createGuidelineFromTop(120.dp)
             val verticalCenterGl = createGuidelineFromAbsoluteLeft(0.5f)
             Surface(//shape = RoundedCornerShape(0.dp,0.dp,15.dp,15.dp),
@@ -100,18 +114,18 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
 
             Card(
                 modifier = Modifier.constrainAs(card) {
-                    top.linkTo(parent.top, 120.dp)
+                    top.linkTo(bgGl)
                     absoluteLeft.linkTo(parent.absoluteLeft)
                     absoluteRight.linkTo(parent.absoluteRight)
-
-                }.fillMaxWidth().fillMaxSize()
+                }.fillMaxWidth().wrapContentHeight()
                     .zIndex(1f),
                 shape = AbsoluteRoundedCornerShape(25.dp, 25.dp),
                 elevation = 10.dp,
                 backgroundColor = MaterialTheme.colors.surface
             ) {
+                Divider()
                 Column(
-                    modifier = Modifier.fillMaxSize().padding(top = 100.dp),
+                    modifier = Modifier.padding(top = 120.dp, bottom = 120.dp).fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
@@ -120,10 +134,13 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
 //                        Icons.Default.Settings,
 //                        stringResource(R.string.settings)
 //                    ) { navController.navigate(MainDestinations.SETTINGS) }
-                    Text("The menu is in development")
-                    Spacer(modifier = Modifier.size(10.dp))
-                    Text("Thank you for testing!")
-                    Spacer(modifier = Modifier.size(100.dp))
+                    userPlacesNum?.let {
+                        if (it.isEmpty()) {
+                            NoPlacesStats()
+                        } else {
+                            CatchesChart()
+                        }
+                    }
                 }
             }
 
@@ -148,6 +165,40 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
         }
 
     }
+}
+
+@Composable
+fun CatchesChart() {
+    val barChartDataModel = BarChartDataModel()
+    BarChart(
+        barChartData = barChartDataModel.barChartData,
+        modifier = Modifier.fillMaxWidth().height(250.dp)
+    )
+}
+
+@Composable
+fun NoPlacesStats() {
+    Column(modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceAround) {
+        SecondaryText(text = "Добавьте места и уловы чтобы увидеть статистику!")
+        LottieMyStats(modifier = Modifier.fillMaxWidth())
+    }
+    
+}
+
+@Composable
+fun LottieMyStats(modifier: Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.stats))
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever,
+    )
+    LottieAnimation(
+        composition,
+        progress,
+        modifier = modifier
+    )
 }
 
 @Composable

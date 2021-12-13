@@ -15,10 +15,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Map
-import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.VerifiedUser
-import androidx.compose.material.icons.outlined.WbSunny
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -102,7 +99,7 @@ enum class HomeSections(
     ),
     NOTES(R.string.notes, Icons.Outlined.Menu, "home/notes"),
     WEATHER(R.string.weather, Icons.Outlined.WbSunny, "home/weather"),
-    PROFILE(R.string.profile, Icons.Outlined.VerifiedUser, "home/profile")
+    PROFILE(R.string.profile, Icons.Outlined.Person, "home/profile")
 }
 
 @Composable

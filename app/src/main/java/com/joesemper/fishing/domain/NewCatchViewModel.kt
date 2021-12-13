@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.model.entity.raw.NewCatchWeather
 import com.joesemper.fishing.model.entity.raw.RawUserCatch
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.repository.app.CatchesRepository
@@ -35,7 +36,7 @@ class NewCatchViewModel(
     val noErrors = mutableStateOf(true)
 
     val marker: MutableState<UserMapMarker?> = mutableStateOf(null)
-    val weather: MutableState<WeatherForecast?> = mutableStateOf(null)
+    val weather: MutableStateFlow<WeatherForecast?> = MutableStateFlow(null)
 
     val fishType = mutableStateOf("")
     val description = mutableStateOf("")
@@ -45,15 +46,26 @@ class NewCatchViewModel(
     val rod = mutableStateOf("")
     val bite = mutableStateOf("")
     val lure = mutableStateOf("")
+
+    val weatherToSave = mutableStateOf(NewCatchWeather())
     val moonPhase = mutableStateOf(0.0f)
 
     val images = mutableStateListOf<Uri>()
 
-    fun getWeather() = runBlocking {
-        marker.value?.run {
-            weatherRepository.getWeather(latitude, longitude)
+    fun getWeather() {
+        viewModelScope.launch {
+            //if (weather.value != null) weather.tryEmit(weather.value)
+            //else
+            //TODO: Weather Loading State
+            marker.value?.run {
+
+                weatherRepository.getWeather(latitude, longitude).collect {
+                    weather.value = it
+                }
+            }
         }
     }
+
 
     fun getHistoricalWeather() = runBlocking {
         marker.value?.run {
@@ -117,13 +129,13 @@ class NewCatchViewModel(
                                 placeTitle = userMapMarker.title,
                                 isPublic = false,
                                 photos = images,
-                                weatherPrimary = forecast.hourly[hour].weather.first().description,
-                                weatherIcon = forecast.hourly[hour].weather.first().icon,
-                                weatherTemperature = forecast.hourly[hour].temperature,
-                                weatherWindSpeed = forecast.hourly[hour].windSpeed,
+                                weatherPrimary = weatherToSave.value.weatherDescription,
+                                weatherIcon = weatherToSave.value.icon,
+                                weatherTemperature = weatherToSave.value.temperatureInC.toFloat(),
+                                weatherWindSpeed = weatherToSave.value.windInMs.toFloat(),
                                 weatherWindDeg = forecast.hourly[hour].windDeg,
-                                weatherPressure = forecast.hourly[hour].pressure,
-                                weatherMoonPhase = moonPhase.value
+                                weatherPressure = weatherToSave.value.pressureInMmhg,
+                                weatherMoonPhase = weatherToSave.value.moonPhase
                             )
                         )
                     }
@@ -132,5 +144,4 @@ class NewCatchViewModel(
         }
 
     }
-
 }

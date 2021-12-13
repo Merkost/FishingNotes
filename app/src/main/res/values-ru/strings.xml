@@ -214,5 +214,6 @@
     <string name="in_8h">8ч</string>
     <string name="in_16h">16ч</string>
     <string name="no_internet_connection">No Internet connection</string>
+    <string name="no_name_place">New place</string>
 
 </resources>

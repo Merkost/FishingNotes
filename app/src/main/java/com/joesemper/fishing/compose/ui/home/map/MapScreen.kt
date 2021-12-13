@@ -123,6 +123,8 @@ fun MapScreen(
         mapUiState = MapUiState.NormalMode
     }
 
+    val noNamePlace = stringResource(R.string.no_name_place)
+
     MapScaffold(
         scaffoldState = scaffoldState,
         fab = {
@@ -151,7 +153,7 @@ fun MapScreen(
                         viewModel.lastKnownLocation.value?.let {
                             viewModel.addNewMarker(
                                 RawMapMarker(
-                                    "Без названия",
+                                    noNamePlace,
                                     latitude = it.latitude,
                                     longitude = it.longitude,
                                 )
@@ -473,8 +475,11 @@ fun MapFab(state: MapUiState, onClick: () -> Unit, onLongPress: () -> Unit,) {
             .padding(bottom = paddingBottom.value, top = paddingTop.value),
         onClick = onClick,
         onLongPress = {
-            Toast.makeText(context, "Adding place on your location", Toast.LENGTH_SHORT).show()
-            onLongPress()
+            if (checkPermission(context)) {
+                Toast.makeText(context, "Adding place on your location", Toast.LENGTH_SHORT).show()
+                onLongPress()
+            } else Toast.makeText(context, "Location permissions required", Toast.LENGTH_SHORT).show()
+
         }
     ) {
         Icon(
