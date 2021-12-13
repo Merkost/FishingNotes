@@ -28,7 +28,6 @@ import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.HeaderText
 import com.joesemper.fishing.compose.ui.home.PrimaryText
 import com.joesemper.fishing.compose.ui.home.SecondaryText
-import com.joesemper.fishing.compose.ui.theme.primaryTextColor
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.model.entity.weather.Temperature
@@ -72,11 +71,13 @@ fun PrimaryWeatherItemView(
             tint = iconTint
         )
         PrimaryText(
-            modifier = Modifier.constrainAs(description) {
-                top.linkTo(icon.bottom, 4.dp)
-                absoluteLeft.linkTo(icon.absoluteLeft)
-                absoluteRight.linkTo(icon.absoluteRight)
-            },
+            modifier = Modifier
+                .width(120.dp)
+                .constrainAs(description) {
+                    top.linkTo(icon.bottom, 4.dp)
+                    absoluteLeft.linkTo(icon.absoluteLeft)
+                    absoluteRight.linkTo(icon.absoluteRight)
+                },
             text = weather.description.replaceFirstChar { it.uppercase() },
             textColor = textTint
         )

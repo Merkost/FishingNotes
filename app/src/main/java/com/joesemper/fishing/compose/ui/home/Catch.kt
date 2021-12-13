@@ -36,6 +36,7 @@ import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.UserCatchViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.utils.network.currentConnectivityState
 import com.joesemper.fishing.utils.network.observeConnectivityAsFlow
@@ -132,17 +133,14 @@ fun CatchTitleView(
 
         val (title, amount, weight, weightUnit) = createRefs()
 
+        createHorizontalChain(title, weight, weightUnit, chainStyle = ChainStyle.Packed)
+
         HeaderText(
-            modifier = Modifier.constrainAs(title) {
-                top.linkTo(parent.top)
-                linkTo(
-                    start = parent.absoluteLeft,
-                    end = weight.absoluteRight,
-                    startMargin = 16.dp,
-                    endMargin = 4.dp,
-                    bias = 0f
-                )
-            },
+            modifier = Modifier
+                .padding(horizontal = 4.dp)
+                .constrainAs(title) {
+                    top.linkTo(parent.top)
+                },
             text = catch.fishType
         )
 
@@ -150,6 +148,7 @@ fun CatchTitleView(
             modifier = Modifier.constrainAs(amount) {
                 top.linkTo(title.bottom, 2.dp)
                 absoluteLeft.linkTo(title.absoluteLeft)
+                absoluteRight.linkTo(weightUnit.absoluteRight)
             },
             text = "${stringResource(id = R.string.amount)}: ${catch.fishAmount} ${stringResource(id = R.string.pc)}"
         )
@@ -157,7 +156,6 @@ fun CatchTitleView(
         HeaderTextSecondary(
             modifier = Modifier.constrainAs(weightUnit) {
                 top.linkTo(parent.top)
-                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
             },
             text = stringResource(id = R.string.kg)
         )
@@ -212,11 +210,8 @@ fun CatchPhotosView(
                     deleteEnabled = false
                 )
             }
-
         }
-
     }
-
 }
 
 @Composable
@@ -318,7 +313,6 @@ fun CatchPlaceView(
                 }
             }
         }
-
     }
 }
 
@@ -348,7 +342,7 @@ fun WayOfFishingView(
 
             SecondaryTextSmall(
                 modifier = Modifier.constrainAs(rodTitle) {
-                    absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 12.dp)
                     top.linkTo(subtitle.bottom, 12.dp)
                 },
                 text = stringResource(id = R.string.fish_rod)
@@ -428,11 +422,10 @@ fun CatchWeatherView(
                 .fillMaxWidth()
                 .wrapContentHeight()
         ) {
-            val (subtitle, pressText, windText, moon, pressIcon, pressValue, windIcon,
-                windValue, windDeg, temp, icon, description) = createRefs()
+            val (subtitle, pressText, windText, pressIcon, pressValue, windIcon, windValue, windDeg,
+                primary, description, moonTile, moonIcon, moonValue) = createRefs()
 
             val guideline = createGuidelineFromAbsoluteLeft(0.5f)
-
 
             SubtitleWithIcon(
                 modifier = Modifier.constrainAs(subtitle) {
@@ -443,58 +436,83 @@ fun CatchWeatherView(
                 text = stringResource(id = R.string.weather)
             )
 
-            createHorizontalChain(icon, temp, chainStyle = ChainStyle.Spread)
-
-            Image(
+            Row(
                 modifier = Modifier
-                    .size(48.dp)
-                    .constrainAs(icon) {
+                    .wrapContentSize()
+                    .constrainAs(primary) {
                         top.linkTo(subtitle.bottom, 8.dp)
-                        absoluteRight.linkTo(temp.absoluteLeft)
                         absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(guideline)
                     },
-                painter = painterResource(id = getWeatherIconByName(catch.weatherIcon)),
-                contentDescription = stringResource(id = R.string.weather)
-            )
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Image(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .padding(horizontal = 2.dp),
+                    painter = painterResource(id = getWeatherIconByName(catch.weatherIcon)),
+                    contentDescription = stringResource(id = R.string.weather)
+                )
+
+                HeaderText(
+                    modifier = Modifier.padding(horizontal = 2.dp),
+                    text = getTemperature(
+                        catch.weatherTemperature,
+                        TemperatureValues.valueOf(temperatureUnit)
+                    ) + getTemperatureFromUnit(temperatureUnit)
+                )
+            }
+
             SecondaryTextSmall(
                 modifier = Modifier.constrainAs(description) {
-                    top.linkTo(icon.bottom, 4.dp)
-                    absoluteLeft.linkTo(icon.absoluteLeft)
-                    absoluteRight.linkTo(icon.absoluteRight)
+                    top.linkTo(primary.bottom, 4.dp)
+                    absoluteLeft.linkTo(primary.absoluteLeft)
+                    absoluteRight.linkTo((primary.absoluteRight))
                 },
                 text = catch.weatherPrimary.replaceFirstChar { it.uppercase() }
             )
 
-            HeaderText(
-                modifier = Modifier
-                    .constrainAs(temp) {
-                        top.linkTo(icon.top)
-                        absoluteLeft.linkTo(icon.absoluteRight)
-                        absoluteRight.linkTo(parent.absoluteRight)
-                        bottom.linkTo(icon.bottom)
-                    },
-                text = getTemperature(
-                    catch.weatherTemperature,
-                    TemperatureValues.valueOf(temperatureUnit)
-                ) + getTemperatureFromUnit(temperatureUnit)
+            SecondaryText(
+                modifier = Modifier.constrainAs(moonTile) {
+                    top.linkTo(primary.top)
+                    absoluteLeft.linkTo(guideline)
+                    absoluteRight.linkTo(parent.absoluteRight)
+                },
+                text = stringResource(id = R.string.moon_phase)
             )
 
-            MoonPhaseView(
-                modifier = Modifier.constrainAs(moon) {
-                    top.linkTo(description.bottom, 8.dp)
-                    linkTo(parent.start, parent.end, bias = 0.5f)
+            Icon(
+                modifier = Modifier
+                    .size(24.dp)
+                    .constrainAs(moonIcon) {
+                        top.linkTo(moonTile.bottom, 4.dp)
+                        absoluteLeft.linkTo(moonTile.absoluteLeft)
+                        absoluteRight.linkTo(moonValue.absoluteLeft)
+                    },
+                painter = painterResource(id = getMoonIconByPhase(catch.weatherMoonPhase)),
+                contentDescription = stringResource(id = R.string.moon_phase)
+            )
+
+            PrimaryText(
+                modifier.constrainAs(moonValue) {
+                    top.linkTo(moonIcon.top)
+                    bottom.linkTo(moonIcon.bottom)
+                    absoluteRight.linkTo(moonTile.absoluteRight)
                 },
-                moonPhase = catch.weatherMoonPhase
+                text = (catch.weatherMoonPhase * 100).toInt().toString()
+                        + " " + stringResource(id = R.string.percent)
             )
 
             SecondaryText(
                 modifier = Modifier.constrainAs(pressText) {
                     absoluteLeft.linkTo(parent.absoluteLeft)
                     absoluteRight.linkTo(guideline)
-                    top.linkTo(moon.bottom, 8.dp)
+                    top.linkTo(description.bottom, 16.dp)
                 },
                 text = stringResource(id = R.string.pressure)
             )
+
             SecondaryText(
                 modifier = Modifier.constrainAs(windText) {
                     absoluteLeft.linkTo(guideline)
@@ -503,7 +521,6 @@ fun CatchWeatherView(
                 },
                 text = stringResource(id = R.string.wind)
             )
-
 
             Image(
                 modifier = Modifier
@@ -517,6 +534,7 @@ fun CatchWeatherView(
                 contentDescription = stringResource(id = R.string.pressure),
                 colorFilter = ColorFilter.tint(color = MaterialTheme.colors.primaryVariant)
             )
+
             PrimaryText(
                 modifier = Modifier.constrainAs(pressValue) {
                     top.linkTo(pressIcon.top)
@@ -541,6 +559,7 @@ fun CatchWeatherView(
                 painter = painterResource(id = R.drawable.ic_wind),
                 contentDescription = stringResource(id = R.string.wind),
             )
+
             PrimaryText(
                 modifier = Modifier.constrainAs(windValue) {
                     top.linkTo(windIcon.top)
@@ -551,6 +570,7 @@ fun CatchWeatherView(
                 text = catch.weatherWindSpeed.toInt()
                     .toString() + " " + stringResource(id = R.string.wind_speed_units)
             )
+
             Icon(
                 modifier = Modifier
                     .constrainAs(windDeg) {

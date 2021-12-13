@@ -34,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -55,14 +54,16 @@ import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
-import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
-import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.utils.*
+import com.joesemper.fishing.utils.time.toDate
+import com.joesemper.fishing.utils.time.toHours
+import com.joesemper.fishing.utils.time.toTime
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.getViewModel
@@ -126,7 +127,11 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
                         notAllFieldsFilled
                     )
                 }) {
-                Icon(Icons.Filled.Done, stringResource(R.string.create), tint = MaterialTheme.colors.onPrimary)
+                Icon(
+                    Icons.Filled.Done,
+                    stringResource(R.string.create),
+                    tint = MaterialTheme.colors.onPrimary
+                )
             }
         }
     ) {
@@ -145,7 +150,7 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
             FishAndWeight(viewModel.fishAmount, viewModel.weight)
             Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
             DateAndTime(viewModel.date)
-            NewCatchWeather(viewModel)
+            NewCatchWeatherItem(viewModel)
             Photos(
                 { clicked -> { } },
                 { deleted -> viewModel.deletePhoto(deleted) })
@@ -648,9 +653,9 @@ fun WeatherLayout(weatherForecast: WeatherForecast?, viewModel: NewCatchViewMode
             weather.hourly.first().date
         )
 
-            val hour by remember(dateAndTime.timeInMillis) {
-                mutableStateOf(dateAndTime.timeInMillis.toHours().toInt())
-            }
+        val hour by remember(dateAndTime.timeInMillis) {
+            mutableStateOf(dateAndTime.timeInMillis.toHours().toInt())
+        }
 
         var weatherDescription by remember(hour, weather) {
             mutableStateOf(weather.hourly[hour].weather
@@ -725,8 +730,9 @@ fun WeatherLayout(weatherForecast: WeatherForecast?, viewModel: NewCatchViewMode
                                 null -> temperature
                                 //old value
                                 else -> newValue.toInt().let {
-                            if (it in -300..300) newValue else temperature   //new value
-                            }}
+                                    if (it in -300..300) newValue else temperature   //new value
+                                }
+                            }
                         },
                         label = { Text(text = stringResource(R.string.temperature)) },
                         modifier = Modifier.weight(1f, true),
@@ -785,10 +791,12 @@ fun WeatherLayout(weatherForecast: WeatherForecast?, viewModel: NewCatchViewMode
                         trailingIcon = {
                             Text(text = stringResource(R.string.wind_speed_units))
                         },
-                        onValueChange = { wind = when (it.toIntOrNull()) {
-                            null -> wind //old value
-                            else -> it   //new value
-                        } },
+                        onValueChange = {
+                            wind = when (it.toIntOrNull()) {
+                                null -> wind //old value
+                                else -> it   //new value
+                            }
+                        },
                         label = { Text(text = stringResource(R.string.wind)) },
                         modifier = Modifier.weight(1f, true),
                         keyboardOptions = KeyboardOptions(
@@ -870,7 +878,8 @@ fun DateAndTime(
                     Icon(
                         painter = painterResource(R.drawable.ic_baseline_event_24),
                         tint = MaterialTheme.colors.primary,
-                        contentDescription = stringResource(R.string.date))
+                        contentDescription = stringResource(R.string.date)
+                    )
                 }
 
             })
