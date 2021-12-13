@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -18,6 +17,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -26,7 +26,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.net.toUri
-import coil.compose.rememberImagePainter
+import coil.compose.AsyncImage
+import coil.compose.AsyncImageContent
+import coil.compose.AsyncImagePainter
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.*
@@ -59,16 +61,26 @@ fun ItemPhoto(
                 .size(100.dp)
                 .padding(4.dp)
         ) {
-            Image(painter = rememberImagePainter(data = pic),
-                contentDescription = Constants.ITEM_PHOTO,
-                contentScale = ContentScale.Crop,
+
+            AsyncImage(
+                model = pic,
+                contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(5.dp))
                     .clickable {
                         clickedPhoto(pic)
                         fullScreenPhoto.value = pic
-                    })
+                    },
+                contentScale = ContentScale.Crop,
+                filterQuality = FilterQuality.Low
+            ) { state ->
+                if (state is AsyncImagePainter.State.Loading) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                } else {
+                    AsyncImageContent()
+                }
+            }
             if (deleteEnabled) {
                 Surface( //For making delete button background half transparent
                     color = Color.LightGray.copy(alpha = 0.2f),
@@ -110,16 +122,21 @@ fun ItemCatchPhotos(
                 .padding(4.dp)
         ) {
             if (pic != null) {
-                Image(
-                    painter = rememberImagePainter(
-                        data = pic
-                    ),
-                    contentDescription = Constants.ITEM_PHOTO,
-                    contentScale = ContentScale.Crop,
+                AsyncImage(
+                    model = pic,
+                    contentDescription = null,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(5.dp))
-                )
+                        .clip(RoundedCornerShape(5.dp)),
+                    contentScale = ContentScale.Crop,
+                    filterQuality = FilterQuality.Low
+                ) { state ->
+                    if (state is AsyncImagePainter.State.Loading) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    } else {
+                        AsyncImageContent()
+                    }
+                }
             } else {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_no_photo_vector),
