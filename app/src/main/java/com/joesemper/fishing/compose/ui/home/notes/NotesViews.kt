@@ -2,7 +2,6 @@ package com.joesemper.fishing.compose.ui.home.notes
 
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -55,57 +54,61 @@ fun ItemPhoto(
         mutableStateOf<Uri?>(null)
     }
 
-    Crossfade(photo) { pic ->
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .padding(4.dp)
-        ) {
+//    Crossfade(photo) { pic ->
+    Box(
+        modifier = Modifier
+            .size(100.dp)
+            .padding(4.dp)
+    ) {
 
-            AsyncImage(
-                model = pic,
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(5.dp))
-                    .clickable {
-                        clickedPhoto(pic)
-                        fullScreenPhoto.value = pic
-                    },
-                contentScale = ContentScale.Crop,
-                filterQuality = FilterQuality.Low
-            ) { state ->
-                if (state is AsyncImagePainter.State.Loading) {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                } else {
-                    AsyncImageContent()
-                }
-            }
-            if (deleteEnabled) {
-                Surface( //For making delete button background half transparent
-                    color = Color.LightGray.copy(alpha = 0.2f),
+        AsyncImage(
+            model = photo,
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(5.dp))
+                .clickable {
+                    clickedPhoto(photo)
+                    fullScreenPhoto.value = photo
+                },
+            contentScale = ContentScale.Crop,
+            filterQuality = FilterQuality.Low
+        ) { state ->
+            if (state is AsyncImagePainter.State.Loading) {
+                CircularProgressIndicator(
                     modifier = Modifier
-                        .size(25.dp)
-                        .align(Alignment.TopEnd)
-                        .padding(3.dp)
-                        .clip(CircleShape)
-                ) {
-                    Icon(
-                        Icons.Default.Close,
-                        tint = Color.White,
-                        contentDescription = stringResource(R.string.delete_photo),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable { deletedPhoto(pic) })
-                }
+                        .fillMaxSize()
+                        .padding(64.dp)
+                        .align(Alignment.Center)
+                )
+            } else {
+                AsyncImageContent()
+            }
+        }
+        if (deleteEnabled) {
+            Surface( //For making delete button background half transparent
+                color = Color.LightGray.copy(alpha = 0.2f),
+                modifier = Modifier
+                    .size(25.dp)
+                    .align(Alignment.TopEnd)
+                    .padding(3.dp)
+                    .clip(CircleShape)
+            ) {
+                Icon(
+                    Icons.Default.Close,
+                    tint = Color.White,
+                    contentDescription = stringResource(R.string.delete_photo),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable { deletedPhoto(photo) })
             }
         }
     }
+//    }
 
     AnimatedVisibility(fullScreenPhoto.value != null) {
         FullScreenPhoto(fullScreenPhoto)
     }
-
 }
 
 @ExperimentalAnimationApi
@@ -115,57 +118,62 @@ fun ItemCatchPhotos(
     photo: Uri? = null,
     photosCount: Int = 0
 ) {
-    Crossfade(photo) { pic ->
-        Box(
-            modifier = modifier
-                .size(100.dp)
-                .padding(4.dp)
-        ) {
-            if (pic != null) {
-                AsyncImage(
-                    model = pic,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(5.dp)),
-                    contentScale = ContentScale.Crop,
-                    filterQuality = FilterQuality.Low
-                ) { state ->
-                    if (state is AsyncImagePainter.State.Loading) {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    } else {
-                        AsyncImageContent()
-                    }
-                }
-            } else {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_no_photo_vector),
-                    contentDescription = Constants.ITEM_PHOTO,
-                    tint = secondaryFigmaTextColor,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(5.dp))
-                )
-            }
-
-            if (photosCount > 1) {
-                Surface( //For making delete button background half transparent
-                    color = Color.LightGray.copy(alpha = 0.2f),
-                    modifier = Modifier
-                        .size(25.dp)
-                        .align(Alignment.BottomStart)
-                        .padding(3.dp)
-                ) {
-                    Text(
-                        text = "X$photosCount",
-                        color = Color.White,
+//    Crossfade(photo) { pic ->
+    Box(
+        modifier = modifier
+            .size(100.dp)
+            .padding(4.dp)
+    ) {
+        if (photo != null) {
+            AsyncImage(
+                model = photo,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(5.dp)),
+                contentScale = ContentScale.Crop,
+                filterQuality = FilterQuality.Low
+            ) { state ->
+                if (state is AsyncImagePainter.State.Loading) {
+                    CircularProgressIndicator(
                         modifier = Modifier
                             .fillMaxSize()
+                            .padding(64.dp)
+                            .align(Alignment.Center)
                     )
+                } else {
+                    AsyncImageContent()
                 }
+            }
+        } else {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_no_photo_vector),
+                contentDescription = Constants.ITEM_PHOTO,
+                tint = secondaryFigmaTextColor,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(5.dp))
+            )
+        }
+
+        if (photosCount > 1) {
+            Surface( //For making delete button background half transparent
+                color = Color.LightGray.copy(alpha = 0.2f),
+                modifier = Modifier
+                    .size(25.dp)
+                    .align(Alignment.BottomStart)
+                    .padding(3.dp)
+            ) {
+                Text(
+                    text = "X$photosCount",
+                    color = Color.White,
+                    modifier = Modifier
+                        .fillMaxSize()
+                )
             }
         }
     }
+//    }
 }
 
 @ExperimentalAnimationApi

@@ -1,25 +1,24 @@
 package com.joesemper.fishing.compose.ui.home
 
+import android.net.Uri
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -28,9 +27,11 @@ import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.net.toUri
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import coil.compose.AsyncImageContent
+import coil.compose.AsyncImagePainter
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
-import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
 import com.joesemper.fishing.compose.ui.home.weather.*
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.UserCatchViewModel
@@ -180,11 +181,14 @@ fun CatchPhotosView(
     val context = LocalContext.current
     val connectionState by context.observeConnectivityAsFlow()
         .collectAsState(initial = context.currentConnectivityState)
+
     Column(
         modifier = Modifier
+            .padding(vertical = 16.dp, horizontal = 8.dp)
             .fillMaxWidth()
             .wrapContentHeight(),
-        horizontalAlignment = Alignment.Start
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
         SubtitleWithIcon(
@@ -193,24 +197,58 @@ fun CatchPhotosView(
             text = stringResource(id = R.string.photos)
         )
 
-        LazyRow() {
-            item {
-                Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-            }
-            if (catch.downloadPhotoLinks.isEmpty()) {
-                item {
-                    SecondaryText(text = stringResource(id = R.string.no_photo_selected))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .horizontalScroll(rememberScrollState()),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            if (catch.downloadPhotoLinks.isNotEmpty()) {
+                catch.downloadPhotoLinks.forEach {
+                    ItemCatchPhotoView(
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        photo = it.toUri()
+                    )
                 }
-            }
-            items(items = catch.downloadPhotoLinks) {
-                ItemPhoto(
-                    photo = it.toUri(),
-                    clickedPhoto = {},
-                    deletedPhoto = {},
-                    deleteEnabled = false
-                )
+            } else {
+                SecondaryTextSmall(text = stringResource(id = R.string.no_photo_selected))
             }
         }
+    }
+}
+
+@ExperimentalAnimationApi
+@ExperimentalComposeUiApi
+@Composable
+fun ItemCatchPhotoView(
+    modifier: Modifier = Modifier,
+    photo: Uri
+) {
+    val fullScreenPhoto = remember {
+        mutableStateOf<Uri?>(null)
+    }
+
+    AsyncImage(
+        model = photo,
+        contentDescription = null,
+        modifier = modifier
+            .size(150.dp)
+            .clip(RoundedCornerShape(5.dp))
+            .clickable { fullScreenPhoto.value = photo },
+        contentScale = ContentScale.Crop,
+        filterQuality = FilterQuality.Low
+    ) { state ->
+        if (state is AsyncImagePainter.State.Loading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        } else {
+            AsyncImageContent()
+        }
+    }
+
+    AnimatedVisibility(fullScreenPhoto.value != null) {
+        FullScreenPhoto(fullScreenPhoto)
     }
 }
 
