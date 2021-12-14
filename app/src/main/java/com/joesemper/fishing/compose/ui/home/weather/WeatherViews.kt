@@ -25,7 +25,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.airbnb.lottie.compose.*
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.UserPreferences
-import com.joesemper.fishing.compose.ui.home.HeaderText
+import com.joesemper.fishing.compose.ui.home.BigText
 import com.joesemper.fishing.compose.ui.home.PrimaryText
 import com.joesemper.fishing.compose.ui.home.SecondaryText
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -55,7 +55,6 @@ fun PrimaryWeatherItemView(
     ) {
         val (temp, icon, description) = createRefs()
 
-        //val guideline = createGuidelineFromAbsoluteLeft(0.5f)
         createHorizontalChain(icon, temp, chainStyle = ChainStyle.Spread)
 
         Icon(
@@ -70,19 +69,21 @@ fun PrimaryWeatherItemView(
             contentDescription = stringResource(id = R.string.weather),
             tint = iconTint
         )
+
         PrimaryText(
             modifier = Modifier
-                .width(120.dp)
+                .width(150.dp)
                 .constrainAs(description) {
                     top.linkTo(icon.bottom, 4.dp)
                     absoluteLeft.linkTo(icon.absoluteLeft)
                     absoluteRight.linkTo(icon.absoluteRight)
                 },
             text = weather.description.replaceFirstChar { it.uppercase() },
-            textColor = textTint
+            textColor = textTint,
+            textAlign = TextAlign.Center
         )
 
-        HeaderText(
+        BigText(
             modifier = Modifier
                 .constrainAs(temp) {
                     top.linkTo(parent.top)

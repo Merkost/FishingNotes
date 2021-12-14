@@ -307,6 +307,22 @@ fun SimpleOutlinedTextField(textState: MutableState<String>, label: String) {
 }
 
 @Composable
+fun BigText(
+    modifier: Modifier = Modifier,
+    text: String,
+    textAlign: TextAlign = TextAlign.Start,
+    textColor: Color = MaterialTheme.colors.onSurface
+) {
+    Text(
+        modifier = modifier,
+        style = MaterialTheme.typography.h3,
+        textAlign = textAlign,
+        color = textColor,
+        text = text
+    )
+}
+
+@Composable
 fun HeaderText(
     modifier: Modifier = Modifier,
     text: String,
