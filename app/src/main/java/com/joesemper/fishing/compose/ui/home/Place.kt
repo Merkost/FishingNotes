@@ -1,5 +1,6 @@
 package com.joesemper.fishing.compose.ui.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,6 +11,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -77,8 +79,8 @@ fun UserPlaceScreen(navController: NavController, place: UserMapMarker?) {
                         top.linkTo(title.top)
                         bottom.linkTo(title.bottom)
                     },
-                    painter = painterResource(id = R.drawable.ic_fish),
-                    tint = secondaryFigmaTextColor,
+                    painter = painterResource(id = R.drawable.ic_fishing_rod),
+                    tint = MaterialTheme.colors.secondary,
                     contentDescription = stringResource(id = R.string.fish_catch)
                 )
 
@@ -111,6 +113,11 @@ fun UserPlaceScreen(navController: NavController, place: UserMapMarker?) {
                             absoluteLeft.linkTo(parent.absoluteLeft)
                             absoluteRight.linkTo(parent.absoluteRight)
                         }) {
+                    if (userCatches.isEmpty()) {
+                        item {
+                            NoCatchesView()
+                        }
+                    }
                     items(items = userCatches.sortedByDescending { it.date }) { item: UserCatch ->
                         ItemUserCatch(
                             userCatch = item,
@@ -127,6 +134,14 @@ fun UserPlaceScreen(navController: NavController, place: UserMapMarker?) {
         }
     }
 
+}
+
+@Composable
+fun NoCatchesView() {
+    Box(contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize()) {
+        SecondaryText(text = stringResource(R.string.no_cathces_added))
+    }
 }
 
 @Composable
