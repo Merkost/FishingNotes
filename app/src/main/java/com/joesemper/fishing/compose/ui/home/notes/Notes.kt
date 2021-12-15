@@ -1,6 +1,7 @@
 package com.joesemper.fishing.compose.ui.home.notes
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,7 @@ import com.joesemper.fishing.compose.ui.theme.primaryTextColor
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalMaterialApi
 @ExperimentalPagerApi
 @ExperimentalAnimationApi
@@ -32,11 +34,9 @@ import kotlinx.coroutines.launch
 fun Notes(
     modifier: Modifier = Modifier,
     navController: NavController,
-//    state: SearchState = rememberSearchState()
 ) {
-    //val navController = rememberNavController()
     val tabs = listOf(TabItem.Places, TabItem.Catches)
-    val pagerState = rememberPagerState(1)
+    val pagerState = rememberPagerState(0)
 
     Scaffold(
         topBar = {
@@ -77,7 +77,6 @@ fun Notes(
 @Composable
 fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
     val scope = rememberCoroutineScope()
-    // OR ScrollableTabRow()
     TabRow(
         selectedTabIndex = pagerState.currentPage,
         backgroundColor = MaterialTheme.colors.surface,
@@ -89,7 +88,6 @@ fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
             )
         }) {
         tabs.forEachIndexed { index, tab ->
-            // OR Tab()
             LeadingIconTab(
                 icon = { Icon(painter = painterResource(id = tab.icon), contentDescription = "",
                     tint = MaterialTheme.colors.primaryVariant ) },
@@ -129,6 +127,7 @@ private fun onAddNewPlaceClick(navController: NavController) {
 }
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @ExperimentalPagerApi

@@ -58,9 +58,10 @@ private val GreenDarkColorPalette = darkColors(
 
 private val BlueLightColorPalette = lightColors(
     primary = primaryBlueColor,
-    primaryVariant = primaryBlueLightColor,
+    primaryVariant = primaryBlueDarkColor,
     secondary = secondaryBlueColor,
     secondaryVariant = secondaryBlueLightColor,
+    onPrimary = primaryWhiteColor,
 )
 
 private val BlueDarkColorPalette = darkColors(

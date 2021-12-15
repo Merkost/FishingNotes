@@ -11,8 +11,8 @@ import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
-import com.joesemper.fishing.model.repository.UserContentRepository
 import com.joesemper.fishing.model.repository.app.MarkersRepository
+import com.joesemper.fishing.model.repository.app.WeatherRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 
 class MapViewModel(
     private val repository: MarkersRepository,
+    private val weatherRepository: WeatherRepository
 ) : ViewModel() {
 
     val showMarker: MutableState<Boolean> = mutableStateOf(false)
@@ -77,6 +78,10 @@ class MapViewModel(
             }
         }
     }
+
+    fun getWeather(latitude: Double, longitude: Double) =
+        weatherRepository.getWeather(latitude, longitude)
+
 
     private fun onError(error: Throwable) {
         viewStateFlow.value = BaseViewState.Error(error)

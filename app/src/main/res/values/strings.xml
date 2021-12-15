@@ -4,6 +4,7 @@
     <string name="logout_dialog_title">Logout</string>
     <string name="logout_dialog_message">Are you sure to logout? Your data will be saved</string>
     <string name="ok_button">OK</string>
+    <string name="logout_dialog_cancel">Close</string>
     <string name="title">Title</string>
     <string name="description">Description</string>
     <string name="kind_of_fish">Kind of fish</string>
@@ -96,8 +97,8 @@
     <string name="permission_denied_message">Permission is denied, Please allow permissions from App Settings.</string>
     <string name="goto_app_settings">App Settings</string>
     <string name="not_all_fields_are_filled">Not all fields are filled in. Please, double check</string>
-    <string name="marker_icon">marker icon</string>
-    <string name="catch_photo">photo of the catch</string>
+    <string name="marker_icon" translatable="false">marker icon</string>
+    <string name="catch_photo" translatable="false">photo of the catch</string>
     <string name="test_description">"Ловля судака, как и, впрочем, ловля любой рыбы, очень интересное и захватывающее занятие. Получите хороший и удачный улов. "</string>
     <string name="location">Location</string>
     <string name="calculating">Calculating…</string>
@@ -205,9 +206,12 @@
     <string name="hours">\h\</string>
     <string name="minutes">\m\</string>
     <string name="choose_temperature_unit">Choose temperature unit</string>
+    <string name="temp">Temp.</string>
+    <string name="in_8h">8h</string>
+    <string name="in_16h">16h</string>
+    <string name="no_internet_connection">No Internet connection</string>
     <string name="app_theme">App theme</string>
     <string name="choose_app_theme">"Choose app theme "</string>
-    <string name="logout_dialog_cancel">Cancel</string>
     <string name="no_name_place">New place</string>
 
 

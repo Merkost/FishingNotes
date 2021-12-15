@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -23,19 +24,19 @@ import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.airbnb.lottie.compose.*
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.HeaderText
+import com.joesemper.fishing.compose.datastore.UserPreferences
+import com.joesemper.fishing.compose.ui.home.BigText
 import com.joesemper.fishing.compose.ui.home.PrimaryText
 import com.joesemper.fishing.compose.ui.home.SecondaryText
-import com.joesemper.fishing.compose.ui.theme.primaryTextColor
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.model.entity.weather.Temperature
 import com.joesemper.fishing.model.entity.weather.Weather
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
-import com.joesemper.fishing.utils.calculateDaylightHours
-import com.joesemper.fishing.utils.calculateDaylightMinutes
-import com.joesemper.fishing.utils.getTimeBySeconds
+import com.joesemper.fishing.utils.time.calculateDaylightTime
+import com.joesemper.fishing.utils.time.toTime
+import org.koin.androidx.compose.get
 
 @Composable
 fun PrimaryWeatherItemView(
@@ -54,7 +55,6 @@ fun PrimaryWeatherItemView(
     ) {
         val (temp, icon, description) = createRefs()
 
-        //val guideline = createGuidelineFromAbsoluteLeft(0.5f)
         createHorizontalChain(icon, temp, chainStyle = ChainStyle.Spread)
 
         Icon(
@@ -69,17 +69,21 @@ fun PrimaryWeatherItemView(
             contentDescription = stringResource(id = R.string.weather),
             tint = iconTint
         )
+
         PrimaryText(
-            modifier = Modifier.constrainAs(description) {
-                top.linkTo(icon.bottom, 4.dp)
-                absoluteLeft.linkTo(icon.absoluteLeft)
-                absoluteRight.linkTo(icon.absoluteRight)
-            },
+            modifier = Modifier
+                .width(150.dp)
+                .constrainAs(description) {
+                    top.linkTo(icon.bottom, 4.dp)
+                    absoluteLeft.linkTo(icon.absoluteLeft)
+                    absoluteRight.linkTo(icon.absoluteRight)
+                },
             text = weather.description.replaceFirstChar { it.uppercase() },
-            textColor = textTint
+            textColor = textTint,
+            textAlign = TextAlign.Center
         )
 
-        HeaderText(
+        BigText(
             modifier = Modifier
                 .constrainAs(temp) {
                     top.linkTo(parent.top)
@@ -270,7 +274,7 @@ fun WeatherEmptyView(modifier: Modifier) {
 
 @Composable
 fun DayTemperatureView(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     temperature: Temperature,
     temperatureUnit: String
 ) {
@@ -366,6 +370,10 @@ fun SunriseSunsetView(
     sunrise: Long,
     sunset: Long,
 ) {
+
+    val preferences: UserPreferences = get()
+    val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
+
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()
@@ -415,7 +423,7 @@ fun SunriseSunsetView(
                 absoluteLeft.linkTo(sunriseIcon.absoluteLeft)
                 absoluteRight.linkTo(sunriseIcon.absoluteRight)
             },
-            text = getTimeBySeconds(sunrise)
+            text = sunrise.toTime(is12hTimeFormat)
         )
 
         PrimaryText(
@@ -424,13 +432,11 @@ fun SunriseSunsetView(
                 absoluteLeft.linkTo(day.absoluteLeft)
                 absoluteRight.linkTo(day.absoluteRight)
             },
-            text = calculateDaylightHours(sunrise, sunset)
-                    + " "
-                    + stringResource(R.string.hours)
-                    + " "
-                    + calculateDaylightMinutes(sunrise, sunset)
-                    + " "
-                    + stringResource(R.string.minutes)
+            text = calculateDaylightTime(
+                context = LocalContext.current,
+                sunrise = sunrise,
+                sunset = sunset
+            )
         )
 
         PrimaryText(
@@ -439,7 +445,7 @@ fun SunriseSunsetView(
                 absoluteLeft.linkTo(sunsetIcon.absoluteLeft)
                 absoluteRight.linkTo(sunsetIcon.absoluteRight)
             },
-            text = getTimeBySeconds(sunset)
+            text = sunset.toTime(is12hTimeFormat)
         )
 
     }

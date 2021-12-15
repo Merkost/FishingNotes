@@ -61,6 +61,9 @@ import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.utils.*
+import com.joesemper.fishing.utils.time.toDate
+import com.joesemper.fishing.utils.time.toHours
+import com.joesemper.fishing.utils.time.toTime
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.getViewModel
@@ -95,7 +98,7 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
 
     LaunchedEffect(key1 = viewModel.marker.value, key2 = viewModel.date.value) {
         viewModel.marker.value?.let {
-            if (getDateByMilliseconds(viewModel.date.value) != getDateByMilliseconds(Date().time)) {
+            if (viewModel.date.value.toDate() != Date().time.toDate()) {
                 viewModel.getHistoricalWeather()?.collect {
                     viewModel.weather.value = it
                 }
@@ -109,6 +112,7 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
         onDispose {
             dateAndTime.timeInMillis = Date().time
         }
+
     }
 
     Scaffold(
@@ -650,7 +654,7 @@ fun WeatherLayout(weatherForecast: WeatherForecast?, viewModel: NewCatchViewMode
         )
 
         val hour by remember(dateAndTime.timeInMillis) {
-            mutableStateOf(getHoursByMilliseconds(dateAndTime.timeInMillis).toInt())
+            mutableStateOf(dateAndTime.timeInMillis.toHours().toInt())
         }
 
         var weatherDescription by remember(hour, weather) {
@@ -726,8 +730,9 @@ fun WeatherLayout(weatherForecast: WeatherForecast?, viewModel: NewCatchViewMode
                                 null -> temperature
                                 //old value
                                 else -> newValue.toInt().let {
-                            if (it in -300..300) newValue else temperature   //new value
-                            }}
+                                    if (it in -300..300) newValue else temperature   //new value
+                                }
+                            }
                         },
                         label = { Text(text = stringResource(R.string.temperature)) },
                         modifier = Modifier.weight(1f, true),
@@ -786,10 +791,12 @@ fun WeatherLayout(weatherForecast: WeatherForecast?, viewModel: NewCatchViewMode
                         trailingIcon = {
                             Text(text = stringResource(R.string.wind_speed_units))
                         },
-                        onValueChange = { wind = when (it.toIntOrNull()) {
-                            null -> wind //old value
-                            else -> it   //new value
-                        } },
+                        onValueChange = {
+                            wind = when (it.toIntOrNull()) {
+                                null -> wind //old value
+                                else -> it   //new value
+                            }
+                        },
                         label = { Text(text = stringResource(R.string.wind)) },
                         modifier = Modifier.weight(1f, true),
                         keyboardOptions = KeyboardOptions(
@@ -842,7 +849,9 @@ fun WeatherLayout(weatherForecast: WeatherForecast?, viewModel: NewCatchViewMode
     )
 
 @Composable
-fun DateAndTime(date: MutableState<Long>) {
+fun DateAndTime(
+    date: MutableState<Long>,
+) {
     val viewModel: NewCatchViewModel = getViewModel()
     val dateSetState = remember { mutableStateOf(false) }
     val timeSetState = remember { mutableStateOf(false) }
@@ -852,7 +861,8 @@ fun DateAndTime(date: MutableState<Long>) {
     if (timeSetState.value) TimePicker(date, timeSetState, context)
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedTextField(value = getDateByMilliseconds(date.value),
+        OutlinedTextField(
+            value = date.value.toDate(),
             onValueChange = {},
             label = { Text(text = stringResource(R.string.date)) },
             readOnly = true,
@@ -874,7 +884,7 @@ fun DateAndTime(date: MutableState<Long>) {
 
             })
         OutlinedTextField(
-            value = get24hTimeByMilliseconds(date.value),
+            value = date.value.toTime(),
             onValueChange = {},
             label = { Text(text = stringResource(R.string.time)) },
             readOnly = true,

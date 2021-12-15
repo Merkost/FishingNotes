@@ -10,8 +10,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -23,17 +21,15 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.notes.ItemUserCatch
 import com.joesemper.fishing.compose.ui.navigate
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
 import com.joesemper.fishing.domain.UserPlaceViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
-import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalMaterialApi
@@ -42,9 +38,6 @@ import org.koin.androidx.compose.getViewModel
 fun UserPlaceScreen(navController: NavController, place: UserMapMarker?) {
     val viewModel = getViewModel<UserPlaceViewModel>()
     place?.let { viewModel.marker.value = it }
-
-    val userPreferences: UserPreferences = get()
-    val timeFormat by userPreferences.use12hTimeFormat.collectAsState(false)
 
     Scaffold(
         topBar = { UserPlaceAppBar(navController, viewModel) },
@@ -125,7 +118,6 @@ fun UserPlaceScreen(navController: NavController, place: UserMapMarker?) {
                     items(items = userCatches.sortedByDescending { it.date }) { item: UserCatch ->
                         ItemUserCatch(
                             userCatch = item,
-                            timeFormat,
                             userCatchClicked = {
                                 onCatchItemClick(
                                     catch = item,

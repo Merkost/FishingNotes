@@ -44,7 +44,10 @@ import androidx.compose.ui.zIndex
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.theme.*
+import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
+import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.launch
@@ -276,14 +279,14 @@ fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Spacer(Modifier.size(8.dp))
         Icon(
             painter = painterResource(id = icon),
             contentDescription = stringResource(R.string.place),
             tint = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
-            modifier = Modifier.size(30.dp)
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .size(24.dp)
         )
-        Spacer(Modifier.size(8.dp))
         SubtitleText(text = text)
     }
 }
@@ -304,7 +307,7 @@ fun SimpleOutlinedTextField(textState: MutableState<String>, label: String) {
 }
 
 @Composable
-fun HeaderText(
+fun BigText(
     modifier: Modifier = Modifier,
     text: String,
     textAlign: TextAlign = TextAlign.Start,
@@ -313,6 +316,22 @@ fun HeaderText(
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.h3,
+        textAlign = textAlign,
+        color = textColor,
+        text = text
+    )
+}
+
+@Composable
+fun HeaderText(
+    modifier: Modifier = Modifier,
+    text: String,
+    textAlign: TextAlign = TextAlign.Start,
+    textColor: Color = MaterialTheme.colors.onSurface
+) {
+    Text(
+        modifier = modifier,
+        style = MaterialTheme.typography.h5,
         textAlign = textAlign,
         color = textColor,
         text = text
@@ -360,6 +379,25 @@ fun PrimaryText(
 }
 
 @Composable
+fun PrimaryTextSmall(
+    modifier: Modifier = Modifier,
+    fontWeight: FontWeight? = null,
+    textAlign: TextAlign? = null,
+    text: String,
+    textColor: Color = MaterialTheme.colors.onSurface
+) {
+    Text(
+        modifier = modifier,
+        style = MaterialTheme.typography.h4,
+        fontSize = 14.sp,
+        fontWeight = fontWeight,
+        textAlign = textAlign,
+        color = textColor,
+        text = text
+    )
+}
+
+@Composable
 fun PrimaryTextBold(modifier: Modifier = Modifier, text: String) {
     PrimaryText(
         modifier = modifier,
@@ -388,23 +426,6 @@ fun SecondaryTextColored(
 }
 
 @Composable
-fun SecondaryTextSmall(
-    modifier: Modifier = Modifier,
-    text: String,
-    textAlign: TextAlign? = null,
-    color: Color = secondaryTextColor
-) {
-    Text(
-        textAlign = textAlign,
-        modifier = modifier,
-        style = MaterialTheme.typography.h5,
-        fontSize = 14.sp,
-        color = color,
-        text = text
-    )
-}
-
-@Composable
 fun SecondaryText(
     modifier: Modifier = Modifier, text: String,
     maxLines: Int = Int.MAX_VALUE,
@@ -416,6 +437,24 @@ fun SecondaryText(
         modifier = modifier,
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
+        color = textColor,
+        text = text,
+        maxLines = maxLines
+    )
+}
+
+@Composable
+fun SecondaryTextSmall(
+    modifier: Modifier = Modifier, text: String,
+    maxLines: Int = Int.MAX_VALUE,
+    textAlign: TextAlign = TextAlign.Center,
+    textColor: Color = secondaryTextColor
+) {
+    Text(
+        textAlign = textAlign,
+        modifier = modifier,
+        style = MaterialTheme.typography.body1,
+        fontSize = 14.sp,
         color = textColor,
         text = text,
         maxLines = maxLines
@@ -443,10 +482,23 @@ fun DefaultAppBar(
     navIcon: ImageVector = Icons.Default.ArrowBack,
     onNavClick: () -> Unit,
     title: String,
+    subtitle: String? = null,
     actions: @Composable() (RowScope.() -> Unit) = {}
 ) {
     TopAppBar(
-        title = { Text(text = title) },
+        title = {
+            Column() {
+                Text(text = title)
+                if (subtitle != null) {
+                    SecondaryTextSmall(
+                        text = subtitle,
+                        textColor = MaterialTheme.colors.onPrimary
+                    )
+                }
+
+            }
+
+        },
         navigationIcon = {
             IconButton(onClick = { onNavClick() }) {
                 Icon(

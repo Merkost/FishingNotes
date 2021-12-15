@@ -1,6 +1,7 @@
 package com.joesemper.fishing.compose.ui.home.notes
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import com.joesemper.fishing.R
@@ -15,6 +16,7 @@ sealed class TabItem(var icon: Int, var titleRes: Int, var screen: ComposableFun
             UserPlacesScreen(navController = navController)
         })
 
+    @ExperimentalFoundationApi
     @ExperimentalAnimationApi
     object Catches : TabItem(R.drawable.ic_fish, R.string.catches, { navController ->
         UserCatchesScreen(navController = navController)

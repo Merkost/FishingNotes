@@ -2,9 +2,7 @@ package com.joesemper.fishing.compose.ui.home.notes
 
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -12,31 +10,35 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.net.toUri
-import coil.compose.rememberImagePainter
+import coil.compose.AsyncImage
+import coil.compose.AsyncImageContent
+import coil.compose.AsyncImagePainter
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.*
-import com.joesemper.fishing.compose.ui.theme.*
+import com.joesemper.fishing.compose.ui.theme.cardColor
+import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.utils.get12hTimeByMilliseconds
-import com.joesemper.fishing.utils.get24hTimeByMilliseconds
+import com.joesemper.fishing.utils.time.toTime
+import org.koin.androidx.compose.get
 
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
@@ -52,47 +54,61 @@ fun ItemPhoto(
         mutableStateOf<Uri?>(null)
     }
 
-    Crossfade(photo) { pic ->
-        Box(
+//    Crossfade(photo) { pic ->
+    Box(
+        modifier = Modifier
+            .size(100.dp)
+            .padding(4.dp)
+    ) {
+
+        AsyncImage(
+            model = photo,
+            contentDescription = null,
             modifier = Modifier
-                .size(100.dp)
-                .padding(4.dp)
-        ) {
-            Image(painter = rememberImagePainter(data = pic),
-                contentDescription = Constants.ITEM_PHOTO,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(5.dp))
-                    .clickable {
-                        clickedPhoto(pic)
-                        fullScreenPhoto.value = pic
-                    })
-            if (deleteEnabled) {
-                Surface( //For making delete button background half transparent
-                    color = Color.LightGray.copy(alpha = 0.2f),
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(5.dp))
+                .clickable {
+                    clickedPhoto(photo)
+                    fullScreenPhoto.value = photo
+                },
+            contentScale = ContentScale.Crop,
+            filterQuality = FilterQuality.Low
+        ) { state ->
+            if (state is AsyncImagePainter.State.Loading) {
+                CircularProgressIndicator(
                     modifier = Modifier
-                        .size(25.dp)
-                        .align(Alignment.TopEnd)
-                        .padding(3.dp)
-                        .clip(CircleShape)
-                ) {
-                    Icon(
-                        Icons.Default.Close,
-                        tint = Color.White,
-                        contentDescription = stringResource(R.string.delete_photo),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable { deletedPhoto(pic) })
-                }
+                        .fillMaxSize()
+                        .padding(64.dp)
+                        .align(Alignment.Center)
+                )
+            } else {
+                AsyncImageContent()
+            }
+        }
+        if (deleteEnabled) {
+            Surface( //For making delete button background half transparent
+                color = Color.LightGray.copy(alpha = 0.2f),
+                modifier = Modifier
+                    .size(25.dp)
+                    .align(Alignment.TopEnd)
+                    .padding(3.dp)
+                    .clip(CircleShape)
+            ) {
+                Icon(
+                    Icons.Default.Close,
+                    tint = Color.White,
+                    contentDescription = stringResource(R.string.delete_photo),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable { deletedPhoto(photo) })
             }
         }
     }
+//    }
 
     AnimatedVisibility(fullScreenPhoto.value != null) {
         FullScreenPhoto(fullScreenPhoto)
     }
-
 }
 
 @ExperimentalAnimationApi
@@ -102,59 +118,68 @@ fun ItemCatchPhotos(
     photo: Uri? = null,
     photosCount: Int = 0
 ) {
-    Crossfade(photo) { pic ->
-        Box(
-            modifier = modifier
-                .size(100.dp)
-                .padding(4.dp)
-        ) {
-            if (pic != null) {
-                Image(
-                    painter = rememberImagePainter(
-                        data = pic
-                    ),
-                    contentDescription = Constants.ITEM_PHOTO,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(5.dp))
-                )
-            } else {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_no_photo_vector),
-                    contentDescription = Constants.ITEM_PHOTO,
-                    tint = secondaryFigmaTextColor,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(5.dp))
-                )
-            }
-
-            if (photosCount > 1) {
-                Surface( //For making delete button background half transparent
-                    color = Color.LightGray.copy(alpha = 0.2f),
-                    modifier = Modifier
-                        .size(25.dp)
-                        .align(Alignment.BottomStart)
-                        .padding(3.dp)
-                ) {
-                    Text(
-                        text = "X$photosCount",
-                        color = Color.White,
+//    Crossfade(photo) { pic ->
+    Box(
+        modifier = modifier
+            .size(100.dp)
+            .padding(4.dp)
+    ) {
+        if (photo != null) {
+            AsyncImage(
+                model = photo,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(5.dp)),
+                contentScale = ContentScale.Crop,
+                filterQuality = FilterQuality.Low
+            ) { state ->
+                if (state is AsyncImagePainter.State.Loading) {
+                    CircularProgressIndicator(
                         modifier = Modifier
                             .fillMaxSize()
+                            .padding(64.dp)
+                            .align(Alignment.Center)
                     )
+                } else {
+                    AsyncImageContent()
                 }
+            }
+        } else {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_no_photo_vector),
+                contentDescription = Constants.ITEM_PHOTO,
+                tint = secondaryFigmaTextColor,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(5.dp))
+            )
+        }
+
+        if (photosCount > 1) {
+            Surface( //For making delete button background half transparent
+                color = Color.LightGray.copy(alpha = 0.2f),
+                modifier = Modifier
+                    .size(25.dp)
+                    .align(Alignment.BottomStart)
+                    .padding(3.dp)
+            ) {
+                Text(
+                    text = "X$photosCount",
+                    color = Color.White,
+                    modifier = Modifier
+                        .fillMaxSize()
+                )
             }
         }
     }
+//    }
 }
 
 @ExperimentalAnimationApi
 @Composable
 fun ItemUserCatch(
     userCatch: UserCatch,
-    use12hTimeFormat: Boolean,
     userCatchClicked: (UserCatch) -> Unit
 ) {
     val photo = if (userCatch.downloadPhotoLinks.isNotEmpty()) {
@@ -162,6 +187,9 @@ fun ItemUserCatch(
     } else {
         null
     }
+
+    val preferences: UserPreferences = get()
+    val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
 
     DefaultCardClickable(onClick = { userCatchClicked(userCatch) }) {
         ConstraintLayout(modifier = Modifier.padding(8.dp)) {
@@ -242,8 +270,7 @@ fun ItemUserCatch(
                     absoluteRight.linkTo(parent.absoluteRight, 4.dp)
                     top.linkTo(place.top)
                 },
-                text = if (use12hTimeFormat) get12hTimeByMilliseconds(userCatch.date)
-                else get24hTimeByMilliseconds(userCatch.date)
+                text = userCatch.date.toTime(is12hTimeFormat)
             )
         }
     }
@@ -262,7 +289,8 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
 
             Icon(
                 modifier = Modifier
-                    .padding(5.dp).padding(horizontal = 5.dp)
+                    .padding(5.dp)
+                    .padding(horizontal = 5.dp)
                     .size(32.dp)
                     .constrainAs(icon) {
                         top.linkTo(parent.top)
@@ -350,6 +378,7 @@ fun ItemDate(text: String) {
         modifier = Modifier
             .wrapContentHeight()
             .fillMaxWidth()
+            .zIndex(1f)
     ) {
         Surface(
             modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
@@ -464,111 +493,111 @@ fun ItemPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Unit) {
     }
 }
 
-@ExperimentalAnimationApi
-@Composable
-fun ItemCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
-    val photo = if (userCatch.downloadPhotoLinks.isNotEmpty()) {
-        userCatch.downloadPhotoLinks.first()
-    } else {
-        null
-    }
-
-    Surface() {
-        ConstraintLayout(modifier = Modifier
-            .fillMaxWidth()
-            .padding(4.dp)
-            .clickable {
-                userCatchClicked(userCatch)
-            }) {
-            val (photos, fish, weight, kg, description, icon, place, date, divider) = createRefs()
-            val guideline = createGuidelineFromAbsoluteLeft(104.dp)
-
-            ItemCatchPhotos(
-                modifier = Modifier.constrainAs(photos) {
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                },
-                photo = photo?.toUri(),
-                photosCount = userCatch.downloadPhotoLinks.count()
-            )
-
-            PrimaryText(
-                modifier = Modifier.constrainAs(fish) {
-                    absoluteLeft.linkTo(guideline, 4.dp)
-                    top.linkTo(parent.top)
-                },
-                text = userCatch.fishType
-            )
-
-            SecondaryText(
-                modifier = Modifier.constrainAs(kg) {
-                    absoluteRight.linkTo(parent.absoluteRight, 4.dp)
-                    top.linkTo(parent.top)
-                },
-                text = stringResource(id = R.string.kg)
-            )
-
-            PrimaryText(
-                modifier = Modifier.constrainAs(weight) {
-                    absoluteRight.linkTo(kg.absoluteLeft, 1.dp)
-                    top.linkTo(parent.top)
-                },
-                text = userCatch.fishWeight.toString()
-            )
-
-            SecondaryText(
-                modifier = Modifier.constrainAs(description) {
-                    absoluteLeft.linkTo(fish.absoluteLeft)
-                    linkTo(fish.bottom, icon.top, bottomMargin = 2.dp, bias = 0F)
-                },
-                text = if (userCatch.description.isNotBlank()) {
-                    userCatch.description
-                } else {
-                    stringResource(id = R.string.no_description)
-                }
-            )
-
-            Icon(
-                modifier = Modifier
-                    .size(24.dp)
-                    .constrainAs(icon) {
-                        absoluteLeft.linkTo(guideline)
-                        bottom.linkTo(parent.bottom)
-                    },
-                painter = painterResource(
-                    id = R.drawable.ic_baseline_location_on_24
-                ),
-                contentDescription = stringResource(R.string.icon),
-                tint = secondaryFigmaTextColor
-            )
-
-            SecondaryTextColored(
-                modifier = Modifier.constrainAs(place) {
-                    top.linkTo(icon.top)
-                    bottom.linkTo(icon.bottom)
-                    absoluteLeft.linkTo(icon.absoluteRight)
-                },
-                text = userCatch.placeTitle
-            )
-
-            SupportText(
-                modifier = Modifier.constrainAs(date) {
-                    absoluteRight.linkTo(parent.absoluteRight, 4.dp)
-                    top.linkTo(place.top)
-                },
-                text = get24hTimeByMilliseconds(userCatch.date)
-            )
-
-            Divider(
-                modifier = Modifier.constrainAs(divider) {
-                    bottom.linkTo(parent.bottom)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                }
-            )
-        }
-    }
-}
+//@ExperimentalAnimationApi
+//@Composable
+//fun ItemCatch(userCatch: UserCatch, userCatchClicked: (UserCatch) -> Unit) {
+//    val photo = if (userCatch.downloadPhotoLinks.isNotEmpty()) {
+//        userCatch.downloadPhotoLinks.first()
+//    } else {
+//        null
+//    }
+//
+//    Surface() {
+//        ConstraintLayout(modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(4.dp)
+//            .clickable {
+//                userCatchClicked(userCatch)
+//            }) {
+//            val (photos, fish, weight, kg, description, icon, place, date, divider) = createRefs()
+//            val guideline = createGuidelineFromAbsoluteLeft(104.dp)
+//
+//            ItemCatchPhotos(
+//                modifier = Modifier.constrainAs(photos) {
+//                    absoluteLeft.linkTo(parent.absoluteLeft)
+//                    top.linkTo(parent.top)
+//                    bottom.linkTo(parent.bottom)
+//                },
+//                photo = photo?.toUri(),
+//                photosCount = userCatch.downloadPhotoLinks.count()
+//            )
+//
+//            PrimaryText(
+//                modifier = Modifier.constrainAs(fish) {
+//                    absoluteLeft.linkTo(guideline, 4.dp)
+//                    top.linkTo(parent.top)
+//                },
+//                text = userCatch.fishType
+//            )
+//
+//            SecondaryText(
+//                modifier = Modifier.constrainAs(kg) {
+//                    absoluteRight.linkTo(parent.absoluteRight, 4.dp)
+//                    top.linkTo(parent.top)
+//                },
+//                text = stringResource(id = R.string.kg)
+//            )
+//
+//            PrimaryText(
+//                modifier = Modifier.constrainAs(weight) {
+//                    absoluteRight.linkTo(kg.absoluteLeft, 1.dp)
+//                    top.linkTo(parent.top)
+//                },
+//                text = userCatch.fishWeight.toString()
+//            )
+//
+//            SecondaryText(
+//                modifier = Modifier.constrainAs(description) {
+//                    absoluteLeft.linkTo(fish.absoluteLeft)
+//                    linkTo(fish.bottom, icon.top, bottomMargin = 2.dp, bias = 0F)
+//                },
+//                text = if (userCatch.description.isNotBlank()) {
+//                    userCatch.description
+//                } else {
+//                    stringResource(id = R.string.no_description)
+//                }
+//            )
+//
+//            Icon(
+//                modifier = Modifier
+//                    .size(24.dp)
+//                    .constrainAs(icon) {
+//                        absoluteLeft.linkTo(guideline)
+//                        bottom.linkTo(parent.bottom)
+//                    },
+//                painter = painterResource(
+//                    id = R.drawable.ic_baseline_location_on_24
+//                ),
+//                contentDescription = stringResource(R.string.icon),
+//                tint = secondaryFigmaTextColor
+//            )
+//
+//            SecondaryTextColored(
+//                modifier = Modifier.constrainAs(place) {
+//                    top.linkTo(icon.top)
+//                    bottom.linkTo(icon.bottom)
+//                    absoluteLeft.linkTo(icon.absoluteRight)
+//                },
+//                text = userCatch.placeTitle
+//            )
+//
+//            SupportText(
+//                modifier = Modifier.constrainAs(date) {
+//                    absoluteRight.linkTo(parent.absoluteRight, 4.dp)
+//                    top.linkTo(place.top)
+//                },
+//                text = get24hTimeByMilliseconds(userCatch.date)
+//            )
+//
+//            Divider(
+//                modifier = Modifier.constrainAs(divider) {
+//                    bottom.linkTo(parent.bottom)
+//                    absoluteLeft.linkTo(parent.absoluteLeft)
+//                }
+//            )
+//        }
+//    }
+//}
 
 @Composable
 fun ItemCounter(
