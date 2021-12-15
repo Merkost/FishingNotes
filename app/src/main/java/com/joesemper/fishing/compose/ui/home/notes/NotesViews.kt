@@ -310,14 +310,14 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
                 text = place.title
             )
 
-            ItemCounter(
+            /*ItemCounter(
                 modifier = Modifier.constrainAs(fishIcon) {
                     bottom.linkTo(parent.bottom)
                     absoluteRight.linkTo(parent.absoluteRight)
                 },
                 text = "0",
                 icon = R.drawable.ic_fish
-            )
+            )*/
 
             SecondaryText(
                 modifier = Modifier.constrainAs(description) {

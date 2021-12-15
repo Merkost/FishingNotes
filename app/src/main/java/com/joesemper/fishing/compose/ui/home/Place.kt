@@ -1,10 +1,7 @@
 package com.joesemper.fishing.compose.ui.home
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
@@ -91,7 +88,7 @@ fun UserPlaceScreen(navController: NavController, place: UserMapMarker?) {
                         top.linkTo(title.top)
                         bottom.linkTo(title.bottom)
                     },
-                    text = userPlace.catchesCount.toString()
+                    text = userCatches.size.toString()
                 )
 
                 SecondaryText(
@@ -108,8 +105,7 @@ fun UserPlaceScreen(navController: NavController, place: UserMapMarker?) {
 
                 LazyColumn(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
+                        .fillMaxSize()
                         .constrainAs(catches) {
                             top.linkTo(description.bottom, 32.dp)
                             absoluteLeft.linkTo(parent.absoluteLeft)
