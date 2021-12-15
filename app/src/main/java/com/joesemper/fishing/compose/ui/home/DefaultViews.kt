@@ -64,8 +64,8 @@ fun DefaultDialog(
     negativeButtonText: String = "",
     onNegativeClick: () -> Unit = { },
     positiveButtonText: String = "",
-    onPositiveClick: () -> Unit,
-    onDismiss: () -> Unit,
+    onPositiveClick: () -> Unit = { },
+    onDismiss: () -> Unit = { },
     content: @Composable() (() -> Unit)? = null
 ) {
     Dialog(onDismissRequest = onDismiss) {
@@ -112,7 +112,8 @@ fun DefaultDialog(
                                 shape = RoundedCornerShape(24.dp)
                             )
                         }
-                        DefaultButton(
+                        if (positiveButtonText.isNotEmpty())
+                            DefaultButton(
                             text = positiveButtonText,
                             onClick = onPositiveClick,
                             shape = RoundedCornerShape(24.dp)

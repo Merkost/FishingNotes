@@ -12,6 +12,7 @@ import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.NewCatchWeather
 import com.joesemper.fishing.model.entity.raw.RawUserCatch
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
+import com.joesemper.fishing.model.mappers.getWeatherNameByIcon
 import com.joesemper.fishing.model.repository.app.CatchesRepository
 import com.joesemper.fishing.model.repository.app.MarkersRepository
 import com.joesemper.fishing.model.repository.app.WeatherRepository
@@ -54,8 +55,9 @@ class NewCatchViewModel(
 
     fun getWeather() {
         viewModelScope.launch {
-            //if (weather.value != null) weather.tryEmit(weather.value)
-            //else
+            //weather.value?.let {
+              //  weather.value = null
+            //weather.value = it} ?:
             //TODO: Weather Loading State
             marker.value?.run {
 

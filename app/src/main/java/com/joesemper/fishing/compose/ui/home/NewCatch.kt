@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.BorderStroke
@@ -17,15 +18,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -48,6 +47,9 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
+import com.google.accompanist.flowlayout.FlowMainAxisAlignment
+import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
@@ -58,9 +60,14 @@ import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
+import com.joesemper.fishing.model.mappers.getAllWeatherIcons
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
+import com.joesemper.fishing.model.mappers.getWeatherNameByIcon
 import com.joesemper.fishing.utils.*
+import com.joesemper.fishing.utils.network.ConnectionState
+import com.joesemper.fishing.utils.network.currentConnectivityState
+import com.joesemper.fishing.utils.network.observeConnectivityAsFlow
 import com.joesemper.fishing.utils.time.toDate
 import com.joesemper.fishing.utils.time.toHours
 import com.joesemper.fishing.utils.time.toTime
@@ -88,6 +95,8 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
 
     val viewModel: NewCatchViewModel = getViewModel()
     val context = LocalContext.current
+    val connectionState by context.observeConnectivityAsFlow()
+        .collectAsState(initial = context.currentConnectivityState)
     val notAllFieldsFilled = stringResource(R.string.not_all_fields_are_filled)
 
     viewModel.date.value = dateAndTime.timeInMillis
@@ -150,10 +159,11 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
             FishAndWeight(viewModel.fishAmount, viewModel.weight)
             Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
             DateAndTime(viewModel.date)
-            NewCatchWeatherItem(viewModel)
+            NewCatchWeatherItem(viewModel, connectionState)
             Photos(
                 { clicked -> { } },
-                { deleted -> viewModel.deletePhoto(deleted) })
+                { deleted -> viewModel.deletePhoto(deleted) }, connectionState
+            )
             Spacer(modifier = Modifier.padding(16.dp))
         }
     }
@@ -524,7 +534,8 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
 @Composable
 fun Photos(
     clickedPhoto: (Uri) -> Unit,
-    deletedPhoto: (Uri) -> Unit
+    deletedPhoto: (Uri) -> Unit,
+    connectionState: ConnectionState
 ) {
     val viewModel: NewCatchViewModel = getViewModel()
     val photos = remember { viewModel.images }
@@ -613,7 +624,7 @@ private fun addPhoto(
 }
 
 @Composable
-fun NewCatchWeatherItem(viewModel: NewCatchViewModel) {
+fun NewCatchWeatherItem(viewModel: NewCatchViewModel, connectionState: ConnectionState) {
 
     val weather by viewModel.weather.collectAsState()
 
@@ -628,21 +639,32 @@ fun NewCatchWeatherItem(viewModel: NewCatchViewModel) {
                 icon = R.drawable.weather_sunny,
                 text = stringResource(id = R.string.weather)
             )
-            Button(onClick = { viewModel.getWeather() }) {
-                Text("Обновить")
-                //Icon(Icons.Default.Refresh, "", tint = MaterialTheme.colors.primary)
+            AnimatedVisibility(viewModel.weather.value != null) {
+                IconButton(onClick = { viewModel.getWeather() }) {
+                    //Text(stringResource(R.string.reset))
+                    Icon(Icons.Default.Refresh, "", tint = MaterialTheme.colors.primary)
+                }
             }
+
         }
 
-        WeatherLayout(weather, viewModel)
+        WeatherLayout(weather, viewModel, connectionState)
     }
 
 
 }
 
 @Composable
-fun WeatherLayout(weatherForecast: WeatherForecast?, viewModel: NewCatchViewModel) =
+fun WeatherLayout(
+    weatherForecast: WeatherForecast?,
+    viewModel: NewCatchViewModel,
+    connectionState: ConnectionState
+) =
     weatherForecast?.let { weather ->
+
+        var weatherIconDialogState by remember {
+            mutableStateOf(false)
+        }
 
         val currentMoonPhase = remember {
             weather.daily.first().moonPhase
@@ -657,6 +679,11 @@ fun WeatherLayout(weatherForecast: WeatherForecast?, viewModel: NewCatchViewMode
             mutableStateOf(dateAndTime.timeInMillis.toHours().toInt())
         }
 
+        var weatherIcon by remember(hour, weather) {
+            mutableStateOf(
+                getWeatherIconByName(weather.hourly.first().weather.first().icon)
+            )
+        }.also { viewModel.weatherToSave.value.icon = getWeatherNameByIcon(it.value) }
         var weatherDescription by remember(hour, weather) {
             mutableStateOf(weather.hourly[hour].weather
                 .first().description.replaceFirstChar { it.uppercase() })
@@ -670,10 +697,13 @@ fun WeatherLayout(weatherForecast: WeatherForecast?, viewModel: NewCatchViewMode
         var wind by remember(hour, weather) {
             mutableStateOf(weather.hourly[hour].windSpeed.toInt().toString())
         }.also { viewModel.weatherToSave.value.windInMs = it.value.toInt() }
-        var moonPhase by remember(hour, weather) {
-            mutableStateOf((viewModel.moonPhase.value * 100).toInt().toString())
-        }.also { viewModel.weatherToSave.value.moonPhase = it.value.toInt() / 100f }
 
+        if (weatherIconDialogState) PickWeatherIconDialog(
+            onDismiss = { weatherIconDialogState = false },
+            onIconSelected = {
+                weatherIcon = it
+                weatherIconDialogState = false
+            })
 
         Crossfade(targetState = weather) { animatedWeather ->
             Column() {
@@ -684,14 +714,18 @@ fun WeatherLayout(weatherForecast: WeatherForecast?, viewModel: NewCatchViewMode
                     readOnly = false,
                     value = weatherDescription,
                     leadingIcon = {
-                        Icon(
+                        IconButton(
                             modifier = Modifier.size(32.dp),
-                            painter = painterResource(
-                                id = getWeatherIconByName(weather.hourly.first().weather.first().icon)
-                                    .also { viewModel.weatherToSave.value.icon = it.toString() }
-                            ),
-                            contentDescription = "",
-                            tint = MaterialTheme.colors.primary
+                            content = {
+                                Icon(
+                                    painter = painterResource(
+                                        id = weatherIcon
+                                    ),
+                                    contentDescription = "",
+                                    tint = MaterialTheme.colors.primary
+                                )
+                            },
+                            onClick = { weatherIconDialogState = true }
                         )
                     },
                     onValueChange = {
@@ -809,8 +843,8 @@ fun WeatherLayout(weatherForecast: WeatherForecast?, viewModel: NewCatchViewMode
                     Spacer(modifier = Modifier.padding(4.dp))
 
                     OutlinedTextField(
-                        readOnly = false,
-                        value = moonPhase,
+                        readOnly = true,
+                        value = (viewModel.moonPhase.value * 100).toInt().toString(),
                         leadingIcon = {
                             Icon(
                                 painter = painterResource(
@@ -820,14 +854,7 @@ fun WeatherLayout(weatherForecast: WeatherForecast?, viewModel: NewCatchViewMode
                                 tint = MaterialTheme.colors.primary
                             )
                         },
-                        onValueChange = { newValue ->
-                            moonPhase = when (newValue.toIntOrNull()) {
-                                null -> moonPhase //old value
-                                else -> newValue.toInt().let {
-                                    if (it in 0..100) newValue else moonPhase
-                                }
-                            }
-                        },
+                        onValueChange = { },
                         trailingIcon = {
                             Text(text = stringResource(R.string.percent))
                         },
@@ -843,10 +870,51 @@ fun WeatherLayout(weatherForecast: WeatherForecast?, viewModel: NewCatchViewMode
             }
 
         }
-    } ?: SecondaryText(
-        modifier = Modifier.padding(vertical = 8.dp),
-        text = "Select a place to load weather!"
+    } ?: when (connectionState) {
+        is ConnectionState.Available -> {
+            SecondaryText(
+                modifier = Modifier.padding(vertical = 8.dp),
+                text = stringResource(R.string.select_place_for_weather)
+            )
+        }
+        is ConnectionState.Unavailable -> {
+            SecondaryText(
+                modifier = Modifier.padding(vertical = 8.dp),
+                text = stringResource(R.string.no_internet)
+            )
+        }
+    }
+
+@Composable
+fun PickWeatherIconDialog(onIconSelected: (Int) -> Unit, onDismiss: () -> Unit) {
+    DefaultDialog("Choose weather icon:",
+        content = {
+            FlowRow(
+                mainAxisAlignment = FlowMainAxisAlignment.Center,
+                crossAxisAlignment = FlowCrossAxisAlignment.Center,
+            ) {
+                getAllWeatherIcons().distinct().forEach { iconResource ->
+                    WeatherIconItem(iconResource) { onIconSelected(iconResource) }
+                }
+            }
+        }, onDismiss = onDismiss
     )
+}
+
+@Composable
+fun WeatherIconItem(iconResource: Int, onIconSelected: () -> Unit) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .padding(4.dp)
+            .clip(CircleShape)
+            .requiredSize(50.dp)
+            .clickable(onClick = onIconSelected)
+    ) {
+        Icon(painterResource(iconResource), "", tint = MaterialTheme.colors.primary)
+    }
+}
+
 
 @Composable
 fun DateAndTime(

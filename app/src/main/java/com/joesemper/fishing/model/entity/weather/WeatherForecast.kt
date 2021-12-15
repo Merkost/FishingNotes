@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-class WeatherForecast(
+data class WeatherForecast(
     @field:SerializedName("lat") val latitude: String = "0.0",
     @field:SerializedName("lon") val longitude: String = "0.0",
     @field:SerializedName("timezone_offset") val timezoneOffset: Long = 0,
