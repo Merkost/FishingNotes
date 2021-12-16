@@ -34,6 +34,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -152,8 +153,8 @@ fun DefaultCard(
     content: @Composable () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(24.dp),
-        elevation = 8.dp,
+        shape = MaterialTheme.shapes.large,
+        elevation = 6.dp,
         backgroundColor = MaterialTheme.colors.surface,
         modifier = modifier
             .zIndex(1.0f)
@@ -173,8 +174,8 @@ fun DefaultCardClickable(
     content: @Composable () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(24.dp),
-        elevation = 8.dp,
+        shape = MaterialTheme.shapes.large,
+        elevation = 6.dp,
         backgroundColor = MaterialTheme.colors.surface,
         onClick = onClick,
         modifier = modifier
@@ -384,6 +385,7 @@ fun PrimaryTextSmall(
     fontWeight: FontWeight? = null,
     textAlign: TextAlign? = null,
     text: String,
+    maxLines: Int = Int.MAX_VALUE,
     textColor: Color = MaterialTheme.colors.onSurface
 ) {
     Text(
@@ -392,6 +394,7 @@ fun PrimaryTextSmall(
         fontSize = 14.sp,
         fontWeight = fontWeight,
         textAlign = textAlign,
+        maxLines = maxLines,
         color = textColor,
         text = text
     )
@@ -457,7 +460,8 @@ fun SecondaryTextSmall(
         fontSize = 14.sp,
         color = textColor,
         text = text,
-        maxLines = maxLines
+        maxLines = maxLines,
+        overflow = TextOverflow.Ellipsis
     )
 }
 

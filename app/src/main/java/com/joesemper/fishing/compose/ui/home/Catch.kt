@@ -273,15 +273,9 @@ fun CatchNoteView(
             )
 
             if (catch.description.isNotBlank()) {
-                PrimaryText(
-                    modifier = Modifier.padding(horizontal = 40.dp),
-                    text = catch.description
-                )
+                PrimaryText(text = catch.description)
             } else {
-                SecondaryText(
-                    modifier = Modifier.padding(horizontal = 40.dp),
-                    text = stringResource(id = R.string.no_description)
-                )
+                SecondaryText(text = stringResource(id = R.string.no_description))
             }
         }
     }

@@ -2,9 +2,7 @@ package com.joesemper.fishing.compose.ui.home.notes
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -62,11 +60,7 @@ fun Notes(
     ) {
         Column() {
             Tabs(tabs = tabs, pagerState = pagerState)
-            Box(modifier = Modifier.fillMaxSize()) {
-                BackgroundImage()
-                TabsContent(tabs = tabs, pagerState = pagerState, navController)
-            }
-
+            TabsContent(tabs = tabs, pagerState = pagerState, navController)
         }
 
     }
@@ -89,9 +83,18 @@ fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
         }) {
         tabs.forEachIndexed { index, tab ->
             LeadingIconTab(
-                icon = { Icon(painter = painterResource(id = tab.icon), contentDescription = "",
-                    tint = MaterialTheme.colors.primaryVariant ) },
-                text = { Text(stringResource(tab.titleRes), color = MaterialTheme.colors.onSurface) },
+                icon = {
+                    Icon(
+                        painter = painterResource(id = tab.icon), contentDescription = "",
+                        tint = MaterialTheme.colors.primaryVariant
+                    )
+                },
+                text = {
+                    Text(
+                        stringResource(tab.titleRes),
+                        color = MaterialTheme.colors.onSurface
+                    )
+                },
                 selected = pagerState.currentPage == index,
                 onClick = {
                     scope.launch {

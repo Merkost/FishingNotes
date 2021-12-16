@@ -21,9 +21,11 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import coil.compose.AsyncImageContent
@@ -31,10 +33,7 @@ import coil.compose.AsyncImagePainter
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.*
-import com.joesemper.fishing.compose.ui.theme.cardColor
-import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
+import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.utils.time.toTime
@@ -281,20 +280,18 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
     DefaultCardClickable(onClick = { userPlaceClicked(place) }) {
         ConstraintLayout(
             modifier = Modifier
-                .height(75.dp)
+                .padding(16.dp)
+                .wrapContentHeight()
                 .fillMaxWidth()
-                .padding(5.dp)
         ) {
-            val (icon, title, description, amount, fishIcon) = createRefs()
+            val (icon, title, description, amount, fishIcon, noteIcon) = createRefs()
 
             Icon(
                 modifier = Modifier
-                    .padding(5.dp)
-                    .padding(horizontal = 5.dp)
-                    .size(32.dp)
+                    .size(24.dp)
                     .constrainAs(icon) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
+                        top.linkTo(title.top)
+                        bottom.linkTo(title.bottom)
                         absoluteLeft.linkTo(parent.absoluteLeft)
                     },
                 painter = painterResource(R.drawable.ic_baseline_location_on_24),
@@ -302,9 +299,9 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
                 tint = Color(place.markerColor)
             )
 
-            PrimaryText(
+            PrimaryTextBold(
                 modifier = Modifier.constrainAs(title) {
-                    linkTo(icon.absoluteRight, amount.absoluteLeft, bias = 0f)
+                    linkTo(icon.absoluteRight, amount.absoluteLeft, startMargin = 8.dp, bias = 0f)
                     top.linkTo(parent.top)
                 },
                 text = place.title
@@ -312,26 +309,41 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
 
             ItemCounter(
                 modifier = Modifier.constrainAs(fishIcon) {
-                    bottom.linkTo(parent.bottom)
+                    bottom.linkTo(title.bottom)
+                    top.linkTo(title.top)
                     absoluteRight.linkTo(parent.absoluteRight)
                 },
-                text = "0",
+                text = place.catchesCount.toString(),
                 icon = R.drawable.ic_fish
             )
 
-            SecondaryText(
+            Icon(
+                modifier = Modifier
+                    .size(24.dp)
+                    .constrainAs(noteIcon) {
+                        top.linkTo(title.bottom, 8.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                    },
+                painter = painterResource(id = R.drawable.ic_baseline_sticky_note_2_24),
+                contentDescription = null,
+                tint = secondaryTextColor
+            )
+
+            PrimaryTextSmall(
                 modifier = Modifier.constrainAs(description) {
-                    top.linkTo(title.bottom)
-                    absoluteLeft.linkTo(title.absoluteLeft)
-                    bottom.linkTo(parent.bottom, 4.dp)
+                    top.linkTo(noteIcon.top)
+                    absoluteLeft.linkTo(noteIcon.absoluteRight, 8.dp)
+                    absoluteRight.linkTo(fishIcon.absoluteRight)
+                    width = Dimension.fillToConstraints
                 },
+                maxLines = 3,
+                textAlign = TextAlign.Start,
                 text = if (place.description.isNotBlank()) {
                     place.description
                 } else {
                     stringResource(id = R.string.no_description)
                 }
             )
-
         }
     }
 }

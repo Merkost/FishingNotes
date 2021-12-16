@@ -6,6 +6,7 @@ import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
+import com.joesemper.fishing.model.datasource.RepositoryCollections.*
 import com.joesemper.fishing.model.entity.common.CatchesContentState
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserCatch
@@ -17,9 +18,6 @@ import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import com.joesemper.fishing.model.datasource.RepositoryCollections.*
-import org.koin.androidx.compose.get
-import kotlin.collections.forEach
 
 class FirebaseCatchesRepositoryImpl(
     private val dbCollections: RepositoryCollections,
@@ -162,19 +160,33 @@ class FirebaseCatchesRepositoryImpl(
         val photoDownloadLinks = savePhotos(newCatch.photos, flow)
         val userCatch = UserCatchMapper().mapRawCatch(newCatch, photoDownloadLinks)
 
+
         dbCollections.getUserCatchesCollection(markerId).document(userCatch.id).set(userCatch)
             .addOnCompleteListener {
                 flow.tryEmit(Progress.Complete)
+                incrementNumOfCatches(markerId)
             }
         return flow
     }
 
+    private fun incrementNumOfCatches(markerId: String) {
+        dbCollections.getUserMapMarkersCollection().document(markerId)
+            .update("catchesCount", FieldValue.increment(1))
+    }
+
     override suspend fun deleteCatch(userCatch: UserCatch) {
         dbCollections.getUserCatchesCollection(userCatch.userMarkerId).document(userCatch.id)
-            .delete()
+            .delete().addOnSuccessListener {
+                decrementNumOfCatches(userCatch.userMarkerId)
+            }
         userCatch.downloadPhotoLinks.forEach {
             cloudPhotoStorage.deletePhoto(it)
         }
+    }
+
+    private fun decrementNumOfCatches(markerId: String) {
+        dbCollections.getUserMapMarkersCollection().document(markerId)
+            .update("catchesCount", FieldValue.increment(-1))
     }
 
     private suspend fun savePhotos(

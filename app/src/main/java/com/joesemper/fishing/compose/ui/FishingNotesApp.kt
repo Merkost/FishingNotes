@@ -1,7 +1,6 @@
 package com.joesemper.fishing.compose.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
@@ -23,7 +22,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.home.weather.WeatherDaily
 import com.joesemper.fishing.compose.ui.login.LoginScreen
-import com.joesemper.fishing.compose.ui.theme.FishingNotesTheme
 import kotlinx.coroutines.InternalCoroutinesApi
 
 @ExperimentalComposeUiApi
@@ -134,6 +132,4 @@ private fun NavGraphBuilder.NavGraph(
             data = it.requiredArg(Arguments.WEATHER_DATA)
         )
     }
-
-
 }
