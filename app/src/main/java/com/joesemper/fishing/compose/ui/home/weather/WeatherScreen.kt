@@ -303,7 +303,7 @@ fun HourlyWeatherItem(
                 text = getTemperature(
                     forecast.temperature,
                     TemperatureValues.valueOf(temperatureUnit)
-                ) + getTemperatureFromUnit(temperatureUnit),
+                ) + getTemperatureNameFromUnit(temperatureUnit),
                 textColor = MaterialTheme.colors.onPrimary
             )
         }
@@ -372,7 +372,7 @@ fun DailyWeatherItem(
                 bottom.linkTo(parent.bottom)
                 absoluteRight.linkTo(parent.absoluteRight, 16.dp)
             },
-            text = getTemperatureFromUnit(temperatureUnit),
+            text = getTemperatureNameFromUnit(temperatureUnit),
             textColor = secondaryTextColor
         )
         WeatherPrimaryText(

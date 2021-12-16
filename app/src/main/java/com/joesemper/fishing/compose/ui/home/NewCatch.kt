@@ -55,7 +55,9 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
+import com.joesemper.fishing.compose.ui.home.weather.*
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -73,6 +75,7 @@ import com.joesemper.fishing.utils.time.toHours
 import com.joesemper.fishing.utils.time.toTime
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
+import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import java.util.*
 
@@ -200,7 +203,6 @@ fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>, upPress: () -> Unit
     }
 }
 
-//TODO("AutoCompleteTextView for places textField")
 @Composable
 private fun Places(label: String, viewModel: NewCatchViewModel) {
     val context = LocalContext.current
@@ -662,6 +664,10 @@ fun WeatherLayout(
 ) =
     weatherForecast?.let { weather ->
 
+        val weatherSettings: WeatherPreferences = get()
+        val temperatureSettings by weatherSettings.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
+        val pressureSettings by weatherSettings.getPressureUnit.collectAsState(PressureValues.mmHg.name)
+
         var weatherIconDialogState by remember {
             mutableStateOf(false)
         }
@@ -680,23 +686,38 @@ fun WeatherLayout(
         }
 
         var weatherIcon by remember(hour, weather) {
-            mutableStateOf(
-                getWeatherIconByName(weather.hourly.first().weather.first().icon)
-            )
+            mutableStateOf(getWeatherIconByName(weather.hourly.first().weather.first().icon))
         }.also { viewModel.weatherToSave.value.icon = getWeatherNameByIcon(it.value) }
+
         var weatherDescription by remember(hour, weather) {
             mutableStateOf(weather.hourly[hour].weather
                 .first().description.replaceFirstChar { it.uppercase() })
         }.also { viewModel.weatherToSave.value.weatherDescription = it.value }
-        var temperature by remember(hour, weather) {
-            mutableStateOf(weather.hourly[hour].temperature.toInt().toString())
-        }.also { viewModel.weatherToSave.value.temperatureInC = it.value.toInt() }
-        var pressure by remember(hour, weather) {
-            mutableStateOf(hPaToMmHg(weather.hourly[hour].pressure).toString())
-        }.also { viewModel.weatherToSave.value.pressureInMmhg = it.value.toInt() }
+
+        var temperature by remember(hour, weather, temperatureSettings) {
+            mutableStateOf(viewModel.getTemperatureForHour(hour = hour, temperatureSettings))
+        }.also {
+            it.value.toFloatOrNull()?.let { floatValue ->
+                viewModel.weatherToSave.value.temperatureInC =
+                    getCelciusTemperature(floatValue, temperatureSettings)
+            }
+        }
+
+        var pressure by remember(hour, weather, pressureSettings) {
+            mutableStateOf(getPressure(weather.hourly[hour].pressure, PressureValues.valueOf(pressureSettings)))
+        }.also {
+            it.value.toFloatOrNull()?.let { floatValue ->
+                viewModel.weatherToSave.value.pressureInMmhg =
+                    getDefaultPressure(floatValue, from = pressureSettings)
+            }
+        }
+
         var wind by remember(hour, weather) {
             mutableStateOf(weather.hourly[hour].windSpeed.toInt().toString())
-        }.also { viewModel.weatherToSave.value.windInMs = it.value.toInt() }
+        }.also { it.value.toIntOrNull()?.let { intValue ->
+            viewModel.weatherToSave.value.windInMs = intValue
+        }  }
+
 
         if (weatherIconDialogState) PickWeatherIconDialog(
             onDismiss = { weatherIconDialogState = false },
@@ -718,9 +739,7 @@ fun WeatherLayout(
                             modifier = Modifier.size(32.dp),
                             content = {
                                 Icon(
-                                    painter = painterResource(
-                                        id = weatherIcon
-                                    ),
+                                    painter = painterResource(id = weatherIcon),
                                     contentDescription = "",
                                     tint = MaterialTheme.colors.primary
                                 )
@@ -728,12 +747,8 @@ fun WeatherLayout(
                             onClick = { weatherIconDialogState = true }
                         )
                     },
-                    onValueChange = {
-                        weatherDescription = it/*when (it.matches(Regex("[a-zA-Z]+"))) {
-                            false -> weatherDescription //old value
-                            true -> it   //new value
-                        }*/
-                    },
+                    onValueChange = { weatherDescription = it },
+                    isError = (weatherDescription.isEmpty()).apply { viewModel.noErrors.value = this },
                     label = { Text(text = stringResource(id = R.string.weather)) },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(
@@ -757,17 +772,19 @@ fun WeatherLayout(
                             )
                         },
                         trailingIcon = {
-                            Text(text = stringResource(R.string.celsius))
+                            Text(text = getTemperatureNameFromUnit(temperatureSettings))
                         },
-                        onValueChange = { newValue ->
-                            temperature = when (newValue.toIntOrNull()) {
+                        onValueChange = { newValue -> temperature = newValue
+                            /*temperature = when (newValue.toIntOrNull()) {
                                 null -> temperature
                                 //old value
                                 else -> newValue.toInt().let {
                                     if (it in -300..300) newValue else temperature   //new value
                                 }
-                            }
+                            }*/
                         },
+                        isError = (temperature.toIntOrNull() == null || temperature.length > 3)
+                            .apply { viewModel.noErrors.value = this },
                         label = { Text(text = stringResource(R.string.temperature)) },
                         modifier = Modifier.weight(1f, true),
                         keyboardOptions = KeyboardOptions(
@@ -793,9 +810,11 @@ fun WeatherLayout(
                         trailingIcon = {
                             Text(
                                 modifier = Modifier.padding(horizontal = 8.dp),
-                                text = stringResource(R.string.pressure_units)
+                                text = getPressureNameFromUnit(pressureSettings)
                             )
                         },
+                        isError = (pressure.endsWith(".") || pressure == "")
+                            .apply { viewModel.noErrors.value = this },
                         onValueChange = { pressure = it },
                         label = { Text(text = stringResource(R.string.pressure)) },
                         modifier = Modifier.weight(1f, true),
@@ -822,15 +841,10 @@ fun WeatherLayout(
                                 tint = MaterialTheme.colors.primary,
                             )
                         },
-                        trailingIcon = {
-                            Text(text = stringResource(R.string.wind_speed_units))
-                        },
-                        onValueChange = {
-                            wind = when (it.toIntOrNull()) {
-                                null -> wind //old value
-                                else -> it   //new value
-                            }
-                        },
+                        trailingIcon = { Text(text = stringResource(R.string.wind_speed_units)) },
+                        onValueChange = { wind = it },
+                        isError = (wind.toIntOrNull() == null || wind.length >= 3)
+                            .apply { viewModel.noErrors.value = this },
                         label = { Text(text = stringResource(R.string.wind)) },
                         modifier = Modifier.weight(1f, true),
                         keyboardOptions = KeyboardOptions(
@@ -872,14 +886,17 @@ fun WeatherLayout(
         }
     } ?: when (connectionState) {
         is ConnectionState.Available -> {
-            SecondaryText(
-                modifier = Modifier.padding(vertical = 8.dp),
-                text = stringResource(R.string.select_place_for_weather)
-            )
+            if (viewModel.marker.value == null) {
+                SecondaryText(
+                    modifier = Modifier.padding(8.dp),
+                    text = stringResource(R.string.select_place_for_weather)
+                )
+            } else { CircularProgressIndicator() }
+
         }
         is ConnectionState.Unavailable -> {
             SecondaryText(
-                modifier = Modifier.padding(vertical = 8.dp),
+                modifier = Modifier.padding(8.dp),
                 text = stringResource(R.string.no_internet)
             )
         }
@@ -887,7 +904,8 @@ fun WeatherLayout(
 
 @Composable
 fun PickWeatherIconDialog(onIconSelected: (Int) -> Unit, onDismiss: () -> Unit) {
-    DefaultDialog("Choose weather icon:",
+    DefaultDialog(
+        "Choose weather icon:",
         content = {
             FlowRow(
                 mainAxisAlignment = FlowMainAxisAlignment.Center,

@@ -498,7 +498,7 @@ fun CatchWeatherView(
                     text = getTemperature(
                         catch.weatherTemperature,
                         TemperatureValues.valueOf(temperatureUnit)
-                    ) + getTemperatureFromUnit(temperatureUnit)
+                    ) + getTemperatureNameFromUnit(temperatureUnit)
                 )
             }
 

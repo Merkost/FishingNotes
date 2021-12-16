@@ -94,7 +94,7 @@ fun PrimaryWeatherItemView(
             text = getTemperature(
                 temperature,
                 TemperatureValues.valueOf(temperatureUnit)
-            ) + getTemperatureFromUnit(temperatureUnit),
+            ) + getTemperatureNameFromUnit(temperatureUnit),
             textColor = textTint
         )
 
@@ -326,7 +326,7 @@ fun DayTemperatureView(
             text = getTemperature(
                 temperature.morning,
                 TemperatureValues.valueOf(temperatureUnit)
-            ) + getTemperatureFromUnit(temperatureUnit)
+            ) + getTemperatureNameFromUnit(temperatureUnit)
         )
         PrimaryText(
             modifier = Modifier.constrainAs(dayMeaning) {
@@ -337,7 +337,7 @@ fun DayTemperatureView(
             text = getTemperature(
                 temperature.day,
                 TemperatureValues.valueOf(temperatureUnit)
-            ) + getTemperatureFromUnit(temperatureUnit),
+            ) + getTemperatureNameFromUnit(temperatureUnit),
         )
         PrimaryText(
             modifier = Modifier.constrainAs(eveMeaning) {
@@ -348,7 +348,7 @@ fun DayTemperatureView(
             text = getTemperature(
                 temperature.evening,
                 TemperatureValues.valueOf(temperatureUnit)
-            ) + getTemperatureFromUnit(temperatureUnit),
+            ) + getTemperatureNameFromUnit(temperatureUnit),
         )
         PrimaryText(
             modifier = Modifier.constrainAs(nightMeaning) {
@@ -359,7 +359,7 @@ fun DayTemperatureView(
             text = getTemperature(
                 temperature.night,
                 TemperatureValues.valueOf(temperatureUnit)
-            ) + getTemperatureFromUnit(temperatureUnit),
+            ) + getTemperatureNameFromUnit(temperatureUnit),
         )
     }
 }

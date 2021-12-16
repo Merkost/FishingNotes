@@ -2,10 +2,15 @@ package com.joesemper.fishing.domain
 
 import android.net.Uri
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.joesemper.fishing.compose.datastore.WeatherPreferences
+import com.joesemper.fishing.compose.ui.home.weather.PressureValues
+import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
+import com.joesemper.fishing.compose.ui.home.weather.getTemperature
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -23,6 +28,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.koin.androidx.compose.get
 
 class NewCatchViewModel(
     private val markersRepo: MarkersRepository,
@@ -145,5 +151,9 @@ class NewCatchViewModel(
             }
         }
 
+    }
+
+    fun getTemperatureForHour(hour: Int, to: String): String {
+        return getTemperature(weather.value!!.hourly[hour].temperature, TemperatureValues.valueOf(to))
     }
 }

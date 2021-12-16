@@ -189,6 +189,9 @@
     <string name="time_format">Формат времени</string>
     <string name="use_12h">Использовать 12-часовой формат</string>
     <string name="pressure_mm">мм рт. ст.</string>
+    <string name="pressure_pa">Па</string>
+    <string name="pressure_bar">Бар</string>
+    <string name="pressure_psi">Psi</string>
     <string name="choose_pressure_unit">Выберите единицу измерения давления</string>
     <string name="pressure_unit">Единица измерения давления</string>
     <string name="temperature_unit">Единица измерения температуры</string>

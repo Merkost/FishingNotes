@@ -190,7 +190,10 @@
     <string name="provide_location_permission">Provide location permission to the app</string>
     <string name="time_format">Time format</string>
     <string name="use_12h">Use 12 hours time format</string>
-    <string name="pressure_mm">mm Hg</string>
+    <string name="pressure_mm">mmHg</string>
+    <string name="pressure_pa">Pa</string>
+    <string name="pressure_bar">Bar</string>
+    <string name="pressure_psi">Psi</string>
     <string name="choose_pressure_unit">Choose pressure unit</string>
     <string name="pressure_unit">Pressure unit</string>
     <string name="temperature_unit">Temperature unit</string>

@@ -29,6 +29,8 @@ fun getRandomString(length: Int): String {
         .joinToString("")
 }
 
+fun String.onlyLetters() = all { it.isLetter() }
+
 fun Double.format(digits: Int) = "%.${digits}f".format(this)
 
 fun Double.roundTo(numFractionDigits: Int): Double {
