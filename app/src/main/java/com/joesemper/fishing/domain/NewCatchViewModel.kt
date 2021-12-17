@@ -2,23 +2,20 @@ package com.joesemper.fishing.domain
 
 import android.net.Uri
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.joesemper.fishing.compose.datastore.WeatherPreferences
-import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
 import com.joesemper.fishing.compose.ui.home.weather.getTemperature
 import com.joesemper.fishing.domain.viewstates.BaseViewState
+import com.joesemper.fishing.domain.viewstates.ResultWrapper
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.NewCatchWeather
 import com.joesemper.fishing.model.entity.raw.RawUserCatch
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
-import com.joesemper.fishing.model.mappers.getWeatherNameByIcon
 import com.joesemper.fishing.model.repository.app.CatchesRepository
 import com.joesemper.fishing.model.repository.app.MarkersRepository
 import com.joesemper.fishing.model.repository.app.WeatherRepository
@@ -28,8 +25,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import org.koin.androidx.compose.get
 
 class NewCatchViewModel(
     private val markersRepo: MarkersRepository,
@@ -40,6 +35,10 @@ class NewCatchViewModel(
     private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
     val uiState: StateFlow<BaseViewState>
         get() = _uiState
+
+    private val _weatherState = MutableStateFlow<ResultWrapper<WeatherForecast>>(ResultWrapper.Loading())
+    val weatherState: StateFlow<ResultWrapper<WeatherForecast>>
+        get() = _weatherState
 
     val noErrors = mutableStateOf(true)
 
@@ -64,23 +63,51 @@ class NewCatchViewModel(
     fun getWeather() {
         viewModelScope.launch {
             //weather.value?.let {
-              //  weather.value = null
+            //  weather.value = null
             //weather.value = it} ?:
             //TODO: Weather Loading State
             marker.value?.run {
-
-                weatherRepository.getWeather(latitude, longitude).collect {
-                    weather.value = it
+                weatherRepository.getWeather(latitude, longitude).collect { result ->
+                    when (result) {
+                        is ResultWrapper.Success<WeatherForecast> -> {
+                            weather.value = result.data
+                            _weatherState.value = ResultWrapper.Success(result.data)
+                        }
+                        is ResultWrapper.Loading -> {
+                            _weatherState.value = ResultWrapper.Loading()
+                        }
+                        is ResultWrapper.Error -> {
+                            _weatherState.value = ResultWrapper.Error(result.error)
+                        }
+                    }
                 }
             }
         }
     }
 
 
-    fun getHistoricalWeather() = runBlocking {
-        marker.value?.run {
-            weatherRepository.getHistoricalWeather(latitude, longitude, (date.value / 1000))
+    fun getHistoricalWeather() {
+        viewModelScope.launch {
+            marker.value?.run {
+                weatherRepository
+                    .getHistoricalWeather(latitude, longitude, (date.value / 1000))
+                    .collect { result ->
+                        when (result) {
+                            is ResultWrapper.Success<WeatherForecast> -> {
+                                weather.value = result.data
+                                _weatherState.value = ResultWrapper.Success(result.data)
+                            }
+                            is ResultWrapper.Loading -> {
+                                _weatherState.value = ResultWrapper.Loading()
+                            }
+                            is ResultWrapper.Error -> {
+                                _weatherState.value = ResultWrapper.Error(result.error)
+                            }
+                        }
+                    }
+            }
         }
+
     }
 
     fun addPhoto(uri: Uri) {
@@ -156,6 +183,9 @@ class NewCatchViewModel(
     }
 
     fun getTemperatureForHour(hour: Int, to: String): String {
-        return getTemperature(weather.value!!.hourly[hour].temperature, TemperatureValues.valueOf(to))
+        return getTemperature(
+            weather.value!!.hourly[hour].temperature,
+            TemperatureValues.valueOf(to)
+        )
     }
 }

@@ -7,6 +7,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
@@ -21,7 +22,9 @@ import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.getPressure
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
+import com.joesemper.fishing.domain.viewstates.ResultWrapper
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.utils.network.ConnectionState
 import com.joesemper.fishing.utils.network.currentConnectivityState
 import com.joesemper.fishing.utils.network.observeConnectivityAsFlow
@@ -45,7 +48,17 @@ fun MarkerInfoDialog(
 
     val weather = marker?.let {
         if (connectionState is ConnectionState.Available) {
-            return@let viewModel.getWeather(it.latitude, it.longitude).collectAsState(null)
+            val result by viewModel.getWeather(it.latitude, it.longitude)
+                .collectAsState(ResultWrapper.Success<WeatherForecast?>(null))
+
+            when (result) {
+                is ResultWrapper.Success<*> -> {
+                    return@let mutableStateOf((result as ResultWrapper.Success<WeatherForecast?>).data)
+                }
+                else -> return@let null
+
+            }
+
         } else {
             null
         }

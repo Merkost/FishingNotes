@@ -5,3 +5,4 @@ sealed class BaseViewState {
     class Error(val error: Throwable) : BaseViewState()
     class Loading(val progress: Int? = null) : BaseViewState()
 }
+

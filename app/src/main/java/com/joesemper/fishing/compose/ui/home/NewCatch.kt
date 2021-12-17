@@ -113,9 +113,7 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
     LaunchedEffect(key1 = viewModel.marker.value, key2 = viewModel.date.value) {
         viewModel.marker.value?.let {
             if (viewModel.date.value.toDate() != Date().time.toDate()) {
-                viewModel.getHistoricalWeather()?.collect {
-                    viewModel.weather.value = it
-                }
+                viewModel.getHistoricalWeather()
             } else {
                 viewModel.getWeather()
             }

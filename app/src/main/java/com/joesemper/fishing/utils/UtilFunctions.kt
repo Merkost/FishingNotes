@@ -4,9 +4,11 @@ import android.content.Context
 import android.widget.Toast
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.compose.ui.home.map.DEFAULT_ZOOM
+import com.joesemper.fishing.domain.viewstates.BaseViewState
 import java.util.*
 import kotlin.math.pow
 import kotlin.math.roundToInt
+
 
 const val MILLISECONDS_IN_DAY = 86400000L
 const val SECONDS_IN_DAY = 86400L
