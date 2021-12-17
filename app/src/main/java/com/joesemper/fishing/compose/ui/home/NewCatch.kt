@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -741,7 +742,7 @@ fun WeatherLayout(
                                 Icon(
                                     painter = painterResource(id = weatherIcon),
                                     contentDescription = "",
-                                    tint = MaterialTheme.colors.primary
+                                    tint = Color.Unspecified
                                 )
                             },
                             onClick = { weatherIconDialogState = true }
@@ -768,7 +769,7 @@ fun WeatherLayout(
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_thermometer),
                                 contentDescription = "",
-                                tint = MaterialTheme.colors.primary
+                                tint = Color.Unspecified
                             )
                         },
                         trailingIcon = {
@@ -804,7 +805,7 @@ fun WeatherLayout(
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_gauge),
                                 contentDescription = "",
-                                tint = MaterialTheme.colors.primary
+                                tint = Color.Unspecified
                             )
                         },
                         trailingIcon = {
@@ -838,7 +839,7 @@ fun WeatherLayout(
                                 modifier = Modifier.rotate(animatedWeather.hourly[hour].windDeg.toFloat()),
                                 painter = painterResource(id = R.drawable.ic_arrow_up),
                                 contentDescription = "",
-                                tint = MaterialTheme.colors.primary,
+                                tint = Color.Unspecified,
                             )
                         },
                         trailingIcon = { Text(text = stringResource(R.string.wind_speed_units)) },
@@ -865,7 +866,7 @@ fun WeatherLayout(
                                     id = getMoonIconByPhase(viewModel.moonPhase.value)
                                 ),
                                 contentDescription = "",
-                                tint = MaterialTheme.colors.primary
+                                tint = Color.Unspecified
                             )
                         },
                         onValueChange = { },
@@ -908,6 +909,7 @@ fun PickWeatherIconDialog(onIconSelected: (Int) -> Unit, onDismiss: () -> Unit) 
         "Choose weather icon:",
         content = {
             FlowRow(
+                modifier = Modifier.fillMaxWidth(),
                 mainAxisAlignment = FlowMainAxisAlignment.Center,
                 crossAxisAlignment = FlowCrossAxisAlignment.Center,
             ) {
@@ -920,16 +922,16 @@ fun PickWeatherIconDialog(onIconSelected: (Int) -> Unit, onDismiss: () -> Unit) 
 }
 
 @Composable
-fun WeatherIconItem(iconResource: Int, onIconSelected: () -> Unit) {
+fun WeatherIconItem(iconResource: Int, iconTint: Color = Color.Unspecified, onIconSelected: () -> Unit) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .padding(4.dp)
-            .clip(CircleShape)
+            .clip(MaterialTheme.shapes.medium)
             .requiredSize(50.dp)
             .clickable(onClick = onIconSelected)
     ) {
-        Icon(painterResource(iconResource), "", tint = MaterialTheme.colors.primary)
+        Icon(painterResource(iconResource), "", tint = iconTint)
     }
 }
 
