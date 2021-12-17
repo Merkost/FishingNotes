@@ -28,7 +28,7 @@ class WeatherRepositoryRetrofitImpl : WeatherRepository {
             val weather = getService().getWeather(latitude = lat, longitude = lon,
                 lang = locale)
             emit(ResultWrapper.Success(weather))
-        } catch (e: Error) {
+        } catch (e: Exception) {
             emit(ResultWrapper.Error(e))
         }
 
@@ -40,7 +40,7 @@ class WeatherRepositoryRetrofitImpl : WeatherRepository {
             val weather = getService().getHistoricalWeather(latitude = lat, longitude = lon, dt = date,
                 lang = locale)
             emit(ResultWrapper.Success(weather))
-        } catch (e: Error) {
+        } catch (e: Exception) {
             emit(ResultWrapper.Error(e))
         }
     }

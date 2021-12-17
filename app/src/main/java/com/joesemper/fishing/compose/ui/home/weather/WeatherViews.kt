@@ -125,7 +125,7 @@ fun WeatherPlaceSelectItem(
             horizontalArrangement = Arrangement.Center
         ) {
             WeatherAppBarText(
-                text = selectedPlace?.title ?: "Не удалось определить местоположение",
+                text = selectedPlace.title ?: "Не удалось определить местоположение",
                 textColor = Color.White
             )
             Icon(imageVector = Icons.Filled.ArrowDropDown, "", tint = Color.White)
@@ -249,17 +249,6 @@ fun WeatherPrimaryText(
 
 @Composable
 fun WeatherLoading(modifier: Modifier) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.clouds))
-    val progress by animateLottieCompositionAsState(composition)
-    LottieAnimation(
-        composition,
-        progress,
-        modifier = modifier
-    )
-}
-
-@Composable
-fun WeatherEmptyView(modifier: Modifier) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.empty_status))
     val progress by animateLottieCompositionAsState(
         composition,

@@ -45,6 +45,7 @@ import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
 import com.joesemper.fishing.compose.ui.theme.primaryWhiteColor
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.WeatherViewModel
+import com.joesemper.fishing.domain.viewstates.ResultWrapper
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.model.entity.weather.Hourly
@@ -99,6 +100,9 @@ fun WeatherScreen(
     }
 
     val scrollState = rememberScrollState()
+
+    val weatherState by viewModel.weatherState.collectAsState()
+
     val weatherPrefs: WeatherPreferences = get()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg.name)
     val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
@@ -131,74 +135,81 @@ fun WeatherScreen(
             }
         }
     ) {
-        AnimatedVisibility(viewModel.currentWeather.value != null) {
-            val forecast = viewModel.currentWeather.value!!
-            Column(
-                modifier = Modifier.verticalScroll(scrollState)
-            ) {
+        when (weatherState) {
+            is ResultWrapper.Success<WeatherForecast> -> {
 
-                CurrentWeather(
-                    forecast = forecast,
-                    pressureUnit = pressureUnit,
-                    temperatureUnit = temperatureUnit,
-                )
+            }
+            is ResultWrapper.Loading -> {
 
-                PressureChartItem(
-                    forecast = forecast.daily,
-                    pressureUnit = pressureUnit,
-                )
+            }
+            is ResultWrapper.Error -> {
+                //TODO: Error view
+            }
+        }
 
-                forecast.daily.forEachIndexed { index, daily ->
-                    DailyWeatherItem(
-                        forecast = daily,
+        Column(modifier = Modifier.fillMaxSize()) {
+            AnimatedVisibility(weatherState is ResultWrapper.Success/*viewModel.currentWeather.value != null*/) {
+                val forecast = viewModel.currentWeather.value!!
+                Column(
+                    modifier = Modifier.verticalScroll(scrollState)
+                ) {
+
+                    CurrentWeather(
+                        forecast = forecast,
+                        pressureUnit = pressureUnit,
                         temperatureUnit = temperatureUnit,
-                        onDailyWeatherClick = {
-                            navigateToDailyWeatherScreen(
-                                navController = navController,
-                                index = index,
-                                forecastDaily = forecast.daily
-                            )
-                        }
                     )
+
+                    PressureChartItem(
+                        forecast = forecast.daily,
+                        pressureUnit = pressureUnit,
+                    )
+
+                    forecast.daily.forEachIndexed { index, daily ->
+                        DailyWeatherItem(
+                            forecast = daily,
+                            temperatureUnit = temperatureUnit,
+                            onDailyWeatherClick = {
+                                navigateToDailyWeatherScreen(
+                                    navController = navController,
+                                    index = index,
+                                    forecastDaily = forecast.daily
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+
+            AnimatedVisibility (weatherState is ResultWrapper.Loading) {
+                Column (modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.SpaceAround,
+                horizontalAlignment = Alignment.CenterHorizontally) {
+
+                    if(checkPermission(context) && viewModel.markersList.value.isEmpty()) {
+                        SecondaryText(text = "No places yet. \nAdd new place now!")
+                        WeatherLoading(
+                            modifier = Modifier
+                                .size(250.dp)
+                            /*.align(Alignment.CenterHorizontally)*/
+                        )
+                        DefaultButtonOutlined(text = "Add", onClick = {
+                            navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${true}")
+                        })
+                    }
+                    else {
+                        WeatherLoading(
+                            modifier = Modifier
+                                .size(300.dp)
+                        )
+                    }
                 }
             }
         }
+
     }
 
-    AnimatedVisibility(viewModel.currentWeather.value == null) {
-        Column(
-            modifier = Modifier
-                .systemBarsPadding(true)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceAround,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (checkPermission(context) && viewModel.markersList.value.isEmpty()) {
-                SecondaryText(text = "No places yet. \nAdd new place now!")
-                WeatherEmptyView(
-                    modifier = Modifier
-                        .size(250.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
-                DefaultButtonOutlined(text = "Add", onClick = {
-                    navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${true}")
-                })
-                //TODO: No places yet view
-            } else {
-                /*WeatherLoading(
-                    modifier = Modifier
-                        .size(500.dp)
-                        .align(Alignment.CenterHorizontally)
-                )*/
-                WeatherEmptyView(
-                    modifier = Modifier
-                        .size(300.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
-                // Spacer(modifier = Modifier.size())
-            }
-        }
-    }
+
 }
 
 @Composable
