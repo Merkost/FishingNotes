@@ -5,6 +5,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
@@ -58,6 +59,7 @@ class NewCatchViewModel(
     val moonPhase = mutableStateOf(0.0f)
 
     val images = mutableStateListOf<Uri>()
+        get() = field as SnapshotStateList<Uri>
 
     fun getWeather() {
         viewModelScope.launch {

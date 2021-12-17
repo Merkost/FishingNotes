@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -35,6 +34,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -85,6 +85,7 @@ private val dateAndTime = Calendar.getInstance()
 private var isNull: Boolean = true
 
 object Constants {
+    const val MAX_PHOTOS: Int = 5
     private const val READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE = 111
     const val ITEM_ADD_PHOTO = "ITEM_ADD_PHOTO"
     const val ITEM_PHOTO = "ITEM_PHOTO"
@@ -154,9 +155,9 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(30.dp),
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxSize().verticalScroll(state = scrollState, enabled = true)
                 .padding(horizontal = 16.dp, vertical = 12.dp)
-                .verticalScroll(state = scrollState, enabled = true),
+
         ) {
 
             Places(stringResource(R.string.place), viewModel)  //Выпадающий список мест
@@ -183,7 +184,7 @@ fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>, upPress: () -> Unit
             if ((uiState as BaseViewState.Success<*>).data != null) {
                 Toast.makeText(
                     LocalContext.current,
-                    "Ваш улов успешно добавлен!",
+                    stringResource(R.string.catch_added_successfully),
                     Toast.LENGTH_SHORT
                 ).show()
                 upPress()
@@ -550,8 +551,9 @@ fun Photos(
             text = stringResource(id = R.string.photos)
         )
 
-        LazyRow(modifier = Modifier.fillMaxSize()) {
-            item { ItemAddPhoto() }
+        LazyRow(modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(vertical = 4.dp)) {
+            item { ItemAddPhoto(connectionState) }
             items(items = photos) {
                 ItemPhoto(
                     photo = it,
@@ -566,24 +568,34 @@ fun Photos(
 
 @ExperimentalPermissionsApi
 @Composable
-fun ItemAddPhoto() {
+fun ItemAddPhoto(connectionState: ConnectionState) {
     val viewModel: NewCatchViewModel = getViewModel()
     val permissionState = rememberPermissionState(Manifest.permission.READ_EXTERNAL_STORAGE)
     val addPhotoState = rememberSaveable { mutableStateOf(false) }
     val choosePhotoLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { value ->
             value.forEach {
-                viewModel.addPhoto(it)
+                    if (viewModel.images.size < Constants.MAX_PHOTOS) {
+                        viewModel.addPhoto(it)
+                    }
+
+                //TODO: set max photos
             }
         }
 
     Card(
-        modifier = Modifier
+        modifier = Modifier.padding(vertical = 4.dp).padding(end = 4.dp)
             .size(100.dp)
-            .padding(4.dp)
             .fillMaxSize()
             .clip(RoundedCornerShape(5.dp))
-            .clickable { addPhotoState.value = true },
+            .clickable {
+                when (connectionState) {
+                    is ConnectionState.Available -> {
+                        addPhotoState.value = true
+                    }
+                    is ConnectionState.Unavailable -> {}//TODO: no internet }
+                }
+            },
         elevation = 8.dp,
         border = BorderStroke(1.dp, MaterialTheme.colors.primary)
     ) {
@@ -596,8 +608,8 @@ fun ItemAddPhoto() {
             Icon(
                 painterResource(R.drawable.ic_baseline_add_photo_alternate_24), //Or we can use Icons.Default.Add
                 contentDescription = Constants.ITEM_ADD_PHOTO,
-                tint = MaterialTheme.colors.onSurface,
-                modifier = Modifier.size(48.dp)
+                tint = MaterialTheme.colors.primary,
+                modifier = Modifier.fillMaxSize().padding(10.dp)
             )
             SecondaryText(text = stringResource(id = R.string.add_photo))
         }
@@ -642,13 +654,11 @@ fun NewCatchWeatherItem(viewModel: NewCatchViewModel, connectionState: Connectio
                 icon = R.drawable.weather_sunny,
                 text = stringResource(id = R.string.weather)
             )
-            AnimatedVisibility(viewModel.weather.value != null) {
+            if (viewModel.weather.value != null) {
                 IconButton(onClick = { viewModel.getWeather() }) {
-                    //Text(stringResource(R.string.reset))
                     Icon(Icons.Default.Refresh, "", tint = MaterialTheme.colors.primary)
                 }
-            }
-
+            } else Spacer(modifier = Modifier.size(LocalViewConfiguration.current.minimumTouchTargetSize))
         }
 
         WeatherLayout(weather, viewModel, connectionState)
@@ -662,12 +672,16 @@ fun WeatherLayout(
     weatherForecast: WeatherForecast?,
     viewModel: NewCatchViewModel,
     connectionState: ConnectionState
-) =
+) {
+    val weatherSettings: WeatherPreferences = get()
+    val temperatureSettings by weatherSettings.getTemperatureUnit.collectAsState(
+        TemperatureValues.C.name
+    )
+    val pressureSettings by weatherSettings.getPressureUnit.collectAsState(PressureValues.mmHg.name)
+
     weatherForecast?.let { weather ->
 
-        val weatherSettings: WeatherPreferences = get()
-        val temperatureSettings by weatherSettings.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
-        val pressureSettings by weatherSettings.getPressureUnit.collectAsState(PressureValues.mmHg.name)
+
 
         var weatherIconDialogState by remember {
             mutableStateOf(false)
@@ -705,7 +719,12 @@ fun WeatherLayout(
         }
 
         var pressure by remember(hour, weather, pressureSettings) {
-            mutableStateOf(getPressure(weather.hourly[hour].pressure, PressureValues.valueOf(pressureSettings)))
+            mutableStateOf(
+                getPressure(
+                    weather.hourly[hour].pressure,
+                    PressureValues.valueOf(pressureSettings)
+                )
+            )
         }.also {
             it.value.toFloatOrNull()?.let { floatValue ->
                 viewModel.weatherToSave.value.pressureInMmhg =
@@ -715,9 +734,11 @@ fun WeatherLayout(
 
         var wind by remember(hour, weather) {
             mutableStateOf(weather.hourly[hour].windSpeed.toInt().toString())
-        }.also { it.value.toIntOrNull()?.let { intValue ->
-            viewModel.weatherToSave.value.windInMs = intValue
-        }  }
+        }.also {
+            it.value.toIntOrNull()?.let { intValue ->
+                viewModel.weatherToSave.value.windInMs = intValue
+            }
+        }
 
 
         if (weatherIconDialogState) PickWeatherIconDialog(
@@ -728,9 +749,7 @@ fun WeatherLayout(
             })
 
         Crossfade(targetState = weather) { animatedWeather ->
-            Column() {
-                Spacer(Modifier.size(8.dp))
-
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 //Main weather title
                 OutlinedTextField(
                     readOnly = false,
@@ -749,7 +768,9 @@ fun WeatherLayout(
                         )
                     },
                     onValueChange = { weatherDescription = it },
-                    isError = (weatherDescription.isEmpty()).apply { viewModel.noErrors.value = this },
+                    isError = (weatherDescription.isEmpty()).apply {
+                        viewModel.noErrors.value = this
+                    },
                     label = { Text(text = stringResource(id = R.string.weather)) },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(
@@ -758,10 +779,9 @@ fun WeatherLayout(
                     singleLine = true
                 )
 
-                Spacer(Modifier.size(8.dp))
-
                 //Temperature
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     OutlinedTextField(
                         readOnly = false,
                         value = temperature,
@@ -769,13 +789,14 @@ fun WeatherLayout(
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_thermometer),
                                 contentDescription = "",
-                                tint = Color.Unspecified
+                                tint = MaterialTheme.colors.primary
                             )
                         },
                         trailingIcon = {
                             Text(text = getTemperatureNameFromUnit(temperatureSettings))
                         },
-                        onValueChange = { newValue -> temperature = newValue
+                        onValueChange = { newValue ->
+                            temperature = newValue
                             /*temperature = when (newValue.toIntOrNull()) {
                                 null -> temperature
                                 //old value
@@ -795,8 +816,6 @@ fun WeatherLayout(
                         singleLine = true
                     )
 
-                    Spacer(modifier = Modifier.padding(4.dp))
-
                     //Pressure
                     OutlinedTextField(
                         readOnly = false,
@@ -805,7 +824,7 @@ fun WeatherLayout(
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_gauge),
                                 contentDescription = "",
-                                tint = Color.Unspecified
+                                tint = MaterialTheme.colors.primary
                             )
                         },
                         trailingIcon = {
@@ -814,7 +833,7 @@ fun WeatherLayout(
                                 text = getPressureNameFromUnit(pressureSettings)
                             )
                         },
-                        isError = (pressure.endsWith(".") || pressure == "")
+                        isError = (pressure.endsWith(".") || pressure.isEmpty() || pressure.toDoubleOrNull() == null)
                             .apply { viewModel.noErrors.value = this },
                         onValueChange = { pressure = it },
                         label = { Text(text = stringResource(R.string.pressure)) },
@@ -827,10 +846,9 @@ fun WeatherLayout(
                     )
                 }
 
-                Spacer(Modifier.size(8.dp))
-
                 //Wind and Moon
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     OutlinedTextField(
                         readOnly = false,
                         value = wind,
@@ -839,7 +857,7 @@ fun WeatherLayout(
                                 modifier = Modifier.rotate(animatedWeather.hourly[hour].windDeg.toFloat()),
                                 painter = painterResource(id = R.drawable.ic_arrow_up),
                                 contentDescription = "",
-                                tint = Color.Unspecified,
+                                tint = MaterialTheme.colors.primary,
                             )
                         },
                         trailingIcon = { Text(text = stringResource(R.string.wind_speed_units)) },
@@ -855,8 +873,6 @@ fun WeatherLayout(
                         singleLine = true
                     )
 
-                    Spacer(modifier = Modifier.padding(4.dp))
-
                     OutlinedTextField(
                         readOnly = true,
                         value = (viewModel.moonPhase.value * 100).toInt().toString(),
@@ -866,7 +882,7 @@ fun WeatherLayout(
                                     id = getMoonIconByPhase(viewModel.moonPhase.value)
                                 ),
                                 contentDescription = "",
-                                tint = Color.Unspecified
+                                tint = MaterialTheme.colors.primary
                             )
                         },
                         onValueChange = { },
@@ -883,7 +899,6 @@ fun WeatherLayout(
                     )
                 }
             }
-
         }
     } ?: when (connectionState) {
         is ConnectionState.Available -> {
@@ -892,7 +907,12 @@ fun WeatherLayout(
                     modifier = Modifier.padding(8.dp),
                     text = stringResource(R.string.select_place_for_weather)
                 )
-            } else { CircularProgressIndicator() }
+            } else {
+                Row(modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                ) { CircularProgressIndicator() }
+            }
 
         }
         is ConnectionState.Unavailable -> {
@@ -902,6 +922,7 @@ fun WeatherLayout(
             )
         }
     }
+}
 
 @Composable
 fun PickWeatherIconDialog(onIconSelected: (Int) -> Unit, onDismiss: () -> Unit) {
@@ -922,7 +943,11 @@ fun PickWeatherIconDialog(onIconSelected: (Int) -> Unit, onDismiss: () -> Unit) 
 }
 
 @Composable
-fun WeatherIconItem(iconResource: Int, iconTint: Color = Color.Unspecified, onIconSelected: () -> Unit) {
+fun WeatherIconItem(
+    iconResource: Int,
+    iconTint: Color = Color.Unspecified,
+    onIconSelected: () -> Unit
+) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier

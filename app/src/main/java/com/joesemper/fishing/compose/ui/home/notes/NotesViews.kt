@@ -56,9 +56,9 @@ fun ItemPhoto(
 
 //    Crossfade(photo) { pic ->
     Box(
-        modifier = Modifier
+        modifier = Modifier.padding(4.dp)
             .size(100.dp)
-            .padding(4.dp)
+
     ) {
 
         AsyncImage(

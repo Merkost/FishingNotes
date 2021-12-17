@@ -219,6 +219,7 @@
     <string name="select_place_for_weather">Select a place to load weather!</string>
     <string name="no_internet">No internet connection</string>
     <string name="reset">Сбросить</string>
+    <string name="catch_added_successfully">Ваш улов успешно добавлен!</string>
 
 
 </resources>
