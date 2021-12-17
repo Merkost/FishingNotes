@@ -1,10 +1,10 @@
 package com.joesemper.fishing.model.mappers
 
-import com.joesemper.fishing.model.entity.content.MapMarker
-import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.utils.getCurrentUserId
 import com.joesemper.fishing.utils.getNewMarkerId
+import java.util.*
 
 class MapMarkerMapper {
 
@@ -17,7 +17,8 @@ class MapMarkerMapper {
             title = newMarker.title,
             description = newMarker.description,
             markerColor = newMarker.markerColor,
-            isPublic = newMarker.isPublic
+            isPublic = newMarker.isPublic,
+            dateOfCreation = Date().time
         )
     }
 }

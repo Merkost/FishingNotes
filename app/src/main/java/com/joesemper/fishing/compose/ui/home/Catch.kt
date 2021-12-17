@@ -32,6 +32,7 @@ import coil.compose.AsyncImageContent
 import coil.compose.AsyncImagePainter
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
+import com.joesemper.fishing.compose.ui.home.notes.ItemUserPlace
 import com.joesemper.fishing.compose.ui.home.weather.*
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.UserCatchViewModel
@@ -112,10 +113,15 @@ fun CatchContent(
         ) {
 
             CatchTitleView(catch = catch)
+
             CatchPhotosView(catch = catch)
-            CatchPlaceView(place = mapMarker)
-            CatchNoteView(catch = catch)
+
+            mapMarker?.let { ItemUserPlace(place = it, userPlaceClicked = { }) }
+
+            DefaultNoteView(note = catch.description)
+
             WayOfFishingView(catch = catch)
+
             CatchWeatherView(catch = catch)
         }
     }

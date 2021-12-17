@@ -20,6 +20,7 @@ import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.compose.ui.home.*
+import com.joesemper.fishing.compose.ui.home.place.UserPlaceScreen
 import com.joesemper.fishing.compose.ui.home.weather.WeatherDaily
 import com.joesemper.fishing.compose.ui.login.LoginScreen
 import kotlinx.coroutines.InternalCoroutinesApi

@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -33,9 +32,13 @@ import coil.compose.AsyncImagePainter
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.*
-import com.joesemper.fishing.compose.ui.theme.*
+import com.joesemper.fishing.compose.ui.theme.cardColor
+import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.utils.time.toDateTextMonth
 import com.joesemper.fishing.utils.time.toTime
 import org.koin.androidx.compose.get
 
@@ -280,19 +283,18 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
     DefaultCardClickable(onClick = { userPlaceClicked(place) }) {
         ConstraintLayout(
             modifier = Modifier
-                .padding(16.dp)
                 .wrapContentHeight()
                 .fillMaxWidth()
         ) {
-            val (icon, title, description, amount, fishIcon, noteIcon) = createRefs()
+            val (icon, title, amount, fishIcon, date, navigateButton) = createRefs()
 
             Icon(
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(32.dp)
                     .constrainAs(icon) {
                         top.linkTo(title.top)
-                        bottom.linkTo(title.bottom)
-                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        bottom.linkTo(date.bottom)
+                        absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
                     },
                 painter = painterResource(R.drawable.ic_baseline_location_on_24),
                 contentDescription = stringResource(R.string.place),
@@ -301,48 +303,41 @@ fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Uni
 
             PrimaryTextBold(
                 modifier = Modifier.constrainAs(title) {
-                    linkTo(icon.absoluteRight, amount.absoluteLeft, startMargin = 8.dp, bias = 0f)
-                    top.linkTo(parent.top)
+                    absoluteLeft.linkTo(icon.absoluteRight, 8.dp)
+                    absoluteRight.linkTo(navigateButton.absoluteLeft, 8.dp)
+                    top.linkTo(parent.top, 16.dp)
+                    width = Dimension.fillToConstraints
                 },
                 text = place.title
             )
 
+            DefaultIconButton(
+                modifier = Modifier.constrainAs(navigateButton) {
+                    top.linkTo(title.top)
+                    bottom.linkTo(date.bottom)
+                    absoluteRight.linkTo(parent.absoluteRight, 8.dp)
+                },
+                icon = painterResource(id = R.drawable.ic_place_on_map),
+                onClick = { }
+            )
+
+            SupportText(
+                modifier = Modifier.constrainAs(date) {
+                    top.linkTo(title.bottom, 4.dp)
+                    bottom.linkTo(parent.bottom, 16.dp)
+                    absoluteLeft.linkTo(title.absoluteLeft)
+                },
+                text = place.dateOfCreation.toDateTextMonth()
+            )
+
             ItemCounter(
                 modifier = Modifier.constrainAs(fishIcon) {
-                    bottom.linkTo(title.bottom)
-                    top.linkTo(title.top)
-                    absoluteRight.linkTo(parent.absoluteRight)
+                    bottom.linkTo(date.bottom)
+                    top.linkTo(date.top)
+                    absoluteLeft.linkTo(date.absoluteRight, 8.dp)
                 },
-                text = place.catchesCount.toString(),
+                count = place.catchesCount,
                 icon = R.drawable.ic_fish
-            )
-
-            Icon(
-                modifier = Modifier
-                    .size(24.dp)
-                    .constrainAs(noteIcon) {
-                        top.linkTo(title.bottom, 8.dp)
-                        absoluteLeft.linkTo(parent.absoluteLeft)
-                    },
-                painter = painterResource(id = R.drawable.ic_baseline_sticky_note_2_24),
-                contentDescription = null,
-                tint = secondaryTextColor
-            )
-
-            PrimaryTextSmall(
-                modifier = Modifier.constrainAs(description) {
-                    top.linkTo(noteIcon.top)
-                    absoluteLeft.linkTo(noteIcon.absoluteRight, 8.dp)
-                    absoluteRight.linkTo(fishIcon.absoluteRight)
-                    width = Dimension.fillToConstraints
-                },
-                maxLines = 3,
-                textAlign = TextAlign.Start,
-                text = if (place.description.isNotBlank()) {
-                    place.description
-                } else {
-                    stringResource(id = R.string.no_description)
-                }
             )
         }
     }
@@ -614,17 +609,17 @@ fun ItemPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Unit) {
 @Composable
 fun ItemCounter(
     modifier: Modifier = Modifier,
-    text: String,
+    count: Int,
     icon: Int
 ) {
     Row(modifier = modifier.padding(2.dp)) {
         Icon(
+            modifier = Modifier.size(24.dp),
             tint = secondaryFigmaTextColor,
             painter = painterResource(id = icon),
-            contentDescription = "",
-            modifier = Modifier.padding(horizontal = 4.dp)
+            contentDescription = null,
         )
-        SecondaryText(text = text)
+        SupportText(text = " x $count")
     }
 
 }
