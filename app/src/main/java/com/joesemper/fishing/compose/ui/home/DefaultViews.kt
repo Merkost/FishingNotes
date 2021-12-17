@@ -844,7 +844,6 @@ fun DefaultNoteView(
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(8.dp)
     ) {
         ConstraintLayout(
             modifier = Modifier
@@ -874,13 +873,14 @@ fun DefaultNoteView(
 
             if (note.isBlank()) {
                 SecondaryText(
-                    modifier = Modifier.constrainAs(text) {
-                        top.linkTo(subtitle.bottom, 16.dp)
-                        bottom.linkTo(parent.bottom, 16.dp)
-                        absoluteLeft.linkTo(subtitle.absoluteLeft)
-                        absoluteRight.linkTo(editButton.absoluteRight)
-                        width = Dimension.fillToConstraints
-                    },
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .constrainAs(text) {
+                            top.linkTo(subtitle.bottom, 16.dp)
+                            absoluteLeft.linkTo(subtitle.absoluteLeft)
+                            absoluteRight.linkTo(editButton.absoluteRight)
+                            width = Dimension.fillToConstraints
+                        },
                     text = stringResource(id = R.string.no_description)
                 )
             } else {

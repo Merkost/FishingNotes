@@ -31,7 +31,6 @@ fun UserPlaceScreen(navController: NavController, place: UserMapMarker?) {
     val viewModel = getViewModel<UserPlaceViewModel>()
     place?.let { viewModel.marker.value = it }
 
-
     Scaffold(
         topBar = {
             PlaceTopBar(navController = navController)

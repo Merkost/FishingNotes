@@ -279,8 +279,15 @@ fun ItemUserCatch(
 }
 
 @Composable
-fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Unit) {
-    DefaultCardClickable(onClick = { userPlaceClicked(place) }) {
+fun ItemUserPlace(
+    modifier: Modifier = Modifier,
+    place: UserMapMarker,
+    userPlaceClicked: (UserMapMarker) -> Unit
+) {
+    DefaultCardClickable(
+        modifier = modifier,
+        onClick = { userPlaceClicked(place) }
+    ) {
         ConstraintLayout(
             modifier = Modifier
                 .wrapContentHeight()

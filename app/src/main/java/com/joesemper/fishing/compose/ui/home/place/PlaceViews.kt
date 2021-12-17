@@ -170,15 +170,23 @@ fun PlaceTabsContentView(
         count = tabs.size,
         verticalAlignment = Alignment.Top
     ) { page ->
-        when (page) {
-            0 -> PlaceCatchesView(
-                catches = catches,
-                userCatchClicked = { onCatchItemClick(it, navController) }
-            )
-            1 -> DefaultNoteView(
-                note = note
-            )
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Top
+        ) {
+            when (page) {
+                0 -> PlaceCatchesView(
+                    catches = catches,
+                    userCatchClicked = { onCatchItemClick(it, navController) }
+                )
+                1 -> DefaultNoteView(
+                    modifier = Modifier.padding(8.dp),
+                    note = note
+                )
+            }
         }
+
+
     }
 }
 
