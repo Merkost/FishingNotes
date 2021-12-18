@@ -23,8 +23,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.core.net.toUri
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -32,6 +32,7 @@ import coil.compose.AsyncImageContent
 import coil.compose.AsyncImagePainter
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
+import com.joesemper.fishing.compose.ui.home.notes.ItemUserPlace
 import com.joesemper.fishing.compose.ui.home.weather.*
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.UserCatchViewModel
@@ -39,6 +40,7 @@ import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
+import com.joesemper.fishing.utils.network.ConnectionState
 import com.joesemper.fishing.utils.network.currentConnectivityState
 import com.joesemper.fishing.utils.network.observeConnectivityAsFlow
 import com.joesemper.fishing.utils.time.toDateTextMonth
@@ -97,6 +99,11 @@ fun CatchContent(
             mutableStateOf<UserMapMarker?>(null)
         }
 
+        val context = LocalContext.current
+
+        val connectionState by context.observeConnectivityAsFlow()
+            .collectAsState(initial = context.currentConnectivityState)
+
         viewModel.getMapMarker(catch.userMarkerId)
             .collectAsState(initial = UserMapMarker()).value?.let {
                 mapMarker = it
@@ -106,16 +113,27 @@ fun CatchContent(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
                 .fillMaxSize()
-                .padding(vertical = 16.dp),
+                .padding(vertical = 16.dp, horizontal = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
             CatchTitleView(catch = catch)
-            CatchPhotosView(catch = catch)
-            CatchPlaceView(place = mapMarker)
-            CatchNoteView(catch = catch)
+
+            if (catch.downloadPhotoLinks.isNotEmpty() || connectionState is ConnectionState.Available) {
+                CatchPhotosView(photos = catch.downloadPhotoLinks)
+            }
+
+            mapMarker?.let {
+                ItemUserPlace(
+                    place = it,
+                    userPlaceClicked = { })
+            }
+
+            DefaultNoteView(note = catch.description)
+
             WayOfFishingView(catch = catch)
+
             CatchWeatherView(catch = catch)
         }
     }
@@ -128,45 +146,52 @@ fun CatchTitleView(
 ) {
     ConstraintLayout(
         modifier = modifier
-            .fillMaxWidth()
             .wrapContentHeight()
+            .fillMaxWidth()
     ) {
+        val (icon, title, editButton, amount) = createRefs()
 
-        val (title, amount, weight, weightUnit) = createRefs()
-
-        createHorizontalChain(title, weight, weightUnit, chainStyle = ChainStyle.Packed)
+        Icon(
+            modifier = Modifier
+                .size(32.dp)
+                .constrainAs(icon) {
+                    top.linkTo(title.top)
+                    bottom.linkTo(amount.bottom)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
+                },
+            painter = painterResource(R.drawable.ic_fishing),
+            contentDescription = stringResource(R.string.place),
+            tint = secondaryTextColor
+        )
 
         HeaderText(
+            modifier = Modifier.constrainAs(title) {
+                absoluteLeft.linkTo(icon.absoluteRight, 16.dp)
+                absoluteRight.linkTo(parent.absoluteRight, 8.dp)
+                top.linkTo(parent.top)
+                width = Dimension.fillToConstraints
+            },
+            text = "${catch.fishType} ${catch.fishWeight} ${stringResource(id = R.string.kg)}"
+        )
+
+        DefaultIconButton(
             modifier = Modifier
-                .padding(horizontal = 4.dp)
-                .constrainAs(title) {
-                    top.linkTo(parent.top)
+                .size(32.dp)
+                .constrainAs(editButton) {
+                    top.linkTo(title.top)
+                    bottom.linkTo(amount.bottom)
+                    absoluteRight.linkTo(parent.absoluteRight, 8.dp)
                 },
-            text = catch.fishType
+            icon = painterResource(id = R.drawable.ic_baseline_edit_24),
+            onClick = { }
         )
 
         SecondaryText(
             modifier = Modifier.constrainAs(amount) {
                 top.linkTo(title.bottom, 2.dp)
                 absoluteLeft.linkTo(title.absoluteLeft)
-                absoluteRight.linkTo(weightUnit.absoluteRight)
             },
             text = "${stringResource(id = R.string.amount)}: ${catch.fishAmount} ${stringResource(id = R.string.pc)}"
-        )
-
-        HeaderTextSecondary(
-            modifier = Modifier.constrainAs(weightUnit) {
-                top.linkTo(parent.top)
-            },
-            text = stringResource(id = R.string.kg)
-        )
-
-        HeaderText(
-            modifier = Modifier.constrainAs(weight) {
-                top.linkTo(weightUnit.top)
-                absoluteRight.linkTo(weightUnit.absoluteLeft, 2.dp)
-            },
-            text = catch.fishWeight.toString()
         )
     }
 }
@@ -176,47 +201,25 @@ fun CatchTitleView(
 @Composable
 fun CatchPhotosView(
     modifier: Modifier = Modifier,
-    catch: UserCatch
+    photos: List<String>
 ) {
-    val context = LocalContext.current
-    val connectionState by context.observeConnectivityAsFlow()
-        .collectAsState(initial = context.currentConnectivityState)
-
-    Column(
-        modifier = Modifier
+    Row(
+        modifier = modifier
             .padding(vertical = 16.dp, horizontal = 8.dp)
             .fillMaxWidth()
-            .wrapContentHeight(),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .wrapContentHeight()
+            .horizontalScroll(rememberScrollState()),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
     ) {
-
-        SubtitleWithIcon(
-            modifier = Modifier.padding(vertical = 8.dp, horizontal = 8.dp),
-            icon = R.drawable.ic_baseline_image_24,
-            text = stringResource(id = R.string.photos)
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .horizontalScroll(rememberScrollState()),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-        ) {
-            if (catch.downloadPhotoLinks.isNotEmpty()) {
-                catch.downloadPhotoLinks.forEach {
-                    ItemCatchPhotoView(
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                        photo = it.toUri()
-                    )
-                }
-            } else {
-                SecondaryTextSmall(text = stringResource(id = R.string.no_photo_selected))
-            }
+        photos.forEach {
+            ItemCatchPhotoView(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                photo = it.toUri()
+            )
         }
     }
+
 }
 
 @ExperimentalAnimationApi
@@ -253,113 +256,11 @@ fun ItemCatchPhotoView(
 }
 
 @Composable
-fun CatchNoteView(
-    modifier: Modifier = Modifier,
-    catch: UserCatch
-) {
-    DefaultCard(modifier = modifier.padding(horizontal = 8.dp)) {
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 16.dp)
-                .fillMaxWidth()
-                .wrapContentHeight(),
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            SubtitleWithIcon(
-                modifier = Modifier,
-                icon = R.drawable.ic_baseline_sticky_note_2_24,
-                text = stringResource(id = R.string.note)
-            )
-
-            if (catch.description.isNotBlank()) {
-                PrimaryText(
-                    modifier = Modifier.padding(horizontal = 40.dp),
-                    text = catch.description
-                )
-            } else {
-                SecondaryText(
-                    modifier = Modifier.padding(horizontal = 40.dp),
-                    text = stringResource(id = R.string.no_description)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun CatchPlaceView(
-    modifier: Modifier = Modifier,
-    place: UserMapMarker?
-) {
-    place?.let {
-        DefaultCard(modifier = modifier.padding(horizontal = 8.dp)) {
-            ConstraintLayout(
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 16.dp)
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-            ) {
-
-                val (navigationIcon, placeTitle, placeIcon, description) = createRefs()
-
-                Icon(
-                    modifier = Modifier.constrainAs(placeIcon) {
-                        top.linkTo(placeTitle.top)
-                        bottom.linkTo(description.bottom)
-                        absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-                    },
-                    painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                    contentDescription = stringResource(id = R.string.location),
-                    tint = Color(place.markerColor)
-                )
-
-                PrimaryText(
-                    modifier = Modifier.constrainAs(placeTitle) {
-                        top.linkTo(parent.top)
-                        absoluteLeft.linkTo(placeIcon.absoluteRight, 8.dp)
-                    },
-                    text = place.title
-                )
-
-                SecondaryText(
-                    modifier = Modifier.constrainAs(description) {
-                        top.linkTo(placeTitle.bottom, 2.dp)
-                        absoluteLeft.linkTo(placeTitle.absoluteLeft)
-                    },
-                    text = if (place.description.isBlank()) {
-                        stringResource(id = R.string.no_description)
-                    } else {
-                        place.description
-                    }
-
-                )
-
-                IconButton(
-                    modifier = Modifier.constrainAs(navigationIcon) {
-                        top.linkTo(placeTitle.top)
-                        bottom.linkTo(description.bottom)
-                        absoluteRight.linkTo(parent.absoluteRight, 8.dp)
-                    },
-                    onClick = { /*TODO*/ }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_map_24),
-                        contentDescription = stringResource(id = R.string.map),
-                        tint = secondaryTextColor
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun WayOfFishingView(
     modifier: Modifier = Modifier,
     catch: UserCatch
 ) {
-    DefaultCard(modifier = modifier.padding(horizontal = 8.dp)) {
+    DefaultCard(modifier = modifier) {
         ConstraintLayout(
             modifier = Modifier
                 .padding(horizontal = 8.dp, vertical = 16.dp)
@@ -372,7 +273,7 @@ fun WayOfFishingView(
             SubtitleWithIcon(
                 modifier = Modifier.constrainAs(subtitle) {
                     top.linkTo(parent.top)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
                 },
                 icon = R.drawable.ic_hook,
                 text = stringResource(id = R.string.way_of_fishing)
@@ -452,7 +353,7 @@ fun CatchWeatherView(
     val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
 
     DefaultCard(
-        modifier = modifier.padding(horizontal = 8.dp)
+        modifier = modifier
     ) {
         ConstraintLayout(
             modifier = Modifier
@@ -468,7 +369,7 @@ fun CatchWeatherView(
             SubtitleWithIcon(
                 modifier = Modifier.constrainAs(subtitle) {
                     top.linkTo(parent.top)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
                 },
                 icon = R.drawable.weather_sunny,
                 text = stringResource(id = R.string.weather)

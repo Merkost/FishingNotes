@@ -22,6 +22,14 @@ sealed class TabItem(var icon: Int, var titleRes: Int, var screen: ComposableFun
         UserCatchesScreen(navController = navController)
     })
 
+    @ExperimentalFoundationApi
+    @ExperimentalAnimationApi
+    object PlaceCatches : TabItem(R.drawable.ic_fish, R.string.catches, { _ -> })
+
+    @ExperimentalFoundationApi
+    @ExperimentalAnimationApi
+    object Note : TabItem(R.drawable.ic_baseline_sticky_note_2_24, R.string.note, { _ -> })
+
 //    class ForADay(weatherForecast: WeatherForecast) :
 //        TabItem(R.drawable.ic_baseline_today_24, R.string.for_today, { navController ->
 //            WeatherForADay(weather = weatherForecast)

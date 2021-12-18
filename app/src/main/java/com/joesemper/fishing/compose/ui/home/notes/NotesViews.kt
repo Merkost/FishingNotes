@@ -24,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.core.net.toUri
 import coil.compose.AsyncImage
 import coil.compose.AsyncImageContent
@@ -56,9 +57,9 @@ fun ItemPhoto(
 
 //    Crossfade(photo) { pic ->
     Box(
-        modifier = Modifier.padding(4.dp)
+        modifier = Modifier
             .size(100.dp)
-
+            .padding(4.dp)
     ) {
 
         AsyncImage(
@@ -277,61 +278,73 @@ fun ItemUserCatch(
 }
 
 @Composable
-fun ItemUserPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Unit) {
-    DefaultCardClickable(onClick = { userPlaceClicked(place) }) {
+fun ItemUserPlace(
+    modifier: Modifier = Modifier,
+    place: UserMapMarker,
+    userPlaceClicked: (UserMapMarker) -> Unit
+) {
+    DefaultCardClickable(
+        modifier = modifier,
+        onClick = { userPlaceClicked(place) }
+    ) {
         ConstraintLayout(
             modifier = Modifier
-                .height(75.dp)
+                .wrapContentHeight()
                 .fillMaxWidth()
-                .padding(5.dp)
         ) {
-            val (icon, title, description, amount, fishIcon) = createRefs()
+            val (icon, title, amount, fishIcon, date, navigateButton) = createRefs()
 
             Icon(
                 modifier = Modifier
-                    .padding(5.dp)
-                    .padding(horizontal = 5.dp)
                     .size(32.dp)
                     .constrainAs(icon) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        top.linkTo(title.top)
+                        bottom.linkTo(date.bottom)
+                        absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
                     },
                 painter = painterResource(R.drawable.ic_baseline_location_on_24),
                 contentDescription = stringResource(R.string.place),
                 tint = Color(place.markerColor)
             )
 
-            PrimaryText(
+            PrimaryTextBold(
                 modifier = Modifier.constrainAs(title) {
-                    linkTo(icon.absoluteRight, amount.absoluteLeft, bias = 0f)
-                    top.linkTo(parent.top)
+                    absoluteLeft.linkTo(icon.absoluteRight, 8.dp)
+                    absoluteRight.linkTo(navigateButton.absoluteLeft, 8.dp)
+                    top.linkTo(parent.top, 16.dp)
+                    width = Dimension.fillToConstraints
                 },
                 text = place.title
             )
 
-            /*ItemCounter(
-                modifier = Modifier.constrainAs(fishIcon) {
-                    bottom.linkTo(parent.bottom)
-                    absoluteRight.linkTo(parent.absoluteRight)
+            DefaultIconButton(
+                modifier = Modifier.constrainAs(navigateButton) {
+                    top.linkTo(title.top)
+                    bottom.linkTo(date.bottom)
+                    absoluteRight.linkTo(parent.absoluteRight, 8.dp)
                 },
-                text = "0",
-                icon = R.drawable.ic_fish
-            )*/
-
-            SecondaryText(
-                modifier = Modifier.constrainAs(description) {
-                    top.linkTo(title.bottom)
-                    absoluteLeft.linkTo(title.absoluteLeft)
-                    bottom.linkTo(parent.bottom, 4.dp)
-                },
-                text = if (place.description.isNotBlank()) {
-                    place.description
-                } else {
-                    stringResource(id = R.string.no_description)
-                }
+                icon = painterResource(id = R.drawable.ic_place_on_map),
+                onClick = { }
             )
 
+            SupportText(
+                modifier = Modifier.constrainAs(date) {
+                    top.linkTo(title.bottom, 4.dp)
+                    bottom.linkTo(parent.bottom, 16.dp)
+                    absoluteLeft.linkTo(title.absoluteLeft)
+                },
+                text = place.dateOfCreation.toDateTextMonth()
+            )
+
+            ItemCounter(
+                modifier = Modifier.constrainAs(fishIcon) {
+                    bottom.linkTo(date.bottom)
+                    top.linkTo(date.top)
+                    absoluteLeft.linkTo(date.absoluteRight, 8.dp)
+                },
+                count = place.catchesCount,
+                icon = R.drawable.ic_fish
+            )
         }
     }
 }
@@ -602,17 +615,17 @@ fun ItemPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Unit) {
 @Composable
 fun ItemCounter(
     modifier: Modifier = Modifier,
-    text: String,
+    count: Int,
     icon: Int
 ) {
     Row(modifier = modifier.padding(2.dp)) {
         Icon(
+            modifier = Modifier.size(24.dp),
             tint = secondaryFigmaTextColor,
             painter = painterResource(id = icon),
-            contentDescription = "",
-            modifier = Modifier.padding(horizontal = 4.dp)
+            contentDescription = null,
         )
-        SecondaryText(text = text)
+        SupportText(text = " x $count")
     }
 
 }

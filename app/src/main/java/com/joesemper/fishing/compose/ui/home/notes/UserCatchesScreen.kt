@@ -3,7 +3,6 @@ package com.joesemper.fishing.compose.ui.home.notes
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Scaffold
@@ -46,20 +45,22 @@ fun UserCatchesScreen(
 @ExperimentalAnimationApi
 @Composable
 fun UserCatches(
+    modifier: Modifier = Modifier,
     catches: List<UserCatch>,
     userCatchClicked: (UserCatch) -> Unit
 ) {
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    LazyColumn(modifier = modifier) {
         when {
             catches.isNotEmpty() -> {
                 getDatesList(catches).forEach { catchDate ->
                     stickyHeader {
                         ItemDate(text = catchDate)
                     }
-                    items(items = catches
-                        .filter { userCatch ->
-                            userCatch.date.toDateTextMonth() == catchDate
-                        }
+                    items(
+                        items = catches
+                            .filter { userCatch ->
+                                userCatch.date.toDateTextMonth() == catchDate
+                            }
                         .sortedByDescending { it.date },
                         key = {
                             it
@@ -85,7 +86,7 @@ fun UserCatches(
     }
 }
 
-private fun getDatesList(catches: List<UserCatch>): List<String> {
+fun getDatesList(catches: List<UserCatch>): List<String> {
     val dates = mutableListOf<String>()
     catches.sortedByDescending { it.date }.forEach { userCatch ->
         val date = userCatch.date.toDateTextMonth()

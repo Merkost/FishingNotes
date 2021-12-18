@@ -5,6 +5,7 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
@@ -27,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -34,6 +36,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -41,13 +44,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
-import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
+import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.launch
@@ -156,8 +158,8 @@ fun DefaultCard(
     content: @Composable () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(24.dp),
-        elevation = 8.dp,
+        shape = MaterialTheme.shapes.large,
+        elevation = 6.dp,
         backgroundColor = MaterialTheme.colors.surface,
         modifier = modifier
             .zIndex(1.0f)
@@ -177,8 +179,8 @@ fun DefaultCardClickable(
     content: @Composable () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(24.dp),
-        elevation = 8.dp,
+        shape = MaterialTheme.shapes.large,
+        elevation = 6.dp,
         backgroundColor = MaterialTheme.colors.surface,
         onClick = onClick,
         modifier = modifier
@@ -288,7 +290,7 @@ fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
             contentDescription = stringResource(R.string.place),
             tint = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
             modifier = Modifier
-                .padding(horizontal = 8.dp)
+                .padding(end = 8.dp)
                 .size(24.dp)
         )
         SubtitleText(text = text)
@@ -388,6 +390,7 @@ fun PrimaryTextSmall(
     fontWeight: FontWeight? = null,
     textAlign: TextAlign? = null,
     text: String,
+    maxLines: Int = Int.MAX_VALUE,
     textColor: Color = MaterialTheme.colors.onSurface
 ) {
     Text(
@@ -396,6 +399,7 @@ fun PrimaryTextSmall(
         fontSize = 14.sp,
         fontWeight = fontWeight,
         textAlign = textAlign,
+        maxLines = maxLines,
         color = textColor,
         text = text
     )
@@ -461,7 +465,8 @@ fun SecondaryTextSmall(
         fontSize = 14.sp,
         color = textColor,
         text = text,
-        maxLines = maxLines
+        maxLines = maxLines,
+        overflow = TextOverflow.Ellipsis
     )
 }
 
@@ -835,6 +840,89 @@ fun FabWithMenu(
 }
 
 @Composable
+fun DefaultNoteView(
+    modifier: Modifier = Modifier,
+    note: String,
+) {
+    DefaultCard(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+    ) {
+        ConstraintLayout(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+        ) {
+            val (subtitle, text, editButton) = createRefs()
+
+            SubtitleWithIcon(
+                modifier = Modifier.constrainAs(subtitle) {
+                    top.linkTo(parent.top, 16.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                },
+                icon = R.drawable.ic_baseline_sticky_note_2_24,
+                text = stringResource(id = R.string.note)
+            )
+
+            DefaultIconButton(
+                modifier = Modifier.constrainAs(editButton) {
+                    top.linkTo(subtitle.top)
+                    bottom.linkTo(subtitle.bottom)
+                    absoluteRight.linkTo(parent.absoluteRight, 8.dp)
+                },
+                icon = painterResource(id = R.drawable.ic_baseline_edit_24),
+                onClick = { }
+            )
+
+            if (note.isBlank()) {
+                SecondaryText(
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .constrainAs(text) {
+                            top.linkTo(subtitle.bottom, 16.dp)
+                            absoluteLeft.linkTo(subtitle.absoluteLeft)
+                            absoluteRight.linkTo(editButton.absoluteRight)
+                            width = Dimension.fillToConstraints
+                        },
+                    text = stringResource(id = R.string.no_description)
+                )
+            } else {
+                PrimaryText(
+                    modifier = Modifier.constrainAs(text) {
+                        top.linkTo(subtitle.bottom, 8.dp)
+                        bottom.linkTo(parent.bottom, 16.dp)
+                        absoluteLeft.linkTo(subtitle.absoluteLeft)
+                        absoluteRight.linkTo(editButton.absoluteRight)
+                        width = Dimension.fillToConstraints
+                    },
+                    text = note
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DefaultIconButton(
+    modifier: Modifier = Modifier,
+    icon: Painter,
+    onClick: () -> Unit
+) {
+    IconButton(
+        modifier = modifier,
+        onClick = { onClick() }
+    ) {
+        Icon(
+            modifier = Modifier.size(24.dp),
+            painter = icon,
+            contentDescription = null,
+            tint = primaryTextColor
+        )
+    }
+}
+
+@Composable
 fun FabMenuItem(item: FabMenuItem, modifier: Modifier = Modifier) {
     FloatingActionButton(
         backgroundColor = primaryFigmaColor,
@@ -846,6 +934,72 @@ fun FabMenuItem(item: FabMenuItem, modifier: Modifier = Modifier) {
             painter = painterResource(id = item.icon),
             contentDescription = ""
         )
+    }
+}
+
+@Composable
+fun ButtonWithIcon(
+    modifier: Modifier = Modifier,
+    icon: Painter? = null,
+    text: String,
+    onClick: () -> Unit
+) {
+    Button(
+        modifier = modifier,
+        onClick = { onClick() },
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color.White,
+            contentColor = MaterialTheme.colors.primaryVariant
+        ),
+        shape = RoundedCornerShape(24.dp),
+        border = BorderStroke(1.dp, color = secondaryTextColor)
+    ) {
+        if (icon != null) {
+            Icon(
+                modifier = Modifier,
+                painter = icon,
+                contentDescription = null
+            )
+        }
+        PrimaryText(
+            modifier = Modifier.padding(horizontal = 4.dp),
+            text = text,
+            textColor = MaterialTheme.colors.primaryVariant
+        )
+
+    }
+}
+
+@Composable
+fun FilledButtonWithIcon(
+    modifier: Modifier = Modifier,
+    icon: Painter? = null,
+    text: String,
+    onClick: () -> Unit
+) {
+    Button(
+        modifier = modifier,
+        onClick = { onClick() },
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = MaterialTheme.colors.primaryVariant,
+            contentColor = MaterialTheme.colors.onPrimary
+        ),
+        shape = RoundedCornerShape(24.dp),
+//        border = BorderStroke(1.dp, color = secondaryTextColor)
+    ) {
+        if (icon != null) {
+            Icon(
+                modifier = Modifier,
+                painter = icon,
+                contentDescription = null
+            )
+        }
+        PrimaryText(
+            modifier = Modifier.padding(horizontal = 4.dp),
+            text = text,
+            textColor = MaterialTheme.colors.onPrimary
+        )
+
     }
 }
 
