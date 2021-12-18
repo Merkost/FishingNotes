@@ -22,7 +22,7 @@ import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.getPressure
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
-import com.joesemper.fishing.domain.viewstates.ResultWrapper
+import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.utils.network.ConnectionState
@@ -49,11 +49,11 @@ fun MarkerInfoDialog(
     val weather = marker?.let {
         if (connectionState is ConnectionState.Available) {
             val result by viewModel.getWeather(it.latitude, it.longitude)
-                .collectAsState(ResultWrapper.Success<WeatherForecast?>(null))
+                .collectAsState(RetrofitWrapper.Success<WeatherForecast?>(null))
 
             when (result) {
-                is ResultWrapper.Success<*> -> {
-                    return@let mutableStateOf((result as ResultWrapper.Success<WeatherForecast?>).data)
+                is RetrofitWrapper.Success<*> -> {
+                    return@let mutableStateOf((result as RetrofitWrapper.Success<WeatherForecast?>).data)
                 }
                 else -> return@let null
 

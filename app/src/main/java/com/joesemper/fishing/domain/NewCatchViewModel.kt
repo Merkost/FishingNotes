@@ -10,7 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
 import com.joesemper.fishing.compose.ui.home.weather.getTemperature
 import com.joesemper.fishing.domain.viewstates.BaseViewState
-import com.joesemper.fishing.domain.viewstates.ResultWrapper
+import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.NewCatchWeather
@@ -36,8 +36,8 @@ class NewCatchViewModel(
     val uiState: StateFlow<BaseViewState>
         get() = _uiState
 
-    private val _weatherState = MutableStateFlow<ResultWrapper<WeatherForecast>>(ResultWrapper.Loading())
-    val weatherState: StateFlow<ResultWrapper<WeatherForecast>>
+    private val _weatherState = MutableStateFlow<RetrofitWrapper<WeatherForecast>>(RetrofitWrapper.Loading())
+    val weatherState: StateFlow<RetrofitWrapper<WeatherForecast>>
         get() = _weatherState
 
     val noErrors = mutableStateOf(true)
@@ -69,15 +69,15 @@ class NewCatchViewModel(
             marker.value?.run {
                 weatherRepository.getWeather(latitude, longitude).collect { result ->
                     when (result) {
-                        is ResultWrapper.Success<WeatherForecast> -> {
+                        is RetrofitWrapper.Success<WeatherForecast> -> {
                             weather.value = result.data
-                            _weatherState.value = ResultWrapper.Success(result.data)
+                            _weatherState.value = RetrofitWrapper.Success(result.data)
                         }
-                        is ResultWrapper.Loading -> {
-                            _weatherState.value = ResultWrapper.Loading()
+                        is RetrofitWrapper.Loading -> {
+                            _weatherState.value = RetrofitWrapper.Loading()
                         }
-                        is ResultWrapper.Error -> {
-                            _weatherState.value = ResultWrapper.Error(result.error)
+                        is RetrofitWrapper.Error -> {
+                            _weatherState.value = RetrofitWrapper.Error(result.errorType)
                         }
                     }
                 }
@@ -93,15 +93,15 @@ class NewCatchViewModel(
                     .getHistoricalWeather(latitude, longitude, (date.value / 1000))
                     .collect { result ->
                         when (result) {
-                            is ResultWrapper.Success<WeatherForecast> -> {
+                            is RetrofitWrapper.Success<WeatherForecast> -> {
                                 weather.value = result.data
-                                _weatherState.value = ResultWrapper.Success(result.data)
+                                _weatherState.value = RetrofitWrapper.Success(result.data)
                             }
-                            is ResultWrapper.Loading -> {
-                                _weatherState.value = ResultWrapper.Loading()
+                            is RetrofitWrapper.Loading -> {
+                                _weatherState.value = RetrofitWrapper.Loading()
                             }
-                            is ResultWrapper.Error -> {
-                                _weatherState.value = ResultWrapper.Error(result.error)
+                            is RetrofitWrapper.Error -> {
+                                _weatherState.value = RetrofitWrapper.Error(result.errorType)
                             }
                         }
                     }

@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
-import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -45,7 +44,8 @@ import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
 import com.joesemper.fishing.compose.ui.theme.primaryWhiteColor
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.WeatherViewModel
-import com.joesemper.fishing.domain.viewstates.ResultWrapper
+import com.joesemper.fishing.domain.viewstates.ErrorType
+import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.model.entity.weather.Hourly
@@ -59,6 +59,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
+import java.lang.Error
 import kotlin.math.min
 
 @ExperimentalCoroutinesApi
@@ -135,20 +136,9 @@ fun WeatherScreen(
             }
         }
     ) {
-        when (weatherState) {
-            is ResultWrapper.Success<WeatherForecast> -> {
-
-            }
-            is ResultWrapper.Loading -> {
-
-            }
-            is ResultWrapper.Error -> {
-                //TODO: Error view
-            }
-        }
 
         Column(modifier = Modifier.fillMaxSize()) {
-            AnimatedVisibility(weatherState is ResultWrapper.Success/*viewModel.currentWeather.value != null*/) {
+            AnimatedVisibility(weatherState is RetrofitWrapper.Success/*viewModel.currentWeather.value != null*/) {
                 val forecast = viewModel.currentWeather.value!!
                 Column(
                     modifier = Modifier.verticalScroll(scrollState)
@@ -181,7 +171,7 @@ fun WeatherScreen(
                 }
             }
 
-            AnimatedVisibility (weatherState is ResultWrapper.Loading) {
+            AnimatedVisibility (weatherState is RetrofitWrapper.Loading) {
                 Column (modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.SpaceAround,
                 horizontalAlignment = Alignment.CenterHorizontally) {
@@ -205,16 +195,23 @@ fun WeatherScreen(
                     }
                 }
             }
+
+            AnimatedVisibility (weatherState is RetrofitWrapper.Error) {
+                val errorType = (weatherState as RetrofitWrapper.Error).errorType
+                when (errorType) {
+                    is ErrorType.NetworkError -> {
+                        //TODO: NoInternetView()
+                    }
+                    is ErrorType.OtherError -> {
+                        //TODO: OtherErrorView()
+                    }
+                }
+            }
         }
 
     }
 
 
-}
-
-@Composable
-fun NoPlacesView() {
-    TODO("Not yet implemented")
 }
 
 @Composable
