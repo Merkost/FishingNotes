@@ -48,10 +48,10 @@ class WeatherViewModel(
                         currentWeather.value = result.data
                     }
                     is RetrofitWrapper.Loading -> {
-                        //_weatherState.value = ResultWrapper.Loading()
+                        _weatherState.value = RetrofitWrapper.Loading()
                     }
                     is RetrofitWrapper.Error -> {
-                        //_weatherState.value = ResultWrapper.Error(result.error)
+                        _weatherState.value = RetrofitWrapper.Error(result.errorType)
                     }
                 }
 

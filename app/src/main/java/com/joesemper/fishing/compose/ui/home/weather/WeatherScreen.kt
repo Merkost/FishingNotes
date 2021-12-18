@@ -11,6 +11,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
+import com.airbnb.lottie.compose.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -37,6 +39,7 @@ import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.DefaultButtonOutlined
 import com.joesemper.fishing.compose.ui.home.PrimaryText
 import com.joesemper.fishing.compose.ui.home.SecondaryText
+import com.joesemper.fishing.compose.ui.home.SupportText
 import com.joesemper.fishing.compose.ui.home.map.LocationState
 import com.joesemper.fishing.compose.ui.home.map.checkPermission
 import com.joesemper.fishing.compose.ui.home.map.getCurrentLocationFlow
@@ -59,7 +62,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
-import java.lang.Error
 import kotlin.math.min
 
 @ExperimentalCoroutinesApi
@@ -171,12 +173,14 @@ fun WeatherScreen(
                 }
             }
 
-            AnimatedVisibility (weatherState is RetrofitWrapper.Loading) {
-                Column (modifier = Modifier.fillMaxSize(),
+            AnimatedVisibility(weatherState is RetrofitWrapper.Loading) {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.SpaceAround,
-                horizontalAlignment = Alignment.CenterHorizontally) {
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
 
-                    if(checkPermission(context) && viewModel.markersList.value.isEmpty()) {
+                    if (checkPermission(context) && viewModel.markersList.value.isEmpty()) {
                         SecondaryText(text = "No places yet. \nAdd new place now!")
                         WeatherLoading(
                             modifier = Modifier
@@ -186,8 +190,7 @@ fun WeatherScreen(
                         DefaultButtonOutlined(text = "Add", onClick = {
                             navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${true}")
                         })
-                    }
-                    else {
+                    } else {
                         WeatherLoading(
                             modifier = Modifier
                                 .size(300.dp)
@@ -196,14 +199,17 @@ fun WeatherScreen(
                 }
             }
 
-            AnimatedVisibility (weatherState is RetrofitWrapper.Error) {
-                val errorType = (weatherState as RetrofitWrapper.Error).errorType
-                when (errorType) {
-                    is ErrorType.NetworkError -> {
-                        //TODO: NoInternetView()
-                    }
-                    is ErrorType.OtherError -> {
-                        //TODO: OtherErrorView()
+            AnimatedVisibility(weatherState is RetrofitWrapper.Error) {
+                if (weatherState is RetrofitWrapper.Error) {
+                    val errorType = (weatherState as RetrofitWrapper.Error).errorType
+                    when (errorType) {
+                        is ErrorType.NetworkError -> {
+                            NoInternetView(Modifier.fillMaxWidth())
+                        }
+                        is ErrorType.OtherError -> {
+                            //TODO: OtherErrorView()
+                            NoInternetView(Modifier.fillMaxWidth())
+                        }
                     }
                 }
             }
@@ -211,6 +217,29 @@ fun WeatherScreen(
 
     }
 
+
+}
+
+@Composable
+fun NoInternetView(modifier: Modifier = Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.error))
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever,
+    )
+
+    Column(
+        Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.SpaceAround,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        LottieAnimation(
+            composition,
+            progress,
+            modifier = modifier
+        )
+        SupportText(text = "Can't connect to the server!")
+    }
 
 }
 

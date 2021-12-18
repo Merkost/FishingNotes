@@ -86,7 +86,6 @@ private var isNull: Boolean = true
 
 object Constants {
     const val MAX_PHOTOS: Int = 5
-    private const val READ_EXTERNAL_STORAGE_PERMISSION_REQUEST_CODE = 111
     const val ITEM_ADD_PHOTO = "ITEM_ADD_PHOTO"
     const val ITEM_PHOTO = "ITEM_PHOTO"
 }
@@ -102,7 +101,6 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
     val context = LocalContext.current
     val connectionState by context.observeConnectivityAsFlow()
         .collectAsState(initial = context.currentConnectivityState)
-    val notAllFieldsFilled = stringResource(R.string.not_all_fields_are_filled)
 
     viewModel.date.value = dateAndTime.timeInMillis
 
@@ -133,11 +131,8 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    if (viewModel.isInputCorrect())
-                        viewModel.createNewUserCatch() else showToast(
-                        context,
-                        notAllFieldsFilled
-                    )
+                    if (viewModel.isInputCorrect()) viewModel.createNewUserCatch()
+                    else SnackbarManager.showMessage(R.string.not_all_fields_are_filled)
                 }) {
                 Icon(
                     Icons.Filled.Done,
@@ -591,7 +586,9 @@ fun ItemAddPhoto(connectionState: ConnectionState) {
                     is ConnectionState.Available -> {
                         addPhotoState.value = true
                     }
-                    is ConnectionState.Unavailable -> {}//TODO: no internet }
+                    is ConnectionState.Unavailable -> {
+                        SnackbarManager.showMessage(R.string.no_internet)
+                    }//TODO: no internet }
                 }
             },
         elevation = 8.dp,

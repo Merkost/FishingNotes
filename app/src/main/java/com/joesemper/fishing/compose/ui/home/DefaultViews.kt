@@ -76,16 +76,19 @@ fun DefaultDialog(
                     .wrapContentSize()
                     .padding(14.dp)
             ) {
-                PrimaryText(
-                    text = primaryText,
-                    modifier = Modifier.padding(6.dp)
-                )
-                secondaryText?.let {
-                    SecondaryText(text = secondaryText, textAlign = TextAlign.Start)
-                }
-                if (content != null) {
-                    Column(modifier = Modifier.padding(4.dp)) {
-                        content()
+                Column(modifier = Modifier.padding(6.dp)) {
+                    PrimaryText(
+                        text = primaryText,
+                    )
+                    Spacer(Modifier.size(4.dp))
+                    secondaryText?.let {
+                        SecondaryText(text = secondaryText, textAlign = TextAlign.Start)
+                    }
+
+                    content?.let {
+                        Column(modifier = Modifier.padding(4.dp)) {
+                            content()
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.size(2.dp))
@@ -114,10 +117,10 @@ fun DefaultDialog(
                         }
                         if (positiveButtonText.isNotEmpty())
                             DefaultButton(
-                            text = positiveButtonText,
-                            onClick = onPositiveClick,
-                            shape = RoundedCornerShape(24.dp)
-                        )
+                                text = positiveButtonText,
+                                onClick = onPositiveClick,
+                                shape = RoundedCornerShape(24.dp)
+                            )
 
                     }
                 }
