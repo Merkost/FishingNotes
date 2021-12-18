@@ -10,7 +10,6 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -30,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -56,33 +54,28 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
-import com.joesemper.fishing.compose.ui.home.weather.*
+import com.joesemper.fishing.compose.ui.home.notes.WeatherLayout
+import com.joesemper.fishing.compose.ui.home.notes.WeatherLayoutLoading
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
+import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getAllWeatherIcons
-import com.joesemper.fishing.model.mappers.getMoonIconByPhase
-import com.joesemper.fishing.model.mappers.getWeatherIconByName
-import com.joesemper.fishing.model.mappers.getWeatherNameByIcon
-import com.joesemper.fishing.utils.*
+import com.joesemper.fishing.utils.MILLISECONDS_IN_DAY
 import com.joesemper.fishing.utils.network.ConnectionState
 import com.joesemper.fishing.utils.network.currentConnectivityState
 import com.joesemper.fishing.utils.network.observeConnectivityAsFlow
+import com.joesemper.fishing.utils.roundTo
+import com.joesemper.fishing.utils.showToast
 import com.joesemper.fishing.utils.time.toDate
-import com.joesemper.fishing.utils.time.toHours
 import com.joesemper.fishing.utils.time.toTime
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
-import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.viewModel
 import java.util.*
 
-
 private val dateAndTime = Calendar.getInstance()
-private var isNull: Boolean = true
 
 object Constants {
     const val MAX_PHOTOS: Int = 5
@@ -97,12 +90,17 @@ object Constants {
 @Composable
 fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
 
-    val viewModel: NewCatchViewModel = getViewModel()
+    val viewModel: NewCatchViewModel by viewModel()
     val context = LocalContext.current
     val connectionState by context.observeConnectivityAsFlow()
         .collectAsState(initial = context.currentConnectivityState)
 
+    //viewModel.date.value = dateAndTime.timeInMillis
+
     viewModel.date.value = dateAndTime.timeInMillis
+    var isNull by remember {
+        mutableStateOf(true)
+    }
 
     if (place.id.isNotEmpty()) {
         viewModel.marker.value = place; isNull = false
@@ -122,7 +120,6 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
         onDispose {
             dateAndTime.timeInMillis = Date().time
         }
-
     }
 
     Scaffold(
@@ -153,7 +150,7 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
 
         ) {
 
-            Places(stringResource(R.string.place), viewModel)  //Выпадающий список мест
+            Places(viewModel, isNull)  //Выпадающий список мест
             FishAndWeight(viewModel.fishAmount, viewModel.weight)
             Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
             DateAndTime(viewModel.date)
@@ -199,17 +196,19 @@ fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>, upPress: () -> Unit
 }
 
 @Composable
-private fun Places(label: String, viewModel: NewCatchViewModel) {
+private fun Places(viewModel: NewCatchViewModel, isNull: Boolean) {
     val context = LocalContext.current
 
     val changePlaceError = stringResource(R.string.Another_place_in_new_catch)
     val marker by rememberSaveable { viewModel.marker }
+
+    var isDropMenuOpen by rememberSaveable { mutableStateOf(false) }
+
     var textFieldValue by rememberSaveable {
         mutableStateOf(
             marker?.title ?: ""
         )
     }
-    var isDropMenuOpen by rememberSaveable { mutableStateOf(false) }
     val suggestions by viewModel.getAllUserMarkersList().collectAsState(listOf())
     val filteredList by rememberSaveable { mutableStateOf(suggestions.toMutableList()) }
     if (textFieldValue == "") searchFor("", suggestions, filteredList)
@@ -240,7 +239,7 @@ private fun Places(label: String, viewModel: NewCatchViewModel) {
                     .onFocusChanged {
                         isDropMenuOpen = it.isFocused
                     },
-                label = { Text(text = label) },
+                label = { Text(text = stringResource(R.string.place)) },
                 trailingIcon = {
 
                     if (isNull) {
@@ -544,8 +543,10 @@ fun Photos(
             text = stringResource(id = R.string.photos)
         )
 
-        LazyRow(modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(vertical = 4.dp)) {
+        LazyRow(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(vertical = 4.dp)
+        ) {
             item { ItemAddPhoto(connectionState) }
             items(items = photos) {
                 ItemPhoto(
@@ -568,9 +569,9 @@ fun ItemAddPhoto(connectionState: ConnectionState) {
     val choosePhotoLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { value ->
             value.forEach {
-                    if (viewModel.images.size < Constants.MAX_PHOTOS) {
-                        viewModel.addPhoto(it)
-                    }
+                if (viewModel.images.size < Constants.MAX_PHOTOS) {
+                    viewModel.addPhoto(it)
+                }
 
                 //TODO: set max photos
             }
@@ -637,6 +638,7 @@ private fun addPhoto(
 fun NewCatchWeatherItem(viewModel: NewCatchViewModel, connectionState: ConnectionState) {
 
     val weather by viewModel.weather.collectAsState()
+    val weatherState by viewModel.weatherState.collectAsState()
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -645,284 +647,44 @@ fun NewCatchWeatherItem(viewModel: NewCatchViewModel, connectionState: Connectio
             modifier = Modifier.fillMaxWidth()
         ) {
             SubtitleWithIcon(
-                //modifier = Modifier.align(Alignment.Start),
                 icon = R.drawable.weather_sunny,
                 text = stringResource(id = R.string.weather)
             )
-            if (viewModel.weather.value != null) {
+            if (weather != null) {
                 IconButton(onClick = { viewModel.getWeather() }) {
                     Icon(Icons.Default.Refresh, "", tint = MaterialTheme.colors.primary)
                 }
             } else Spacer(modifier = Modifier.size(LocalViewConfiguration.current.minimumTouchTargetSize))
         }
 
-        WeatherLayout(weather, viewModel, connectionState)
-    }
-
-
-}
-
-@Composable
-fun WeatherLayout(
-    weatherForecast: WeatherForecast?,
-    viewModel: NewCatchViewModel,
-    connectionState: ConnectionState
-) {
-    val weatherSettings: WeatherPreferences = get()
-    val temperatureSettings by weatherSettings.getTemperatureUnit.collectAsState(
-        TemperatureValues.C.name
-    )
-    val pressureSettings by weatherSettings.getPressureUnit.collectAsState(PressureValues.mmHg.name)
-
-    weatherForecast?.let { weather ->
-
-
-
-        var weatherIconDialogState by remember {
-            mutableStateOf(false)
+        AnimatedVisibility(weatherState is RetrofitWrapper.Success) {
+            WeatherLayout(weather, viewModel, connectionState, dateAndTime)
         }
 
-        val currentMoonPhase = remember {
-            weather.daily.first().moonPhase
-        }
-        viewModel.moonPhase.value = calcMoonPhase(
-            currentMoonPhase,
-            Date().time / MILLISECONDS_IN_SECOND,
-            weather.hourly.first().date
-        )
-
-        val hour by remember(dateAndTime.timeInMillis) {
-            mutableStateOf(dateAndTime.timeInMillis.toHours().toInt())
-        }
-
-        var weatherIcon by remember(hour, weather) {
-            mutableStateOf(getWeatherIconByName(weather.hourly.first().weather.first().icon))
-        }.also { viewModel.weatherToSave.value.icon = getWeatherNameByIcon(it.value) }
-
-        var weatherDescription by remember(hour, weather) {
-            mutableStateOf(weather.hourly[hour].weather
-                .first().description.replaceFirstChar { it.uppercase() })
-        }.also { viewModel.weatherToSave.value.weatherDescription = it.value }
-
-        var temperature by remember(hour, weather, temperatureSettings) {
-            mutableStateOf(viewModel.getTemperatureForHour(hour = hour, temperatureSettings))
-        }.also {
-            it.value.toFloatOrNull()?.let { floatValue ->
-                viewModel.weatherToSave.value.temperatureInC =
-                    getCelciusTemperature(floatValue, temperatureSettings)
-            }
-        }
-
-        var pressure by remember(hour, weather, pressureSettings) {
-            mutableStateOf(
-                getPressure(
-                    weather.hourly[hour].pressure,
-                    PressureValues.valueOf(pressureSettings)
-                )
-            )
-        }.also {
-            it.value.toFloatOrNull()?.let { floatValue ->
-                viewModel.weatherToSave.value.pressureInMmhg =
-                    getDefaultPressure(floatValue, from = pressureSettings)
-            }
-        }
-
-        var wind by remember(hour, weather) {
-            mutableStateOf(weather.hourly[hour].windSpeed.toInt().toString())
-        }.also {
-            it.value.toIntOrNull()?.let { intValue ->
-                viewModel.weatherToSave.value.windInMs = intValue
-            }
-        }
-
-
-        if (weatherIconDialogState) PickWeatherIconDialog(
-            onDismiss = { weatherIconDialogState = false },
-            onIconSelected = {
-                weatherIcon = it
-                weatherIconDialogState = false
-            })
-
-        Crossfade(targetState = weather) { animatedWeather ->
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                //Main weather title
-                OutlinedTextField(
-                    readOnly = false,
-                    value = weatherDescription,
-                    leadingIcon = {
-                        IconButton(
-                            modifier = Modifier.size(32.dp),
-                            content = {
-                                Icon(
-                                    painter = painterResource(id = weatherIcon),
-                                    contentDescription = "",
-                                    tint = Color.Unspecified
-                                )
-                            },
-                            onClick = { weatherIconDialogState = true }
-                        )
-                    },
-                    onValueChange = { weatherDescription = it },
-                    isError = (weatherDescription.isEmpty()).apply {
-                        viewModel.noErrors.value = this
-                    },
-                    label = { Text(text = stringResource(id = R.string.weather)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next
-                    ),
-                    singleLine = true
-                )
-
-                //Temperature
-                Row(modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    OutlinedTextField(
-                        readOnly = false,
-                        value = temperature,
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_thermometer),
-                                contentDescription = "",
-                                tint = MaterialTheme.colors.primary
-                            )
-                        },
-                        trailingIcon = {
-                            Text(text = getTemperatureNameFromUnit(temperatureSettings))
-                        },
-                        onValueChange = { newValue ->
-                            temperature = newValue
-                            /*temperature = when (newValue.toIntOrNull()) {
-                                null -> temperature
-                                //old value
-                                else -> newValue.toInt().let {
-                                    if (it in -300..300) newValue else temperature   //new value
-                                }
-                            }*/
-                        },
-                        isError = (temperature.toIntOrNull() == null || temperature.length > 3)
-                            .apply { viewModel.noErrors.value = this },
-                        label = { Text(text = stringResource(R.string.temperature)) },
-                        modifier = Modifier.weight(1f, true),
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Next,
-                            keyboardType = KeyboardType.Number
-                        ),
-                        singleLine = true
-                    )
-
-                    //Pressure
-                    OutlinedTextField(
-                        readOnly = false,
-                        value = pressure,
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_gauge),
-                                contentDescription = "",
-                                tint = MaterialTheme.colors.primary
-                            )
-                        },
-                        trailingIcon = {
-                            Text(
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                text = getPressureNameFromUnit(pressureSettings)
-                            )
-                        },
-                        isError = (pressure.endsWith(".") || pressure.isEmpty() || pressure.toDoubleOrNull() == null)
-                            .apply { viewModel.noErrors.value = this },
-                        onValueChange = { pressure = it },
-                        label = { Text(text = stringResource(R.string.pressure)) },
-                        modifier = Modifier.weight(1f, true),
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Next,
-                            keyboardType = KeyboardType.Number
-                        ),
-                        singleLine = true
-                    )
-                }
-
-                //Wind and Moon
-                Row(modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    OutlinedTextField(
-                        readOnly = false,
-                        value = wind,
-                        leadingIcon = {
-                            Icon(
-                                modifier = Modifier.rotate(animatedWeather.hourly[hour].windDeg.toFloat()),
-                                painter = painterResource(id = R.drawable.ic_arrow_up),
-                                contentDescription = "",
-                                tint = MaterialTheme.colors.primary,
-                            )
-                        },
-                        trailingIcon = { Text(text = stringResource(R.string.wind_speed_units)) },
-                        onValueChange = { wind = it },
-                        isError = (wind.toIntOrNull() == null || wind.length >= 3)
-                            .apply { viewModel.noErrors.value = this },
-                        label = { Text(text = stringResource(R.string.wind)) },
-                        modifier = Modifier.weight(1f, true),
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Next,
-                            keyboardType = KeyboardType.Number
-                        ),
-                        singleLine = true
-                    )
-
-                    OutlinedTextField(
-                        readOnly = true,
-                        value = (viewModel.moonPhase.value * 100).toInt().toString(),
-                        leadingIcon = {
-                            Icon(
-                                painter = painterResource(
-                                    id = getMoonIconByPhase(viewModel.moonPhase.value)
-                                ),
-                                contentDescription = "",
-                                tint = MaterialTheme.colors.primary
-                            )
-                        },
-                        onValueChange = { },
-                        trailingIcon = {
-                            Text(text = stringResource(R.string.percent))
-                        },
-                        label = { Text(text = stringResource(R.string.moon_phase)) },
-                        modifier = Modifier.weight(1f, true),
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Next,
-                            keyboardType = KeyboardType.Number
-                        ),
-                        singleLine = true
-                    )
-                }
-            }
-        }
-    } ?: when (connectionState) {
-        is ConnectionState.Available -> {
+        AnimatedVisibility(weatherState is RetrofitWrapper.Loading) {
             if (viewModel.marker.value == null) {
                 SecondaryText(
                     modifier = Modifier.padding(8.dp),
                     text = stringResource(R.string.select_place_for_weather)
                 )
             } else {
-                Row(modifier = Modifier.fillMaxWidth().padding(8.dp),
-                    horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                ) { CircularProgressIndicator() }
+                WeatherLayoutLoading()
             }
 
         }
-        is ConnectionState.Unavailable -> {
-            SecondaryText(
-                modifier = Modifier.padding(8.dp),
-                text = stringResource(R.string.no_internet)
-            )
-        }
+        //TODO: WeatherLayoutError
+        /*AnimatedVisibility(weatherState is RetrofitWrapper.Error) {
+            WeatherLayoutError(weather, viewModel, connectionState)
+        }*/
     }
+
+
 }
 
 @Composable
 fun PickWeatherIconDialog(onIconSelected: (Int) -> Unit, onDismiss: () -> Unit) {
     DefaultDialog(
-        "Choose weather icon:",
+        stringResource(R.string.choose_weather_icon),
         content = {
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -1029,8 +791,8 @@ fun ErrorDialog(errorDialog: MutableState<Boolean>) {
     val viewModel: NewCatchViewModel = getViewModel()
     val context = LocalContext.current
     AlertDialog(
-        title = { Text("Произошла ошибка!") },
-        text = { Text("Не удалось загрузить фотографии. Проверьте интернет соединение и попробуйте еще раз.") },
+        title = { Text(stringResource(R.string.error_occured)) },
+        text = { Text(stringResource(R.string.new_catch_error_description)) },
         onDismissRequest = { errorDialog.value = false },
         confirmButton = {
             OutlinedButton(

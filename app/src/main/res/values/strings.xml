@@ -220,6 +220,9 @@
     <string name="no_internet">No internet connection</string>
     <string name="reset">Сбросить</string>
     <string name="catch_added_successfully">Ваш улов успешно добавлен!</string>
+    <string name="error_occured">Произошла ошибка!</string>
+    <string name="new_catch_error_description">Не удалось добавить улов. Проверьте интернет соединение и попробуйте еще раз.</string>
+    <string name="choose_weather_icon">Choose weather icon:</string>
 
 
 </resources>

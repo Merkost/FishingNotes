@@ -67,6 +67,7 @@ class NewCatchViewModel(
             //weather.value = it} ?:
             //TODO: Weather Loading State
             marker.value?.run {
+                _weatherState.value = RetrofitWrapper.Loading()
                 weatherRepository.getWeather(latitude, longitude).collect { result ->
                     when (result) {
                         is RetrofitWrapper.Success<WeatherForecast> -> {
@@ -89,6 +90,7 @@ class NewCatchViewModel(
     fun getHistoricalWeather() {
         viewModelScope.launch {
             marker.value?.run {
+                _weatherState.value = RetrofitWrapper.Loading()
                 weatherRepository
                     .getHistoricalWeather(latitude, longitude, (date.value / 1000))
                     .collect { result ->
@@ -188,4 +190,5 @@ class NewCatchViewModel(
             TemperatureValues.valueOf(to)
         )
     }
+
 }
