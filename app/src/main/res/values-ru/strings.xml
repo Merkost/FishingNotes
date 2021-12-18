@@ -225,5 +225,7 @@
     <string name="error_occured">Произошла ошибка!</string>
     <string name="new_catch_error_description">Не удалось добавить улов. Проверьте интернет соединение и попробуйте еще раз.</string>
     <string name="choose_weather_icon">Choose weather icon:</string>
+    <string name="adding_place_on_current_location">Adding place on your location</string>
+    <string name="location_permissions_required">Location permissions required</string>
 
 </resources>

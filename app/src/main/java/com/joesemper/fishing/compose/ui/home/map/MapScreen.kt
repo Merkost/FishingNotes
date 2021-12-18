@@ -446,8 +446,8 @@ fun MapFab(state: MapUiState, onClick: () -> Unit, onLongPress: () -> Unit,) {
         }
         MapUiState.BottomSheetInfoMode -> {
             fabImg.value = R.drawable.ic_add_catch
-            paddingBottom.value = 8.dp
-            paddingTop.value = 16.dp
+            paddingBottom.value = 24.dp
+            paddingTop.value = 32.dp
         }
         MapUiState.PlaceSelectMode -> {
             fabImg.value = R.drawable.ic_baseline_check_24
@@ -469,17 +469,21 @@ fun MapFab(state: MapUiState, onClick: () -> Unit, onLongPress: () -> Unit,) {
         )
     }*/
 
+    val adding_place = stringResource(R.string.adding_place_on_current_location)
+    val permissions_required = stringResource(R.string.location_permissions_required)
+
     FishingFab(
         modifier = Modifier
             .animateContentSize()
             .padding(bottom = paddingBottom.value, top = paddingTop.value),
         onClick = onClick,
         onLongPress = {
-            if (checkPermission(context)) {
-                Toast.makeText(context, "Adding place on your location", Toast.LENGTH_SHORT).show()
-                onLongPress()
-            } else Toast.makeText(context, "Location permissions required", Toast.LENGTH_SHORT).show()
-
+            if (state == MapUiState.NormalMode) {
+                if (!checkPermission(context)) {
+                    Toast.makeText(context, adding_place, Toast.LENGTH_SHORT).show()
+                    onLongPress()
+                } else Toast.makeText(context, permissions_required, Toast.LENGTH_SHORT).show()
+            }
         }
     ) {
         Icon(
