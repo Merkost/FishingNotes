@@ -38,6 +38,7 @@ import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.utils.time.toDateTextMonth
 import com.joesemper.fishing.utils.time.toTime
 import org.koin.androidx.compose.get
 
