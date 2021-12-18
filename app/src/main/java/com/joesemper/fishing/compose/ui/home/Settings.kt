@@ -4,10 +4,7 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.Icon
-import androidx.compose.material.RadioButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
@@ -53,6 +50,8 @@ fun SettingsScreen(backPress: () -> Unit) {
     val context = LocalContext.current
 
     val use12hTimeFormat by userPreferences.use12hTimeFormat.collectAsState(false)
+    val useFastFabAdd by userPreferences.useFabFastAdd.collectAsState(false)
+
     val pressureUnit = weatherPreferences.getPressureUnit.collectAsState(PressureValues.mmHg.name)
     val temperatureUnit = weatherPreferences.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
 
@@ -88,13 +87,9 @@ fun SettingsScreen(backPress: () -> Unit) {
                 title = { Text(text = stringResource(R.string.time_format)) },
                 subtitle = { Text(text = stringResource(R.string.use_12h)) },
                 onCheckedChange = { use12h ->
-                    coroutineScope.launch {
-                        userPreferences.saveTimeFormatStatus(use12h)
-                    }
+                    coroutineScope.launch { userPreferences.saveTimeFormatStatus(use12h) }
                 },
-                state = if (use12hTimeFormat) rememberBooleanSettingState(true) else rememberBooleanSettingState(
-                    false
-                )
+                state = if (use12hTimeFormat) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
             )
             SettingsMenuLink(
                 icon = {
@@ -117,6 +112,21 @@ fun SettingsScreen(backPress: () -> Unit) {
                 title = { Text(text = stringResource(R.string.pressure_unit)) },
                 subtitle = { Text(text = stringResource(R.string.choose_pressure_unit)/* (Current is: ${pressureUnit.value})*/) },
                 onClick = { isPressureDialogOpen.value = true }
+            )
+
+            SettingsCheckbox(
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.LocationCity,
+                        contentDescription = Icons.Default.LocationCity.name
+                    )
+                },
+                title = { Text(text = stringResource(R.string.fab_fast_add)) },
+                subtitle = { Text(text = "Удерживайте кнопку добавления места на карте, чтобы быстро сохранить ваше текущее местоположение") },
+                onCheckedChange = { useFastFabAdd ->
+                    coroutineScope.launch { userPreferences.saveFabFastAdd(useFastFabAdd) }
+                },
+                state = if (useFastFabAdd) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
             )
         }
 

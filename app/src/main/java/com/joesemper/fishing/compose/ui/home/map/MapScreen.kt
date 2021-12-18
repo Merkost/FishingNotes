@@ -161,7 +161,8 @@ fun MapScreen(
                         }
                     }
                 }
-            })
+            },
+            userSettings = userPreferences)
         },
         bottomSheet = {
             MarkerInfoDialog(viewModel.currentMarker.value) { marker ->
@@ -431,7 +432,13 @@ fun LocationPermissionDialog(
 
 @ExperimentalMaterialApi
 @Composable
-fun MapFab(state: MapUiState, onClick: () -> Unit, onLongPress: () -> Unit,) {
+fun MapFab(
+    state: MapUiState,
+    onClick: () -> Unit,
+    onLongPress: () -> Unit,
+    userSettings: UserPreferences
+) {
+    val useFastFabAdd by userSettings.useFabFastAdd.collectAsState(false)
     val fabImg = remember { mutableStateOf(R.drawable.ic_baseline_add_location_24) }
     val defaultBottomPadding: Dp = 128.dp
     val context = LocalContext.current
@@ -478,7 +485,7 @@ fun MapFab(state: MapUiState, onClick: () -> Unit, onLongPress: () -> Unit,) {
             .padding(bottom = paddingBottom.value, top = paddingTop.value),
         onClick = onClick,
         onLongPress = {
-            if (state == MapUiState.NormalMode) {
+            if (state == MapUiState.NormalMode && useFastFabAdd) {
                 if (!checkPermission(context)) {
                     Toast.makeText(context, adding_place, Toast.LENGTH_SHORT).show()
                     onLongPress()

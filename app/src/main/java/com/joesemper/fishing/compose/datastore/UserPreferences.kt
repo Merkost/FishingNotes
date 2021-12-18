@@ -19,6 +19,7 @@ class UserPreferences(private val context: Context) {
 
         val USER_LOCATION_PERMISSION_KEY = booleanPreferencesKey("should_show_location_permission")
         val TIME_FORMAT_KEY = booleanPreferencesKey("use_12h_time_format")
+        val FAB_FAST_ADD = booleanPreferencesKey("fab_fast_add")
         val APP_THEME_KEY = stringPreferencesKey("app_theme")
     }
 
@@ -36,7 +37,11 @@ class UserPreferences(private val context: Context) {
     val appTheme: Flow<String> = context.dataStore.data
         .map { preferences ->
             preferences[APP_THEME_KEY] ?: AppThemeValues.Blue.name
+        }
 
+    val useFabFastAdd: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[FAB_FAST_ADD] ?: false
         }
 
     //save values
@@ -58,5 +63,10 @@ class UserPreferences(private val context: Context) {
         }
     }
 
+    suspend fun saveFabFastAdd(fastAdd: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[FAB_FAST_ADD] = fastAdd
+        }
+    }
 
 }
