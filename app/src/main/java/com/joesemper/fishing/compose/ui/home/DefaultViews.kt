@@ -155,6 +155,7 @@ fun DefaultCard(
     modifier: Modifier = Modifier,
     shape: CornerBasedShape = RoundedCornerShape(6.dp),
     padding: Dp = 4.dp,
+    elevation: Dp = 6.dp,
     content: @Composable () -> Unit
 ) {
     Card(

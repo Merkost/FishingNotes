@@ -177,7 +177,9 @@ fun MapScreen(
         },
         bottomSheet = {
 
-                MarkerInfoDialog(viewModel.currentMarker.value, mapState = mapUiState) { marker ->
+                MarkerInfoDialog(viewModel.currentMarker.value,
+                    mapState = mapUiState,
+                    scaffoldState = scaffoldState) { marker ->
                     coroutineScope.launch {
                         scaffoldState.bottomSheetState.collapse()
                     }

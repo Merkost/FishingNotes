@@ -1,10 +1,8 @@
 package com.joesemper.fishing.compose.ui.home.map
 
-import androidx.compose.animation.core.TwoWayConverter
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateValueAsState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -12,18 +10,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.getPressure
+import com.joesemper.fishing.compose.ui.utils.currentFraction
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -33,7 +31,6 @@ import com.joesemper.fishing.utils.network.currentConnectivityState
 import com.joesemper.fishing.utils.network.observeConnectivityAsFlow
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
-import kotlin.math.roundToInt
 
 
 @ExperimentalMaterialApi
@@ -41,9 +38,9 @@ import kotlin.math.roundToInt
 fun MarkerInfoDialog(
     marker: UserMapMarker?,
     mapState: MapUiState,
+    scaffoldState: BottomSheetScaffoldState,
     onDescriptionClick: (UserMapMarker) -> Unit,
-
-) {
+    ) {
     val context = LocalContext.current
     val viewModel: MapViewModel = getViewModel()
 
@@ -69,39 +66,43 @@ fun MarkerInfoDialog(
         }
     }
 
-    val paddingDp = animateDpAsState(when(mapState) {
-        is MapUiState.BottomSheetInfoMode -> 8.dp
-        is MapUiState.BottomSheetFullyExpanded -> 0.dp
-        else -> 8.dp
-    })
 
-    val cornersDp = animateDpAsState(when(mapState) {
-        is MapUiState.BottomSheetInfoMode -> (12.dp)
-        is MapUiState.BottomSheetFullyExpanded -> (0.dp)
-        else -> (12.dp)
-    })
+    val paddingDp = animateDpAsState(
+        when (scaffoldState.currentFraction) {
+            0.0f -> 8.dp
+            else -> 0.dp
+        }
+    )
 
 
-    val roundedCorners by remember(cornersDp.value) {
-        mutableStateOf(RoundedCornerShape(cornersDp.value))
-    }
+    val elevationDp = animateDpAsState(
+        when (mapState) {
+            is MapUiState.BottomSheetInfoMode -> (12.dp)
+            is MapUiState.BottomSheetFullyExpanded -> (0.dp)
+            else -> (12.dp)
+        }
+    )
 
-
-    Spacer(modifier = Modifier.size(1.dp))
-    DefaultCard(
-        modifier = Modifier,
-        shape = roundedCorners,
-        padding = paddingDp.value
+    Card(
+        shape = MaterialTheme.shapes.large,
+        elevation = 6.dp,
+        backgroundColor = MaterialTheme.colors.surface,
+        modifier = Modifier
+            .zIndex(1.0f)
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(paddingDp.value),
     ) {
+        Spacer(modifier = Modifier.size(1.dp))
         marker?.let {
 
             ConstraintLayout(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .clickable {
+                    /*.clickable {
                         //onDescriptionClick(it)
-                    }
+                    }*/
             ) {
                 val (locationIcon, title, timeNow, time8, time16, pressNowVal, press8Val,
                     press16Val, press8Icon, press16Icon, loading, noNetwork) = createRefs()
@@ -246,10 +247,12 @@ fun MarkerInfoDialog(
                     )
                 }
             }
-
-
-
+        }
+        if (paddingDp.value == 0.dp) {
+            Spacer(modifier = Modifier.fillMaxSize())
         }
     }
-    Spacer(modifier = Modifier.fillMaxHeight())
+
 }
+
+

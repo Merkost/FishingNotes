@@ -38,6 +38,7 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.DefaultDialog
 import com.joesemper.fishing.compose.ui.theme.Shapes
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.compose.ui.utils.currentFraction
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.Dispatchers
@@ -66,12 +67,14 @@ fun MapScaffold(
         }
     )
 
+    val radius = (30 * (1f-scaffoldState.currentFraction)).dp
+
     BottomSheetScaffold(
         modifier = modifier.fillMaxSize(),
         scaffoldState = scaffoldState,
-        sheetShape = Shapes.large,
         sheetBackgroundColor = Color.White.copy(0f),
         sheetElevation = 0.dp,
+        sheetShape = RoundedCornerShape(radius),
         sheetPeekHeight = dp.value,
         floatingActionButton = fab,
         sheetContent = bottomSheet,
