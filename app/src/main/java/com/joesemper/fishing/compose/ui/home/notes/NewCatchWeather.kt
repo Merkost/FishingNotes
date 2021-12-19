@@ -39,14 +39,10 @@ fun WeatherLayout(
     dateAndTime: Calendar
 ) {
     val weatherSettings: WeatherPreferences = get()
-    val temperatureSettings by weatherSettings.getTemperatureUnit.collectAsState(
-        TemperatureValues.C.name
-    )
+    val temperatureSettings by weatherSettings.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
     val pressureSettings by weatherSettings.getPressureUnit.collectAsState(PressureValues.mmHg.name)
 
     weatherForecast?.let { weather ->
-
-
 
         var weatherIconDialogState by remember {
             mutableStateOf(false)
@@ -145,8 +141,10 @@ fun WeatherLayout(
                 )
 
                 //Temperature
-                Row(modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     OutlinedTextField(
                         readOnly = false,
                         value = temperature,
@@ -212,8 +210,10 @@ fun WeatherLayout(
                 }
 
                 //Wind and Moon
-                Row(modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     OutlinedTextField(
                         readOnly = false,
                         value = wind,
@@ -265,33 +265,16 @@ fun WeatherLayout(
                 }
             }
         }
-    } ?: when (connectionState) {
-        is ConnectionState.Available -> {
-            if (viewModel.marker.value == null) {
-                SecondaryText(
-                    modifier = Modifier.padding(8.dp),
-                    text = stringResource(R.string.select_place_for_weather)
-                )
-            } else {
-                Row(modifier = Modifier.fillMaxWidth().padding(8.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) { CircularProgressIndicator() }
-            }
-
-        }
-        is ConnectionState.Unavailable -> {
-            SecondaryText(
-                modifier = Modifier.padding(8.dp),
-                text = stringResource(R.string.no_internet)
-            )
-        }
-    }
+    } ?: SecondaryText(
+        modifier = Modifier.padding(8.dp),
+        text = stringResource(R.string.select_place_for_weather)
+    )
 }
 
 @Composable
 fun WeatherLayoutLoading() {
-    Row(modifier = Modifier.fillMaxWidth().padding(8.dp),
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(8.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) { CircularProgressIndicator() }

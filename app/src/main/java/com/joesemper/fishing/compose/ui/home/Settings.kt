@@ -42,7 +42,6 @@ fun SettingsScreen(backPress: () -> Unit) {
     val userPreferences: UserPreferences = get()
     val weatherPreferences: WeatherPreferences = get()
 
-
     val isPressureDialogOpen = remember { mutableStateOf(false) }
     val isTemperatureDialogOpen = remember { mutableStateOf(false) }
 
