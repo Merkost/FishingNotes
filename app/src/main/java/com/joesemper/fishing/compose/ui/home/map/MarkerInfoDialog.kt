@@ -1,19 +1,22 @@
 package com.joesemper.fishing.compose.ui.home.map
 
+import androidx.compose.animation.core.TwoWayConverter
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateValueAsState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.joesemper.fishing.R
@@ -30,12 +33,16 @@ import com.joesemper.fishing.utils.network.currentConnectivityState
 import com.joesemper.fishing.utils.network.observeConnectivityAsFlow
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
+import kotlin.math.roundToInt
+
 
 @ExperimentalMaterialApi
 @Composable
 fun MarkerInfoDialog(
     marker: UserMapMarker?,
-    onDescriptionClick: (UserMapMarker) -> Unit
+    mapState: MapUiState,
+    onDescriptionClick: (UserMapMarker) -> Unit,
+
 ) {
     val context = LocalContext.current
     val viewModel: MapViewModel = getViewModel()
@@ -56,18 +63,35 @@ fun MarkerInfoDialog(
                     return@let mutableStateOf((result as RetrofitWrapper.Success<WeatherForecast?>).data)
                 }
                 else -> return@let null
-
             }
-
         } else {
             null
         }
     }
 
+    val paddingDp = animateDpAsState(when(mapState) {
+        is MapUiState.BottomSheetInfoMode -> 8.dp
+        is MapUiState.BottomSheetFullyExpanded -> 0.dp
+        else -> 8.dp
+    })
+
+    val cornersDp = animateDpAsState(when(mapState) {
+        is MapUiState.BottomSheetInfoMode -> (12.dp)
+        is MapUiState.BottomSheetFullyExpanded -> (0.dp)
+        else -> (12.dp)
+    })
+
+
+    val roundedCorners by remember(cornersDp.value) {
+        mutableStateOf(RoundedCornerShape(cornersDp.value))
+    }
+
+
     Spacer(modifier = Modifier.size(1.dp))
     DefaultCard(
-        shape = RoundedCornerShape(12.dp),
-        padding = 8.dp
+        modifier = Modifier,
+        shape = roundedCorners,
+        padding = paddingDp.value
     ) {
         marker?.let {
 
@@ -76,7 +100,7 @@ fun MarkerInfoDialog(
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .clickable {
-                        onDescriptionClick(it)
+                        //onDescriptionClick(it)
                     }
             ) {
                 val (locationIcon, title, timeNow, time8, time16, pressNowVal, press8Val,
@@ -222,6 +246,10 @@ fun MarkerInfoDialog(
                     )
                 }
             }
+
+
+
         }
     }
+    Spacer(modifier = Modifier.fillMaxHeight())
 }

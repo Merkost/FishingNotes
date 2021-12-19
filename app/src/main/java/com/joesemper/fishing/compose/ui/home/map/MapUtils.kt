@@ -101,8 +101,8 @@ sealed class LocationState() {
 sealed class MapUiState {
     object NormalMode : MapUiState()
     object PlaceSelectMode : MapUiState()
-    //object FastAddPlace : MapUiState()
     object BottomSheetInfoMode : MapUiState()
+    object BottomSheetFullyExpanded : MapUiState()
 }
 
 const val DEFAULT_ZOOM = 15f

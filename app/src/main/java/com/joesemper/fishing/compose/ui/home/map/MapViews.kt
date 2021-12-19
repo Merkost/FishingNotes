@@ -5,6 +5,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -34,10 +35,11 @@ import com.airbnb.lottie.compose.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.*
+import com.joesemper.fishing.compose.ui.home.DefaultDialog
 import com.joesemper.fishing.compose.ui.theme.Shapes
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
+import com.joesemper.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -47,19 +49,30 @@ import org.koin.androidx.compose.getViewModel
 @ExperimentalMaterialApi
 @Composable
 fun MapScaffold(
+    mapUiState: MapUiState,
+    currentPlace: MutableState<UserMapMarker?>,
     modifier: Modifier = Modifier,
     scaffoldState: BottomSheetScaffoldState,
     fab: @Composable() (() -> Unit)?,
     bottomSheet: @Composable() (ColumnScope.() -> Unit),
-    content: @Composable (PaddingValues) -> Unit
-) {
+    content: @Composable (PaddingValues) -> Unit,
+
+    ) {
+    val dp = animateDpAsState(
+        when (mapUiState) {
+            is MapUiState.BottomSheetInfoMode,
+            MapUiState.BottomSheetFullyExpanded -> 158.dp
+            else -> 0.dp
+        }
+    )
+
     BottomSheetScaffold(
         modifier = modifier.fillMaxSize(),
         scaffoldState = scaffoldState,
         sheetShape = Shapes.large,
         sheetBackgroundColor = Color.White.copy(0f),
         sheetElevation = 0.dp,
-        sheetPeekHeight = 0.dp,
+        sheetPeekHeight = dp.value,
         floatingActionButton = fab,
         sheetContent = bottomSheet,
         content = content

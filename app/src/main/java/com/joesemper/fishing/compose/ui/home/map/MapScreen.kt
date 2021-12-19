@@ -95,37 +95,47 @@ fun MapScreen(
     LaunchedEffect(mapUiState) {
         viewModel.mapUiState = mapUiState
         when (mapUiState) {
-            MapUiState.NormalMode -> {
-                scaffoldState.bottomSheetState.collapse()
+            is MapUiState.NormalMode -> {
+                //scaffoldState.bottomSheetState.collapse()
                 viewModel.currentMarker.value = null
                 addingPlace = false
             }
-            MapUiState.BottomSheetInfoMode -> {
+            is MapUiState.BottomSheetInfoMode -> {
                 addingPlace = false
-                scaffoldState.bottomSheetState.expand()
+                scaffoldState.bottomSheetState.collapse()
             }
-            MapUiState.PlaceSelectMode -> {
+            is MapUiState.PlaceSelectMode -> {
 
+            }
+            is MapUiState.BottomSheetFullyExpanded -> {
+                scaffoldState.bottomSheetState.expand()
             }
         }
     }
 
     LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
         if (!addingPlace) {
-            mapUiState = when (scaffoldState.bottomSheetState.currentValue) {
-                BottomSheetValue.Collapsed -> MapUiState.NormalMode
-                BottomSheetValue.Expanded -> MapUiState.BottomSheetInfoMode
+            when (scaffoldState.bottomSheetState.currentValue) {
+                BottomSheetValue.Collapsed -> if (viewModel.currentMarker.value != null)
+                    mapUiState = MapUiState.BottomSheetInfoMode
+                BottomSheetValue.Expanded -> mapUiState = MapUiState.BottomSheetFullyExpanded
+                else -> {}
             }
         }
     }
 
     BackPressHandler(mapUiState = mapUiState) {
-        mapUiState = MapUiState.NormalMode
+        mapUiState = when (mapUiState) {
+            is MapUiState.BottomSheetFullyExpanded -> { MapUiState.BottomSheetInfoMode }
+            else -> MapUiState.NormalMode
+        }
     }
 
     val noNamePlace = stringResource(R.string.no_name_place)
 
     MapScaffold(
+        mapUiState = mapUiState,
+        currentPlace = viewModel.currentMarker,
         scaffoldState = scaffoldState,
         fab = {
             MapFab(
@@ -140,10 +150,11 @@ fun MapScreen(
                             mapUiState = MapUiState.NormalMode
                         }
                         MapUiState.BottomSheetInfoMode -> {
-                            coroutineScope.launch {
+                            mapUiState = MapUiState.PlaceSelectMode
+                            /*coroutineScope.launch {
                                 scaffoldState.bottomSheetState.collapse()
-                            }
-                            onAddNewCatchClick(navController, viewModel)
+                            }*/
+                            /*onAddNewCatchClick(navController, viewModel)*/
                         }
                     }
                 },
@@ -165,12 +176,15 @@ fun MapScreen(
             userSettings = userPreferences)
         },
         bottomSheet = {
-            MarkerInfoDialog(viewModel.currentMarker.value) { marker ->
-                coroutineScope.launch {
-                    scaffoldState.bottomSheetState.collapse()
+
+                MarkerInfoDialog(viewModel.currentMarker.value, mapState = mapUiState) { marker ->
+                    coroutineScope.launch {
+                        scaffoldState.bottomSheetState.collapse()
+                    }
+                    onMarkerDetailsClick(navController, marker)
                 }
-                onMarkerDetailsClick(navController, marker)
-            }
+
+
         }
     ) {
       
@@ -195,7 +209,10 @@ fun MapScreen(
                 },
                 cameraMoveCallback = { state -> cameraMoveState = state },
                 currentCameraPosition = currentCameraPosition,
-                mapType = mapType
+                mapType = mapType,
+                onMapClick = {
+                    mapUiState = MapUiState.NormalMode
+                }
             )
 
             MapLayersButton(
@@ -290,7 +307,8 @@ fun MapLayout(
     onMarkerClick: (marker: UserMapMarker) -> Unit,
     cameraMoveCallback: (state: CameraMoveState) -> Unit,
     currentCameraPosition: MutableState<Pair<LatLng, Float>>,
-    mapType: MutableState<Int>
+    mapType: MutableState<Int>,
+    onMapClick: () -> Unit,
 ) {
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
@@ -338,6 +356,9 @@ fun MapLayout(
                     onMarkerClick(markers.value.first { it.id == marker.tag })
                     viewModel.lastMapCameraPosition.value = Pair(marker.position, DEFAULT_ZOOM)
                     true
+                }
+                googleMap.setOnMapClickListener {
+                    onMapClick()
                 }
 
                 //Map styles: https://mapstyle.withgoogle.com
@@ -445,6 +466,7 @@ fun MapFab(
     val paddingBottom = remember { mutableStateOf(defaultBottomPadding) } //128
     val paddingTop = remember { mutableStateOf(0.dp) }
 
+
     when (state) {
         MapUiState.NormalMode -> {
             fabImg.value = R.drawable.ic_baseline_add_location_24
@@ -452,7 +474,7 @@ fun MapFab(
             paddingTop.value = 0.dp
         }
         MapUiState.BottomSheetInfoMode -> {
-            fabImg.value = R.drawable.ic_add_catch
+            //fabImg.value = R.drawable.ic_add_catch
             paddingBottom.value = 24.dp
             paddingTop.value = 32.dp
         }
