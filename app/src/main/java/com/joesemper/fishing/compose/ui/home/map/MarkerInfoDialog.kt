@@ -22,6 +22,7 @@ import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.getPressure
 import com.joesemper.fishing.compose.ui.utils.currentFraction
+import com.joesemper.fishing.compose.ui.utils.noRippleClickable
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -37,9 +38,10 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun MarkerInfoDialog(
     marker: UserMapMarker?,
-    mapState: MapUiState,
+    mapUiState: MapUiState,
+    modifier: Modifier = Modifier,
     scaffoldState: BottomSheetScaffoldState,
-    onDescriptionClick: (UserMapMarker) -> Unit,
+    onDescriptionClick: () -> Unit,
     ) {
     val context = LocalContext.current
     val viewModel: MapViewModel = getViewModel()
@@ -74,18 +76,16 @@ fun MarkerInfoDialog(
         }
     )
 
-
     val elevationDp = animateDpAsState(
-        when (mapState) {
-            is MapUiState.BottomSheetInfoMode -> (12.dp)
-            is MapUiState.BottomSheetFullyExpanded -> (0.dp)
-            else -> (12.dp)
+        when (scaffoldState.currentFraction) {
+            0.0f -> (6.dp)
+            else -> (0.dp)
         }
     )
 
     Card(
         shape = MaterialTheme.shapes.large,
-        elevation = 6.dp,
+        elevation = elevationDp.value,
         backgroundColor = MaterialTheme.colors.surface,
         modifier = Modifier
             .zIndex(1.0f)
@@ -93,16 +93,17 @@ fun MarkerInfoDialog(
             .wrapContentHeight()
             .padding(paddingDp.value),
     ) {
-        Spacer(modifier = Modifier.size(1.dp))
-        marker?.let {
+
+        viewModel.currentMarker.value?.let { marker ->
 
             ConstraintLayout(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    /*.clickable {
-                        //onDescriptionClick(it)
-                    }*/
+                    .noRippleClickable(
+                        onClick = onDescriptionClick,
+                        enabled = scaffoldState.bottomSheetState.isCollapsed
+                    )
             ) {
                 val (locationIcon, title, timeNow, time8, time16, pressNowVal, press8Val,
                     press16Val, press8Icon, press16Icon, loading, noNetwork) = createRefs()

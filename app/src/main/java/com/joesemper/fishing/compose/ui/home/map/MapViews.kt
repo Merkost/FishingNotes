@@ -13,6 +13,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerBasedShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -67,12 +69,17 @@ fun MapScaffold(
         }
     )
 
+    val sheetColor = animateColorAsState(
+        if (scaffoldState.currentFraction > 0.5f) MaterialTheme.colors.surface
+        else Color.White.copy(0f)
+    )
+
     val radius = (30 * (1f-scaffoldState.currentFraction)).dp
 
     BottomSheetScaffold(
         modifier = modifier.fillMaxSize(),
         scaffoldState = scaffoldState,
-        sheetBackgroundColor = Color.White.copy(0f),
+        sheetBackgroundColor = sheetColor.value,
         sheetElevation = 0.dp,
         sheetShape = RoundedCornerShape(radius),
         sheetPeekHeight = dp.value,

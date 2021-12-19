@@ -2,6 +2,7 @@ package com.joesemper.fishing.compose.ui.home.map
 
 import android.widget.Toast
 import androidx.compose.animation.*
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -42,6 +43,7 @@ import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.navigate
+import com.joesemper.fishing.compose.ui.utils.currentFraction
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
@@ -92,34 +94,40 @@ fun MapScreen(
         mutableStateOf(Pair(LatLng(0.0, 0.0), 20f))
     }
 
-    LaunchedEffect(mapUiState) {
-        viewModel.mapUiState = mapUiState
-        when (mapUiState) {
-            is MapUiState.NormalMode -> {
-                //scaffoldState.bottomSheetState.collapse()
-                viewModel.currentMarker.value = null
-                addingPlace = false
-            }
-            is MapUiState.BottomSheetInfoMode -> {
-                addingPlace = false
-                scaffoldState.bottomSheetState.collapse()
-            }
-            is MapUiState.PlaceSelectMode -> {
+    LaunchedEffect(mapUiState, scaffoldState.bottomSheetState.currentValue) {
+        if (mapUiState != viewModel.mapUiState) {
+            viewModel.mapUiState = mapUiState
+            when (mapUiState) {
+                is MapUiState.NormalMode -> {
+                    scaffoldState.bottomSheetState.collapse()
+                    viewModel.currentMarker.value = null
+                    addingPlace = false
+                }
+                is MapUiState.BottomSheetInfoMode -> {
+                    addingPlace = false
+                    scaffoldState.bottomSheetState.collapse()
+                }
+                is MapUiState.PlaceSelectMode -> {
 
-            }
-            is MapUiState.BottomSheetFullyExpanded -> {
-                scaffoldState.bottomSheetState.expand()
+                }
+                is MapUiState.BottomSheetFullyExpanded -> {
+                    scaffoldState.bottomSheetState.expand()
+                }
             }
         }
+
     }
 
     LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
+        viewModel.sheetState = scaffoldState.bottomSheetState.currentValue
         if (!addingPlace) {
             when (scaffoldState.bottomSheetState.currentValue) {
-                BottomSheetValue.Collapsed -> if (viewModel.currentMarker.value != null)
+                BottomSheetValue.Collapsed -> if (viewModel.currentMarker.value != null &&
+                    mapUiState == MapUiState.BottomSheetFullyExpanded
+                )
                     mapUiState = MapUiState.BottomSheetInfoMode
-                BottomSheetValue.Expanded -> mapUiState = MapUiState.BottomSheetFullyExpanded
-                else -> {}
+                BottomSheetValue.Expanded -> if (mapUiState == MapUiState.BottomSheetInfoMode)
+                    mapUiState = MapUiState.BottomSheetFullyExpanded
             }
         }
     }
@@ -158,41 +166,47 @@ fun MapScreen(
                         }
                     }
                 },
-            onLongPress = {
-                when (mapUiState) {
-                    MapUiState.NormalMode -> {
-                        viewModel.lastKnownLocation.value?.let {
-                            viewModel.addNewMarker(
-                                RawMapMarker(
-                                    noNamePlace,
-                                    latitude = it.latitude,
-                                    longitude = it.longitude,
+                onLongPress = {
+                    when (mapUiState) {
+                        MapUiState.NormalMode -> {
+                            viewModel.lastKnownLocation.value?.let {
+                                viewModel.addNewMarker(
+                                    RawMapMarker(
+                                        noNamePlace,
+                                        latitude = it.latitude,
+                                        longitude = it.longitude,
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
-                }
-            },
-            userSettings = userPreferences)
+                },
+                userSettings = userPreferences,
+                currentFraction = scaffoldState.currentFraction
+            )
         },
         bottomSheet = {
 
-                MarkerInfoDialog(viewModel.currentMarker.value,
-                    mapState = mapUiState,
-                    scaffoldState = scaffoldState) { marker ->
-                    coroutineScope.launch {
-                        scaffoldState.bottomSheetState.collapse()
-                    }
-                    onMarkerDetailsClick(navController, marker)
+            MarkerInfoDialog(
+                viewModel.currentMarker.value,
+                mapUiState = mapUiState,
+                scaffoldState = scaffoldState
+            ) {
+                coroutineScope.launch {
+                    scaffoldState.bottomSheetState.expand()
                 }
+                /*onMarkerDetailsClick(navController, marker)*/
+            }
 
 
         }
     ) {
-      
-        val shouldShowPermissions by userPreferences.shouldShowLocationPermission.collectAsState(false)
+
+        val shouldShowPermissions by userPreferences.shouldShowLocationPermission.collectAsState(
+            false
+        )
         if (shouldShowPermissions) LocationPermissionDialog(userPreferences = userPreferences)
-        
+
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (mapLayout, addMarkerFragment, mapMyLocationButton, mapLayersButton,
                 mapLayersView, pointer) = createRefs()
@@ -361,6 +375,7 @@ fun MapLayout(
                 }
                 googleMap.setOnMapClickListener {
                     onMapClick()
+                    return@setOnMapClickListener
                 }
 
                 //Map styles: https://mapstyle.withgoogle.com
@@ -459,32 +474,58 @@ fun MapFab(
     state: MapUiState,
     onClick: () -> Unit,
     onLongPress: () -> Unit,
-    userSettings: UserPreferences
+    userSettings: UserPreferences,
+    currentFraction: Float
 ) {
     val useFastFabAdd by userSettings.useFabFastAdd.collectAsState(false)
     val fabImg = remember { mutableStateOf(R.drawable.ic_baseline_add_location_24) }
     val defaultBottomPadding: Dp = 128.dp
     val context = LocalContext.current
-    val paddingBottom = remember { mutableStateOf(defaultBottomPadding) } //128
-    val paddingTop = remember { mutableStateOf(0.dp) }
 
+    val paddingBottom = animateDpAsState(
+        when (state) {
+            MapUiState.NormalMode -> {
+                defaultBottomPadding
+            }
+            MapUiState.BottomSheetInfoMode, MapUiState.BottomSheetFullyExpanded -> {
+                24.dp
+            }
+            //MapUiState.BottomSheetFullyExpanded -> { 0.dp }
+            MapUiState.PlaceSelectMode -> {
+                defaultBottomPadding
+            }
+        }
+    )
+
+    val paddingTop = animateDpAsState(
+        when (state) {
+            MapUiState.NormalMode -> {
+                0.dp
+            }
+            MapUiState.BottomSheetInfoMode, MapUiState.BottomSheetFullyExpanded -> {
+                32.dp
+            }
+            //MapUiState.BottomSheetFullyExpanded -> { 82.dp }
+            MapUiState.PlaceSelectMode -> {
+                0.dp
+            }
+        }
+    )
 
     when (state) {
         MapUiState.NormalMode -> {
             fabImg.value = R.drawable.ic_baseline_add_location_24
-            paddingBottom.value = defaultBottomPadding
-            paddingTop.value = 0.dp
         }
         MapUiState.BottomSheetInfoMode -> {
+            fabImg.value = R.drawable.ic_baseline_add_location_24
+        }
+        MapUiState.BottomSheetFullyExpanded -> {
             //fabImg.value = R.drawable.ic_add_catch
-            paddingBottom.value = 24.dp
-            paddingTop.value = 32.dp
         }
         MapUiState.PlaceSelectMode -> {
             fabImg.value = R.drawable.ic_baseline_check_24
-            paddingBottom.value = defaultBottomPadding
-            paddingTop.value = 0.dp
         }
+
     }
 
     /*FloatingActionButton(
@@ -502,41 +543,48 @@ fun MapFab(
 
     val adding_place = stringResource(R.string.adding_place_on_current_location)
     val permissions_required = stringResource(R.string.location_permissions_required)
-
-    FishingFab(
-        modifier = Modifier
-            .animateContentSize()
-            .padding(bottom = paddingBottom.value, top = paddingTop.value),
-        onClick = onClick,
-        onLongPress = {
-            if (state == MapUiState.NormalMode && useFastFabAdd) {
-                if (!checkPermission(context)) {
-                    Toast.makeText(context, adding_place, Toast.LENGTH_SHORT).show()
-                    onLongPress()
-                } else Toast.makeText(context, permissions_required, Toast.LENGTH_SHORT).show()
-            }
-        }
+    AnimatedVisibility(
+        state != MapUiState.BottomSheetFullyExpanded,
+        exit = fadeOut(),
+        enter = fadeIn()
     ) {
-        Icon(
-            painter = painterResource(id = fabImg.value),
-            contentDescription = stringResource(R.string.new_place),
-            tint = MaterialTheme.colors.onPrimary,
-        )
+
+        FishingFab(
+            modifier = Modifier
+                .animateContentSize()
+                .padding(bottom = paddingBottom.value, top = paddingTop.value),
+            onClick = onClick,
+            onLongPress = {
+                if (state == MapUiState.NormalMode && useFastFabAdd) {
+                    if (!checkPermission(context)) {
+                        Toast.makeText(context, adding_place, Toast.LENGTH_SHORT).show()
+                        onLongPress()
+                    } else Toast.makeText(context, permissions_required, Toast.LENGTH_SHORT).show()
+                }
+            }
+        ) {
+            Icon(
+                painter = painterResource(id = fabImg.value),
+                contentDescription = stringResource(R.string.new_place),
+                tint = MaterialTheme.colors.onPrimary,
+            )
+        }
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun FishingFab(onClick: () -> Unit,
-               onLongPress: () -> Unit,
-               modifier: Modifier = Modifier,
-               interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-               shape: Shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
-               backgroundColor: Color = MaterialTheme.colors.secondary,
-               contentColor: Color = contentColorFor(backgroundColor),
-               elevation: FloatingActionButtonElevation = FloatingActionButtonDefaults.elevation(),
-               content: @Composable () -> Unit)
-{
+fun FishingFab(
+    onClick: () -> Unit,
+    onLongPress: () -> Unit,
+    modifier: Modifier = Modifier,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    shape: Shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
+    backgroundColor: Color = MaterialTheme.colors.secondary,
+    contentColor: Color = contentColorFor(backgroundColor),
+    elevation: FloatingActionButtonElevation = FloatingActionButtonDefaults.elevation(),
+    content: @Composable () -> Unit
+) {
     Surface(
         modifier = modifier,
         shape = shape,
@@ -565,6 +613,7 @@ fun FishingFab(onClick: () -> Unit,
         }
     }
 }
+
 private val FabSize = 56.dp
 
 private fun onAddNewCatchClick(navController: NavController, viewModel: MapViewModel) {
