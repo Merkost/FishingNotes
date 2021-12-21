@@ -54,15 +54,15 @@ class FirebaseCatchesRepositoryImpl(
                         val result = CatchesContentState()
 
                         for (dc in snapshots.documentChanges) {
+                            val userCatch = dc.document.toObject<UserCatch>()
                             when (dc.type) {
                                 DocumentChange.Type.ADDED -> {
-                                    val userCatch = dc.document.toObject<UserCatch>()
                                     result.added.add(userCatch)
                                 }
                                 DocumentChange.Type.MODIFIED -> {
+                                    result.modified.add(userCatch)
                                 }
                                 DocumentChange.Type.REMOVED -> {
-                                    val userCatch = dc.document.toObject<UserCatch>()
                                     result.deleted.add(userCatch)
                                 }
                             }
@@ -188,6 +188,39 @@ class FirebaseCatchesRepositoryImpl(
         dbCollections.getUserMapMarkersCollection().document(markerId)
             .update("catchesCount", FieldValue.increment(-1))
     }
+
+    override suspend fun updateUserCatch(
+        markerId: String,
+        catchId: String,
+        data: Map<String, Any>
+    ) {
+        dbCollections.getUserCatchesCollection(markerId).document(catchId).update(data)
+    }
+
+    override fun subscribeOnUserCatchState(markerId: String, catchId: String) =
+        channelFlow<UserCatch> {
+
+            val listener =
+                dbCollections.getUserCatchesCollection(markerId).whereEqualTo("id", catchId)
+                    .addSnapshotListener { snapshots, error ->
+
+                        for (dc in snapshots!!.documentChanges) {
+                            when (dc.type) {
+                                DocumentChange.Type.MODIFIED -> {
+                                    trySend(dc.document.toObject())
+                                }
+                                DocumentChange.Type.ADDED -> {
+                                }
+                                DocumentChange.Type.REMOVED -> {
+                                }
+                            }
+                        }
+                    }
+
+            awaitClose {
+                listener.remove()
+            }
+        }
 
     private suspend fun savePhotos(
         photos: List<Uri>,

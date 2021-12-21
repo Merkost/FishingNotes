@@ -293,7 +293,7 @@ fun ItemUserPlace(
                 .wrapContentHeight()
                 .fillMaxWidth()
         ) {
-            val (icon, title, amount, fishIcon, date, navigateButton) = createRefs()
+            val (icon, title, amount, date, navigateButton) = createRefs()
 
             Icon(
                 modifier = Modifier
@@ -308,7 +308,7 @@ fun ItemUserPlace(
                 tint = Color(place.markerColor)
             )
 
-            PrimaryTextBold(
+            PrimaryText(
                 modifier = Modifier.constrainAs(title) {
                     absoluteLeft.linkTo(icon.absoluteRight, 8.dp)
                     absoluteRight.linkTo(navigateButton.absoluteLeft, 8.dp)
@@ -338,14 +338,15 @@ fun ItemUserPlace(
             )
 
             ItemCounter(
-                modifier = Modifier.constrainAs(fishIcon) {
+                modifier = Modifier.constrainAs(amount) {
                     bottom.linkTo(date.bottom)
                     top.linkTo(date.top)
                     absoluteLeft.linkTo(date.absoluteRight, 8.dp)
                 },
                 count = place.catchesCount,
-                icon = R.drawable.ic_fish
+                icon = R.drawable.ic_fishing
             )
+
         }
     }
 }

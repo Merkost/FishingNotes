@@ -4,12 +4,12 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.libraries.maps.model.Marker
 import com.joesemper.fishing.model.entity.content.UserCatch
-import com.joesemper.fishing.model.repository.UserContentRepository
+import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.repository.UserRepository
 import com.joesemper.fishing.model.repository.app.CatchesRepository
 import com.joesemper.fishing.model.repository.app.MarkersRepository
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class UserCatchViewModel(
@@ -19,6 +19,21 @@ class UserCatchViewModel(
 ) : ViewModel() {
 
     val catch: MutableState<UserCatch?> = mutableStateOf(null)
+    val mapMarker: MutableState<UserMapMarker?> = mutableStateOf(null)
+
+    fun updateCatch(data: Map<String, Any>) {
+        mapMarker.value?.let { marker ->
+            catch.value?.let { catch ->
+                viewModelScope.launch {
+                    catchesRepo.updateUserCatch(
+                        markerId = marker.id,
+                        catchId = catch.id,
+                        data = data
+                    )
+                }
+            }
+        }
+    }
 
     fun deleteCatch() {
         viewModelScope.launch {
@@ -30,5 +45,26 @@ class UserCatchViewModel(
 
     fun getCurrentUser() = userRepository.currentUser
 
-    fun getMapMarker(markerId: String) = markersRepo.getMapMarker(markerId)
+    fun getMapMarker(markerId: String) {
+        viewModelScope.launch {
+            markersRepo.getMapMarker(markerId).collect {
+                mapMarker.value = it
+                subscribeOnCatchChanges()
+            }
+        }
+    }
+
+    suspend fun subscribeOnCatchChanges() {
+        mapMarker.value?.let { marker ->
+            catch.value?.let { oldCatch ->
+                catchesRepo.subscribeOnUserCatchState(
+                    markerId = marker.id,
+                    catchId = oldCatch.id
+                ).collect {
+                    catch.value = it
+                }
+            }
+        }
+    }
+
 }

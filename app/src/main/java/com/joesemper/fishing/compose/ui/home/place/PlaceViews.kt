@@ -11,6 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -103,7 +104,7 @@ fun PlaceTitleView(
                 absoluteLeft.linkTo(date.absoluteRight, 8.dp)
             },
             count = catchesAmount,
-            icon = R.drawable.ic_fish
+            icon = R.drawable.ic_fishing
         )
     }
 }
@@ -152,6 +153,7 @@ fun PlaceTabsView(
     }
 }
 
+@ExperimentalComposeUiApi
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @ExperimentalFoundationApi
@@ -181,7 +183,8 @@ fun PlaceTabsContentView(
                 )
                 1 -> DefaultNoteView(
                     modifier = Modifier.padding(8.dp),
-                    note = note
+                    note = note,
+                    onSaveNoteChange = {}
                 )
             }
         }
