@@ -42,7 +42,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
 import coil.annotation.ExperimentalCoilApi
-import com.airbnb.lottie.compose.*
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
@@ -54,7 +57,6 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
 import com.joesemper.fishing.compose.ui.home.notes.WeatherLayout
 import com.joesemper.fishing.compose.ui.home.notes.WeatherLayoutLoading
-import com.joesemper.fishing.compose.ui.home.weather.NoInternetView
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.domain.viewstates.ErrorType
@@ -144,7 +146,8 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(30.dp),
             modifier = Modifier
-                .fillMaxSize().verticalScroll(state = scrollState, enabled = true)
+                .fillMaxSize()
+                .verticalScroll(state = scrollState, enabled = true)
                 .padding(horizontal = 16.dp, vertical = 12.dp)
 
         ) {
@@ -392,134 +395,139 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
 
         SimpleOutlinedTextField(viewModel.description, stringResource(R.string.note))
         Spacer(modifier = Modifier.size(2.dp))
-        Row {
-            Column(Modifier.weight(1F)) {
-                OutlinedTextField(
-                    value = fishState.value,
-                    onValueChange = {
-                        if (it.isEmpty()) fishState.value = it
-                        else {
-                            fishState.value = when (it.toIntOrNull()) {
-                                null -> fishState.value //old value
-                                else -> it   //new value
-                            }
-                        }
-                    },
-                    isError = fishState.value.isEmpty(),
-                    label = { Text(text = stringResource(R.string.amount)) },
-                    trailingIcon = { Text(stringResource(R.string.pc)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next
-                    )
-                )
-                Spacer(modifier = Modifier.size(6.dp))
-                Row(Modifier.fillMaxWidth()) {
-                    OutlinedButton(
-                        onClick = {
-                            if (fishState.value.toInt() >= 1 && fishState.value.isNotBlank())
-                                fishState.value = ((fishState.value.toInt() - 1).toString())
-                        },
-                        Modifier
-                            .weight(1F)
-                            .fillMaxHeight()
-                            .align(Alignment.CenterVertically)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_baseline_minus),
-                            tint = MaterialTheme.colors.primary,
-                            contentDescription = ""
-                        )
-                    }
-                    Spacer(modifier = Modifier.size(6.dp))
-                    OutlinedButton(
-                        onClick = {
-                            if (fishState.value.isEmpty()) fishState.value = 1.toString()
-                            else fishState.value =
-                                ((fishState.value.toInt() + 1).toString())
-                        },
-                        Modifier
-                            .weight(1F)
-                            .fillMaxHeight()
-                            .align(Alignment.CenterVertically)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_baseline_plus),
-                            tint = MaterialTheme.colors.primary,
-                            contentDescription = ""
-                        )
-                    }
-                }
+        FishAmountAndWeightView(amountState = fishState, weightState = weightState)
 
-            }
-            Spacer(modifier = Modifier.size(6.dp))
-            Column(Modifier.weight(1F)) {
-                OutlinedTextField(
-                    value = weightState.value,
-                    onValueChange = {
-                        if (it.isEmpty()) weightState.value = it
-                        else {
-                            weightState.value = when (it.toDoubleOrNull()) {
-                                null -> weightState.value //old value
-                                else -> it   //new value
-                            }
+    }
+}
+
+@Composable
+fun FishAmountAndWeightView(
+    modifier: Modifier = Modifier,
+    amountState: MutableState<String>,
+    weightState: MutableState<String>
+) {
+    Row(modifier = modifier) {
+        Column(Modifier.weight(1F)) {
+            OutlinedTextField(
+                value = amountState.value,
+                onValueChange = {
+                    if (it.isEmpty()) amountState.value = it
+                    else {
+                        amountState.value = when (it.toIntOrNull()) {
+                            null -> amountState.value //old value
+                            else -> it   //new value
                         }
-                    },
-                    label = { Text(text = stringResource(R.string.weight)) },
-                    trailingIcon = {
-                        Text(stringResource(R.string.kg))
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next
-                    )
+                    }
+                },
+                isError = amountState.value.isEmpty(),
+                label = { Text(text = stringResource(R.string.amount)) },
+                trailingIcon = { Text(stringResource(R.string.pc)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
                 )
+            )
+            Spacer(modifier = Modifier.size(6.dp))
+            Row(Modifier.fillMaxWidth()) {
+                OutlinedButton(
+                    onClick = {
+                        if (amountState.value.toInt() >= 1 && amountState.value.isNotBlank())
+                            amountState.value = ((amountState.value.toInt() - 1).toString())
+                    },
+                    Modifier
+                        .weight(1F)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_minus),
+                        tint = MaterialTheme.colors.primary,
+                        contentDescription = ""
+                    )
+                }
                 Spacer(modifier = Modifier.size(6.dp))
-                Row(Modifier.fillMaxWidth()) {
-                    OutlinedButton(
-                        onClick = {
-                            if (weightState.value.toDouble() >= 0.1 && weightState.value.isNotBlank())
-                                weightState.value =
-                                    ((weightState.value.toDouble() - 0.1).roundTo(1).toString())
-                        },
-                        Modifier
-                            .weight(1F)
-                            .fillMaxHeight()
-                            .align(Alignment.CenterVertically)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_baseline_minus),
-                            tint = MaterialTheme.colors.primary,
-                            contentDescription = ""
-                        )
+                OutlinedButton(
+                    onClick = {
+                        if (amountState.value.isEmpty()) amountState.value = 1.toString()
+                        else amountState.value =
+                            ((amountState.value.toInt() + 1).toString())
+                    },
+                    Modifier
+                        .weight(1F)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_plus),
+                        tint = MaterialTheme.colors.primary,
+                        contentDescription = ""
+                    )
+                }
+            }
+
+        }
+        Spacer(modifier = Modifier.size(6.dp))
+        Column(Modifier.weight(1F)) {
+            OutlinedTextField(
+                value = weightState.value,
+                onValueChange = {
+                    if (it.isEmpty()) weightState.value = it
+                    else {
+                        weightState.value = when (it.toDoubleOrNull()) {
+                            null -> weightState.value //old value
+                            else -> it   //new value
+                        }
                     }
-                    Spacer(modifier = Modifier.size(6.dp))
-                    OutlinedButton(
-                        onClick = {
-                            if (weightState.value.isEmpty()) weightState.value =
-                                0.1f.roundTo(1).toString()
-                            else weightState.value =
-                                ((weightState.value.toDouble() + 0.1).roundTo(1).toString())
-                        },
-                        Modifier
-                            .weight(1F)
-                            .fillMaxHeight()
-                            .align(Alignment.CenterVertically)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_baseline_plus),
-                            tint = MaterialTheme.colors.primary,
-                            contentDescription = ""
-                        )
-                    }
+                },
+                label = { Text(text = stringResource(R.string.weight)) },
+                trailingIcon = {
+                    Text(stringResource(R.string.kg))
+                },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                )
+            )
+            Spacer(modifier = Modifier.size(6.dp))
+            Row(Modifier.fillMaxWidth()) {
+                OutlinedButton(
+                    onClick = {
+                        if (weightState.value.toDouble() >= 0.1 && weightState.value.isNotBlank())
+                            weightState.value =
+                                ((weightState.value.toDouble() - 0.1).roundTo(1).toString())
+                    },
+                    Modifier
+                        .weight(1F)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_minus),
+                        tint = MaterialTheme.colors.primary,
+                        contentDescription = ""
+                    )
+                }
+                Spacer(modifier = Modifier.size(6.dp))
+                OutlinedButton(
+                    onClick = {
+                        if (weightState.value.isEmpty()) weightState.value =
+                            0.1f.roundTo(1).toString()
+                        else weightState.value =
+                            ((weightState.value.toDouble() + 0.1).roundTo(1).toString())
+                    },
+                    Modifier
+                        .weight(1F)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_plus),
+                        tint = MaterialTheme.colors.primary,
+                        contentDescription = ""
+                    )
                 }
             }
         }
-
     }
 }
 
@@ -577,7 +585,9 @@ fun ItemAddPhoto(connectionState: ConnectionState) {
         }
 
     Card(
-        modifier = Modifier.padding(vertical = 4.dp).padding(end = 4.dp)
+        modifier = Modifier
+            .padding(vertical = 4.dp)
+            .padding(end = 4.dp)
             .size(100.dp)
             .fillMaxSize()
             .clip(RoundedCornerShape(5.dp))
@@ -604,7 +614,9 @@ fun ItemAddPhoto(connectionState: ConnectionState) {
                 painterResource(R.drawable.ic_baseline_add_photo_alternate_24), //Or we can use Icons.Default.Add
                 contentDescription = Constants.ITEM_ADD_PHOTO,
                 tint = MaterialTheme.colors.primary,
-                modifier = Modifier.fillMaxSize().padding(10.dp)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(10.dp)
             )
             SecondaryText(text = stringResource(id = R.string.add_photo))
         }
@@ -691,10 +703,9 @@ fun NewCatchWeatherItem(viewModel: NewCatchViewModel, connectionState: Connectio
             }
         }
     }
-
-
 }
 
+@ExperimentalComposeUiApi
 @Composable
 fun PickWeatherIconDialog(onIconSelected: (Int) -> Unit, onDismiss: () -> Unit) {
     DefaultDialog(

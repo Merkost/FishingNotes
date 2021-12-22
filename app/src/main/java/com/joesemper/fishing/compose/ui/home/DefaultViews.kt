@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -49,6 +50,7 @@ import androidx.constraintlayout.compose.Dimension
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.home.catch_screen.EditNoteDialog
 import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -57,6 +59,7 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 
+@ExperimentalComposeUiApi
 @Composable
 fun DefaultDialog(
     primaryText: String,
@@ -70,15 +73,33 @@ fun DefaultDialog(
     onDismiss: () -> Unit = { },
     content: @Composable() (() -> Unit)? = null
 ) {
-    Dialog(onDismissRequest = onDismiss) {
-        DefaultCard() {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        )
+    ) {
+        DefaultCard(
+            modifier = Modifier
+                .padding(4.dp)
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .animateContentSize()
+        ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
                 modifier = Modifier
                     .wrapContentSize()
+                    .animateContentSize()
                     .padding(14.dp)
             ) {
-                Column(modifier = Modifier.padding(6.dp)) {
+                Column(
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .animateContentSize()
+                ) {
                     PrimaryText(
                         text = primaryText,
                     )
@@ -88,7 +109,12 @@ fun DefaultDialog(
                     }
 
                     content?.let {
-                        Column(modifier = Modifier.padding(4.dp)) {
+                        Column(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .wrapContentSize()
+                                .animateContentSize()
+                        ) {
                             content()
                         }
                     }
@@ -106,14 +132,12 @@ fun DefaultDialog(
                         )
                     } else Spacer(modifier = Modifier.size(1.dp))
                     Row(
-
                         horizontalArrangement = Arrangement.End
                     ) {
                         if (negativeButtonText.isNotEmpty()) {
                             DefaultButtonText(
                                 text = negativeButtonText,
                                 onClick = onNegativeClick,
-
                                 shape = RoundedCornerShape(24.dp)
                             )
                         }
@@ -166,7 +190,8 @@ fun DefaultCard(
             .zIndex(1.0f)
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(padding), content = content
+            .padding(padding),
+        content = content
     )
 }
 
@@ -299,7 +324,11 @@ fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
 }
 
 @Composable
-fun SimpleOutlinedTextField(textState: MutableState<String>, label: String) {
+fun SimpleOutlinedTextField(
+    textState: MutableState<String>,
+    label: String,
+    singleLine: Boolean = true,
+) {
     var text by rememberSaveable { textState }
     OutlinedTextField(
         value = text,
@@ -309,7 +338,7 @@ fun SimpleOutlinedTextField(textState: MutableState<String>, label: String) {
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Next
         ),
-        singleLine = true
+        singleLine = singleLine
     )
 }
 
@@ -373,7 +402,8 @@ fun PrimaryText(
     fontWeight: FontWeight? = null,
     textAlign: TextAlign? = null,
     text: String,
-    textColor: Color = MaterialTheme.colors.onSurface
+    textColor: Color = MaterialTheme.colors.onSurface,
+    maxLines: Int = Int.MAX_VALUE
 ) {
     Text(
         modifier = modifier,
@@ -382,7 +412,9 @@ fun PrimaryText(
         fontWeight = fontWeight,
         textAlign = textAlign,
         color = textColor,
-        text = text
+        text = text,
+        maxLines = maxLines,
+        softWrap = true
     )
 }
 
@@ -411,8 +443,9 @@ fun PrimaryTextSmall(
 fun PrimaryTextBold(modifier: Modifier = Modifier, text: String) {
     PrimaryText(
         modifier = modifier,
-        fontWeight = FontWeight.Bold,
-        text = text
+        fontWeight = FontWeight.SemiBold,
+        text = text,
+        maxLines = 1
     )
 }
 
@@ -841,22 +874,38 @@ fun FabWithMenu(
     }
 }
 
+@ExperimentalComposeUiApi
 @Composable
 fun DefaultNoteView(
     modifier: Modifier = Modifier,
     note: String,
+    onSaveNoteChange: (String) -> Unit
 ) {
-    DefaultCard(
+
+    val dialogState = remember { mutableStateOf(false) }
+
+    if (dialogState.value) {
+        EditNoteDialog(
+            note = note,
+            dialogState = dialogState,
+            onSaveNoteChange = onSaveNoteChange
+        )
+    }
+
+    DefaultCardClickable(
         modifier = modifier
             .fillMaxWidth()
-            .wrapContentHeight()
+            .wrapContentHeight(),
+        onClick = {
+            dialogState.value = true
+        }
     ) {
         ConstraintLayout(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight(),
         ) {
-            val (subtitle, text, editButton) = createRefs()
+            val (subtitle, text) = createRefs()
 
             SubtitleWithIcon(
                 modifier = Modifier.constrainAs(subtitle) {
@@ -867,16 +916,6 @@ fun DefaultNoteView(
                 text = stringResource(id = R.string.note)
             )
 
-            DefaultIconButton(
-                modifier = Modifier.constrainAs(editButton) {
-                    top.linkTo(subtitle.top)
-                    bottom.linkTo(subtitle.bottom)
-                    absoluteRight.linkTo(parent.absoluteRight, 8.dp)
-                },
-                icon = painterResource(id = R.drawable.ic_baseline_edit_24),
-                onClick = { }
-            )
-
             if (note.isBlank()) {
                 SecondaryText(
                     modifier = Modifier
@@ -884,7 +923,7 @@ fun DefaultNoteView(
                         .constrainAs(text) {
                             top.linkTo(subtitle.bottom, 16.dp)
                             absoluteLeft.linkTo(subtitle.absoluteLeft)
-                            absoluteRight.linkTo(editButton.absoluteRight)
+                            absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                             width = Dimension.fillToConstraints
                         },
                     text = stringResource(id = R.string.no_description)
@@ -895,7 +934,7 @@ fun DefaultNoteView(
                         top.linkTo(subtitle.bottom, 8.dp)
                         bottom.linkTo(parent.bottom, 16.dp)
                         absoluteLeft.linkTo(subtitle.absoluteLeft)
-                        absoluteRight.linkTo(editButton.absoluteRight)
+                        absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                         width = Dimension.fillToConstraints
                     },
                     text = note

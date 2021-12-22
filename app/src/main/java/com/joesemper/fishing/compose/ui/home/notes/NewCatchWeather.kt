@@ -6,6 +6,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
@@ -31,6 +32,7 @@ import com.joesemper.fishing.utils.time.toHours
 import org.koin.androidx.compose.get
 import java.util.*
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun WeatherLayout(
     weatherForecast: WeatherForecast?,
@@ -274,7 +276,9 @@ fun WeatherLayout(
 @Composable
 fun WeatherLayoutLoading() {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) { CircularProgressIndicator() }

@@ -12,6 +12,10 @@ interface CatchesRepository {
     fun getAllUserCatchesState(): Flow<CatchesContentState>
     fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>>
 
+
+    fun subscribeOnUserCatchState(markerId: String, catchId: String): Flow<UserCatch>
+    suspend fun updateUserCatch(markerId: String, catchId: String, data: Map<String, Any>)
+
     suspend fun deleteCatch(userCatch: UserCatch)
     suspend fun addNewCatch(markerId: String, newCatch: RawUserCatch): StateFlow<Progress>
 }

@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -389,6 +390,7 @@ fun PlaceTileView(
     }
 }
 
+@ExperimentalComposeUiApi
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 @ExperimentalPermissionsApi
@@ -410,7 +412,9 @@ fun GrantLocationPermissionsDialog(
         onPositiveClick = onPositiveClick,
         onDismiss = onDismiss,
         content = {
-            LottieMyLocation(modifier = Modifier.fillMaxWidth().height(180.dp))
+            LottieMyLocation(modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp))
         }
     )
 

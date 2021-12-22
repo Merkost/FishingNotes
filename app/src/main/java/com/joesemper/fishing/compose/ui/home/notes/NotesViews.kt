@@ -32,10 +32,7 @@ import coil.compose.AsyncImagePainter
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.*
-import com.joesemper.fishing.compose.ui.theme.cardColor
-import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
+import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.utils.time.toDateTextMonth
@@ -293,7 +290,7 @@ fun ItemUserPlace(
                 .wrapContentHeight()
                 .fillMaxWidth()
         ) {
-            val (icon, title, amount, fishIcon, date, navigateButton) = createRefs()
+            val (icon, title, amount, date, navigateButton) = createRefs()
 
             Icon(
                 modifier = Modifier
@@ -308,7 +305,7 @@ fun ItemUserPlace(
                 tint = Color(place.markerColor)
             )
 
-            PrimaryTextBold(
+            PrimaryText(
                 modifier = Modifier.constrainAs(title) {
                     absoluteLeft.linkTo(icon.absoluteRight, 8.dp)
                     absoluteRight.linkTo(navigateButton.absoluteLeft, 8.dp)
@@ -338,14 +335,15 @@ fun ItemUserPlace(
             )
 
             ItemCounter(
-                modifier = Modifier.constrainAs(fishIcon) {
+                modifier = Modifier.constrainAs(amount) {
                     bottom.linkTo(date.bottom)
                     top.linkTo(date.top)
                     absoluteLeft.linkTo(date.absoluteRight, 8.dp)
                 },
                 count = place.catchesCount,
-                icon = R.drawable.ic_fish
+                icon = R.drawable.ic_fishing
             )
+
         }
     }
 }
@@ -616,13 +614,14 @@ fun ItemPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Unit) {
 @Composable
 fun ItemCounter(
     modifier: Modifier = Modifier,
-    count: Int,
-    icon: Int
+    count: Number,
+    icon: Int,
+    tint: Color = secondaryTextColor
 ) {
-    Row(modifier = modifier.padding(2.dp)) {
+    Row(modifier = modifier) {
         Icon(
             modifier = Modifier.size(24.dp),
-            tint = secondaryFigmaTextColor,
+            tint = tint,
             painter = painterResource(id = icon),
             contentDescription = null,
         )

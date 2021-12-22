@@ -1,11 +1,7 @@
 package com.joesemper.fishing.compose.ui.home
 
 import android.content.res.Configuration
-import android.graphics.Point
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.FloatTweenSpec
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
@@ -23,13 +19,11 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -42,15 +36,12 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-
 import coil.annotation.ExperimentalCoilApi
 import com.airbnb.lottie.compose.*
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.bar_chart.BarChart
 import com.joesemper.fishing.compose.bar_chart.BarChartDataModel
-import com.joesemper.fishing.compose.bar_chart.BarChartUtils.axisAreas
 import com.joesemper.fishing.compose.ui.MainDestinations
-import com.joesemper.fishing.compose.ui.home.map.LottieMyLocation
 import com.joesemper.fishing.domain.UserViewModel
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.MapMarker
@@ -81,8 +72,9 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
     val uiState = viewModel.uiState
     Scaffold(modifier = Modifier.fillMaxSize(),
         topBar = { ProfileAppBar(navController, viewModel) }) {
-        ConstraintLayout(modifier = Modifier.fillMaxSize()
-            .scrollable(rememberScrollState(0), Orientation.Vertical,true,)) {
+        ConstraintLayout(modifier = Modifier
+            .fillMaxSize()
+            .scrollable(rememberScrollState(0), Orientation.Vertical, true,)) {
 
             val (background, card, image, name, places, catches, content, stats, box, logout, settings) = createRefs()
             val bgGl = createGuidelineFromTop(120.dp)
@@ -99,25 +91,32 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
             ) {}
 
 
-            UserImage(user, imgSize, modifier = Modifier.constrainAs(image) {
-                top.linkTo(parent.top)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
-                bottom.linkTo(parent.bottom)
-                centerAround(bgGl)
-            }.zIndex(2f))
-            UserText(user, modifier = Modifier.constrainAs(name) {
-                top.linkTo(image.bottom)
-                absoluteLeft.linkTo(card.absoluteLeft)
-                absoluteRight.linkTo(card.absoluteRight)
-            }.zIndex(2f))
-
-            Card(
-                modifier = Modifier.constrainAs(card) {
-                    top.linkTo(bgGl)
+            UserImage(user, imgSize, modifier = Modifier
+                .constrainAs(image) {
+                    top.linkTo(parent.top)
                     absoluteLeft.linkTo(parent.absoluteLeft)
                     absoluteRight.linkTo(parent.absoluteRight)
-                }.fillMaxWidth().wrapContentHeight()
+                    bottom.linkTo(parent.bottom)
+                    centerAround(bgGl)
+                }
+                .zIndex(2f))
+            UserText(user, modifier = Modifier
+                .constrainAs(name) {
+                    top.linkTo(image.bottom)
+                    absoluteLeft.linkTo(card.absoluteLeft)
+                    absoluteRight.linkTo(card.absoluteRight)
+                }
+                .zIndex(2f))
+
+            Card(
+                modifier = Modifier
+                    .constrainAs(card) {
+                        top.linkTo(bgGl)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                    }
+                    .fillMaxWidth()
+                    .wrapContentHeight()
                     .zIndex(1f),
                 shape = AbsoluteRoundedCornerShape(25.dp, 25.dp),
                 elevation = 10.dp,
@@ -125,7 +124,9 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
             ) {
                 Divider()
                 Column(
-                    modifier = Modifier.padding(top = 120.dp, bottom = 120.dp).fillMaxSize(),
+                    modifier = Modifier
+                        .padding(top = 120.dp, bottom = 120.dp)
+                        .fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
@@ -144,18 +145,24 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
                 }
             }
 
-            PlacesNumber(userPlacesNum, Modifier.constrainAs(places) {
-                top.linkTo(bgGl)
-                absoluteLeft.linkTo(verticalCenterGl, imgSize / 2)
-                absoluteRight.linkTo(parent.absoluteRight)
-                bottom.linkTo(image.bottom)
-            }.zIndex(3f))
-            CatchesNumber(userCatchesNum, Modifier.constrainAs(catches) {
-                top.linkTo(bgGl)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(verticalCenterGl, imgSize / 2)
-                bottom.linkTo(image.bottom)
-            }.zIndex(3f))
+            PlacesNumber(userPlacesNum,
+                Modifier
+                    .constrainAs(places) {
+                        top.linkTo(bgGl)
+                        absoluteLeft.linkTo(verticalCenterGl, imgSize / 2)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                        bottom.linkTo(image.bottom)
+                    }
+                    .zIndex(3f))
+            CatchesNumber(userCatchesNum,
+                Modifier
+                    .constrainAs(catches) {
+                        top.linkTo(bgGl)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(verticalCenterGl, imgSize / 2)
+                        bottom.linkTo(image.bottom)
+                    }
+                    .zIndex(3f))
             /*SettingsIcon(Modifier.constrainAs(settings) {
                 top.linkTo(parent.top, 60.dp)
                 absoluteLeft.linkTo(verticalCenterGl, imgSize / 2)
@@ -172,7 +179,9 @@ fun CatchesChart() {
     val barChartDataModel = BarChartDataModel()
     BarChart(
         barChartData = barChartDataModel.barChartData,
-        modifier = Modifier.fillMaxWidth().height(250.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(250.dp)
     )
 }
 
@@ -242,13 +251,17 @@ fun PlacesNumber(userPlacesNum: List<MapMarker>?, modifier: Modifier = Modifier)
     ) {
         Icon(
             Icons.Default.Place, stringResource(R.string.place),
-            modifier = Modifier.size(25.dp).shimmer(),
+            modifier = Modifier
+                .size(25.dp)
+                .shimmer(),
             tint = Color.LightGray
         )
         Text(
             "0",
             color = Color.LightGray,
-            modifier = Modifier.background(Color.LightGray).shimmer()
+            modifier = Modifier
+                .background(Color.LightGray)
+                .shimmer()
         )
     }
 
@@ -274,13 +287,17 @@ fun CatchesNumber(userCatchesNum: List<UserCatch>?, modifier: Modifier = Modifie
     ) {
         Icon(
             painterResource(R.drawable.ic_fishing), stringResource(R.string.place),
-            modifier = Modifier.size(25.dp).shimmer(),
+            modifier = Modifier
+                .size(25.dp)
+                .shimmer(),
             tint = Color.LightGray
         )
         Text(
             "0",
             color = Color.LightGray,
-            modifier = Modifier.background(Color.LightGray).shimmer()
+            modifier = Modifier
+                .background(Color.LightGray)
+                .shimmer()
         )
     }
 }
@@ -292,7 +309,9 @@ fun UserButtons(navController: NavController) {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize().padding(horizontal = 80.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 80.dp),
         verticalArrangement = Arrangement.spacedBy(15.dp, Alignment.Bottom)
     ) {
 //        ColumnButton(painterResource(R.drawable.ic_friends), stringResource(R.string.friends)) {
@@ -317,6 +336,7 @@ fun UserButtons(navController: NavController) {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @InternalCoroutinesApi
 @Composable
 fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavController) {
@@ -346,7 +366,9 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
         },
         onDismiss = { dialogOnLogout.value = false },
         content = {
-            LottieLogout(modifier = Modifier.fillMaxWidth().height(180.dp))
+            LottieLogout(modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp))
         }
     )
 /*
@@ -419,7 +441,10 @@ fun UserImage(user: User?, imgSize: Dp, modifier: Modifier = Modifier) {
     )
     user?.let {
         Column(
-            modifier = modifier.fillMaxWidth().wrapContentHeight().padding(20.dp),
+            modifier = modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -439,7 +464,9 @@ fun UserImage(user: User?, imgSize: Dp, modifier: Modifier = Modifier) {
                 failure = {
                     Text("Image request failed")
                 },
-                modifier = Modifier.size(imgSize).clip(CircleShape)
+                modifier = Modifier
+                    .size(imgSize)
+                    .clip(CircleShape)
                     .border(2.dp, linearGradientBrush, CircleShape)
 
             )

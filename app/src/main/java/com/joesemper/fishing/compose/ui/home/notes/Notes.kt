@@ -5,6 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -33,7 +34,7 @@ fun Notes(
     modifier: Modifier = Modifier,
     navController: NavController,
 ) {
-    val tabs = listOf(TabItem.Places, TabItem.Catches)
+    val tabs = remember { listOf(TabItem.Places, TabItem.Catches) }
     val pagerState = rememberPagerState(0)
 
     Scaffold(

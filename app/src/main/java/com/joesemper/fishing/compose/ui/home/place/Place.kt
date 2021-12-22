@@ -11,6 +11,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -22,7 +23,7 @@ import com.joesemper.fishing.model.entity.content.UserMapMarker
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class,
-        ExperimentalAnimationApi::class, ExperimentalPagerApi::class)
+        ExperimentalAnimationApi::class, ExperimentalPagerApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: UserMapMarker?) {
 

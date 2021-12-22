@@ -4,11 +4,15 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.RadioButton
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -16,7 +20,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.airbnb.lottie.compose.*
 import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
 import com.alorma.compose.settings.ui.SettingsCheckbox
 import com.alorma.compose.settings.ui.SettingsMenuLink
@@ -26,7 +29,9 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
-import com.joesemper.fishing.compose.ui.home.map.*
+import com.joesemper.fishing.compose.ui.home.map.GrantLocationPermissionsDialog
+import com.joesemper.fishing.compose.ui.home.map.checkPermission
+import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
 import com.joesemper.fishing.compose.ui.theme.AppThemeValues
@@ -36,6 +41,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
+@ExperimentalComposeUiApi
 @Composable
 fun SettingsScreen(backPress: () -> Unit) {
 
@@ -135,6 +141,7 @@ fun SettingsScreen(backPress: () -> Unit) {
 
 }
 
+@ExperimentalComposeUiApi
 @Composable
 fun MainAppSettings(userPreferences: UserPreferences) {
     val context = LocalContext.current
@@ -179,7 +186,9 @@ fun MainAppSettings(userPreferences: UserPreferences) {
             }
 
             Row(
-                modifier = Modifier.fillMaxWidth().wrapContentHeight()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
                     .padding(horizontal = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
 
@@ -384,6 +393,7 @@ fun GetPressureUnit(
     }
 }
 
+@ExperimentalComposeUiApi
 @Composable
 @OptIn(ExperimentalPermissionsApi::class)
 fun GetLocationPermission(closeDialog: () -> Unit) {
@@ -392,12 +402,12 @@ fun GetLocationPermission(closeDialog: () -> Unit) {
     PermissionsRequired(
         multiplePermissionsState = permissionsState,
         permissionsNotGrantedContent = {
-                GrantLocationPermissionsDialog(
-                    onDismiss = closeDialog,
-                    onNegativeClick = closeDialog,
-                    onPositiveClick = closeDialog,
-                    onDontAskClick = closeDialog
-                )
+            GrantLocationPermissionsDialog(
+                onDismiss = closeDialog,
+                onNegativeClick = closeDialog,
+                onPositiveClick = closeDialog,
+                onDontAskClick = closeDialog
+            )
         },
         permissionsNotAvailableContent = { SnackbarManager.showMessage(R.string.location_permission_denied) })
     { checkPermission(context) }
