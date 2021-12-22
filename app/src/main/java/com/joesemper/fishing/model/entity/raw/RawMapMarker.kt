@@ -9,5 +9,6 @@ data class RawMapMarker (
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
     val markerColor: Int = Color(0xFFEC407A).hashCode(),
+    val isVisible: Boolean = true,
     val isPublic: Boolean = false
 )

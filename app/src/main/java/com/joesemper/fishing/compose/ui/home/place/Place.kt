@@ -22,17 +22,23 @@ import com.joesemper.fishing.domain.UserPlaceViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import org.koin.androidx.compose.getViewModel
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class,
-        ExperimentalAnimationApi::class, ExperimentalPagerApi::class, ExperimentalComposeUiApi::class)
+@OptIn(
+    ExperimentalFoundationApi::class, ExperimentalMaterialApi::class,
+    ExperimentalAnimationApi::class, ExperimentalPagerApi::class, ExperimentalComposeUiApi::class
+)
 @Composable
 fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: UserMapMarker?) {
 
     val viewModel = getViewModel<UserPlaceViewModel>()
-    place?.let { viewModel.marker.value = it }
+    place?.let { marker ->
+        viewModel.marker.value = marker
+        if (viewModel.markerVisibility.value == null)
+            viewModel.markerVisibility.value = marker.isVisible
+    }
 
     Scaffold(
         topBar = {
-            PlaceTopBar(backPress)
+            PlaceTopBar(backPress, viewModel)
         }
     ) {
         viewModel.marker.value?.let { userPlace ->

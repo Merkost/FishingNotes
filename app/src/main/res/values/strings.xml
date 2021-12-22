@@ -226,6 +226,8 @@
     <string name="adding_place_on_current_location">Adding place on your location</string>
     <string name="location_permissions_required">Location permissions required</string>
     <string name="fab_fast_add">Быстрое добавление точки на карте</string>
+    <string name="marker_visibility_change_error">Не удалось изменить видимость места!</string>
+    <string name="marker_visibility_change_success">Видимость места успешно сохранена</string>
 
 
 </resources>

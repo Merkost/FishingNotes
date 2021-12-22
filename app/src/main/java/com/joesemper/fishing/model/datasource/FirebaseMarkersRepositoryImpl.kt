@@ -2,32 +2,25 @@ package com.joesemper.fishing.model.datasource
 
 import android.net.Uri
 import android.util.Log
-import com.google.android.gms.tasks.OnSuccessListener
-import com.google.android.gms.tasks.Task
+import androidx.compose.runtime.MutableState
 import com.google.firebase.firestore.DocumentChange
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.QuerySnapshot
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
-import com.google.firebase.ktx.Firebase
-import com.joesemper.fishing.model.entity.common.CatchesContentState
+import com.joesemper.fishing.model.entity.common.LiteProgress
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.MapMarker
-import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
-import com.joesemper.fishing.model.entity.raw.RawUserCatch
 import com.joesemper.fishing.model.mappers.MapMarkerMapper
-import com.joesemper.fishing.model.mappers.UserCatchMapper
 import com.joesemper.fishing.model.repository.app.MarkersRepository
 import com.joesemper.fishing.utils.getCurrentUserId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 class FirebaseMarkersRepositoryImpl(
     private val dbCollections: RepositoryCollections,
@@ -74,6 +67,22 @@ class FirebaseMarkersRepositoryImpl(
         awaitClose {
             listeners.forEach { it.remove() }
         }
+    }
+
+    override suspend fun changeMarkerVisibility(marker: UserMapMarker, changeTo: Boolean)
+    : StateFlow<LiteProgress> {
+        val flow = MutableStateFlow<LiteProgress>(LiteProgress.Loading)
+        val documentRef = dbCollections.getUserMapMarkersCollection().document(marker.id)
+        val task = documentRef.update("isVisible", changeTo)
+        task.addOnCompleteListener {
+            if (task.isSuccessful) {
+                flow.tryEmit(LiteProgress.Complete)
+            }
+            if (task.isCanceled || task.exception != null) {
+                flow.tryEmit(LiteProgress.Error(task.exception?.cause))
+            }
+        }
+        return flow
     }
 
 

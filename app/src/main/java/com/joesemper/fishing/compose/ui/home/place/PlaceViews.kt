@@ -2,6 +2,7 @@ package com.joesemper.fishing.compose.ui.home.place
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -396,18 +397,20 @@ fun PlaceButtonsView(
 @Composable
 fun PlaceTopBar(
     backPress: () -> Unit,
+    viewModel: UserPlaceViewModel,
     modifier: Modifier = Modifier,
-) {
-    var toggleChecked by remember {
-        mutableStateOf(false)
-    }
+
+    ) {
+
+    val isVisible = viewModel.markerVisibility.value ?: true
 
     val color = animateColorAsState(
-        targetValue = if (toggleChecked) {
-            supportTextColor
-        } else {
+        targetValue = if (isVisible) {
             MaterialTheme.colors.onPrimary
-        }
+        } else {
+            supportTextColor
+        },
+        animationSpec = tween(900)
     )
 
     DefaultAppBar(
@@ -415,9 +418,11 @@ fun PlaceTopBar(
         title = stringResource(id = R.string.place),
         onNavClick = backPress,
         actions = {
-            IconToggleButton(checked = toggleChecked, onCheckedChange = {
-                toggleChecked = it
-            }) {
+            IconToggleButton(checked = isVisible,
+                onCheckedChange = {
+                    //viewModel.markerVisibility.value = it
+                    viewModel.changeVisibility(it)
+                }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_baseline_remove_red_eye_24),
                     contentDescription = null,

@@ -15,5 +15,6 @@ class UserMapMarker(
     var markerColor: Int = Color(0xFFEC407A).hashCode(),
     val catchesCount: Int = 0,
     val dateOfCreation: Long = 0,
+    val isVisible: Boolean = true,
     val isPublic: Boolean = false
 ) : Parcelable, MapMarker
