@@ -121,7 +121,7 @@ private fun NavGraphBuilder.NavGraph(
 
     composable(
         route = MainDestinations.PLACE_ROUTE,
-    ) { UserPlaceScreen(navController, it.requiredArg(Arguments.PLACE)) }
+    ) { UserPlaceScreen(upPress, navController, it.requiredArg(Arguments.PLACE)) }
 
     composable(
         route = MainDestinations.CATCH_ROUTE,

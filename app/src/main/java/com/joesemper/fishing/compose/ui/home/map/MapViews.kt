@@ -6,6 +6,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -70,8 +71,10 @@ fun MapScaffold(
     )
 
     val sheetColor = animateColorAsState(
-        if (scaffoldState.currentFraction > 0.5f) MaterialTheme.colors.surface
-        else Color.White.copy(0f)
+        if (scaffoldState.currentFraction != 1f) {
+            MaterialTheme.colors.surface.copy(0f)
+        } else MaterialTheme.colors.surface.copy(scaffoldState.currentFraction)
+
     )
 
     val radius = (30 * (1f-scaffoldState.currentFraction)).dp
@@ -85,6 +88,7 @@ fun MapScaffold(
         sheetPeekHeight = dp.value,
         floatingActionButton = fab,
         sheetContent = bottomSheet,
+        sheetGesturesEnabled = scaffoldState.currentFraction != 1f,
         content = content
     )
 }

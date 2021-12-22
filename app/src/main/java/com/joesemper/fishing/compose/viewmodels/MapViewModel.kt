@@ -31,7 +31,7 @@ class MapViewModel(
 
     private val mapMarkers = MutableStateFlow(listOf<UserMapMarker>())
 
-    var mapUiState: MapUiState = MapUiState.NormalMode
+    var mapUiState: MutableState<MapUiState> = mutableStateOf(MapUiState.NormalMode)
 
     @ExperimentalMaterialApi
     var sheetState: BottomSheetValue = BottomSheetValue.Collapsed

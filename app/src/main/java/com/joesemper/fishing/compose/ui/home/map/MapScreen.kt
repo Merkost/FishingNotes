@@ -79,7 +79,7 @@ fun MapScreen(
 
     var mapUiState: MapUiState by remember {
         if (addPlaceOnStart) mutableStateOf(MapUiState.PlaceSelectMode)
-        else mutableStateOf(viewModel.mapUiState)
+        else mutableStateOf(viewModel.mapUiState.value)
     }
 
     var cameraMoveState: CameraMoveState by remember {
@@ -94,9 +94,9 @@ fun MapScreen(
         mutableStateOf(Pair(LatLng(0.0, 0.0), 20f))
     }
 
-    LaunchedEffect(mapUiState, scaffoldState.bottomSheetState.currentValue) {
+    LaunchedEffect(mapUiState) {
         if (mapUiState != viewModel.mapUiState) {
-            viewModel.mapUiState = mapUiState
+            viewModel.mapUiState.value = mapUiState
             when (mapUiState) {
                 is MapUiState.NormalMode -> {
                     scaffoldState.bottomSheetState.collapse()
@@ -189,11 +189,18 @@ fun MapScreen(
 
             MarkerInfoDialog(
                 viewModel.currentMarker.value,
+                navController = navController,
                 mapUiState = mapUiState,
-                scaffoldState = scaffoldState
+                scaffoldState = scaffoldState,
+                upPress = {
+                    coroutineScope.launch {
+                        scaffoldState.bottomSheetState.collapse()
+                    }
+                }
             ) {
+                mapUiState = MapUiState.BottomSheetFullyExpanded
                 coroutineScope.launch {
-                    scaffoldState.bottomSheetState.expand()
+                    //scaffoldState.bottomSheetState.expand()
                 }
                 /*onMarkerDetailsClick(navController, marker)*/
             }
@@ -499,16 +506,12 @@ fun MapFab(
 
     val paddingTop = animateDpAsState(
         when (state) {
-            MapUiState.NormalMode -> {
-                0.dp
-            }
+            MapUiState.NormalMode -> { 0.dp }
             MapUiState.BottomSheetInfoMode, MapUiState.BottomSheetFullyExpanded -> {
                 32.dp
             }
             //MapUiState.BottomSheetFullyExpanded -> { 82.dp }
-            MapUiState.PlaceSelectMode -> {
-                0.dp
-            }
+            MapUiState.PlaceSelectMode -> { 0.dp }
         }
     )
 
@@ -544,7 +547,7 @@ fun MapFab(
     val adding_place = stringResource(R.string.adding_place_on_current_location)
     val permissions_required = stringResource(R.string.location_permissions_required)
     AnimatedVisibility(
-        state != MapUiState.BottomSheetFullyExpanded,
+        currentFraction == 0f,
         exit = fadeOut(),
         enter = fadeIn()
     ) {

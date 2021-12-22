@@ -355,13 +355,14 @@ fun HeaderTextSecondary(
 }
 
 @Composable
-fun SubtitleText(modifier: Modifier = Modifier, text: String) {
+fun SubtitleText(modifier: Modifier = Modifier, text: String,
+                 textColor: Color? = null) {
     val darkTheme = isSystemInDarkTheme()
 
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.subtitle1,
-        color = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
+        color = textColor ?: if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
         text = text
     )
 }
