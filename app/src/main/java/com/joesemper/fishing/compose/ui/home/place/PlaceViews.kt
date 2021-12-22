@@ -11,11 +11,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -29,6 +31,7 @@ import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.home.notes.*
 import com.joesemper.fishing.compose.ui.theme.primaryTextColor
+import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.compose.ui.theme.supportTextColor
 import com.joesemper.fishing.domain.UserPlaceViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
@@ -103,7 +106,7 @@ fun PlaceTitleView(
                 absoluteLeft.linkTo(date.absoluteRight, 8.dp)
             },
             count = catchesAmount,
-            icon = R.drawable.ic_fish
+            icon = R.drawable.ic_fishing
         )
     }
 }
@@ -152,6 +155,7 @@ fun PlaceTabsView(
     }
 }
 
+@ExperimentalComposeUiApi
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @ExperimentalFoundationApi
@@ -181,7 +185,8 @@ fun PlaceTabsContentView(
                 )
                 1 -> DefaultNoteView(
                     modifier = Modifier.padding(8.dp),
-                    note = note
+                    note = note,
+                    onSaveNoteChange = {}
                 )
             }
         }
@@ -220,7 +225,7 @@ fun PlaceCatchesView(
                     ) {
                         PlaceCatchItemView(
                             catch = it,
-                            onClick = { userCatchClicked(it) }
+                            onClick = { userCatch -> userCatchClicked(userCatch) }
                         )
                     }
                 }
@@ -243,46 +248,44 @@ fun PlaceCatchesView(
 fun PlaceCatchItemView(
     modifier: Modifier = Modifier,
     catch: UserCatch,
-    onClick: () -> Unit
+    showPlace: Boolean = true,
+    onClick: (UserCatch) -> Unit
 ) {
     val preferences: UserPreferences = get()
     val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
 
     DefaultCardClickable(
         modifier = modifier,
-        onClick = { onClick() }
+        onClick = { onClick(catch) }
     ) {
         ConstraintLayout(
             modifier = Modifier
                 .padding(8.dp)
                 .fillMaxWidth()
         ) {
-            val (fishType, amount, weight, rodIcon, rod, time, photosIcon, photosCount) = createRefs()
+            val (fishType, amount, weight, placeIcon, place, time, photosCount) = createRefs()
 
-            PrimaryTextBold(
+            PrimaryText(
                 modifier = Modifier.constrainAs(fishType) {
                     top.linkTo(parent.top)
-                    linkTo(
-                        parent.start,
-                        weight.start,
-                        startMargin = 8.dp,
-                        endMargin = 8.dp,
-                        bias = 0f
-                    )
+                    absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
+                    absoluteRight.linkTo(weight.absoluteLeft, 16.dp)
+                    width = Dimension.fillToConstraints
                 },
-                text = catch.fishType
+                text = catch.fishType,
+                maxLines = 1
             )
 
             SecondaryTextSmall(
                 modifier = Modifier.constrainAs(amount) {
-                    top.linkTo(fishType.bottom, 2.dp)
+                    top.linkTo(fishType.bottom)
                     absoluteLeft.linkTo(fishType.absoluteLeft)
                 },
                 text = "${stringResource(id = R.string.amount)}: ${catch.fishAmount}" +
                         " ${stringResource(id = R.string.pc)}"
             )
 
-            PrimaryText(
+            PrimaryTextBold(
                 modifier = Modifier.constrainAs(weight) {
                     top.linkTo(fishType.top)
                     absoluteRight.linkTo(parent.absoluteRight, 8.dp)
@@ -290,55 +293,50 @@ fun PlaceCatchItemView(
                 text = "${catch.fishWeight} ${stringResource(id = R.string.kg)}"
             )
 
-            Icon(
-                modifier = Modifier
-                    .size(24.dp)
-                    .constrainAs(rodIcon) {
-                        absoluteLeft.linkTo(fishType.absoluteLeft)
-                        top.linkTo(amount.bottom, 12.dp)
-                    },
-                painter = painterResource(id = R.drawable.ic_fishing_rod),
-                contentDescription = stringResource(id = R.string.fish_rod)
-            )
+            if (showPlace) {
+                Icon(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .constrainAs(placeIcon) {
+                            absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
+                            top.linkTo(time.top)
+                            bottom.linkTo(time.bottom)
+                        },
+                    painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+                    contentDescription = stringResource(id = R.string.location),
+                    tint = secondaryTextColor
+                )
 
-            PrimaryText(
-                modifier = Modifier.constrainAs(rod) {
-                    absoluteLeft.linkTo(rodIcon.absoluteRight, 4.dp)
-                    top.linkTo(rodIcon.top)
-                    bottom.linkTo(rodIcon.bottom)
-                },
-                text = if (catch.fishingRodType.isNotBlank()) {
-                    catch.fishingRodType
-                } else {
-                    stringResource(id = R.string.no_rod)
-                }
-            )
+                SecondaryText(
+                    modifier = Modifier.constrainAs(place) {
+                        absoluteLeft.linkTo(placeIcon.absoluteRight, 8.dp)
+                        absoluteRight.linkTo(photosCount.absoluteLeft, 8.dp)
+                        top.linkTo(placeIcon.top)
+                        bottom.linkTo(placeIcon.bottom)
+                        width = Dimension.fillToConstraints
+                    },
+                    text = catch.placeTitle,
+                    textAlign = TextAlign.Start,
+                    maxLines = 1
+                )
+            }
 
             SupportText(
                 modifier = Modifier.constrainAs(time) {
-                    absoluteRight.linkTo(parent.absoluteRight, 12.dp)
-                    top.linkTo(rod.bottom)
+                    absoluteRight.linkTo(parent.absoluteRight, 8.dp)
+                    top.linkTo(amount.bottom, 16.dp)
                 },
                 text = catch.date.toTime(is12hTimeFormat)
             )
 
-            SupportText(
+            ItemCounter(
                 modifier = Modifier.constrainAs(photosCount) {
                     top.linkTo(time.top)
+                    bottom.linkTo(time.bottom)
                     absoluteRight.linkTo(time.absoluteLeft, 12.dp)
                 },
-                text = " x ${catch.downloadPhotoLinks.size}"
-            )
-
-            Icon(
-                modifier = Modifier.constrainAs(photosIcon) {
-                    top.linkTo(photosCount.top)
-                    bottom.linkTo(photosCount.bottom)
-                    absoluteRight.linkTo(photosCount.absoluteLeft)
-                },
-                painter = painterResource(id = R.drawable.ic_baseline_photo_24),
-                contentDescription = null,
-                tint = supportTextColor
+                count = catch.downloadPhotoLinks.size,
+                icon = R.drawable.ic_baseline_photo_24
             )
 
         }

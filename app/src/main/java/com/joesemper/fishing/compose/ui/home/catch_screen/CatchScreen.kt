@@ -1,4 +1,4 @@
-package com.joesemper.fishing.compose.ui.home
+package com.joesemper.fishing.compose.ui.home.catch_screen
 
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
@@ -32,12 +32,11 @@ import coil.compose.AsyncImageContent
 import coil.compose.AsyncImagePainter
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
+import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.home.notes.ItemUserPlace
 import com.joesemper.fishing.compose.ui.home.weather.*
-import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.UserCatchViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
-import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.utils.network.ConnectionState
@@ -53,8 +52,11 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun UserCatchScreen(navController: NavController, catch: UserCatch?) {
     val viewModel = getViewModel<UserCatchViewModel>()
-    catch?.let {
-        viewModel.catch.value = it
+
+    LaunchedEffect(key1 = catch) {
+        catch?.let {
+            viewModel.catch.value = it
+        }
     }
 
     Scaffold(topBar = {
@@ -94,20 +96,16 @@ fun CatchContent(
     navController: NavController,
     viewModel: UserCatchViewModel,
 ) {
+
+    val context = LocalContext.current
+    val connectionState by context.observeConnectivityAsFlow()
+        .collectAsState(initial = context.currentConnectivityState)
+
     viewModel.catch.value?.let { catch ->
-        var mapMarker by remember {
-            mutableStateOf<UserMapMarker?>(null)
+
+        LaunchedEffect(key1 = catch) {
+            viewModel.getMapMarker(catch.userMarkerId)
         }
-
-        val context = LocalContext.current
-
-        val connectionState by context.observeConnectivityAsFlow()
-            .collectAsState(initial = context.currentConnectivityState)
-
-        viewModel.getMapMarker(catch.userMarkerId)
-            .collectAsState(initial = UserMapMarker()).value?.let {
-                mapMarker = it
-            }
 
         Column(
             modifier = Modifier
@@ -118,82 +116,91 @@ fun CatchContent(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
-            CatchTitleView(catch = catch)
+            CatchTitleView(catch = catch, viewModel = viewModel)
 
             if (catch.downloadPhotoLinks.isNotEmpty() || connectionState is ConnectionState.Available) {
                 CatchPhotosView(photos = catch.downloadPhotoLinks)
             }
 
-            mapMarker?.let {
+            viewModel.mapMarker.value?.let {
                 ItemUserPlace(
                     place = it,
                     userPlaceClicked = { })
             }
 
-            DefaultNoteView(note = catch.description)
+            DefaultNoteView(
+                note = catch.description,
+                onSaveNoteChange = { newNote ->
+                    viewModel.updateCatch(data = mapOf("description" to newNote))
+                })
 
-            WayOfFishingView(catch = catch)
+            WayOfFishingView(catch = catch, viewModel = viewModel)
 
             CatchWeatherView(catch = catch)
         }
     }
 }
 
+@ExperimentalComposeUiApi
+@ExperimentalAnimationApi
 @Composable
 fun CatchTitleView(
     modifier: Modifier = Modifier,
-    catch: UserCatch
+    catch: UserCatch,
+    viewModel: UserCatchViewModel
 ) {
-    ConstraintLayout(
-        modifier = modifier
-            .wrapContentHeight()
-            .fillMaxWidth()
-    ) {
-        val (icon, title, editButton, amount) = createRefs()
 
-        Icon(
-            modifier = Modifier
-                .size(32.dp)
-                .constrainAs(icon) {
-                    top.linkTo(title.top)
-                    bottom.linkTo(amount.bottom)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-                },
-            painter = painterResource(R.drawable.ic_fishing),
-            contentDescription = stringResource(R.string.place),
-            tint = secondaryTextColor
-        )
+    val dialogState = remember { mutableStateOf(false) }
 
-        HeaderText(
-            modifier = Modifier.constrainAs(title) {
-                absoluteLeft.linkTo(icon.absoluteRight, 16.dp)
-                absoluteRight.linkTo(parent.absoluteRight, 8.dp)
-                top.linkTo(parent.top)
-                width = Dimension.fillToConstraints
-            },
-            text = "${catch.fishType} ${catch.fishWeight} ${stringResource(id = R.string.kg)}"
-        )
-
-        DefaultIconButton(
-            modifier = Modifier
-                .size(32.dp)
-                .constrainAs(editButton) {
-                    top.linkTo(title.top)
-                    bottom.linkTo(amount.bottom)
-                    absoluteRight.linkTo(parent.absoluteRight, 8.dp)
-                },
-            icon = painterResource(id = R.drawable.ic_baseline_edit_24),
-            onClick = { }
-        )
-
-        SecondaryText(
-            modifier = Modifier.constrainAs(amount) {
-                top.linkTo(title.bottom, 2.dp)
-                absoluteLeft.linkTo(title.absoluteLeft)
-            },
-            text = "${stringResource(id = R.string.amount)}: ${catch.fishAmount} ${stringResource(id = R.string.pc)}"
+    if (dialogState.value) {
+        FishTypeAmountAndWeightDialog(
+            catch = catch,
+            dialogState = dialogState,
+            viewModel = viewModel
         )
     }
+
+    DefaultCardClickable(
+        modifier = modifier,
+        onClick = { dialogState.value = true }
+    ) {
+        ConstraintLayout(
+            modifier = Modifier
+                .padding(horizontal = 8.dp, vertical = 8.dp)
+                .wrapContentHeight()
+                .fillMaxWidth()
+        ) {
+            val (title, amount, weight) = createRefs()
+
+            HeaderText(
+                modifier = Modifier.constrainAs(title) {
+                    absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
+                    absoluteRight.linkTo(weight.absoluteLeft, 8.dp)
+                    top.linkTo(parent.top)
+                    width = Dimension.fillToConstraints
+                },
+                text = catch.fishType
+            )
+
+            HeaderText(
+                modifier = Modifier.constrainAs(weight) {
+                    absoluteRight.linkTo(parent.absoluteRight, 8.dp)
+                    top.linkTo(parent.top)
+                },
+                text = "${catch.fishWeight} ${stringResource(id = R.string.kg)}"
+            )
+
+            SecondaryText(
+                modifier = Modifier.constrainAs(amount) {
+                    top.linkTo(title.bottom, 2.dp)
+                    absoluteLeft.linkTo(title.absoluteLeft)
+                },
+                text = "${stringResource(id = R.string.amount)}: ${catch.fishAmount} " +
+                        stringResource(id = R.string.pc)
+            )
+        }
+    }
+
 }
 
 @ExperimentalAnimationApi
@@ -255,12 +262,28 @@ fun ItemCatchPhotoView(
     }
 }
 
+@ExperimentalComposeUiApi
 @Composable
 fun WayOfFishingView(
     modifier: Modifier = Modifier,
-    catch: UserCatch
+    catch: UserCatch,
+    viewModel: UserCatchViewModel
 ) {
-    DefaultCard(modifier = modifier) {
+
+    val dialogState = remember { mutableStateOf(false) }
+
+    if (dialogState.value) {
+        EditWayOfFishingDialog(
+            catch = catch,
+            dialogState = dialogState,
+            viewModel = viewModel
+        )
+    }
+
+    DefaultCardClickable(
+        modifier = modifier,
+        onClick = { dialogState.value = true }
+    ) {
         ConstraintLayout(
             modifier = Modifier
                 .padding(horizontal = 8.dp, vertical = 16.dp)
@@ -290,7 +313,9 @@ fun WayOfFishingView(
             PrimaryText(
                 modifier = Modifier.constrainAs(rodValue) {
                     absoluteLeft.linkTo(rodTitle.absoluteLeft)
+                    absoluteRight.linkTo(parent.absoluteRight, 12.dp)
                     top.linkTo(rodTitle.bottom, 2.dp)
+                    width = Dimension.fillToConstraints
                 },
                 text = if (catch.fishingRodType.isNotBlank()) {
                     catch.fishingRodType
@@ -310,7 +335,9 @@ fun WayOfFishingView(
             PrimaryText(
                 modifier = Modifier.constrainAs(baitValue) {
                     absoluteLeft.linkTo(rodTitle.absoluteLeft)
+                    absoluteRight.linkTo(parent.absoluteRight, 12.dp)
                     top.linkTo(baitTitle.bottom, 2.dp)
+                    width = Dimension.fillToConstraints
                 },
                 text = if (catch.fishingBait.isNotBlank()) {
                     catch.fishingBait
@@ -330,7 +357,9 @@ fun WayOfFishingView(
             PrimaryText(
                 modifier = Modifier.constrainAs(lureValue) {
                     absoluteLeft.linkTo(rodTitle.absoluteLeft)
+                    absoluteRight.linkTo(parent.absoluteRight, 12.dp)
                     top.linkTo(lureTile.bottom, 2.dp)
+                    width = Dimension.fillToConstraints
                 },
                 text = if (catch.fishingLure.isNotBlank()) {
                     catch.fishingLure

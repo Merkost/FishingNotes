@@ -3,7 +3,6 @@ package com.joesemper.fishing.domain
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.model.entity.content.UserCatch
-import com.joesemper.fishing.model.repository.UserContentRepository
 import com.joesemper.fishing.model.repository.app.CatchesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
@@ -23,9 +22,15 @@ class UserCatchesViewModel(private val repository: CatchesRepository) : ViewMode
                 if (currentContent.value == null) {
                     currentContent.value = mutableListOf()
                 }
+                contentState.modified.forEach { newCatch ->
+                    currentContent.value?.removeAll { oldCatch ->
+                        newCatch.id == oldCatch.id
+                    }
+                }
                 currentContent.value?.apply {
                     addAll(contentState.added)
                     removeAll(contentState.deleted)
+                    addAll(contentState.modified)
                 }
             }
         }

@@ -1,7 +1,6 @@
 package com.joesemper.fishing.compose.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
@@ -21,10 +20,10 @@ import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.compose.ui.home.*
+import com.joesemper.fishing.compose.ui.home.catch_screen.UserCatchScreen
 import com.joesemper.fishing.compose.ui.home.place.UserPlaceScreen
 import com.joesemper.fishing.compose.ui.home.weather.WeatherDaily
 import com.joesemper.fishing.compose.ui.login.LoginScreen
-import com.joesemper.fishing.compose.ui.theme.FishingNotesTheme
 import kotlinx.coroutines.InternalCoroutinesApi
 
 @ExperimentalComposeUiApi

@@ -5,6 +5,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,6 +17,7 @@ import androidx.navigation.NavController
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.home.place.PlaceCatchItemView
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserCatchesViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
@@ -41,6 +43,7 @@ fun UserCatchesScreen(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @ExperimentalFoundationApi
 @ExperimentalAnimationApi
 @Composable
@@ -61,14 +64,14 @@ fun UserCatches(
                             .filter { userCatch ->
                                 userCatch.date.toDateTextMonth() == catchDate
                             }
-                        .sortedByDescending { it.date },
+                            .sortedByDescending { it.date },
                         key = {
                             it
                         }
                     ) {
-                        ItemUserCatch(
-                            userCatch = it,
-                            userCatchClicked = userCatchClicked
+                        PlaceCatchItemView(
+                            catch = it,
+                            onClick = userCatchClicked
                         )
                     }
                 }
