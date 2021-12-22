@@ -400,7 +400,8 @@ fun PrimaryText(
     fontWeight: FontWeight? = null,
     textAlign: TextAlign? = null,
     text: String,
-    textColor: Color = MaterialTheme.colors.onSurface
+    textColor: Color = MaterialTheme.colors.onSurface,
+    maxLines: Int = Int.MAX_VALUE
 ) {
     Text(
         modifier = modifier,
@@ -409,7 +410,9 @@ fun PrimaryText(
         fontWeight = fontWeight,
         textAlign = textAlign,
         color = textColor,
-        text = text
+        text = text,
+        maxLines = maxLines,
+        softWrap = true
     )
 }
 
@@ -438,8 +441,9 @@ fun PrimaryTextSmall(
 fun PrimaryTextBold(modifier: Modifier = Modifier, text: String) {
     PrimaryText(
         modifier = modifier,
-        fontWeight = FontWeight.Bold,
-        text = text
+        fontWeight = FontWeight.SemiBold,
+        text = text,
+        maxLines = 1
     )
 }
 

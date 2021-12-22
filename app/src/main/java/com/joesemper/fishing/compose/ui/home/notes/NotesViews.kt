@@ -32,10 +32,7 @@ import coil.compose.AsyncImagePainter
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.*
-import com.joesemper.fishing.compose.ui.theme.cardColor
-import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
+import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.utils.time.toDateTextMonth
@@ -617,13 +614,14 @@ fun ItemPlace(place: UserMapMarker, userPlaceClicked: (UserMapMarker) -> Unit) {
 @Composable
 fun ItemCounter(
     modifier: Modifier = Modifier,
-    count: Int,
-    icon: Int
+    count: Number,
+    icon: Int,
+    tint: Color = secondaryTextColor
 ) {
-    Row(modifier = modifier.padding(2.dp)) {
+    Row(modifier = modifier) {
         Icon(
             modifier = Modifier.size(24.dp),
-            tint = secondaryFigmaTextColor,
+            tint = tint,
             painter = painterResource(id = icon),
             contentDescription = null,
         )

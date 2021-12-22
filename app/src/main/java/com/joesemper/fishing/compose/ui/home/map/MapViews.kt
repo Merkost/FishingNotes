@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -34,7 +35,7 @@ import com.airbnb.lottie.compose.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.*
+import com.joesemper.fishing.compose.ui.home.DefaultDialog
 import com.joesemper.fishing.compose.ui.theme.Shapes
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
@@ -362,6 +363,7 @@ fun PlaceTileView(
     }
 }
 
+@ExperimentalComposeUiApi
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 @ExperimentalPermissionsApi
@@ -383,7 +385,9 @@ fun GrantLocationPermissionsDialog(
         onPositiveClick = onPositiveClick,
         onDismiss = onDismiss,
         content = {
-            LottieMyLocation(modifier = Modifier.fillMaxWidth().height(180.dp))
+            LottieMyLocation(modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp))
         }
     )
 

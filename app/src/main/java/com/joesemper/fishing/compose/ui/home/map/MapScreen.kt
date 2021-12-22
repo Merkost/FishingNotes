@@ -3,8 +3,11 @@ package com.joesemper.fishing.compose.ui.home.map
 import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.*
@@ -389,6 +392,7 @@ fun MapLayout(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalPermissionsApi
 @Composable
 fun LocationPermissionDialog(

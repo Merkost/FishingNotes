@@ -703,8 +703,6 @@ fun NewCatchWeatherItem(viewModel: NewCatchViewModel, connectionState: Connectio
             }
         }
     }
-
-
 }
 
 @ExperimentalComposeUiApi
