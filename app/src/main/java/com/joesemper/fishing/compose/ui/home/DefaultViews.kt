@@ -179,6 +179,7 @@ fun DefaultCard(
     modifier: Modifier = Modifier,
     shape: CornerBasedShape = RoundedCornerShape(6.dp),
     padding: Dp = 4.dp,
+    elevation: Dp = 6.dp,
     content: @Composable () -> Unit
 ) {
     Card(
@@ -383,13 +384,14 @@ fun HeaderTextSecondary(
 }
 
 @Composable
-fun SubtitleText(modifier: Modifier = Modifier, text: String) {
+fun SubtitleText(modifier: Modifier = Modifier, text: String,
+                 textColor: Color? = null) {
     val darkTheme = isSystemInDarkTheme()
 
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.subtitle1,
-        color = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
+        color = textColor ?: if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
         text = text
     )
 }

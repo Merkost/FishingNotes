@@ -395,8 +395,8 @@ fun PlaceButtonsView(
 
 @Composable
 fun PlaceTopBar(
+    backPress: () -> Unit,
     modifier: Modifier = Modifier,
-    navController: NavController,
 ) {
     var toggleChecked by remember {
         mutableStateOf(false)
@@ -413,7 +413,7 @@ fun PlaceTopBar(
     DefaultAppBar(
         modifier = modifier,
         title = stringResource(id = R.string.place),
-        onNavClick = { navController.popBackStack() },
+        onNavClick = backPress,
         actions = {
             IconToggleButton(checked = toggleChecked, onCheckedChange = {
                 toggleChecked = it

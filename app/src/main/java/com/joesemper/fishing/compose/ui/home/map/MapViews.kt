@@ -5,6 +5,8 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -12,6 +14,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerBasedShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -38,7 +42,9 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.DefaultDialog
 import com.joesemper.fishing.compose.ui.theme.Shapes
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.compose.ui.utils.currentFraction
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
+import com.joesemper.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -48,21 +54,42 @@ import org.koin.androidx.compose.getViewModel
 @ExperimentalMaterialApi
 @Composable
 fun MapScaffold(
+    mapUiState: MapUiState,
+    currentPlace: MutableState<UserMapMarker?>,
     modifier: Modifier = Modifier,
     scaffoldState: BottomSheetScaffoldState,
     fab: @Composable() (() -> Unit)?,
     bottomSheet: @Composable() (ColumnScope.() -> Unit),
-    content: @Composable (PaddingValues) -> Unit
-) {
+    content: @Composable (PaddingValues) -> Unit,
+
+    ) {
+    val dp = animateDpAsState(
+        when (mapUiState) {
+            is MapUiState.BottomSheetInfoMode,
+            MapUiState.BottomSheetFullyExpanded -> 158.dp
+            else -> 0.dp
+        }
+    )
+
+    val sheetColor = animateColorAsState(
+        if (scaffoldState.currentFraction != 1f) {
+            MaterialTheme.colors.surface.copy(0f)
+        } else MaterialTheme.colors.surface.copy(scaffoldState.currentFraction)
+
+    )
+
+    val radius = (30 * (1f-scaffoldState.currentFraction)).dp
+
     BottomSheetScaffold(
         modifier = modifier.fillMaxSize(),
         scaffoldState = scaffoldState,
-        sheetShape = Shapes.large,
-        sheetBackgroundColor = Color.White.copy(0f),
+        sheetBackgroundColor = sheetColor.value,
         sheetElevation = 0.dp,
-        sheetPeekHeight = 0.dp,
+        sheetShape = RoundedCornerShape(radius),
+        sheetPeekHeight = dp.value,
         floatingActionButton = fab,
         sheetContent = bottomSheet,
+        sheetGesturesEnabled = scaffoldState.currentFraction != 1f,
         content = content
     )
 }

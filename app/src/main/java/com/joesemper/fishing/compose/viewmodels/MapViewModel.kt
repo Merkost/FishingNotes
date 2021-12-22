@@ -1,5 +1,7 @@
 package com.joesemper.fishing.compose.viewmodels
 
+import androidx.compose.material.BottomSheetValue
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -29,7 +31,10 @@ class MapViewModel(
 
     private val mapMarkers = MutableStateFlow(listOf<UserMapMarker>())
 
-    var mapUiState: MapUiState = MapUiState.NormalMode
+    var mapUiState: MutableState<MapUiState> = mutableStateOf(MapUiState.NormalMode)
+
+    @ExperimentalMaterialApi
+    var sheetState: BottomSheetValue = BottomSheetValue.Collapsed
 
     private val _uiState = MutableStateFlow<UiState?>(null)
     val uiState: StateFlow<UiState?>
