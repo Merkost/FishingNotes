@@ -17,7 +17,8 @@ class MapMarkerMapper {
             title = newMarker.title,
             description = newMarker.description,
             markerColor = newMarker.markerColor,
-            isPublic = newMarker.isPublic,
+            public = newMarker.public,
+            visible = newMarker.visible,
             dateOfCreation = Date().time
         )
     }

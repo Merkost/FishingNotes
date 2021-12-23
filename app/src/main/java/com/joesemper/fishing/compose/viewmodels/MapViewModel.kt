@@ -3,6 +3,7 @@ package com.joesemper.fishing.compose.viewmodels
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,7 +30,10 @@ class MapViewModel(
     private val viewStateFlow: MutableStateFlow<BaseViewState> =
         MutableStateFlow(BaseViewState.Loading(null))
 
-    private val mapMarkers = MutableStateFlow(listOf<UserMapMarker>())
+    private var _mapMarkers: MutableStateFlow<MutableList<UserMapMarker>>
+        = MutableStateFlow(mutableListOf())
+    val mapMarkers: StateFlow<MutableList<UserMapMarker>>
+        get() = _mapMarkers
 
     var mapUiState: MutableState<MapUiState> = mutableStateOf(MapUiState.NormalMode)
 
@@ -45,7 +49,7 @@ class MapViewModel(
     val lastKnownLocation = mutableStateOf<LatLng?>(null)
     val lastMapCameraPosition = mutableStateOf<Pair<LatLng, Float>?>(null)
 
-    val currentMarker: MutableState<UserMapMarker?> = mutableStateOf(null)
+    var currentMarker: MutableState<UserMapMarker?> = mutableStateOf(null)
 
     val chosenPlace = mutableStateOf<String?>(null)
 
@@ -53,7 +57,7 @@ class MapViewModel(
         loadMarkers()
     }
 
-    fun getAllMarkers(): StateFlow<List<UserMapMarker>> = mapMarkers
+    fun getAllMarkers(): StateFlow<List<UserMapMarker>> = _mapMarkers
 
     override fun onCleared() {
         super.onCleared()
@@ -63,7 +67,7 @@ class MapViewModel(
     private fun loadMarkers() {
         viewModelScope.launch {
             repository.getAllUserMarkersList().collect { markers ->
-                mapMarkers.value = markers as List<UserMapMarker>
+                _mapMarkers.value = markers as MutableList<UserMapMarker>
             }
         }
     }
@@ -90,5 +94,21 @@ class MapViewModel(
 
     private fun onError(error: Throwable) {
         viewStateFlow.value = BaseViewState.Error(error)
+    }
+
+    fun updateCurrentPlace(markerToUpdate: UserMapMarker) {
+        viewModelScope.launch {
+                repository.getMapMarker(markerToUpdate.id).collect { updatedMarker ->
+                    updatedMarker?.let {
+                        currentMarker.value?.let {
+                            currentMarker.value = updatedMarker
+                        }
+                        _mapMarkers.value.apply {
+                            remove(markerToUpdate)
+                            add(updatedMarker)
+                        }
+                    }
+                }
+        }
     }
 }

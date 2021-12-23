@@ -52,7 +52,7 @@ fun MarkerInfoDialog(
     modifier: Modifier = Modifier,
     navController: NavController,
     scaffoldState: BottomSheetScaffoldState,
-    upPress: () -> Unit,
+    upPress: (UserMapMarker) -> Unit,
     onDescriptionClick: () -> Unit,
 
 ) {
@@ -315,7 +315,7 @@ fun MarkerInfoDialog(
                 }
             }
             AnimatedVisibility(scaffoldState.currentFraction != 0f) {
-                UserPlaceScreen(upPress, navController, place = marker)
+                UserPlaceScreen({ upPress(marker) }, navController, place = marker)
             }
 
         }

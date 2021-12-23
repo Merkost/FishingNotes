@@ -104,7 +104,7 @@ fun MapScreen(
             when (mapUiState) {
                 is MapUiState.NormalMode -> {
                     scaffoldState.bottomSheetState.collapse()
-                    viewModel.currentMarker.value = null
+                    //viewModel.currentMarker.value = null
                     addingPlace = false
                 }
                 is MapUiState.BottomSheetInfoMode -> {
@@ -198,17 +198,18 @@ fun MapScreen(
                 navController = navController,
                 mapUiState = mapUiState,
                 scaffoldState = scaffoldState,
-                upPress = {
+                upPress = { markerToUpdate ->
                     coroutineScope.launch {
+                        viewModel.updateCurrentPlace(markerToUpdate)
                         scaffoldState.bottomSheetState.collapse()
                     }
                 }
             ) {
                 mapUiState = MapUiState.BottomSheetFullyExpanded
-                coroutineScope.launch {
-                    //scaffoldState.bottomSheetState.expand()
+                /*coroutineScope.launch {
+                    scaffoldState.bottomSheetState.expand()
                 }
-                /*onMarkerDetailsClick(navController, marker)*/
+                onMarkerDetailsClick(navController, marker)*/
             }
 
 
@@ -361,10 +362,10 @@ fun MapLayout(
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlaces.collectAsState(true)
     val context = LocalContext.current
     val darkTheme = isSystemInDarkTheme()
-    val markers = viewModel.getAllMarkers().collectAsState()
+    val markers by viewModel.mapMarkers.collectAsState()
     val markersToShow by remember(markers, showHiddenPlaces) {
-        mutableStateOf(if (showHiddenPlaces) markers.value
-        else markers.value.filter { it.isVisible })
+        mutableStateOf(if (showHiddenPlaces) markers
+        else markers.filter { it.visible })
     }
     val map = rememberMapViewWithLifecycle()
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
@@ -382,6 +383,7 @@ fun MapLayout(
         ) { mapView ->
             coroutineScope.launch {
                 val googleMap = mapView.awaitMap()
+                googleMap.clear()
                 markersToShow.forEach {
                     val position = LatLng(it.latitude, it.longitude)
                     val markerColor = Color(it.markerColor)
@@ -392,6 +394,7 @@ fun MapLayout(
                                 .position(position)
                                 .title(it.title)
                                 .icon(BitmapDescriptorFactory.defaultMarker(hue))
+
                         )
                     marker.tag = it.id
                 }
@@ -404,7 +407,7 @@ fun MapLayout(
                         Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom)
                 }
                 googleMap.setOnMarkerClickListener { marker ->
-                    onMarkerClick(markers.value.first { it.id == marker.tag })
+                    onMarkerClick(markers.first { it.id == marker.tag })
                     viewModel.lastMapCameraPosition.value = Pair(marker.position, DEFAULT_ZOOM)
                     true
                 }

@@ -34,7 +34,7 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
 
     }
     DisposableEffect(Unit) {
-        viewModel.markerVisibility.value = place?.isVisible
+        viewModel.markerVisibility.value = place?.visible
         onDispose {  }
     }
 

@@ -73,12 +73,12 @@ class FirebaseMarkersRepositoryImpl(
     : StateFlow<LiteProgress> {
         val flow = MutableStateFlow<LiteProgress>(LiteProgress.Loading)
         val documentRef = dbCollections.getUserMapMarkersCollection().document(marker.id)
-        val task = documentRef.update("isVisible", changeTo)
+        val task = documentRef.update("visible", changeTo)
         task.addOnCompleteListener {
-            if (task.isSuccessful) {
+            if (it.isSuccessful) {
                 flow.tryEmit(LiteProgress.Complete)
             }
-            if (task.isCanceled || task.exception != null) {
+            if (it.isCanceled || it.exception != null) {
                 flow.tryEmit(LiteProgress.Error(task.exception?.cause))
             }
         }

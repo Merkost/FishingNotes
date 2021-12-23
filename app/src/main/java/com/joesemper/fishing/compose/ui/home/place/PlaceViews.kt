@@ -402,10 +402,13 @@ fun PlaceTopBar(
 
     ) {
 
-    val isVisible = viewModel.markerVisibility.value ?: true
+    val isVisible by remember(viewModel.markerVisibility.value) {
+        if (viewModel.markerVisibility.value == null) mutableStateOf(true)
+        else viewModel.markerVisibility
+    }
 
     val color = animateColorAsState(
-        targetValue = if (isVisible) {
+        targetValue = if (isVisible!!) {
             MaterialTheme.colors.onPrimary
         } else {
             supportTextColor
@@ -418,7 +421,7 @@ fun PlaceTopBar(
         title = stringResource(id = R.string.place),
         onNavClick = backPress,
         actions = {
-            IconToggleButton(checked = isVisible,
+            IconToggleButton(checked = isVisible!!,
                 onCheckedChange = {
                     viewModel.changeVisibility(it)
                 }) {
