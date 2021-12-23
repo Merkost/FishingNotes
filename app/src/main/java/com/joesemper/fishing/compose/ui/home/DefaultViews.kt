@@ -332,7 +332,6 @@ fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
 
 @Composable
 fun SimpleOutlinedTextField(
-    modifier: Modifier = Modifier,
     textState: MutableState<String>,
     label: String,
     singleLine: Boolean = true,
@@ -393,12 +392,13 @@ fun HeaderTextSecondary(
 
 @Composable
 fun SubtitleText(modifier: Modifier = Modifier, text: String,
-                 textColor: Color? = null) {
+                 textColor: Color? = null, singleLine: Boolean = true) {
     val darkTheme = isSystemInDarkTheme()
 
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.subtitle1,
+        maxLines = if (singleLine) 1 else Int.MAX_VALUE,
         color = textColor ?: if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
         text = text
     )

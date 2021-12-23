@@ -15,9 +15,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.os.LocaleListCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.joesemper.fishing.R
@@ -26,6 +28,7 @@ import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.home.place.UserPlaceScreen
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.getPressure
+import com.joesemper.fishing.compose.ui.resources
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.compose.ui.utils.currentFraction
 import com.joesemper.fishing.compose.ui.utils.noRippleClickable
@@ -60,7 +63,7 @@ fun MarkerInfoDialog(
 
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
-    val geocoder = Geocoder(context)
+    val geocoder = Geocoder(context, resources().configuration.locale)
 
     val weatherPrefs: WeatherPreferences = get()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg.name)

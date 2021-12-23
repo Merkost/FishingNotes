@@ -212,7 +212,6 @@ fun MapScreen(
                 onMarkerDetailsClick(navController, marker)*/
             }
 
-
         }
     ) {
 
