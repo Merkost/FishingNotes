@@ -8,10 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -36,10 +33,9 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
         viewModel.marker.value = marker
 
     }
-
-    LaunchedEffect(place) {
-        if (viewModel.markerVisibility.value == null)
-            viewModel.markerVisibility.value = place?.isVisible
+    DisposableEffect(Unit) {
+        viewModel.markerVisibility.value = place?.isVisible
+        onDispose {  }
     }
 
     Scaffold(
