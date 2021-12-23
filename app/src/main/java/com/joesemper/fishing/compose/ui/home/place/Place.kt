@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -21,6 +22,7 @@ import com.joesemper.fishing.compose.ui.home.notes.TabItem
 import com.joesemper.fishing.domain.UserPlaceViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.viewModel
 
 @OptIn(
     ExperimentalFoundationApi::class, ExperimentalMaterialApi::class,
@@ -29,11 +31,15 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: UserMapMarker?) {
 
-    val viewModel = getViewModel<UserPlaceViewModel>()
+    val viewModel: UserPlaceViewModel by viewModel()
     place?.let { marker ->
         viewModel.marker.value = marker
+
+    }
+
+    LaunchedEffect(place) {
         if (viewModel.markerVisibility.value == null)
-            viewModel.markerVisibility.value = marker.isVisible
+            viewModel.markerVisibility.value = place?.isVisible
     }
 
     Scaffold(

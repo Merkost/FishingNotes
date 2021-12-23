@@ -6,7 +6,6 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,13 +13,12 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerBasedShape
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -40,8 +38,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.DefaultDialog
-import com.joesemper.fishing.compose.ui.theme.Shapes
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
+import com.joesemper.fishing.compose.ui.theme.supportTextColor
 import com.joesemper.fishing.compose.ui.utils.currentFraction
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -78,7 +76,7 @@ fun MapScaffold(
 
     )
 
-    val radius = (30 * (1f-scaffoldState.currentFraction)).dp
+    val radius = (30 * (1f - scaffoldState.currentFraction)).dp
 
     BottomSheetScaffold(
         modifier = modifier.fillMaxSize(),
@@ -140,6 +138,7 @@ fun LayersView(
         modifier = Modifier
             .width(250.dp)
             .wrapContentHeight()
+
     ) {
         Column(
             modifier = Modifier
@@ -216,6 +215,37 @@ fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name:
             )
         }
         Text(text = name, fontSize = 12.sp, overflow = TextOverflow.Ellipsis, maxLines = 1)
+    }
+}
+
+@Composable
+fun MapFilterButton(
+    modifier: Modifier, showHiddenPlaces: Boolean,
+    onCLick: (Boolean) -> Unit,
+) {
+
+
+    val color = animateColorAsState(
+        targetValue = if (showHiddenPlaces) {
+            MaterialTheme.colors.onSurface
+        } else {
+            supportTextColor
+        },
+        animationSpec = tween(800)
+    )
+
+    Card(
+        shape = CircleShape,
+        modifier = modifier.size(40.dp)
+    ) {
+        IconToggleButton(checked = showHiddenPlaces,
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxSize(),
+            onCheckedChange = { onCLick(it) }) {
+            Icon(Icons.Default.Visibility, Icons.Default.Visibility.name,
+                tint = color.value)
+        }
     }
 }
 
@@ -412,9 +442,11 @@ fun GrantLocationPermissionsDialog(
         onPositiveClick = onPositiveClick,
         onDismiss = onDismiss,
         content = {
-            LottieMyLocation(modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp))
+            LottieMyLocation(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+            )
         }
     )
 

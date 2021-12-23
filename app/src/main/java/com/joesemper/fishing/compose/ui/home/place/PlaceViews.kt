@@ -410,7 +410,7 @@ fun PlaceTopBar(
         } else {
             supportTextColor
         },
-        animationSpec = tween(900)
+        animationSpec = tween(800)
     )
 
     DefaultAppBar(
@@ -420,7 +420,6 @@ fun PlaceTopBar(
         actions = {
             IconToggleButton(checked = isVisible,
                 onCheckedChange = {
-                    //viewModel.markerVisibility.value = it
                     viewModel.changeVisibility(it)
                 }) {
                 Icon(

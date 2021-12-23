@@ -73,6 +73,7 @@ fun MapScreen(
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
     val userPreferences: UserPreferences = get()
+    val showHiddenPlaces by userPreferences.shouldShowHiddenPlaces.collectAsState(true)
 
     val scaffoldState = rememberBottomSheetScaffoldState()
     val dialogAddPlaceIsShowing = remember { mutableStateOf(false) }
@@ -137,7 +138,9 @@ fun MapScreen(
 
     BackPressHandler(mapUiState = mapUiState) {
         mapUiState = when (mapUiState) {
-            is MapUiState.BottomSheetFullyExpanded -> { MapUiState.BottomSheetInfoMode }
+            is MapUiState.BottomSheetFullyExpanded -> {
+                MapUiState.BottomSheetInfoMode
+            }
             else -> MapUiState.NormalMode
         }
     }
@@ -219,7 +222,7 @@ fun MapScreen(
 
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (mapLayout, addMarkerFragment, mapMyLocationButton, mapLayersButton,
-                mapLayersView, pointer) = createRefs()
+                mapFilterButton, mapLayersView, pointer) = createRefs()
             val verticalMyLocationButtonGl = createGuidelineFromAbsoluteRight(56.dp)
 
             MapLayout(
@@ -233,6 +236,7 @@ fun MapScreen(
                     viewModel.currentMarker.value = it
                     mapUiState = MapUiState.BottomSheetInfoMode
                 },
+                showHiddenPlacess = showHiddenPlaces,
                 cameraMoveCallback = { state -> cameraMoveState = state },
                 currentCameraPosition = currentCameraPosition,
                 mapType = mapType,
@@ -265,8 +269,21 @@ fun MapScreen(
                 modifier = Modifier.constrainAs(mapLayersView) {
                     top.linkTo(parent.top, 16.dp)
                     absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                }) {
+                }.zIndex(5f)
+            ) {
                 LayersView(mapLayersSelection, mapType)
+            }
+
+            MapFilterButton(
+                modifier = Modifier.constrainAs(mapFilterButton) {
+                    top.linkTo(mapLayersButton.bottom, 16.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                },
+                showHiddenPlaces = showHiddenPlaces,
+            ) { newValue ->
+                coroutineScope.launch {
+                    userPreferences.saveMapHiddenPlaces(newValue)
+                }
             }
 
             AnimatedVisibility(
@@ -331,16 +348,24 @@ fun MapScreen(
 fun MapLayout(
     modifier: Modifier = Modifier,
     onMarkerClick: (marker: UserMapMarker) -> Unit,
+    showHiddenPlacess: Boolean,
     cameraMoveCallback: (state: CameraMoveState) -> Unit,
     currentCameraPosition: MutableState<Pair<LatLng, Float>>,
     mapType: MutableState<Int>,
     onMapClick: () -> Unit,
-) {
+
+    ) {
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
+    val userPreferences: UserPreferences = get()
+    val showHiddenPlaces by userPreferences.shouldShowHiddenPlaces.collectAsState(true)
     val context = LocalContext.current
     val darkTheme = isSystemInDarkTheme()
     val markers = viewModel.getAllMarkers().collectAsState()
+    val markersToShow by remember(markers, showHiddenPlaces) {
+        mutableStateOf(if (showHiddenPlaces) markers.value
+        else markers.value.filter { it.isVisible })
+    }
     val map = rememberMapViewWithLifecycle()
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
 
@@ -357,7 +382,7 @@ fun MapLayout(
         ) { mapView ->
             coroutineScope.launch {
                 val googleMap = mapView.awaitMap()
-                markers.value.forEach {
+                markersToShow.forEach {
                     val position = LatLng(it.latitude, it.longitude)
                     val markerColor = Color(it.markerColor)
                     val hue = getHue(markerColor.red, markerColor.green, markerColor.blue)
@@ -510,12 +535,16 @@ fun MapFab(
 
     val paddingTop = animateDpAsState(
         when (state) {
-            MapUiState.NormalMode -> { 0.dp }
+            MapUiState.NormalMode -> {
+                0.dp
+            }
             MapUiState.BottomSheetInfoMode, MapUiState.BottomSheetFullyExpanded -> {
                 32.dp
             }
             //MapUiState.BottomSheetFullyExpanded -> { 82.dp }
-            MapUiState.PlaceSelectMode -> { 0.dp }
+            MapUiState.PlaceSelectMode -> {
+                0.dp
+            }
         }
     )
 
