@@ -14,11 +14,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.datastore.NotesPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.navigate
+import com.joesemper.fishing.compose.ui.utils.PlacesSortValues
+import com.joesemper.fishing.compose.ui.utils.myPlacesSort
 import com.joesemper.fishing.domain.UserPlacesViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
@@ -27,12 +31,16 @@ fun UserPlacesScreen(
     navController: NavController,
     viewModel: UserPlacesViewModel = getViewModel()
 ) {
+    val notesPreferences: NotesPreferences = get()
+    val placesSortValue by notesPreferences.placesSortValue
+        .collectAsState(PlacesSortValues.Default.name)
+
     Scaffold(backgroundColor = Color.Transparent) {
         val places: List<UserMapMarker>? by viewModel.currentContent.collectAsState()
         Crossfade(places) { animatedUiState ->
             if (animatedUiState != null) {
                 UserPlaces(
-                    places = animatedUiState,
+                    places = animatedUiState.myPlacesSort(placesSortValue),
                     userPlaceClicked = { userMarker ->
                         onPlaceItemClick(userMarker, navController)
                     }
@@ -41,6 +49,8 @@ fun UserPlacesScreen(
         }
     }
 }
+
+
 
 @ExperimentalAnimationApi
 @Composable

@@ -15,13 +15,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.datastore.NotesPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.place.PlaceCatchItemView
 import com.joesemper.fishing.compose.ui.navigate
+import com.joesemper.fishing.compose.ui.utils.CatchesSortValues
+import com.joesemper.fishing.compose.ui.utils.myCatchesSort
 import com.joesemper.fishing.domain.UserCatchesViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.utils.time.toDateTextMonth
+import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalFoundationApi
@@ -31,13 +35,19 @@ fun UserCatchesScreen(
     navController: NavController,
     viewModel: UserCatchesViewModel = getViewModel()
 ) {
+
+    val notesPreferences: NotesPreferences = get()
+    val catchesSortValue by notesPreferences.catchesSortValue
+        .collectAsState(CatchesSortValues.Default.name)
+
     Scaffold(backgroundColor = Color.Transparent) {
         val catches by viewModel.currentContent.collectAsState()
         Crossfade(catches) { animatedUiState ->
             if (animatedUiState != null) {
                 UserCatches(
-                    catches = animatedUiState,
-                    userCatchClicked = { catch -> onCatchItemClick(catch, navController) })
+                    catches = animatedUiState.myCatchesSort(catchesSortValue),
+                    userCatchClicked = { catch -> onCatchItemClick(catch, navController) },
+                    sortValue = catchesSortValue)
             }
         }
     }
@@ -50,29 +60,43 @@ fun UserCatchesScreen(
 fun UserCatches(
     modifier: Modifier = Modifier,
     catches: List<UserCatch>,
-    userCatchClicked: (UserCatch) -> Unit
-) {
+    sortValue: String,
+    userCatchClicked: (UserCatch) -> Unit,
+
+    ) {
     LazyColumn(modifier = modifier) {
         when {
             catches.isNotEmpty() -> {
-                getDatesList(catches).forEach { catchDate ->
-                    stickyHeader {
-                        ItemDate(text = catchDate)
-                    }
-                    items(
-                        items = catches
-                            .filter { userCatch ->
-                                userCatch.date.toDateTextMonth() == catchDate
+                when(sortValue) {
+                    CatchesSortValues.TimeAsc.name, CatchesSortValues.TimeDesc.name -> {
+                        getDatesList(catches).forEach { catchDate ->
+                            stickyHeader {
+                                ItemDate(text = catchDate)
                             }
-                            .sortedByDescending { it.date },
-                        key = {
-                            it
+                            items(
+                                items = catches
+                                    .filter { userCatch ->
+                                        userCatch.date.toDateTextMonth() == catchDate
+                                    }
+                                    .sortedByDescending { it.date },
+                                key = {
+                                    it
+                                }
+                            ) {
+                                PlaceCatchItemView(
+                                    catch = it,
+                                    onClick = userCatchClicked
+                                )
+                            }
                         }
-                    ) {
-                        PlaceCatchItemView(
-                            catch = it,
-                            onClick = userCatchClicked
-                        )
+                    }
+                    else -> {
+                        items(items = catches) {
+                            PlaceCatchItemView(
+                                catch = it,
+                                onClick = userCatchClicked
+                            )
+                        }
                     }
                 }
             }
@@ -91,7 +115,7 @@ fun UserCatches(
 
 fun getDatesList(catches: List<UserCatch>): List<String> {
     val dates = mutableListOf<String>()
-    catches.sortedByDescending { it.date }.forEach { userCatch ->
+    catches.forEach { userCatch ->
         val date = userCatch.date.toDateTextMonth()
         if (!dates.contains(date)) {
             dates.add(date)
