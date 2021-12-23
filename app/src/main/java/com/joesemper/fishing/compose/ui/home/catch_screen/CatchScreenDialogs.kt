@@ -150,7 +150,7 @@ fun EditNoteDialog(
     ) {
         Column(
             modifier = Modifier
-                .padding(horizontal = 8.dp)
+
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .animateContentSize(),

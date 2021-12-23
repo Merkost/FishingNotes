@@ -81,7 +81,7 @@ fun DefaultDialog(
     ) {
         DefaultCard(
             modifier = Modifier
-                .padding(4.dp)
+                .padding(28.dp)
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .animateContentSize()
@@ -121,38 +121,43 @@ fun DefaultDialog(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.size(2.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    if (neutralButtonText.isNotEmpty()) {
-                        DefaultButtonSecondaryText(
-                            text = neutralButtonText,
-                            onClick = onNeutralClick,
-                            shape = RoundedCornerShape(24.dp)
-                        )
-                    } else Spacer(modifier = Modifier.size(1.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        if (negativeButtonText.isNotEmpty()) {
-                            DefaultButtonText(
-                                text = negativeButtonText,
-                                onClick = onNegativeClick,
-                                shape = RoundedCornerShape(24.dp)
-                            )
-                        }
-                        if (positiveButtonText.isNotEmpty())
-                            DefaultButton(
-                                text = positiveButtonText,
-                                onClick = onPositiveClick,
-                                shape = RoundedCornerShape(24.dp)
-                            )
+                if (neutralButtonText.isNotEmpty() || negativeButtonText.isNotEmpty()
+                    || positiveButtonText.isNotEmpty()) {
 
+                    Spacer(modifier = Modifier.size(2.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        if (neutralButtonText.isNotEmpty()) {
+                            DefaultButtonSecondaryText(
+                                text = neutralButtonText,
+                                onClick = onNeutralClick,
+                                shape = RoundedCornerShape(24.dp)
+                            )
+                        } else Spacer(modifier = Modifier.size(1.dp))
+                        Row(
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            if (negativeButtonText.isNotEmpty()) {
+                                DefaultButtonText(
+                                    text = negativeButtonText,
+                                    onClick = onNegativeClick,
+                                    shape = RoundedCornerShape(24.dp)
+                                )
+                            }
+                            if (positiveButtonText.isNotEmpty())
+                                DefaultButton(
+                                    text = positiveButtonText,
+                                    onClick = onPositiveClick,
+                                    shape = RoundedCornerShape(24.dp)
+                                )
+
+                        }
                     }
                 }
-            }
+                }
+
         }
     }
 }
@@ -327,6 +332,7 @@ fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
 
 @Composable
 fun SimpleOutlinedTextField(
+    modifier: Modifier = Modifier,
     textState: MutableState<String>,
     label: String,
     singleLine: Boolean = true,

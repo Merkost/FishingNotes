@@ -63,27 +63,21 @@ fun Notes(
 
     if (placesFilterDialog.value) PlacesFilterDialog(
         currentSort = currentPlacesSort,
-        onDismiss = {
-            placesFilterDialog.value = false
-        },
+        onDismiss = { placesFilterDialog.value = false },
         onSelectedValue = { newValue ->
             coroutineScope.launch {
                 notesPreferences.savePlacesSortValue(newValue.name)
-                delay(200)
                 placesFilterDialog.value = false
             }
         }
     )
 
-    if (placesFilterDialog.value) CatchesFilterDialog(
+    if (catchesFilterDialog.value) CatchesFilterDialog(
         currentSort = currentCatchesSort,
-        onDismiss = {
-            catchesFilterDialog.value = false
-        },
+        onDismiss = { catchesFilterDialog.value = false },
         onSelectedValue = { newValue ->
             coroutineScope.launch {
                 notesPreferences.saveCatchesSortValue(newValue.name)
-                delay(200)
                 catchesFilterDialog.value = false
             }
         }
@@ -95,12 +89,12 @@ fun Notes(
                 onNavClick = { navController.popBackStack() },
                 title = stringResource(id = R.string.notes),
                 actions = {
-                    AnimatedVisibility(pagerState.currentPage == 0) {
+                    AnimatedVisibility(pagerState.currentPage == 0 && !pagerState.isScrollInProgress) {
                         PlacesActions() {
                             placesFilterDialog.value = true
                         }
                     }
-                    AnimatedVisibility(pagerState.currentPage == 1) {
+                    AnimatedVisibility(pagerState.currentPage == 1 && !pagerState.isScrollInProgress) {
                         CatchesActions() {
                             catchesFilterDialog.value = true
                         }
