@@ -62,7 +62,7 @@ import kotlin.math.roundToInt
 @ExperimentalComposeUiApi
 @Composable
 fun DefaultDialog(
-    primaryText: String,
+    primaryText: String? = null,
     secondaryText: String? = null,
     neutralButtonText: String = "",
     onNeutralClick: (() -> Unit) = { },
@@ -100,11 +100,13 @@ fun DefaultDialog(
                         .wrapContentHeight()
                         .animateContentSize()
                 ) {
-                    PrimaryText(
-                        text = primaryText,
-                    )
-                    Spacer(Modifier.size(4.dp))
+                    primaryText?.let {
+                        PrimaryText(
+                            text = primaryText,
+                        )
+                    }
                     secondaryText?.let {
+                        Spacer(Modifier.size(4.dp))
                         SecondaryText(text = secondaryText, textAlign = TextAlign.Start)
                     }
 

@@ -114,9 +114,6 @@ fun getPressureNameFromUnit(pressureUnit: String): String {
     }
 }
 
-
-
-
 enum class PressureValues {
     Pa,
     Bar,

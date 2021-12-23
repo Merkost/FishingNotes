@@ -1,5 +1,6 @@
 package com.joesemper.fishing.di
 
+import com.joesemper.fishing.compose.datastore.NotesPreferences
 import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
@@ -27,6 +28,7 @@ val appModule = module {
     single { SnackbarManager }
     single { UserPreferences(androidContext()) }
     single { WeatherPreferences(androidContext()) }
+    single { NotesPreferences(androidContext()) }
     single { RepositoryCollections() }
 
 }

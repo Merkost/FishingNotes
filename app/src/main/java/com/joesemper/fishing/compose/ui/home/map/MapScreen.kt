@@ -73,7 +73,7 @@ fun MapScreen(
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
     val userPreferences: UserPreferences = get()
-    val showHiddenPlaces by userPreferences.shouldShowHiddenPlaces.collectAsState(true)
+    val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
 
     val scaffoldState = rememberBottomSheetScaffoldState()
     val dialogAddPlaceIsShowing = remember { mutableStateOf(false) }
@@ -359,7 +359,7 @@ fun MapLayout(
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
     val userPreferences: UserPreferences = get()
-    val showHiddenPlaces by userPreferences.shouldShowHiddenPlaces.collectAsState(true)
+    val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
     val context = LocalContext.current
     val darkTheme = isSystemInDarkTheme()
     val markers by viewModel.mapMarkers.collectAsState()

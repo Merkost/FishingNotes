@@ -18,7 +18,7 @@ class UserPreferences(private val context: Context) {
         private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("userSettings")
 
         val USER_LOCATION_PERMISSION_KEY = booleanPreferencesKey("should_show_location_permission")
-        val MAP_HIDDEN_PLACES_KEY = booleanPreferencesKey("should_show_hidden_places")
+        val MAP_HIDDEN_PLACES_KEY = booleanPreferencesKey("should_show_hidden_places_on_map")
         val TIME_FORMAT_KEY = booleanPreferencesKey("use_12h_time_format")
         val FAB_FAST_ADD = booleanPreferencesKey("fab_fast_add")
         val APP_THEME_KEY = stringPreferencesKey("app_theme")
@@ -30,7 +30,7 @@ class UserPreferences(private val context: Context) {
             preferences[USER_LOCATION_PERMISSION_KEY] ?: true
         }
 
-    val shouldShowHiddenPlaces: Flow<Boolean> = context.dataStore.data
+    val shouldShowHiddenPlacesOnMap: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
             preferences[MAP_HIDDEN_PLACES_KEY] ?: true
         }
