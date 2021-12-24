@@ -1,6 +1,9 @@
 package com.joesemper.fishing.compose.ui.home.catch_screen
 
+import android.Manifest
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.*
@@ -10,6 +13,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -30,13 +34,21 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.compose.AsyncImageContent
 import coil.compose.AsyncImagePainter
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberPermissionState
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
+import com.joesemper.fishing.compose.ui.Arguments
+import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.home.notes.ItemUserPlace
+import com.joesemper.fishing.compose.ui.home.views.PhotosView
 import com.joesemper.fishing.compose.ui.home.weather.*
+import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserCatchViewModel
+import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserCatch
+import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.utils.network.ConnectionState
@@ -47,7 +59,7 @@ import com.joesemper.fishing.utils.time.toTime
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
-
+@OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalAnimationApi
 @Composable
 fun UserCatchScreen(navController: NavController, catch: UserCatch?) {
@@ -57,6 +69,10 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch?) {
         catch?.let {
             viewModel.catch.value = it
         }
+    }
+
+    if (viewModel.loadingState.value is Progress.Loading) {
+        LoadingDialog()
     }
 
     Scaffold(topBar = {
@@ -70,6 +86,7 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch?) {
             viewModel = viewModel,
         )
     }
+
 }
 
 @Composable
@@ -96,15 +113,18 @@ fun CatchContent(
     navController: NavController,
     viewModel: UserCatchViewModel,
 ) {
-
-    val context = LocalContext.current
-    val connectionState by context.observeConnectivityAsFlow()
-        .collectAsState(initial = context.currentConnectivityState)
+    val photosState = remember { mutableStateOf(listOf<Uri>()) }
 
     viewModel.catch.value?.let { catch ->
 
         LaunchedEffect(key1 = catch) {
             viewModel.getMapMarker(catch.userMarkerId)
+        }
+
+        LaunchedEffect(key1 = photosState.value) {
+            if (photosState.value.isNotEmpty()) {
+                viewModel.updateCatchPhotos(photosState.value)
+            }
         }
 
         Column(
@@ -118,14 +138,17 @@ fun CatchContent(
 
             CatchTitleView(catch = catch, viewModel = viewModel)
 
-            if (catch.downloadPhotoLinks.isNotEmpty() || connectionState is ConnectionState.Available) {
-                CatchPhotosView(photos = catch.downloadPhotoLinks)
-            }
+            PhotosView(
+                photos = catch.downloadPhotoLinks.map { it.toUri() },
+                onSavePhotos = { newPhotos -> photosState.value = newPhotos }
+            )
 
             viewModel.mapMarker.value?.let {
                 ItemUserPlace(
                     place = it,
-                    userPlaceClicked = { })
+                    userPlaceClicked = {
+                        onPlaceItemClick(place = it, navController = navController)
+                    })
             }
 
             DefaultNoteView(
@@ -203,6 +226,7 @@ fun CatchTitleView(
 
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @ExperimentalAnimationApi
 @ExperimentalComposeUiApi
 @Composable
@@ -210,6 +234,32 @@ fun CatchPhotosView(
     modifier: Modifier = Modifier,
     photos: List<String>
 ) {
+    val context = LocalContext.current
+    val connectionState by context.observeConnectivityAsFlow()
+        .collectAsState(initial = context.currentConnectivityState)
+    val permissionState = rememberPermissionState(Manifest.permission.READ_EXTERNAL_STORAGE)
+    val addPhotoState = rememberSaveable { mutableStateOf(false) }
+
+    val photosState = remember { mutableStateOf(photos.map { it.toUri() }.toMutableList()) }
+
+    val dialogState = remember { mutableStateOf(false) }
+
+    val choosePhotoLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { value ->
+            photosState.value.addAll(value)
+            dialogState.value = true
+        }
+
+    if (dialogState.value) {
+        AddPhotoDialog(
+            photos = photosState.value,
+            dialogState = dialogState,
+            onSavePhotosClick = { newPhotos ->
+                photosState.value.addAll(newPhotos)
+            }
+        )
+    }
+
     Row(
         modifier = modifier
             .padding(vertical = 16.dp, horizontal = 8.dp)
@@ -219,12 +269,46 @@ fun CatchPhotosView(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
     ) {
-        photos.forEach {
-            ItemCatchPhotoView(
-                modifier = Modifier.padding(horizontal = 8.dp),
-                photo = it.toUri()
-            )
+        if (photosState.value.isNotEmpty()) {
+            if (connectionState is ConnectionState.Available) {
+                photosState.value.forEach {
+                    ItemCatchPhotoView(
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        photo = it
+                    )
+                }
+            } else {
+                PrimaryTextSmall(
+                    text = stringResource(R.string.photos_not_available)
+                )
+            }
+        } else {
+            Column(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                PrimaryTextSmall(text = stringResource(R.string.no_photos_added))
+                ButtonWithIcon(
+                    text = stringResource(id = R.string.add_photo),
+                    icon = painterResource(id = R.drawable.ic_baseline_add_photo_alternate_24),
+                    onClick = {
+                        addPhotoState.value = true
+                    }
+                )
+            }
+
         }
+
+    }
+
+    if (addPhotoState.value) {
+        LaunchedEffect(addPhotoState) {
+            permissionState.launchPermissionRequest()
+        }
+        addPhoto(permissionState, addPhotoState, choosePhotoLauncher)
     }
 
 }
@@ -298,7 +382,7 @@ fun WayOfFishingView(
                     top.linkTo(parent.top)
                     absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
                 },
-                icon = R.drawable.ic_hook,
+                icon = R.drawable.ic_fishing_rod,
                 text = stringResource(id = R.string.way_of_fishing)
             )
 
@@ -553,6 +637,13 @@ fun CatchWeatherView(
             )
         }
     }
+}
+
+private fun onPlaceItemClick(place: UserMapMarker, navController: NavController) {
+    navController.navigate(
+        MainDestinations.PLACE_ROUTE,
+        Arguments.PLACE to place
+    )
 }
 
 

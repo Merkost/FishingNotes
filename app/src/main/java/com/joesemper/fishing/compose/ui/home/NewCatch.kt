@@ -6,7 +6,6 @@ import android.app.TimePickerDialog
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -39,21 +38,16 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
 import coil.annotation.ExperimentalCoilApi
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.home.catch_screen.addPhoto
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
 import com.joesemper.fishing.compose.ui.home.notes.WeatherLayout
 import com.joesemper.fishing.compose.ui.home.notes.WeatherLayoutLoading
@@ -166,6 +160,7 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>, upPress: () -> Unit) {
     val errorDialog = rememberSaveable { mutableStateOf(false) }
@@ -631,19 +626,6 @@ fun ItemAddPhoto(connectionState: ConnectionState) {
     }
 }
 
-@ExperimentalPermissionsApi
-private fun addPhoto(
-    permissionState: PermissionState,
-    addPhotoState: MutableState<Boolean>,
-    choosePhotoLauncher: ManagedActivityResultLauncher<Array<String>, List<Uri>>
-) {
-    when {
-        permissionState.hasPermission -> {
-            choosePhotoLauncher.launch(arrayOf("image/*"))
-            addPhotoState.value = false
-        }
-    }
-}
 
 @Composable
 fun NewCatchWeatherItem(viewModel: NewCatchViewModel, connectionState: ConnectionState) {
@@ -829,37 +811,6 @@ fun ErrorDialog(errorDialog: MutableState<Boolean>) {
                 content = { Text(stringResource(R.string.Cancel)) })
         }
     )
-}
-
-@Composable
-fun LoadingDialog() {
-    Dialog(onDismissRequest = {}) {
-        Card(modifier = Modifier.wrapContentSize()) {
-            Column(modifier = Modifier.wrapContentSize()) {
-                PrimaryText(
-                    modifier = Modifier
-                        .align(alignment = Alignment.Start)
-                        .padding(8.dp),
-                    text = stringResource(R.string.saving_new_catch)
-                )
-                val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.fish_loading))
-                LottieAnimation(
-                    modifier = Modifier.size(128.dp),
-                    composition = composition,
-                    iterations = LottieConstants.IterateForever,
-                    isPlaying = true
-                )
-                OutlinedButton(
-                    modifier = Modifier
-                        .align(alignment = Alignment.End)
-                        .padding(8.dp),
-                    onClick = { },
-                    content = { Text(stringResource(R.string.Cancel)) }
-                )
-            }
-        }
-
-    }
 }
 
 @Composable

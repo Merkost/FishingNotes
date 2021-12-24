@@ -228,5 +228,8 @@
     <string name="adding_place_on_current_location">Adding place on your location</string>
     <string name="location_permissions_required">Location permissions required</string>
     <string name="fab_fast_add">Быстрое добавление точки на карте</string>
+    <string name="photos_not_available">No Internet connection\nPhotos not available</string>
+    <string name="no_photos_added">No photos added</string>
+    <string name="loading">Loading</string>
 
 </resources>

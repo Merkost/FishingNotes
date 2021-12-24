@@ -222,6 +222,27 @@ class FirebaseCatchesRepositoryImpl(
             }
         }
 
+    override suspend fun updateUserCatchPhotos(
+        markerId: String,
+        catchId: String,
+        newPhotos: List<Uri>
+    ): StateFlow<Progress> {
+        val flow = MutableStateFlow<Progress>(Progress.Loading(0))
+
+        val newPhotoDownloadLinks =
+            savePhotos(newPhotos.filter { !it.toString().startsWith("http") }, flow)
+
+        val oldPhotos = newPhotos.filter { it.toString().startsWith("http") }
+
+        val photosResult = newPhotoDownloadLinks + oldPhotos.map { it.toString() }
+        dbCollections.getUserCatchesCollection(markerId).document(catchId)
+            .update("downloadPhotoLinks", photosResult)
+            .addOnCompleteListener { flow.tryEmit(Progress.Complete) }
+
+        return flow
+
+    }
+
     private suspend fun savePhotos(
         photos: List<Uri>,
         progressFlow: MutableStateFlow<Progress>

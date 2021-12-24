@@ -49,6 +49,10 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.catch_screen.EditNoteDialog
 import com.joesemper.fishing.compose.ui.theme.*
@@ -81,79 +85,94 @@ fun DefaultDialog(
     ) {
         DefaultCard(
             modifier = Modifier
-                .padding(4.dp)
+                .padding(horizontal = 16.dp)
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .animateContentSize()
         ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ConstraintLayout(
                 modifier = Modifier
-                    .wrapContentSize()
-                    .animateContentSize()
-                    .padding(14.dp)
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(16.dp)
             ) {
-                Column(
+                val (title, subtitle, mainContent, neutralButton, negativeButton, positiveButton) = createRefs()
+
+                PrimaryText(
+                    modifier = Modifier.constrainAs(title) {
+                        top.linkTo(parent.top)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                    },
+                    text = primaryText,
+                )
+
+                if (secondaryText != null) {
+                    PrimaryTextSmall(
+                        modifier = Modifier.constrainAs(subtitle) {
+                            top.linkTo(title.bottom, 2.dp)
+                            absoluteLeft.linkTo(title.absoluteLeft)
+                        },
+                        text = secondaryText, textAlign = TextAlign.Start
+                    )
+                } else {
+                    Spacer(modifier = Modifier
+                        .size(1.dp)
+                        .constrainAs(subtitle) {
+                            top.linkTo(title.bottom, 2.dp)
+                            absoluteLeft.linkTo(title.absoluteLeft)
+                        })
+                }
+
+                Box(
                     modifier = Modifier
-                        .padding(6.dp)
                         .fillMaxWidth()
                         .wrapContentHeight()
-                        .animateContentSize()
-                ) {
-                    PrimaryText(
-                        text = primaryText,
-                    )
-                    Spacer(Modifier.size(4.dp))
-                    secondaryText?.let {
-                        SecondaryText(text = secondaryText, textAlign = TextAlign.Start)
-                    }
-
-                    content?.let {
-                        Column(
-                            modifier = Modifier
-                                .padding(4.dp)
-                                .wrapContentSize()
-                                .animateContentSize()
-                        ) {
-                            content()
+                        .constrainAs(mainContent) {
+                            top.linkTo(subtitle.bottom, 16.dp)
+                            absoluteLeft.linkTo(parent.absoluteLeft)
+                            absoluteRight.linkTo(parent.absoluteRight)
+                            width = Dimension.fillToConstraints
                         }
-                    }
+                ) {
+                    content?.invoke()
                 }
-                Spacer(modifier = Modifier.size(2.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    if (neutralButtonText.isNotEmpty()) {
-                        DefaultButtonSecondaryText(
-                            text = neutralButtonText,
-                            onClick = onNeutralClick,
-                            shape = RoundedCornerShape(24.dp)
-                        )
-                    } else Spacer(modifier = Modifier.size(1.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        if (negativeButtonText.isNotEmpty()) {
-                            DefaultButtonText(
-                                text = negativeButtonText,
-                                onClick = onNegativeClick,
-                                shape = RoundedCornerShape(24.dp)
-                            )
-                        }
-                        if (positiveButtonText.isNotEmpty())
-                            DefaultButton(
-                                text = positiveButtonText,
-                                onClick = onPositiveClick,
-                                shape = RoundedCornerShape(24.dp)
-                            )
 
-                    }
+                if (neutralButtonText.isNotEmpty()) {
+                    DefaultTextButton(
+                        modifier = Modifier.constrainAs(neutralButton) {
+                            top.linkTo(positiveButton.top)
+                            absoluteLeft.linkTo(parent.absoluteLeft)
+                        },
+                        text = neutralButtonText,
+                        onClick = onNeutralClick,
+                    )
+                }
+
+                DefaultTextButton(
+                    modifier = Modifier.constrainAs(positiveButton) {
+                        top.linkTo(mainContent.bottom, 16.dp)
+                        bottom.linkTo(parent.bottom)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                    },
+                    text = positiveButtonText,
+                    onClick = onPositiveClick,
+                )
+
+                if (negativeButtonText.isNotEmpty()) {
+                    DefaultTextButton(
+                        modifier = Modifier.constrainAs(negativeButton) {
+                            top.linkTo(positiveButton.top)
+                            absoluteRight.linkTo(positiveButton.absoluteLeft, 8.dp)
+                        },
+                        text = negativeButtonText,
+                        onClick = onNegativeClick,
+                    )
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun MyCardNoPadding(content: @Composable () -> Unit) {
@@ -384,8 +403,10 @@ fun HeaderTextSecondary(
 }
 
 @Composable
-fun SubtitleText(modifier: Modifier = Modifier, text: String,
-                 textColor: Color? = null) {
+fun SubtitleText(
+    modifier: Modifier = Modifier, text: String,
+    textColor: Color? = null
+) {
     val darkTheme = isSystemInDarkTheme()
 
     Text(
@@ -716,7 +737,7 @@ fun DefaultButton(
             }
             SecondaryTextColored(
                 color = Color.White,
-                text = text,
+                text = text.uppercase(),
                 modifier = Modifier.padding(horizontal = 4.dp),
                 style = textStyle,
                 maxLines = 1
@@ -793,6 +814,24 @@ fun DefaultButtonText(
                 maxLines = 1
             )
         }
+    }
+}
+
+@Composable
+fun DefaultTextButton(
+    modifier: Modifier = Modifier,
+    text: String,
+    onClick: () -> Unit
+) {
+    TextButton(
+        modifier = modifier,
+        onClick = onClick
+    ) {
+        Text(
+            text = text.uppercase(),
+            color = MaterialTheme.colors.primaryVariant,
+            maxLines = 1
+        )
     }
 }
 
@@ -983,6 +1022,7 @@ fun ButtonWithIcon(
     modifier: Modifier = Modifier,
     icon: Painter? = null,
     text: String,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     Button(
@@ -992,6 +1032,7 @@ fun ButtonWithIcon(
             backgroundColor = Color.White,
             contentColor = MaterialTheme.colors.primaryVariant
         ),
+        enabled = enabled,
         shape = RoundedCornerShape(24.dp),
         border = BorderStroke(1.dp, color = secondaryTextColor)
     ) {
@@ -1006,6 +1047,34 @@ fun ButtonWithIcon(
             modifier = Modifier.padding(horizontal = 4.dp),
             text = text,
             textColor = MaterialTheme.colors.primaryVariant
+        )
+
+    }
+}
+
+@Composable
+fun MaxCounterView(
+    modifier: Modifier = Modifier,
+    icon: Painter? = null,
+    count: Int = 0,
+    maxCount: Int = 0
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (icon != null) {
+            Icon(
+                modifier = Modifier
+                    .size(24.dp)
+                    .padding(end = 4.dp),
+                painter = icon,
+                tint = secondaryTextColor,
+                contentDescription = null
+            )
+        }
+        SecondaryText(
+            text = "$count/$maxCount"
         )
 
     }
@@ -1040,6 +1109,32 @@ fun FilledButtonWithIcon(
             text = text,
             textColor = MaterialTheme.colors.onPrimary
         )
+
+    }
+}
+
+@ExperimentalComposeUiApi
+@Composable
+fun LoadingDialog() {
+    DefaultDialog(
+        primaryText = stringResource(R.string.loading),
+        onDismiss = {}
+    ) {
+        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.fish_loading))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            contentAlignment = Alignment.Center
+        ) {
+            LottieAnimation(
+                modifier = Modifier.size(256.dp),
+                composition = composition,
+                iterations = LottieConstants.IterateForever,
+                isPlaying = true
+            )
+        }
+
 
     }
 }

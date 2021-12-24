@@ -17,7 +17,6 @@ import androidx.navigation.NavController
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
-import com.joesemper.fishing.compose.ui.home.place.PlaceCatchItemView
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserCatchesViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
@@ -69,7 +68,7 @@ fun UserCatches(
                             it
                         }
                     ) {
-                        PlaceCatchItemView(
+                        CatchItemView(
                             catch = it,
                             onClick = userCatchClicked
                         )
