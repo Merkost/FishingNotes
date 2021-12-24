@@ -46,14 +46,12 @@ import coil.annotation.ExperimentalCoilApi
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
-import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
 import com.joesemper.fishing.compose.ui.home.notes.WeatherLayout
@@ -131,11 +129,11 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
 
     BottomSheetScaffold(
 /*        scaffoldState = bottomSheetScaffoldState,*/
-        modifier = Modifier.navigationBarsWithImePadding(),
+        modifier = Modifier,
         topBar = { NewCatchAppBar(upPress) },
         floatingActionButton = {
             FloatingActionButton(
-                modifier = Modifier.padding(bottom = 16.dp),
+                modifier = Modifier.padding(bottom = 36.dp),
                 onClick = {
                     if (viewModel.isInputCorrect()) viewModel.createNewUserCatch()
                     else SnackbarManager.showMessage(R.string.not_all_fields_are_filled)
@@ -147,7 +145,11 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
                 )
             }
         },
-        sheetContent = { BannerAdvertView() },
+        sheetContent = {
+            BannerAdvertView(
+                adId = stringResource(R.string.new_catch_admob_banner_id)
+            )
+        },
         sheetShape = RectangleShape,
         sheetGesturesEnabled = false
     ) {
@@ -177,14 +179,13 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
                 )
                 Spacer(modifier = Modifier.padding(16.dp))
             }
-            BannerAdvertView(/*modifier = Modifier.padding(4.dp)*/)
         }
 
     }
 }
 
 @Composable
-fun BannerAdvertView(modifier: Modifier = Modifier) {
+fun BannerAdvertView(modifier: Modifier = Modifier, adId: String) {
     val configuration = LocalConfiguration.current
     val isInEditMode = LocalInspectionMode.current
     if (isInEditMode) {
@@ -204,8 +205,9 @@ fun BannerAdvertView(modifier: Modifier = Modifier) {
                 AdView(context).apply {
                     adSize = AdSize
                         .getCurrentOrientationAnchoredAdaptiveBannerAdSize(
-                            context, configuration.screenWidthDp)
-                    adUnitId = context.getString(R.string.new_catch_admob_banner_id)
+                            context, configuration.screenWidthDp
+                        )
+                    adUnitId = adId
                     loadAd(AdRequest.Builder().build())
                 }
             }
@@ -882,7 +884,7 @@ fun ErrorDialog(errorDialog: MutableState<Boolean>) {
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun LoadingDialog() {
-    DefaultDialog (primaryText = stringResource(R.string.saving_new_catch),
+    DefaultDialog(primaryText = stringResource(R.string.saving_new_catch),
         content = {
             LoadingAdvertView()
             /*val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.fish_loading))

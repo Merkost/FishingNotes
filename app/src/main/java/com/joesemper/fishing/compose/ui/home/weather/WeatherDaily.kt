@@ -2,21 +2,22 @@ package com.joesemper.fishing.compose.ui.home.weather
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.*
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
+import com.joesemper.fishing.compose.ui.home.BannerAdvertView
 import com.joesemper.fishing.compose.ui.home.DefaultAppBar
 import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.utils.time.toDayOfWeekAndDate
@@ -32,9 +33,7 @@ fun WeatherDaily(
     data: DailyWeatherData?
 ) {
 
-    val pagerState = rememberPagerState(
-        initialPage = data?.selectedDay ?: 0
-    )
+    val pagerState = rememberPagerState(initialPage = data?.selectedDay ?: 0)
 
     Scaffold(
         topBar = {
@@ -42,13 +41,20 @@ fun WeatherDaily(
                 onNavClick = { upPress() },
                 title = stringResource(id = R.string.weather)
             )
-        }
+        },
+
     ) {
         AnimatedVisibility(visible = data != null) {
-            Column {
-                WeatherDaysTabs(forecast = data!!.dailyForecast, pagerState = pagerState)
-                WeatherTabsContent(forecast = data.dailyForecast, pagerState = pagerState)
+            Column(modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween) {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState(0))
+                ) {
+                    WeatherDaysTabs(forecast = data!!.dailyForecast, pagerState = pagerState)
+                    WeatherTabsContent(forecast = data.dailyForecast, pagerState = pagerState)
+                }
+                BannerAdvertView(adId = stringResource(R.string.new_catch_admob_banner_id))
             }
+
         }
     }
 }
