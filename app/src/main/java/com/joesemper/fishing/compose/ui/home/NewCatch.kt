@@ -28,6 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalViewConfiguration
@@ -39,13 +41,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
 import coil.annotation.ExperimentalCoilApi
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
@@ -56,6 +53,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
 import com.joesemper.fishing.compose.ui.home.notes.WeatherLayout
@@ -102,6 +100,9 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
 
     SubscribeToProgress(viewModel.uiState, upPress)
     val scrollState = rememberScrollState()
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = BottomSheetState(BottomSheetValue.Expanded)
+    )
 
     viewModel.date.value = dateAndTime.timeInMillis
     var isNull by remember {
@@ -128,11 +129,13 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
         }
     }
 
-    Scaffold(
+    BottomSheetScaffold(
+/*        scaffoldState = bottomSheetScaffoldState,*/
         modifier = Modifier.navigationBarsWithImePadding(),
         topBar = { NewCatchAppBar(upPress) },
         floatingActionButton = {
             FloatingActionButton(
+                modifier = Modifier.padding(bottom = 16.dp),
                 onClick = {
                     if (viewModel.isInputCorrect()) viewModel.createNewUserCatch()
                     else SnackbarManager.showMessage(R.string.not_all_fields_are_filled)
@@ -143,14 +146,16 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
                     tint = MaterialTheme.colors.onPrimary
                 )
             }
-        }
+        },
+        sheetContent = { BannerAdvertView() },
+        sheetShape = RectangleShape,
+        sheetGesturesEnabled = false
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxSize()
         ) {
-            AdvertView(modifier = Modifier.padding(4.dp))
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(30.dp),
@@ -172,13 +177,15 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
                 )
                 Spacer(modifier = Modifier.padding(16.dp))
             }
+            BannerAdvertView(/*modifier = Modifier.padding(4.dp)*/)
         }
 
     }
 }
 
 @Composable
-fun AdvertView(modifier: Modifier = Modifier) {
+fun BannerAdvertView(modifier: Modifier = Modifier) {
+    val configuration = LocalConfiguration.current
     val isInEditMode = LocalInspectionMode.current
     if (isInEditMode) {
         Text(
@@ -195,7 +202,9 @@ fun AdvertView(modifier: Modifier = Modifier) {
             modifier = modifier.fillMaxWidth().wrapContentHeight(),
             factory = { context ->
                 AdView(context).apply {
-                    adSize = AdSize.BANNER
+                    adSize = AdSize
+                        .getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+                            context, configuration.screenWidthDp)
                     adUnitId = context.getString(R.string.new_catch_admob_banner_id)
                     loadAd(AdRequest.Builder().build())
                 }
@@ -869,34 +878,50 @@ fun ErrorDialog(errorDialog: MutableState<Boolean>) {
     )
 }
 
+
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun LoadingDialog() {
-    Dialog(onDismissRequest = {}) {
-        Card(modifier = Modifier.wrapContentSize()) {
-            Column(modifier = Modifier.wrapContentSize()) {
-                PrimaryText(
-                    modifier = Modifier
-                        .align(alignment = Alignment.Start)
-                        .padding(8.dp),
-                    text = stringResource(R.string.saving_new_catch)
-                )
-                val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.fish_loading))
-                LottieAnimation(
-                    modifier = Modifier.size(128.dp),
-                    composition = composition,
-                    iterations = LottieConstants.IterateForever,
-                    isPlaying = true
-                )
-                OutlinedButton(
-                    modifier = Modifier
-                        .align(alignment = Alignment.End)
-                        .padding(8.dp),
-                    onClick = { },
-                    content = { Text(stringResource(R.string.Cancel)) }
-                )
-            }
-        }
+    DefaultDialog (primaryText = stringResource(R.string.saving_new_catch),
+        content = {
+            LoadingAdvertView()
+            /*val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.fish_loading))
+            LottieAnimation(
+                modifier = Modifier.size(128.dp),
+                composition = composition,
+                iterations = LottieConstants.IterateForever,
+                isPlaying = true
+            )*/
+        },
+        negativeButtonText = stringResource(R.string.Cancel),
+        onNegativeClick = {},
+        onDismiss = {})
+}
 
+@Composable
+fun LoadingAdvertView(modifier: Modifier = Modifier) {
+    val isInEditMode = LocalInspectionMode.current
+    if (isInEditMode) {
+        Text(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(Color.Red)
+                .padding(horizontal = 2.dp, vertical = 6.dp),
+            textAlign = TextAlign.Center,
+            color = Color.White,
+            text = "Advert Here",
+        )
+    } else {
+        AndroidView(
+            modifier = modifier.fillMaxWidth().wrapContentHeight(),
+            factory = { context ->
+                AdView(context).apply {
+                    adSize = AdSize.WIDE_SKYSCRAPER
+                    adUnitId = context.getString(R.string.new_catch_loading_admob_banner_id)
+                    loadAd(AdRequest.Builder().build())
+                }
+            }
+        )
     }
 }
 
