@@ -6,10 +6,10 @@
         translatable="false">
         ca-app-pub-3940256099942544/6300978111</string>
 
-    <string name="new_catch_loading_admob_banner_id"
+    <string name="new_catch_loading_admob_fullscreen_id"
         templateMergeStrategy="preserve"
         translatable="false">
-        ca-app-pub-3940256099942544/6300978111</string>
+        ca-app-pub-3940256099942544/8691691433</string>
 
 
     <string name="weather_daily_admob_banner_id"

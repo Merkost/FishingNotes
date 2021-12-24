@@ -5,6 +5,7 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -43,6 +44,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.PopupProperties
 import coil.annotation.ExperimentalCoilApi
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
@@ -52,7 +57,11 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.MainActivity
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
 import com.joesemper.fishing.compose.ui.home.notes.WeatherLayout
 import com.joesemper.fishing.compose.ui.home.notes.WeatherLayoutLoading
@@ -62,12 +71,10 @@ import com.joesemper.fishing.domain.viewstates.ErrorType
 import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getAllWeatherIcons
-import com.joesemper.fishing.utils.MILLISECONDS_IN_DAY
+import com.joesemper.fishing.utils.*
 import com.joesemper.fishing.utils.network.ConnectionState
 import com.joesemper.fishing.utils.network.currentConnectivityState
 import com.joesemper.fishing.utils.network.observeConnectivityAsFlow
-import com.joesemper.fishing.utils.roundTo
-import com.joesemper.fishing.utils.showToast
 import com.joesemper.fishing.utils.time.toDate
 import com.joesemper.fishing.utils.time.toTime
 import kotlinx.coroutines.flow.StateFlow
@@ -76,11 +83,14 @@ import org.koin.androidx.compose.viewModel
 import java.util.*
 
 private val dateAndTime = Calendar.getInstance()
+private var mInterstitialAd: InterstitialAd? = null
 
 object Constants {
     const val MAX_PHOTOS: Int = 5
     const val ITEM_ADD_PHOTO = "ITEM_ADD_PHOTO"
     const val ITEM_PHOTO = "ITEM_PHOTO"
+
+    const val TAG = "NEW_CATCH_LOG"
 }
 
 @ExperimentalPermissionsApi
@@ -98,9 +108,6 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
 
     SubscribeToProgress(viewModel.uiState, upPress)
     val scrollState = rememberScrollState()
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = BottomSheetState(BottomSheetValue.Expanded)
-    )
 
     viewModel.date.value = dateAndTime.timeInMillis
     var isNull by remember {
@@ -128,14 +135,32 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
     }
 
     BottomSheetScaffold(
-/*        scaffoldState = bottomSheetScaffoldState,*/
         modifier = Modifier,
         topBar = { NewCatchAppBar(upPress) },
         floatingActionButton = {
             FloatingActionButton(
                 modifier = Modifier.padding(bottom = 36.dp),
                 onClick = {
-                    if (viewModel.isInputCorrect()) viewModel.createNewUserCatch()
+                    if (viewModel.isInputCorrect()) {
+                        InterstitialAd.load(context,
+                            context.getString(R.string.new_catch_loading_admob_fullscreen_id),
+                        AdRequest.Builder().build(), object : InterstitialAdLoadCallback() {
+                                override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                                    Log.d(Constants.TAG, "Ad was loaded.")
+                                    mInterstitialAd = interstitialAd
+                                    viewModel.createNewUserCatch()
+                                    mInterstitialAd?.show(context as MainActivity)
+                                    super.onAdLoaded(interstitialAd)
+                                }
+
+                                override fun onAdFailedToLoad(adError: LoadAdError) {
+                                    Log.d(Constants.TAG, adError?.message)
+                                    mInterstitialAd = null
+                                    viewModel.createNewUserCatch()
+                                    super.onAdFailedToLoad(adError)
+                                }
+                            })
+                    }
                     else SnackbarManager.showMessage(R.string.not_all_fields_are_filled)
                 }) {
                 Icon(
@@ -155,7 +180,7 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxSize()
         ) {
             Column(
@@ -179,6 +204,7 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
                 )
                 Spacer(modifier = Modifier.padding(16.dp))
             }
+
         }
 
     }
@@ -886,14 +912,14 @@ fun ErrorDialog(errorDialog: MutableState<Boolean>) {
 fun LoadingDialog() {
     DefaultDialog(primaryText = stringResource(R.string.saving_new_catch),
         content = {
-            LoadingAdvertView()
-            /*val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.fish_loading))
+            //LoadingAdvertView()
+            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.fish_loading))
             LottieAnimation(
                 modifier = Modifier.size(128.dp),
                 composition = composition,
                 iterations = LottieConstants.IterateForever,
                 isPlaying = true
-            )*/
+            )
         },
         negativeButtonText = stringResource(R.string.Cancel),
         onNegativeClick = {},
@@ -902,29 +928,7 @@ fun LoadingDialog() {
 
 @Composable
 fun LoadingAdvertView(modifier: Modifier = Modifier) {
-    val isInEditMode = LocalInspectionMode.current
-    if (isInEditMode) {
-        Text(
-            modifier = modifier
-                .fillMaxWidth()
-                .background(Color.Red)
-                .padding(horizontal = 2.dp, vertical = 6.dp),
-            textAlign = TextAlign.Center,
-            color = Color.White,
-            text = "Advert Here",
-        )
-    } else {
-        AndroidView(
-            modifier = modifier.fillMaxWidth().wrapContentHeight(),
-            factory = { context ->
-                AdView(context).apply {
-                    adSize = AdSize.WIDE_SKYSCRAPER
-                    adUnitId = context.getString(R.string.new_catch_loading_admob_banner_id)
-                    loadAd(AdRequest.Builder().build())
-                }
-            }
-        )
-    }
+
 }
 
 @Composable

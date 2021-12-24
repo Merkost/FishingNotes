@@ -24,6 +24,7 @@ import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.MobileAds.setAppMuted
 import com.google.android.gms.ads.RequestConfiguration
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -137,6 +138,7 @@ class MainActivity : ComponentActivity() {
         auth = FirebaseAuth.getInstance()
 
         MobileAds.initialize(this) {}
+        setAppMuted(true)
     }
 
     // This app draws behind the system bars, so we want to handle fitting system windows

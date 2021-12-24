@@ -47,7 +47,7 @@ fun WeatherDaily(
         AnimatedVisibility(visible = data != null) {
             Column(modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween) {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState(0))
+                Column(modifier = Modifier.verticalScroll(rememberScrollState(0), enabled = true)
                 ) {
                     WeatherDaysTabs(forecast = data!!.dailyForecast, pagerState = pagerState)
                     WeatherTabsContent(forecast = data.dailyForecast, pagerState = pagerState)
