@@ -11,15 +11,12 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -32,13 +29,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
 import coil.annotation.ExperimentalCoilApi
@@ -53,6 +53,9 @@ import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
 import com.joesemper.fishing.compose.ui.home.notes.WeatherLayout
@@ -91,12 +94,14 @@ object Constants {
 @Composable
 fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
 
+
     val viewModel: NewCatchViewModel by viewModel()
     val context = LocalContext.current
     val connectionState by context.observeConnectivityAsFlow()
         .collectAsState(initial = context.currentConnectivityState)
 
-    //viewModel.date.value = dateAndTime.timeInMillis
+    SubscribeToProgress(viewModel.uiState, upPress)
+    val scrollState = rememberScrollState()
 
     viewModel.date.value = dateAndTime.timeInMillis
     var isNull by remember {
@@ -140,29 +145,62 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
             }
         }
     ) {
-        SubscribeToProgress(viewModel.uiState, upPress)
-        val scrollState = rememberScrollState()
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(30.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(state = scrollState, enabled = true)
-                .padding(horizontal = 16.dp, vertical = 12.dp)
-
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
         ) {
+            AdvertView(modifier = Modifier.padding(4.dp))
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(30.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(state = scrollState, enabled = true)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
 
-            Places(viewModel, isNull)  //Выпадающий список мест
-            FishAndWeight(viewModel.fishAmount, viewModel.weight)
-            Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
-            DateAndTime(viewModel.date)
-            NewCatchWeatherItem(viewModel, connectionState)
-            Photos(
-                { clicked -> { } },
-                { deleted -> viewModel.deletePhoto(deleted) }, connectionState
-            )
-            Spacer(modifier = Modifier.padding(16.dp))
+            ) {
+
+                Places(viewModel, isNull)  //Выпадающий список мест
+                FishAndWeight(viewModel.fishAmount, viewModel.weight)
+                Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
+                DateAndTime(viewModel.date)
+                NewCatchWeatherItem(viewModel, connectionState)
+                Photos(
+                    { clicked -> { } },
+                    { deleted -> viewModel.deletePhoto(deleted) }, connectionState
+                )
+                Spacer(modifier = Modifier.padding(16.dp))
+            }
         }
+
+    }
+}
+
+@Composable
+fun AdvertView(modifier: Modifier = Modifier) {
+    val isInEditMode = LocalInspectionMode.current
+    if (isInEditMode) {
+        Text(
+            modifier = modifier
+                .fillMaxWidth()
+                .background(Color.Red)
+                .padding(horizontal = 2.dp, vertical = 6.dp),
+            textAlign = TextAlign.Center,
+            color = Color.White,
+            text = "Advert Here",
+        )
+    } else {
+        AndroidView(
+            modifier = modifier.fillMaxWidth().wrapContentHeight(),
+            factory = { context ->
+                AdView(context).apply {
+                    adSize = AdSize.BANNER
+                    adUnitId = context.getString(R.string.new_catch_admob_banner_id)
+                    loadAd(AdRequest.Builder().build())
+                }
+            }
+        )
     }
 }
 

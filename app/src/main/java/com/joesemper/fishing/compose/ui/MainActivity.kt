@@ -23,6 +23,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.RequestConfiguration
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -69,6 +71,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val viewModel: MainViewModel = get()
+
         val userStateFlow: StateFlow<BaseViewState> = viewModel.subscribe()
 
         val userPreferences: UserPreferences = get()
@@ -132,6 +135,8 @@ class MainActivity : ComponentActivity() {
         }
 
         auth = FirebaseAuth.getInstance()
+
+        MobileAds.initialize(this) {}
     }
 
     // This app draws behind the system bars, so we want to handle fitting system windows

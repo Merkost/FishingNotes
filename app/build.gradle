@@ -69,7 +69,7 @@ dependencies {
     implementation "androidx.core:core-splashscreen:1.0.0-alpha02"
     implementation "com.google.accompanist:accompanist-systemuicontroller:0.18.0"
 
-    //implementation 'com.google.android.gms:play-services-ads:20.4.0'
+    implementation 'com.google.android.gms:play-services-ads:20.5.0'
 
     // Preferences DataStore
     implementation "androidx.datastore:datastore-preferences:1.0.0"

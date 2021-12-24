@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">REDACTED</string>
+    <string name="admob_app_id" templateMergeStrategy="preserve" translatable="false">ca-app-pub-5946981839129788~9187275712</string>
+
 </resources>
