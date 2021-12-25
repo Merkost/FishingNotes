@@ -71,10 +71,14 @@ import com.joesemper.fishing.domain.viewstates.ErrorType
 import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getAllWeatherIcons
-import com.joesemper.fishing.utils.*
+import com.joesemper.fishing.utils.Constants.ITEM_ADD_PHOTO
+import com.joesemper.fishing.utils.Constants.defaultFabBottomPadding
+import com.joesemper.fishing.utils.MILLISECONDS_IN_DAY
 import com.joesemper.fishing.utils.network.ConnectionState
 import com.joesemper.fishing.utils.network.currentConnectivityState
 import com.joesemper.fishing.utils.network.observeConnectivityAsFlow
+import com.joesemper.fishing.utils.roundTo
+import com.joesemper.fishing.utils.showToast
 import com.joesemper.fishing.utils.time.toDate
 import com.joesemper.fishing.utils.time.toTime
 import kotlinx.coroutines.flow.StateFlow
@@ -82,15 +86,16 @@ import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.viewModel
 import java.util.*
 
+
 private val dateAndTime = Calendar.getInstance()
 private var mInterstitialAd: InterstitialAd? = null
 
-object Constants {
+private object Constants {
     const val MAX_PHOTOS: Int = 5
-    const val ITEM_ADD_PHOTO = "ITEM_ADD_PHOTO"
-    const val ITEM_PHOTO = "ITEM_PHOTO"
+
 
     const val TAG = "NEW_CATCH_LOG"
+
 }
 
 @ExperimentalPermissionsApi
@@ -99,10 +104,29 @@ object Constants {
 @ExperimentalCoilApi
 @Composable
 fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
-
-
     val viewModel: NewCatchViewModel by viewModel()
     val context = LocalContext.current
+
+    val onAdLoadCallback: InterstitialAdLoadCallback = object : InterstitialAdLoadCallback() {
+        val viewModel: NewCatchViewModel by viewModel()
+
+        override fun onAdLoaded(interstitialAd: InterstitialAd) {
+            Log.d(Constants.TAG, "Ad was loaded.")
+            mInterstitialAd = interstitialAd
+            mInterstitialAd?.show(context as MainActivity)
+            viewModel.createNewUserCatch()
+            super.onAdLoaded(interstitialAd)
+        }
+
+        override fun onAdFailedToLoad(adError: LoadAdError) {
+            Log.d(Constants.TAG, adError?.message)
+            mInterstitialAd = null
+            viewModel.createNewUserCatch()
+            super.onAdFailedToLoad(adError)
+        }
+    }
+
+
     val connectionState by context.observeConnectivityAsFlow()
         .collectAsState(initial = context.currentConnectivityState)
 
@@ -134,34 +158,25 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
         }
     }
 
+    val scaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = BottomSheetState(BottomSheetValue.Expanded)
+    )
+
     BottomSheetScaffold(
+        scaffoldState = scaffoldState,
         modifier = Modifier,
         topBar = { NewCatchAppBar(upPress) },
         floatingActionButton = {
             FloatingActionButton(
-                modifier = Modifier.padding(bottom = 36.dp),
+                modifier = Modifier.padding(bottom = defaultFabBottomPadding),
                 onClick = {
                     if (viewModel.isInputCorrect()) {
-                        InterstitialAd.load(context,
+                        InterstitialAd.load(
+                            context,
                             context.getString(R.string.new_catch_loading_admob_fullscreen_id),
-                        AdRequest.Builder().build(), object : InterstitialAdLoadCallback() {
-                                override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                                    Log.d(Constants.TAG, "Ad was loaded.")
-                                    mInterstitialAd = interstitialAd
-                                    viewModel.createNewUserCatch()
-                                    mInterstitialAd?.show(context as MainActivity)
-                                    super.onAdLoaded(interstitialAd)
-                                }
-
-                                override fun onAdFailedToLoad(adError: LoadAdError) {
-                                    Log.d(Constants.TAG, adError?.message)
-                                    mInterstitialAd = null
-                                    viewModel.createNewUserCatch()
-                                    super.onAdFailedToLoad(adError)
-                                }
-                            })
-                    }
-                    else SnackbarManager.showMessage(R.string.not_all_fields_are_filled)
+                            AdRequest.Builder().build(), onAdLoadCallback
+                        )
+                    } else SnackbarManager.showMessage(R.string.not_all_fields_are_filled)
                 }) {
                 Icon(
                     Icons.Filled.Done,
@@ -171,12 +186,11 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
             }
         },
         sheetContent = {
-            BannerAdvertView(
-                adId = stringResource(R.string.new_catch_admob_banner_id)
-            )
+            BannerAdvertView(adId = stringResource(R.string.new_catch_admob_banner_id))
         },
         sheetShape = RectangleShape,
-        sheetGesturesEnabled = false
+        sheetGesturesEnabled = false,
+        sheetPeekHeight = 0.dp
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -214,6 +228,11 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
 fun BannerAdvertView(modifier: Modifier = Modifier, adId: String) {
     val configuration = LocalConfiguration.current
     val isInEditMode = LocalInspectionMode.current
+    val localContext = LocalContext.current
+
+    val connectionState by localContext.observeConnectivityAsFlow()
+        .collectAsState(initial = localContext.currentConnectivityState)
+
     if (isInEditMode) {
         Text(
             modifier = modifier
@@ -687,7 +706,7 @@ fun ItemAddPhoto(connectionState: ConnectionState) {
         ) {
             Icon(
                 painterResource(R.drawable.ic_baseline_add_photo_alternate_24), //Or we can use Icons.Default.Add
-                contentDescription = Constants.ITEM_ADD_PHOTO,
+                contentDescription = ITEM_ADD_PHOTO,
                 tint = MaterialTheme.colors.primary,
                 modifier = Modifier
                     .fillMaxSize()

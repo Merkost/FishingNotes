@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
+import java.util.*
 
 class MainActivity : ComponentActivity() {
 
@@ -138,6 +139,14 @@ class MainActivity : ComponentActivity() {
         auth = FirebaseAuth.getInstance()
 
         MobileAds.initialize(this) {}
+
+        /*
+            Kostya's Pixel XL = 7254B9BDD30F1D2EACA4C4EAD6B31F2C
+
+        */
+        val testDeviceIds = Arrays.asList("7254B9BDD30F1D2EACA4C4EAD6B31F2C")
+        val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
+        MobileAds.setRequestConfiguration(configuration)
         setAppMuted(true)
     }
 

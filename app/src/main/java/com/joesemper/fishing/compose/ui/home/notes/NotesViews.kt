@@ -35,6 +35,7 @@ import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.utils.Constants.ITEM_PHOTO
 import com.joesemper.fishing.utils.time.toDateTextMonth
 import com.joesemper.fishing.utils.time.toTime
 import org.koin.androidx.compose.get
@@ -147,7 +148,7 @@ fun ItemCatchPhotos(
         } else {
             Icon(
                 painter = painterResource(id = R.drawable.ic_no_photo_vector),
-                contentDescription = Constants.ITEM_PHOTO,
+                contentDescription = ITEM_PHOTO,
                 tint = secondaryFigmaTextColor,
                 modifier = Modifier
                     .fillMaxSize()

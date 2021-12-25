@@ -50,6 +50,7 @@ import com.joesemper.fishing.compose.ui.utils.currentFraction
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
+import com.joesemper.fishing.utils.Constants.defaultFabBottomPadding
 import com.joesemper.fishing.utils.getCameraPosition
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -517,20 +518,20 @@ fun MapFab(
 ) {
     val useFastFabAdd by userSettings.useFabFastAdd.collectAsState(false)
     val fabImg = remember { mutableStateOf(R.drawable.ic_baseline_add_location_24) }
-    val defaultBottomPadding: Dp = 128.dp
+
     val context = LocalContext.current
 
     val paddingBottom = animateDpAsState(
         when (state) {
             MapUiState.NormalMode -> {
-                defaultBottomPadding
+                defaultFabBottomPadding
             }
             MapUiState.BottomSheetInfoMode, MapUiState.BottomSheetFullyExpanded -> {
                 24.dp
             }
             //MapUiState.BottomSheetFullyExpanded -> { 0.dp }
             MapUiState.PlaceSelectMode -> {
-                defaultBottomPadding
+                defaultFabBottomPadding
             }
         }
     )
