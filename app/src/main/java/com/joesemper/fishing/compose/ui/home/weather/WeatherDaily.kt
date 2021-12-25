@@ -35,24 +35,30 @@ fun WeatherDaily(
 
     val pagerState = rememberPagerState(initialPage = data?.selectedDay ?: 0)
 
-    Scaffold(
+    BottomSheetScaffold(
         topBar = {
             DefaultAppBar(
                 onNavClick = { upPress() },
                 title = stringResource(id = R.string.weather)
             )
         },
-
+        sheetContent = {
+            BannerAdvertView(adId = stringResource(R.string.weather_daily_admob_banner_id))
+        },
+        sheetShape = RectangleShape,
+        sheetGesturesEnabled = false,
+        sheetPeekHeight = 0.dp
     ) {
         AnimatedVisibility(visible = data != null) {
             Column(modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween) {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState(0), enabled = true)
+                Column(
                 ) {
                     WeatherDaysTabs(forecast = data!!.dailyForecast, pagerState = pagerState)
                     WeatherTabsContent(forecast = data.dailyForecast, pagerState = pagerState)
+
                 }
-                BannerAdvertView(adId = stringResource(R.string.new_catch_admob_banner_id))
+
             }
 
         }
@@ -120,7 +126,8 @@ fun DailyWeatherScreen(
 
     Column(
         modifier = modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState(0), enabled = true),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
 
@@ -157,7 +164,7 @@ fun DailyWeatherScreen(
             pressureUnit = pressureUnit
         )
 
-
+        Spacer(modifier = Modifier.size(80.dp))
     }
 }
 
