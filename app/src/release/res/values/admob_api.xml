@@ -11,5 +11,9 @@
         templateMergeStrategy="preserve"
         translatable="false">
         ca-app-pub-5946981839129788/6860991089</string>
+    <string name="catch_admob_banner_id"
+        templateMergeStrategy="preserve"
+        translatable="false">
+        ca-app-pub-5946981839129788/6886069485</string>
 
 </resources>

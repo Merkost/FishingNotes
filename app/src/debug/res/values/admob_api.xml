@@ -11,13 +11,17 @@
         translatable="false">
         ca-app-pub-3940256099942544/8691691433</string>
 
-
     <string name="weather_daily_admob_banner_id"
         templateMergeStrategy="preserve"
         translatable="false">
         ca-app-pub-3940256099942544/6300978111</string>
 
     <string name="place_admob_banner_id"
+        templateMergeStrategy="preserve"
+        translatable="false">
+        ca-app-pub-3940256099942544/6300978111</string>
+
+    <string name="catch_admob_banner_id"
         templateMergeStrategy="preserve"
         translatable="false">
         ca-app-pub-3940256099942544/6300978111</string>

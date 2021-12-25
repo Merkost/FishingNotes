@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -39,6 +40,7 @@ import com.joesemper.fishing.domain.UserCatchViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
+import com.joesemper.fishing.utils.Constants
 import com.joesemper.fishing.utils.network.ConnectionState
 import com.joesemper.fishing.utils.network.currentConnectivityState
 import com.joesemper.fishing.utils.network.observeConnectivityAsFlow
@@ -48,6 +50,7 @@ import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @ExperimentalAnimationApi
 @Composable
 fun UserCatchScreen(navController: NavController, catch: UserCatch?) {
@@ -59,12 +62,20 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch?) {
         }
     }
 
-    Scaffold(topBar = {
-        CatchTopBar(
-            navController = navController,
-            viewModel = viewModel
-        )
-    }) {
+    BottomSheetScaffold(
+        topBar = {
+            CatchTopBar(
+                navController = navController,
+                viewModel = viewModel
+            )
+        },
+        sheetContent = {
+            BannerAdvertView(adId = stringResource(R.string.catch_admob_banner_id))
+        },
+        sheetShape = RectangleShape,
+        sheetGesturesEnabled = false,
+        sheetPeekHeight = 0.dp
+    ) {
         CatchContent(
             navController = navController,
             viewModel = viewModel,
@@ -137,6 +148,8 @@ fun CatchContent(
             WayOfFishingView(catch = catch, viewModel = viewModel)
 
             CatchWeatherView(catch = catch)
+
+            Spacer(modifier = Modifier.size(Constants.bottomBannerPadding))
         }
     }
 }
