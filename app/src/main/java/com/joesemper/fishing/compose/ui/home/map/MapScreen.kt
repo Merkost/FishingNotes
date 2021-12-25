@@ -165,11 +165,11 @@ fun MapScreen(
                             mapUiState = MapUiState.NormalMode
                         }
                         MapUiState.BottomSheetInfoMode -> {
-                            mapUiState = MapUiState.PlaceSelectMode
+                            //mapUiState = MapUiState.PlaceSelectMode
                             /*coroutineScope.launch {
                                 scaffoldState.bottomSheetState.collapse()
                             }*/
-                            /*onAddNewCatchClick(navController, viewModel)*/
+                            onAddNewCatchClick(navController, viewModel)
                         }
                     }
                 },
@@ -556,7 +556,8 @@ fun MapFab(
             fabImg.value = R.drawable.ic_baseline_add_location_24
         }
         MapUiState.BottomSheetInfoMode -> {
-            fabImg.value = R.drawable.ic_baseline_add_location_24
+            fabImg.value = R.drawable.ic_add_catch
+            //fabImg.value = R.drawable.ic_baseline_add_location_24
         }
         MapUiState.BottomSheetFullyExpanded -> {
             //fabImg.value = R.drawable.ic_add_catch

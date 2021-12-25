@@ -4,10 +4,7 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.Icon
-import androidx.compose.material.RadioButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
@@ -17,8 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
 import com.alorma.compose.settings.ui.SettingsCheckbox
@@ -48,14 +48,56 @@ fun SettingsScreen(backPress: () -> Unit) {
     val userPreferences: UserPreferences = get()
     val weatherPreferences: WeatherPreferences = get()
 
+    Scaffold(
+        topBar = { SettingsTopAppBar(backPress) },
+        modifier = Modifier.fillMaxSize())
+    {
+        Column {
+            MainAppSettings(userPreferences)
+            WeatherSettings(weatherPreferences)
+            AboutApp()
+        }
+    }
+}
+
+@Composable
+fun AboutApp() {
+
+    SettingsHeader(text = stringResource(R.string.settings_about))
+    SettingsMenuLink(
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = Icons.Default.Info.name
+            )
+        },
+        title = { Text(text = stringResource(R.string.settings_about)) },
+        onClick = {
+            //TODO: about app screen
+        }
+    )
+    SettingsMenuLink(
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Share,
+                contentDescription = Icons.Default.Share.name
+            )
+        },
+        title = { Text(text = "Предложить идею") },
+        onClick = {
+            //TODO: идея screen
+        }
+    )
+
+
+}
+
+@Composable
+fun WeatherSettings(weatherPreferences: WeatherPreferences) {
+    val coroutineScope = rememberCoroutineScope()
+
     val isPressureDialogOpen = remember { mutableStateOf(false) }
     val isTemperatureDialogOpen = remember { mutableStateOf(false) }
-
-    val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
-
-    val use12hTimeFormat by userPreferences.use12hTimeFormat.collectAsState(false)
-    val useFastFabAdd by userPreferences.useFabFastAdd.collectAsState(false)
 
     val pressureUnit = weatherPreferences.getPressureUnit.collectAsState(PressureValues.mmHg.name)
     val temperatureUnit = weatherPreferences.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
@@ -75,70 +117,30 @@ fun SettingsScreen(backPress: () -> Unit) {
         }
     }
 
-    Scaffold(
-        topBar = { SettingsTopAppBar(backPress) },
-        modifier = Modifier.fillMaxSize())
-    {
-        Column {
-            MainAppSettings(userPreferences)
-            //HeaderText(modifier = Modifier.padding(start = 12.dp), text = "Weather settings")
-            SettingsCheckbox(
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.AccessTime,
-                        contentDescription = Icons.Default.AccessTime.name
-                    )
-                },
-                title = { Text(text = stringResource(R.string.time_format)) },
-                subtitle = { Text(text = stringResource(R.string.use_12h)) },
-                onCheckedChange = { use12h ->
-                    coroutineScope.launch { userPreferences.saveTimeFormatStatus(use12h) }
-                },
-                state = if (use12hTimeFormat) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
+    SettingsHeader(text = stringResource(R.string.settings_weather))
+
+    SettingsMenuLink(
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Thermostat,
+                contentDescription = Icons.Default.Thermostat.name
             )
-            SettingsMenuLink(
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Thermostat,
-                        contentDescription = Icons.Default.Thermostat.name
-                    )
-                },
-                title = { Text(text = stringResource(R.string.temperature_unit)) },
-                subtitle = { Text(text = stringResource(R.string.choose_temperature_unit)/*(Current is: ${temperatureUnit.value})*/) },
-                onClick = { isTemperatureDialogOpen.value = true }
+        },
+        title = { Text(text = stringResource(R.string.temperature_unit)) },
+        subtitle = { Text(text = stringResource(R.string.choose_temperature_unit)/*(Current is: ${temperatureUnit.value})*/) },
+        onClick = { isTemperatureDialogOpen.value = true }
+    )
+    SettingsMenuLink(
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Compress,
+                contentDescription = Icons.Default.Compress.name
             )
-            SettingsMenuLink(
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Compress,
-                        contentDescription = Icons.Default.Compress.name
-                    )
-                },
-                title = { Text(text = stringResource(R.string.pressure_unit)) },
-                subtitle = { Text(text = stringResource(R.string.choose_pressure_unit)/* (Current is: ${pressureUnit.value})*/) },
-                onClick = { isPressureDialogOpen.value = true }
-            )
-
-            SettingsCheckbox(
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.LocationCity,
-                        contentDescription = Icons.Default.LocationCity.name
-                    )
-                },
-                title = { Text(text = stringResource(R.string.fab_fast_add)) },
-                subtitle = { Text(text = "Удерживайте кнопку добавления места на карте, чтобы быстро сохранить ваше текущее местоположение") },
-                onCheckedChange = { useFastFabAdd ->
-                    coroutineScope.launch { userPreferences.saveFabFastAdd(useFastFabAdd) }
-                },
-                state = if (useFastFabAdd) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
-            )
-        }
-
-
-    }
-
-
+        },
+        title = { Text(text = stringResource(R.string.pressure_unit)) },
+        subtitle = { Text(text = stringResource(R.string.choose_pressure_unit)/* (Current is: ${pressureUnit.value})*/) },
+        onClick = { isPressureDialogOpen.value = true }
+    )
 }
 
 @ExperimentalComposeUiApi
@@ -148,6 +150,8 @@ fun MainAppSettings(userPreferences: UserPreferences) {
     val coroutineScope = rememberCoroutineScope()
 
     val appTheme = userPreferences.appTheme.collectAsState(AppThemeValues.Blue.name)
+    val use12hTimeFormat by userPreferences.use12hTimeFormat.collectAsState(false)
+    val useFastFabAdd by userPreferences.useFabFastAdd.collectAsState(false)
 
     var isPermissionDialogOpen by remember { mutableStateOf(false) }
     var isAppThemeDialogOpen by remember { mutableStateOf(false) }
@@ -168,7 +172,7 @@ fun MainAppSettings(userPreferences: UserPreferences) {
                 onClick = { isPermissionDialogOpen = true },
             )
         }
-        //HeaderText(modifier = Modifier.padding(start = 12.dp), text = "Main app settings")
+        SettingsHeader(text = stringResource(R.string.settings_main))
         SettingsMenuLink(
             icon = {
                 Icon(
@@ -208,7 +212,50 @@ fun MainAppSettings(userPreferences: UserPreferences) {
                     .requiredSize(48.dp))*/
             }
         }
+        SettingsCheckbox(
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.AccessTime,
+                    contentDescription = Icons.Default.AccessTime.name
+                )
+            },
+            title = { Text(text = stringResource(R.string.time_format)) },
+            subtitle = { Text(text = stringResource(R.string.use_12h)) },
+            onCheckedChange = { use12h ->
+                coroutineScope.launch { userPreferences.saveTimeFormatStatus(use12h) }
+            },
+            state = if (use12hTimeFormat) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
+        )
+        SettingsCheckbox(
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.LocationCity,
+                    contentDescription = Icons.Default.LocationCity.name
+                )
+            },
+            title = { Text(text = stringResource(R.string.fab_fast_add)) },
+            subtitle = { Text(text = stringResource(R.string.fast_fab_description)) },
+            onCheckedChange = { useFastFabAdd ->
+                coroutineScope.launch { userPreferences.saveFabFastAdd(useFastFabAdd) }
+            },
+            state = if (useFastFabAdd) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
+        )
     }
+}
+
+@Composable
+fun SettingsHeader(text: String, modifier: Modifier = Modifier) {
+    Text(
+        modifier = modifier.padding(14.dp),
+        //style = MaterialTheme.typography.h4,
+        fontSize = 14.sp,
+        fontWeight = FontWeight.SemiBold,
+        textAlign = TextAlign.Start,
+        color = Color.Gray,
+        text = text,
+        maxLines = 1,
+        softWrap = true
+    )
 }
 
 

@@ -230,5 +230,9 @@
     <string name="fab_fast_add">Быстрое добавление точки на карте</string>
     <string name="marker_visibility_change_error">Не удалось изменить видимость места!</string>
     <string name="marker_visibility_change_success">Видимость места успешно сохранена</string>
+    <string name="settings_main">Основные настройки</string>
+    <string name="fast_fab_description">Удерживайте кнопку добавления места на карте, чтобы быстро сохранить ваше текущее местоположение</string>
+    <string name="settings_weather">Weather settings</string>
+    <string name="settings_about">О приложении</string>
 
 </resources>
