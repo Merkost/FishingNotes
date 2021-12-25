@@ -72,6 +72,7 @@ import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getAllWeatherIcons
 import com.joesemper.fishing.utils.Constants.ITEM_ADD_PHOTO
+import com.joesemper.fishing.utils.Constants.bottomBannerPadding
 import com.joesemper.fishing.utils.Constants.defaultFabBottomPadding
 import com.joesemper.fishing.utils.MILLISECONDS_IN_DAY
 import com.joesemper.fishing.utils.network.ConnectionState
@@ -218,7 +219,7 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
                 )
                 Spacer(modifier = Modifier.padding(16.dp))
             }
-
+            Spacer(modifier = Modifier.size(bottomBannerPadding))
         }
 
     }

@@ -17,6 +17,11 @@
         translatable="false">
         ca-app-pub-3940256099942544/6300978111</string>
 
+    <string name="place_admob_banner_id"
+        templateMergeStrategy="preserve"
+        translatable="false">
+        ca-app-pub-3940256099942544/6300978111</string>
+
 
     <!--Ad format	Sample ad unit ID
     App Open	ca-app-pub-3940256099942544/3419835294

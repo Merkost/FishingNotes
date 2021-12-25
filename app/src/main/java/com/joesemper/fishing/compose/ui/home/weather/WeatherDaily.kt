@@ -20,6 +20,7 @@ import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.BannerAdvertView
 import com.joesemper.fishing.compose.ui.home.DefaultAppBar
 import com.joesemper.fishing.model.entity.weather.Daily
+import com.joesemper.fishing.utils.Constants
 import com.joesemper.fishing.utils.time.toDayOfWeekAndDate
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -164,7 +165,7 @@ fun DailyWeatherScreen(
             pressureUnit = pressureUnit
         )
 
-        Spacer(modifier = Modifier.size(80.dp))
+        Spacer(modifier = Modifier.size(Constants.bottomBannerPadding))
     }
 }
 

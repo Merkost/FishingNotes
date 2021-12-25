@@ -2,22 +2,25 @@ package com.joesemper.fishing.compose.ui.home.place
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
+import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.home.BannerAdvertView
 import com.joesemper.fishing.compose.ui.home.notes.TabItem
 import com.joesemper.fishing.domain.UserPlaceViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.utils.Constants.bottomBannerPadding
 import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.viewModel
 
@@ -38,10 +41,16 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
         onDispose {  }
     }
 
-    Scaffold(
+    BottomSheetScaffold(
         topBar = {
             PlaceTopBar(backPress, viewModel)
-        }
+        },
+        sheetContent = {
+            BannerAdvertView(adId = stringResource(R.string.place_admob_banner_id))
+        },
+        sheetShape = RectangleShape,
+        sheetGesturesEnabled = false,
+        sheetPeekHeight = 0.dp
     ) {
         viewModel.marker.value?.let { userPlace ->
 
@@ -80,6 +89,8 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
                     catches = userCatches,
                     note = userPlace.description
                 )
+
+                Spacer(modifier = Modifier.size(bottomBannerPadding))
 
             }
         }

@@ -7,5 +7,9 @@
         templateMergeStrategy="preserve"
         translatable="false">
         ca-app-pub-5946981839129788/1519064878</string>
+    <string name="place_admob_banner_id"
+        templateMergeStrategy="preserve"
+        translatable="false">
+        ca-app-pub-5946981839129788/6860991089</string>
 
 </resources>
