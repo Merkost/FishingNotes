@@ -202,7 +202,7 @@ fun AddPhotoDialog(
     val choosePhotoLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { value ->
             if ((value.size + tempDialogPhotosState.size) > Constants.MAX_PHOTOS) {
-                tempDialogPhotosState.addAll(value.takeLast(Constants.MAX_PHOTOS))
+                tempDialogPhotosState.addAll(value.takeLast(tempDialogPhotosState.size-value.size))
                 Toast.makeText(context, "5 photos maximum allowed", Toast.LENGTH_SHORT).show()
             } else {
                 tempDialogPhotosState.addAll(value)
