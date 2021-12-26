@@ -114,15 +114,17 @@ fun getPressureNameFromUnit(pressureUnit: String): String {
     }
 }
 
-enum class PressureValues {
-    Pa,
-    Bar,
-    mmHg,
-    Psi
+enum class PressureValues(val stringRes: Int) {
+    Pa (R.string.pressure_pa),
+    Bar (R.string.pressure_bar),
+    mmHg (R.string.pressure_mm),
+    Psi (R.string.pressure_psi);
 }
 
-enum class TemperatureValues {
-    C, F, K
+enum class TemperatureValues(val stringRes: Int) {
+    C (R.string.celsius),
+    F (R.string.fahrenheit),
+    K (R.string.kelvin);
 }
 
 fun navigateToDailyWeatherScreen(

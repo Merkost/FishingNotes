@@ -349,7 +349,7 @@ fun GetTemperatureUnit(
                     radioOptions.forEach { temperatureValue ->
                         Row(
                             Modifier
-                                .fillMaxWidth()
+                                .fillMaxWidth().height(60.dp)
                                 .selectable(
                                     selected = (temperatureValue == selectedOption),
                                     onClick = {
@@ -376,7 +376,7 @@ fun GetTemperatureUnit(
                                 }
                             )
                             Text(
-                                text = temperatureValue.name,
+                                text = stringResource(temperatureValue.stringRes),
                                 modifier = Modifier.padding(start = 16.dp)
                             )
                         }
@@ -423,7 +423,7 @@ fun GetPressureUnit(
                     radioOptions.forEach { pressureValue ->
                         Row(
                             Modifier
-                                .fillMaxWidth()
+                                .fillMaxWidth().height(60.dp)
                                 .selectable(
                                     selected = (pressureValue == selectedOption),
                                     onClick = {
@@ -446,7 +446,7 @@ fun GetPressureUnit(
                                 }
                             )
                             Text(
-                                text = pressureValue.name,
+                                text = stringResource(pressureValue.stringRes),
                                 modifier = Modifier.padding(start = 16.dp)
                             )
                         }
