@@ -57,6 +57,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
+import org.koin.core.definition.OnCloseCallback
 
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
@@ -470,7 +471,8 @@ fun MapLayout(
 @Composable
 fun LocationPermissionDialog(
     modifier: Modifier = Modifier,
-    userPreferences: UserPreferences
+    userPreferences: UserPreferences,
+    onCloseCallback: () -> Unit = { },
 ) {
     val context = LocalContext.current
     var isDialogOpen by remember {
@@ -486,19 +488,27 @@ fun LocationPermissionDialog(
                 GrantLocationPermissionsDialog(
                     onDismiss = {
                         isDialogOpen = false
+                        onCloseCallback()
                     },
                     onNegativeClick = {
                         isDialogOpen = false
+                        onCloseCallback()
                     },
                     onPositiveClick = {
                         isDialogOpen = false
+                        coroutineScope.launch {
+                            userPreferences.saveLocationPermissionStatus(true)
+                        }
                         permissionsState.launchMultiplePermissionRequest()
+                        onCloseCallback()
                     },
                     onDontAskClick = {
+                        isDialogOpen = false
                         SnackbarManager.showMessage(R.string.location_dont_ask)
                         coroutineScope.launch {
                             userPreferences.saveLocationPermissionStatus(false)
                         }
+                        onCloseCallback()
                     }
                 )
             }

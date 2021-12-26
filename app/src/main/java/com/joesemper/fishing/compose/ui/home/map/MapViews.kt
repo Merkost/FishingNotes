@@ -430,7 +430,6 @@ fun GrantLocationPermissionsDialog(
     onNegativeClick: () -> Unit,
     onDontAskClick: () -> Unit
 ) {
-    var visible = remember { false }
 
     DefaultDialog(
         primaryText = stringResource(R.string.location_permission_dialog),
@@ -449,49 +448,6 @@ fun GrantLocationPermissionsDialog(
             )
         }
     )
-
-    /*Dialog(onDismissRequest = onDismiss) {
-        DefaultCard() {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-                modifier = Modifier
-                    .wrapContentSize()
-                    .padding(14.dp)
-            ) {
-                PrimaryText(text = stringResource(R.string.location_permission_dialog),
-                modifier = Modifier.padding(4.dp))
-                LottieMyLocation(modifier = Modifier.fillMaxWidth().height(180.dp))
-                Spacer(modifier = Modifier.size(6.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    DefaultButtonSecondaryText(
-                        text = stringResource(id = R.string.dont_ask_again),
-                        onClick = onDontAskClick
-                    )
-                    Row(
-
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        DefaultButtonText(
-                            text = stringResource(id = R.string.cancel),
-                            onClick = onNegativeClick
-                        )
-                        DefaultButton(
-                            text = stringResource(id = R.string.ok_button),
-                            onClick = onPositiveClick
-                        )
-//                        { permissionsState.launchMultiplePermissionRequest() })
-                        Spacer(Modifier.width(8.dp))
-                    }
-
-//                        { permissionsState.launchMultiplePermissionRequest() })
-
-                }
-            }
-        }*/
-    //}
 }
 
 @Composable
