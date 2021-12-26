@@ -18,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -28,19 +27,15 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.home.notes.*
 import com.joesemper.fishing.compose.ui.theme.primaryTextColor
-import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.compose.ui.theme.supportTextColor
 import com.joesemper.fishing.domain.UserPlaceViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.utils.time.toDateTextMonth
-import com.joesemper.fishing.utils.time.toTime
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.get
 
 @Composable
 fun PlaceTitleView(
@@ -224,8 +219,9 @@ fun PlaceCatchesView(
                             it
                         }
                     ) {
-                        PlaceCatchItemView(
+                        CatchItemView(
                             catch = it,
+                            showPlace = false,
                             onClick = { userCatch -> userCatchClicked(userCatch) }
                         )
                     }
@@ -240,106 +236,6 @@ fun PlaceCatchesView(
                     )
                 }
             }
-        }
-    }
-}
-
-@ExperimentalMaterialApi
-@Composable
-fun PlaceCatchItemView(
-    modifier: Modifier = Modifier,
-    catch: UserCatch,
-    showPlace: Boolean = true,
-    onClick: (UserCatch) -> Unit
-) {
-    val preferences: UserPreferences = get()
-    val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
-
-    DefaultCardClickable(
-        modifier = modifier,
-        onClick = { onClick(catch) }
-    ) {
-        ConstraintLayout(
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxWidth()
-        ) {
-            val (fishType, amount, weight, placeIcon, place, time, photosCount) = createRefs()
-
-            PrimaryText(
-                modifier = Modifier.constrainAs(fishType) {
-                    top.linkTo(parent.top)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-                    absoluteRight.linkTo(weight.absoluteLeft, 16.dp)
-                    width = Dimension.fillToConstraints
-                },
-                text = catch.fishType,
-                maxLines = 1
-            )
-
-            SecondaryTextSmall(
-                modifier = Modifier.constrainAs(amount) {
-                    top.linkTo(fishType.bottom)
-                    absoluteLeft.linkTo(fishType.absoluteLeft)
-                },
-                text = "${stringResource(id = R.string.amount)}: ${catch.fishAmount}" +
-                        " ${stringResource(id = R.string.pc)}"
-            )
-
-            PrimaryTextBold(
-                modifier = Modifier.constrainAs(weight) {
-                    top.linkTo(fishType.top)
-                    absoluteRight.linkTo(parent.absoluteRight, 8.dp)
-                },
-                text = "${catch.fishWeight} ${stringResource(id = R.string.kg)}"
-            )
-
-            if (showPlace) {
-                Icon(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .constrainAs(placeIcon) {
-                            absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-                            top.linkTo(time.top)
-                            bottom.linkTo(time.bottom)
-                        },
-                    painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                    contentDescription = stringResource(id = R.string.location),
-                    tint = secondaryTextColor
-                )
-
-                SecondaryText(
-                    modifier = Modifier.constrainAs(place) {
-                        absoluteLeft.linkTo(placeIcon.absoluteRight, 8.dp)
-                        absoluteRight.linkTo(photosCount.absoluteLeft, 8.dp)
-                        top.linkTo(placeIcon.top)
-                        bottom.linkTo(placeIcon.bottom)
-                        width = Dimension.fillToConstraints
-                    },
-                    text = catch.placeTitle,
-                    textAlign = TextAlign.Start,
-                    maxLines = 1
-                )
-            }
-
-            SupportText(
-                modifier = Modifier.constrainAs(time) {
-                    absoluteRight.linkTo(parent.absoluteRight, 8.dp)
-                    top.linkTo(amount.bottom, 16.dp)
-                },
-                text = catch.date.toTime(is12hTimeFormat)
-            )
-
-            ItemCounter(
-                modifier = Modifier.constrainAs(photosCount) {
-                    top.linkTo(time.top)
-                    bottom.linkTo(time.bottom)
-                    absoluteRight.linkTo(time.absoluteLeft, 12.dp)
-                },
-                count = catch.downloadPhotoLinks.size,
-                icon = R.drawable.ic_baseline_photo_24
-            )
-
         }
     }
 }

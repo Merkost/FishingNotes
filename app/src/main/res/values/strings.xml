@@ -240,6 +240,9 @@
     <string name="name_asc">Имя: по возрастанию</string>
     <string name="name_desc">Имя: по убыванию</string>
 
+    <string name="photos_not_available">No Internet connection\nPhotos not available</string>
+    <string name="no_photos_added">No photos added</string>
+    <string name="loading">Loading</string>
 
 
 </resources>

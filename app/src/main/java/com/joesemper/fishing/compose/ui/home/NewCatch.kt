@@ -5,19 +5,21 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.*
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -29,19 +31,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.PopupProperties
 import coil.annotation.ExperimentalCoilApi
 import com.airbnb.lottie.compose.LottieAnimation
@@ -51,17 +49,11 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
+import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.AdView
-import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.MainActivity
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
 import com.joesemper.fishing.compose.ui.home.notes.WeatherLayout
 import com.joesemper.fishing.compose.ui.home.notes.WeatherLayoutLoading
@@ -71,9 +63,6 @@ import com.joesemper.fishing.domain.viewstates.ErrorType
 import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getAllWeatherIcons
-import com.joesemper.fishing.utils.Constants.ITEM_ADD_PHOTO
-import com.joesemper.fishing.utils.Constants.bottomBannerPadding
-import com.joesemper.fishing.utils.Constants.defaultFabBottomPadding
 import com.joesemper.fishing.utils.MILLISECONDS_IN_DAY
 import com.joesemper.fishing.utils.network.ConnectionState
 import com.joesemper.fishing.utils.network.currentConnectivityState
@@ -261,6 +250,7 @@ fun BannerAdvertView(modifier: Modifier = Modifier, adId: String) {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SubscribeToProgress(vmuiState: StateFlow<BaseViewState>, upPress: () -> Unit) {
     val errorDialog = rememberSaveable { mutableStateOf(false) }
@@ -726,19 +716,6 @@ fun ItemAddPhoto(connectionState: ConnectionState) {
     }
 }
 
-@ExperimentalPermissionsApi
-private fun addPhoto(
-    permissionState: PermissionState,
-    addPhotoState: MutableState<Boolean>,
-    choosePhotoLauncher: ManagedActivityResultLauncher<Array<String>, List<Uri>>
-) {
-    when {
-        permissionState.hasPermission -> {
-            choosePhotoLauncher.launch(arrayOf("image/*"))
-            addPhotoState.value = false
-        }
-    }
-}
 
 @Composable
 fun NewCatchWeatherItem(viewModel: NewCatchViewModel, connectionState: ConnectionState) {
@@ -924,31 +901,6 @@ fun ErrorDialog(errorDialog: MutableState<Boolean>) {
                 content = { Text(stringResource(R.string.Cancel)) })
         }
     )
-}
-
-
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalComposeUiApi::class)
-@Composable
-fun LoadingDialog() {
-    DefaultDialog(primaryText = stringResource(R.string.saving_new_catch),
-        content = {
-            //LoadingAdvertView()
-            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.fish_loading))
-            LottieAnimation(
-                modifier = Modifier.size(128.dp),
-                composition = composition,
-                iterations = LottieConstants.IterateForever,
-                isPlaying = true
-            )
-        },
-        negativeButtonText = stringResource(R.string.Cancel),
-        onNegativeClick = {},
-        onDismiss = {})
-}
-
-@Composable
-fun LoadingAdvertView(modifier: Modifier = Modifier) {
-
 }
 
 @Composable
