@@ -36,6 +36,7 @@ import com.joesemper.fishing.compose.ui.theme.primaryTextColor
 import com.joesemper.fishing.compose.ui.utils.CatchesSortValues
 import com.joesemper.fishing.compose.ui.utils.PlacesSortValues
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.utils.Constants.modalBottomSheetCorners
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
@@ -61,8 +62,8 @@ fun Notes(
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     var bottomSheetScreen by remember { mutableStateOf(BottomSheetScreen.Filter) }
 
-    ModalBottomSheetLayout(sheetState = bottomState, sheetShape = RoundedCornerShape(
-        topStart = 16.dp, topEnd = 16.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
+    ModalBottomSheetLayout(sheetState = bottomState,
+        sheetShape = modalBottomSheetCorners,
         sheetContent = {
             NotesModalBottomSheet(
                 pagerState = pagerState,
