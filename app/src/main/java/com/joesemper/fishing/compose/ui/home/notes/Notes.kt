@@ -83,12 +83,14 @@ fun Notes(
                                     coroutineScope.launch { bottomState.show() }
                                 }
                             }) { Icon(Icons.Default.Sort, Icons.Default.Sort.name) }
-                            IconButton(onClick = {
+
+                            //TODO: Add filters
+                            /*IconButton(onClick = {
                                 if (!pagerState.isScrollInProgress) {
                                     bottomSheetScreen = BottomSheetScreen.Filter
                                     coroutineScope.launch { bottomState.show() }
                                 }
-                            }) { Icon(Icons.Default.FilterAlt, Icons.Default.FilterAlt.name) }
+                            }) { Icon(Icons.Default.FilterAlt, Icons.Default.FilterAlt.name) }*/
                         }
                     }
                 )
@@ -128,6 +130,7 @@ fun NotesModalBottomSheet(
         .collectAsState(PlacesSortValues.Default.name)
     val currentCatchesSort = notesPreferences.placesSortValue
         .collectAsState(CatchesSortValues.Default.name)
+
     val coroutineScope = rememberCoroutineScope()
 
     when (pagerState.currentPage) {
@@ -142,11 +145,6 @@ fun NotesModalBottomSheet(
                 }
                 BottomSheetScreen.Filter -> {
                     Text("Not yet implemented")
-                    /*PlacesSort(currentPlacesSort) { newValue ->
-                        coroutineScope.launch {
-                            notesPreferences.savePlacesSortValue(newValue.name)
-                        }
-                    }*/
                 }
             }
         }
@@ -161,11 +159,6 @@ fun NotesModalBottomSheet(
                 }
                 BottomSheetScreen.Filter -> {
                     Text("Not yet implemented")
-                    /*CatchesFilter(currentCatchesSort) { newValue ->
-                        coroutineScope.launch {
-                            notesPreferences.saveCatchesSortValue(newValue.name)
-                        }
-                    }*/
                 }
             }
         }
@@ -194,7 +187,7 @@ fun PlacesSort(
         radioOptions.forEach { placesSortValue ->
             Row(
                 Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth().height(45.dp)
                     .selectable(
                         selected = (placesSortValue == selectedOption),
                         onClick = {
@@ -248,7 +241,7 @@ fun CatchesSort(
         radioOptions.forEach { catchesSortValue ->
             Row(
                 Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth().height(45.dp)
                     .selectable(
                         selected = (catchesSortValue == selectedOption),
                         onClick = {
