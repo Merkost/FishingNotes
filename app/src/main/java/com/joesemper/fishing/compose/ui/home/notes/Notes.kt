@@ -62,7 +62,7 @@ fun Notes(
     var bottomSheetScreen by remember { mutableStateOf(BottomSheetScreen.Filter) }
 
     ModalBottomSheetLayout(sheetState = bottomState, sheetShape = RoundedCornerShape(
-        topStart = 8.dp, topEnd = 8.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
+        topStart = 16.dp, topEnd = 16.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
         sheetContent = {
             NotesModalBottomSheet(
                 pagerState = pagerState,
@@ -210,11 +210,12 @@ fun PlacesSort(
                     }
                 )
                 Text(
-                    text = placesSortValue.name,
+                    text = stringResource(placesSortValue.stringRes),
                     modifier = Modifier.padding(start = 16.dp)
                 )
             }
         }
+        Spacer(modifier = Modifier.size(4.dp))
     }
 }
 
@@ -264,11 +265,12 @@ fun CatchesSort(
                     }
                 )
                 Text(
-                    text = catchesSortValue.name,
+                    text = stringResource(catchesSortValue.stringRes),
                     modifier = Modifier.padding(start = 16.dp)
                 )
             }
         }
+        Spacer(modifier = Modifier.size(4.dp))
     }
 }
 

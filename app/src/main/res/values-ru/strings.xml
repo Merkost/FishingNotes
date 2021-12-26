@@ -236,5 +236,11 @@
     <string name="settings_about">О приложении</string>
     <string name="current_app_version">"Current version: "</string>
     <string name="sort">Сортировка</string>
+    <string name="default_word">По умолчанию</string>
+    <string name="time_asc">Время: по возрастанию</string>
+    <string name="time_desc">Время: по убыванию</string>
+    <string name="name_asc">Имя: по возрастанию</string>
+    <string name="name_desc">Имя: по убыванию</string>
+
 
 </resources>
