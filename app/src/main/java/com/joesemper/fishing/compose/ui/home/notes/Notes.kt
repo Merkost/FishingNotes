@@ -1,14 +1,15 @@
 package com.joesemper.fishing.compose.ui.home.notes
 
 import android.widget.Toast
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterAlt
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -27,18 +28,21 @@ import com.joesemper.fishing.compose.datastore.NotesPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.DefaultAppBar
-import com.joesemper.fishing.compose.ui.home.DefaultDialog
 import com.joesemper.fishing.compose.ui.home.FabMenuItem
 import com.joesemper.fishing.compose.ui.home.FabWithMenu
+import com.joesemper.fishing.compose.ui.home.SettingsHeader
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.theme.primaryTextColor
 import com.joesemper.fishing.compose.ui.utils.CatchesSortValues
 import com.joesemper.fishing.compose.ui.utils.PlacesSortValues
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.utils.Constants
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
+
+enum class BottomSheetScreen {
+    Sort,
+    Filter,
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @ExperimentalMaterialApi
@@ -54,139 +58,168 @@ fun Notes(
     val tabs = remember { listOf(TabItem.Places, TabItem.Catches) }
     val pagerState = rememberPagerState(0)
 
+    val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    var bottomSheetScreen by remember { mutableStateOf(BottomSheetScreen.Filter) }
+
+    ModalBottomSheetLayout(sheetState = bottomState, sheetShape = RoundedCornerShape(
+        topStart = 8.dp, topEnd = 8.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
+        sheetContent = {
+            NotesModalBottomSheet(
+                pagerState = pagerState,
+                bottomSheetScreen = bottomSheetScreen,
+                notesPreferences = notesPreferences,
+            )
+        }) {
+        Scaffold(
+            topBar = {
+                DefaultAppBar(
+                    onNavClick = { navController.popBackStack() },
+                    title = stringResource(id = R.string.notes),
+                    actions = {
+                        Row {
+                            IconButton(onClick = {
+                                if (!pagerState.isScrollInProgress) {
+                                    bottomSheetScreen = BottomSheetScreen.Sort
+                                    coroutineScope.launch { bottomState.show() }
+                                }
+                            }) { Icon(Icons.Default.Sort, Icons.Default.Sort.name) }
+                            IconButton(onClick = {
+                                if (!pagerState.isScrollInProgress) {
+                                    bottomSheetScreen = BottomSheetScreen.Filter
+                                    coroutineScope.launch { bottomState.show() }
+                                }
+                            }) { Icon(Icons.Default.FilterAlt, Icons.Default.FilterAlt.name) }
+                        }
+                    }
+                )
+            },
+            floatingActionButton = {
+                FabWithMenu(
+                    items = listOf(
+                        FabMenuItem(
+                            icon = R.drawable.ic_add_catch,
+                            onClick = { onAddNewCatchClick(navController) }
+                        ),
+                        FabMenuItem(
+                            icon = R.drawable.ic_baseline_add_location_24,
+                            onClick = { onAddNewPlaceClick(navController) }
+                        )
+                    )
+                )
+            },
+        ) {
+            Column() {
+                Tabs(tabs = tabs, pagerState = pagerState)
+                TabsContent(tabs = tabs, pagerState = pagerState, navController)
+            }
+
+        }
+    }
+}
+
+@ExperimentalPagerApi
+@Composable
+fun NotesModalBottomSheet(
+    pagerState: PagerState,
+    bottomSheetScreen: BottomSheetScreen,
+    notesPreferences: NotesPreferences
+) {
     val currentPlacesSort = notesPreferences.placesSortValue
         .collectAsState(PlacesSortValues.Default.name)
     val currentCatchesSort = notesPreferences.placesSortValue
-        .collectAsState(PlacesSortValues.Default.name)
+        .collectAsState(CatchesSortValues.Default.name)
+    val coroutineScope = rememberCoroutineScope()
 
-    val placesFilterDialog = remember { mutableStateOf(false) }
-    val catchesFilterDialog = remember { mutableStateOf(false) }
-
-    if (placesFilterDialog.value) PlacesFilterDialog(
-        currentSort = currentPlacesSort,
-        onDismiss = { placesFilterDialog.value = false },
-        onSelectedValue = { newValue ->
-            coroutineScope.launch {
-                notesPreferences.savePlacesSortValue(newValue.name)
-                placesFilterDialog.value = false
-            }
-        }
-    )
-
-    if (catchesFilterDialog.value) CatchesFilterDialog(
-        currentSort = currentCatchesSort,
-        onDismiss = { catchesFilterDialog.value = false },
-        onSelectedValue = { newValue ->
-            coroutineScope.launch {
-                notesPreferences.saveCatchesSortValue(newValue.name)
-                catchesFilterDialog.value = false
-            }
-        }
-    )
-
-    Scaffold(
-        topBar = {
-            DefaultAppBar(
-                onNavClick = { navController.popBackStack() },
-                title = stringResource(id = R.string.notes),
-                actions = {
-                    AnimatedVisibility(pagerState.currentPage == 0 && !pagerState.isScrollInProgress) {
-                        PlacesActions() {
-                            placesFilterDialog.value = true
+    when (pagerState.currentPage) {
+        0 -> {
+            when (bottomSheetScreen) {
+                BottomSheetScreen.Sort -> {
+                    PlacesSort(currentPlacesSort) { newValue ->
+                        coroutineScope.launch {
+                            notesPreferences.savePlacesSortValue(newValue.name)
                         }
                     }
-                    AnimatedVisibility(pagerState.currentPage == 1 && !pagerState.isScrollInProgress) {
-                        CatchesActions() {
-                            catchesFilterDialog.value = true
-                        }
-                    }
-                    /*when (pagerState.currentPage) {
-                        0 -> {
-                            PlacesActions() {
-                                placesFilterDialog.value = true
-                            }
-                        }
-                        1 -> {
-                            Row {}
+                }
+                BottomSheetScreen.Filter -> {
+                    Text("Not yet implemented")
+                    /*PlacesSort(currentPlacesSort) { newValue ->
+                        coroutineScope.launch {
+                            notesPreferences.savePlacesSortValue(newValue.name)
                         }
                     }*/
                 }
-            )
-        },
-        floatingActionButton = {
-            FabWithMenu(
-                items = listOf(
-                    FabMenuItem(
-                        icon = R.drawable.ic_add_catch,
-                        onClick = { onAddNewCatchClick(navController) }
-                    ),
-                    FabMenuItem(
-                        icon = R.drawable.ic_baseline_add_location_24,
-                        onClick = { onAddNewPlaceClick(navController) }
-                    )
-                )
-            )
-        },
-    ) {
-        Column() {
-            Tabs(tabs = tabs, pagerState = pagerState)
-            TabsContent(tabs = tabs, pagerState = pagerState, navController)
+            }
         }
-
+        1 -> {
+            when (bottomSheetScreen) {
+                BottomSheetScreen.Sort -> {
+                    CatchesSort(currentCatchesSort) { newValue ->
+                        coroutineScope.launch {
+                            notesPreferences.saveCatchesSortValue(newValue.name)
+                        }
+                    }
+                }
+                BottomSheetScreen.Filter -> {
+                    Text("Not yet implemented")
+                    /*CatchesFilter(currentCatchesSort) { newValue ->
+                        coroutineScope.launch {
+                            notesPreferences.saveCatchesSortValue(newValue.name)
+                        }
+                    }*/
+                }
+            }
+        }
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun PlacesFilterDialog(
+fun PlacesSort(
     currentSort: State<String>,
-    onDismiss: () -> Unit,
     onSelectedValue: (placesSore: PlacesSortValues) -> Unit
 ) {
-    DefaultDialog(onDismiss = onDismiss) {
 
-        val radioOptions = PlacesSortValues.values().asList()
-        val context = LocalContext.current
+    val radioOptions = PlacesSortValues.values().asList()
+    val context = LocalContext.current
 
-        val (selectedOption, onOptionSelected) = remember {
-            mutableStateOf(
-                PlacesSortValues.valueOf(
-                    currentSort.value
-                )
+    val (selectedOption, onOptionSelected) = remember {
+        mutableStateOf(
+            PlacesSortValues.valueOf(
+                currentSort.value
             )
-        }
+        )
+    }
 
-        Column {
-            radioOptions.forEach { placesSortValue ->
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .selectable(
-                            selected = (placesSortValue == selectedOption),
-                            onClick = {
-                                onOptionSelected(placesSortValue)
-                                onSelectedValue(placesSortValue)
-                            }
-                        )
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(
+    Column {
+        SettingsHeader(stringResource(R.string.sort))
+        radioOptions.forEach { placesSortValue ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .selectable(
                         selected = (placesSortValue == selectedOption),
-                        modifier = Modifier.padding(all = Dp(value = 8F)),
                         onClick = {
                             onOptionSelected(placesSortValue)
                             onSelectedValue(placesSortValue)
-                            Toast.makeText(context, placesSortValue.name, Toast.LENGTH_LONG)
-                                .show()
                         }
                     )
-                    Text(
-                        text = placesSortValue.name,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                }
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                RadioButton(
+                    selected = (placesSortValue == selectedOption),
+                    modifier = Modifier.padding(all = Dp(value = 8F)),
+                    onClick = {
+                        onOptionSelected(placesSortValue)
+                        onSelectedValue(placesSortValue)
+                        Toast.makeText(context, placesSortValue.name, Toast.LENGTH_LONG)
+                            .show()
+                    }
+                )
+                Text(
+                    text = placesSortValue.name,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
             }
         }
     }
@@ -194,74 +227,54 @@ fun PlacesFilterDialog(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun CatchesFilterDialog(
+fun CatchesSort(
     currentSort: State<String>,
-    onDismiss: () -> Unit,
     onSelectedValue: (catchesSort: CatchesSortValues) -> Unit
 ) {
-    DefaultDialog(onDismiss = onDismiss) {
 
-        val radioOptions = CatchesSortValues.values().asList()
-        val context = LocalContext.current
+    val radioOptions = CatchesSortValues.values().asList()
+    val context = LocalContext.current
 
-        val (selectedOption, onOptionSelected) = remember {
-            mutableStateOf(
-                CatchesSortValues.valueOf(
-                    currentSort.value
-                )
+    val (selectedOption, onOptionSelected) = remember {
+        mutableStateOf(
+            CatchesSortValues.valueOf(
+                currentSort.value
             )
-        }
+        )
+    }
 
-        Column {
-            radioOptions.forEach { catchesSortValue ->
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .selectable(
-                            selected = (catchesSortValue == selectedOption),
-                            onClick = {
-                                onOptionSelected(catchesSortValue)
-                                onSelectedValue(catchesSortValue)
-                            }
-                        )
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(
+    Column {
+        SettingsHeader(stringResource(R.string.sort))
+        radioOptions.forEach { catchesSortValue ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .selectable(
                         selected = (catchesSortValue == selectedOption),
-                        modifier = Modifier.padding(all = Dp(value = 8F)),
                         onClick = {
                             onOptionSelected(catchesSortValue)
                             onSelectedValue(catchesSortValue)
-                            Toast.makeText(context, catchesSortValue.name, Toast.LENGTH_LONG)
-                                .show()
                         }
                     )
-                    Text(
-                        text = catchesSortValue.name,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                }
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                RadioButton(
+                    selected = (catchesSortValue == selectedOption),
+                    modifier = Modifier.padding(all = Dp(value = 8F)),
+                    onClick = {
+                        onOptionSelected(catchesSortValue)
+                        onSelectedValue(catchesSortValue)
+                        Toast.makeText(context, catchesSortValue.name, Toast.LENGTH_LONG)
+                            .show()
+                    }
+                )
+                Text(
+                    text = catchesSortValue.name,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
             }
-        }
-    }
-}
-
-@Composable
-fun PlacesActions(onFilterClick: () -> Unit) {
-    Row {
-        IconButton(onClick = onFilterClick) {
-            Icon(Icons.Default.FilterAlt, Icons.Default.FilterAlt.name)
-        }
-    }
-}
-
-@Composable
-fun CatchesActions(onFilterClick: () -> Unit) {
-    Row {
-        IconButton(onClick = onFilterClick) {
-            Icon(Icons.Default.FilterAlt, Icons.Default.FilterAlt.name)
         }
     }
 }

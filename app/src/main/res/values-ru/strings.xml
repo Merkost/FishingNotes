@@ -235,5 +235,6 @@
     <string name="settings_weather">Weather settings</string>
     <string name="settings_about">О приложении</string>
     <string name="current_app_version">"Current version: "</string>
+    <string name="sort">Сортировка</string>
 
 </resources>
