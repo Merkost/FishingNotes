@@ -42,7 +42,7 @@ fun WeatherLayout(
 ) {
     val weatherSettings: WeatherPreferences = get()
     val temperatureSettings by weatherSettings.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
-    val pressureSettings by weatherSettings.getPressureUnit.collectAsState(PressureValues.mmHg.name)
+    val pressureUnit by weatherSettings.getPressureUnit.collectAsState(PressureValues.mmHg)
 
     weatherForecast?.let { weather ->
 
@@ -81,17 +81,12 @@ fun WeatherLayout(
             }
         }
 
-        var pressure by remember(hour, weather, pressureSettings) {
-            mutableStateOf(
-                getPressure(
-                    weather.hourly[hour].pressure,
-                    PressureValues.valueOf(pressureSettings)
-                )
-            )
+        var pressure by remember(hour, weather, pressureUnit) {
+            mutableStateOf(pressureUnit.getPressure(weather.hourly[hour].pressure,))
         }.also {
             it.value.toFloatOrNull()?.let { floatValue ->
                 viewModel.weatherToSave.value.pressureInMmhg =
-                    getDefaultPressure(floatValue, from = pressureSettings)
+                    pressureUnit.getDefaultPressure(floatValue)
             }
         }
 
@@ -195,7 +190,7 @@ fun WeatherLayout(
                         trailingIcon = {
                             Text(
                                 modifier = Modifier.padding(horizontal = 8.dp),
-                                text = getPressureNameFromUnit(pressureSettings)
+                                text = stringResource(pressureUnit.stringRes)
                             )
                         },
                         isError = (pressure.endsWith(".") || pressure.isEmpty() || pressure.toDoubleOrNull() == null)

@@ -107,7 +107,7 @@ fun WeatherScreen(
     val weatherState by viewModel.weatherState.collectAsState()
 
     val weatherPrefs: WeatherPreferences = get()
-    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg.name)
+    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
     val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
 
     Scaffold(
@@ -248,7 +248,7 @@ fun CurrentWeather(
     modifier: Modifier = Modifier,
     forecast: WeatherForecast,
     temperatureUnit: String,
-    pressureUnit: String,
+    pressureUnit: PressureValues,
 ) {
     Surface(
         modifier = modifier
@@ -467,14 +467,14 @@ fun DailyWeatherItem(
 fun PressureChartItem(
     modifier: Modifier = Modifier,
     forecast: List<Daily>,
-    pressureUnit: String,
+    pressureUnit: PressureValues,
 ) {
     Column(
         modifier = modifier
     ) {
         WeatherHeaderText(
             modifier = Modifier.padding(8.dp),
-            text = stringResource(id = R.string.pressure) + ", " + pressureUnit
+            text = stringResource(id = R.string.pressure) + ", " + stringResource(pressureUnit.stringRes)
         )
         PressureChart(
             Modifier
@@ -494,7 +494,7 @@ fun PressureChartItem(
 fun PressureChart(
     modifier: Modifier = Modifier,
     weather: List<Daily>,
-    pressureUnit: String
+    pressureUnit: PressureValues
 ) {
     val x = remember { Animatable(0f) }
     val yValues = remember(weather) { mutableStateOf(getPressureList(weather, pressureUnit)) }
@@ -539,10 +539,8 @@ fun PressureChart(
             )
 
             drawContext.canvas.nativeCanvas.drawText(
-                getPressure(
-                    weather[index].pressure,
-                    PressureValues.valueOf(pressureUnit)
-                ),
+                pressureUnit.getPressure(
+                    weather[index].pressure),
                 pointX, pointY - 48f, paint
             )
 
@@ -571,7 +569,7 @@ fun PressureChart(
 fun CurrentWeatherValuesView(
     modifier: Modifier = Modifier,
     forecast: Hourly,
-    pressureUnit: String,
+    pressureUnit: PressureValues,
 ) {
     ConstraintLayout(
         modifier = modifier
@@ -633,10 +631,8 @@ fun CurrentWeatherValuesView(
                 absoluteLeft.linkTo(pressIcon.absoluteRight, 2.dp)
                 absoluteRight.linkTo(pressText.absoluteRight)
             },
-            text = getPressure(
-                forecast.pressure,
-                PressureValues.valueOf(pressureUnit)
-            ) + " " + pressureUnit,
+            text = pressureUnit.getPressure(
+                forecast.pressure) + " " + stringResource(pressureUnit.stringRes),
             textColor = MaterialTheme.colors.onPrimary
         )
 

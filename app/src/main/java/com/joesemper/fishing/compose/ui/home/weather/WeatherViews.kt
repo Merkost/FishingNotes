@@ -444,7 +444,7 @@ fun SunriseSunsetView(
 fun DailyWeatherValuesView(
     modifier: Modifier = Modifier,
     forecast: Daily,
-    pressureUnit: String
+    pressureUnit: PressureValues
 ) {
     ConstraintLayout(
         modifier = modifier
@@ -511,10 +511,8 @@ fun DailyWeatherValuesView(
                 absoluteLeft.linkTo(pressIcon.absoluteRight, 2.dp)
                 absoluteRight.linkTo(pressText.absoluteRight)
             },
-            text = getPressure(
-                forecast.pressure,
-                PressureValues.valueOf(pressureUnit)
-            ) + " " + pressureUnit,
+            text = pressureUnit.getPressure(
+                forecast.pressure) + " " + stringResource(pressureUnit.stringRes),
         )
 
         Image(

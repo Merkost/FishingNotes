@@ -27,7 +27,6 @@ import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.home.place.UserPlaceScreen
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
-import com.joesemper.fishing.compose.ui.home.weather.getPressure
 import com.joesemper.fishing.compose.ui.resources
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.compose.ui.utils.currentFraction
@@ -66,7 +65,7 @@ fun MarkerInfoDialog(
     val geocoder = Geocoder(context, resources().configuration.locale)
 
     val weatherPrefs: WeatherPreferences = get()
-    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg.name)
+    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
 
     val connectionState by context.observeConnectivityAsFlow()
         .collectAsState(initial = context.currentConnectivityState)
@@ -237,10 +236,8 @@ fun MarkerInfoDialog(
                                     absoluteLeft.linkTo(timeNow.absoluteLeft)
                                     absoluteRight.linkTo(timeNow.absoluteRight)
                                 },
-                                text = getPressure(
-                                    forecast.hourly.first().pressure,
-                                    PressureValues.valueOf(pressureUnit)
-                                ) + " " + pressureUnit
+                                text = pressureUnit.getPressure(
+                                    forecast.hourly.first().pressure) + " " + pressureUnit.name
                             )
 
                             PrimaryTextSmall(
@@ -249,10 +246,8 @@ fun MarkerInfoDialog(
                                     absoluteLeft.linkTo(time8.absoluteLeft)
                                     absoluteRight.linkTo(time8.absoluteRight)
                                 },
-                                text = getPressure(
-                                    forecast.hourly[7].pressure,
-                                    PressureValues.valueOf(pressureUnit)
-                                ) + " " + pressureUnit
+                                text = pressureUnit.getPressure(
+                                    forecast.hourly[7].pressure) + " " + pressureUnit.name
                             )
 
                             Icon(
@@ -274,10 +269,8 @@ fun MarkerInfoDialog(
                                     absoluteLeft.linkTo(time16.absoluteLeft)
                                     absoluteRight.linkTo(time16.absoluteRight)
                                 },
-                                text = getPressure(
-                                    forecast.hourly[15].pressure,
-                                    PressureValues.valueOf(pressureUnit)
-                                ) + " " + pressureUnit
+                                text = pressureUnit.getPressure(
+                                    forecast.hourly[15].pressure) + " " + pressureUnit.name
                             )
 
                             Icon(

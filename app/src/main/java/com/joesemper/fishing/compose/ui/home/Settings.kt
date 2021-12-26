@@ -111,7 +111,7 @@ fun WeatherSettings(weatherPreferences: WeatherPreferences) {
     val isPressureDialogOpen = remember { mutableStateOf(false) }
     val isTemperatureDialogOpen = remember { mutableStateOf(false) }
 
-    val pressureUnit = weatherPreferences.getPressureUnit.collectAsState(PressureValues.mmHg.name)
+    val pressureUnit = weatherPreferences.getPressureUnit.collectAsState(PressureValues.mmHg)
     val temperatureUnit = weatherPreferences.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
 
     GetPressureUnit(isPressureDialogOpen, pressureUnit) { newValue ->
@@ -391,7 +391,7 @@ fun GetTemperatureUnit(
 @Composable
 fun GetPressureUnit(
     pressureDialogOpen: MutableState<Boolean>,
-    currentPressureUnit: State<String>,
+    currentPressureUnit: State<PressureValues>,
     onSelectedValue: (pressureUnit: PressureValues) -> Unit
 ) {
     val radioOptions = PressureValues.values().asList()
@@ -400,9 +400,7 @@ fun GetPressureUnit(
     if (pressureDialogOpen.value) {
         val (selectedOption, onOptionSelected) = remember {
             mutableStateOf(
-                PressureValues.valueOf(
-                    currentPressureUnit.value
-                )
+                currentPressureUnit.value
             )
         }
         Dialog(onDismissRequest = { pressureDialogOpen.value = false }) {
@@ -441,8 +439,6 @@ fun GetPressureUnit(
                                 onClick = {
                                     onOptionSelected(pressureValue)
                                     onSelectedValue(pressureValue)
-                                    Toast.makeText(context, pressureValue.name, Toast.LENGTH_LONG)
-                                        .show()
                                 }
                             )
                             Text(

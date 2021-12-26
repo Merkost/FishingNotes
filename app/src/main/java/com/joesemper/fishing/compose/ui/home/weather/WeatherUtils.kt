@@ -23,9 +23,9 @@ fun createCurrentPlaceItem(latLng: LatLng, context: Context): UserMapMarker {
 
 fun getPressureList(
     forecast: List<Daily>,
-    pressureUnit: String
+    pressureUnit: PressureValues
 ): List<Int> {
-    return forecast.map { getPressureInt(it.pressure, PressureValues.valueOf(pressureUnit)) }
+    return forecast.map { pressureUnit.getPressureInt(it.pressure) }
 }
 
 fun getBounds(list: List<Int>): Pair<Int, Int> {
@@ -70,55 +70,38 @@ fun getTemperatureNameFromUnit(temperatureUnit: String): String {
     }
 }
 
-fun getPressure(hPa: Int, pressureValue: PressureValues): String {
-    return when (pressureValue) {
-        PressureValues.Pa -> (hPa * 100).toString()
-        PressureValues.Bar -> (hPa / 1000f).toString()
-        PressureValues.mmHg -> (hPa * 0.75006375541921).toInt().toString()
-        PressureValues.Psi -> String.format("%.5g", (hPa * 0.0145037738))
-    }
-}
-
-/*
-    Used for weather pressure chart
- */
-fun getPressureInt(hPa: Int, pressureValue: PressureValues): Int {
-    return when (pressureValue) {
-        PressureValues.Pa -> (hPa * 100)
-        PressureValues.Bar -> hPa
-        PressureValues.mmHg -> (hPa * 0.75006375541921).toInt()
-        PressureValues.Psi -> (hPa * 0.0145037738 * 100).toInt()
-    }
-}
-
-fun getDefaultPressure(value: Float, from: String): Int {
-    return when (from) {
-        PressureValues.Pa.name -> (value * 0.0075006156130264f).toInt()
-        PressureValues.Bar.name -> (value * 750.06168f).toInt()
-        PressureValues.mmHg.name -> value.toInt()
-        PressureValues.Psi.name -> (value * 51.71484f).toInt()
-        else -> { value.toInt() }
-    }
-}
-
-@Composable
-fun getPressureNameFromUnit(pressureUnit: String): String {
-    return when (pressureUnit) {
-        PressureValues.mmHg.name -> stringResource(R.string.pressure_mm)
-        PressureValues.Pa.name -> stringResource(R.string.pressure_pa)
-        PressureValues.Bar.name -> stringResource(R.string.pressure_bar)
-        PressureValues.Psi.name -> stringResource(R.string.pressure_psi)
-        else -> {
-            stringResource(R.string.pressure_mm)
-        }
-    }
-}
-
 enum class PressureValues(val stringRes: Int) {
     Pa (R.string.pressure_pa),
     Bar (R.string.pressure_bar),
     mmHg (R.string.pressure_mm),
     Psi (R.string.pressure_psi);
+
+    fun getPressure(hPa: Int): String {
+        return when (this) {
+            Pa -> (hPa * 100).toString()
+            Bar -> (hPa / 1000f).toString()
+            mmHg -> (hPa * 0.75006375541921).toInt().toString()
+            Psi -> String.format("%.5g", (hPa * 0.0145037738))
+        }
+    }
+
+    fun getDefaultPressure(value: Float): Int {
+        return when (this) {
+            Pa -> (value * 0.0075006156130264f).toInt()
+            Bar -> (value * 750.06168f).toInt()
+            mmHg -> value.toInt()
+            Psi -> (value * 51.71484f).toInt()
+        }
+    }
+
+    fun getPressureInt(hPa: Int): Int {
+        return when (this) {
+            Pa -> (hPa * 100)
+            Bar -> hPa
+            mmHg -> (hPa * 0.75006375541921).toInt()
+            Psi -> (hPa * 0.0145037738 * 100).toInt()
+        }
+    }
 }
 
 enum class TemperatureValues(val stringRes: Int) {

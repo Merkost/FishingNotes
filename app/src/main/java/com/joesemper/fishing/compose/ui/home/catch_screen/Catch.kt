@@ -391,7 +391,7 @@ fun CatchWeatherView(
 ) {
 
     val weatherPrefs: WeatherPreferences = get()
-    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg.name)
+    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
     val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
 
     DefaultCard(
@@ -523,10 +523,8 @@ fun CatchWeatherView(
                     absoluteLeft.linkTo(pressIcon.absoluteRight, 2.dp)
                     absoluteRight.linkTo(pressText.absoluteRight)
                 },
-                text = getPressure(
-                    catch.weatherPressure,
-                    PressureValues.valueOf(pressureUnit)
-                ) + " " + pressureUnit,
+                text = pressureUnit.getPressure(
+                    catch.weatherPressure) + " " + pressureUnit.name,
             )
 
             Image(
