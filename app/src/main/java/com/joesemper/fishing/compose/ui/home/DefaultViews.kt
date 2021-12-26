@@ -177,7 +177,7 @@ fun MyCard(
 ) {
     Card(
         elevation = 8.dp, shape = shape,
-        modifier = modifier.fillMaxWidth(), content = content
+        modifier = modifier, content = content
     )
 }
 

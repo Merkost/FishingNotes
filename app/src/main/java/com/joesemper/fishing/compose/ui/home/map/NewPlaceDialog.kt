@@ -55,7 +55,7 @@ fun NewPlaceDialog(
     val coroutineScope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsState()
 
-    MyCard(shape = Shapes.large, modifier = Modifier.wrapContentHeight()) {
+    MyCard(shape = Shapes.large, modifier = Modifier.wrapContentHeight().fillMaxWidth()) {
         ConstraintLayout(
             modifier = Modifier
                 .wrapContentHeight()

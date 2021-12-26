@@ -234,5 +234,6 @@
     <string name="fast_fab_description">Удерживайте кнопку добавления места на карте, чтобы быстро сохранить ваше текущее местоположение</string>
     <string name="settings_weather">Weather settings</string>
     <string name="settings_about">О приложении</string>
+    <string name="current_app_version">"Current version: "</string>
 
 </resources>

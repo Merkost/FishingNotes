@@ -30,6 +30,7 @@ object MainDestinations {
     const val LOGIN_ROUTE = "login"
     const val HOME_ROUTE = "home"
     const val SETTINGS = "settings"
+    const val ABOUT_APP = "about_app"
 
     const val NEW_CATCH_ROUTE = "new_catch"
     const val PLACE_ROUTE = "place"

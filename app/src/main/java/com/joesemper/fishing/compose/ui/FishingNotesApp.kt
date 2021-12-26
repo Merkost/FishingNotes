@@ -104,7 +104,11 @@ private fun NavGraphBuilder.NavGraph(
     }
 
     composable(MainDestinations.SETTINGS) {
-        SettingsScreen(upPress)
+        SettingsScreen(upPress, navController = navController)
+    }
+
+    composable(MainDestinations.ABOUT_APP) {
+        AboutApp(upPress)
     }
 
     composable(
@@ -137,3 +141,5 @@ private fun NavGraphBuilder.NavGraph(
 
 
 }
+
+

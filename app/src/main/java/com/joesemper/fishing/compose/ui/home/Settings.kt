@@ -3,7 +3,9 @@ package com.joesemper.fishing.compose.ui.home
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -20,6 +22,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavController
 import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
 import com.alorma.compose.settings.ui.SettingsCheckbox
 import com.alorma.compose.settings.ui.SettingsMenuLink
@@ -29,7 +32,9 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
+import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.map.GrantLocationPermissionsDialog
+import com.joesemper.fishing.compose.ui.home.map.LocationPermissionDialog
 import com.joesemper.fishing.compose.ui.home.map.checkPermission
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
@@ -41,9 +46,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
+@OptIn(ExperimentalPermissionsApi::class)
 @ExperimentalComposeUiApi
 @Composable
-fun SettingsScreen(backPress: () -> Unit) {
+fun SettingsScreen(backPress: () -> Unit, navController: NavController) {
 
     val userPreferences: UserPreferences = get()
     val weatherPreferences: WeatherPreferences = get()
@@ -52,16 +58,23 @@ fun SettingsScreen(backPress: () -> Unit) {
         topBar = { SettingsTopAppBar(backPress) },
         modifier = Modifier.fillMaxSize())
     {
-        Column {
+        Column(modifier = Modifier.verticalScroll(rememberScrollState(0))) {
             MainAppSettings(userPreferences)
             WeatherSettings(weatherPreferences)
-            AboutApp()
+            AboutSettings(navController)
         }
     }
 }
 
 @Composable
-fun AboutApp() {
+fun AboutSettings(navController: NavController) {
+    val context = LocalContext.current
+
+
+
+
+
+
 
     SettingsHeader(text = stringResource(R.string.settings_about))
     SettingsMenuLink(
@@ -73,10 +86,10 @@ fun AboutApp() {
         },
         title = { Text(text = stringResource(R.string.settings_about)) },
         onClick = {
-            //TODO: about app screen
+            navController.navigate(MainDestinations.ABOUT_APP)
         }
     )
-    SettingsMenuLink(
+    /*SettingsMenuLink(
         icon = {
             Icon(
                 imageVector = Icons.Default.Share,
@@ -87,8 +100,7 @@ fun AboutApp() {
         onClick = {
             //TODO: идея screen
         }
-    )
-
+    )*/
 
 }
 
@@ -143,6 +155,7 @@ fun WeatherSettings(weatherPreferences: WeatherPreferences) {
     )
 }
 
+@ExperimentalPermissionsApi
 @ExperimentalComposeUiApi
 @Composable
 fun MainAppSettings(userPreferences: UserPreferences) {
@@ -155,11 +168,16 @@ fun MainAppSettings(userPreferences: UserPreferences) {
 
     var isPermissionDialogOpen by remember { mutableStateOf(false) }
     var isAppThemeDialogOpen by remember { mutableStateOf(false) }
+    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
 
-    if (isPermissionDialogOpen) GetLocationPermission() { isPermissionDialogOpen = false }
+
+    if (isPermissionDialogOpen)
+        LocationPermissionDialog(userPreferences = userPreferences) {
+            isPermissionDialogOpen = false
+        }
 
     Column {
-        if (checkPermission(context)) {
+        AnimatedVisibility (!permissionsState.allPermissionsGranted) {
             SettingsMenuLink(
                 icon = {
                     Icon(
