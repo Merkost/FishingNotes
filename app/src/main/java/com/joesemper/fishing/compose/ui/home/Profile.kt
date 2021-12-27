@@ -42,6 +42,9 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.bar_chart.BarChart
 import com.joesemper.fishing.compose.bar_chart.BarChartDataModel
 import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.home.views.DefaultCardClickable
+import com.joesemper.fishing.compose.ui.home.views.DefaultDialog
+import com.joesemper.fishing.compose.ui.home.views.SecondaryText
 import com.joesemper.fishing.domain.UserViewModel
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.MapMarker

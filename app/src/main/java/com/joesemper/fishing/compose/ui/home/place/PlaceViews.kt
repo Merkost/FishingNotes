@@ -27,8 +27,9 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.*
+import com.joesemper.fishing.compose.ui.home.DefaultNoteView
 import com.joesemper.fishing.compose.ui.home.notes.*
+import com.joesemper.fishing.compose.ui.home.views.*
 import com.joesemper.fishing.compose.ui.theme.primaryTextColor
 import com.joesemper.fishing.compose.ui.theme.supportTextColor
 import com.joesemper.fishing.domain.UserPlaceViewModel
@@ -256,31 +257,31 @@ fun PlaceButtonsView(
     ) {
         Spacer(modifier = Modifier.padding(4.dp))
 
-        ButtonWithIcon(
+        DefaultButtonOutlined(
             text = stringResource(id = R.string.new_catch),
             icon = painterResource(id = R.drawable.ic_add_catch),
             onClick = { newCatchClicked(navController, viewModel) }
         )
 
-        ButtonWithIcon(
+        DefaultButtonOutlined(
             text = stringResource(id = R.string.navigate),
             icon = painterResource(id = R.drawable.ic_baseline_navigation_24),
             onClick = { onRouteClicked(context, place) }
         )
 
-        ButtonWithIcon(
+        DefaultButtonOutlined(
             text = stringResource(id = R.string.share),
             icon = painterResource(id = R.drawable.ic_baseline_share_24),
             onClick = { onShareClicked(context, place) }
         )
 
-        ButtonWithIcon(
+        DefaultButtonOutlined(
             text = stringResource(id = R.string.edit),
             icon = painterResource(id = R.drawable.ic_baseline_edit_24),
             onClick = { }
         )
 
-        ButtonWithIcon(
+        DefaultButtonOutlined(
             text = stringResource(id = R.string.delete),
             icon = painterResource(id = R.drawable.ic_baseline_delete_24),
             onClick = { }

@@ -19,6 +19,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.home.views.DefaultAppBar
+import com.joesemper.fishing.compose.ui.home.views.MyCard
+import com.joesemper.fishing.compose.ui.home.views.PrimaryText
 
 
 @Composable
@@ -31,11 +34,15 @@ fun AboutApp(upPress: () -> Unit) {
         topBar = { AboutAppAppBar(upPress) },
         modifier = Modifier.fillMaxSize())
     {
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState(0)),
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState(0)),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Column(modifier = Modifier.weight(1f).padding(20.dp),
+            Column(modifier = Modifier
+                .weight(1f)
+                .padding(20.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -45,7 +52,9 @@ fun AboutApp(upPress: () -> Unit) {
                 )
                 PrimaryText(text = "Fishing Notes")
                 Box(contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxWidth().height(32.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(32.dp)
                 ) {
                     Text(
                         modifier = Modifier.padding(4.dp),
@@ -59,7 +68,9 @@ fun AboutApp(upPress: () -> Unit) {
                     )
                 }
             }
-            Column(modifier = Modifier.weight(1f).padding(20.dp),
+            Column(modifier = Modifier
+                .weight(1f)
+                .padding(20.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -75,7 +86,9 @@ fun AboutApp(upPress: () -> Unit) {
                     ) {
                         Image(
                             painterResource(R.drawable.russia), "",
-                                modifier = Modifier.size(50.dp).padding(6.dp))
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .padding(6.dp))
                         Text(" Made in Russia with love  ❤️ ")
                     }
                 }

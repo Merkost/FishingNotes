@@ -15,17 +15,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.core.os.LocaleListCompat
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.home.place.UserPlaceScreen
+import com.joesemper.fishing.compose.ui.home.views.PrimaryText
+import com.joesemper.fishing.compose.ui.home.views.PrimaryTextSmall
+import com.joesemper.fishing.compose.ui.home.views.SecondaryTextSmall
+import com.joesemper.fishing.compose.ui.home.views.SubtitleText
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.resources
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
@@ -41,7 +42,6 @@ import com.joesemper.fishing.utils.network.observeConnectivityAsFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.vponomarenko.compose.shimmer.shimmer
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 

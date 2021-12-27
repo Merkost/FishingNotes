@@ -11,7 +11,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,14 +35,14 @@ import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
-import com.joesemper.fishing.compose.ui.home.DefaultButtonOutlined
-import com.joesemper.fishing.compose.ui.home.PrimaryText
-import com.joesemper.fishing.compose.ui.home.SecondaryText
-import com.joesemper.fishing.compose.ui.home.SupportText
 import com.joesemper.fishing.compose.ui.home.map.LocationState
 import com.joesemper.fishing.compose.ui.home.map.checkPermission
 import com.joesemper.fishing.compose.ui.home.map.getCurrentLocationFlow
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
+import com.joesemper.fishing.compose.ui.home.views.DefaultButtonOutlined
+import com.joesemper.fishing.compose.ui.home.views.PrimaryText
+import com.joesemper.fishing.compose.ui.home.views.SecondaryText
+import com.joesemper.fishing.compose.ui.home.views.SupportText
 import com.joesemper.fishing.compose.ui.theme.primaryWhiteColor
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.WeatherViewModel

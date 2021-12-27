@@ -18,8 +18,11 @@ import androidx.compose.ui.unit.dp
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.PickWeatherIconDialog
-import com.joesemper.fishing.compose.ui.home.SecondaryText
-import com.joesemper.fishing.compose.ui.home.weather.*
+import com.joesemper.fishing.compose.ui.home.views.SecondaryText
+import com.joesemper.fishing.compose.ui.home.weather.PressureValues
+import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
+import com.joesemper.fishing.compose.ui.home.weather.getCelciusTemperature
+import com.joesemper.fishing.compose.ui.home.weather.getTemperatureNameFromUnit
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase

@@ -18,7 +18,7 @@ import com.google.accompanist.pager.*
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.BannerAdvertView
-import com.joesemper.fishing.compose.ui.home.DefaultAppBar
+import com.joesemper.fishing.compose.ui.home.views.DefaultAppBar
 import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.utils.Constants
 import com.joesemper.fishing.utils.time.toDayOfWeekAndDate

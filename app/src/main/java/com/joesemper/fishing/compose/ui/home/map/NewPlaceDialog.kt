@@ -31,9 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.MyCard
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.UiState
+import com.joesemper.fishing.compose.ui.home.views.MyCard
 import com.joesemper.fishing.compose.ui.theme.Shapes
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.compose.ui.utils.ColorPicker
@@ -55,7 +55,9 @@ fun NewPlaceDialog(
     val coroutineScope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsState()
 
-    MyCard(shape = Shapes.large, modifier = Modifier.wrapContentHeight().fillMaxWidth()) {
+    MyCard(shape = Shapes.large, modifier = Modifier
+        .wrapContentHeight()
+        .fillMaxWidth()) {
         ConstraintLayout(
             modifier = Modifier
                 .wrapContentHeight()

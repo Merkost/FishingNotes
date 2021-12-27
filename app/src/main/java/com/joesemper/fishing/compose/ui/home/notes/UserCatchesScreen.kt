@@ -17,8 +17,8 @@ import androidx.navigation.NavController
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
-import com.joesemper.fishing.compose.ui.home.place.PlaceCatchItemView
 import com.joesemper.fishing.compose.ui.navigate
+import com.joesemper.fishing.compose.ui.utils.CatchesSortValues
 import com.joesemper.fishing.domain.UserCatchesViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.utils.time.toDateTextMonth
@@ -37,7 +37,9 @@ fun UserCatchesScreen(
             if (animatedUiState != null) {
                 UserCatches(
                     catches = animatedUiState,
-                    userCatchClicked = { catch -> onCatchItemClick(catch, navController) })
+                    userCatchClicked = { catch -> onCatchItemClick(catch, navController) },
+                    sortValue = CatchesSortValues.TimeAsc.name
+                )
             }
         }
     }
@@ -73,7 +75,7 @@ fun UserCatches(
                                     it
                                 }
                             ) {
-                                PlaceCatchItemView(
+                                CatchItemView(
                                     catch = it,
                                     onClick = userCatchClicked
                                 )
@@ -82,7 +84,7 @@ fun UserCatches(
                     }
                     else -> {
                         items(items = catches) {
-                            PlaceCatchItemView(
+                            CatchItemView(
                                 catch = it,
                                 onClick = userCatchClicked
                             )

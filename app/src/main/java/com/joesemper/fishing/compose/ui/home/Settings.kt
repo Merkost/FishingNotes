@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.RadioButton
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
@@ -37,6 +40,9 @@ import com.joesemper.fishing.compose.ui.home.map.GrantLocationPermissionsDialog
 import com.joesemper.fishing.compose.ui.home.map.LocationPermissionDialog
 import com.joesemper.fishing.compose.ui.home.map.checkPermission
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
+import com.joesemper.fishing.compose.ui.home.views.DefaultAppBar
+import com.joesemper.fishing.compose.ui.home.views.DefaultCard
+import com.joesemper.fishing.compose.ui.home.views.PrimaryText
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
 import com.joesemper.fishing.compose.ui.theme.AppThemeValues
@@ -349,7 +355,8 @@ fun GetTemperatureUnit(
                     radioOptions.forEach { temperatureValue ->
                         Row(
                             Modifier
-                                .fillMaxWidth().height(60.dp)
+                                .fillMaxWidth()
+                                .height(60.dp)
                                 .selectable(
                                     selected = (temperatureValue == selectedOption),
                                     onClick = {
@@ -421,7 +428,8 @@ fun GetPressureUnit(
                     radioOptions.forEach { pressureValue ->
                         Row(
                             Modifier
-                                .fillMaxWidth().height(60.dp)
+                                .fillMaxWidth()
+                                .height(60.dp)
                                 .selectable(
                                     selected = (pressureValue == selectedOption),
                                     onClick = {

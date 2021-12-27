@@ -5,10 +5,8 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,10 +25,10 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.NotesPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
-import com.joesemper.fishing.compose.ui.home.DefaultAppBar
-import com.joesemper.fishing.compose.ui.home.FabMenuItem
-import com.joesemper.fishing.compose.ui.home.FabWithMenu
 import com.joesemper.fishing.compose.ui.home.SettingsHeader
+import com.joesemper.fishing.compose.ui.home.views.DefaultAppBar
+import com.joesemper.fishing.compose.ui.home.views.FabMenuItem
+import com.joesemper.fishing.compose.ui.home.views.FabWithMenu
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.theme.primaryTextColor
 import com.joesemper.fishing.compose.ui.utils.CatchesSortValues
@@ -188,7 +186,8 @@ fun PlacesSort(
         radioOptions.forEach { placesSortValue ->
             Row(
                 Modifier
-                    .fillMaxWidth().height(45.dp)
+                    .fillMaxWidth()
+                    .height(45.dp)
                     .selectable(
                         selected = (placesSortValue == selectedOption),
                         onClick = {
@@ -243,7 +242,8 @@ fun CatchesSort(
         radioOptions.forEach { catchesSortValue ->
             Row(
                 Modifier
-                    .fillMaxWidth().height(45.dp)
+                    .fillMaxWidth()
+                    .height(45.dp)
                     .selectable(
                         selected = (catchesSortValue == selectedOption),
                         onClick = {

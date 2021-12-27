@@ -27,8 +27,13 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.*
+import com.joesemper.fishing.compose.ui.home.Constants
+import com.joesemper.fishing.compose.ui.home.FishAmountAndWeightView
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
+import com.joesemper.fishing.compose.ui.home.views.DefaultDialog
+import com.joesemper.fishing.compose.ui.home.views.MaxCounterView
+import com.joesemper.fishing.compose.ui.home.views.PrimaryTextSmall
+import com.joesemper.fishing.compose.ui.home.views.SimpleOutlinedTextField
 import com.joesemper.fishing.domain.UserCatchViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 

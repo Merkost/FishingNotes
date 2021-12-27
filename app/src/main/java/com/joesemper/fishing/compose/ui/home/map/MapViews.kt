@@ -37,7 +37,7 @@ import com.airbnb.lottie.compose.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.DefaultDialog
+import com.joesemper.fishing.compose.ui.home.views.DefaultDialog
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.compose.ui.theme.supportTextColor
 import com.joesemper.fishing.compose.ui.utils.currentFraction
