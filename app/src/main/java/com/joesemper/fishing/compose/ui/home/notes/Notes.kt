@@ -126,9 +126,9 @@ fun NotesModalBottomSheet(
     notesPreferences: NotesPreferences
 ) {
     val currentPlacesSort = notesPreferences.placesSortValue
-        .collectAsState(PlacesSortValues.Default.name)
-    val currentCatchesSort = notesPreferences.placesSortValue
-        .collectAsState(CatchesSortValues.Default.name)
+        .collectAsState(PlacesSortValues.Default)
+    val currentCatchesSort = notesPreferences.catchesSortValue
+        .collectAsState(CatchesSortValues.Default)
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -138,7 +138,7 @@ fun NotesModalBottomSheet(
                 BottomSheetScreen.Sort -> {
                     PlacesSort(currentPlacesSort) { newValue ->
                         coroutineScope.launch {
-                            notesPreferences.savePlacesSortValue(newValue.name)
+                            notesPreferences.savePlacesSortValue(newValue)
                         }
                     }
                 }
@@ -152,7 +152,7 @@ fun NotesModalBottomSheet(
                 BottomSheetScreen.Sort -> {
                     CatchesSort(currentCatchesSort) { newValue ->
                         coroutineScope.launch {
-                            notesPreferences.saveCatchesSortValue(newValue.name)
+                            notesPreferences.saveCatchesSortValue(newValue)
                         }
                     }
                 }
@@ -166,7 +166,7 @@ fun NotesModalBottomSheet(
 
 @Composable
 fun PlacesSort(
-    currentSort: State<String>,
+    currentSort: State<PlacesSortValues>,
     onSelectedValue: (placesSore: PlacesSortValues) -> Unit
 ) {
 
@@ -175,9 +175,7 @@ fun PlacesSort(
 
     val (selectedOption, onOptionSelected) = remember {
         mutableStateOf(
-            PlacesSortValues.valueOf(
                 currentSort.value
-            )
         )
     }
 
@@ -205,8 +203,6 @@ fun PlacesSort(
                     onClick = {
                         onOptionSelected(placesSortValue)
                         onSelectedValue(placesSortValue)
-                        Toast.makeText(context, placesSortValue.name, Toast.LENGTH_LONG)
-                            .show()
                     }
                 )
                 Text(
@@ -222,7 +218,7 @@ fun PlacesSort(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CatchesSort(
-    currentSort: State<String>,
+    currentSort: State<CatchesSortValues>,
     onSelectedValue: (catchesSort: CatchesSortValues) -> Unit
 ) {
 
@@ -231,9 +227,7 @@ fun CatchesSort(
 
     val (selectedOption, onOptionSelected) = remember {
         mutableStateOf(
-            CatchesSortValues.valueOf(
-                currentSort.value
-            )
+            currentSort.value
         )
     }
 
@@ -261,8 +255,6 @@ fun CatchesSort(
                     onClick = {
                         onOptionSelected(catchesSortValue)
                         onSelectedValue(catchesSortValue)
-                        Toast.makeText(context, catchesSortValue.name, Toast.LENGTH_LONG)
-                            .show()
                     }
                 )
                 Text(
