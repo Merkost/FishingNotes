@@ -88,7 +88,7 @@ private val dateAndTime = Calendar.getInstance()
 private var mInterstitialAd: InterstitialAd? = null
 
 object Constants {
-    const val MAX_PHOTOS: Int = 5
+    const val MAX_PHOTOS: Int = 3
 
 
     const val TAG = "NEW_CATCH_LOG"
@@ -466,9 +466,9 @@ fun Fishing(
             text = stringResource(id = R.string.way_of_fishing)
         )
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SimpleOutlinedTextField(rod, stringResource(R.string.fish_rod))
-            SimpleOutlinedTextField(bite, stringResource(R.string.bait))
-            SimpleOutlinedTextField(lure, stringResource(R.string.lure))
+            SimpleOutlinedTextField(textState = rod, label = stringResource(R.string.fish_rod))
+            SimpleOutlinedTextField(textState = bite, label = stringResource(R.string.bait))
+            SimpleOutlinedTextField(textState = lure, label = stringResource(R.string.lure))
         }
 
     }
@@ -487,7 +487,10 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
 
         FishSpecies(viewModel.fishType)
 
-        SimpleOutlinedTextField(viewModel.description, stringResource(R.string.note))
+        SimpleOutlinedTextField(
+            textState = viewModel.description,
+            label = stringResource(R.string.note)
+        )
         Spacer(modifier = Modifier.size(2.dp))
         FishAmountAndWeightView(amountState = fishState, weightState = weightState)
 

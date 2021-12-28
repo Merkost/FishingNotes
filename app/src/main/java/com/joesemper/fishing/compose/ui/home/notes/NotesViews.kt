@@ -55,10 +55,9 @@ fun ItemPhoto(
         mutableStateOf<Uri?>(null)
     }
 
-//    Crossfade(photo) { pic ->
     Box(
         modifier = Modifier
-            .size(100.dp)
+            .size(150.dp)
             .padding(4.dp)
     ) {
 
@@ -87,10 +86,10 @@ fun ItemPhoto(
             }
         }
         if (deleteEnabled) {
-            Surface( //For making delete button background half transparent
-                color = Color.LightGray.copy(alpha = 0.2f),
+            Surface(
+                color = Color.LightGray.copy(alpha = 0.5f),
                 modifier = Modifier
-                    .size(25.dp)
+                    .size(32.dp)
                     .align(Alignment.TopEnd)
                     .padding(3.dp)
                     .clip(CircleShape)
@@ -105,7 +104,6 @@ fun ItemPhoto(
             }
         }
     }
-//    }
 
     AnimatedVisibility(fullScreenPhoto.value != null) {
         FullScreenPhoto(fullScreenPhoto)
@@ -119,7 +117,6 @@ fun ItemCatchPhotos(
     photo: Uri? = null,
     photosCount: Int = 0
 ) {
-//    Crossfade(photo) { pic ->
     Box(
         modifier = modifier
             .size(100.dp)
@@ -174,7 +171,6 @@ fun ItemCatchPhotos(
             }
         }
     }
-//    }
 }
 
 @ExperimentalAnimationApi
@@ -283,6 +279,7 @@ fun ItemUserPlace(
     place: UserMapMarker,
     userPlaceClicked: (UserMapMarker) -> Unit
 ) {
+
     DefaultCardClickable(
         modifier = modifier,
         onClick = { userPlaceClicked(place) }
@@ -345,7 +342,6 @@ fun ItemUserPlace(
                 count = place.catchesCount,
                 icon = R.drawable.ic_fishing
             )
-
         }
     }
 }

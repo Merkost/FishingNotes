@@ -60,7 +60,8 @@ fun Notes(
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     var bottomSheetScreen by remember { mutableStateOf(BottomSheetScreen.Filter) }
 
-    ModalBottomSheetLayout(sheetState = bottomState,
+    ModalBottomSheetLayout(
+        sheetState = bottomState,
         sheetShape = modalBottomSheetCorners,
         sheetContent = {
             NotesModalBottomSheet(

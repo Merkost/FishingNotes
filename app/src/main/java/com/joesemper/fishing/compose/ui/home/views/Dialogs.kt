@@ -11,7 +11,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.airbnb.lottie.compose.LottieAnimation
@@ -35,14 +34,10 @@ fun DefaultDialog(
     content: @Composable() (() -> Unit)? = null
 ) {
     Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false
-        )
+        onDismissRequest = onDismiss
     ) {
         DefaultCard(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .animateContentSize()
@@ -105,7 +100,7 @@ fun DefaultDialog(
                     )
                 }
 
-                DefaultButton(
+                DefaultButtonFilled(
                     modifier = Modifier.constrainAs(positiveButton) {
                         top.linkTo(mainContent.bottom, 16.dp)
                         bottom.linkTo(parent.bottom)

@@ -1,14 +1,18 @@
 package com.joesemper.fishing.compose.ui.home
 
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Icon
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -16,8 +20,8 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.catch_screen.EditNoteDialog
 import com.joesemper.fishing.compose.ui.home.views.DefaultCardClickable
 import com.joesemper.fishing.compose.ui.home.views.PrimaryText
-import com.joesemper.fishing.compose.ui.home.views.SecondaryText
 import com.joesemper.fishing.compose.ui.home.views.SubtitleWithIcon
+import com.joesemper.fishing.compose.ui.theme.supportTextColor
 
 @ExperimentalComposeUiApi
 @Composable
@@ -62,7 +66,7 @@ fun DefaultNoteView(
             )
 
             if (note.isBlank()) {
-                SecondaryText(
+                NoContentView(
                     modifier = Modifier
                         .padding(bottom = 16.dp)
                         .constrainAs(text) {
@@ -71,7 +75,8 @@ fun DefaultNoteView(
                             absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                             width = Dimension.fillToConstraints
                         },
-                    text = stringResource(id = R.string.no_description)
+                    text = stringResource(id = R.string.no_description),
+                    icon = painterResource(id = R.drawable.ic_no_note)
                 )
             } else {
                 PrimaryText(
@@ -86,6 +91,31 @@ fun DefaultNoteView(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun NoContentView(
+    modifier: Modifier = Modifier,
+    text: String,
+    icon: Painter
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Icon(
+            modifier = Modifier.size(32.dp),
+            painter = icon,
+            contentDescription = null,
+            tint = supportTextColor
+        )
+        Text(
+            text = text,
+            textAlign = TextAlign.Center,
+            color = supportTextColor
+        )
     }
 }
 
