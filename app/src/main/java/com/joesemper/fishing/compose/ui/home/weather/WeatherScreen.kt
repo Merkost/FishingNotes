@@ -107,7 +107,7 @@ fun WeatherScreen(
 
     val weatherPrefs: WeatherPreferences = get()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
-    val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
+    val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -246,7 +246,7 @@ fun NoInternetView(modifier: Modifier = Modifier) {
 fun CurrentWeather(
     modifier: Modifier = Modifier,
     forecast: WeatherForecast,
-    temperatureUnit: String,
+    temperatureUnit: TemperatureValues,
     pressureUnit: PressureValues,
 ) {
     Surface(
@@ -286,7 +286,7 @@ fun CurrentWeather(
 fun HourlyWeather(
     modifier: Modifier = Modifier,
     forecastHourly: List<Hourly>,
-    temperatureUnit: String,
+    temperatureUnit: TemperatureValues,
 ) {
     val preferences: UserPreferences = get()
     val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
@@ -314,7 +314,7 @@ fun HourlyWeatherItem(
     modifier: Modifier = Modifier,
     timeTitle: String,
     forecast: Hourly,
-    temperatureUnit: String
+    temperatureUnit: TemperatureValues
 ) {
     Column(
         modifier = modifier.padding(horizontal = 12.dp),
@@ -336,10 +336,8 @@ fun HourlyWeatherItem(
                 colorFilter = ColorFilter.tint(color = MaterialTheme.colors.onPrimary)
             )
             PrimaryText(
-                text = getTemperature(
-                    forecast.temperature,
-                    TemperatureValues.valueOf(temperatureUnit)
-                ) + getTemperatureNameFromUnit(temperatureUnit),
+                text = temperatureUnit.getTemperature(
+                    forecast.temperature) + stringResource(temperatureUnit.stringRes),
                 textColor = MaterialTheme.colors.onPrimary
             )
         }
@@ -368,7 +366,7 @@ fun HourlyWeatherItem(
 fun DailyWeatherItem(
     modifier: Modifier = Modifier,
     forecast: Daily,
-    temperatureUnit: String,
+    temperatureUnit: TemperatureValues,
     onDailyWeatherClick: () -> Unit,
 ) {
     ConstraintLayout(
@@ -408,7 +406,7 @@ fun DailyWeatherItem(
                 bottom.linkTo(parent.bottom)
                 absoluteRight.linkTo(parent.absoluteRight, 16.dp)
             },
-            text = getTemperatureNameFromUnit(temperatureUnit),
+            text = stringResource(temperatureUnit.stringRes),
             textColor = secondaryTextColor
         )
         WeatherPrimaryText(
@@ -417,10 +415,7 @@ fun DailyWeatherItem(
                 bottom.linkTo(tempUnits.bottom)
                 absoluteRight.linkTo(tempUnits.absoluteLeft, 2.dp)
             },
-            text = getTemperature(
-                forecast.temperature.day,
-                TemperatureValues.valueOf(temperatureUnit)
-            ),
+            text = temperatureUnit.getTemperature(forecast.temperature.day),
         )
         Image(
             modifier = Modifier

@@ -45,7 +45,7 @@ fun PrimaryWeatherItemView(
     temperature: Float,
     textTint: Color = MaterialTheme.colors.primaryVariant,
     iconTint: Color = Color.Unspecified,
-    temperatureUnit: String
+    temperatureUnit: TemperatureValues
 ) {
 
     ConstraintLayout(
@@ -91,10 +91,8 @@ fun PrimaryWeatherItemView(
                     absoluteRight.linkTo(parent.absoluteRight)
                     bottom.linkTo(parent.bottom, 8.dp)
                 },
-            text = getTemperature(
-                temperature,
-                TemperatureValues.valueOf(temperatureUnit)
-            ) + getTemperatureNameFromUnit(temperatureUnit),
+            text = temperatureUnit.getTemperature(temperature)
+                    + stringResource(temperatureUnit.stringRes),
             textColor = textTint
         )
 
@@ -125,7 +123,7 @@ fun WeatherPlaceSelectItem(
             horizontalArrangement = Arrangement.Center
         ) {
             WeatherAppBarText(
-                text = selectedPlace.title ?: "Не удалось определить местоположение",
+                text = selectedPlace.title,
                 textColor = Color.White
             )
             Icon(imageVector = Icons.Filled.ArrowDropDown, "", tint = Color.White)
@@ -265,7 +263,7 @@ fun WeatherLoading(modifier: Modifier) {
 fun DayTemperatureView(
     modifier: Modifier = Modifier,
     temperature: Temperature,
-    temperatureUnit: String
+    temperatureUnit: TemperatureValues
 ) {
     ConstraintLayout(
         modifier = modifier
@@ -312,10 +310,8 @@ fun DayTemperatureView(
                 absoluteRight.linkTo(morn.absoluteRight)
                 top.linkTo(morn.bottom, 4.dp)
             },
-            text = getTemperature(
-                temperature.morning,
-                TemperatureValues.valueOf(temperatureUnit)
-            ) + getTemperatureNameFromUnit(temperatureUnit)
+            text = temperatureUnit.getTemperature(temperature.morning)
+                    + stringResource(temperatureUnit.stringRes)
         )
         PrimaryText(
             modifier = Modifier.constrainAs(dayMeaning) {
@@ -323,10 +319,8 @@ fun DayTemperatureView(
                 absoluteRight.linkTo(day.absoluteRight)
                 top.linkTo(day.bottom, 4.dp)
             },
-            text = getTemperature(
-                temperature.day,
-                TemperatureValues.valueOf(temperatureUnit)
-            ) + getTemperatureNameFromUnit(temperatureUnit),
+            text = temperatureUnit.getTemperature(
+                temperature.day) + stringResource(temperatureUnit.stringRes),
         )
         PrimaryText(
             modifier = Modifier.constrainAs(eveMeaning) {
@@ -334,10 +328,8 @@ fun DayTemperatureView(
                 absoluteRight.linkTo(eve.absoluteRight)
                 top.linkTo(eve.bottom, 4.dp)
             },
-            text = getTemperature(
-                temperature.evening,
-                TemperatureValues.valueOf(temperatureUnit)
-            ) + getTemperatureNameFromUnit(temperatureUnit),
+            text = temperatureUnit.getTemperature(
+                temperature.evening) + stringResource(temperatureUnit.stringRes),
         )
         PrimaryText(
             modifier = Modifier.constrainAs(nightMeaning) {
@@ -345,10 +337,8 @@ fun DayTemperatureView(
                 absoluteRight.linkTo(night.absoluteRight)
                 top.linkTo(night.bottom, 4.dp)
             },
-            text = getTemperature(
-                temperature.night,
-                TemperatureValues.valueOf(temperatureUnit)
-            ) + getTemperatureNameFromUnit(temperatureUnit),
+            text = temperatureUnit.getTemperature(
+                temperature.night) + stringResource(temperatureUnit.stringRes),
         )
     }
 }

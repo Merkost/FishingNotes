@@ -8,7 +8,6 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
-import com.joesemper.fishing.compose.ui.home.weather.getTemperature
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
 import com.joesemper.fishing.model.entity.common.Progress
@@ -59,7 +58,7 @@ class NewCatchViewModel(
     val moonPhase = mutableStateOf(0.0f)
 
     val images = mutableStateListOf<Uri>()
-        get() = field as SnapshotStateList<Uri>
+        get() = field
 
     fun getWeather() {
         viewModelScope.launch {
@@ -185,11 +184,8 @@ class NewCatchViewModel(
 
     }
 
-    fun getTemperatureForHour(hour: Int, to: String): String {
-        return getTemperature(
-            weather.value!!.hourly[hour].temperature,
-            TemperatureValues.valueOf(to)
-        )
+    fun getTemperatureForHour(hour: Int, temperatureValue: TemperatureValues): String {
+        return temperatureValue.getTemperature(weather.value!!.hourly[hour].temperature)
     }
 
 }

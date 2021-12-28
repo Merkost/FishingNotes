@@ -43,22 +43,7 @@ data class Point(
     val y: Float
 )
 
-fun getTemperature(temperature: Float, temperatureValue: TemperatureValues): String {
-    return when (temperatureValue) {
-        TemperatureValues.C -> temperature.toInt().toString()
-        TemperatureValues.F -> (temperature * 9f/5f + 32).toInt().toString()
-        TemperatureValues.K -> (temperature + 273.15).toInt().toString()
-    }
-}
 
-fun getCelciusTemperature(temperaturInC: Float, from: String): Int {
-    return when (from) {
-        TemperatureValues.C.name -> temperaturInC.toInt()
-        TemperatureValues.F.name -> ((temperaturInC - 32)*(5/9)).toInt()
-        TemperatureValues.K.name -> (temperaturInC - 273.15).toInt()
-        else -> {temperaturInC.toInt()}
-    }
-}
 
 @Composable
 fun getTemperatureNameFromUnit(temperatureUnit: String): String {
@@ -108,6 +93,23 @@ enum class TemperatureValues(val stringRes: Int) {
     C (R.string.celsius),
     F (R.string.fahrenheit),
     K (R.string.kelvin);
+
+    fun getTemperature(temperature: Float): String {
+        return when (this) {
+            C -> temperature.toInt().toString()
+            F -> (temperature * 9f/5f + 32).toInt().toString()
+            K -> (temperature + 273.15).toInt().toString()
+        }
+    }
+
+    fun getCelciusTemperature(temperaturInC: Float): Int {
+        return when (this) {
+            C -> temperaturInC.toInt()
+            F -> ((temperaturInC - 32)*(5/9)).toInt()
+            K -> (temperaturInC - 273.15).toInt()
+        }
+    }
+
 }
 
 fun navigateToDailyWeatherScreen(

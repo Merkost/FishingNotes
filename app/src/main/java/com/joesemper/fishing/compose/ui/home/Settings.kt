@@ -118,7 +118,7 @@ fun WeatherSettings(weatherPreferences: WeatherPreferences) {
     val isTemperatureDialogOpen = remember { mutableStateOf(false) }
 
     val pressureUnit = weatherPreferences.getPressureUnit.collectAsState(PressureValues.mmHg)
-    val temperatureUnit = weatherPreferences.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
+    val temperatureUnit = weatherPreferences.getTemperatureUnit.collectAsState(TemperatureValues.C)
 
     GetPressureUnit(isPressureDialogOpen, pressureUnit) { newValue ->
         coroutineScope.launch {
@@ -323,7 +323,7 @@ fun DarkModeLottieSwitch(modifier: Modifier = Modifier) {
 @Composable
 fun GetTemperatureUnit(
     isTemperatureDialogOpen: MutableState<Boolean>,
-    currentTemperatureUnit: State<String>,
+    currentTemperatureUnit: State<TemperatureValues>,
     onSelectedValue: (temperatureValues: TemperatureValues) -> Unit
 ) {
     val radioOptions = TemperatureValues.values().asList()
@@ -332,9 +332,7 @@ fun GetTemperatureUnit(
     if (isTemperatureDialogOpen.value) {
         val (selectedOption, onOptionSelected) = remember {
             mutableStateOf(
-                TemperatureValues.valueOf(
                     currentTemperatureUnit.value
-                )
             )
         }
         Dialog(onDismissRequest = { isTemperatureDialogOpen.value = false }) {

@@ -27,14 +27,14 @@ class WeatherPreferences(private val context: Context) {
         .map { preferences ->
             PressureValues.valueOf(preferences[PRESSURE_UNIT] ?: PressureValues.mmHg.name)
         }.catch { e ->
-            if (e is IllegalArgumentException) {
-                emit(PressureValues.mmHg)
-            }
+            if (e is IllegalArgumentException) { emit(PressureValues.mmHg) }
         }
 
-    val getTemperatureUnit: Flow<String> = context.dataStore.data
+    val getTemperatureUnit: Flow<TemperatureValues> = context.dataStore.data
         .map { preferences ->
-            preferences[TEMPERATURE_UNIT] ?: TemperatureValues.C.name
+            TemperatureValues.valueOf(preferences[TEMPERATURE_UNIT] ?: TemperatureValues.C.name)
+        }.catch { e ->
+            if (e is IllegalArgumentException) { emit(TemperatureValues.C) }
         }
 
     //save into datastore
