@@ -42,6 +42,7 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.bar_chart.BarChart
 import com.joesemper.fishing.compose.bar_chart.BarChartDataModel
 import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.home.views.DefaultAppBar
 import com.joesemper.fishing.compose.ui.home.views.DefaultCardClickable
 import com.joesemper.fishing.compose.ui.home.views.DefaultDialog
 import com.joesemper.fishing.compose.ui.home.views.SecondaryText
@@ -483,16 +484,8 @@ fun UserImage(user: User?, imgSize: Dp, modifier: Modifier = Modifier) {
 @Composable
 fun ProfileAppBar(navController: NavController, viewModel: UserViewModel) {
     val dialogOnLogout = rememberSaveable { mutableStateOf(false) }
-    TopAppBar(
-        title = { Text(text = stringResource(R.string.profile)) },
-        navigationIcon = {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.back)
-                )
-            }
-        },
+    DefaultAppBar(
+        title = stringResource(R.string.profile),
         actions = {
             IconButton(onClick = { dialogOnLogout.value = true }) {
                 Icon(
@@ -504,8 +497,7 @@ fun ProfileAppBar(navController: NavController, viewModel: UserViewModel) {
                 Icon(Icons.Default.Settings, stringResource(R.string.settings))
             }
         },
-        elevation = 0.dp,
-        backgroundColor = MaterialTheme.colors.primary
+        elevation = 0.dp
     )
     if (dialogOnLogout.value) LogoutDialog(dialogOnLogout, navController)
 }

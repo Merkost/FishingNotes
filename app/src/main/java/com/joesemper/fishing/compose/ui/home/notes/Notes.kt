@@ -1,6 +1,5 @@
 package com.joesemper.fishing.compose.ui.home.notes
 
-import android.widget.Toast
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
@@ -51,6 +50,7 @@ enum class BottomSheetScreen {
 fun Notes(
     modifier: Modifier = Modifier,
     navController: NavController,
+    upPress: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val notesPreferences: NotesPreferences = get()
@@ -71,28 +71,10 @@ fun Notes(
         }) {
         Scaffold(
             topBar = {
-                DefaultAppBar(
-                    onNavClick = { navController.popBackStack() },
-                    title = stringResource(id = R.string.notes),
-                    actions = {
-                        Row {
-                            IconButton(onClick = {
-                                if (!pagerState.isScrollInProgress) {
-                                    bottomSheetScreen = BottomSheetScreen.Sort
-                                    coroutineScope.launch { bottomState.show() }
-                                }
-                            }) { Icon(Icons.Default.Sort, Icons.Default.Sort.name) }
-
-                            //TODO: Add filters
-                            /*IconButton(onClick = {
-                                if (!pagerState.isScrollInProgress) {
-                                    bottomSheetScreen = BottomSheetScreen.Filter
-                                    coroutineScope.launch { bottomState.show() }
-                                }
-                            }) { Icon(Icons.Default.FilterAlt, Icons.Default.FilterAlt.name) }*/
-                        }
-                    }
-                )
+                NotesAppBar(pagerState) { newSheetState ->
+                    bottomSheetScreen = newSheetState
+                    coroutineScope.launch { bottomState.show() }
+                }
             },
             floatingActionButton = {
                 FabWithMenu(
@@ -116,6 +98,35 @@ fun Notes(
 
         }
     }
+}
+
+@ExperimentalPagerApi
+@Composable
+fun NotesAppBar(
+    pagerState: PagerState,
+    openModalBottomSheet: (BottomSheetScreen) -> Unit
+) {
+
+    DefaultAppBar(
+        title = stringResource(id = R.string.notes),
+        actions = {
+            Row {
+                IconButton(onClick = {
+                    if (!pagerState.isScrollInProgress) {
+                        openModalBottomSheet(BottomSheetScreen.Sort)
+                    }
+                }) { Icon(Icons.Default.Sort, Icons.Default.Sort.name) }
+
+                //TODO: Add filters
+                /*IconButton(onClick = {
+                    if (!pagerState.isScrollInProgress) {
+                        bottomSheetScreen = BottomSheetScreen.Filter
+                        coroutineScope.launch { bottomState.show() }
+                    }
+                }) { Icon(Icons.Default.FilterAlt, Icons.Default.FilterAlt.name) }*/
+            }
+        }
+    )
 }
 
 @ExperimentalPagerApi
@@ -175,7 +186,7 @@ fun PlacesSort(
 
     val (selectedOption, onOptionSelected) = remember {
         mutableStateOf(
-                currentSort.value
+            currentSort.value
         )
     }
 

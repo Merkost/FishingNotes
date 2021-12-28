@@ -102,5 +102,5 @@ fun AboutAppAppBar(backPress: () -> Unit) {
     DefaultAppBar(
         title = stringResource(id = R.string.settings_about),
         onNavClick = { backPress() }
-    ) {}
+    )
 }

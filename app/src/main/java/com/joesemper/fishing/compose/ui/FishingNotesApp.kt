@@ -94,9 +94,9 @@ private fun NavGraphBuilder.NavGraph(
 ) {
     navigation(
         route = MainDestinations.HOME_ROUTE,
-        startDestination = HomeSections.MAP.route
+        startDestination = HomeSections.MAP.route,
     ) {
-        addHomeGraph(navController)
+        addHomeGraph(navController, upPress = upPress)
     }
 
     composable(MainDestinations.LOGIN_ROUTE) {

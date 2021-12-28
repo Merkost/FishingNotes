@@ -478,5 +478,5 @@ fun SettingsTopAppBar(backPress: () -> Unit) {
     DefaultAppBar(
         title = stringResource(id = R.string.settings),
         onNavClick = { backPress() }
-    ) {}
+    )
 }
