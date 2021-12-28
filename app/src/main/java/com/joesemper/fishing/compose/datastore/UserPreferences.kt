@@ -8,7 +8,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.joesemper.fishing.compose.ui.theme.AppThemeValues
+import com.joesemper.fishing.compose.ui.utils.PlacesSortValues
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
 class UserPreferences(private val context: Context) {
@@ -40,9 +42,11 @@ class UserPreferences(private val context: Context) {
             preferences[TIME_FORMAT_KEY] ?: false
         }
 
-    val appTheme: Flow<String> = context.dataStore.data
+    val appTheme: Flow<AppThemeValues> = context.dataStore.data
         .map { preferences ->
-            preferences[APP_THEME_KEY] ?: AppThemeValues.Blue.name
+            AppThemeValues.valueOf(preferences[APP_THEME_KEY] ?: AppThemeValues.Blue.name)
+        }.catch { e ->
+            if (e is IllegalArgumentException) { emit(AppThemeValues.Blue) }
         }
 
     val useFabFastAdd: Flow<Boolean> = context.dataStore.data

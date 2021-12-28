@@ -7,7 +7,6 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -73,14 +72,14 @@ private val BlueDarkColorPalette = darkColors(
 
 @Composable
 fun FishingNotesTheme(
-    initialAppTheme: String? = null,
+    initialAppTheme: AppThemeValues? = null,
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable() () -> Unit
 ) {
     val userPreferences: UserPreferences = get()
-    val appTheme = userPreferences.appTheme.collectAsState(initialAppTheme ?: "null")
+    val appTheme = userPreferences.appTheme.collectAsState(initialAppTheme)
 
-    val colors = chooseTheme(appTheme, darkTheme)
+    val colors = chooseTheme(appTheme.value, darkTheme)
 
     val systemUiController = rememberSystemUiController()
     SideEffect {
@@ -106,10 +105,10 @@ fun FishingNotesTheme(
 }
 
 
-fun chooseTheme(appTheme: State<String>, darkTheme: Boolean): Colors {
-    return when(appTheme.value) {
-        AppThemeValues.Blue.name -> if (darkTheme) BlueDarkColorPalette else BlueLightColorPalette
-        AppThemeValues.Green.name -> if (darkTheme) GreenDarkColorPalette else GreenLightColorPalette
+fun chooseTheme(appTheme: AppThemeValues?, darkTheme: Boolean): Colors {
+    return when(appTheme) {
+        AppThemeValues.Blue -> if (darkTheme) BlueDarkColorPalette else BlueLightColorPalette
+        AppThemeValues.Green -> if (darkTheme) GreenDarkColorPalette else GreenLightColorPalette
         else -> { InitColorPalette }
     }
 }

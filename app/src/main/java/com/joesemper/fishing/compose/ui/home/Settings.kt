@@ -46,7 +46,6 @@ import com.joesemper.fishing.compose.ui.home.views.PrimaryText
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
 import com.joesemper.fishing.compose.ui.theme.AppThemeValues
-import com.joesemper.fishing.compose.ui.theme.getAppThemeValueFromColor
 import com.joesemper.fishing.compose.ui.utils.ColorPicker
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -75,12 +74,6 @@ fun SettingsScreen(backPress: () -> Unit, navController: NavController) {
 @Composable
 fun AboutSettings(navController: NavController) {
     val context = LocalContext.current
-
-
-
-
-
-
 
     SettingsHeader(text = stringResource(R.string.settings_about))
     SettingsMenuLink(
@@ -168,7 +161,7 @@ fun MainAppSettings(userPreferences: UserPreferences) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    val appTheme = userPreferences.appTheme.collectAsState(AppThemeValues.Blue.name)
+    val appTheme by userPreferences.appTheme.collectAsState(AppThemeValues.Blue)
     val use12hTimeFormat by userPreferences.use12hTimeFormat.collectAsState(false)
     val useFastFabAdd by userPreferences.useFabFastAdd.collectAsState(false)
 
@@ -210,7 +203,7 @@ fun MainAppSettings(userPreferences: UserPreferences) {
         )
         AnimatedVisibility(isAppThemeDialogOpen) {
             val (selectedColor, onColorSelected) = remember {
-                mutableStateOf(AppThemeValues.valueOf(appTheme.value).color)
+                mutableStateOf(appTheme.color)
             }
 
             Row(
@@ -226,7 +219,7 @@ fun MainAppSettings(userPreferences: UserPreferences) {
                     selectedColor,
                     (onColorSelected as (Color?) -> Unit).apply {
                         coroutineScope.launch {
-                            userPreferences.saveAppTheme(getAppThemeValueFromColor(selectedColor))
+                            userPreferences.saveAppTheme(appTheme.getColor(selectedColor))
                         }
                     },
                     modifier = Modifier.align(Alignment.CenterVertically)

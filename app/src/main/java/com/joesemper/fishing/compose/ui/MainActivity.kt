@@ -36,6 +36,7 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.login.LoginScreen
+import com.joesemper.fishing.compose.ui.theme.AppThemeValues
 import com.joesemper.fishing.compose.ui.theme.FishingNotesTheme
 import com.joesemper.fishing.compose.viewmodels.MainViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
@@ -77,7 +78,7 @@ class MainActivity : ComponentActivity() {
         val userStateFlow: StateFlow<BaseViewState> = viewModel.subscribe()
 
         val userPreferences: UserPreferences = get()
-        var appTheme: String? = null
+        var appTheme: AppThemeValues? = null
 
         lifecycleScope.launchWhenStarted {
             userPreferences.appTheme.collect {
