@@ -96,7 +96,8 @@ fun MapScaffold(
 @Composable
 fun MyLocationButton(
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    lastKnownLocation: MutableState<LatLng?>,
+    onClick: () -> Unit,
 ) {
     Card(
         shape = CircleShape,
@@ -108,7 +109,11 @@ fun MyLocationButton(
                 .fillMaxSize(),
             onClick = onClick
         ) {
-            Icon(Icons.Default.MyLocation, stringResource(R.string.my_location))
+            Icon(
+                Icons.Default.MyLocation, stringResource(R.string.my_location),
+                tint = if (lastKnownLocation.value == null) Color.Red
+                else LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+            )
         }
     }
 }
@@ -243,8 +248,10 @@ fun MapFilterButton(
                 .padding(8.dp)
                 .fillMaxSize(),
             onCheckedChange = { onCLick(it) }) {
-            Icon(Icons.Default.Visibility, Icons.Default.Visibility.name,
-                tint = color.value)
+            Icon(
+                Icons.Default.Visibility, Icons.Default.Visibility.name,
+                tint = color.value
+            )
         }
     }
 }
