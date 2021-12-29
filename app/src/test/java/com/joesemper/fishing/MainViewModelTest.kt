@@ -58,7 +58,7 @@ class MainViewModelTest {
     @Test
     fun coroutines_stateFlowHasSuccessValue() {
         testCoroutineRule.runBlockingTest {
-            val user = User(userId = "1", isAnonymous = true, userPic = "1")
+            val user = User(uid = "1", isAnonymous = true, photoUrl = "1")
 
             Mockito.`when`(repository.currentUser).thenReturn(
                 flow {
@@ -75,7 +75,7 @@ class MainViewModelTest {
     @Test
     fun coroutines_stateFlowHasCorrectSuccessValue() {
         testCoroutineRule.runBlockingTest {
-            val user = User(userId = "1", isAnonymous = true, userPic = "1")
+            val user = User(uid = "1", isAnonymous = true, photoUrl = "1")
 
             Mockito.`when`(repository.currentUser).thenReturn(
                 flowOf(user)
@@ -92,7 +92,7 @@ class MainViewModelTest {
     @Test
     fun coroutines_repositoryCurrentUserCalledOnce() {
         testCoroutineRule.runBlockingTest {
-            val user = User(userId = "1", isAnonymous = true, userPic = "1")
+            val user = User(uid = "1", isAnonymous = true, photoUrl = "1")
 
             Mockito.`when`(repository.currentUser).thenReturn(
                 flowOf(user)

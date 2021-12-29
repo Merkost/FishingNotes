@@ -244,6 +244,7 @@
     <string name="no_photos_added">No photos added</string>
     <string name="loading">Загрузка. Пожалуйста, подождите</string>
     <string name="edit_note">Edit note</string>
+    <string name="unable_to_get_location">Не удается получить ваше местоположение. Проверьте, что на устройстве включен GPS</string>
 
 
 </resources>

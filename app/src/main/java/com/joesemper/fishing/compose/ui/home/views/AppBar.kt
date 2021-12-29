@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.joesemper.fishing.R
 
@@ -16,11 +17,25 @@ import com.joesemper.fishing.R
 fun DefaultAppBar(
     modifier: Modifier = Modifier,
     navIcon: ImageVector = Icons.Default.ArrowBack,
-    onNavClick: () -> Unit,
+    onNavClick: (() -> Unit)? = null,
     title: String,
     subtitle: String? = null,
+    elevation: Dp = 4.dp,
     actions: @Composable() (RowScope.() -> Unit) = {}
+
 ) {
+    var navBack: @Composable (() -> Unit)? = null
+    if (onNavClick != null) {
+        navBack = {
+            IconButton(onClick = onNavClick) {
+                Icon(
+                    imageVector = navIcon,
+                    contentDescription = stringResource(R.string.back)
+                )
+            }
+        }
+    }
+
     TopAppBar(
         modifier = modifier,
         title = {
@@ -32,19 +47,10 @@ fun DefaultAppBar(
                         textColor = MaterialTheme.colors.onPrimary
                     )
                 }
-
-            }
-
-        },
-        navigationIcon = {
-            IconButton(onClick = { onNavClick() }) {
-                Icon(
-                    imageVector = navIcon,
-                    contentDescription = stringResource(R.string.back)
-                )
             }
         },
-        elevation = 4.dp,
+        navigationIcon = navBack,
+        elevation = elevation,
         actions = actions
     )
 }

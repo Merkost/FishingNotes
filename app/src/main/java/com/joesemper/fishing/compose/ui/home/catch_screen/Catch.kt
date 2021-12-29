@@ -32,8 +32,6 @@ import com.joesemper.fishing.compose.ui.home.notes.ItemUserPlace
 import com.joesemper.fishing.compose.ui.home.views.*
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
-import com.joesemper.fishing.compose.ui.home.weather.getTemperature
-import com.joesemper.fishing.compose.ui.home.weather.getTemperatureNameFromUnit
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserCatchViewModel
 import com.joesemper.fishing.model.entity.common.Progress
@@ -357,7 +355,7 @@ fun CatchWeatherView(
 
     val weatherPrefs: WeatherPreferences = get()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
-    val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
+    val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
 
     DefaultCard(
         modifier = modifier
@@ -403,10 +401,8 @@ fun CatchWeatherView(
 
                 HeaderText(
                     modifier = Modifier.padding(horizontal = 2.dp),
-                    text = getTemperature(
-                        catch.weatherTemperature,
-                        TemperatureValues.valueOf(temperatureUnit)
-                    ) + getTemperatureNameFromUnit(temperatureUnit)
+                    text = temperatureUnit.getTemperature(catch.weatherTemperature)
+                            + stringResource(temperatureUnit.stringRes)
                 )
             }
 

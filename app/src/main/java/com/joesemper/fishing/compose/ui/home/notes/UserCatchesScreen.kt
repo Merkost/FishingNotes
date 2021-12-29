@@ -15,13 +15,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.datastore.NotesPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.utils.CatchesSortValues
+import com.joesemper.fishing.compose.ui.utils.PlacesSortValues
 import com.joesemper.fishing.domain.UserCatchesViewModel
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.utils.time.toDateTextMonth
+import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalFoundationApi
@@ -31,14 +34,18 @@ fun UserCatchesScreen(
     navController: NavController,
     viewModel: UserCatchesViewModel = getViewModel()
 ) {
+    val notesPreferences: NotesPreferences = get()
+    val catchesSortValue by notesPreferences.catchesSortValue
+        .collectAsState(CatchesSortValues.Default)
+
     Scaffold(backgroundColor = Color.Transparent) {
         val catches by viewModel.currentContent.collectAsState()
         Crossfade(catches) { animatedUiState ->
             if (animatedUiState != null) {
                 UserCatches(
-                    catches = animatedUiState,
+                    catches = catchesSortValue.sort(animatedUiState),
                     userCatchClicked = { catch -> onCatchItemClick(catch, navController) },
-                    sortValue = CatchesSortValues.TimeAsc.name
+                    sortValue = catchesSortValue
                 )
             }
         }
@@ -52,7 +59,7 @@ fun UserCatchesScreen(
 fun UserCatches(
     modifier: Modifier = Modifier,
     catches: List<UserCatch>,
-    sortValue: String,
+    sortValue: CatchesSortValues,
     userCatchClicked: (UserCatch) -> Unit,
 
     ) {
@@ -60,7 +67,7 @@ fun UserCatches(
         when {
             catches.isNotEmpty() -> {
                 when(sortValue) {
-                    CatchesSortValues.TimeAsc.name, CatchesSortValues.TimeDesc.name -> {
+                    CatchesSortValues.TimeAsc, CatchesSortValues.TimeDesc -> {
                         getDatesList(catches).forEach { catchDate ->
                             stickyHeader {
                                 ItemDate(text = catchDate)

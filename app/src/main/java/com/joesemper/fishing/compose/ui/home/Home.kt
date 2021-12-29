@@ -65,6 +65,7 @@ import kotlinx.coroutines.InternalCoroutinesApi
 fun NavGraphBuilder.addHomeGraph(
     navController: NavController,
     modifier: Modifier = Modifier,
+    upPress: () -> Unit,
 ) {
     composable(
         HomeSections.MAP.route,
@@ -76,7 +77,7 @@ fun NavGraphBuilder.addHomeGraph(
         MapScreen(modifier, navController, addPlace)
     }
     composable(HomeSections.NOTES.route) { from ->
-        Notes(modifier, navController)
+        Notes(modifier, navController, upPress)
     }
     composable(HomeSections.WEATHER.route) { from ->
         WeatherScreen(modifier, navController)

@@ -232,9 +232,9 @@
     <string name="marker_visibility_change_success">Видимость места успешно сохранена</string>
     <string name="settings_main">Основные настройки</string>
     <string name="fast_fab_description">Удерживайте кнопку добавления места на карте, чтобы быстро сохранить ваше текущее местоположение</string>
-    <string name="settings_weather">Weather settings</string>
+    <string name="settings_weather">Настройки погоды</string>
     <string name="settings_about">О приложении</string>
-    <string name="current_app_version">"Current version: "</string>
+    <string name="current_app_version">"Текущая версия: "</string>
     <string name="sort">Сортировка</string>
     <string name="default_word">По умолчанию</string>
     <string name="time_asc">Время: по возрастанию</string>
@@ -244,6 +244,7 @@
 
     <string name="photos_not_available">No Internet connection\nPhotos not available</string>
     <string name="no_photos_added">No photos added</string>
+    <string name="unable_to_get_location">Не удается получить ваше местоположение. Проверьте, что на устройстве включен GPS</string>
     <string name="loading">Loading. Please wait</string>
     <string name="edit_note">Edit note</string>
 

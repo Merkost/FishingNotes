@@ -24,12 +24,28 @@ fun MyCardNoPadding(content: @Composable () -> Unit) {
 
 @Composable
 fun MyCard(
-    shape: CornerBasedShape = RoundedCornerShape(8.dp), modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
+    shape: CornerBasedShape = RoundedCornerShape(8.dp),
     content: @Composable () -> Unit
 ) {
     Card(
         elevation = 8.dp, shape = shape,
         modifier = modifier, content = content
+    )
+}
+
+@ExperimentalMaterialApi
+@Composable
+fun MyClickableCard(
+    modifier: Modifier = Modifier,
+    shape: CornerBasedShape = RoundedCornerShape(8.dp),
+    onClick: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    Card(
+        elevation = 8.dp, shape = shape,
+        modifier = modifier, content = content,
+        onClick = onClick
     )
 }
 

@@ -1,7 +1,7 @@
 package com.joesemper.fishing.compose.ui.home.notes
 
-import android.widget.Toast
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
@@ -12,12 +12,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.*
@@ -51,6 +53,7 @@ enum class BottomSheetScreen {
 fun Notes(
     modifier: Modifier = Modifier,
     navController: NavController,
+    upPress: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val notesPreferences: NotesPreferences = get()
@@ -58,7 +61,8 @@ fun Notes(
     val pagerState = rememberPagerState(0)
 
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    var bottomSheetScreen by remember { mutableStateOf(BottomSheetScreen.Filter) }
+    var bottomSheetScreen by remember { mutableStateOf(BottomSheetScreen.Sort) }
+    val shouldShowBlur = remember { mutableStateOf(false) }
 
     ModalBottomSheetLayout(
         sheetState = bottomState,
@@ -72,31 +76,14 @@ fun Notes(
         }) {
         Scaffold(
             topBar = {
-                DefaultAppBar(
-                    onNavClick = { navController.popBackStack() },
-                    title = stringResource(id = R.string.notes),
-                    actions = {
-                        Row {
-                            IconButton(onClick = {
-                                if (!pagerState.isScrollInProgress) {
-                                    bottomSheetScreen = BottomSheetScreen.Sort
-                                    coroutineScope.launch { bottomState.show() }
-                                }
-                            }) { Icon(Icons.Default.Sort, Icons.Default.Sort.name) }
-
-                            //TODO: Add filters
-                            /*IconButton(onClick = {
-                                if (!pagerState.isScrollInProgress) {
-                                    bottomSheetScreen = BottomSheetScreen.Filter
-                                    coroutineScope.launch { bottomState.show() }
-                                }
-                            }) { Icon(Icons.Default.FilterAlt, Icons.Default.FilterAlt.name) }*/
-                        }
-                    }
-                )
+                NotesAppBar(pagerState) { newSheetState ->
+                    bottomSheetScreen = newSheetState
+                    coroutineScope.launch { bottomState.show() }
+                }
             },
             floatingActionButton = {
                 FabWithMenu(
+                    modifier = Modifier.padding(bottom = 20.dp).zIndex(5f),
                     items = listOf(
                         FabMenuItem(
                             icon = R.drawable.ic_add_catch,
@@ -106,17 +93,52 @@ fun Notes(
                             icon = R.drawable.ic_baseline_add_location_24,
                             onClick = { onAddNewPlaceClick(navController) }
                         )
-                    )
+                    ), shouldShowBlur
                 )
             },
         ) {
+            AnimatedVisibility(shouldShowBlur.value,
+                modifier = Modifier.zIndex(4f).fillMaxSize(),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Surface(color = Color.Black.copy(0.5f)) { }
+            }
             Column() {
                 Tabs(tabs = tabs, pagerState = pagerState)
                 TabsContent(tabs = tabs, pagerState = pagerState, navController)
             }
-
         }
     }
+}
+
+@ExperimentalPagerApi
+@Composable
+fun NotesAppBar(
+    pagerState: PagerState,
+    openModalBottomSheet: (BottomSheetScreen) -> Unit
+) {
+
+    DefaultAppBar(
+        title = stringResource(id = R.string.notes),
+        actions = {
+            Row {
+                IconButton(onClick = {
+                    if (!pagerState.isScrollInProgress) {
+                        openModalBottomSheet(BottomSheetScreen.Sort)
+                    }
+                }) { Icon(Icons.Default.Sort, Icons.Default.Sort.name) }
+
+                //TODO: Add filters
+                /*IconButton(onClick = {
+                    if (!pagerState.isScrollInProgress) {
+                        bottomSheetScreen = BottomSheetScreen.Filter
+                        coroutineScope.launch { bottomState.show() }
+                    }
+                }) { Icon(Icons.Default.FilterAlt, Icons.Default.FilterAlt.name) }*/
+            }
+        }
+    )
 }
 
 @ExperimentalPagerApi
@@ -127,9 +149,9 @@ fun NotesModalBottomSheet(
     notesPreferences: NotesPreferences
 ) {
     val currentPlacesSort = notesPreferences.placesSortValue
-        .collectAsState(PlacesSortValues.Default.name)
-    val currentCatchesSort = notesPreferences.placesSortValue
-        .collectAsState(CatchesSortValues.Default.name)
+        .collectAsState(PlacesSortValues.Default)
+    val currentCatchesSort = notesPreferences.catchesSortValue
+        .collectAsState(CatchesSortValues.Default)
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -139,12 +161,12 @@ fun NotesModalBottomSheet(
                 BottomSheetScreen.Sort -> {
                     PlacesSort(currentPlacesSort) { newValue ->
                         coroutineScope.launch {
-                            notesPreferences.savePlacesSortValue(newValue.name)
+                            notesPreferences.savePlacesSortValue(newValue)
                         }
                     }
                 }
                 BottomSheetScreen.Filter -> {
-                    Text("Not yet implemented")
+                    /*Text("Not yet implemented")*/
                 }
             }
         }
@@ -153,12 +175,12 @@ fun NotesModalBottomSheet(
                 BottomSheetScreen.Sort -> {
                     CatchesSort(currentCatchesSort) { newValue ->
                         coroutineScope.launch {
-                            notesPreferences.saveCatchesSortValue(newValue.name)
+                            notesPreferences.saveCatchesSortValue(newValue)
                         }
                     }
                 }
                 BottomSheetScreen.Filter -> {
-                    Text("Not yet implemented")
+                    /*Text("Not yet implemented")*/
                 }
             }
         }
@@ -167,7 +189,7 @@ fun NotesModalBottomSheet(
 
 @Composable
 fun PlacesSort(
-    currentSort: State<String>,
+    currentSort: State<PlacesSortValues>,
     onSelectedValue: (placesSore: PlacesSortValues) -> Unit
 ) {
 
@@ -176,9 +198,7 @@ fun PlacesSort(
 
     val (selectedOption, onOptionSelected) = remember {
         mutableStateOf(
-            PlacesSortValues.valueOf(
-                currentSort.value
-            )
+            currentSort.value
         )
     }
 
@@ -206,8 +226,6 @@ fun PlacesSort(
                     onClick = {
                         onOptionSelected(placesSortValue)
                         onSelectedValue(placesSortValue)
-                        Toast.makeText(context, placesSortValue.name, Toast.LENGTH_LONG)
-                            .show()
                     }
                 )
                 Text(
@@ -223,7 +241,7 @@ fun PlacesSort(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CatchesSort(
-    currentSort: State<String>,
+    currentSort: State<CatchesSortValues>,
     onSelectedValue: (catchesSort: CatchesSortValues) -> Unit
 ) {
 
@@ -232,9 +250,7 @@ fun CatchesSort(
 
     val (selectedOption, onOptionSelected) = remember {
         mutableStateOf(
-            CatchesSortValues.valueOf(
-                currentSort.value
-            )
+            currentSort.value
         )
     }
 
@@ -262,8 +278,6 @@ fun CatchesSort(
                     onClick = {
                         onOptionSelected(catchesSortValue)
                         onSelectedValue(catchesSortValue)
-                        Toast.makeText(context, catchesSortValue.name, Toast.LENGTH_LONG)
-                            .show()
                     }
                 )
                 Text(

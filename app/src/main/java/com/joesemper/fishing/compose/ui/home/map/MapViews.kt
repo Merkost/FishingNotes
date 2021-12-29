@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.GpsOff
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.runtime.*
@@ -37,7 +38,10 @@ import com.airbnb.lottie.compose.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.datastore.UserPreferences
+import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.views.DefaultDialog
+import com.joesemper.fishing.compose.ui.theme.RedGoogleChrome
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.compose.ui.theme.supportTextColor
 import com.joesemper.fishing.compose.ui.utils.currentFraction
@@ -96,8 +100,29 @@ fun MapScaffold(
 @Composable
 fun MyLocationButton(
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    lastKnownLocation: MutableState<LatLng?>,
+    userPreferences: UserPreferences,
+    onClick: () -> Unit,
 ) {
+
+    var locationDialogIsShowing by remember { mutableStateOf(false) }
+    val shouldShowPermissions by userPreferences.shouldShowLocationPermission.collectAsState(false)
+
+    if (locationDialogIsShowing) {
+        if (shouldShowPermissions) {
+            LocationPermissionDialog(userPreferences = userPreferences) {
+                locationDialogIsShowing = false
+            }
+        } else SnackbarManager.showMessage(R.string.location_permission_denied)
+    }
+
+    val color = animateColorAsState(
+        when {
+            !shouldShowPermissions || lastKnownLocation.value == null -> { RedGoogleChrome }
+            else -> { LocalContentColor.current.copy(alpha = LocalContentAlpha.current) }
+        }
+    )
+
     Card(
         shape = CircleShape,
         modifier = modifier.size(40.dp)
@@ -106,9 +131,17 @@ fun MyLocationButton(
             modifier = Modifier
                 .padding(8.dp)
                 .fillMaxSize(),
-            onClick = onClick
+            onClick = {
+                if (lastKnownLocation.value == null) locationDialogIsShowing = true
+                else onClick()
+            }
         ) {
-            Icon(Icons.Default.MyLocation, stringResource(R.string.my_location))
+            Icon(
+                if (!shouldShowPermissions) Icons.Default.GpsOff
+                    else Icons.Default.MyLocation,
+                stringResource(R.string.my_location),
+                tint = color.value
+            )
         }
     }
 }
@@ -243,8 +276,10 @@ fun MapFilterButton(
                 .padding(8.dp)
                 .fillMaxSize(),
             onCheckedChange = { onCLick(it) }) {
-            Icon(Icons.Default.Visibility, Icons.Default.Visibility.name,
-                tint = color.value)
+            Icon(
+                Icons.Default.Visibility, Icons.Default.Visibility.name,
+                tint = color.value
+            )
         }
     }
 }

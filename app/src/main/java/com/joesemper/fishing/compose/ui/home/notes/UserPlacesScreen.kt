@@ -19,7 +19,6 @@ import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.utils.PlacesSortValues
-import com.joesemper.fishing.compose.ui.utils.myPlacesSort
 import com.joesemper.fishing.domain.UserPlacesViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import org.koin.androidx.compose.get
@@ -33,14 +32,14 @@ fun UserPlacesScreen(
 ) {
     val notesPreferences: NotesPreferences = get()
     val placesSortValue by notesPreferences.placesSortValue
-        .collectAsState(PlacesSortValues.Default.name)
+        .collectAsState(PlacesSortValues.Default)
 
     Scaffold(backgroundColor = Color.Transparent) {
         val places: List<UserMapMarker>? by viewModel.currentContent.collectAsState()
         Crossfade(places) { animatedUiState ->
             if (animatedUiState != null) {
                 UserPlaces(
-                    places = animatedUiState.myPlacesSort(placesSortValue),
+                    places = placesSortValue.sort(animatedUiState),
                     userPlaceClicked = { userMarker ->
                         onPlaceItemClick(userMarker, navController)
                     }

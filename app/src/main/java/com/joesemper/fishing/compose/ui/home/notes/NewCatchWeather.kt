@@ -21,8 +21,6 @@ import com.joesemper.fishing.compose.ui.home.new_catch.PickWeatherIconDialog
 import com.joesemper.fishing.compose.ui.home.views.SecondaryText
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
-import com.joesemper.fishing.compose.ui.home.weather.getCelciusTemperature
-import com.joesemper.fishing.compose.ui.home.weather.getTemperatureNameFromUnit
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
@@ -42,7 +40,7 @@ fun WeatherLayout(
 ) {
     val calendar = Calendar.getInstance()
     val weatherSettings: WeatherPreferences = get()
-    val temperatureSettings by weatherSettings.getTemperatureUnit.collectAsState(TemperatureValues.C.name)
+    val temperatureSettings by weatherSettings.getTemperatureUnit.collectAsState(TemperatureValues.C)
     val pressureUnit by weatherSettings.getPressureUnit.collectAsState(PressureValues.mmHg)
 
     weatherForecast?.let { weather ->
@@ -78,7 +76,7 @@ fun WeatherLayout(
         }.also {
             it.value.toFloatOrNull()?.let { floatValue ->
                 viewModel.weatherToSave.value.temperatureInC =
-                    getCelciusTemperature(floatValue, temperatureSettings)
+                temperatureSettings.getCelciusTemperature(floatValue)
             }
         }
 
@@ -154,7 +152,7 @@ fun WeatherLayout(
                             )
                         },
                         trailingIcon = {
-                            Text(text = getTemperatureNameFromUnit(temperatureSettings))
+                            Text(text = stringResource(temperatureSettings.stringRes))
                         },
                         onValueChange = { newValue ->
                             temperature = newValue

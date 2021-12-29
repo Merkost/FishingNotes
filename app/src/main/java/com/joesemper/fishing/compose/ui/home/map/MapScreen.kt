@@ -25,7 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
@@ -57,7 +56,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
-import org.koin.core.definition.OnCloseCallback
 
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
@@ -91,6 +89,7 @@ fun MapScreen(
     var cameraMoveState: CameraMoveState by remember {
         mutableStateOf(CameraMoveState.MoveFinish)
     }
+
 
     val pointerState: MutableState<PointerState> = remember {
         mutableStateOf(PointerState.HideMarker)
@@ -216,12 +215,6 @@ fun MapScreen(
 
         }
     ) {
-
-        val shouldShowPermissions by userPreferences.shouldShowLocationPermission.collectAsState(
-            false
-        )
-        if (shouldShowPermissions) LocationPermissionDialog(userPreferences = userPreferences)
-
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (mapLayout, addMarkerFragment, mapMyLocationButton, mapLayersButton,
                 mapFilterButton, mapLayersView, pointer) = createRefs()
@@ -261,7 +254,8 @@ fun MapScreen(
                     .alpha(0f)
                     .clickable { mapLayersSelection.value = false }, color = Color.White
             ) { }
-            AnimatedVisibility(mapLayersSelection.value,
+            AnimatedVisibility(
+                mapLayersSelection.value,
                 enter = expandIn(expandFrom = Alignment.TopStart) + fadeIn(),
                 exit = shrinkOut(
                     shrinkTowards = Alignment.TopStart,
@@ -288,21 +282,20 @@ fun MapScreen(
                 }
             }
 
-            AnimatedVisibility(
+
+            MyLocationButton(
                 modifier = modifier.constrainAs(mapMyLocationButton) {
                     top.linkTo(parent.top, 16.dp)
                     absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                 },
-                visible = (viewModel.lastKnownLocation.value != null)
+                lastKnownLocation = viewModel.lastKnownLocation,
+                userPreferences = userPreferences,
             ) {
-                MyLocationButton(
-                    onClick = {
-                        viewModel.lastKnownLocation.value?.let {
-                            viewModel.lastMapCameraPosition.value = getCameraPosition(it)
-                        }
-                    }
-                )
+                viewModel.lastKnownLocation.value?.let {
+                    viewModel.lastMapCameraPosition.value = getCameraPosition(it)
+                }
             }
+
 
             AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode,
                 modifier = Modifier.constrainAs(pointer) {
@@ -496,9 +489,6 @@ fun LocationPermissionDialog(
                     },
                     onPositiveClick = {
                         isDialogOpen = false
-                        coroutineScope.launch {
-                            userPreferences.saveLocationPermissionStatus(true)
-                        }
                         permissionsState.launchMultiplePermissionRequest()
                         onCloseCallback()
                     },

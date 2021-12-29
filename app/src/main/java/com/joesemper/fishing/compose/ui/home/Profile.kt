@@ -12,7 +12,6 @@ import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Settings
@@ -38,10 +37,13 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import com.airbnb.lottie.compose.*
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.bar_chart.BarChart
 import com.joesemper.fishing.compose.bar_chart.BarChartDataModel
 import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.home.views.DefaultAppBar
 import com.joesemper.fishing.compose.ui.home.views.DefaultCardClickable
 import com.joesemper.fishing.compose.ui.home.views.DefaultDialog
 import com.joesemper.fishing.compose.ui.home.views.SecondaryText
@@ -49,6 +51,7 @@ import com.joesemper.fishing.domain.UserViewModel
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.model.entity.content.UserCatch
+import com.joesemper.fishing.utils.time.toDateTextMonth
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -68,6 +71,9 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
     val user by viewModel.currentUser.collectAsState()
     val userPlacesNum by viewModel.currentPlaces.collectAsState()
     val userCatchesNum by viewModel.currentCatches.collectAsState()
+
+
+    //val firebaseUser = Firebase.auth.currentUser
 
     val imgSize: Dp = 120.dp
     val bgHeight: Dp = 180.dp
@@ -134,17 +140,26 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
                     verticalArrangement = Arrangement.Center,
                 ) {
 
-//                    ColumnButton(
-//                        Icons.Default.Settings,
-//                        stringResource(R.string.settings)
-//                    ) { navController.navigate(MainDestinations.SETTINGS) }
-                    userPlacesNum?.let {
+                    OutlinedTextField(value = /*user?.login ?: */"@fisherman",
+                        label = { Text(text = "Login") },
+                        readOnly = true,
+                        onValueChange = {})
+                    OutlinedTextField(value = user?.email ?: "",
+                        label = { Text(text = "Email") },
+                        readOnly = true,
+                        onValueChange = {})
+                    OutlinedTextField(value = user?.registerDate?.toDateTextMonth() ?: "",
+                        label = { Text(text = "Register date") },
+                        readOnly = true,
+                        onValueChange = {})
+
+                    /*userPlacesNum?.let {
                         if (it.isEmpty()) {
                             NoPlacesStats()
                         } else {
                             CatchesChart()
                         }
-                    }
+                    }*/
                 }
             }
 
@@ -227,7 +242,7 @@ fun UserText(user: User?, modifier: Modifier) {
             modifier = modifier,
             text = when (user.isAnonymous) {
                 true -> stringResource(R.string.anonymous)
-                false -> user.userName
+                false -> user.displayName
             }, style = MaterialTheme.typography.h6,
             textAlign = TextAlign.Center
         )
@@ -454,8 +469,8 @@ fun UserImage(user: User?, imgSize: Dp, modifier: Modifier = Modifier) {
 
 
             CoilImage(
-                imageModel = if (user.userPic.isNullOrEmpty() or user.isAnonymous)
-                    painterResource(R.drawable.ic_fisher) else user.userPic,
+                imageModel = if (user.photoUrl.isNullOrEmpty() or user.isAnonymous)
+                    painterResource(R.drawable.ic_fisher) else user.photoUrl,
                 contentScale = ContentScale.Crop,
                 shimmerParams = ShimmerParams(
                     baseColor = Color.LightGray,
@@ -483,16 +498,8 @@ fun UserImage(user: User?, imgSize: Dp, modifier: Modifier = Modifier) {
 @Composable
 fun ProfileAppBar(navController: NavController, viewModel: UserViewModel) {
     val dialogOnLogout = rememberSaveable { mutableStateOf(false) }
-    TopAppBar(
-        title = { Text(text = stringResource(R.string.profile)) },
-        navigationIcon = {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(
-                    imageVector = Icons.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.back)
-                )
-            }
-        },
+    DefaultAppBar(
+        title = stringResource(R.string.profile),
         actions = {
             IconButton(onClick = { dialogOnLogout.value = true }) {
                 Icon(
@@ -504,8 +511,7 @@ fun ProfileAppBar(navController: NavController, viewModel: UserViewModel) {
                 Icon(Icons.Default.Settings, stringResource(R.string.settings))
             }
         },
-        elevation = 0.dp,
-        backgroundColor = MaterialTheme.colors.primary
+        elevation = 0.dp
     )
     if (dialogOnLogout.value) LogoutDialog(dialogOnLogout, navController)
 }
