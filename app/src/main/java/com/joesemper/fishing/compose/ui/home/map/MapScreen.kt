@@ -77,9 +77,6 @@ fun MapScreen(
 
     val scaffoldState = rememberBottomSheetScaffoldState()
     val dialogAddPlaceIsShowing = remember { mutableStateOf(false) }
-    var locationDialogIsShowing by remember { mutableStateOf(false) }
-    val shouldShowPermissions by userPreferences.shouldShowLocationPermission.collectAsState(false)
-    if (shouldShowPermissions) locationDialogIsShowing = true
 
     val mapLayersSelection = rememberSaveable { mutableStateOf(false) }
     val mapType = rememberSaveable { mutableStateOf(MapTypes.roadmap) }
@@ -218,13 +215,6 @@ fun MapScreen(
 
         }
     ) {
-
-        if (locationDialogIsShowing) {
-            LocationPermissionDialog(userPreferences = userPreferences) {
-                locationDialogIsShowing = false
-            }
-        }
-
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (mapLayout, addMarkerFragment, mapMyLocationButton, mapLayersButton,
                 mapFilterButton, mapLayersView, pointer) = createRefs()
@@ -299,12 +289,12 @@ fun MapScreen(
                     absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                 },
                 lastKnownLocation = viewModel.lastKnownLocation,
-                onClick = {
-                    viewModel.lastKnownLocation.value?.let {
-                        viewModel.lastMapCameraPosition.value = getCameraPosition(it)
-                    } ?: run { locationDialogIsShowing = true }
+                userPreferences = userPreferences,
+            ) {
+                viewModel.lastKnownLocation.value?.let {
+                    viewModel.lastMapCameraPosition.value = getCameraPosition(it)
                 }
-            )
+            }
 
 
             AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode,

@@ -243,6 +243,7 @@
     <string name="photos_not_available">No Internet connection\nPhotos not available</string>
     <string name="no_photos_added">No photos added</string>
     <string name="loading">Loading</string>
+    <string name="unable_to_get_location">Не удается получить ваше местоположение. Проверьте, что на устройстве включен GPS</string>
 
 
 </resources>

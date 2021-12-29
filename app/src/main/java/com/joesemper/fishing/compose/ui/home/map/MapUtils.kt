@@ -31,6 +31,7 @@ import com.google.android.libraries.maps.model.LatLng
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.MainActivity
+import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.utils.showToast
@@ -201,8 +202,10 @@ fun getCurrentLocationFlow(
 
             } catch (e: Exception) {
                 Log.d("MAP", "Unable to get location")
-                Toast.makeText(context, R.string.cant_get_current_location, Toast.LENGTH_SHORT)
-                    .show()
+                SnackbarManager.showMessage(R.string.unable_to_get_location)
+                /*Toast.makeText(context, R.string.cant_get_current_location, Toast.LENGTH_SHORT)
+                    .show()*/
+                //TODO: check GPS switch status
             }
 
         }
