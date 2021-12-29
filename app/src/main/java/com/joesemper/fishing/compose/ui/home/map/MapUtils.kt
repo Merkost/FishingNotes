@@ -1,10 +1,14 @@
 package com.joesemper.fishing.compose.ui.home.map
 
 import android.Manifest
+
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+
+import android.content.IntentSender
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -23,7 +27,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.*
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task
 import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.MapView
@@ -41,6 +50,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.net.URI.create
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
@@ -178,6 +188,8 @@ fun getCurrentLocationFlow(
     context: Context,
     permissionsState: MultiplePermissionsState,
 ) = callbackFlow {
+
+
     val fusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
 
@@ -199,13 +211,15 @@ fun getCurrentLocationFlow(
                         )
                     )
                 )
-
             } catch (e: Exception) {
-                Log.d("MAP", "Unable to get location")
-                SnackbarManager.showMessage(R.string.unable_to_get_location)
+                Log.d("MAP", "GPS is off")
+
+                checkGPSEnabled(context)
+
+                SnackbarManager.showMessage(R.string.gps_is_off)
                 /*Toast.makeText(context, R.string.cant_get_current_location, Toast.LENGTH_SHORT)
                     .show()*/
-                //TODO: check GPS switch status
+
             }
 
         }
@@ -213,6 +227,40 @@ fun getCurrentLocationFlow(
         trySend(LocationState.NoPermission)
     }
     awaitClose { }
+}
+
+private fun checkGPSEnabled(context: Context) {
+    val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    if (manager.isProviderEnabled(LocationManager.GPS_PROVIDER).not()) {
+        turnOnGPS(context)
+    } else SnackbarManager.showMessage(R.string.unable_to_get_location)
+}
+
+private fun turnOnGPS(context: Context) {
+    val request = LocationRequest.create().apply {
+        interval = 8000
+        fastestInterval = 5000
+        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+    }
+    val builder = LocationSettingsRequest.Builder().addLocationRequest(request)
+    val client: SettingsClient = LocationServices.getSettingsClient(context as MainActivity)
+    val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
+    task.addOnFailureListener { exception ->
+        if (exception is ResolvableApiException){
+            // Location settings are not satisfied, but this can be fixed
+            // by showing the user a dialog.
+            try {
+                // Show the dialog by calling startResolutionForResult(),
+                // and check the result in onActivityResult().
+                exception.startResolutionForResult(context as MainActivity,
+                    /*REQUEST_CHECK_SETTINGS*/12345)
+            } catch (sendEx: IntentSender.SendIntentException) {
+                // Ignore the error.
+            }
+        }
+    }.addOnSuccessListener {
+        //here GPS is On
+    }
 }
 
 @ExperimentalPermissionsApi

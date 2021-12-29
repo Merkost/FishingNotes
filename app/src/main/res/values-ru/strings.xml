@@ -246,5 +246,6 @@
     <string name="no_photos_added">No photos added</string>
     <string name="loading">Loading</string>
     <string name="unable_to_get_location">Не удается получить ваше местоположение. Проверьте, что на устройстве включен GPS</string>
+    <string name="gps_is_off">You need to turn on GPS on your device</string>
 
 </resources>
