@@ -10,7 +10,6 @@ import com.google.firebase.ktx.Firebase
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.repository.UserRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,12 +45,13 @@ class FirebaseUserRepositoryImpl(private val context: Context) : UserRepository 
         return with(firebaseUser) {
             User(
                 uid,
+                email = firebaseUser.email ?: "",
                 displayName ?: "Anonymous",
                 isAnonymous,
                 photoUrl.toString()
             )
         }
-        TODO("change name")
+        //TODO("change name")
     }
 
     override suspend fun addNewUser(user: User): StateFlow<Progress> {
@@ -59,7 +59,7 @@ class FirebaseUserRepositoryImpl(private val context: Context) : UserRepository 
         if (user.isAnonymous) {
             flow.emit(Progress.Complete)
         } else {
-            getUsersCollection().document(user.userId).set(user)
+            getUsersCollection().document(user.uid).set(user)
                 .addOnCompleteListener {
                     flow.tryEmit(Progress.Complete)
                 }
