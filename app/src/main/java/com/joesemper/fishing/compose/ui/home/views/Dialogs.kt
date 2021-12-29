@@ -11,7 +11,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.airbnb.lottie.compose.LottieAnimation
@@ -35,14 +34,10 @@ fun DefaultDialog(
     content: @Composable() (() -> Unit)? = null
 ) {
     Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false
-        )
+        onDismissRequest = onDismiss
     ) {
         DefaultCard(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .animateContentSize()
@@ -97,7 +92,7 @@ fun DefaultDialog(
                 if (neutralButtonText.isNotEmpty()) {
                     DefaultButton(
                         modifier = Modifier.constrainAs(neutralButton) {
-                            top.linkTo(positiveButton.top)
+                            top.linkTo(mainContent.bottom, 16.dp)
                             absoluteLeft.linkTo(parent.absoluteLeft)
                         },
                         text = neutralButtonText,
@@ -105,20 +100,32 @@ fun DefaultDialog(
                     )
                 }
 
-                DefaultButton(
-                    modifier = Modifier.constrainAs(positiveButton) {
-                        top.linkTo(mainContent.bottom, 16.dp)
-                        bottom.linkTo(parent.bottom)
-                        absoluteRight.linkTo(parent.absoluteRight)
-                    },
-                    text = positiveButtonText,
-                    onClick = onPositiveClick,
-                )
+                if (positiveButtonText.isNotEmpty()) {
+                    DefaultButtonFilled(
+                        modifier = Modifier.constrainAs(positiveButton) {
+                            top.linkTo(mainContent.bottom, 16.dp)
+                            bottom.linkTo(parent.bottom)
+                            absoluteRight.linkTo(parent.absoluteRight)
+                        },
+                        text = positiveButtonText,
+                        onClick = onPositiveClick,
+                    )
+                } else {
+                    Spacer(
+                        modifier = Modifier
+                            .size(0.dp)
+                            .constrainAs(positiveButton) {
+                                top.linkTo(mainContent.bottom, 16.dp)
+                                bottom.linkTo(parent.bottom)
+                                absoluteRight.linkTo(parent.absoluteRight)
+                            },
+                    )
+                }
 
                 if (negativeButtonText.isNotEmpty()) {
                     DefaultButton(
                         modifier = Modifier.constrainAs(negativeButton) {
-                            top.linkTo(positiveButton.top)
+                            top.linkTo(mainContent.bottom, 16.dp)
                             absoluteRight.linkTo(positiveButton.absoluteLeft, 8.dp)
                         },
                         text = negativeButtonText,
@@ -138,7 +145,7 @@ fun LoadingDialog() {
         primaryText = stringResource(R.string.loading),
         onDismiss = {}
     ) {
-        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.fish_loading))
+        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading_animation))
         Box(
             modifier = Modifier
                 .fillMaxWidth()

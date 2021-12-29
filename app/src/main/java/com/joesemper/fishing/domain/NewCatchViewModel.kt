@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
@@ -19,7 +18,6 @@ import com.joesemper.fishing.model.repository.app.CatchesRepository
 import com.joesemper.fishing.model.repository.app.MarkersRepository
 import com.joesemper.fishing.model.repository.app.WeatherRepository
 import com.joesemper.fishing.utils.time.toHours
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -58,7 +56,6 @@ class NewCatchViewModel(
     val moonPhase = mutableStateOf(0.0f)
 
     val images = mutableStateListOf<Uri>()
-        get() = field
 
     fun getWeather() {
         viewModelScope.launch {

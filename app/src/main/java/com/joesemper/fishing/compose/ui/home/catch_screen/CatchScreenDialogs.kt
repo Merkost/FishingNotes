@@ -7,7 +7,6 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -19,131 +18,272 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.core.net.toUri
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.Constants
-import com.joesemper.fishing.compose.ui.home.FishAmountAndWeightView
+import com.joesemper.fishing.compose.ui.home.advertising.showInterstitialAd
+import com.joesemper.fishing.compose.ui.home.new_catch.FishAmountAndWeightView
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
-import com.joesemper.fishing.compose.ui.home.views.DefaultDialog
-import com.joesemper.fishing.compose.ui.home.views.MaxCounterView
-import com.joesemper.fishing.compose.ui.home.views.PrimaryTextSmall
-import com.joesemper.fishing.compose.ui.home.views.SimpleOutlinedTextField
+import com.joesemper.fishing.compose.ui.home.views.*
 import com.joesemper.fishing.domain.UserCatchViewModel
-import com.joesemper.fishing.model.entity.content.UserCatch
+import com.joesemper.fishing.utils.Constants.MAX_PHOTOS
 
+
+sealed class BottomSheetCatchScreen() {
+    object EditFishTypeAndWeightScreen : BottomSheetCatchScreen()
+    object EditNoteScreen : BottomSheetCatchScreen()
+    object EditPhotosScreen : BottomSheetCatchScreen()
+    object EditWayOfFishingScreen : BottomSheetCatchScreen()
+}
+
+@ExperimentalPermissionsApi
+@ExperimentalAnimationApi
 @ExperimentalComposeUiApi
 @Composable
-fun FishTypeAmountAndWeightDialog(
-    catch: UserCatch,
-    dialogState: MutableState<Boolean>,
-    viewModel: UserCatchViewModel
+fun CatchModalBottomSheetContent(
+    currentScreen: BottomSheetCatchScreen,
+    viewModel: UserCatchViewModel,
+    onCloseBottomSheet: () -> Unit,
 ) {
+    val context = LocalContext.current
 
-    val fishType = remember { mutableStateOf(catch.fishType) }
-    val fishAmount = remember { mutableStateOf(catch.fishAmount.toString()) }
-    val fishWeight = remember { mutableStateOf(catch.fishWeight.toString()) }
-
-    DefaultDialog(
-        primaryText = stringResource(id = R.string.user_catch),
-        positiveButtonText = stringResource(id = R.string.save),
-        negativeButtonText = stringResource(id = R.string.cancel),
-        onNegativeClick = { dialogState.value = false },
-        onPositiveClick = {
-            viewModel.updateCatch(
-                data = mapOf(
-                    "fishType" to fishType.value,
-                    "fishAmount" to fishAmount.value.toInt(),
-                    "fishWeight" to fishWeight.value.toDouble()
-                )
+    when (currentScreen) {
+        BottomSheetCatchScreen.EditFishTypeAndWeightScreen -> {
+            FishTypeAmountAndWeightDialog(
+                viewModel = viewModel,
+                onCloseBottomSheet = onCloseBottomSheet
             )
-            dialogState.value = false
-        },
-        onDismiss = { dialogState.value = false },
-    ) {
+        }
 
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .fillMaxWidth()
-                .wrapContentHeight(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
-            SimpleOutlinedTextField(
-                textState = fishType,
-                label = stringResource(id = R.string.fish_species)
-            )
-            FishAmountAndWeightView(
-                amountState = fishAmount,
-                weightState = fishWeight
+        BottomSheetCatchScreen.EditNoteScreen -> {
+            EditNoteDialog(
+                note = viewModel.catch.value?.description ?: "",
+                onSaveNote = { note ->
+                    viewModel.updateCatch(data = mapOf("description" to note))
+                },
+                onCloseDialog = onCloseBottomSheet
             )
 
         }
+
+        BottomSheetCatchScreen.EditPhotosScreen -> {
+            AddPhotoDialog(
+                photos = viewModel.catch.value?.downloadPhotoLinks?.map { it.toUri() } ?: listOf(),
+                onSavePhotosClick = { newPhotos ->
+                    viewModel.updateCatchPhotos(newPhotos)
+                    if (newPhotos.find { !it.toString().startsWith("http") } != null) {
+                        showInterstitialAd(
+                            context = context,
+                            onAdLoaded = { }
+                        )
+                    }
+                },
+                onCloseBottomSheet = onCloseBottomSheet
+            )
+        }
+
+        BottomSheetCatchScreen.EditWayOfFishingScreen -> {
+            EditWayOfFishingDialog(
+                viewModel = viewModel,
+                onCloseBottomSheet = onCloseBottomSheet
+            )
+        }
+
     }
 }
 
 @ExperimentalComposeUiApi
 @Composable
-fun EditWayOfFishingDialog(
-    catch: UserCatch,
-    dialogState: MutableState<Boolean>,
-    viewModel: UserCatchViewModel
+fun FishTypeAmountAndWeightDialog(
+    viewModel: UserCatchViewModel,
+    onCloseBottomSheet: () -> Unit
 ) {
-    val rodState = remember { mutableStateOf(catch.fishingRodType) }
-    val baitState = remember { mutableStateOf(catch.fishingBait) }
-    val lureState = remember { mutableStateOf(catch.fishingLure) }
 
-    DefaultDialog(
-        primaryText = stringResource(id = R.string.way_of_fishing),
-        positiveButtonText = stringResource(id = R.string.save),
-        negativeButtonText = stringResource(id = R.string.cancel),
-        onNegativeClick = { dialogState.value = false },
-        onPositiveClick = {
-            viewModel.updateCatch(
-                data = mapOf(
-                    "fishingRodType" to rodState.value,
-                    "fishingBait" to baitState.value,
-                    "fishingLure" to lureState.value
-                )
-            )
-            dialogState.value = false
-        },
-        onDismiss = { dialogState.value = false },
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .animateContentSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    val fishType = remember { mutableStateOf("") }
+    val fishAmount = remember { mutableStateOf("") }
+    val fishWeight = remember { mutableStateOf("") }
 
-            SimpleOutlinedTextField(
-                textState = rodState,
-                label = stringResource(id = R.string.fish_rod),
-                singleLine = false
-            )
-            SimpleOutlinedTextField(
-                textState = baitState,
-                label = stringResource(id = R.string.bait),
-                singleLine = false
-            )
-            SimpleOutlinedTextField(
-                textState = lureState,
-                label = stringResource(id = R.string.lure),
-                singleLine = false
-            )
-
+    LaunchedEffect(key1 = viewModel.catch.value) {
+        viewModel.catch.value?.let {
+            fishType.value = it.fishType
+            fishAmount.value = it.fishAmount.toString()
+            fishWeight.value = it.fishWeight.toString()
         }
+    }
+
+    ConstraintLayout(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+            .fillMaxHeight(),
+    ) {
+
+        val (title, fish, amountAndWeight, saveButton, cancelButton) = createRefs()
+
+        PrimaryText(
+            modifier = Modifier.constrainAs(title) {
+                top.linkTo(parent.top)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+            },
+            text = stringResource(id = R.string.user_catch)
+        )
+
+        SimpleOutlinedTextField(
+            modifier = Modifier.constrainAs(fish) {
+                top.linkTo(title.bottom, 16.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+                width = Dimension.fillToConstraints
+            },
+            textState = fishType,
+            label = stringResource(id = R.string.fish_species)
+        )
+
+        FishAmountAndWeightView(
+            modifier = Modifier.constrainAs(amountAndWeight) {
+                top.linkTo(fish.bottom, 8.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+                width = Dimension.fillToConstraints
+            },
+            amountState = fishAmount,
+            weightState = fishWeight
+        )
+
+        DefaultButtonFilled(
+            modifier = Modifier.constrainAs(saveButton) {
+                top.linkTo(amountAndWeight.bottom, 16.dp)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            text = stringResource(id = R.string.save),
+            onClick = {
+                viewModel.updateCatch(
+                    data = mapOf(
+                        "fishType" to fishType.value,
+                        "fishAmount" to fishAmount.value.toInt(),
+                        "fishWeight" to fishWeight.value.toDouble()
+                    )
+                )
+                onCloseBottomSheet()
+            }
+        )
+
+        DefaultButton(
+            modifier = Modifier.constrainAs(cancelButton) {
+                top.linkTo(saveButton.top)
+                bottom.linkTo(saveButton.bottom)
+                absoluteRight.linkTo(saveButton.absoluteLeft, 8.dp)
+            },
+            text = stringResource(id = R.string.cancel),
+            onClick = { onCloseBottomSheet() }
+        )
+    }
+
+}
+
+@ExperimentalComposeUiApi
+@Composable
+fun EditWayOfFishingDialog(
+    viewModel: UserCatchViewModel,
+    onCloseBottomSheet: () -> Unit
+) {
+    val rod = remember { mutableStateOf("") }
+    val bait = remember { mutableStateOf("") }
+    val lure = remember { mutableStateOf("") }
+
+    LaunchedEffect(key1 = viewModel.catch.value) {
+        viewModel.catch.value?.let {
+            rod.value = it.fishingRodType
+            bait.value = it.fishingBait
+            lure.value = it.fishingLure
+        }
+    }
+
+    ConstraintLayout(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+            .fillMaxHeight()
+    ) {
+        val (title, rodField, baitField, lureField, saveButton, cancelButton) = createRefs()
+
+        PrimaryText(
+            modifier = Modifier.constrainAs(title) {
+                top.linkTo(parent.top)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+            },
+            text = stringResource(id = R.string.way_of_fishing)
+        )
+
+        SimpleOutlinedTextField(
+            modifier = Modifier.constrainAs(rodField) {
+                top.linkTo(title.bottom, 16.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+                width = Dimension.fillToConstraints
+            },
+            textState = rod,
+            label = stringResource(id = R.string.fish_rod),
+            singleLine = false
+        )
+
+        SimpleOutlinedTextField(
+            modifier = Modifier.constrainAs(baitField) {
+                top.linkTo(rodField.bottom, 8.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+                width = Dimension.fillToConstraints
+            },
+            textState = bait,
+            label = stringResource(id = R.string.bait),
+            singleLine = false
+        )
+
+        SimpleOutlinedTextField(
+            modifier = Modifier.constrainAs(lureField) {
+                top.linkTo(baitField.bottom, 8.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+                width = Dimension.fillToConstraints
+            },
+            textState = lure,
+            label = stringResource(id = R.string.lure),
+            singleLine = false
+        )
+
+        DefaultButtonFilled(
+            modifier = Modifier.constrainAs(saveButton) {
+                top.linkTo(lureField.bottom, 16.dp)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            text = stringResource(id = R.string.save),
+            onClick = {
+                viewModel.updateCatch(
+                    data = mapOf(
+                        "fishingRodType" to rod.value,
+                        "fishingBait" to bait.value,
+                        "fishingLure" to lure.value
+                    )
+                )
+                onCloseBottomSheet()
+            }
+        )
+
+        DefaultButton(
+            modifier = Modifier.constrainAs(cancelButton) {
+                top.linkTo(saveButton.top)
+                bottom.linkTo(saveButton.bottom)
+                absoluteRight.linkTo(saveButton.absoluteLeft, 8.dp)
+            },
+            text = stringResource(id = R.string.cancel),
+            onClick = { onCloseBottomSheet() }
+        )
+
     }
 }
 
@@ -151,39 +291,62 @@ fun EditWayOfFishingDialog(
 @Composable
 fun EditNoteDialog(
     note: String,
-    dialogState: MutableState<Boolean>,
-    onSaveNoteChange: (String) -> Unit
+    onSaveNote: (String) -> Unit,
+    onCloseDialog: () -> Unit
 ) {
     val noteState = remember { mutableStateOf(note) }
 
-    DefaultDialog(
-        primaryText = stringResource(id = R.string.note),
-        positiveButtonText = stringResource(id = R.string.save),
-        negativeButtonText = stringResource(id = R.string.cancel),
-        onNegativeClick = { dialogState.value = false },
-        onPositiveClick = {
-            onSaveNoteChange(noteState.value)
-            dialogState.value = false
-        },
-        onDismiss = { dialogState.value = false },
+    ConstraintLayout(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+            .fillMaxHeight()
     ) {
-        Column(
-            modifier = Modifier
+        val (title, editNote, saveButton, cancelButton) = createRefs()
 
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .animateContentSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
 
-            SimpleOutlinedTextField(
-                textState = noteState,
-                label = stringResource(id = R.string.note),
-                singleLine = false
-            )
+        PrimaryText(
+            modifier = Modifier.constrainAs(title) {
+                top.linkTo(parent.top)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+            },
+            text = stringResource(id = R.string.edit_note)
+        )
 
-        }
+        SimpleOutlinedTextField(
+            modifier = Modifier.constrainAs(editNote) {
+                top.linkTo(title.bottom, 16.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+                width = Dimension.fillToConstraints
+            },
+            textState = noteState,
+            label = stringResource(id = R.string.note),
+            singleLine = false
+        )
+
+        DefaultButtonFilled(
+            modifier = Modifier.constrainAs(saveButton) {
+                top.linkTo(editNote.bottom, 16.dp)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            text = stringResource(id = R.string.save),
+            onClick = {
+                onSaveNote(noteState.value)
+                onCloseDialog()
+            }
+        )
+
+        DefaultButton(
+            modifier = Modifier.constrainAs(cancelButton) {
+                top.linkTo(saveButton.top)
+                bottom.linkTo(saveButton.bottom)
+                absoluteRight.linkTo(saveButton.absoluteLeft, 8.dp)
+            },
+            text = stringResource(id = R.string.cancel),
+            onClick = { onCloseDialog() }
+        )
+
     }
 }
 
@@ -193,8 +356,8 @@ fun EditNoteDialog(
 @Composable
 fun AddPhotoDialog(
     photos: List<Uri>,
-    dialogState: MutableState<Boolean>,
-    onSavePhotosClick: (List<Uri>) -> Unit
+    onSavePhotosClick: (List<Uri>) -> Unit,
+    onCloseBottomSheet: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -206,12 +369,10 @@ fun AddPhotoDialog(
 
     val choosePhotoLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { value ->
-            if ((value.size + tempDialogPhotosState.size) > Constants.MAX_PHOTOS) {
-                tempDialogPhotosState.addAll(value.takeLast(tempDialogPhotosState.size-value.size))
+            if ((value.size + tempDialogPhotosState.size) > MAX_PHOTOS) {
                 Toast.makeText(context, "5 photos maximum allowed", Toast.LENGTH_SHORT).show()
-            } else {
-                tempDialogPhotosState.addAll(value)
             }
+            tempDialogPhotosState.addAll(value)
         }
 
     LaunchedEffect(key1 = photos) {
@@ -222,73 +383,102 @@ fun AddPhotoDialog(
         }
     }
 
-    DefaultDialog(
-        primaryText = stringResource(id = R.string.photos),
-        positiveButtonText = stringResource(id = R.string.save),
-        negativeButtonText = stringResource(id = R.string.cancel),
-        neutralButtonText = stringResource(id = R.string.add),
-        onNegativeClick = {
-            dialogState.value = false
-        },
-        onPositiveClick = {
-            onSavePhotosClick(tempDialogPhotosState)
-            dialogState.value = false
-        },
-        onDismiss = {
-            dialogState.value = false
-        },
-        onNeutralClick = {
-            if (tempDialogPhotosState.size >= Constants.MAX_PHOTOS) {
-                Toast.makeText(context, "5 photos maximum allowed", Toast.LENGTH_SHORT).show()
-            } else {
-                addPhotoState.value = true
-            }
-        }
+
+    ConstraintLayout(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
     ) {
-        ConstraintLayout(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            val (counter, content, addButton) = createRefs()
+        val (title, counter, content, addButton, saveButton, cancelButton) = createRefs()
 
-            MaxCounterView(
-                modifier = Modifier.constrainAs(counter) {
-                    absoluteRight.linkTo(parent.absoluteRight)
-                },
-                count = tempDialogPhotosState.size,
-                maxCount = Constants.MAX_PHOTOS,
-                icon = painterResource(id = R.drawable.ic_baseline_photo_24)
-            )
+        PrimaryText(
+            modifier = Modifier.constrainAs(title) {
+                top.linkTo(parent.top, 16.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+            },
+            text = stringResource(id = R.string.photos)
+        )
 
-            LazyRow(
-                modifier = Modifier.constrainAs(content) {
+        MaxCounterView(
+            modifier = Modifier.constrainAs(counter) {
+                top.linkTo(title.bottom, 8.dp)
+                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+            },
+            count = tempDialogPhotosState.size,
+            maxCount = MAX_PHOTOS,
+            icon = painterResource(id = R.drawable.ic_baseline_photo_24)
+        )
+
+        LazyRow(
+            modifier = Modifier
+                .defaultMinSize(minHeight = 150.dp)
+                .constrainAs(content) {
                     top.linkTo(counter.bottom, 8.dp)
-                    bottom.linkTo(parent.bottom, 8.dp)
                     absoluteLeft.linkTo(parent.absoluteLeft)
                     absoluteRight.linkTo(parent.absoluteRight)
                     width = Dimension.fillToConstraints
                 },
-                contentPadding = PaddingValues(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (tempDialogPhotosState.isNotEmpty()) {
-                    items(items = tempDialogPhotosState) {
-                        ItemPhoto(
-                            photo = it,
-                            clickedPhoto = { },
-                            deletedPhoto = { tempDialogPhotosState.remove(it) }
-                        )
-                    }
-                } else {
-                    item {
-                        PrimaryTextSmall(
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
-                            text = stringResource(id = R.string.no_photos_added)
-                        )
-                    }
+            contentPadding = PaddingValues(vertical = 4.dp, horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            if (tempDialogPhotosState.isNotEmpty()) {
+                items(items = tempDialogPhotosState) {
+                    ItemPhoto(
+                        photo = it,
+                        clickedPhoto = { },
+                        deletedPhoto = { tempDialogPhotosState.remove(it) }
+                    )
+                }
+            } else {
+                item {
+                    NoContentView(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = stringResource(id = R.string.no_photos_added),
+                        icon = painterResource(id = R.drawable.ic_no_photos)
+                    )
                 }
             }
         }
+
+        DefaultButtonFilled(
+            modifier = Modifier.constrainAs(saveButton) {
+                top.linkTo(content.bottom, 16.dp)
+                bottom.linkTo(parent.bottom, 32.dp)
+                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+            },
+            text = stringResource(id = R.string.save),
+            onClick = {
+                if (tempDialogPhotosState.size > MAX_PHOTOS) {
+                    Toast.makeText(context, "5 photos maximum allowed", Toast.LENGTH_SHORT).show()
+                } else {
+                    onSavePhotosClick(tempDialogPhotosState)
+                    onCloseBottomSheet()
+                }
+            }
+        )
+
+        DefaultButton(
+            modifier = Modifier.constrainAs(cancelButton) {
+                top.linkTo(saveButton.top)
+                bottom.linkTo(saveButton.bottom)
+                absoluteRight.linkTo(saveButton.absoluteLeft, 8.dp)
+            },
+            text = stringResource(id = R.string.cancel),
+            onClick = onCloseBottomSheet
+        )
+
+        DefaultButtonOutlined(
+            modifier = Modifier.constrainAs(addButton) {
+                top.linkTo(saveButton.top)
+                bottom.linkTo(saveButton.bottom)
+                absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+            },
+            icon = painterResource(id = R.drawable.ic_baseline_add_photo_alternate_24),
+            text = stringResource(id = R.string.add),
+            onClick = { addPhotoState.value = true }
+        )
+
     }
 
     if (addPhotoState.value) {
@@ -312,3 +502,4 @@ fun addPhoto(
         }
     }
 }
+

@@ -17,7 +17,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
-import com.joesemper.fishing.compose.ui.home.PickWeatherIconDialog
+import com.joesemper.fishing.compose.ui.home.new_catch.PickWeatherIconDialog
 import com.joesemper.fishing.compose.ui.home.views.SecondaryText
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
@@ -28,7 +28,6 @@ import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.model.mappers.getWeatherNameByIcon
 import com.joesemper.fishing.utils.MILLISECONDS_IN_SECOND
 import com.joesemper.fishing.utils.calcMoonPhase
-import com.joesemper.fishing.utils.network.ConnectionState
 import com.joesemper.fishing.utils.time.toHours
 import org.koin.androidx.compose.get
 import java.util.*
@@ -38,9 +37,8 @@ import java.util.*
 fun WeatherLayout(
     weatherForecast: WeatherForecast?,
     viewModel: NewCatchViewModel,
-    connectionState: ConnectionState,
-    dateAndTime: Calendar
 ) {
+    val calendar = Calendar.getInstance()
     val weatherSettings: WeatherPreferences = get()
     val temperatureSettings by weatherSettings.getTemperatureUnit.collectAsState(TemperatureValues.C)
     val pressureUnit by weatherSettings.getPressureUnit.collectAsState(PressureValues.mmHg)
@@ -60,8 +58,8 @@ fun WeatherLayout(
             weather.hourly.first().date
         )
 
-        val hour by remember(dateAndTime.timeInMillis) {
-            mutableStateOf(dateAndTime.timeInMillis.toHours().toInt())
+        val hour by remember(calendar.timeInMillis) {
+            mutableStateOf(calendar.timeInMillis.toHours().toInt())
         }
 
         var weatherIcon by remember(hour, weather) {

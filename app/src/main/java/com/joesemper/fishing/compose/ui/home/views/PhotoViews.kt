@@ -38,8 +38,7 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberImagePainter
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.Constants
-import com.joesemper.fishing.compose.ui.home.catch_screen.AddPhotoDialog
+import com.joesemper.fishing.utils.Constants.MAX_PHOTOS
 import com.joesemper.fishing.utils.network.ConnectionState
 import com.joesemper.fishing.utils.network.currentConnectivityState
 import com.joesemper.fishing.utils.network.observeConnectivityAsFlow
@@ -54,13 +53,11 @@ import kotlin.math.roundToInt
 fun PhotosView(
     modifier: Modifier = Modifier,
     photos: List<Uri>,
-    onSavePhotos: (List<Uri>) -> Unit
+    onEditClick: () -> Unit
 ) {
     val context = LocalContext.current
     val connectionState by context.observeConnectivityAsFlow()
         .collectAsState(initial = context.currentConnectivityState)
-
-    val dialogState = remember { mutableStateOf(false) }
 
     val tempPhotosState = remember { mutableStateListOf<Uri>() }
 
@@ -71,27 +68,13 @@ fun PhotosView(
         }
     }
 
-    if (dialogState.value) {
-        AddPhotoDialog(
-            photos = tempPhotosState,
-            dialogState = dialogState,
-            onSavePhotosClick = { newPhotos ->
-                tempPhotosState.apply {
-                    clear()
-                    addAll(newPhotos)
-                }
-                onSavePhotos(tempPhotosState)
-            }
-        )
-    }
-
     Column(modifier = modifier) {
         MaxCounterView(
             modifier = Modifier
                 .align(Alignment.End)
                 .padding(8.dp),
             count = tempPhotosState.size,
-            maxCount = Constants.MAX_PHOTOS,
+            maxCount = MAX_PHOTOS,
             icon = painterResource(id = R.drawable.ic_baseline_photo_24)
         )
         Row(
@@ -107,7 +90,7 @@ fun PhotosView(
                     Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        LazyRow() {
+                        LazyRow(horizontalArrangement = Arrangement.Center) {
                             items(items = tempPhotosState) {
                                 ItemCatchPhotoView(
                                     modifier = Modifier.padding(horizontal = 8.dp),
@@ -120,13 +103,14 @@ fun PhotosView(
                                 .align(Alignment.End)
                                 .padding(top = 8.dp),
                             text = stringResource(id = R.string.edit),
-                            onClick = { dialogState.value = true }
+                            onClick = onEditClick
                         )
                     }
                 } else {
-                    PrimaryTextSmall(
+                    NoContentView(
                         modifier = Modifier.padding(8.dp),
-                        text = stringResource(R.string.photos_not_available)
+                        text = stringResource(R.string.photos_not_available),
+                        icon = painterResource(id = R.drawable.ic_no_internet)
                     )
                 }
             } else {
@@ -137,13 +121,16 @@ fun PhotosView(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    PrimaryTextSmall(text = stringResource(R.string.no_photos_added))
+                    NoContentView(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = stringResource(id = R.string.no_photos_added),
+                        icon = painterResource(id = R.drawable.ic_no_photos)
+                    )
                     DefaultButtonOutlined(
                         text = stringResource(id = R.string.add_photo),
                         icon = painterResource(id = R.drawable.ic_baseline_add_photo_alternate_24),
-                        onClick = {
-                            dialogState.value = true
-                        }
+                        onClick = onEditClick
+
                     )
                 }
             }

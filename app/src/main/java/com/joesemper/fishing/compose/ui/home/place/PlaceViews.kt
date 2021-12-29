@@ -27,7 +27,6 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.DefaultNoteView
 import com.joesemper.fishing.compose.ui.home.notes.*
 import com.joesemper.fishing.compose.ui.home.views.*
 import com.joesemper.fishing.compose.ui.theme.primaryTextColor
@@ -183,7 +182,7 @@ fun PlaceTabsContentView(
                 1 -> DefaultNoteView(
                     modifier = Modifier.padding(8.dp),
                     note = note,
-                    onSaveNoteChange = {}
+                    onClick = { }
                 )
             }
         }

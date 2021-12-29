@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.*
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
-import com.joesemper.fishing.compose.ui.home.BannerAdvertView
+import com.joesemper.fishing.compose.ui.home.advertising.BannerAdvertView
 import com.joesemper.fishing.compose.ui.home.views.DefaultAppBar
 import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.utils.Constants
