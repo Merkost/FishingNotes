@@ -364,7 +364,7 @@ fun NewCatchWeatherItem(viewModel: NewCatchViewModel) {
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
-            horizontalArrangement = Arrangement.SpaceBetween.also { Arrangement.Start },
+            horizontalArrangement = Arrangement.SpaceBetween.also { Arrangement.Center },
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -386,7 +386,9 @@ fun NewCatchWeatherItem(viewModel: NewCatchViewModel) {
         AnimatedVisibility(weatherState is RetrofitWrapper.Loading) {
             if (viewModel.marker.value == null) {
                 NoContentView(
-                    modifier = Modifier.padding(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
                     text = stringResource(R.string.select_place_for_weather),
                     icon = painterResource(id = R.drawable.ic_baseline_location_on_24)
                 )
