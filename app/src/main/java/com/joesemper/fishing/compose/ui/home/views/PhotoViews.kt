@@ -38,8 +38,7 @@ import coil.compose.AsyncImagePainter
 import coil.compose.rememberImagePainter
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.Constants
-import com.joesemper.fishing.compose.ui.home.NoContentView
+import com.joesemper.fishing.utils.Constants.MAX_PHOTOS
 import com.joesemper.fishing.utils.network.ConnectionState
 import com.joesemper.fishing.utils.network.currentConnectivityState
 import com.joesemper.fishing.utils.network.observeConnectivityAsFlow
@@ -75,7 +74,7 @@ fun PhotosView(
                 .align(Alignment.End)
                 .padding(8.dp),
             count = tempPhotosState.size,
-            maxCount = Constants.MAX_PHOTOS,
+            maxCount = MAX_PHOTOS,
             icon = painterResource(id = R.drawable.ic_baseline_photo_24)
         )
         Row(

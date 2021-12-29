@@ -7,7 +7,6 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -27,12 +26,12 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.home.Constants
-import com.joesemper.fishing.compose.ui.home.FishAmountAndWeightView
-import com.joesemper.fishing.compose.ui.home.NoContentView
+import com.joesemper.fishing.compose.ui.home.advertising.showInterstitialAd
+import com.joesemper.fishing.compose.ui.home.new_catch.FishAmountAndWeightView
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
 import com.joesemper.fishing.compose.ui.home.views.*
 import com.joesemper.fishing.domain.UserCatchViewModel
+import com.joesemper.fishing.utils.Constants.MAX_PHOTOS
 
 
 sealed class BottomSheetCatchScreen() {
@@ -51,23 +50,39 @@ fun CatchModalBottomSheetContent(
     viewModel: UserCatchViewModel,
     onCloseBottomSheet: () -> Unit,
 ) {
+    val context = LocalContext.current
+
     when (currentScreen) {
         BottomSheetCatchScreen.EditFishTypeAndWeightScreen -> {
             FishTypeAmountAndWeightDialog(
                 viewModel = viewModel,
-                onCloseBottomSheet = { onCloseBottomSheet() }
+                onCloseBottomSheet = onCloseBottomSheet
             )
         }
 
         BottomSheetCatchScreen.EditNoteScreen -> {
-
+            EditNoteDialog(
+                note = viewModel.catch.value?.description ?: "",
+                onSaveNote = { note ->
+                    viewModel.updateCatch(data = mapOf("description" to note))
+                },
+                onCloseDialog = onCloseBottomSheet
+            )
 
         }
 
         BottomSheetCatchScreen.EditPhotosScreen -> {
             AddPhotoDialog(
                 photos = viewModel.catch.value?.downloadPhotoLinks?.map { it.toUri() } ?: listOf(),
-                onSavePhotosClick = { newPhotos -> viewModel.updateCatchPhotos(newPhotos) },
+                onSavePhotosClick = { newPhotos ->
+                    viewModel.updateCatchPhotos(newPhotos)
+                    if (newPhotos.find { !it.toString().startsWith("http") } != null) {
+                        showInterstitialAd(
+                            context = context,
+                            onAdLoaded = { }
+                        )
+                    }
+                },
                 onCloseBottomSheet = onCloseBottomSheet
             )
         }
@@ -75,13 +90,12 @@ fun CatchModalBottomSheetContent(
         BottomSheetCatchScreen.EditWayOfFishingScreen -> {
             EditWayOfFishingDialog(
                 viewModel = viewModel,
-                onCloseBottomSheet = { onCloseBottomSheet() }
+                onCloseBottomSheet = onCloseBottomSheet
             )
         }
 
     }
 }
-
 
 @ExperimentalComposeUiApi
 @Composable
@@ -277,39 +291,62 @@ fun EditWayOfFishingDialog(
 @Composable
 fun EditNoteDialog(
     note: String,
-    dialogState: MutableState<Boolean>,
-    onSaveNoteChange: (String) -> Unit
+    onSaveNote: (String) -> Unit,
+    onCloseDialog: () -> Unit
 ) {
     val noteState = remember { mutableStateOf(note) }
 
-    DefaultDialog(
-        primaryText = stringResource(id = R.string.note),
-        positiveButtonText = stringResource(id = R.string.save),
-        negativeButtonText = stringResource(id = R.string.cancel),
-        onNegativeClick = { dialogState.value = false },
-        onPositiveClick = {
-            onSaveNoteChange(noteState.value)
-            dialogState.value = false
-        },
-        onDismiss = { dialogState.value = false },
+    ConstraintLayout(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth()
+            .fillMaxHeight()
     ) {
-        Column(
-            modifier = Modifier
+        val (title, editNote, saveButton, cancelButton) = createRefs()
 
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .animateContentSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
 
-            SimpleOutlinedTextField(
-                textState = noteState,
-                label = stringResource(id = R.string.note),
-                singleLine = false
-            )
+        PrimaryText(
+            modifier = Modifier.constrainAs(title) {
+                top.linkTo(parent.top)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+            },
+            text = stringResource(id = R.string.edit_note)
+        )
 
-        }
+        SimpleOutlinedTextField(
+            modifier = Modifier.constrainAs(editNote) {
+                top.linkTo(title.bottom, 16.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+                width = Dimension.fillToConstraints
+            },
+            textState = noteState,
+            label = stringResource(id = R.string.note),
+            singleLine = false
+        )
+
+        DefaultButtonFilled(
+            modifier = Modifier.constrainAs(saveButton) {
+                top.linkTo(editNote.bottom, 16.dp)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            text = stringResource(id = R.string.save),
+            onClick = {
+                onSaveNote(noteState.value)
+                onCloseDialog()
+            }
+        )
+
+        DefaultButton(
+            modifier = Modifier.constrainAs(cancelButton) {
+                top.linkTo(saveButton.top)
+                bottom.linkTo(saveButton.bottom)
+                absoluteRight.linkTo(saveButton.absoluteLeft, 8.dp)
+            },
+            text = stringResource(id = R.string.cancel),
+            onClick = { onCloseDialog() }
+        )
+
     }
 }
 
@@ -332,7 +369,7 @@ fun AddPhotoDialog(
 
     val choosePhotoLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { value ->
-            if ((value.size + tempDialogPhotosState.size) > Constants.MAX_PHOTOS) {
+            if ((value.size + tempDialogPhotosState.size) > MAX_PHOTOS) {
                 Toast.makeText(context, "5 photos maximum allowed", Toast.LENGTH_SHORT).show()
             }
             tempDialogPhotosState.addAll(value)
@@ -368,7 +405,7 @@ fun AddPhotoDialog(
                 absoluteRight.linkTo(parent.absoluteRight, 16.dp)
             },
             count = tempDialogPhotosState.size,
-            maxCount = Constants.MAX_PHOTOS,
+            maxCount = MAX_PHOTOS,
             icon = painterResource(id = R.drawable.ic_baseline_photo_24)
         )
 
@@ -412,7 +449,7 @@ fun AddPhotoDialog(
             },
             text = stringResource(id = R.string.save),
             onClick = {
-                if (tempDialogPhotosState.size > Constants.MAX_PHOTOS) {
+                if (tempDialogPhotosState.size > MAX_PHOTOS) {
                     Toast.makeText(context, "5 photos maximum allowed", Toast.LENGTH_SHORT).show()
                 } else {
                     onSavePhotosClick(tempDialogPhotosState)
@@ -465,3 +502,4 @@ fun addPhoto(
         }
     }
 }
+

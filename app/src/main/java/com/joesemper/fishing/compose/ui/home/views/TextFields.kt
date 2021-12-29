@@ -1,6 +1,8 @@
 package com.joesemper.fishing.compose.ui.home.views
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,11 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joesemper.fishing.compose.ui.theme.primaryBlueLightColorTransparent
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
+import kotlinx.coroutines.flow.collect
 
 @Composable
 fun SimpleOutlinedTextField(
@@ -50,6 +50,7 @@ fun SimpleUnderlineTextField(
     modifier: Modifier = Modifier,
     text: String,
     label: String = "",
+    singleLine: Boolean = true,
     trailingIcon: @Composable() (() -> Unit)? = null,
     leadingIcon: @Composable() (() -> Unit)? = null,
     onClick: () -> Unit = { },
@@ -57,17 +58,21 @@ fun SimpleUnderlineTextField(
 ) {
     val darkTheme = isSystemInDarkTheme()
     Column(modifier = modifier.clickable { onClick() }) {
-        Text(
-            text = label,
+        if (label.isNotBlank()) {
+            Text(
+                text = label,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp, start = 16.dp),
+                textAlign = TextAlign.Start,
+                color = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
+                style = MaterialTheme.typography.body2,
+            )
+        }
+        TextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 4.dp, start = 16.dp),
-            textAlign = TextAlign.Start,
-            color = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
-            style = MaterialTheme.typography.body2,
-        )
-        TextField(
-            modifier = Modifier.fillMaxWidth(),
+                .clickable { onClick() },
             readOnly = true,
             value = text,
             textStyle = MaterialTheme.typography.body1.copy(fontSize = 18.sp),
@@ -79,9 +84,19 @@ fun SimpleUnderlineTextField(
             ),
             onValueChange = { },
             shape = RoundedCornerShape(24.dp),
-            singleLine = true,
+            singleLine = singleLine,
             trailingIcon = trailingIcon,
-            leadingIcon = leadingIcon
+            leadingIcon = leadingIcon,
+            interactionSource = remember { MutableInteractionSource() }
+                .also { interactionSource ->
+                    LaunchedEffect(interactionSource) {
+                        interactionSource.interactions.collect {
+                            if (it is PressInteraction.Release) {
+                                onClick()
+                            }
+                        }
+                    }
+                }
         )
         helperText?.let {
             SecondaryTextColored(

@@ -28,7 +28,6 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
-import com.joesemper.fishing.compose.ui.home.DefaultNoteView
 import com.joesemper.fishing.compose.ui.home.notes.ItemUserPlace
 import com.joesemper.fishing.compose.ui.home.views.*
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
@@ -116,8 +115,6 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch?) {
             )
         }
     }
-
-
 }
 
 @Composable
@@ -188,9 +185,8 @@ fun CatchContent(
 
             DefaultNoteView(
                 note = catch.description,
-                onSaveNoteChange = { newNote ->
-                    viewModel.updateCatch(data = mapOf("description" to newNote))
-                })
+                onClick = { openSheet(BottomSheetCatchScreen.EditNoteScreen) }
+            )
 
             WayOfFishingView(
                 catch = catch,
@@ -198,7 +194,9 @@ fun CatchContent(
                     openSheet(BottomSheetCatchScreen.EditWayOfFishingScreen)
                 })
 
-            CatchWeatherView(catch = catch)
+            CatchWeatherView(
+                catch = catch
+            )
         }
     }
 }
