@@ -1,6 +1,7 @@
 package com.joesemper.fishing.compose.ui.home.notes
 
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
@@ -11,12 +12,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.*
@@ -58,7 +61,8 @@ fun Notes(
     val pagerState = rememberPagerState(0)
 
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    var bottomSheetScreen by remember { mutableStateOf(BottomSheetScreen.Filter) }
+    var bottomSheetScreen by remember { mutableStateOf(BottomSheetScreen.Sort) }
+    val shouldShowBlur = remember { mutableStateOf(false) }
 
     ModalBottomSheetLayout(sheetState = bottomState,
         sheetShape = modalBottomSheetCorners,
@@ -78,6 +82,7 @@ fun Notes(
             },
             floatingActionButton = {
                 FabWithMenu(
+                    modifier = Modifier.padding(bottom = 20.dp).zIndex(5f),
                     items = listOf(
                         FabMenuItem(
                             icon = R.drawable.ic_add_catch,
@@ -87,15 +92,21 @@ fun Notes(
                             icon = R.drawable.ic_baseline_add_location_24,
                             onClick = { onAddNewPlaceClick(navController) }
                         )
-                    )
+                    ), shouldShowBlur
                 )
             },
         ) {
+            AnimatedVisibility(shouldShowBlur.value,
+                modifier = Modifier.zIndex(4f).fillMaxSize(),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Surface(color = Color.Black.copy(0.5f)) { }
+            }
             Column() {
                 Tabs(tabs = tabs, pagerState = pagerState)
                 TabsContent(tabs = tabs, pagerState = pagerState, navController)
             }
-
         }
     }
 }
@@ -154,7 +165,7 @@ fun NotesModalBottomSheet(
                     }
                 }
                 BottomSheetScreen.Filter -> {
-                    Text("Not yet implemented")
+                    /*Text("Not yet implemented")*/
                 }
             }
         }
@@ -168,7 +179,7 @@ fun NotesModalBottomSheet(
                     }
                 }
                 BottomSheetScreen.Filter -> {
-                    Text("Not yet implemented")
+                    /*Text("Not yet implemented")*/
                 }
             }
         }

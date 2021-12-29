@@ -10,6 +10,7 @@ import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -18,15 +19,16 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.theme.primaryFigmaColor
 
 @Composable
 fun FabWithMenu(
     modifier: Modifier = Modifier,
-    items: List<FabMenuItem>
-) {
+    items: List<FabMenuItem>,
+    shouldShowBlur: MutableState<Boolean>,
+    ) {
     val toState = remember { mutableStateOf(MultiFabState.COLLAPSED) }
     val transition = updateTransition(targetState = toState, label = "")
+        .also { shouldShowBlur.value = (it.targetState.value == MultiFabState.EXPANDED) }
 
     val size = transition.animateDp(label = "") { state ->
         if (state.value == MultiFabState.EXPANDED) 48.dp else 0.dp
@@ -64,7 +66,7 @@ fun FabWithMenu(
 @Composable
 fun FabMenuItem(item: FabMenuItem, modifier: Modifier = Modifier) {
     FloatingActionButton(
-        backgroundColor = primaryFigmaColor,
+        backgroundColor = MaterialTheme.colors.primary,
         modifier = modifier,
         onClick = item.onClick
     ) {
