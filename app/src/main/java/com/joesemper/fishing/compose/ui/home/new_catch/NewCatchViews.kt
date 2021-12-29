@@ -29,8 +29,6 @@ import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
-import com.joesemper.fishing.compose.ui.home.notes.WeatherLayout
-import com.joesemper.fishing.compose.ui.home.notes.WeatherLayoutLoading
 import com.joesemper.fishing.compose.ui.home.views.*
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.domain.viewstates.ErrorType

@@ -1,4 +1,4 @@
-package com.joesemper.fishing.compose.ui.home.notes
+package com.joesemper.fishing.compose.ui.home.new_catch
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.*
@@ -17,7 +17,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
-import com.joesemper.fishing.compose.ui.home.new_catch.PickWeatherIconDialog
 import com.joesemper.fishing.compose.ui.home.views.SecondaryText
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
@@ -76,7 +75,7 @@ fun WeatherLayout(
         }.also {
             it.value.toFloatOrNull()?.let { floatValue ->
                 viewModel.weatherToSave.value.temperatureInC =
-                temperatureSettings.getCelciusTemperature(floatValue)
+                    temperatureSettings.getCelciusTemperature(floatValue)
             }
         }
 
