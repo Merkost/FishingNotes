@@ -80,6 +80,7 @@ fun MapScreen(
 
     val mapLayersSelection = rememberSaveable { mutableStateOf(false) }
     val mapType = rememberSaveable { mutableStateOf(MapTypes.roadmap) }
+    val mapBearing = remember { mutableStateOf(0f) }
 
     var mapUiState: MapUiState by remember {
         if (addPlaceOnStart) mutableStateOf(MapUiState.PlaceSelectMode)
@@ -216,7 +217,8 @@ fun MapScreen(
         }
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (mapLayout, addMarkerFragment, mapMyLocationButton, mapLayersButton,
+            val (mapLayout, addMarkerFragment, mapMyLocationButton,
+                mapCompassButton, mapLayersButton,
                 mapFilterButton, mapLayersView, pointer) = createRefs()
             val verticalMyLocationButtonGl = createGuidelineFromAbsoluteRight(56.dp)
 
@@ -234,7 +236,7 @@ fun MapScreen(
                 showHiddenPlacess = showHiddenPlaces,
                 cameraMoveCallback = { state -> cameraMoveState = state },
                 currentCameraPosition = currentCameraPosition,
-                mapType = mapType,
+                mapType = mapType, mapBearing = mapBearing,
                 onMapClick = {
                     mapUiState = MapUiState.NormalMode
                 }
@@ -249,11 +251,8 @@ fun MapScreen(
             )
 
             if (mapLayersSelection.value) Surface(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(0f)
-                    .clickable { mapLayersSelection.value = false }, color = Color.White
-            ) { }
+                modifier = Modifier.fillMaxSize().alpha(0f)
+                    .clickable { mapLayersSelection.value = false }, color = Color.White) { }
             AnimatedVisibility(
                 mapLayersSelection.value,
                 enter = expandIn(expandFrom = Alignment.TopStart) + fadeIn(),
@@ -294,6 +293,16 @@ fun MapScreen(
                 viewModel.lastKnownLocation.value?.let {
                     viewModel.lastMapCameraPosition.value = getCameraPosition(it)
                 }
+            }
+
+            CompassButton(
+                modifier = modifier.constrainAs(mapCompassButton) {
+                    top.linkTo(mapMyLocationButton.bottom, 16.dp)
+                    absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+                },
+                mapBearing = mapBearing
+            ) {
+
             }
 
 
@@ -347,6 +356,7 @@ fun MapLayout(
     cameraMoveCallback: (state: CameraMoveState) -> Unit,
     currentCameraPosition: MutableState<Pair<LatLng, Float>>,
     mapType: MutableState<Int>,
+    mapBearing: MutableState<Float>,
     onMapClick: () -> Unit,
 
     ) {
@@ -394,11 +404,16 @@ fun MapLayout(
                 }
                 googleMap.setOnCameraMoveStartedListener {
                     cameraMoveCallback(CameraMoveState.MoveStart)
+                    //mapBearing.value = googleMap.cameraPosition.bearing
+                }
+                googleMap.setOnCameraMoveListener {
+                    mapBearing.value = googleMap.cameraPosition.bearing
                 }
                 googleMap.setOnCameraIdleListener {
                     cameraMoveCallback(CameraMoveState.MoveFinish)
                     currentCameraPosition.value =
                         Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom)
+                    //mapBearing.value = googleMap.cameraPosition.bearing
                 }
                 googleMap.setOnMarkerClickListener { marker ->
                     onMarkerClick(markers.first { it.id == marker.tag })

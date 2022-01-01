@@ -6,6 +6,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,15 +17,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.GpsOff
-import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -118,8 +117,12 @@ fun MyLocationButton(
 
     val color = animateColorAsState(
         when {
-            !shouldShowPermissions || lastKnownLocation.value == null -> { RedGoogleChrome }
-            else -> { LocalContentColor.current.copy(alpha = LocalContentAlpha.current) }
+            !shouldShowPermissions || lastKnownLocation.value == null -> {
+                RedGoogleChrome
+            }
+            else -> {
+                LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+            }
         }
     )
 
@@ -138,10 +141,33 @@ fun MyLocationButton(
         ) {
             Icon(
                 if (!shouldShowPermissions) Icons.Default.GpsOff
-                    else Icons.Default.MyLocation,
+                else Icons.Default.MyLocation,
                 stringResource(R.string.my_location),
                 tint = color.value
             )
+        }
+    }
+}
+
+@Composable
+fun CompassButton(
+    modifier: Modifier,
+    mapBearing: MutableState<Float>,
+    onClick: () -> Unit
+) {
+
+    val rotation = animateFloatAsState(mapBearing.value)
+    Card(
+        shape = CircleShape,
+        modifier = modifier.size(40.dp)
+    ) {
+        IconButton(modifier = Modifier
+            .padding(8.dp)
+            .fillMaxSize(),
+            onClick = {  }) {
+            Icon(painterResource(R.drawable.direction),
+                stringResource(R.string.layers),
+                modifier = Modifier.rotate(rotation.value))
         }
     }
 }
