@@ -246,6 +246,8 @@
     <string name="edit_note">Edit note</string>
     <string name="unable_to_get_location">Не удается получить ваше местоположение. Проверьте, что на устройстве включен GPS</string>
     <string name="gps_is_off">You need to turn on GPS on your device</string>
+    <string name="compass">Compass</string>
+    <string name="app_exit_message">Do it again to close the app</string>
 
 
 </resources>

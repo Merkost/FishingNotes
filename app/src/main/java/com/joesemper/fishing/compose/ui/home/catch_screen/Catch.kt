@@ -32,7 +32,6 @@ import com.joesemper.fishing.compose.ui.home.notes.ItemUserPlace
 import com.joesemper.fishing.compose.ui.home.views.*
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
-import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserCatchViewModel
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserCatch
@@ -45,6 +44,7 @@ import com.joesemper.fishing.utils.time.toTime
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
+import com.joesemper.fishing.compose.ui.navigate
 
 @ExperimentalPermissionsApi
 @ExperimentalComposeUiApi
@@ -178,8 +178,11 @@ fun CatchContent(
                 place = viewModel.mapMarker.value ?: UserMapMarker(),
                 userPlaceClicked = {
                     onPlaceItemClick(place = it, navController = navController)
-                })
-
+                }, navigateToMap = {
+                    navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
+                        Arguments.PLACE to (viewModel.mapMarker.value ?: UserMapMarker()))
+                }
+            )
 
             DefaultNoteView(
                 note = catch.description,

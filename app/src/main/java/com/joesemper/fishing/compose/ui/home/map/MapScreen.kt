@@ -34,10 +34,8 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.android.libraries.maps.model.BitmapDescriptorFactory
-import com.google.android.libraries.maps.model.LatLng
-import com.google.android.libraries.maps.model.MapStyleOptions
-import com.google.android.libraries.maps.model.MarkerOptions
+import com.google.android.libraries.maps.MapView
+import com.google.android.libraries.maps.model.*
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.UserPreferences
@@ -66,11 +64,21 @@ import org.koin.androidx.compose.getViewModel
 fun MapScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    addPlaceOnStart: Boolean = false
+    addPlaceOnStart: Boolean = false,
+    place: UserMapMarker?
 ) {
     var addingPlace by remember { mutableStateOf(addPlaceOnStart) }
+    val chosenPlace by remember { mutableStateOf(place) }
+
+    val map = rememberMapViewWithLifecycle()
 
     val viewModel: MapViewModel = getViewModel()
+
+    chosenPlace?.let {
+        viewModel.currentMarker.value = chosenPlace
+        viewModel.lastMapCameraPosition.value =
+            Pair(LatLng(it.latitude, it.longitude), DEFAULT_ZOOM)
+    }
     val coroutineScope = rememberCoroutineScope()
     val userPreferences: UserPreferences = get()
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
@@ -80,24 +88,28 @@ fun MapScreen(
 
     val mapLayersSelection = rememberSaveable { mutableStateOf(false) }
     val mapType = rememberSaveable { mutableStateOf(MapTypes.roadmap) }
+    val mapBearing = remember { mutableStateOf(0f) }
+
 
     var mapUiState: MapUiState by remember {
-        if (addPlaceOnStart) mutableStateOf(MapUiState.PlaceSelectMode)
-        else mutableStateOf(viewModel.mapUiState.value)
+        when {
+            addPlaceOnStart -> mutableStateOf(MapUiState.PlaceSelectMode)
+            chosenPlace != null -> {
+                mutableStateOf(MapUiState.BottomSheetInfoMode)
+            }
+            else -> mutableStateOf(viewModel.mapUiState.value)
+        }
     }
 
     var cameraMoveState: CameraMoveState by remember {
         mutableStateOf(CameraMoveState.MoveFinish)
     }
 
-
     val pointerState: MutableState<PointerState> = remember {
         mutableStateOf(PointerState.HideMarker)
     }
 
-    val currentCameraPosition = remember {
-        mutableStateOf(Pair(LatLng(0.0, 0.0), 20f))
-    }
+    val currentCameraPosition = remember { mutableStateOf(Pair(LatLng(0.0, 0.0), 20f)) }
 
     LaunchedEffect(mapUiState) {
         if (mapUiState != viewModel.mapUiState) {
@@ -137,11 +149,12 @@ fun MapScreen(
         }
     }
 
-    BackPressHandler(mapUiState = mapUiState) {
+    BackPressHandler(
+        mapUiState = mapUiState,
+        navController = navController,
+    ) {
         mapUiState = when (mapUiState) {
-            is MapUiState.BottomSheetFullyExpanded -> {
-                MapUiState.BottomSheetInfoMode
-            }
+            is MapUiState.BottomSheetFullyExpanded -> { MapUiState.BottomSheetInfoMode }
             else -> MapUiState.NormalMode
         }
     }
@@ -165,10 +178,6 @@ fun MapScreen(
                             mapUiState = MapUiState.NormalMode
                         }
                         MapUiState.BottomSheetInfoMode -> {
-                            //mapUiState = MapUiState.PlaceSelectMode
-                            /*coroutineScope.launch {
-                                scaffoldState.bottomSheetState.collapse()
-                            }*/
                             onAddNewCatchClick(navController, viewModel)
                         }
                     }
@@ -216,7 +225,8 @@ fun MapScreen(
         }
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (mapLayout, addMarkerFragment, mapMyLocationButton, mapLayersButton,
+            val (mapLayout, addMarkerFragment, mapMyLocationButton,
+                mapCompassButton, mapLayersButton,
                 mapFilterButton, mapLayersView, pointer) = createRefs()
             val verticalMyLocationButtonGl = createGuidelineFromAbsoluteRight(56.dp)
 
@@ -226,7 +236,7 @@ fun MapScreen(
                     bottom.linkTo(parent.bottom)
                     absoluteLeft.linkTo(parent.absoluteLeft)
                     absoluteRight.linkTo(parent.absoluteRight)
-                },
+                }, map = map,
                 onMarkerClick = {
                     viewModel.currentMarker.value = it
                     mapUiState = MapUiState.BottomSheetInfoMode
@@ -234,7 +244,7 @@ fun MapScreen(
                 showHiddenPlacess = showHiddenPlaces,
                 cameraMoveCallback = { state -> cameraMoveState = state },
                 currentCameraPosition = currentCameraPosition,
-                mapType = mapType,
+                mapType = mapType, mapBearing = mapBearing,
                 onMapClick = {
                     mapUiState = MapUiState.NormalMode
                 }
@@ -248,20 +258,19 @@ fun MapScreen(
                 layersSelectionMode = mapLayersSelection,
             )
 
-            if (mapLayersSelection.value) Surface(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .alpha(0f)
-                    .clickable { mapLayersSelection.value = false }, color = Color.White
-            ) { }
+            if (mapLayersSelection.value)
+                Surface(modifier = Modifier.fillMaxSize().alpha(0f).zIndex(4f)
+                    .clickable { mapLayersSelection.value = false }) {}
             AnimatedVisibility(
                 mapLayersSelection.value,
-                enter = expandIn(expandFrom = Alignment.TopStart) + fadeIn(),
+                enter = expandIn(
+                    expandFrom = Alignment.TopStart,
+                    animationSpec = tween(380)
+                ) + fadeIn(animationSpec = tween(480)),
                 exit = shrinkOut(
                     shrinkTowards = Alignment.TopStart,
                     animationSpec = tween(380)
-                )
-                        + fadeOut(animationSpec = tween(280)),
+                ) + fadeOut(animationSpec = tween(480)),
                 modifier = Modifier.constrainAs(mapLayersView) {
                     top.linkTo(parent.top, 16.dp)
                     absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
@@ -296,6 +305,16 @@ fun MapScreen(
                 }
             }
 
+            CompassButton(modifier = modifier.constrainAs(mapCompassButton) {
+                top.linkTo(mapMyLocationButton.bottom, 16.dp)
+                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+            }, mapBearing = mapBearing) {
+                setCameraBearing(
+                    coroutineScope, map,
+                    currentCameraPosition.value.first,
+                    currentCameraPosition.value.second
+                )
+            }
 
             AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode,
                 modifier = Modifier.constrainAs(pointer) {
@@ -336,22 +355,26 @@ fun MapScreen(
     }
 }
 
+
 @ExperimentalAnimationApi
 @ExperimentalCoroutinesApi
 @ExperimentalPermissionsApi
 @Composable
 fun MapLayout(
     modifier: Modifier = Modifier,
+    map: MapView,
     onMarkerClick: (marker: UserMapMarker) -> Unit,
     showHiddenPlacess: Boolean,
     cameraMoveCallback: (state: CameraMoveState) -> Unit,
     currentCameraPosition: MutableState<Pair<LatLng, Float>>,
     mapType: MutableState<Int>,
+    mapBearing: MutableState<Float>,
     onMapClick: () -> Unit,
 
     ) {
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
+
     val userPreferences: UserPreferences = get()
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
     val context = LocalContext.current
@@ -361,7 +384,7 @@ fun MapLayout(
         mutableStateOf(if (showHiddenPlaces) markers
         else markers.filter { it.visible })
     }
-    val map = rememberMapViewWithLifecycle()
+
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
 
     var isMapVisible by remember {
@@ -395,10 +418,16 @@ fun MapLayout(
                 googleMap.setOnCameraMoveStartedListener {
                     cameraMoveCallback(CameraMoveState.MoveStart)
                 }
-                googleMap.setOnCameraIdleListener {
-                    cameraMoveCallback(CameraMoveState.MoveFinish)
+                googleMap.setOnCameraMoveListener {
+                    mapBearing.value = googleMap.cameraPosition.bearing
                     currentCameraPosition.value =
                         Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom)
+                }
+                googleMap.setOnCameraIdleListener {
+                    cameraMoveCallback(CameraMoveState.MoveFinish)
+                    /*currentCameraPosition.value =
+                        Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom)*/
+                    //mapBearing.value = googleMap.cameraPosition.bearing
                 }
                 googleMap.setOnMarkerClickListener { marker ->
                     onMarkerClick(markers.first { it.id == marker.tag })

@@ -8,7 +8,7 @@ object Libs {
     const val androidGradlePlugin = "com.android.tools.build:gradle:7.0.3"
 
     object Accompanist {
-        private const val version = "0.21.3-beta"
+        private const val version = "0.22.0-rc"
         const val insets = "com.google.accompanist:accompanist-insets:$version"
         const val systemuicontroller =
             "com.google.accompanist:accompanist-systemuicontroller:$version"
@@ -25,24 +25,26 @@ object Libs {
     }
 
     object PlayServices {
-        private const val version = "18.0.0"
+        private const val version = "19.0.0"
+        private const val oldVersion = "18.0.1"
+
         const val auth = "com.google.android.gms:play-services-auth:$version"
         const val ads = "com.google.android.gms:play-services-ads:20.4.0"
 
         //Maps
-        const val maps = "com.google.android.gms:play-services-maps:$version"
+        const val maps = "com.google.android.gms:play-services-maps:$oldVersion"
         const val location = "com.google.android.gms:play-services-location:$version"
     }
 
     object Kotlin {
-        private const val version = "1.6.0"
+        private const val version = "1.6.10"
         const val stdlib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version"
         const val gradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$version"
         const val extensions = "org.jetbrains.kotlin:kotlin-android-extensions:$version"
     }
 
     object Coroutines {
-        private const val version = "1.6.0-RC"
+        private const val version = "1.6.0"
         const val core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version"
         const val android = "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version"
         const val test = "org.jetbrains.kotlinx:kotlinx-coroutines-test:$version"
@@ -53,27 +55,28 @@ object Libs {
         const val splashScreen = "androidx.core:core-splashscreen:1.0.0-alpha02"
 
         object Compose {
-            const val version = "1.0.5"//"1.1.0-beta04"
+            const val newVersion = "1.1.0-rc02"
+            const val version = "1.1.0-rc01"
             const val oldVersion = "1.0.5"
 
             const val foundation = "androidx.compose.foundation:foundation:${version}"
             const val layout = "androidx.compose.foundation:foundation-layout:${version}"
             const val ui = "androidx.compose.ui:ui:${version}"
             const val uiUtil = "androidx.compose.ui:ui-util:${version}"
-            const val runtime = "androidx.compose.runtime:runtime:${oldVersion}"
+            const val runtime = "androidx.compose.runtime:runtime:${version}"
             const val material = "androidx.compose.material:material:${version}"
             const val animation = "androidx.compose.animation:animation:${version}"
 
             //Theme
-            const val theme = "com.google.android.material:compose-theme-adapter:${oldVersion}"
+            const val theme = "com.google.android.material:compose-theme-adapter:1.1.2"
             const val lottie = "com.airbnb.android:lottie-compose:4.2.2"
 
             // Tooling support (Previews, etc.)
-            const val tooling = "androidx.compose.ui:ui-tooling:${oldVersion}"
-            const val iconsExtended = "androidx.compose.material:material-icons-extended:$oldVersion"
+            const val tooling = "androidx.compose.ui:ui-tooling:${version}"
+            const val iconsExtended = "androidx.compose.material:material-icons-extended:$version"
 
             // UI Tests
-            const val uiTest = "androidx.compose.ui:ui-test-junit4:$oldVersion"
+            const val uiTest = "androidx.compose.ui:ui-test-junit4:$version"
         }
 
         object Activity {
@@ -89,7 +92,8 @@ object Libs {
         }
 
         object Navigation {
-            const val navigationCompose = "androidx.navigation:navigation-compose:2.4.0-beta02"
+            const val version = "2.4.0-rc01"
+            const val navigationCompose = "androidx.navigation:navigation-compose:$version"
         }
 
         object ConstraintLayout {
@@ -102,7 +106,7 @@ object Libs {
         }
 
         object DependencyInjection {
-            private const val koin_version = "3.1.3"
+            private const val koin_version = "3.1.4"
 
             const val koinMain = "io.insert-koin:koin-android:${koin_version}"
             const val koinJava = "io.insert-koin:koin-android-compat:${koin_version}"
@@ -126,10 +130,10 @@ object Libs {
     }
 
     object Firebase {
-        private const val version = "20.0.0"
+        private const val version = "20.0.2"
 
         // Import the Firebase BoM
-        const val platform = "com.google.firebase:firebase-bom:29.0.0"
+        const val platform = "com.google.firebase:firebase-bom:29.0.3"
 
         // When using the BoM, you don't specify versions in Firebase library dependencies
         const val auth = "com.google.firebase:firebase-auth-ktx"
@@ -149,7 +153,7 @@ object Libs {
     }
 
     object Coil {
-        const val coilCompose = "io.coil-kt:coil-compose:2.0.0-alpha05"
+        const val coilCompose = "io.coil-kt:coil-compose:2.0.0-alpha06"
     }
 
     object Shimmer {
@@ -159,8 +163,7 @@ object Libs {
     object Retrofit {
         const val main = "com.squareup.retrofit2:retrofit:2.9.0"
         const val converterGson = "com.squareup.retrofit2:converter-gson:2.9.0"
-        const val coroutinesAdapter =
-            "com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2"
-        const val logging = "com.squareup.okhttp3:logging-interceptor:4.9.1"
+        const val coroutinesAdapter = "com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2"
+        const val logging = "com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.3"
     }
 }

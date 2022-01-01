@@ -42,6 +42,12 @@ fun UserPlacesScreen(
                     places = placesSortValue.sort(animatedUiState),
                     userPlaceClicked = { userMarker ->
                         onPlaceItemClick(userMarker, navController)
+                    },
+                    navigateToMap = {
+                        navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
+                            Arguments.PLACE to it)
+                        /*navController.navigate(MainDestinations.MAP_ROUTE,
+                            Arguments.PLACE to it)*/
                     }
                 )
             }
@@ -56,14 +62,19 @@ fun UserPlacesScreen(
 fun UserPlaces(
     places: List<UserMapMarker>,
     userPlaceClicked: (UserMapMarker) -> Unit,
+    navigateToMap: (UserMapMarker) -> Unit,
 ) {
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         when {
             places.isNotEmpty() -> {
                 items(items = places) { userPlace ->
                     ItemUserPlace(
-                        place = userPlace
-                    ) { userPlaceClicked(userPlace) }
+                        place = userPlace,
+                        userPlaceClicked = { userPlaceClicked(userPlace) }
+                    ) {
+                        navigateToMap(userPlace)
+                    }
+
                 }
             }
             places.isEmpty() -> {
@@ -71,7 +82,7 @@ fun UserPlaces(
                     NoElementsView(
                         mainText = stringResource(R.string.no_places_added),
                         secondaryText = stringResource(R.string.new_place_text),
-                        onClickAction = { }
+                        onClickAction = {  }
                     )
                 }
 
