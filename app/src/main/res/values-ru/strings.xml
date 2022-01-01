@@ -248,5 +248,6 @@
     <string name="gps_is_off">You need to turn on GPS on your device</string>
     <string name="loading">Loading. Please wait</string>
     <string name="edit_note">Edit note</string>
+    <string name="compass">Compass</string>
 
 </resources>

@@ -36,6 +36,7 @@ import com.google.android.gms.tasks.Task
 import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.MapView
+import com.google.android.libraries.maps.model.CameraPosition
 import com.google.android.libraries.maps.model.LatLng
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
@@ -136,6 +137,26 @@ fun moveCameraToLocation(
             CameraUpdateFactory.newLatLngZoom(
                 location,
                 zoom
+            )
+        )
+    }
+}
+
+fun setCameraBearing(
+    coroutineScope: CoroutineScope,
+    map: MapView,
+    location: LatLng,
+    zoom: Float = DEFAULT_ZOOM
+) {
+    coroutineScope.launch {
+        val googleMap = map.awaitMap()
+        googleMap.animateCamera(
+            CameraUpdateFactory.newCameraPosition(
+                CameraPosition.Builder()
+                    .zoom(zoom)
+                    .target(location)
+                    .bearing(0f)
+                    .build()
             )
         )
     }

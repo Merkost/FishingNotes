@@ -34,10 +34,8 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.android.libraries.maps.model.BitmapDescriptorFactory
-import com.google.android.libraries.maps.model.LatLng
-import com.google.android.libraries.maps.model.MapStyleOptions
-import com.google.android.libraries.maps.model.MarkerOptions
+import com.google.android.libraries.maps.MapView
+import com.google.android.libraries.maps.model.*
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.UserPreferences
@@ -69,6 +67,7 @@ fun MapScreen(
     addPlaceOnStart: Boolean = false
 ) {
     var addingPlace by remember { mutableStateOf(addPlaceOnStart) }
+    val map = rememberMapViewWithLifecycle()
 
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
@@ -81,6 +80,7 @@ fun MapScreen(
     val mapLayersSelection = rememberSaveable { mutableStateOf(false) }
     val mapType = rememberSaveable { mutableStateOf(MapTypes.roadmap) }
     val mapBearing = remember { mutableStateOf(0f) }
+
 
     var mapUiState: MapUiState by remember {
         if (addPlaceOnStart) mutableStateOf(MapUiState.PlaceSelectMode)
@@ -228,7 +228,7 @@ fun MapScreen(
                     bottom.linkTo(parent.bottom)
                     absoluteLeft.linkTo(parent.absoluteLeft)
                     absoluteRight.linkTo(parent.absoluteRight)
-                },
+                }, map = map,
                 onMarkerClick = {
                     viewModel.currentMarker.value = it
                     mapUiState = MapUiState.BottomSheetInfoMode
@@ -252,7 +252,8 @@ fun MapScreen(
 
             if (mapLayersSelection.value) Surface(
                 modifier = Modifier.fillMaxSize().alpha(0f)
-                    .clickable { mapLayersSelection.value = false }, color = Color.White) { }
+                    .clickable { mapLayersSelection.value = false }, color = Color.White
+            ) { }
             AnimatedVisibility(
                 mapLayersSelection.value,
                 enter = expandIn(expandFrom = Alignment.TopStart) + fadeIn(),
@@ -295,16 +296,14 @@ fun MapScreen(
                 }
             }
 
-            CompassButton(
-                modifier = modifier.constrainAs(mapCompassButton) {
-                    top.linkTo(mapMyLocationButton.bottom, 16.dp)
-                    absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-                },
-                mapBearing = mapBearing
-            ) {
-
+            CompassButton(modifier = modifier.constrainAs(mapCompassButton) {
+                top.linkTo(mapMyLocationButton.bottom, 16.dp)
+                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+            }, mapBearing = mapBearing) {
+                setCameraBearing(coroutineScope, map,
+                    currentCameraPosition.value.first,
+                    currentCameraPosition.value.second)
             }
-
 
             AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode,
                 modifier = Modifier.constrainAs(pointer) {
@@ -345,12 +344,14 @@ fun MapScreen(
     }
 }
 
+
 @ExperimentalAnimationApi
 @ExperimentalCoroutinesApi
 @ExperimentalPermissionsApi
 @Composable
 fun MapLayout(
     modifier: Modifier = Modifier,
+    map: MapView,
     onMarkerClick: (marker: UserMapMarker) -> Unit,
     showHiddenPlacess: Boolean,
     cameraMoveCallback: (state: CameraMoveState) -> Unit,
@@ -362,6 +363,7 @@ fun MapLayout(
     ) {
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
+
     val userPreferences: UserPreferences = get()
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
     val context = LocalContext.current
@@ -371,7 +373,7 @@ fun MapLayout(
         mutableStateOf(if (showHiddenPlaces) markers
         else markers.filter { it.visible })
     }
-    val map = rememberMapViewWithLifecycle()
+
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
 
     var isMapVisible by remember {
@@ -404,15 +406,16 @@ fun MapLayout(
                 }
                 googleMap.setOnCameraMoveStartedListener {
                     cameraMoveCallback(CameraMoveState.MoveStart)
-                    //mapBearing.value = googleMap.cameraPosition.bearing
                 }
                 googleMap.setOnCameraMoveListener {
                     mapBearing.value = googleMap.cameraPosition.bearing
+                    currentCameraPosition.value =
+                        Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom)
                 }
                 googleMap.setOnCameraIdleListener {
                     cameraMoveCallback(CameraMoveState.MoveFinish)
-                    currentCameraPosition.value =
-                        Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom)
+                    /*currentCameraPosition.value =
+                        Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom)*/
                     //mapBearing.value = googleMap.cameraPosition.bearing
                 }
                 googleMap.setOnMarkerClickListener { marker ->

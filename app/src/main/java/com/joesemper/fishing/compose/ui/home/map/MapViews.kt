@@ -1,9 +1,7 @@
 package com.joesemper.fishing.compose.ui.home.map
 
 import android.location.Geocoder
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -17,7 +15,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.GpsOff
+import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -46,6 +47,8 @@ import com.joesemper.fishing.compose.ui.theme.supportTextColor
 import com.joesemper.fishing.compose.ui.utils.currentFraction
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.utils.contains
+import com.joesemper.fishing.utils.open
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -151,25 +154,36 @@ fun MyLocationButton(
 
 @Composable
 fun CompassButton(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     mapBearing: MutableState<Float>,
     onClick: () -> Unit
 ) {
+    val rotation =  mapBearing.value
 
-    val rotation = animateFloatAsState(mapBearing.value)
-    Card(
-        shape = CircleShape,
-        modifier = modifier.size(40.dp)
+    AnimatedVisibility(
+        modifier = modifier,
+        visible = mapBearing.value < 356f && mapBearing.value > 4f,
+        enter = fadeIn(), exit = fadeOut(animationSpec = tween(delayMillis = 3000))
     ) {
-        IconButton(modifier = Modifier
-            .padding(8.dp)
-            .fillMaxSize(),
-            onClick = {  }) {
-            Icon(painterResource(R.drawable.direction),
-                stringResource(R.string.layers),
-                modifier = Modifier.rotate(rotation.value))
+        Card(
+            shape = CircleShape,
+            modifier = Modifier.size(40.dp)
+        ) {
+            IconButton(modifier = Modifier
+                .padding(8.dp)
+                .fillMaxSize(),
+                onClick = { onClick() }) {
+                Icon(
+                    painterResource(if (mapBearing.value > 356f ||
+                        mapBearing.value < 4f) R.drawable.north
+                    else R.drawable.gps),
+                    stringResource(R.string.compass),
+                    modifier = Modifier.rotate(mapBearing.value).fillMaxSize()
+                )
+            }
         }
     }
+
 }
 
 @Composable
