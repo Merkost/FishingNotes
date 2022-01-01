@@ -35,7 +35,6 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @InternalCoroutinesApi
 @Composable
 fun FishingNotesApp() {
-
     ProvideWindowInsets {
         val appStateHolder = rememberAppStateHolder()
         var visible by remember { mutableStateOf(false) }
