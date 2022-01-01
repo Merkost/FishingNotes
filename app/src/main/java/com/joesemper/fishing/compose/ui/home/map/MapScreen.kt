@@ -250,18 +250,20 @@ fun MapScreen(
                 layersSelectionMode = mapLayersSelection,
             )
 
-            if (mapLayersSelection.value) Surface(
-                modifier = Modifier.fillMaxSize().alpha(0f)
-                    .clickable { mapLayersSelection.value = false }, color = Color.White
-            ) { }
+            if (mapLayersSelection.value)
+                Surface(modifier = Modifier.fillMaxSize().alpha(0f).zIndex(4f)
+                    .clickable { mapLayersSelection.value = false }) {}
             AnimatedVisibility(
                 mapLayersSelection.value,
-                enter = expandIn(expandFrom = Alignment.TopStart) + fadeIn(),
+                enter = expandIn(
+                    expandFrom = Alignment.TopStart,
+                    animationSpec = tween(380)
+                ) +
+                        fadeIn(animationSpec = tween(480)),
                 exit = shrinkOut(
                     shrinkTowards = Alignment.TopStart,
                     animationSpec = tween(380)
-                )
-                        + fadeOut(animationSpec = tween(280)),
+                ) + fadeOut(animationSpec = tween(480)),
                 modifier = Modifier.constrainAs(mapLayersView) {
                     top.linkTo(parent.top, 16.dp)
                     absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
@@ -300,9 +302,11 @@ fun MapScreen(
                 top.linkTo(mapMyLocationButton.bottom, 16.dp)
                 absoluteRight.linkTo(parent.absoluteRight, 16.dp)
             }, mapBearing = mapBearing) {
-                setCameraBearing(coroutineScope, map,
+                setCameraBearing(
+                    coroutineScope, map,
                     currentCameraPosition.value.first,
-                    currentCameraPosition.value.second)
+                    currentCameraPosition.value.second
+                )
             }
 
             AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode,
