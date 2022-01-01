@@ -51,6 +51,7 @@ import com.joesemper.fishing.compose.ui.home.map.MapScreen
 import com.joesemper.fishing.compose.ui.home.notes.Notes
 import com.joesemper.fishing.compose.ui.home.weather.WeatherScreen
 import com.joesemper.fishing.compose.ui.theme.FishingNotesTheme
+import com.joesemper.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 
@@ -72,9 +73,10 @@ fun NavGraphBuilder.addHomeGraph(
         arguments = listOf(navArgument(Arguments.MAP_NEW_PLACE) { defaultValue = false })
     ) { from ->
         val addPlace = requireNotNull(from.arguments).getBoolean(Arguments.MAP_NEW_PLACE, false)
+        val place: UserMapMarker? = from.arguments?.getParcelable(Arguments.PLACE)
         requireNotNull(from.arguments).clear()
         //from.arguments?.getBoolean(Arguments.MAP_NEW_PLACE)!!
-        MapScreen(modifier, navController, addPlace)
+        MapScreen(modifier, navController, addPlace, place)
     }
     composable(HomeSections.NOTES.route) { from ->
         Notes(modifier, navController, upPress)

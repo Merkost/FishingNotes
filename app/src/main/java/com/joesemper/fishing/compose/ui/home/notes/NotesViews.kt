@@ -277,7 +277,8 @@ fun ItemUserCatch(
 fun ItemUserPlace(
     modifier: Modifier = Modifier,
     place: UserMapMarker,
-    userPlaceClicked: (UserMapMarker) -> Unit
+    userPlaceClicked: (UserMapMarker) -> Unit,
+    navigateToMap: () -> Unit,
 ) {
 
     DefaultCardClickable(
@@ -321,7 +322,7 @@ fun ItemUserPlace(
                     absoluteRight.linkTo(parent.absoluteRight, 8.dp)
                 },
                 icon = painterResource(id = R.drawable.ic_place_on_map),
-                onClick = { }
+                onClick = { navigateToMap() }
             )
 
             SupportText(

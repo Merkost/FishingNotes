@@ -54,6 +54,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.viewModel
 
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
@@ -64,12 +65,20 @@ import org.koin.androidx.compose.getViewModel
 fun MapScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    addPlaceOnStart: Boolean = false
+    addPlaceOnStart: Boolean = false,
+    place: UserMapMarker?
 ) {
     var addingPlace by remember { mutableStateOf(addPlaceOnStart) }
+    var chosenPlace by remember { mutableStateOf(place) }
+
     val map = rememberMapViewWithLifecycle()
 
     val viewModel: MapViewModel = getViewModel()
+
+    chosenPlace?.let {
+        viewModel.currentMarker.value = chosenPlace
+        viewModel.lastMapCameraPosition.value = Pair(LatLng(it.latitude, it.longitude), DEFAULT_ZOOM)
+    }
     val coroutineScope = rememberCoroutineScope()
     val userPreferences: UserPreferences = get()
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
@@ -83,22 +92,22 @@ fun MapScreen(
 
 
     var mapUiState: MapUiState by remember {
-        if (addPlaceOnStart) mutableStateOf(MapUiState.PlaceSelectMode)
-        else mutableStateOf(viewModel.mapUiState.value)
+        when {
+            addPlaceOnStart -> mutableStateOf(MapUiState.PlaceSelectMode)
+            chosenPlace!=null -> { mutableStateOf(MapUiState.BottomSheetInfoMode) }
+            else -> mutableStateOf(viewModel.mapUiState.value)
+        }
     }
 
     var cameraMoveState: CameraMoveState by remember {
         mutableStateOf(CameraMoveState.MoveFinish)
     }
 
-
     val pointerState: MutableState<PointerState> = remember {
         mutableStateOf(PointerState.HideMarker)
     }
 
-    val currentCameraPosition = remember {
-        mutableStateOf(Pair(LatLng(0.0, 0.0), 20f))
-    }
+    val currentCameraPosition = remember { mutableStateOf(Pair(LatLng(0.0, 0.0), 20f)) }
 
     LaunchedEffect(mapUiState) {
         if (mapUiState != viewModel.mapUiState) {
@@ -258,8 +267,7 @@ fun MapScreen(
                 enter = expandIn(
                     expandFrom = Alignment.TopStart,
                     animationSpec = tween(380)
-                ) +
-                        fadeIn(animationSpec = tween(480)),
+                ) + fadeIn(animationSpec = tween(480)),
                 exit = shrinkOut(
                     shrinkTowards = Alignment.TopStart,
                     animationSpec = tween(380)
