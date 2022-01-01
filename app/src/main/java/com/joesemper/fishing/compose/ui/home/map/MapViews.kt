@@ -47,8 +47,6 @@ import com.joesemper.fishing.compose.ui.theme.supportTextColor
 import com.joesemper.fishing.compose.ui.utils.currentFraction
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.utils.contains
-import com.joesemper.fishing.utils.open
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -163,7 +161,7 @@ fun CompassButton(
     AnimatedVisibility(
         modifier = modifier,
         visible = mapBearing.value < 356f && mapBearing.value > 4f,
-        enter = fadeIn(), exit = fadeOut(animationSpec = tween(delayMillis = 3000))
+        enter = fadeIn(), exit = fadeOut(animationSpec = tween(delayMillis = 3000, durationMillis = 1000))
     ) {
         Card(
             shape = CircleShape,
