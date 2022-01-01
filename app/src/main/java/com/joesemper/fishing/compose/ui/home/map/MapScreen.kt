@@ -54,7 +54,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
-import org.koin.androidx.compose.viewModel
 
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
@@ -69,7 +68,7 @@ fun MapScreen(
     place: UserMapMarker?
 ) {
     var addingPlace by remember { mutableStateOf(addPlaceOnStart) }
-    var chosenPlace by remember { mutableStateOf(place) }
+    val chosenPlace by remember { mutableStateOf(place) }
 
     val map = rememberMapViewWithLifecycle()
 
@@ -77,7 +76,8 @@ fun MapScreen(
 
     chosenPlace?.let {
         viewModel.currentMarker.value = chosenPlace
-        viewModel.lastMapCameraPosition.value = Pair(LatLng(it.latitude, it.longitude), DEFAULT_ZOOM)
+        viewModel.lastMapCameraPosition.value =
+            Pair(LatLng(it.latitude, it.longitude), DEFAULT_ZOOM)
     }
     val coroutineScope = rememberCoroutineScope()
     val userPreferences: UserPreferences = get()
@@ -94,7 +94,9 @@ fun MapScreen(
     var mapUiState: MapUiState by remember {
         when {
             addPlaceOnStart -> mutableStateOf(MapUiState.PlaceSelectMode)
-            chosenPlace!=null -> { mutableStateOf(MapUiState.BottomSheetInfoMode) }
+            chosenPlace != null -> {
+                mutableStateOf(MapUiState.BottomSheetInfoMode)
+            }
             else -> mutableStateOf(viewModel.mapUiState.value)
         }
     }
@@ -147,11 +149,12 @@ fun MapScreen(
         }
     }
 
-    BackPressHandler(mapUiState = mapUiState) {
+    BackPressHandler(
+        mapUiState = mapUiState,
+        navController = navController,
+    ) {
         mapUiState = when (mapUiState) {
-            is MapUiState.BottomSheetFullyExpanded -> {
-                MapUiState.BottomSheetInfoMode
-            }
+            is MapUiState.BottomSheetFullyExpanded -> { MapUiState.BottomSheetInfoMode }
             else -> MapUiState.NormalMode
         }
     }
@@ -175,10 +178,6 @@ fun MapScreen(
                             mapUiState = MapUiState.NormalMode
                         }
                         MapUiState.BottomSheetInfoMode -> {
-                            //mapUiState = MapUiState.PlaceSelectMode
-                            /*coroutineScope.launch {
-                                scaffoldState.bottomSheetState.collapse()
-                            }*/
                             onAddNewCatchClick(navController, viewModel)
                         }
                     }

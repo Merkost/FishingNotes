@@ -21,17 +21,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
-import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.*
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task
 import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.GoogleMap
@@ -51,7 +50,6 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.net.URI.create
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
@@ -66,7 +64,7 @@ object MapTypes {
 fun getHue(red: Float, green: Float, blue: Float): Float {
     val min = min(min(red, green), blue)
     val max = max(max(red, green), blue)
-    val c = max-min
+    val c = max - min
     if (min == max) {
         return 0f
     }
@@ -267,14 +265,16 @@ private fun turnOnGPS(context: Context) {
     val client: SettingsClient = LocationServices.getSettingsClient(context as MainActivity)
     val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
     task.addOnFailureListener { exception ->
-        if (exception is ResolvableApiException){
+        if (exception is ResolvableApiException) {
             // Location settings are not satisfied, but this can be fixed
             // by showing the user a dialog.
             try {
                 // Show the dialog by calling startResolutionForResult(),
                 // and check the result in onActivityResult().
-                exception.startResolutionForResult(context as MainActivity,
-                    /*REQUEST_CHECK_SETTINGS*/12345)
+                exception.startResolutionForResult(
+                    context as MainActivity,
+                    /*REQUEST_CHECK_SETTINGS*/12345
+                )
             } catch (sendEx: IntentSender.SendIntentException) {
                 // Ignore the error.
             }
@@ -340,22 +340,28 @@ fun startMapsActivityForNavigation(mapMarker: UserMapMarker, context: Context) {
 @Composable
 fun BackPressHandler(
     mapUiState: MapUiState,
-    onBackPressedCallback: () -> Unit
-) {
+    navController: NavController,
+    onBackPressedCallback: () -> Unit,
+
+    ) {
     val context = LocalContext.current
+    val exitString = stringResource(R.string.app_exit_message)
     var lastPressed: Long = 0
+
     BackHandler(onBack = {
-        when (mapUiState) {
-            MapUiState.NormalMode -> {
-                val currentMillis = System.currentTimeMillis()
-                if (currentMillis - lastPressed < 2000) {
-                    (context as MainActivity).finish()
-                } else {
-                    showToast(context, "Do it again to close the app")
+        if (navController.navigateUp()) {
+            return@BackHandler
+        } else {
+            when (mapUiState) {
+                MapUiState.NormalMode -> {
+                    val currentMillis = System.currentTimeMillis()
+                    if (currentMillis - lastPressed < 2000) {
+                        (context as MainActivity).finish()
+                    } else { showToast(context, exitString) }
+                    lastPressed = currentMillis
                 }
-                lastPressed = currentMillis
+                else -> onBackPressedCallback()
             }
-            else -> onBackPressedCallback()
         }
     })
 }
