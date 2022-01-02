@@ -18,6 +18,7 @@ const val SECONDS_IN_HOUR = 3600L
 const val SECONDS_IN_MINUTE = 60L
 const val MOON_PHASE_INCREMENT_IN_DAY = 0.03f
 
+fun getNewMarkerNoteId() = getRandomString(6)
 fun getNewCatchId() = getRandomString(10)
 fun getNewMarkerId() = getRandomString(15)
 fun getNewPhotoId() = getRandomString(12)

@@ -31,6 +31,7 @@ import com.joesemper.fishing.compose.ui.home.new_catch.FishAmountAndWeightView
 import com.joesemper.fishing.compose.ui.home.notes.ItemPhoto
 import com.joesemper.fishing.compose.ui.home.views.*
 import com.joesemper.fishing.domain.UserCatchViewModel
+import com.joesemper.fishing.model.entity.common.Note
 import com.joesemper.fishing.utils.Constants.MAX_PHOTOS
 
 
@@ -62,9 +63,9 @@ fun CatchModalBottomSheetContent(
 
         BottomSheetCatchScreen.EditNoteScreen -> {
             EditNoteDialog(
-                note = viewModel.catch.value?.description ?: "",
+                note = viewModel.catch.value?.note ?: Note(),
                 onSaveNote = { note ->
-                    viewModel.updateCatch(data = mapOf("description" to note))
+                    viewModel.updateCatch(data = mapOf("note" to note))
                 },
                 onCloseDialog = onCloseBottomSheet
             )
@@ -290,11 +291,14 @@ fun EditWayOfFishingDialog(
 @ExperimentalComposeUiApi
 @Composable
 fun EditNoteDialog(
-    note: String,
-    onSaveNote: (String) -> Unit,
+    note: Note,
+    onSaveNote: (Note) -> Unit,
     onCloseDialog: () -> Unit
 ) {
-    val noteState = remember { mutableStateOf(note) }
+    val noteId = remember { mutableStateOf(note.id) }
+    val noteTitle = remember { mutableStateOf(note.title) }
+    val noteDescriptionState = remember { mutableStateOf(note.description) }
+    val noteDateCreated = remember { mutableStateOf(note.dateCreated) }
 
     ConstraintLayout(
         modifier = Modifier
@@ -303,7 +307,6 @@ fun EditNoteDialog(
             .fillMaxHeight()
     ) {
         val (title, editNote, saveButton, cancelButton) = createRefs()
-
 
         PrimaryText(
             modifier = Modifier.constrainAs(title) {
@@ -320,7 +323,7 @@ fun EditNoteDialog(
                 absoluteRight.linkTo(parent.absoluteRight)
                 width = Dimension.fillToConstraints
             },
-            textState = noteState,
+            textState = noteDescriptionState,
             label = stringResource(id = R.string.note),
             singleLine = false
         )
@@ -332,7 +335,14 @@ fun EditNoteDialog(
             },
             text = stringResource(id = R.string.save),
             onClick = {
-                onSaveNote(noteState.value)
+                onSaveNote(
+                    Note(
+                        noteId.value,
+                        noteTitle.value,
+                        noteDescriptionState.value,
+                        noteDateCreated.value
+                    )
+                )
                 onCloseDialog()
             }
         )

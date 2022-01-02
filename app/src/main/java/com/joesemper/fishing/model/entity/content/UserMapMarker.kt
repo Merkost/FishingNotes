@@ -2,6 +2,7 @@ package com.joesemper.fishing.model.entity.content
 
 import android.os.Parcelable
 import androidx.compose.ui.graphics.Color
+import com.joesemper.fishing.model.entity.common.Note
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -16,5 +17,6 @@ class UserMapMarker(
     val catchesCount: Int = 0,
     val dateOfCreation: Long = 0,
     val visible: Boolean = true,
-    val public: Boolean = false
+    val public: Boolean = false,
+    var notes: List<Note> = listOf()
 ) : Parcelable, MapMarker

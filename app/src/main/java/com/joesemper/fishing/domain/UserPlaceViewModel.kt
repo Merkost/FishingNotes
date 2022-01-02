@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.model.entity.common.LiteProgress
+import com.joesemper.fishing.model.entity.common.Note
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.repository.app.CatchesRepository
@@ -14,6 +15,7 @@ import com.joesemper.fishing.model.repository.app.MarkersRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import org.koin.core.component.getScopeName
 
 class UserPlaceViewModel(
     private val markersRepo: MarkersRepository,
@@ -22,6 +24,8 @@ class UserPlaceViewModel(
 
     var markerVisibility: MutableState<Boolean?> = mutableStateOf(null)
     val marker: MutableState<UserMapMarker?> = mutableStateOf(null)
+
+    val markerNotes = marker.value?.notes
 
     fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>> {
         return viewModelScope.run {
@@ -55,6 +59,21 @@ class UserPlaceViewModel(
                     }
                 }
             }
+
+        }
+    }
+
+    fun updateMarkerNotes(note: Note) {
+        marker.value?.let { marker ->
+                viewModelScope.launch {
+                    markersRepo.updateUserMarkerNote(
+                        markerId = marker.id,
+                        note = note
+                    )
+                    //TODO: Check on success
+                    marker.notes = (marker.notes as MutableList).also { it.add(note) }
+                }
+
 
         }
     }

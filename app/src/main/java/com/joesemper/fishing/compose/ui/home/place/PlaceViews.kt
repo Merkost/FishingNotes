@@ -10,6 +10,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -27,13 +29,16 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.home.catch_screen.EditNoteDialog
 import com.joesemper.fishing.compose.ui.home.notes.*
 import com.joesemper.fishing.compose.ui.home.views.*
 import com.joesemper.fishing.compose.ui.theme.primaryTextColor
 import com.joesemper.fishing.compose.ui.theme.supportTextColor
 import com.joesemper.fishing.domain.UserPlaceViewModel
+import com.joesemper.fishing.model.entity.common.Note
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.utils.Constants.bottomBannerPadding
 import com.joesemper.fishing.utils.time.toDateTextMonth
 import kotlinx.coroutines.launch
 
@@ -162,7 +167,8 @@ fun PlaceTabsContentView(
     pagerState: PagerState,
     navController: NavController,
     catches: List<UserCatch>,
-    note: String
+    notes: List<Note>,
+    onNoteSelected: (Note) -> Unit
 ) {
     HorizontalPager(
         modifier = Modifier.fillMaxSize(),
@@ -170,6 +176,8 @@ fun PlaceTabsContentView(
         count = tabs.size,
         verticalAlignment = Alignment.Top
     ) { page ->
+
+
         Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Top
@@ -179,15 +187,57 @@ fun PlaceTabsContentView(
                     catches = catches,
                     userCatchClicked = { onCatchItemClick(it, navController) }
                 )
-                1 -> DefaultNoteView(
-                    modifier = Modifier.padding(8.dp),
-                    note = note,
-                    onClick = { }
-                )
+                1 -> PlaceNotes(notes) {
+                    onNoteSelected(it)
+                }
             }
         }
 
+    }
+}
 
+@ExperimentalComposeUiApi
+@Composable
+fun NoteModalBottomSheet(
+    currentNote: Note,
+    onSaveNote: (Note) -> Unit,
+    onCloseBottomSheet: () -> Unit,
+) {
+    EditNoteDialog(
+        note = currentNote,
+        onSaveNote = { note ->
+            onSaveNote(note)
+        },
+        onCloseDialog = onCloseBottomSheet
+    )
+}
+
+@ExperimentalComposeUiApi
+@ExperimentalMaterialApi
+@Composable
+fun PlaceNotes(
+    notes: List<Note>,
+    onNoteSelected: (Note) -> Unit
+) {
+    LazyColumn(/*contentPadding = PaddingValues(8.dp)*/) {
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Card(onClick = { onNoteSelected(Note()) }) {
+                    Icon(Icons.Default.Add, "")
+                }
+            }
+        }
+        items(notes) { note ->
+            DefaultNoteView(
+                modifier = Modifier.padding(8.dp),
+                note = note,
+                onClick = { onNoteSelected(note) }
+            )
+        }
+        item { Spacer(modifier = Modifier.size(bottomBannerPadding)) }
     }
 }
 
