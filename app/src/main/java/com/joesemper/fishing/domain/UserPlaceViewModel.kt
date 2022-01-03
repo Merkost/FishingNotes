@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
+import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.LiteProgress
 import com.joesemper.fishing.model.entity.common.Note
 import com.joesemper.fishing.model.entity.content.UserCatch
@@ -13,9 +14,7 @@ import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.repository.app.CatchesRepository
 import com.joesemper.fishing.model.repository.app.MarkersRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.koin.core.component.getScopeName
 
 class UserPlaceViewModel(
     private val markersRepo: MarkersRepository,
@@ -25,6 +24,7 @@ class UserPlaceViewModel(
     var markerVisibility: MutableState<Boolean?> = mutableStateOf(null)
     val marker: MutableState<UserMapMarker?> = mutableStateOf(null)
 
+    val currentNote: MutableState<Note?> = mutableStateOf(null)
     val markerNotes = marker.value?.notes
 
     fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>> {
@@ -65,14 +65,31 @@ class UserPlaceViewModel(
 
     fun updateMarkerNotes(note: Note) {
         marker.value?.let { marker ->
-                viewModelScope.launch {
-                    markersRepo.updateUserMarkerNote(
-                        markerId = marker.id,
-                        note = note
-                    )
-                    //TODO: Check on success
-                    marker.notes = (marker.notes as MutableList).also { it.add(note) }
+            val mutableList = marker.notes.toMutableList()
+
+            viewModelScope.launch {
+                markersRepo.updateUserMarkerNote(
+                    markerId = marker.id,
+                    note = note
+                ).collect { baseViewState ->
+                    when (baseViewState) {
+                        is BaseViewState.Success<*> -> {
+                            val noteToAdd = baseViewState.data as Note
+                            if (mutableList.isEmpty() || mutableList.find { it.id == note.id } == null) {
+                                marker.notes = mutableList.apply { add(noteToAdd) }
+                            } else {
+                                val index = mutableList.indexOf(mutableList.find { it.id == note.id })
+                                marker.notes = mutableList.apply { set(index, noteToAdd) }
+                            }
+                        }
+                    }
+
                 }
+                //TODO: Check on success
+
+
+
+            }
 
 
         }

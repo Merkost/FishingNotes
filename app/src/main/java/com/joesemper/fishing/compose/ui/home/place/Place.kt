@@ -44,28 +44,22 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
 
     LaunchedEffect(modalBottomSheetState.currentValue) {
         when (modalBottomSheetState.currentValue) {
-            ModalBottomSheetValue.Hidden -> scaffoldState.bottomSheetState.expand()
+            ModalBottomSheetValue.Hidden -> viewModel.currentNote.value = null
             //else -> scaffoldState.bottomSheetState.collapse()
         }
     }
 
     val coroutineScope = rememberCoroutineScope()
-    var currentNote by remember { mutableStateOf(Note()) }
+    var currentNote = remember { mutableStateOf(Note()) }
 
 
     ModalBottomSheetLayout(
         sheetState = modalBottomSheetState,
         sheetShape = Constants.modalBottomSheetCorners,
         sheetContent = {
-            NoteModalBottomSheet(
-                currentNote = currentNote,
-                onSaveNote = {
-                    viewModel.updateMarkerNotes(it)
-                }
-            ) {
+            NoteModalBottomSheet(viewModel = viewModel,) {
                 coroutineScope.launch {
                     modalBottomSheetState.hide()
-                    currentNote = Note()
                 }
             }
         }) {
@@ -118,7 +112,7 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
                         catches = userCatches,
                         notes = userPlace.notes
                     ) { note ->
-                        currentNote = note
+                        viewModel.currentNote.value = note
                         coroutineScope.launch {
                             modalBottomSheetState.animateTo(ModalBottomSheetValue.Expanded)
                         }

@@ -295,10 +295,14 @@ fun EditNoteDialog(
     onSaveNote: (Note) -> Unit,
     onCloseDialog: () -> Unit
 ) {
-    val noteId = remember { mutableStateOf(note.id) }
-    val noteTitle = remember { mutableStateOf(note.title) }
-    val noteDescriptionState = remember { mutableStateOf(note.description) }
-    val noteDateCreated = remember { mutableStateOf(note.dateCreated) }
+    val note = remember { mutableStateOf(note) }
+
+    val noteId = remember { mutableStateOf(note.value.id) }
+    val noteTitle = remember { mutableStateOf(note.value.title) }
+    val noteDescriptionState = remember { mutableStateOf(note.value.description) }
+    val noteDateCreated = remember { mutableStateOf(note.value.dateCreated) }
+
+    val description = noteDescriptionState.value
 
     ConstraintLayout(
         modifier = Modifier

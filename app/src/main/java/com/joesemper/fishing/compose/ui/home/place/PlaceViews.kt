@@ -199,14 +199,13 @@ fun PlaceTabsContentView(
 @ExperimentalComposeUiApi
 @Composable
 fun NoteModalBottomSheet(
-    currentNote: Note,
-    onSaveNote: (Note) -> Unit,
+    viewModel: UserPlaceViewModel,
     onCloseBottomSheet: () -> Unit,
 ) {
     EditNoteDialog(
-        note = currentNote,
+        note = viewModel.currentNote.value ?: Note(),
         onSaveNote = { note ->
-            onSaveNote(note)
+            viewModel.updateMarkerNotes(note)
         },
         onCloseDialog = onCloseBottomSheet
     )

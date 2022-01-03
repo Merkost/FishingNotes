@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.runtime.MutableState
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
+import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.LiteProgress
 import com.joesemper.fishing.model.entity.common.Note
 import com.joesemper.fishing.model.entity.common.Progress
@@ -68,16 +69,33 @@ class FirebaseMarkersRepositoryImpl(
         }
     }
 
-    override suspend fun updateUserMarkerNote(markerId: String, note: Note) {
+    override suspend fun updateUserMarkerNote(markerId: String, note: Note): StateFlow<BaseViewState> {
+        val flow = MutableStateFlow<BaseViewState>(BaseViewState.Loading())
+
         if (note.id.isEmpty()) {
             val newNote = MarkerNoteMapper().mapRawMarkerNote(note)
             dbCollections.getUserMapMarkersCollection().document(markerId)
-                .update("notes", FieldValue.arrayUnion(newNote))
+                .update("notes", FieldValue.arrayUnion(newNote)).addOnCompleteListener {
+                    if (it.exception != null) {
+                        flow.tryEmit(BaseViewState.Error(it.exception!!))
+                    }
+                    if (it.isSuccessful) {
+                        flow.tryEmit(BaseViewState.Success(newNote))
+                    }
+                }
         } else {
             dbCollections.getUserMapMarkersCollection().document(markerId)
-                .update("notes", FieldValue.arrayUnion(note))
+                .update("notes", FieldValue.arrayUnion(note)).addOnCompleteListener {
+                    if (it.exception != null) {
+                        flow.tryEmit(BaseViewState.Error(it.exception!!))
+                    }
+                    if (it.isSuccessful) {
+                        flow.tryEmit(BaseViewState.Success(note))
+                    }
+                }
         }
             //TODO: Update array problem
+        return flow
     }
 
     override suspend fun changeMarkerVisibility(marker: UserMapMarker, changeTo: Boolean)
