@@ -2,6 +2,7 @@ package com.joesemper.fishing.compose.ui
 
 import android.content.Intent
 import android.content.res.Resources
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -91,24 +92,44 @@ class MainActivity : ComponentActivity() {
                 userStateFlow.value is BaseViewState.Loading
                         && appTheme.value == null
             }
-            /*setOnExitAnimationListener { splashScreenViewProvider ->
+            setOnExitAnimationListener { splashScreenViewProvider ->
                 // Get icon instance and start a fade out animation
-                splashScreenViewProvider.iconView
+                splashScreenViewProvider.view
                     .animate()
                     .setDuration(splashFadeDurationMillis.toLong())
                     .alpha(0f)
                     .withEndAction {
-                        splashScreenViewProvider.remove()
 
+                        if (Build.VERSION.SDK_INT < 31) {
+                            setContent {
+                                FishingNotesTheme(appTheme.value) {
+                                    DistributionScreen(viewModel.user)
+                                }
+                            }
+                        }
                     }
                     .start()
-            }*/
+
+                splashScreenViewProvider.iconView
+                    .animate()
+                    .setDuration(splashFadeDurationMillis*2.toLong())
+                    .alpha(0f)
+                    .scaleX(20f)
+                    .scaleY(20f)
+                    .withEndAction {
+                        splashScreenViewProvider.remove()
+                    }
+                    .start()
+
+            }
 
         }
 
-        setContent {
-            FishingNotesTheme(appTheme.value) {
-                DistributionScreen(viewModel.user)
+        if (Build.VERSION.SDK_INT >= 31) {
+            setContent {
+                FishingNotesTheme(appTheme.value) {
+                    DistributionScreen(viewModel.user)
+                }
             }
         }
 
