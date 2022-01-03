@@ -15,10 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.GpsOff
-import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -35,10 +32,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.airbnb.lottie.compose.*
+import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
+import com.alorma.compose.settings.ui.SettingsCheckbox
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.UserPreferences
+import com.joesemper.fishing.compose.ui.home.SettingsHeader
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.views.DefaultDialog
 import com.joesemper.fishing.compose.ui.theme.RedGoogleChrome
@@ -94,6 +94,41 @@ fun MapScaffold(
         sheetGesturesEnabled = scaffoldState.currentFraction != 1f,
         content = content
     )
+}
+
+@Composable
+fun MapModalBottomSheet(
+    mapPreferences: UserPreferences
+) {
+    val coroutineScope = rememberCoroutineScope()
+    val showHiddenPlaces by mapPreferences.shouldShowHiddenPlacesOnMap.collectAsState(false)
+
+    val color = animateColorAsState(
+        targetValue = if (showHiddenPlaces) {
+            MaterialTheme.colors.onSurface
+        } else {
+            supportTextColor
+        },
+        animationSpec = tween(800)
+    )
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        SettingsHeader(stringResource(R.string.settings))
+        SettingsCheckbox(
+            icon = {
+                Icon(
+                    Icons.Default.Visibility, Icons.Default.Visibility.name,
+                    tint = color.value
+                )
+            },
+            title = { Text(text = stringResource(R.string.hidden_places)) },
+            subtitle = { Text(text = stringResource(R.string.show_hidden_places)) },
+            onCheckedChange = { newValue ->
+                coroutineScope.launch { mapPreferences.saveMapHiddenPlaces(newValue) }
+            },
+            state = if (showHiddenPlaces) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
+        )
+    }
 }
 
 @ExperimentalPermissionsApi
@@ -290,33 +325,21 @@ fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name:
 }
 
 @Composable
-fun MapFilterButton(
-    modifier: Modifier, showHiddenPlaces: Boolean,
-    onCLick: (Boolean) -> Unit,
+fun MapSettingsButton(
+    modifier: Modifier,
+    onCLick: () -> Unit,
 ) {
-
-
-    val color = animateColorAsState(
-        targetValue = if (showHiddenPlaces) {
-            MaterialTheme.colors.onSurface
-        } else {
-            supportTextColor
-        },
-        animationSpec = tween(800)
-    )
 
     Card(
         shape = CircleShape,
         modifier = modifier.size(40.dp)
     ) {
-        IconToggleButton(checked = showHiddenPlaces,
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxSize(),
-            onCheckedChange = { onCLick(it) }) {
+        IconButton(
+            modifier = Modifier.padding(8.dp).fillMaxSize(),
+            onClick = onCLick
+            ) {
             Icon(
-                Icons.Default.Visibility, Icons.Default.Visibility.name,
-                tint = color.value
+                Icons.Default.Settings, Icons.Default.Settings.name,
             )
         }
     }

@@ -76,7 +76,7 @@ fun NavGraphBuilder.addHomeGraph(
         val place: UserMapMarker? = from.arguments?.getParcelable(Arguments.PLACE)
         requireNotNull(from.arguments).clear()
         //from.arguments?.getBoolean(Arguments.MAP_NEW_PLACE)!!
-        MapScreen(modifier, navController, addPlace, place)
+        MapScreen(modifier, upPress = upPress, navController, addPlace, place)
     }
     composable(HomeSections.NOTES.route) { from ->
         Notes(modifier, navController, upPress)

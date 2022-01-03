@@ -47,10 +47,10 @@ import com.joesemper.fishing.compose.ui.utils.currentFraction
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
+import com.joesemper.fishing.utils.Constants
 import com.joesemper.fishing.utils.Constants.defaultFabBottomPadding
 import com.joesemper.fishing.utils.getCameraPosition
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
@@ -63,6 +63,7 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun MapScreen(
     modifier: Modifier = Modifier,
+    upPress: () -> Unit,
     navController: NavController,
     addPlaceOnStart: Boolean = false,
     place: UserMapMarker?
@@ -84,6 +85,7 @@ fun MapScreen(
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
 
     val scaffoldState = rememberBottomSheetScaffoldState()
+    val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val dialogAddPlaceIsShowing = remember { mutableStateOf(false) }
 
     val mapLayersSelection = rememberSaveable { mutableStateOf(false) }
@@ -109,7 +111,7 @@ fun MapScreen(
         mutableStateOf(PointerState.HideMarker)
     }
 
-    val currentCameraPosition = remember { mutableStateOf(Pair(LatLng(0.0, 0.0), 20f)) }
+    val currentCameraPosition = remember { mutableStateOf(Pair(LatLng(0.0, 0.0), 0f)) }
 
     LaunchedEffect(mapUiState) {
         if (mapUiState != viewModel.mapUiState) {
@@ -154,203 +156,215 @@ fun MapScreen(
         navController = navController,
     ) {
         mapUiState = when (mapUiState) {
-            is MapUiState.BottomSheetFullyExpanded -> { MapUiState.BottomSheetInfoMode }
+            is MapUiState.BottomSheetFullyExpanded -> {
+                MapUiState.BottomSheetInfoMode
+            }
             else -> MapUiState.NormalMode
         }
     }
 
     val noNamePlace = stringResource(R.string.no_name_place)
 
-    MapScaffold(
-        mapUiState = mapUiState,
-        currentPlace = viewModel.currentMarker,
-        scaffoldState = scaffoldState,
-        fab = {
-            MapFab(
-                state = mapUiState,
-                onClick = {
-                    when (mapUiState) {
-                        MapUiState.NormalMode -> {
-                            mapUiState = MapUiState.PlaceSelectMode
-                        }
-                        MapUiState.PlaceSelectMode -> {
-                            dialogAddPlaceIsShowing.value = true
-                            mapUiState = MapUiState.NormalMode
-                        }
-                        MapUiState.BottomSheetInfoMode -> {
-                            onAddNewCatchClick(navController, viewModel)
-                        }
-                    }
-                },
-                onLongPress = {
-                    when (mapUiState) {
-                        MapUiState.NormalMode -> {
-                            viewModel.lastKnownLocation.value?.let {
-                                viewModel.addNewMarker(
-                                    RawMapMarker(
-                                        noNamePlace,
-                                        latitude = it.latitude,
-                                        longitude = it.longitude,
-                                    )
-                                )
-                            }
-                        }
-                    }
-                },
-                userSettings = userPreferences,
-                currentFraction = scaffoldState.currentFraction
+
+    ModalBottomSheetLayout(
+        sheetState = modalBottomSheetState,
+        sheetShape = Constants.modalBottomSheetCorners,
+        sheetContent = {
+            MapModalBottomSheet(
+                mapPreferences = userPreferences,
             )
-        },
-        bottomSheet = {
-
-            MarkerInfoDialog(
-                viewModel.currentMarker.value,
-                navController = navController,
-                mapUiState = mapUiState,
-                scaffoldState = scaffoldState,
-                upPress = { markerToUpdate ->
-                    coroutineScope.launch {
-                        viewModel.updateCurrentPlace(markerToUpdate)
-                        scaffoldState.bottomSheetState.collapse()
-                    }
-                }
-            ) {
-                mapUiState = MapUiState.BottomSheetFullyExpanded
-                /*coroutineScope.launch {
-                    scaffoldState.bottomSheetState.expand()
-                }
-                onMarkerDetailsClick(navController, marker)*/
-            }
-
         }
     ) {
-        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (mapLayout, addMarkerFragment, mapMyLocationButton,
-                mapCompassButton, mapLayersButton,
-                mapFilterButton, mapLayersView, pointer) = createRefs()
-            val verticalMyLocationButtonGl = createGuidelineFromAbsoluteRight(56.dp)
-
-            MapLayout(
-                modifier = Modifier.constrainAs(mapLayout) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                    absoluteRight.linkTo(parent.absoluteRight)
-                }, map = map,
-                onMarkerClick = {
-                    viewModel.currentMarker.value = it
-                    mapUiState = MapUiState.BottomSheetInfoMode
-                },
-                showHiddenPlacess = showHiddenPlaces,
-                cameraMoveCallback = { state -> cameraMoveState = state },
-                currentCameraPosition = currentCameraPosition,
-                mapType = mapType, mapBearing = mapBearing,
-                onMapClick = {
-                    mapUiState = MapUiState.NormalMode
-                }
-            )
-
-            MapLayersButton(
-                modifier = Modifier.constrainAs(mapLayersButton) {
-                    top.linkTo(parent.top, 16.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                },
-                layersSelectionMode = mapLayersSelection,
-            )
-
-            if (mapLayersSelection.value)
-                Surface(modifier = Modifier.fillMaxSize().alpha(0f).zIndex(4f)
-                    .clickable { mapLayersSelection.value = false }) {}
-            AnimatedVisibility(
-                mapLayersSelection.value,
-                enter = expandIn(
-                    expandFrom = Alignment.TopStart,
-                    animationSpec = tween(380)
-                ) + fadeIn(animationSpec = tween(480)),
-                exit = shrinkOut(
-                    shrinkTowards = Alignment.TopStart,
-                    animationSpec = tween(380)
-                ) + fadeOut(animationSpec = tween(480)),
-                modifier = Modifier.constrainAs(mapLayersView) {
-                    top.linkTo(parent.top, 16.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                }.zIndex(5f)
-            ) {
-                LayersView(mapLayersSelection, mapType)
-            }
-
-            MapFilterButton(
-                modifier = Modifier.constrainAs(mapFilterButton) {
-                    top.linkTo(mapLayersButton.bottom, 16.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                },
-                showHiddenPlaces = showHiddenPlaces,
-            ) { newValue ->
-                coroutineScope.launch {
-                    userPreferences.saveMapHiddenPlaces(newValue)
-                }
-            }
-
-
-            MyLocationButton(
-                modifier = modifier.constrainAs(mapMyLocationButton) {
-                    top.linkTo(parent.top, 16.dp)
-                    absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-                },
-                lastKnownLocation = viewModel.lastKnownLocation,
-                userPreferences = userPreferences,
-            ) {
-                viewModel.lastKnownLocation.value?.let {
-                    viewModel.lastMapCameraPosition.value = getCameraPosition(it)
-                }
-            }
-
-            CompassButton(modifier = modifier.constrainAs(mapCompassButton) {
-                top.linkTo(mapMyLocationButton.bottom, 16.dp)
-                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-            }, mapBearing = mapBearing) {
-                setCameraBearing(
-                    coroutineScope, map,
-                    currentCameraPosition.value.first,
-                    currentCameraPosition.value.second
+        MapScaffold(
+            mapUiState = mapUiState,
+            currentPlace = viewModel.currentMarker,
+            scaffoldState = scaffoldState,
+            fab = {
+                MapFab(
+                    state = mapUiState,
+                    onClick = {
+                        when (mapUiState) {
+                            MapUiState.NormalMode -> {
+                                mapUiState = MapUiState.PlaceSelectMode
+                            }
+                            MapUiState.PlaceSelectMode -> {
+                                dialogAddPlaceIsShowing.value = true
+                                mapUiState = MapUiState.NormalMode
+                            }
+                            MapUiState.BottomSheetInfoMode -> {
+                                onAddNewCatchClick(navController, viewModel)
+                            }
+                        }
+                    },
+                    onLongPress = {
+                        when (mapUiState) {
+                            MapUiState.NormalMode -> {
+                                viewModel.lastKnownLocation.value?.let {
+                                    viewModel.addNewMarker(
+                                        RawMapMarker(
+                                            noNamePlace,
+                                            latitude = it.latitude,
+                                            longitude = it.longitude,
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    },
+                    userSettings = userPreferences,
+                    currentFraction = scaffoldState.currentFraction
                 )
-            }
+            },
+            bottomSheet = {
 
-            AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode,
-                modifier = Modifier.constrainAs(pointer) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom, 65.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                    absoluteRight.linkTo(parent.absoluteRight)
-                }) {
-                PointerIcon(pointerState)
-            }
-
-            AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection.value,
-                enter = fadeIn(animationSpec = tween(300)),
-                exit = fadeOut(animationSpec = tween(300)),
-                modifier = Modifier.constrainAs(addMarkerFragment) {
-                    top.linkTo(parent.top, 16.dp)
-                    absoluteLeft.linkTo(mapLayersButton.absoluteRight, 8.dp)
-                    absoluteRight.linkTo(verticalMyLocationButtonGl, 8.dp)
+                MarkerInfoDialog(
+                    viewModel.currentMarker.value,
+                    navController = navController,
+                    mapUiState = mapUiState,
+                    scaffoldState = scaffoldState,
+                    upPress = { markerToUpdate ->
+                        coroutineScope.launch {
+                            viewModel.updateCurrentPlace(markerToUpdate)
+                            scaffoldState.bottomSheetState.collapse()
+                        }
+                    }
+                ) {
+                    mapUiState = MapUiState.BottomSheetFullyExpanded
+                    /*coroutineScope.launch {
+                        scaffoldState.bottomSheetState.expand()
+                    }
+                    onMarkerDetailsClick(navController, marker)*/
                 }
-            ) {
-                PlaceTileView(
-                    modifier = Modifier.wrapContentSize(),
-                    cameraMoveState = cameraMoveState,
+
+            }
+        ) {
+            ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+                val (mapLayout, addMarkerFragment, mapMyLocationButton,
+                    mapCompassButton, mapLayersButton,
+                    mapSettingsButton, mapLayersView, pointer) = createRefs()
+                val verticalMyLocationButtonGl = createGuidelineFromAbsoluteRight(56.dp)
+
+                MapLayout(
+                    modifier = Modifier.constrainAs(mapLayout) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                    }, map = map,
+                    onMarkerClick = {
+                        viewModel.currentMarker.value = it
+                        mapUiState = MapUiState.BottomSheetInfoMode
+                    },
+                    showHiddenPlacess = showHiddenPlaces,
+                    cameraMoveCallback = { state -> cameraMoveState = state },
                     currentCameraPosition = currentCameraPosition,
-                    pointerState = pointerState
+                    mapType = mapType, mapBearing = mapBearing,
+                    onMapClick = {
+                        mapUiState = MapUiState.NormalMode
+                    }
                 )
-            }
 
-            if (dialogAddPlaceIsShowing.value)
-                Dialog(onDismissRequest = { dialogAddPlaceIsShowing.value = false }) {
-                    NewPlaceDialog(
-                        currentCameraPosition = currentCameraPosition,
-                        dialogState = dialogAddPlaceIsShowing,
-                        chosenPlace = viewModel.chosenPlace
+                MapLayersButton(
+                    modifier = Modifier.constrainAs(mapLayersButton) {
+                        top.linkTo(parent.top, 16.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                    },
+                    layersSelectionMode = mapLayersSelection,
+                )
+
+                if (mapLayersSelection.value)
+                    Surface(modifier = Modifier.fillMaxSize().alpha(0f).zIndex(4f)
+                        .clickable { mapLayersSelection.value = false }) {}
+                AnimatedVisibility(
+                    mapLayersSelection.value,
+                    enter = expandIn(
+                        expandFrom = Alignment.TopStart,
+                        animationSpec = tween(380)
+                    ) + fadeIn(animationSpec = tween(480)),
+                    exit = shrinkOut(
+                        shrinkTowards = Alignment.TopStart,
+                        animationSpec = tween(380)
+                    ) + fadeOut(animationSpec = tween(480)),
+                    modifier = Modifier.constrainAs(mapLayersView) {
+                        top.linkTo(parent.top, 16.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                    }.zIndex(5f)
+                ) {
+                    LayersView(mapLayersSelection, mapType)
+                }
+
+                MapSettingsButton(
+                    modifier = Modifier.constrainAs(mapSettingsButton) {
+                        top.linkTo(mapLayersButton.bottom, 16.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                    },
+                ) {
+                    coroutineScope.launch {
+                        modalBottomSheetState.show()
+                    }
+                }
+
+
+                MyLocationButton(
+                    modifier = modifier.constrainAs(mapMyLocationButton) {
+                        top.linkTo(parent.top, 16.dp)
+                        absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+                    },
+                    lastKnownLocation = viewModel.lastKnownLocation,
+                    userPreferences = userPreferences,
+                ) {
+                    viewModel.lastKnownLocation.value?.let {
+                        viewModel.lastMapCameraPosition.value = getCameraPosition(it)
+                    }
+                }
+
+                CompassButton(modifier = modifier.constrainAs(mapCompassButton) {
+                    top.linkTo(mapMyLocationButton.bottom, 16.dp)
+                    absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+                }, mapBearing = mapBearing) {
+                    setCameraBearing(
+                        coroutineScope, map,
+                        currentCameraPosition.value.first,
+                        currentCameraPosition.value.second
                     )
                 }
+
+                AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode,
+                    modifier = Modifier.constrainAs(pointer) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom, 65.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                    }) {
+                    PointerIcon(pointerState)
+                }
+
+                AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection.value,
+                    enter = fadeIn(animationSpec = tween(300)),
+                    exit = fadeOut(animationSpec = tween(300)),
+                    modifier = Modifier.constrainAs(addMarkerFragment) {
+                        top.linkTo(parent.top, 16.dp)
+                        absoluteLeft.linkTo(mapLayersButton.absoluteRight, 8.dp)
+                        absoluteRight.linkTo(verticalMyLocationButtonGl, 8.dp)
+                    }
+                ) {
+                    PlaceTileView(
+                        modifier = Modifier.wrapContentSize(),
+                        cameraMoveState = cameraMoveState,
+                        currentCameraPosition = currentCameraPosition,
+                        pointerState = pointerState
+                    )
+                }
+
+                if (dialogAddPlaceIsShowing.value)
+                    Dialog(onDismissRequest = { dialogAddPlaceIsShowing.value = false }) {
+                        NewPlaceDialog(
+                            currentCameraPosition = currentCameraPosition,
+                            dialogState = dialogAddPlaceIsShowing,
+                            chosenPlace = viewModel.chosenPlace
+                        )
+                    }
+            }
         }
     }
 }

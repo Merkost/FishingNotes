@@ -185,7 +185,7 @@ fun CatchContent(
             )
 
             DefaultNoteView(
-                note = catch.description,
+                note = catch.note,
                 onClick = { openSheet(BottomSheetCatchScreen.EditNoteScreen) }
             )
 

@@ -248,6 +248,8 @@
     <string name="gps_is_off">You need to turn on GPS on your device</string>
     <string name="compass">Compass</string>
     <string name="app_exit_message">Do it again to close the app</string>
+    <string name="hidden_places">Скрытые места</string>
+    <string name="show_hidden_places">Показывать скрытые места на карте</string>
 
 
 </resources>

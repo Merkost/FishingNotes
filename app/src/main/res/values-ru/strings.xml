@@ -241,5 +241,7 @@
     <string name="edit_note">Редактировать заметку</string>
     <string name="compass">Компас</string>
     <string name="app_exit_message">Нажмите еще раз для выхода из приложения</string>
+    <string name="hidden_places">Скрытые места</string>
+    <string name="show_hidden_places">Показывать скрытые места на карте</string>
 
 </resources>

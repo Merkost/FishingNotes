@@ -3,17 +3,17 @@ package com.joesemper.fishing.model.datasource
 import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.MutableState
-import com.google.firebase.firestore.DocumentChange
-import com.google.firebase.firestore.EventListener
-import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
+import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.LiteProgress
+import com.joesemper.fishing.model.entity.common.Note
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.model.mappers.MapMarkerMapper
+import com.joesemper.fishing.model.mappers.MarkerNoteMapper
 import com.joesemper.fishing.model.repository.app.MarkersRepository
 import com.joesemper.fishing.utils.getCurrentUserId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -67,6 +67,35 @@ class FirebaseMarkersRepositoryImpl(
         awaitClose {
             listeners.forEach { it.remove() }
         }
+    }
+
+    override suspend fun updateUserMarkerNote(markerId: String, note: Note): StateFlow<BaseViewState> {
+        val flow = MutableStateFlow<BaseViewState>(BaseViewState.Loading())
+
+        if (note.id.isEmpty()) {
+            val newNote = MarkerNoteMapper().mapRawMarkerNote(note)
+            dbCollections.getUserMapMarkersCollection().document(markerId)
+                .update("notes", FieldValue.arrayUnion(newNote)).addOnCompleteListener {
+                    if (it.exception != null) {
+                        flow.tryEmit(BaseViewState.Error(it.exception!!))
+                    }
+                    if (it.isSuccessful) {
+                        flow.tryEmit(BaseViewState.Success(newNote))
+                    }
+                }
+        } else {
+            dbCollections.getUserMapMarkersCollection().document(markerId)
+                .update("notes", FieldValue.arrayUnion(note)).addOnCompleteListener {
+                    if (it.exception != null) {
+                        flow.tryEmit(BaseViewState.Error(it.exception!!))
+                    }
+                    if (it.isSuccessful) {
+                        flow.tryEmit(BaseViewState.Success(note))
+                    }
+                }
+        }
+            //TODO: Update array problem
+        return flow
     }
 
     override suspend fun changeMarkerVisibility(marker: UserMapMarker, changeTo: Boolean)

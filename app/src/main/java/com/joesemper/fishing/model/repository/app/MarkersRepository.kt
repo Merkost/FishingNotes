@@ -1,7 +1,9 @@
 package com.joesemper.fishing.model.repository.app
 
 import androidx.compose.runtime.MutableState
+import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.LiteProgress
+import com.joesemper.fishing.model.entity.common.Note
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.MapMarker
 import com.joesemper.fishing.model.entity.content.UserMapMarker
@@ -14,8 +16,11 @@ interface MarkersRepository {
     fun getAllUserMarkers(): Flow<MapMarker>
     fun getAllUserMarkersList(): Flow<List<MapMarker>>
 
+    suspend fun updateUserMarkerNote(markerId: String, note: Note): StateFlow<BaseViewState>
+
     suspend fun changeMarkerVisibility(marker: UserMapMarker, changeTo: Boolean): StateFlow<LiteProgress>
 
     suspend fun deleteMarker(userMapMarker: UserMapMarker)
     suspend fun addNewMarker(newMarker: RawMapMarker): StateFlow<Progress>
+
 }
