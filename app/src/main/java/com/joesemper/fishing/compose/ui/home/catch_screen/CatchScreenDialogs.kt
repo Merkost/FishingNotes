@@ -295,12 +295,18 @@ fun EditNoteDialog(
     onSaveNote: (Note) -> Unit,
     onCloseDialog: () -> Unit
 ) {
-    val note = remember { mutableStateOf(note) }
 
-    val noteId = remember { mutableStateOf(note.value.id) }
-    val noteTitle = remember { mutableStateOf(note.value.title) }
-    val noteDescriptionState = remember { mutableStateOf(note.value.description) }
-    val noteDateCreated = remember { mutableStateOf(note.value.dateCreated) }
+    val noteId = remember { mutableStateOf(note.id) }
+    val noteTitle = remember { mutableStateOf(note.title) }
+    val noteDescriptionState = remember { mutableStateOf(note.description) }
+    val noteDateCreated = remember { mutableStateOf(note.dateCreated) }
+
+    LaunchedEffect(note) {
+        noteId.value = note.id
+        noteTitle.value = note.title
+        noteDescriptionState.value = note.description
+        noteDateCreated.value = note.dateCreated
+    }
 
     val description = noteDescriptionState.value
 

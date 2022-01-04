@@ -48,6 +48,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.getViewModel
 import java.util.*
 
 class MainActivity : ComponentActivity() {
@@ -74,7 +75,7 @@ class MainActivity : ComponentActivity() {
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val viewModel: MainViewModel = get()
+        val viewModel: MainViewModel = getViewModel()
 
         val userStateFlow: StateFlow<BaseViewState> = viewModel.mutableStateFlow
 
