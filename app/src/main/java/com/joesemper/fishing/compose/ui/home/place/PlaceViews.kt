@@ -167,7 +167,7 @@ fun PlaceTabsContentView(
     pagerState: PagerState,
     navController: NavController,
     catches: List<UserCatch>,
-    notes: List<Note>,
+    notes: MutableState<List<Note>?>,
     onNoteSelected: (Note) -> Unit
 ) {
     HorizontalPager(
@@ -187,7 +187,7 @@ fun PlaceTabsContentView(
                     catches = catches,
                     userCatchClicked = { onCatchItemClick(it, navController) }
                 )
-                1 -> PlaceNotes(notes) {
+                1 -> PlaceNotes(notes.value) {
                     onNoteSelected(it)
                 }
             }
@@ -215,7 +215,7 @@ fun NoteModalBottomSheet(
 @ExperimentalMaterialApi
 @Composable
 fun PlaceNotes(
-    notes: List<Note>,
+    notes: List<Note>?,
     onNoteSelected: (Note) -> Unit
 ) {
     LazyColumn(/*contentPadding = PaddingValues(8.dp)*/) {
@@ -229,13 +229,22 @@ fun PlaceNotes(
                 }
             }
         }
-        items(notes) { note ->
+        notes?.let {
+            items(notes) { note ->
+                DefaultNoteView(
+                    modifier = Modifier.padding(8.dp),
+                    note = note,
+                    onClick = { onNoteSelected(note) }
+                )
+            }
+        } ?: item {
             DefaultNoteView(
                 modifier = Modifier.padding(8.dp),
-                note = note,
-                onClick = { onNoteSelected(note) }
+                note = Note(),
+                onClick = { onNoteSelected(Note()) }
             )
         }
+
         item { Spacer(modifier = Modifier.size(bottomBannerPadding)) }
     }
 }

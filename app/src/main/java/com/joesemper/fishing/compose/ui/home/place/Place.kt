@@ -17,7 +17,6 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.advertising.BannerAdvertView
 import com.joesemper.fishing.compose.ui.home.notes.TabItem
 import com.joesemper.fishing.domain.UserPlaceViewModel
-import com.joesemper.fishing.model.entity.common.Note
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.utils.Constants
 import com.joesemper.fishing.utils.Constants.bottomBannerPadding
@@ -50,14 +49,15 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
     }
 
     val coroutineScope = rememberCoroutineScope()
-    var currentNote = remember { mutableStateOf(Note()) }
+    val marker by remember { viewModel.marker }
+    val notes = remember(marker?.notes) { mutableStateOf(marker?.notes) }
 
 
     ModalBottomSheetLayout(
         sheetState = modalBottomSheetState,
         sheetShape = Constants.modalBottomSheetCorners,
         sheetContent = {
-            NoteModalBottomSheet(viewModel = viewModel,) {
+            NoteModalBottomSheet(viewModel = viewModel) {
                 coroutineScope.launch {
                     modalBottomSheetState.hide()
                 }
@@ -75,7 +75,7 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
             sheetGesturesEnabled = false,
             sheetPeekHeight = 0.dp
         ) {
-            viewModel.marker.value?.let { userPlace ->
+            marker?.let { userPlace ->
 
                 val userCatches by viewModel.getCatchesByMarkerId(userPlace.id)
                     .collectAsState(listOf())
@@ -110,7 +110,7 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
                         pagerState = pagerState,
                         navController = navController,
                         catches = userCatches,
-                        notes = userPlace.notes
+                        notes = notes
                     ) { note ->
                         viewModel.currentNote.value = note
                         coroutineScope.launch {

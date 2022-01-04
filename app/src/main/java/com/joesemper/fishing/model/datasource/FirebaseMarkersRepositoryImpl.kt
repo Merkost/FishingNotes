@@ -2,7 +2,6 @@ package com.joesemper.fishing.model.datasource
 
 import android.net.Uri
 import android.util.Log
-import androidx.compose.runtime.MutableState
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
 import com.joesemper.fishing.domain.viewstates.BaseViewState
@@ -17,7 +16,6 @@ import com.joesemper.fishing.model.mappers.MarkerNoteMapper
 import com.joesemper.fishing.model.repository.app.MarkersRepository
 import com.joesemper.fishing.utils.getCurrentUserId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
@@ -69,37 +67,46 @@ class FirebaseMarkersRepositoryImpl(
         }
     }
 
-    override suspend fun updateUserMarkerNote(markerId: String, note: Note): StateFlow<BaseViewState> {
+    override suspend fun updateUserMarkerNote(
+        markerId: String,
+        currentNotes: List<Note>,
+        note: Note
+    ): StateFlow<BaseViewState> {
         val flow = MutableStateFlow<BaseViewState>(BaseViewState.Loading())
 
         if (note.id.isEmpty()) {
             val newNote = MarkerNoteMapper().mapRawMarkerNote(note)
             dbCollections.getUserMapMarkersCollection().document(markerId)
                 .update("notes", FieldValue.arrayUnion(newNote)).addOnCompleteListener {
-                    if (it.exception != null) {
-                        flow.tryEmit(BaseViewState.Error(it.exception!!))
+                    it.exception?.let { exp ->
+                        flow.tryEmit(BaseViewState.Error(exp))
                     }
+
                     if (it.isSuccessful) {
-                        flow.tryEmit(BaseViewState.Success(newNote))
+                        flow.tryEmit(BaseViewState.Success(currentNotes + newNote))
                     }
                 }
         } else {
+            val newNotes = currentNotes.toMutableList().apply {
+                set(indexOf(find { it.id == note.id }), note)
+            }
+
             dbCollections.getUserMapMarkersCollection().document(markerId)
-                .update("notes", FieldValue.arrayUnion(note)).addOnCompleteListener {
-                    if (it.exception != null) {
-                        flow.tryEmit(BaseViewState.Error(it.exception!!))
+                .update("notes", newNotes).addOnCompleteListener {
+                    it.exception?.let { exp ->
+                        flow.tryEmit(BaseViewState.Error(exp))
                     }
                     if (it.isSuccessful) {
-                        flow.tryEmit(BaseViewState.Success(note))
+                        flow.tryEmit(BaseViewState.Success(newNotes))
                     }
                 }
         }
-            //TODO: Update array problem
+        //TODO: Update array problem
         return flow
     }
 
     override suspend fun changeMarkerVisibility(marker: UserMapMarker, changeTo: Boolean)
-    : StateFlow<LiteProgress> {
+            : StateFlow<LiteProgress> {
         val flow = MutableStateFlow<LiteProgress>(LiteProgress.Loading)
         val documentRef = dbCollections.getUserMapMarkersCollection().document(marker.id)
         val task = documentRef.update("visible", changeTo)

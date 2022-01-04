@@ -25,7 +25,7 @@ class UserPlaceViewModel(
     val marker: MutableState<UserMapMarker?> = mutableStateOf(null)
 
     val currentNote: MutableState<Note?> = mutableStateOf(null)
-    val markerNotes = marker.value?.notes
+    val markerNotes = marker.value?.notes ?: listOf()
 
     fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>> {
         return viewModelScope.run {
@@ -70,18 +70,16 @@ class UserPlaceViewModel(
             viewModelScope.launch {
                 markersRepo.updateUserMarkerNote(
                     markerId = marker.id,
+                    marker.notes,
                     note = note
                 ).collect { baseViewState ->
                     when (baseViewState) {
                         is BaseViewState.Success<*> -> {
-                            val noteToAdd = baseViewState.data as Note
-                            if (mutableList.isEmpty() || mutableList.find { it.id == note.id } == null) {
-                                marker.notes = mutableList.apply { add(noteToAdd) }
-                            } else {
-                                val index = mutableList.indexOf(mutableList.find { it.id == note.id })
-                                marker.notes = mutableList.apply { set(index, noteToAdd) }
-                            }
+                            val newNotesList = baseViewState.data as List<Note>
+                            this@UserPlaceViewModel.marker.value?.notes = newNotesList
                         }
+                        else -> {//TODO не удалось добавить заметку
+                         }
                     }
 
                 }
