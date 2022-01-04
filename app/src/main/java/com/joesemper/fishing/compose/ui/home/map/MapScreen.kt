@@ -218,7 +218,8 @@ fun MapScreen(
             bottomSheet = {
 
                 MarkerInfoDialog(
-                    viewModel.currentMarker.value,
+                    marker = viewModel.currentMarker.value,
+                    lastKnownLocation = viewModel.lastKnownLocation,
                     navController = navController,
                     mapUiState = mapUiState,
                     scaffoldState = scaffoldState,
@@ -418,7 +419,11 @@ fun MapLayout(
                 markersToShow.forEach {
                     val position = LatLng(it.latitude, it.longitude)
                     val markerColor = Color(it.markerColor)
-                    val hue = getHue(markerColor.red, markerColor.green, markerColor.blue)
+                    val hue = getHue(
+                        red = markerColor.red,
+                        green = markerColor.green,
+                        blue = markerColor.blue
+                    )
                     val marker = googleMap
                         .addMarker(
                             MarkerOptions()

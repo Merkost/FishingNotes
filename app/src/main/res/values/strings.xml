@@ -215,7 +215,7 @@
     <string name="no_internet_connection">No Internet connection</string>
     <string name="app_theme">App theme</string>
     <string name="choose_app_theme">"Choose app theme "</string>
-    <string name="no_name_place">New place</string>
+    <string name="no_name_place">No name place</string>
     <string name="select_place_for_weather">Select a place to load weather!</string>
     <string name="no_internet">No internet connection</string>
     <string name="reset">Сбросить</string>

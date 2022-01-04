@@ -208,7 +208,7 @@
     <string name="in_8h">8ч</string>
     <string name="in_16h">16ч</string>
     <string name="no_internet_connection">Нет интернет соединения</string>
-    <string name="no_name_place">Новое место</string>
+    <string name="no_name_place">Место без названия</string>
     <string name="select_place_for_weather">Выберите место для отображения погоды</string>
     <string name="no_internet">Нет интернет соединения</string>
     <string name="reset">Сбросить</string>

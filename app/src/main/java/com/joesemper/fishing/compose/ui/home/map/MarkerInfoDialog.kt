@@ -10,22 +10,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
+import com.google.android.libraries.maps.model.LatLng
+import com.google.maps.android.SphericalUtil
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.home.place.UserPlaceScreen
 import com.joesemper.fishing.compose.ui.home.views.PrimaryText
-import com.joesemper.fishing.compose.ui.home.views.PrimaryTextSmall
-import com.joesemper.fishing.compose.ui.home.views.SecondaryTextSmall
 import com.joesemper.fishing.compose.ui.home.views.SubtitleText
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.resources
@@ -44,19 +44,20 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
+import java.text.DecimalFormat
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MarkerInfoDialog(
     marker: UserMapMarker?,
+    lastKnownLocation: MutableState<LatLng?>,
     mapUiState: MapUiState,
     modifier: Modifier = Modifier,
     navController: NavController,
     scaffoldState: BottomSheetScaffoldState,
     upPress: (UserMapMarker) -> Unit,
     onDescriptionClick: () -> Unit,
-
 ) {
     val context = LocalContext.current
 
@@ -64,15 +65,15 @@ fun MarkerInfoDialog(
     val coroutineScope = rememberCoroutineScope()
     val geocoder = Geocoder(context, resources().configuration.locale)
 
+
     val weatherPrefs: WeatherPreferences = get()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
 
     val connectionState by context.observeConnectivityAsFlow()
         .collectAsState(initial = context.currentConnectivityState)
 
-    var address: String? by remember {
-        mutableStateOf(null)
-    }
+    var address: String? by remember { mutableStateOf(null) }
+    var distance: String? by remember { mutableStateOf(null) }
 
     val weather = marker?.let {
         if (connectionState is ConnectionState.Available) {
@@ -92,38 +93,36 @@ fun MarkerInfoDialog(
 
     marker?.let {
 
-
         LaunchedEffect(marker) {
-            address = null
+
             coroutineScope.launch(Dispatchers.Default) {
+                distance = null
+                lastKnownLocation.value?.let {
+                    distance = convertDistance(SphericalUtil.computeDistanceBetween(
+                        com.google.android.gms.maps.model.LatLng(marker.latitude, marker.longitude),
+                        com.google.android.gms.maps.model.LatLng(it.latitude, it.longitude)
+                    ))
+                }
+            }
+
+            coroutineScope.launch(Dispatchers.Default) {
+                address = null
                 delay(800)
                 try {
-                    val addresses = geocoder.getFromLocation(
-                        marker.latitude,
-                        marker.longitude,
-                        1
-                    )
-                    address =
-                        if (addresses != null && addresses.size > 0) {
-                            addresses[0].getAddressLine(0)
-                        } else "Не удалось получить адрес"
-                    /*addresses?.first()?.let { address ->
-                    viewModel.showMarker.value = true
-                    if (!address.subAdminArea.isNullOrBlank()) {
-                        viewModel.chosenPlace.value =
-                            address.subAdminArea.replaceFirstChar { it.uppercase() }
-                    } else if (!address.adminArea.isNullOrBlank()) {
-                        viewModel.chosenPlace.value = address.adminArea
-                            .replaceFirstChar { it.uppercase() }
-                    } else viewModel.chosenPlace.value = "Место без названия"
-                }*/
+                    val position = geocoder.getFromLocation(marker.latitude, marker.longitude, 1)
+                    position?.first()?.apply {
+                        if (!subAdminArea.isNullOrBlank()) {
+                            address = subAdminArea.replaceFirstChar { it.uppercase() }
+                        } else if (!adminArea.isNullOrBlank()) {
+                            address = adminArea.replaceFirstChar { it.uppercase() }
+                        } else address = "Не удалось определить название"
+                    }
                 } catch (e: Throwable) {
                     address = "Нет соединения с сервером"
                 }
             }
         }
     }
-
 
     val paddingDp = animateDpAsState(((1f - scaffoldState.currentFraction) * 8).dp)
     val cornersDp = animateDpAsState(((1f - scaffoldState.currentFraction) * 16).dp)
@@ -142,9 +141,11 @@ fun MarkerInfoDialog(
 
         viewModel.currentMarker.value?.let { marker ->
 
-            AnimatedVisibility(scaffoldState.currentFraction == 0f,
+            AnimatedVisibility(
+                scaffoldState.currentFraction == 0f,
                 enter = fadeIn(tween(500)),
-                exit = fadeOut(tween(500)),) {
+                exit = fadeOut(tween(500)),
+            ) {
                 ConstraintLayout(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -154,37 +155,64 @@ fun MarkerInfoDialog(
                             enabled = scaffoldState.bottomSheetState.isCollapsed
                         )
                 ) {
-                    val (locationIcon, title, street, timeNow, time8, time16, pressNowVal, press8Val,
+                    val (locationIcon, title, area, distanceTo, time8, time16, pressNowVal, press8Val,
                         press16Val, press8Icon, press16Icon, loading, noNetwork) = createRefs()
 
-                    Icon(
+
+                    Box(modifier = Modifier
+                        .size(64.dp).padding(16.dp)
+
+                        .constrainAs(locationIcon) {
+                            absoluteLeft.linkTo(parent.absoluteLeft)
+                            top.linkTo(parent.top)
+                        }) {
+                        Icon(
+                            modifier = Modifier.fillMaxSize(),
+                            painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+                            contentDescription = "Marker",
+                            tint = Color(marker.markerColor)
+                        )
+                    }
+
+
+                    //Distance
+                    SubtitleText(
                         modifier = Modifier
-                            .size(28.dp)
-                            .constrainAs(locationIcon) {
-                                absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-                                top.linkTo(title.top)
-                                bottom.linkTo(title.bottom)
-                            },
-                        painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                        contentDescription = "Marker",
-                        tint = Color(marker.markerColor)
+                            .constrainAs(distanceTo) {
+                                /*top.linkTo(area.bottom, 4.dp)
+                                *//*bottom.linkTo(timeNow.top, 8.dp)*//*
+                                linkTo(area.start, area.end, 0.dp, 0.dp, 0f)*/
+                                linkTo(locationIcon.bottom, parent.bottom, bias = 0f)
+
+                                linkTo(locationIcon.absoluteLeft, locationIcon.absoluteRight, 0.dp, 0.dp, 0.5f)
+                            }.width(60.dp),
+
+                        /*overflow = TextOverflow.Ellipsis,*/
+                        text = distance ?: "",
+                        textColor = if (distance == null) Color.LightGray else secondaryTextColor,
+                        textAlign = TextAlign.Center,
+                        singleLine = false,
                     )
+
 
                     PrimaryText(
                         modifier = Modifier
                             .constrainAs(title) {
-                                top.linkTo(parent.top, 16.dp)
-                                linkTo(locationIcon.end, parent.end, 8.dp, 8.dp, 0f)
+                                top.linkTo(locationIcon.top)
+                                linkTo(locationIcon.end, parent.end, 0.dp, 32.dp, 0f)
+                                bottom.linkTo(locationIcon.bottom)
                             },
-                        text = marker.title,
+                        text = when { marker.title.isNotEmpty() -> marker.title
+                            else -> stringResource(R.string.no_name_place) },
                     )
 
-                    SubtitleText(
+                    //Area name
+                    /*SubtitleText(
                         modifier = Modifier
-                            .constrainAs(street) {
+                            .constrainAs(area) {
                                 top.linkTo(title.bottom, 4.dp)
-                                /*bottom.linkTo(timeNow.top, 8.dp)*/
-                                linkTo(title.start, parent.end, 0.dp, 0.dp, 0f)
+                                *//*bottom.linkTo(timeNow.top, 8.dp)*//*
+                                linkTo(locationIcon.end, parent.end, 0.dp, 0.dp, 0f)
                             }
                             .animateContentSize(
                                 animationSpec = tween(
@@ -192,12 +220,12 @@ fun MarkerInfoDialog(
                                     easing = LinearOutSlowInEasing
                                 )
                             ),
-                        /*overflow = TextOverflow.Ellipsis,*/
+                        *//*overflow = TextOverflow.Ellipsis,*//*
                         text = address ?: "",
                         textColor = if (address == null) Color.LightGray else secondaryTextColor
-                    )
+                    )*/
 
-                    //weatherForecast
+                    /* //weatherForecast
                     if (connectionState is ConnectionState.Available) {
                         weather?.value?.let { forecast ->
 
@@ -205,7 +233,7 @@ fun MarkerInfoDialog(
 
                             SecondaryTextSmall(
                                 modifier = Modifier.constrainAs(timeNow) {
-                                    top.linkTo(street.bottom, 16.dp)
+                                    top.linkTo(area.bottom, 16.dp)
                                     absoluteLeft.linkTo(parent.absoluteLeft)
                                     absoluteRight.linkTo(guideline, 16.dp)
                                 },
@@ -214,7 +242,7 @@ fun MarkerInfoDialog(
 
                             SecondaryTextSmall(
                                 modifier = Modifier.constrainAs(time8) {
-                                    top.linkTo(street.bottom, 16.dp)
+                                    top.linkTo(area.bottom, 16.dp)
                                     absoluteLeft.linkTo(guideline)
                                     absoluteRight.linkTo(guideline)
                                 },
@@ -223,7 +251,7 @@ fun MarkerInfoDialog(
 
                             SecondaryTextSmall(
                                 modifier = Modifier.constrainAs(time16) {
-                                    top.linkTo(street.bottom, 16.dp)
+                                    top.linkTo(area.bottom, 16.dp)
                                     absoluteLeft.linkTo(guideline, 16.dp)
                                     absoluteRight.linkTo(parent.absoluteRight)
                                 },
@@ -290,7 +318,7 @@ fun MarkerInfoDialog(
                         if (weather?.value == null) {
                             CircularProgressIndicator(
                                 modifier = Modifier.constrainAs(loading) {
-                                    top.linkTo(street.bottom)
+                                    top.linkTo(area.bottom)
                                     bottom.linkTo(parent.bottom)
                                     absoluteRight.linkTo(parent.absoluteRight)
                                     absoluteLeft.linkTo(parent.absoluteLeft)
@@ -300,14 +328,14 @@ fun MarkerInfoDialog(
                     } else {
                         SecondaryTextSmall(
                             modifier = Modifier.constrainAs(noNetwork) {
-                                top.linkTo(street.bottom)
+                                top.linkTo(area.bottom)
                                 bottom.linkTo(parent.bottom)
                                 absoluteLeft.linkTo(parent.absoluteLeft)
                                 absoluteRight.linkTo(parent.absoluteRight)
                             },
                             text = stringResource(R.string.no_internet_connection)
                         )
-                    }
+                    }*/
                 }
             }
             AnimatedVisibility(scaffoldState.currentFraction != 0f) {
@@ -329,5 +357,17 @@ fun MarkerInfoDialog(
     }
 
 }
+
+
+fun convertDistance(distanceInMeters: Double): String {
+    val df = DecimalFormat("#.#")
+
+    return when (distanceInMeters.toInt()) {
+        in 0..999 -> distanceInMeters.toInt().toString() + " m"
+        in 1000..9999 -> df.format(distanceInMeters/1000f).toString() + " km"
+        else -> distanceInMeters.div(1000).toInt().toString() + " km"
+    }
+}
+
 
 
