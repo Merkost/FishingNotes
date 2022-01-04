@@ -17,6 +17,7 @@ class MainViewModel(private val repository: UserRepository) : ViewModel() {
         loadCurrentUser()
     }
 
+
     val userState: MutableStateFlow<User?> = MutableStateFlow(null)
     var user: User? = null
 
@@ -27,12 +28,15 @@ class MainViewModel(private val repository: UserRepository) : ViewModel() {
         viewModelScope.launch {
             repository.currentUser
                 .catch { error -> handleError(error) }
-                .collectLatest { user -> onSuccess(user) }
+                .collectLatest { user -> user?.let { onSuccess(user) } }
         }
     }
 
-    private fun onSuccess(user: User?) {
+    private fun onSuccess(user: User) {
         this.user = user
+        viewModelScope.launch {
+            repository.setUserListener(user)
+        }
         mutableStateFlow.value = BaseViewState.Success(user)
     }
 
