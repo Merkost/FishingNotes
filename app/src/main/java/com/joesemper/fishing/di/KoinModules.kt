@@ -20,7 +20,7 @@ import org.koin.dsl.module
 
 
 val appModule = module {
-    single<UserRepository> { FirebaseUserRepositoryImpl(get(), androidContext()) }
+    single<UserRepository> { FirebaseUserRepositoryImpl(get(), get(), androidContext()) }
     single<CatchesRepository> { FirebaseCatchesRepositoryImpl(get(), get()) }
     single<MarkersRepository> { FirebaseMarkersRepositoryImpl(get(), get()) }
     single<PhotoStorage> { CloudPhotoStorage(androidContext()) }

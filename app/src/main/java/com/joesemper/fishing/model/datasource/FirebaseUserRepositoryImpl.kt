@@ -1,15 +1,17 @@
 package com.joesemper.fishing.model.datasource
 
 import android.content.Context
+import android.util.Log
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.*
+import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.ktx.toObject
 import com.joesemper.fishing.compose.datastore.AppPreferences
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.common.User
+import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.repository.UserRepository
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
@@ -17,11 +19,13 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import java.util.*
 
-class FirebaseUserRepositoryImpl(private val appPreferences: AppPreferences,
-                                 private val context: Context) : UserRepository {
+class FirebaseUserRepositoryImpl(
+    private val appPreferences: AppPreferences,
+    private val dbCollections: RepositoryCollections,
+    private val context: Context
+) : UserRepository {
 
     private val fireBaseAuth = FirebaseAuth.getInstance()
-    private val db = Firebase.firestore
 
     override val currentUser: Flow<User?>
         get() = callbackFlow {
@@ -40,7 +44,7 @@ class FirebaseUserRepositoryImpl(private val appPreferences: AppPreferences,
             appPreferences.userValue.collectLatest {
                 send(it)
             }
-            awaitClose {  }
+            awaitClose { }
         }
 
     override suspend fun logoutCurrentUser() = callbackFlow {
@@ -53,11 +57,11 @@ class FirebaseUserRepositoryImpl(private val appPreferences: AppPreferences,
     private fun mapFirebaseUserToUser(firebaseUser: FirebaseUser): User {
         return with(firebaseUser) {
             User(
-                uid,
+                uid = uid,
                 email = firebaseUser.email ?: "",
-                displayName ?: "Anonymous",
-                isAnonymous,
-                photoUrl.toString(),
+                displayName = displayName ?: "Anonymous",
+                anonymous = isAnonymous,
+                photoUrl = photoUrl.toString(),
                 registerDate = Date().time
             )
         }
@@ -70,13 +74,14 @@ class FirebaseUserRepositoryImpl(private val appPreferences: AppPreferences,
         if (user.anonymous) {
             flow.tryEmit(Progress.Complete)
         } else {
-            val userFromDatabase = getUsersCollection().document(user.uid).get().await().toObject(User::class.java)
+            val userFromDatabase =
+                dbCollections.getUsersCollection().document(user.uid).get().await().toObject(User::class.java)
 
             if (userFromDatabase != null) {
                 appPreferences.saveUserValue(userFromDatabase)
                 flow.tryEmit(Progress.Complete)
             } else {
-                getUsersCollection().document(user.uid).set(user)
+                dbCollections.getUsersCollection().document(user.uid).set(user)
                     .addOnCompleteListener {
                         runBlocking {
                             appPreferences.saveUserValue(user)
@@ -89,8 +94,37 @@ class FirebaseUserRepositoryImpl(private val appPreferences: AppPreferences,
         return flow
     }
 
+    override suspend fun setUserListener(user: User) {
+        val listeners = mutableListOf<ListenerRegistration>()
+
+        listeners.add(
+            dbCollections.getUsersCollection().document(user.uid)
+                .addSnapshotListener(getUserSnapshotListener())
+        )
+    }
+
+    private fun getUserSnapshotListener(): EventListener<DocumentSnapshot> =
+        EventListener { snapshot, error ->
+            if (error != null) {
+                Log.d("Fishing", "User snapshot listener", error)
+                return@EventListener
+            }
+            if (snapshot != null && snapshot.exists()) {
+                Log.d("Fishing", "Current data: ${snapshot.data}")
+                snapshot.toObject(User::class.java)?.let { userToUpdate ->
+                    runBlocking {
+                        appPreferences.saveUserValue(userToUpdate)
+                    }
+                }
+
+            } else {
+                Log.d("Fishing", "Current data: null")
+            }
+
+        }
+
     suspend fun getCurrentUserFromDatabase(userId: String) = callbackFlow {
-        getUsersCollection().document(userId).get().addOnCompleteListener {
+        dbCollections.getUsersCollection().document(userId).get().addOnCompleteListener {
             if (it.result.exists()) {
                 trySend(true)
             }
@@ -98,11 +132,4 @@ class FirebaseUserRepositoryImpl(private val appPreferences: AppPreferences,
         awaitClose { }
     }
 
-    private fun getUsersCollection(): CollectionReference {
-        return db.collection(USERS_COLLECTION)
-    }
-
-    companion object {
-        private const val USERS_COLLECTION = "users"
-    }
 }
