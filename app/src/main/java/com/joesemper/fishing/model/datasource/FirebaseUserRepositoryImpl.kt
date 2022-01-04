@@ -10,12 +10,17 @@ import com.google.firebase.ktx.Firebase
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.repository.UserRepository
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.tasks.await
+import java.util.*
 
 class FirebaseUserRepositoryImpl(private val context: Context) : UserRepository {
 
@@ -38,7 +43,7 @@ class FirebaseUserRepositoryImpl(private val context: Context) : UserRepository 
         AuthUI.getInstance().signOut(context).addOnSuccessListener {
             trySend(true)
         }
-        awaitClose{}
+        awaitClose {}
     }
 
     private fun mapFirebaseUserToUser(firebaseUser: FirebaseUser): User {
@@ -48,7 +53,8 @@ class FirebaseUserRepositoryImpl(private val context: Context) : UserRepository 
                 email = firebaseUser.email ?: "",
                 displayName ?: "Anonymous",
                 isAnonymous,
-                photoUrl.toString()
+                photoUrl.toString(),
+                registerDate = Date().time
             )
         }
         //TODO("change name")
@@ -56,15 +62,30 @@ class FirebaseUserRepositoryImpl(private val context: Context) : UserRepository 
 
     override suspend fun addNewUser(user: User): StateFlow<Progress> {
         val flow = MutableStateFlow<Progress>(Progress.Loading())
+
         if (user.isAnonymous) {
-            flow.emit(Progress.Complete)
+            flow.tryEmit(Progress.Complete)
         } else {
-            getUsersCollection().document(user.uid).set(user)
-                .addOnCompleteListener {
-                    flow.tryEmit(Progress.Complete)
-                }
+            if (getUsersCollection().document(user.uid).get().await().exists()) {
+                flow.tryEmit(Progress.Complete)
+            } else {
+                getUsersCollection().document(user.uid).set(user)
+                    .addOnCompleteListener {
+                        flow.tryEmit(Progress.Complete)
+                    }
+            }
+
         }
         return flow
+    }
+
+    suspend fun getCurrentUserFromDatabase(userId: String) = callbackFlow {
+        getUsersCollection().document(userId).get().addOnCompleteListener {
+            if (it.result.exists()) {
+                trySend(true)
+            }
+        }
+        awaitClose { }
     }
 
     private fun getUsersCollection(): CollectionReference {
@@ -73,6 +94,5 @@ class FirebaseUserRepositoryImpl(private val context: Context) : UserRepository 
 
     companion object {
         private const val USERS_COLLECTION = "users"
-
     }
 }

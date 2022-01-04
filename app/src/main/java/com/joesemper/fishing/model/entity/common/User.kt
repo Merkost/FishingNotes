@@ -13,5 +13,5 @@ data class User(
     val isAnonymous: Boolean = true,
     val photoUrl: String? = null,
     val login: String = "",
-    val registerDate: Long = Calendar.getInstance().timeInMillis,
+    val registerDate: Long = 0,
 ): Parcelable

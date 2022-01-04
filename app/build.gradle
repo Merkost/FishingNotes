@@ -58,6 +58,9 @@ android {
 dependencies {
     //implementation "com.github.ben-manes:gradle-versions-plugin:0.39.0"
 
+    //Firebase Coroutine dependency:
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.1.1'
+
     //Settings
     implementation 'com.github.alorma:compose-settings-ui:0.7.2'
 
