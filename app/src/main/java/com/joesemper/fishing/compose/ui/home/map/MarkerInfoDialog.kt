@@ -174,27 +174,6 @@ fun MarkerInfoDialog(
                         )
                     }
 
-
-                    //Distance
-                    SubtitleText(
-                        modifier = Modifier
-                            .constrainAs(distanceTo) {
-                                /*top.linkTo(area.bottom, 4.dp)
-                                *//*bottom.linkTo(timeNow.top, 8.dp)*//*
-                                linkTo(area.start, area.end, 0.dp, 0.dp, 0f)*/
-                                linkTo(locationIcon.bottom, parent.bottom, bias = 0f)
-
-                                linkTo(locationIcon.absoluteLeft, locationIcon.absoluteRight, 0.dp, 0.dp, 0.5f)
-                            }.width(60.dp),
-
-                        /*overflow = TextOverflow.Ellipsis,*/
-                        text = distance ?: "",
-                        textColor = if (distance == null) Color.LightGray else secondaryTextColor,
-                        textAlign = TextAlign.Center,
-                        singleLine = false,
-                    )
-
-
                     PrimaryText(
                         modifier = Modifier
                             .constrainAs(title) {
@@ -203,16 +182,15 @@ fun MarkerInfoDialog(
                                 bottom.linkTo(locationIcon.bottom)
                             },
                         text = when { marker.title.isNotEmpty() -> marker.title
-                            else -> stringResource(R.string.no_name_place) },
+                            else -> stringResource(R.string.no_name_place) } + "",
                     )
 
                     //Area name
-                    /*SubtitleText(
+                    SubtitleText(
                         modifier = Modifier
                             .constrainAs(area) {
                                 top.linkTo(title.bottom, 4.dp)
-                                *//*bottom.linkTo(timeNow.top, 8.dp)*//*
-                                linkTo(locationIcon.end, parent.end, 0.dp, 0.dp, 0f)
+                                linkTo(locationIcon.end, parent.end, 0.dp, 80.dp, 0f)
                             }
                             .animateContentSize(
                                 animationSpec = tween(
@@ -220,10 +198,24 @@ fun MarkerInfoDialog(
                                     easing = LinearOutSlowInEasing
                                 )
                             ),
-                        *//*overflow = TextOverflow.Ellipsis,*//*
                         text = address ?: "",
                         textColor = if (address == null) Color.LightGray else secondaryTextColor
-                    )*/
+                    )
+
+                    //Distance
+                    SubtitleText(
+                        modifier = Modifier
+                            .constrainAs(distanceTo) {
+                                top.linkTo(area.top)
+                                bottom.linkTo(area.bottom)
+                                linkTo(area.absoluteRight, parent.absoluteRight, 0.dp, 0.dp, 1f)
+                            }.width(80.dp),
+
+                        /*overflow = TextOverflow.Ellipsis,*/
+                        text = distance ?: "",
+                        textColor = if (distance == null) Color.LightGray else secondaryTextColor,
+                        textAlign = TextAlign.Center,
+                    )
 
                     /* //weatherForecast
                     if (connectionState is ConnectionState.Available) {

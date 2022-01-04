@@ -604,7 +604,7 @@ fun MapFab(
             fabImg.value = R.drawable.ic_baseline_add_location_24
         }
         MapUiState.BottomSheetInfoMode -> {
-            fabImg.value = R.drawable.ic_add_catch
+            //fabImg.value = R.drawable.ic_add_catch
             //fabImg.value = R.drawable.ic_baseline_add_location_24
         }
         MapUiState.BottomSheetFullyExpanded -> {
@@ -639,8 +639,8 @@ fun MapFab(
 
         FishingFab(
             modifier = Modifier
-                .animateContentSize()
-                .padding(bottom = paddingBottom.value, top = paddingTop.value),
+                /*.animateContentSize()*/
+                .padding(bottom = paddingBottom.value/*, top = paddingTop.value*/),
             onClick = onClick,
             onLongPress = {
                 if (state == MapUiState.NormalMode && useFastFabAdd) {
