@@ -10,8 +10,8 @@ data class User(
     val uid: String = "1",
     val email: String = "",
     val displayName: String = "Anonymous",
-    val isAnonymous: Boolean = true,
-    val photoUrl: String? = null,
+    val anonymous: Boolean = false,
+    val photoUrl: String = "",
     val login: String = "",
     val registerDate: Long = 0,
 ): Parcelable

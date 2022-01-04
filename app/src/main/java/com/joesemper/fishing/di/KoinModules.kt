@@ -1,5 +1,6 @@
 package com.joesemper.fishing.di
 
+import com.joesemper.fishing.compose.datastore.AppPreferences
 import com.joesemper.fishing.compose.datastore.NotesPreferences
 import com.joesemper.fishing.compose.datastore.UserPreferences
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
@@ -19,13 +20,14 @@ import org.koin.dsl.module
 
 
 val appModule = module {
-    single<UserRepository> { FirebaseUserRepositoryImpl(androidContext()) }
+    single<UserRepository> { FirebaseUserRepositoryImpl(get(), androidContext()) }
     single<CatchesRepository> { FirebaseCatchesRepositoryImpl(get(), get()) }
     single<MarkersRepository> { FirebaseMarkersRepositoryImpl(get(), get()) }
     single<PhotoStorage> { CloudPhotoStorage(androidContext()) }
     single<WeatherRepository> { WeatherRepositoryRetrofitImpl() }
     single { Logger() }
     single { SnackbarManager }
+    single { AppPreferences(androidContext()) }
     single { UserPreferences(androidContext()) }
     single { WeatherPreferences(androidContext()) }
     single { NotesPreferences(androidContext()) }

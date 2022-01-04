@@ -7,22 +7,18 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.joesemper.fishing.compose.datastore.AppPreferences
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.repository.UserRepository
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import java.util.*
 
-class FirebaseUserRepositoryImpl(private val context: Context) : UserRepository {
+class FirebaseUserRepositoryImpl(private val appPreferences: AppPreferences,
+                                 private val context: Context) : UserRepository {
 
     private val fireBaseAuth = FirebaseAuth.getInstance()
     private val db = Firebase.firestore
@@ -37,6 +33,14 @@ class FirebaseUserRepositoryImpl(private val context: Context) : UserRepository 
 
             fireBaseAuth.addAuthStateListener(authListener)
             awaitClose { fireBaseAuth.removeAuthStateListener(authListener) }
+        }
+
+    override val datastoreUser: Flow<User?>
+        get() = callbackFlow {
+            appPreferences.userValue.collectLatest {
+                send(it)
+            }
+            awaitClose {  }
         }
 
     override suspend fun logoutCurrentUser() = callbackFlow {
@@ -63,14 +67,20 @@ class FirebaseUserRepositoryImpl(private val context: Context) : UserRepository 
     override suspend fun addNewUser(user: User): StateFlow<Progress> {
         val flow = MutableStateFlow<Progress>(Progress.Loading())
 
-        if (user.isAnonymous) {
+        if (user.anonymous) {
             flow.tryEmit(Progress.Complete)
         } else {
-            if (getUsersCollection().document(user.uid).get().await().exists()) {
+            val userFromDatabase = getUsersCollection().document(user.uid).get().await().toObject(User::class.java)
+
+            if (userFromDatabase != null) {
+                appPreferences.saveUserValue(userFromDatabase)
                 flow.tryEmit(Progress.Complete)
             } else {
                 getUsersCollection().document(user.uid).set(user)
                     .addOnCompleteListener {
+                        runBlocking {
+                            appPreferences.saveUserValue(user)
+                        }
                         flow.tryEmit(Progress.Complete)
                     }
             }

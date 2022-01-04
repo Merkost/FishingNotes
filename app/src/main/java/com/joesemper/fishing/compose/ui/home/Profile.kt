@@ -37,8 +37,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import com.airbnb.lottie.compose.*
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.bar_chart.BarChart
 import com.joesemper.fishing.compose.bar_chart.BarChartDataModel
@@ -55,7 +53,6 @@ import com.joesemper.fishing.utils.time.toDateTextMonth
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import me.vponomarenko.compose.shimmer.shimmer
 import org.koin.androidx.compose.getViewModel
@@ -240,7 +237,7 @@ fun UserText(user: User?, modifier: Modifier) {
     user?.let {
         Text(
             modifier = modifier,
-            text = when (user.isAnonymous) {
+            text = when (user.anonymous) {
                 true -> stringResource(R.string.anonymous)
                 false -> user.displayName
             }, style = MaterialTheme.typography.h6,
@@ -469,7 +466,7 @@ fun UserImage(user: User?, imgSize: Dp, modifier: Modifier = Modifier) {
 
 
             CoilImage(
-                imageModel = if (user.photoUrl.isNullOrEmpty() or user.isAnonymous)
+                imageModel = if (user.photoUrl.isNullOrEmpty() or user.anonymous)
                     painterResource(R.drawable.ic_fisher) else user.photoUrl,
                 contentScale = ContentScale.Crop,
                 shimmerParams = ShimmerParams(
