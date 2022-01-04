@@ -7,11 +7,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.EventListener
-import com.google.firebase.firestore.ktx.toObject
 import com.joesemper.fishing.compose.datastore.AppPreferences
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.common.User
-import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.repository.UserRepository
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
@@ -60,7 +58,6 @@ class FirebaseUserRepositoryImpl(
                 uid = uid,
                 email = firebaseUser.email ?: "",
                 displayName = displayName ?: "Anonymous",
-                anonymous = isAnonymous,
                 photoUrl = photoUrl.toString(),
                 registerDate = Date().time
             )
@@ -71,24 +68,21 @@ class FirebaseUserRepositoryImpl(
     override suspend fun addNewUser(user: User): StateFlow<Progress> {
         val flow = MutableStateFlow<Progress>(Progress.Loading())
 
-        if (user.anonymous) {
+        val userFromDatabase =
+            dbCollections.getUsersCollection().document(user.uid).get().await()
+                .toObject(User::class.java)
+
+        if (userFromDatabase != null && userFromDatabase.registerDate != 0L) {
+            appPreferences.saveUserValue(userFromDatabase)
             flow.tryEmit(Progress.Complete)
         } else {
-            val userFromDatabase =
-                dbCollections.getUsersCollection().document(user.uid).get().await().toObject(User::class.java)
-
-            if (userFromDatabase != null) {
-                appPreferences.saveUserValue(userFromDatabase)
-                flow.tryEmit(Progress.Complete)
-            } else {
-                dbCollections.getUsersCollection().document(user.uid).set(user)
-                    .addOnCompleteListener {
-                        runBlocking {
-                            appPreferences.saveUserValue(user)
-                        }
-                        flow.tryEmit(Progress.Complete)
+            dbCollections.getUsersCollection().document(user.uid).set(user)
+                .addOnCompleteListener {
+                    runBlocking {
+                        appPreferences.saveUserValue(user)
                     }
-            }
+                    flow.tryEmit(Progress.Complete)
+                }
 
         }
         return flow

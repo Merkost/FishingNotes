@@ -10,7 +10,6 @@ data class User(
     val uid: String = "1",
     val email: String = "",
     val displayName: String = "Anonymous",
-    val anonymous: Boolean = false,
     val photoUrl: String = "",
     val login: String = "",
     val registerDate: Long = 0,

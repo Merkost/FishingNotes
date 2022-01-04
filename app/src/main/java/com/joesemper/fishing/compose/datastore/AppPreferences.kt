@@ -17,7 +17,6 @@ class AppPreferences(private val context: Context) {
         private val USER_UID_KEY = stringPreferencesKey("user_uid")
         private val USER_EMAIL_KEY = stringPreferencesKey("user_email")
         private val USER_NAME_KEY = stringPreferencesKey("user_name")
-        private val USER_ISANONYMOUS_KEY = booleanPreferencesKey("user_isAnonymous")
         private val USER_PHOTOURL_KEY = stringPreferencesKey("user_photoUrl")
         private val USER_LOGIN_KEY = stringPreferencesKey("user_login")
         private val USER_REGISTERDATE_KEY = longPreferencesKey("user_regDate")
@@ -32,7 +31,6 @@ class AppPreferences(private val context: Context) {
                     uid = preferences[USER_UID_KEY] ?: "",
                     email = preferences[USER_EMAIL_KEY] ?: "",
                     displayName = preferences[USER_NAME_KEY] ?: "",
-                    anonymous = preferences[USER_ISANONYMOUS_KEY] ?: false,
                     photoUrl = preferences[USER_PHOTOURL_KEY] ?: "",
                     login = preferences[USER_LOGIN_KEY] ?: "",
                     registerDate = preferences[USER_REGISTERDATE_KEY] ?: 0,
@@ -46,7 +44,6 @@ class AppPreferences(private val context: Context) {
                 preferences[USER_UID_KEY] = uid
                 preferences[USER_EMAIL_KEY] = email
                 preferences[USER_NAME_KEY] = displayName
-                preferences[USER_ISANONYMOUS_KEY] = anonymous
                 preferences[USER_PHOTOURL_KEY] = photoUrl
                 preferences[USER_LOGIN_KEY] = login
                 preferences[USER_REGISTERDATE_KEY] = registerDate

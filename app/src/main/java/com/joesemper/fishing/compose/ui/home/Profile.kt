@@ -237,7 +237,7 @@ fun UserText(user: User?, modifier: Modifier) {
     user?.let {
         Text(
             modifier = modifier,
-            text = when (user.anonymous) {
+            text = when (user.displayName.isEmpty()) {
                 true -> stringResource(R.string.anonymous)
                 false -> user.displayName
             }, style = MaterialTheme.typography.h6,
@@ -466,7 +466,7 @@ fun UserImage(user: User?, imgSize: Dp, modifier: Modifier = Modifier) {
 
 
             CoilImage(
-                imageModel = if (user.photoUrl.isNullOrEmpty() or user.anonymous)
+                imageModel = if (user.photoUrl.isNullOrEmpty())
                     painterResource(R.drawable.ic_fisher) else user.photoUrl,
                 contentScale = ContentScale.Crop,
                 shimmerParams = ShimmerParams(

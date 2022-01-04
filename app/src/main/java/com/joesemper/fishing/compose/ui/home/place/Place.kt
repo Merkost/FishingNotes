@@ -41,13 +41,6 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
     val scaffoldState = rememberBottomSheetScaffoldState()
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
 
-    LaunchedEffect(modalBottomSheetState.currentValue) {
-        when (modalBottomSheetState.currentValue) {
-            ModalBottomSheetValue.Hidden -> viewModel.currentNote.value = null
-            //else -> scaffoldState.bottomSheetState.collapse()
-        }
-    }
-
     val coroutineScope = rememberCoroutineScope()
     val marker by remember { viewModel.marker }
     val notes = remember(marker?.notes) { mutableStateOf(marker?.notes) }

@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -295,6 +296,11 @@ fun EditNoteDialog(
     onSaveNote: (Note) -> Unit,
     onCloseDialog: () -> Unit
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val onClose = {
+        keyboardController?.hide()
+        onCloseDialog()
+    }
 
     val noteId = remember { mutableStateOf(note.id) }
     val noteTitle = remember { mutableStateOf(note.title) }
@@ -353,7 +359,7 @@ fun EditNoteDialog(
                         noteDateCreated.value
                     )
                 )
-                onCloseDialog()
+                onClose()
             }
         )
 
@@ -364,7 +370,8 @@ fun EditNoteDialog(
                 absoluteRight.linkTo(saveButton.absoluteLeft, 8.dp)
             },
             text = stringResource(id = R.string.cancel),
-            onClick = { onCloseDialog() }
+            onClick = {
+                onClose() }
         )
 
     }
