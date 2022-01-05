@@ -53,12 +53,14 @@ class SolunarRetrofitRepositoryImpl : SolunarRepository {
                 val currentDate = Date()
                 val format = SimpleDateFormat("yyyyMMdd", Locale.getDefault());
                 val date = format.format(currentDate)
-                val timezone = TimeZone.getDefault().getOffset(currentDate.time)
+                //val timeZone = TimeZone.getDefault().getOffset(currentDate.time)
+                val timeZone = SimpleDateFormat("ZZZZZ", Locale.getDefault())
+                    .format(System.currentTimeMillis()).split(":")[0]
 
                 val solunar = getService().getSolunar(
                     latitude = latitude, longitude = longitude,
                     date = date,
-                    tz = timezone
+                    tz = timeZone.toInt()
                 )
 
                 emit(RetrofitWrapper.Success(solunar))

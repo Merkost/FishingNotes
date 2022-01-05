@@ -108,7 +108,7 @@ class MapViewModel(
                         val solunar = result.data
                         val calendar = Calendar.getInstance()
                         val currentHour24 = calendar[Calendar.HOUR_OF_DAY]
-                        fishActivity.value = solunar.hourlyRating.`17`
+                        fishActivity.value = solunar.hourlyRating[currentHour24]
                         //_weatherState.value = RetrofitWrapper.Success(result.data)
                     }
                     is RetrofitWrapper.Loading -> {

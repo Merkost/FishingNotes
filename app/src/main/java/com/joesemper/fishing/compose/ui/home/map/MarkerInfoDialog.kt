@@ -116,7 +116,7 @@ fun MarkerInfoDialog(
             viewModel.getFishActivity(marker.latitude, marker.longitude)
         }
 
-        LaunchedEffect(marker, viewModel.lastKnownLocation) {
+        LaunchedEffect(marker, viewModel.lastKnownLocation.value) {
             coroutineScope.launch(Dispatchers.Default) {
                 distance = null
                 lastKnownLocation.value?.let {
@@ -222,7 +222,7 @@ fun MarkerInfoDialog(
                         textAlign = TextAlign.Center,
                     )
 
-                    //Area name
+                    //Fish activity
                     SubtitleText(
                         modifier = Modifier
                             .constrainAs(fish) {
@@ -235,7 +235,7 @@ fun MarkerInfoDialog(
                                     easing = LinearOutSlowInEasing
                                 )
                             ),
-                        text = fishActivity.toString() ?: "",
+                        text = (fishActivity ?: "").toString(),
                         textColor = if (fishActivity == null) Color.LightGray else secondaryTextColor
                     )
 
