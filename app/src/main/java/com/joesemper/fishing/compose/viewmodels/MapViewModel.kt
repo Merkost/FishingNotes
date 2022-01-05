@@ -1,5 +1,6 @@
 package com.joesemper.fishing.compose.viewmodels
 
+import android.util.Log
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.MutableState
@@ -11,19 +12,25 @@ import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.compose.ui.home.UiState
 import com.joesemper.fishing.compose.ui.home.map.MapUiState
 import com.joesemper.fishing.domain.viewstates.BaseViewState
+import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
+import com.joesemper.fishing.model.entity.solunar.Solunar
+import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.repository.app.MarkersRepository
+import com.joesemper.fishing.model.repository.app.SolunarRepository
 import com.joesemper.fishing.model.repository.app.WeatherRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.util.*
 
 class MapViewModel(
     private val repository: MarkersRepository,
-    private val weatherRepository: WeatherRepository
+    private val weatherRepository: WeatherRepository,
+    private val solunarRepository: SolunarRepository,
 ) : ViewModel() {
 
     val showMarker: MutableState<Boolean> = mutableStateOf(false)
@@ -52,6 +59,8 @@ class MapViewModel(
     var currentMarker: MutableState<UserMapMarker?> = mutableStateOf(null)
 
     val chosenPlace = mutableStateOf<String?>(null)
+
+    val fishActivity: MutableState<Int?> = mutableStateOf(null)
 
     init {
         loadMarkers()
@@ -91,6 +100,29 @@ class MapViewModel(
     fun getWeather(latitude: Double, longitude: Double) =
         weatherRepository.getWeather(latitude, longitude)
 
+    fun getFishActivity(latitude: Double, longitude: Double) {
+        viewModelScope.launch {
+            solunarRepository.getSolunar(latitude,longitude).collect { result ->
+                when (result) {
+                    is RetrofitWrapper.Success<Solunar> -> {
+                        val solunar = result.data
+                        val calendar = Calendar.getInstance()
+                        val currentHour24 = calendar[Calendar.HOUR_OF_DAY]
+                        fishActivity.value = solunar.hourlyRating.`17`
+                        //_weatherState.value = RetrofitWrapper.Success(result.data)
+                    }
+                    is RetrofitWrapper.Loading -> {
+                        //_weatherState.value = RetrofitWrapper.Loading()
+                    }
+                    is RetrofitWrapper.Error -> {
+                        Log.d("SOLUNAR ERROR", result.errorType.error.toString())
+                        //_weatherState.value = RetrofitWrapper.Error(result.errorType)
+                    }
+                }
+            }
+        }
+    }
+
 
     private fun onError(error: Throwable) {
         viewStateFlow.value = BaseViewState.Error(error)
@@ -111,4 +143,6 @@ class MapViewModel(
                 }
         }
     }
+
+
 }

@@ -65,17 +65,17 @@ fun MarkerInfoDialog(
     val coroutineScope = rememberCoroutineScope()
     val geocoder = Geocoder(context, resources().configuration.locale)
 
-
-    val weatherPrefs: WeatherPreferences = get()
+    /*val weatherPrefs: WeatherPreferences = get()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
 
     val connectionState by context.observeConnectivityAsFlow()
-        .collectAsState(initial = context.currentConnectivityState)
+        .collectAsState(initial = context.currentConnectivityState)*/
 
     var address: String? by remember { mutableStateOf(null) }
     var distance: String? by remember { mutableStateOf(null) }
+    val fishActivity: Int? by remember { viewModel.fishActivity }
 
-    val weather = marker?.let {
+    /*val weather = marker?.let {
         if (connectionState is ConnectionState.Available) {
             val result by viewModel.getWeather(it.latitude, it.longitude)
                 .collectAsState(RetrofitWrapper.Success<WeatherForecast?>(null))
@@ -89,12 +89,34 @@ fun MarkerInfoDialog(
         } else {
             null
         }
-    }
+    }*/
 
-    marker?.let {
+    marker?.let  {
+        LaunchedEffect(marker) {
+            coroutineScope.launch(Dispatchers.Default) {
+                address = null
+                delay(800)
+                try {
+                    val position = geocoder.getFromLocation(marker.latitude, marker.longitude, 1)
+                    position?.first()?.apply {
+                        address = if (!subAdminArea.isNullOrBlank()) {
+                            subAdminArea.replaceFirstChar { it.uppercase() }
+                        } else if (!adminArea.isNullOrBlank()) {
+                            adminArea.replaceFirstChar { it.uppercase() }
+                        } else "Не удалось определить название"
+                    }
+                } catch (e: Throwable) {
+                    address = "Нет соединения с сервером"
+                }
+            }
+        }
 
         LaunchedEffect(marker) {
+            viewModel.fishActivity.value = null
+            viewModel.getFishActivity(marker.latitude, marker.longitude)
+        }
 
+        LaunchedEffect(marker, viewModel.lastKnownLocation) {
             coroutineScope.launch(Dispatchers.Default) {
                 distance = null
                 lastKnownLocation.value?.let {
@@ -102,23 +124,6 @@ fun MarkerInfoDialog(
                         com.google.android.gms.maps.model.LatLng(marker.latitude, marker.longitude),
                         com.google.android.gms.maps.model.LatLng(it.latitude, it.longitude)
                     ))
-                }
-            }
-
-            coroutineScope.launch(Dispatchers.Default) {
-                address = null
-                delay(800)
-                try {
-                    val position = geocoder.getFromLocation(marker.latitude, marker.longitude, 1)
-                    position?.first()?.apply {
-                        if (!subAdminArea.isNullOrBlank()) {
-                            address = subAdminArea.replaceFirstChar { it.uppercase() }
-                        } else if (!adminArea.isNullOrBlank()) {
-                            address = adminArea.replaceFirstChar { it.uppercase() }
-                        } else address = "Не удалось определить название"
-                    }
-                } catch (e: Throwable) {
-                    address = "Нет соединения с сервером"
                 }
             }
         }
@@ -155,7 +160,7 @@ fun MarkerInfoDialog(
                             enabled = scaffoldState.bottomSheetState.isCollapsed
                         )
                 ) {
-                    val (locationIcon, title, area, distanceTo, time8, time16, pressNowVal, press8Val,
+                    val (locationIcon, title, area, distanceTo, fish, time8, time16, pressNowVal, press8Val,
                         press16Val, press8Icon, press16Icon, loading, noNetwork) = createRefs()
 
 
@@ -215,6 +220,23 @@ fun MarkerInfoDialog(
                         text = distance ?: "",
                         textColor = if (distance == null) Color.LightGray else secondaryTextColor,
                         textAlign = TextAlign.Center,
+                    )
+
+                    //Area name
+                    SubtitleText(
+                        modifier = Modifier
+                            .constrainAs(fish) {
+                                top.linkTo(area.bottom, 4.dp)
+                                linkTo(parent.absoluteLeft, parent.absoluteRight, 0.dp, 0.dp, 0.1f)
+                            }
+                            .animateContentSize(
+                                animationSpec = tween(
+                                    durationMillis = 300,
+                                    easing = LinearOutSlowInEasing
+                                )
+                            ),
+                        text = fishActivity.toString() ?: "",
+                        textColor = if (fishActivity == null) Color.LightGray else secondaryTextColor
                     )
 
                     /* //weatherForecast

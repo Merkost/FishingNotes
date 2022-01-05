@@ -590,7 +590,7 @@ fun MapFab(
                 0.dp
             }
             MapUiState.BottomSheetInfoMode, MapUiState.BottomSheetFullyExpanded -> {
-                32.dp
+                38.dp
             }
             //MapUiState.BottomSheetFullyExpanded -> { 82.dp }
             MapUiState.PlaceSelectMode -> {
@@ -604,7 +604,7 @@ fun MapFab(
             fabImg.value = R.drawable.ic_baseline_add_location_24
         }
         MapUiState.BottomSheetInfoMode -> {
-            //fabImg.value = R.drawable.ic_add_catch
+            fabImg.value = R.drawable.ic_add_catch
             //fabImg.value = R.drawable.ic_baseline_add_location_24
         }
         MapUiState.BottomSheetFullyExpanded -> {
@@ -639,8 +639,8 @@ fun MapFab(
 
         FishingFab(
             modifier = Modifier
-                /*.animateContentSize()*/
-                .padding(bottom = paddingBottom.value/*, top = paddingTop.value*/),
+                .animateContentSize()
+                .padding(bottom = paddingBottom.value, top = paddingTop.value),
             onClick = onClick,
             onLongPress = {
                 if (state == MapUiState.NormalMode && useFastFabAdd) {
@@ -651,11 +651,27 @@ fun MapFab(
                 }
             }
         ) {
-            Icon(
-                painter = painterResource(id = fabImg.value),
-                contentDescription = stringResource(R.string.new_place),
-                tint = MaterialTheme.colors.onPrimary,
-            )
+            AnimatedVisibility(state is MapUiState.NormalMode) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_baseline_add_location_24),
+                    contentDescription = stringResource(R.string.new_place),
+                    tint = MaterialTheme.colors.onPrimary,
+                )
+            }
+            AnimatedVisibility(state is MapUiState.BottomSheetInfoMode) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_add_catch),
+                    contentDescription = stringResource(R.string.new_place),
+                    tint = MaterialTheme.colors.onPrimary,
+                )
+            }
+            AnimatedVisibility(state is MapUiState.PlaceSelectMode) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_baseline_check_24),
+                    contentDescription = stringResource(R.string.new_place),
+                    tint = MaterialTheme.colors.onPrimary,
+                )
+            }
         }
     }
 }
