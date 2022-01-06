@@ -27,9 +27,11 @@ import androidx.navigation.NavController
 import com.google.android.libraries.maps.model.LatLng
 import com.google.maps.android.SphericalUtil
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.place.UserPlaceScreen
 import com.joesemper.fishing.compose.ui.home.views.PrimaryText
 import com.joesemper.fishing.compose.ui.home.views.SubtitleText
+import com.joesemper.fishing.compose.ui.home.weather.WindSpeedValues
 import com.joesemper.fishing.compose.ui.resources
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.compose.ui.utils.currentFraction
@@ -40,6 +42,7 @@ import com.joesemper.fishing.model.entity.weather.CurrentWeatherFree
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import java.text.DecimalFormat
 import kotlin.math.floor
@@ -60,8 +63,11 @@ fun MarkerInfoDialog(
     val context = LocalContext.current
 
     val viewModel: MapViewModel = getViewModel()
+    val weatherPreferences: WeatherPreferences = get()
     val coroutineScope = rememberCoroutineScope()
     val geocoder = Geocoder(context, resources().configuration.locale)
+
+    val windUnit by weatherPreferences.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
 
     /*val weatherPrefs: WeatherPreferences = get()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
@@ -234,7 +240,10 @@ fun MarkerInfoDialog(
                                     easing = LinearOutSlowInEasing
                                 )
                             ),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            6.dp,
+                            Alignment.CenterHorizontally
+                        ),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         SubtitleText(
@@ -259,7 +268,10 @@ fun MarkerInfoDialog(
                                     easing = LinearOutSlowInEasing
                                 )
                             ),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            6.dp,
+                            Alignment.CenterHorizontally
+                        ),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
@@ -288,32 +300,43 @@ fun MarkerInfoDialog(
 
                     //Weather
 
-                        Row(
-                            modifier = Modifier
-                                .constrainAs(weather) {
-                                    top.linkTo(area.bottom, 4.dp)
-                                    linkTo(horizontalLine, parent.absoluteRight, 0.dp, 0.dp, 0.5f)
-                                    bottom.linkTo(parent.bottom)
-                                }
-                                .animateContentSize(
-                                    animationSpec = tween(
-                                        durationMillis = 300,
-                                        easing = LinearOutSlowInEasing
-                                    )
-                                ),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Icon(painterResource(R.drawable.ic_baseline_navigation_24), "",
-                                modifier = Modifier.rotate(currentWeather?.wind_degrees?.let { it.minus(mapBearing.value) } ?: mapBearing.value ),
-                                tint = if (fishActivity == null) Color.LightGray else MaterialTheme.colors.primaryVariant
+                    Row(
+                        modifier = Modifier
+                            .constrainAs(weather) {
+                                top.linkTo(area.bottom, 4.dp)
+                                linkTo(horizontalLine, parent.absoluteRight, 0.dp, 0.dp, 0.5f)
+                                bottom.linkTo(parent.bottom)
+                            }
+                            .animateContentSize(
+                                animationSpec = tween(
+                                    durationMillis = 300,
+                                    easing = LinearOutSlowInEasing
+                                )
+                            ),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            6.dp,
+                            Alignment.CenterHorizontally
+                        ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(painterResource(R.drawable.ic_baseline_navigation_24), "",
+                            modifier = Modifier.rotate(currentWeather?.wind_degrees?.let {
+                                it.minus(
+                                    mapBearing.value
+                                )
+                            } ?: mapBearing.value),
+                            tint = if (fishActivity == null) Color.LightGray else MaterialTheme.colors.primaryVariant
+                        )
+                        currentWeather?.let {
+                            SubtitleText(
+                                text = windUnit.getWindSpeed(currentWeather!!.wind_speed)
+                                    .toString() + " " +
+                                        stringResource(windUnit.stringRes)
                             )
-                            SubtitleText(text = getWindFromDouble(currentWeather?.wind_speed, unit = stringResource(id = R.string.wind_speed_units)))
-
-
                         }
 
 
+                    }
 
 
                     /* //weatherForecast

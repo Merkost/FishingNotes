@@ -107,13 +107,13 @@ enum class WindSpeedValues(val stringRes: Int) {
     ftps (R.string.wind_ftps),
     kmph (R.string.wind_kmph);
 
-    fun getWindSpeed(windSpeed: Float): String {
+    fun getWindSpeed(windSpeed: Double): Double {
         return when (this) {
-            metersps -> windSpeed.toString()
-            knots -> (windSpeed * 1.9438444924574).toString()
-            milesph -> (windSpeed * 2.2369362920544).toString()
-            ftps -> (windSpeed * 3.28084).toString()
-            kmph -> (windSpeed * 3.6).toInt().toString()
+            metersps -> windSpeed
+            knots -> (windSpeed * 1.9438444924574)
+            milesph -> (windSpeed * 2.2369362920544)
+            ftps -> (windSpeed * 3.28084)
+            kmph -> (windSpeed * 3.6)
         }
     }
 

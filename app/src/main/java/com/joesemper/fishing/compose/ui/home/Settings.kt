@@ -45,6 +45,7 @@ import com.joesemper.fishing.compose.ui.home.views.DefaultCard
 import com.joesemper.fishing.compose.ui.home.views.PrimaryText
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
+import com.joesemper.fishing.compose.ui.home.weather.WindSpeedValues
 import com.joesemper.fishing.compose.ui.theme.AppThemeValues
 import com.joesemper.fishing.compose.ui.utils.ColorPicker
 import kotlinx.coroutines.delay
@@ -109,9 +110,11 @@ fun WeatherSettings(weatherPreferences: WeatherPreferences) {
 
     val isPressureDialogOpen = remember { mutableStateOf(false) }
     val isTemperatureDialogOpen = remember { mutableStateOf(false) }
+    val isWindSpeedDialogOpen = remember { mutableStateOf(false) }
 
     val pressureUnit = weatherPreferences.getPressureUnit.collectAsState(PressureValues.mmHg)
     val temperatureUnit = weatherPreferences.getTemperatureUnit.collectAsState(TemperatureValues.C)
+    val windSpeedUnit = weatherPreferences.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
 
     GetPressureUnit(isPressureDialogOpen, pressureUnit) { newValue ->
         coroutineScope.launch {
@@ -125,6 +128,13 @@ fun WeatherSettings(weatherPreferences: WeatherPreferences) {
             weatherPreferences.saveTemperatureUnit(newValue)
             delay(200)
             isTemperatureDialogOpen.value = false
+        }
+    }
+    GetWindSpeedUnit(isWindSpeedDialogOpen, windSpeedUnit) { newValue ->
+        coroutineScope.launch {
+            weatherPreferences.saveWindSpeedUnit(newValue)
+            delay(200)
+            isWindSpeedDialogOpen.value = false
         }
     }
 
@@ -151,6 +161,17 @@ fun WeatherSettings(weatherPreferences: WeatherPreferences) {
         title = { Text(text = stringResource(R.string.pressure_unit)) },
         subtitle = { Text(text = stringResource(R.string.choose_pressure_unit)/* (Current is: ${pressureUnit.value})*/) },
         onClick = { isPressureDialogOpen.value = true }
+    )
+    SettingsMenuLink(
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Air,
+                contentDescription = Icons.Default.Air.name
+            )
+        },
+        title = { Text(text = stringResource(R.string.wind_speed_unit)) },
+        subtitle = { Text(text = stringResource(R.string.choose_wind_speed_unit)/* (Current is: ${pressureUnit.value})*/) },
+        onClick = { isWindSpeedDialogOpen.value = true }
     )
 }
 
@@ -442,6 +463,74 @@ fun GetPressureUnit(
                             )
                             Text(
                                 text = stringResource(pressureValue.stringRes),
+                                modifier = Modifier.padding(start = 16.dp)
+                            )
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+}
+
+@Composable
+fun GetWindSpeedUnit(
+    isWindSpeedDialogOpen: MutableState<Boolean>,
+    currentWindSpeedUnit: State<WindSpeedValues>,
+    onSelectedValue: (windSpeedValues: WindSpeedValues) -> Unit
+) {
+    val radioOptions = WindSpeedValues.values().asList()
+    val context = LocalContext.current
+
+    if (isWindSpeedDialogOpen.value) {
+        val (selectedOption, onOptionSelected) = remember {
+            mutableStateOf(
+                currentWindSpeedUnit.value
+            )
+        }
+        Dialog(onDismissRequest = { isWindSpeedDialogOpen.value = false }) {
+            DefaultCard {
+                Column(
+                    modifier = Modifier.padding(bottom = 12.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Row(
+                        modifier = Modifier.padding(14.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        PrimaryText(text = stringResource(R.string.choose_temperature_unit))
+                    }
+
+                    radioOptions.forEach { windSpeedValue ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .height(60.dp)
+                                .selectable(
+                                    selected = (windSpeedValue == selectedOption),
+                                    onClick = {
+                                        onOptionSelected(windSpeedValue)
+                                        onSelectedValue(windSpeedValue)
+                                    }
+                                )
+                                .padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(
+                                selected = (windSpeedValue == selectedOption),
+                                modifier = Modifier.padding(all = Dp(value = 8F)),
+                                onClick = {
+                                    onOptionSelected(windSpeedValue)
+                                    onSelectedValue(windSpeedValue)
+                                    Toast.makeText(context, windSpeedValue.name, Toast.LENGTH_LONG).show()
+                                }
+                            )
+                            Text(
+                                text = stringResource(windSpeedValue.stringRes),
                                 modifier = Modifier.padding(start = 16.dp)
                             )
                         }

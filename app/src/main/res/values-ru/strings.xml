@@ -244,5 +244,7 @@
     <string name="hidden_places">Скрытые места</string>
     <string name="show_hidden_places">Показывать скрытые места на карте</string>
     <string name="wind_ftps">ft/s</string>
+    <string name="wind_speed_unit">Единица измерения скорости ветра</string>
+    <string name="choose_wind_speed_unit">Выберите единицу измерения скорости ветра</string>
 
 </resources>
