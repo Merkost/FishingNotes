@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
+import com.joesemper.fishing.compose.ui.home.weather.WindSpeedValues
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -20,6 +21,7 @@ class WeatherPreferences(private val context: Context) {
 
         val PRESSURE_UNIT = stringPreferencesKey("pressure_unit")
         val TEMPERATURE_UNIT = stringPreferencesKey("temperature_unit")
+        val WIND_UNIT = stringPreferencesKey("wind_unit")
     }
 
     //get the saved value
@@ -37,6 +39,13 @@ class WeatherPreferences(private val context: Context) {
             if (e is IllegalArgumentException) { emit(TemperatureValues.C) }
         }
 
+    val getWindSpeedUnit: Flow<WindSpeedValues> = context.dataStore.data
+        .map { preferences ->
+            WindSpeedValues.valueOf(preferences[WIND_UNIT] ?: WindSpeedValues.metersps.name)
+        }.catch { e ->
+            if (e is IllegalArgumentException) { emit(WindSpeedValues.metersps) }
+        }
+
     //save into datastore
     suspend fun savePressureUnit(pressureValues: PressureValues) {
         context.dataStore.edit { preferences ->
@@ -44,10 +53,15 @@ class WeatherPreferences(private val context: Context) {
         }
     }
 
-
     suspend fun saveTemperatureUnit(temperatureValues: TemperatureValues) {
         context.dataStore.edit { preferences ->
             preferences[TEMPERATURE_UNIT] = temperatureValues.name
+        }
+    }
+
+    suspend fun saveWindSpeedUnit(windSpeedValues: WindSpeedValues) {
+        context.dataStore.edit { preferences ->
+            preferences[WIND_UNIT] = windSpeedValues.name
         }
     }
 

@@ -250,6 +250,11 @@
     <string name="app_exit_message">Do it again to close the app</string>
     <string name="hidden_places">Скрытые места</string>
     <string name="show_hidden_places">Показывать скрытые места на карте</string>
+    <string name="wind_mph">mph</string>
+    <string name="wind_knots">knots</string>
+    <string name="wind_mps">m/s</string>
+    <string name="wind_ftps">ft/s</string>
+    <string name="wind_kmph">km/h</string>
 
 
 </resources>

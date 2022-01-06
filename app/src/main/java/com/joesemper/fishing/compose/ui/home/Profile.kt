@@ -11,6 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
+import androidx.compose.material.SnackbarDefaults.backgroundColor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Place
@@ -508,7 +509,8 @@ fun ProfileAppBar(navController: NavController, viewModel: UserViewModel) {
                 Icon(Icons.Default.Settings, stringResource(R.string.settings))
             }
         },
-        elevation = 0.dp
+        elevation = 0.dp,
+        backgroundColor = MaterialTheme.colors.primary
     )
     if (dialogOnLogout.value) LogoutDialog(dialogOnLogout, navController)
 }

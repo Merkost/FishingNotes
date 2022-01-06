@@ -120,7 +120,7 @@ fun WeatherScreen(
 
             TopAppBar(
                 elevation = elevation.value,
-                backgroundColor = MaterialTheme.colors.primaryVariant
+                backgroundColor = MaterialTheme.colors.primary
             ) {
                 WeatherLocationIcon(color = MaterialTheme.colors.onPrimary)
                 selectedPlace.value?.let {
@@ -253,7 +253,7 @@ fun CurrentWeather(
         modifier = modifier
             .fillMaxWidth()
             .height(350.dp),
-        color = MaterialTheme.colors.primaryVariant
+        color = MaterialTheme.colors.primary
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),

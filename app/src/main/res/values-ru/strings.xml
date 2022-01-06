@@ -243,5 +243,6 @@
     <string name="app_exit_message">Нажмите еще раз для выхода из приложения</string>
     <string name="hidden_places">Скрытые места</string>
     <string name="show_hidden_places">Показывать скрытые места на карте</string>
+    <string name="wind_ftps">ft/s</string>
 
 </resources>

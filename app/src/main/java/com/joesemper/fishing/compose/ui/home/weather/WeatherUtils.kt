@@ -43,18 +43,6 @@ data class Point(
     val y: Float
 )
 
-
-
-@Composable
-fun getTemperatureNameFromUnit(temperatureUnit: String): String {
-    return when (temperatureUnit) {
-        TemperatureValues.C.name -> stringResource(R.string.celsius)
-        TemperatureValues.F.name -> stringResource(R.string.fahrenheit)
-        TemperatureValues.K.name -> stringResource(R.string.kelvin)
-        else -> { stringResource(R.string.celsius) }
-    }
-}
-
 enum class PressureValues(val stringRes: Int) {
     Pa (R.string.pressure_pa),
     Bar (R.string.pressure_bar),
@@ -109,6 +97,36 @@ enum class TemperatureValues(val stringRes: Int) {
             K -> (temperaturInC - 273.15).toInt()
         }
     }
+
+}
+
+enum class WindSpeedValues(val stringRes: Int) {
+    metersps (R.string.wind_mps),
+    milesph (R.string.wind_mph),
+    knots (R.string.wind_knots),
+    ftps (R.string.wind_ftps),
+    kmph (R.string.wind_kmph);
+
+    fun getWindSpeed(windSpeed: Float): String {
+        return when (this) {
+            metersps -> windSpeed.toString()
+            knots -> (windSpeed * 1.9438444924574).toString()
+            milesph -> (windSpeed * 2.2369362920544).toString()
+            ftps -> (windSpeed * 3.28084).toString()
+            kmph -> (windSpeed * 3.6).toInt().toString()
+        }
+    }
+
+    //for graphic
+    /*fun getMpsWindSpeed(windSpeed: Float): Int {
+        return when (this) {
+            mph -> windSpeed.toInt().toString()
+            knots -> (windSpeed * 9f/5f + 32).toInt().toString()
+            mps -> (windSpeed + 273.15).toInt().toString()
+            ftps -> (windSpeed + 273.15).toInt().toString()
+            kmph -> (windSpeed + 273.15).toInt().toString()
+        }
+    }*/
 
 }
 
