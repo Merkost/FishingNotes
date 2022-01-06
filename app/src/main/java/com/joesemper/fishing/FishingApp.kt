@@ -17,7 +17,7 @@ class FishingApp : Application() {
         startKoin {
             androidLogger(if (BuildConfig.DEBUG) Level.ERROR else Level.NONE)
             androidContext(this@FishingApp)
-            modules(appModule, mainActivity)
+            modules(appModule, mainModule, repositoryModule, settingsModule)
 
         }
     }

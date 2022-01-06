@@ -21,23 +21,30 @@ import org.koin.dsl.module
 
 
 val appModule = module {
+    single { Logger() }
+    single { SnackbarManager }
+
+}
+
+val repositoryModule = module {
+    single { RepositoryCollections() }
+
     single<UserRepository> { FirebaseUserRepositoryImpl(get(), get(), androidContext()) }
     single<CatchesRepository> { FirebaseCatchesRepositoryImpl(get(), get()) }
     single<MarkersRepository> { FirebaseMarkersRepositoryImpl(get(), get()) }
     single<SolunarRepository> { SolunarRetrofitRepositoryImpl() }
     single<PhotoStorage> { CloudPhotoStorage(androidContext()) }
     single<WeatherRepository> { WeatherRepositoryRetrofitImpl() }
-    single { Logger() }
-    single { SnackbarManager }
+}
+
+val settingsModule = module {
     single { AppPreferences(androidContext()) }
     single { UserPreferences(androidContext()) }
     single { WeatherPreferences(androidContext()) }
     single { NotesPreferences(androidContext()) }
-    single { RepositoryCollections() }
-
 }
 
-val mainActivity = module {
+val mainModule = module {
 
     viewModel { MainViewModel(get()) }
     viewModel { LoginViewModel(get()) }
