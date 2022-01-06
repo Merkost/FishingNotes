@@ -221,19 +221,29 @@ fun MarkerInfoDialog(
                     )
 
                     //Distance
-                    SubtitleText(
+                    Row(
                         modifier = Modifier
                             .constrainAs(distanceTo) {
                                 top.linkTo(area.top)
                                 bottom.linkTo(area.bottom)
-                                linkTo(area.absoluteRight, parent.absoluteRight, 0.dp, 0.dp, 1f)
-                            }.width(80.dp),
-
-                        /*overflow = TextOverflow.Ellipsis,*/
-                        text = distance ?: "",
-                        textColor = if (distance == null) Color.LightGray else secondaryTextColor,
-                        textAlign = TextAlign.Center,
-                    )
+                                linkTo(area.absoluteRight, parent.absoluteRight, 0.dp, 16.dp, 1f)
+                            }/*.width(80.dp)*/
+                            .animateContentSize(
+                                animationSpec = tween(
+                                    durationMillis = 300,
+                                    easing = LinearOutSlowInEasing
+                                )
+                            ),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        SubtitleText(
+                            /*overflow = TextOverflow.Ellipsis,*/
+                            text = distance ?: "",
+                            textColor = if (distance == null) Color.LightGray else secondaryTextColor,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
 
                     //Fish activity
                     Row(
