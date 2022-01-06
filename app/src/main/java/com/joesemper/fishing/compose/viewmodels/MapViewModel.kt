@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,19 +16,18 @@ import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.model.entity.solunar.Solunar
-import com.joesemper.fishing.model.entity.weather.WeatherForecast
+import com.joesemper.fishing.model.entity.weather.CurrentWeatherFree
+import com.joesemper.fishing.model.repository.app.FreeWeatherRepository
 import com.joesemper.fishing.model.repository.app.MarkersRepository
 import com.joesemper.fishing.model.repository.app.SolunarRepository
-import com.joesemper.fishing.model.repository.app.WeatherRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.util.*
 
 class MapViewModel(
     private val repository: MarkersRepository,
-    private val weatherRepository: WeatherRepository,
+    private val freeWeatherRepository: FreeWeatherRepository,
     private val solunarRepository: SolunarRepository,
 ) : ViewModel() {
 
@@ -37,8 +35,8 @@ class MapViewModel(
     private val viewStateFlow: MutableStateFlow<BaseViewState> =
         MutableStateFlow(BaseViewState.Loading(null))
 
-    private var _mapMarkers: MutableStateFlow<MutableList<UserMapMarker>>
-        = MutableStateFlow(mutableListOf())
+    private var _mapMarkers: MutableStateFlow<MutableList<UserMapMarker>> =
+        MutableStateFlow(mutableListOf())
     val mapMarkers: StateFlow<MutableList<UserMapMarker>>
         get() = _mapMarkers
 
@@ -61,6 +59,7 @@ class MapViewModel(
     val chosenPlace = mutableStateOf<String?>(null)
 
     val fishActivity: MutableState<Int?> = mutableStateOf(null)
+    val currentWeather: MutableState<CurrentWeatherFree?> = mutableStateOf(null)
 
     init {
         loadMarkers()
@@ -97,12 +96,31 @@ class MapViewModel(
         }
     }
 
-    fun getWeather(latitude: Double, longitude: Double) =
-        weatherRepository.getWeather(latitude, longitude)
+
+    fun getCurrentWeather(latitude: Double, longitude: Double) {
+        viewModelScope.launch {
+            freeWeatherRepository
+                .getCurrentWeatherFree(latitude, longitude).collect { result ->
+                    when (result) {
+                        is RetrofitWrapper.Success<CurrentWeatherFree> -> {
+                            val weather = result.data
+                            currentWeather.value = weather
+                        }
+                        is RetrofitWrapper.Loading -> {
+
+                        }
+                        is RetrofitWrapper.Error -> {
+                            Log.d("CURRENT WEATHER ERROR", result.errorType.error.toString())
+                            //_weatherState.value = RetrofitWrapper.Error(result.errorType)
+                        }
+                    }
+                }
+        }
+    }
 
     fun getFishActivity(latitude: Double, longitude: Double) {
         viewModelScope.launch {
-            solunarRepository.getSolunar(latitude,longitude).collect { result ->
+            solunarRepository.getSolunar(latitude, longitude).collect { result ->
                 when (result) {
                     is RetrofitWrapper.Success<Solunar> -> {
                         val solunar = result.data
@@ -130,17 +148,17 @@ class MapViewModel(
 
     fun updateCurrentPlace(markerToUpdate: UserMapMarker) {
         viewModelScope.launch {
-                repository.getMapMarker(markerToUpdate.id).collect { updatedMarker ->
-                    updatedMarker?.let {
-                        currentMarker.value?.let {
-                            currentMarker.value = updatedMarker
-                        }
-                        _mapMarkers.value.apply {
-                            remove(markerToUpdate)
-                            add(updatedMarker)
-                        }
+            repository.getMapMarker(markerToUpdate.id).collect { updatedMarker ->
+                updatedMarker?.let {
+                    currentMarker.value?.let {
+                        currentMarker.value = updatedMarker
+                    }
+                    _mapMarkers.value.apply {
+                        remove(markerToUpdate)
+                        add(updatedMarker)
                     }
                 }
+            }
         }
     }
 

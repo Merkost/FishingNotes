@@ -10,10 +10,7 @@ import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.domain.*
 import com.joesemper.fishing.model.datasource.*
 import com.joesemper.fishing.model.repository.UserRepository
-import com.joesemper.fishing.model.repository.app.CatchesRepository
-import com.joesemper.fishing.model.repository.app.MarkersRepository
-import com.joesemper.fishing.model.repository.app.SolunarRepository
-import com.joesemper.fishing.model.repository.app.WeatherRepository
+import com.joesemper.fishing.model.repository.app.*
 import com.joesemper.fishing.utils.Logger
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -35,6 +32,7 @@ val repositoryModule = module {
     single<SolunarRepository> { SolunarRetrofitRepositoryImpl() }
     single<PhotoStorage> { CloudPhotoStorage(androidContext()) }
     single<WeatherRepository> { WeatherRepositoryRetrofitImpl() }
+    single<FreeWeatherRepository> { FreeWeatherRepositoryImpl() }
 }
 
 val settingsModule = module {

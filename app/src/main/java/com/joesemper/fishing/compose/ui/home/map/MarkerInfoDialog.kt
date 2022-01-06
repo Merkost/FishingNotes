@@ -1,14 +1,18 @@
 package com.joesemper.fishing.compose.ui.home.map
 
 import android.location.Geocoder
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -22,27 +26,18 @@ import androidx.navigation.NavController
 import com.google.android.libraries.maps.model.LatLng
 import com.google.maps.android.SphericalUtil
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.datastore.WeatherPreferences
-import com.joesemper.fishing.compose.ui.home.*
 import com.joesemper.fishing.compose.ui.home.place.UserPlaceScreen
 import com.joesemper.fishing.compose.ui.home.views.PrimaryText
 import com.joesemper.fishing.compose.ui.home.views.SubtitleText
-import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.resources
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.compose.ui.utils.currentFraction
 import com.joesemper.fishing.compose.ui.utils.noRippleClickable
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
-import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.model.entity.weather.WeatherForecast
-import com.joesemper.fishing.utils.network.ConnectionState
-import com.joesemper.fishing.utils.network.currentConnectivityState
-import com.joesemper.fishing.utils.network.observeConnectivityAsFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import java.text.DecimalFormat
 
@@ -91,7 +86,7 @@ fun MarkerInfoDialog(
         }
     }*/
 
-    marker?.let  {
+    marker?.let {
         LaunchedEffect(marker) {
             coroutineScope.launch(Dispatchers.Default) {
                 address = null
@@ -116,14 +111,24 @@ fun MarkerInfoDialog(
             viewModel.getFishActivity(marker.latitude, marker.longitude)
         }
 
+        LaunchedEffect(marker) {
+            viewModel.currentWeather.value = null
+            viewModel.getCurrentWeather(marker.latitude, marker.longitude)
+        }
+
         LaunchedEffect(marker, viewModel.lastKnownLocation.value) {
             coroutineScope.launch(Dispatchers.Default) {
                 distance = null
                 lastKnownLocation.value?.let {
-                    distance = convertDistance(SphericalUtil.computeDistanceBetween(
-                        com.google.android.gms.maps.model.LatLng(marker.latitude, marker.longitude),
-                        com.google.android.gms.maps.model.LatLng(it.latitude, it.longitude)
-                    ))
+                    distance = convertDistance(
+                        SphericalUtil.computeDistanceBetween(
+                            com.google.android.gms.maps.model.LatLng(
+                                marker.latitude,
+                                marker.longitude
+                            ),
+                            com.google.android.gms.maps.model.LatLng(it.latitude, it.longitude)
+                        )
+                    )
                 }
             }
         }
@@ -163,6 +168,8 @@ fun MarkerInfoDialog(
                     val (locationIcon, title, area, distanceTo, fish, time8, time16, pressNowVal, press8Val,
                         press16Val, press8Icon, press16Icon, loading, noNetwork) = createRefs()
 
+                    val horizontalLine = createGuidelineFromAbsoluteLeft(0.5f)
+
 
                     Box(modifier = Modifier
                         .size(64.dp).padding(16.dp)
@@ -186,8 +193,10 @@ fun MarkerInfoDialog(
                                 linkTo(locationIcon.end, parent.end, 0.dp, 32.dp, 0f)
                                 bottom.linkTo(locationIcon.bottom)
                             },
-                        text = when { marker.title.isNotEmpty() -> marker.title
-                            else -> stringResource(R.string.no_name_place) } + "",
+                        text = when {
+                            marker.title.isNotEmpty() -> marker.title
+                            else -> stringResource(R.string.no_name_place)
+                        } + "",
                     )
 
                     //Area name
@@ -223,11 +232,12 @@ fun MarkerInfoDialog(
                     )
 
                     //Fish activity
-                    SubtitleText(
+                    Row(
                         modifier = Modifier
                             .constrainAs(fish) {
                                 top.linkTo(area.bottom, 4.dp)
-                                linkTo(parent.absoluteLeft, parent.absoluteRight, 0.dp, 0.dp, 0.1f)
+                                linkTo(parent.absoluteLeft, horizontalLine, 0.dp, 0.dp, 0.5f)
+                                bottom.linkTo(parent.bottom)
                             }
                             .animateContentSize(
                                 animationSpec = tween(
@@ -235,9 +245,24 @@ fun MarkerInfoDialog(
                                     easing = LinearOutSlowInEasing
                                 )
                             ),
-                        text = (fishActivity ?: "").toString(),
-                        textColor = if (fishActivity == null) Color.LightGray else secondaryTextColor
-                    )
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.fish),
+                            contentDescription = "Marker",
+                            modifier = Modifier.size(45.dp).padding(6.dp),
+                            tint = if (fishActivity == null) Color.LightGray else MaterialTheme.colors.primary
+                        )
+                        SubtitleText(
+                            text = if (fishActivity != null) fishActivity.toString() + "%" else "",
+                            textColor = if (fishActivity == null) Color.LightGray else secondaryTextColor
+                        )
+                    }
+
+                    //Weather
+
+
 
                     /* //weatherForecast
                     if (connectionState is ConnectionState.Available) {
@@ -378,7 +403,7 @@ fun convertDistance(distanceInMeters: Double): String {
 
     return when (distanceInMeters.toInt()) {
         in 0..999 -> distanceInMeters.toInt().toString() + " m"
-        in 1000..9999 -> df.format(distanceInMeters/1000f).toString() + " km"
+        in 1000..9999 -> df.format(distanceInMeters / 1000f).toString() + " km"
         else -> distanceInMeters.div(1000).toInt().toString() + " km"
     }
 }

@@ -60,7 +60,7 @@ class SolunarRetrofitRepositoryImpl : SolunarRepository {
                 val solunar = getService().getSolunar(
                     latitude = latitude, longitude = longitude,
                     date = date,
-                    tz = timeZone.toInt()
+                    tz = timeZone.toIntOrNull() ?: 0
                 )
 
                 emit(RetrofitWrapper.Success(solunar))
