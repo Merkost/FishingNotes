@@ -103,8 +103,7 @@ class MapViewModel(
                 .getCurrentWeatherFree(latitude, longitude).collect { result ->
                     when (result) {
                         is RetrofitWrapper.Success<CurrentWeatherFree> -> {
-                            val weather = result.data
-                            currentWeather.value = weather
+                            currentWeather.value = result.data
                         }
                         is RetrofitWrapper.Loading -> {
 

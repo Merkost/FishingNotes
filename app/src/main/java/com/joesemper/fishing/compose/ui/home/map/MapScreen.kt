@@ -221,7 +221,7 @@ fun MapScreen(
                     marker = viewModel.currentMarker.value,
                     lastKnownLocation = viewModel.lastKnownLocation,
                     navController = navController,
-                    mapUiState = mapUiState,
+                    mapBearing = mapBearing,
                     scaffoldState = scaffoldState,
                     upPress = { markerToUpdate ->
                         coroutineScope.launch {

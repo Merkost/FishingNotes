@@ -14,6 +14,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -35,11 +36,13 @@ import com.joesemper.fishing.compose.ui.utils.currentFraction
 import com.joesemper.fishing.compose.ui.utils.noRippleClickable
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
+import com.joesemper.fishing.model.entity.weather.CurrentWeatherFree
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 import java.text.DecimalFormat
+import kotlin.math.floor
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -47,7 +50,7 @@ import java.text.DecimalFormat
 fun MarkerInfoDialog(
     marker: UserMapMarker?,
     lastKnownLocation: MutableState<LatLng?>,
-    mapUiState: MapUiState,
+    mapBearing: MutableState<Float>,
     modifier: Modifier = Modifier,
     navController: NavController,
     scaffoldState: BottomSheetScaffoldState,
@@ -69,6 +72,7 @@ fun MarkerInfoDialog(
     var address: String? by remember { mutableStateOf(null) }
     var distance: String? by remember { mutableStateOf(null) }
     val fishActivity: Int? by remember { viewModel.fishActivity }
+    val currentWeather: CurrentWeatherFree? by remember { viewModel.currentWeather }
 
     /*val weather = marker?.let {
         if (connectionState is ConnectionState.Available) {
@@ -98,7 +102,7 @@ fun MarkerInfoDialog(
                             subAdminArea.replaceFirstChar { it.uppercase() }
                         } else if (!adminArea.isNullOrBlank()) {
                             adminArea.replaceFirstChar { it.uppercase() }
-                        } else "Не удалось определить название"
+                        } else "-"
                     }
                 } catch (e: Throwable) {
                     address = "Нет соединения с сервером"
@@ -134,7 +138,7 @@ fun MarkerInfoDialog(
         }
     }
 
-    val paddingDp = animateDpAsState(((1f - scaffoldState.currentFraction) * 8).dp)
+    val paddingDp = animateDpAsState(((1f - scaffoldState.currentFraction) * 6).dp)
     val cornersDp = animateDpAsState(((1f - scaffoldState.currentFraction) * 16).dp)
     val elevationDp = animateDpAsState(((1f - scaffoldState.currentFraction) * 6).dp)
 
@@ -159,14 +163,14 @@ fun MarkerInfoDialog(
                 ConstraintLayout(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(142.dp)
+                        .height(144.dp)
                         .noRippleClickable(
                             onClick = onDescriptionClick,
                             enabled = scaffoldState.bottomSheetState.isCollapsed
                         )
                 ) {
-                    val (locationIcon, title, area, distanceTo, fish, time8, time16, pressNowVal, press8Val,
-                        press16Val, press8Icon, press16Icon, loading, noNetwork) = createRefs()
+                    val (locationIcon, title, area, distanceTo,
+                        fish, divider, weather) = createRefs()
 
                     val horizontalLine = createGuidelineFromAbsoluteLeft(0.5f)
 
@@ -245,7 +249,7 @@ fun MarkerInfoDialog(
                                     easing = LinearOutSlowInEasing
                                 )
                             ),
-                        horizontalArrangement = Arrangement.Center,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
@@ -260,7 +264,45 @@ fun MarkerInfoDialog(
                         )
                     }
 
+                    //Divider
+                    Divider(
+                        modifier = Modifier
+                            .constrainAs(divider) {
+                                top.linkTo(area.bottom, 4.dp)
+                                linkTo(horizontalLine, horizontalLine, 0.dp, 0.dp, 0.5f)
+                                bottom.linkTo(parent.bottom)
+                            }.height(20.dp)
+                            .width(1.dp),
+                        color = Color.Gray,
+                    )
+
                     //Weather
+
+                        Row(
+                            modifier = Modifier
+                                .constrainAs(weather) {
+                                    top.linkTo(area.bottom, 4.dp)
+                                    linkTo(horizontalLine, parent.absoluteRight, 0.dp, 0.dp, 0.5f)
+                                    bottom.linkTo(parent.bottom)
+                                }
+                                .animateContentSize(
+                                    animationSpec = tween(
+                                        durationMillis = 300,
+                                        easing = LinearOutSlowInEasing
+                                    )
+                                ),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(painterResource(R.drawable.ic_baseline_navigation_24), "",
+                                modifier = Modifier.rotate(currentWeather?.wind_degrees?.let { it.minus(mapBearing.value) } ?: mapBearing.value ),
+                                tint = if (fishActivity == null) Color.LightGray else MaterialTheme.colors.primaryVariant
+                            )
+                            SubtitleText(text = getWindFromDouble(currentWeather?.wind_speed, unit = stringResource(id = R.string.wind_speed_units)))
+
+
+                        }
+
 
 
 
@@ -397,13 +439,38 @@ fun MarkerInfoDialog(
 
 }
 
+fun getWindFromDouble(windSpeed: Double?, unit: String): String {
+    return when (windSpeed) {
+        null -> ""
+        else -> {
+            return if ((windSpeed == floor(windSpeed))) {
+                // integer type
+                val wind = windSpeed.toInt()
+                if (wind == 0) wind.toWindString(unit) else wind.toWindString(unit)
+            } else {
+                val rounded = Math.round(windSpeed * 10.0) / 10.0
+                if ((rounded == floor(rounded))) getWindFromDouble(
+                    rounded,
+                    unit
+                )
+                else rounded.toWindString(unit)
+            }
+        }
+    }
+
+}
+
+private fun Number.toWindString(unit: String): String {
+    return "$this $unit"
+}
+
 
 fun convertDistance(distanceInMeters: Double): String {
     val df = DecimalFormat("#.#")
 
     return when (distanceInMeters.toInt()) {
         in 0..999 -> distanceInMeters.toInt().toString() + " m"
-        in 1000..9999 -> df.format(distanceInMeters / 1000f).toString() + " km"
+        in 1001..9999 -> df.format(distanceInMeters / 1000f).toString() + " km"
         else -> distanceInMeters.div(1000).toInt().toString() + " km"
     }
 }
