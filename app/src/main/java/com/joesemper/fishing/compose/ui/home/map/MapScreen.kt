@@ -241,9 +241,10 @@ fun MapScreen(
         ) {
             ConstraintLayout(modifier = Modifier.fillMaxSize()) {
                 val (mapLayout, addMarkerFragment, mapMyLocationButton,
-                    mapCompassButton, mapLayersButton,
+                    mapCompassButton, mapLayersButton, zoomInButton, zoomOutButton,
                     mapSettingsButton, mapLayersView, pointer) = createRefs()
                 val verticalMyLocationButtonGl = createGuidelineFromAbsoluteRight(56.dp)
+                val centerHorizontal = createGuidelineFromBottom(0.5f)
 
                 MapLayout(
                     modifier = Modifier.constrainAs(mapLayout) {
@@ -328,6 +329,29 @@ fun MapScreen(
                         currentCameraPosition.value.first,
                         currentCameraPosition.value.second
                     )
+                }
+
+                MapZoomInButton(
+                    modifier = Modifier.constrainAs(zoomInButton) {
+                        linkTo(parent.top, centerHorizontal, 4.dp, 4.dp, 1f)
+                        linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, 1f)
+                    },
+                ) {
+                    currentCameraPosition.value.let {
+                        moveCameraToLocation(coroutineScope, map, it.first, it.second + 1f, mapBearing.value)
+                    }
+
+                }
+
+                MapZoomOutButton(
+                    modifier = Modifier.constrainAs(zoomOutButton) {
+                        linkTo(centerHorizontal, parent.bottom, 4.dp, 4.dp, 0f)
+                        linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, 1f)
+                    },
+                ) {
+                    currentCameraPosition.value.let {
+                        moveCameraToLocation(coroutineScope, map, it.first, it.second - 1f, mapBearing.value)
+                    }
                 }
 
                 AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode,
@@ -491,7 +515,7 @@ fun MapLayout(
 
     LaunchedEffect(viewModel.lastMapCameraPosition.value) {
         viewModel.lastMapCameraPosition.value?.let {
-            moveCameraToLocation(this, map, it.first, it.second)
+            moveCameraToLocation(this, map, it.first, it.second, mapBearing.value)
         }
     }
 

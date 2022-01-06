@@ -126,15 +126,23 @@ fun moveCameraToLocation(
     coroutineScope: CoroutineScope,
     map: MapView,
     location: LatLng,
-    zoom: Float = DEFAULT_ZOOM
+    zoom: Float = DEFAULT_ZOOM,
+    bearing: Float = 0f
 ) {
     coroutineScope.launch {
         val googleMap = map.awaitMap()
         googleMap.stopAnimation()
         googleMap.animateCamera(
-            CameraUpdateFactory.newLatLngZoom(
+            /*CameraUpdateFactory.newLatLngZoom(
                 location,
                 zoom
+            )*/
+            CameraUpdateFactory.newCameraPosition(
+                CameraPosition.Builder()
+                    .zoom(zoom)
+                    .target(location)
+                    .bearing(bearing)
+                    .build()
             )
         )
     }

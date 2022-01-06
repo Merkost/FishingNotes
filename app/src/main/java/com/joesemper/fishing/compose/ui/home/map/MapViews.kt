@@ -220,6 +220,52 @@ fun CompassButton(
 }
 
 @Composable
+fun MapZoomInButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+
+        Card(
+            shape = CircleShape,
+            modifier = modifier.size(40.dp)
+        ) {
+            IconButton(modifier = Modifier
+                .padding(8.dp)
+                .fillMaxSize(),
+                onClick = { onClick() }) {
+                Icon(
+                    Icons.Default.Add,
+                    Icons.Default.Add.name,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+}
+
+@Composable
+fun MapZoomOutButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+
+    Card(
+        shape = CircleShape,
+        modifier = modifier.size(40.dp)
+    ) {
+        IconButton(modifier = Modifier
+            .padding(8.dp)
+            .fillMaxSize(),
+            onClick = { onClick() }) {
+            Icon(
+                Icons.Default.Remove,
+                Icons.Default.Remove.name,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
+}
+
+@Composable
 fun MapLayersButton(layersSelectionMode: MutableState<Boolean>, modifier: Modifier) {
     Card(
         shape = CircleShape,
