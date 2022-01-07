@@ -59,7 +59,6 @@ import com.joesemper.fishing.utils.time.toDayOfWeek
 import com.joesemper.fishing.utils.time.toDayOfWeekAndDate
 import com.joesemper.fishing.utils.time.toTime
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import kotlin.math.min
@@ -118,6 +117,7 @@ fun WeatherScreen(
     val weatherPrefs: WeatherPreferences = get()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
     val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
+    val windSpeedUnit by weatherPrefs.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -164,6 +164,7 @@ fun WeatherScreen(
                         forecast = forecast,
                         pressureUnit = pressureUnit,
                         temperatureUnit = temperatureUnit,
+                        windSpeedUnit = windSpeedUnit,
                     )
 
                     PressureChartItem(
@@ -263,6 +264,7 @@ fun CurrentWeather(
     forecast: WeatherForecast,
     temperatureUnit: TemperatureValues,
     pressureUnit: PressureValues,
+    windSpeedUnit: WindSpeedValues,
 ) {
     Surface(
         modifier = modifier
@@ -286,12 +288,13 @@ fun CurrentWeather(
 
             CurrentWeatherValuesView(
                 forecast = forecast.hourly.first(),
-                pressureUnit = pressureUnit
+                pressureUnit = pressureUnit,
             )
 
             HourlyWeather(
                 forecastHourly = forecast.hourly,
                 temperatureUnit = temperatureUnit,
+                windSpeedUnit = windSpeedUnit,
             )
         }
     }
@@ -302,6 +305,7 @@ fun HourlyWeather(
     modifier: Modifier = Modifier,
     forecastHourly: List<Hourly>,
     temperatureUnit: TemperatureValues,
+    windSpeedUnit: WindSpeedValues,
 ) {
     val preferences: UserPreferences = get()
     val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
@@ -318,7 +322,8 @@ fun HourlyWeather(
                 } else {
                     forecastHourly[index].date.toTime(is12hTimeFormat)
                 },
-                temperatureUnit = temperatureUnit
+                temperatureUnit = temperatureUnit,
+                windSpeedUnit = windSpeedUnit,
             )
         }
     }
@@ -329,7 +334,8 @@ fun HourlyWeatherItem(
     modifier: Modifier = Modifier,
     timeTitle: String,
     forecast: Hourly,
-    temperatureUnit: TemperatureValues
+    temperatureUnit: TemperatureValues,
+    windSpeedUnit: WindSpeedValues
 ) {
     Column(
         modifier = modifier.padding(horizontal = 12.dp),
@@ -362,8 +368,8 @@ fun HourlyWeatherItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             PrimaryText(
-                text = forecast.windSpeed.toInt()
-                    .toString() + " " + stringResource(id = R.string.wind_speed_units),
+                text = windSpeedUnit.getWindSpeedInt(forecast.windSpeed.toDouble())
+                        + " " + stringResource(windSpeedUnit.stringRes),
                 textColor = MaterialTheme.colors.onPrimary
             )
             Icon(

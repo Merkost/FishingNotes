@@ -438,7 +438,8 @@ fun SunriseSunsetView(
 fun DailyWeatherValuesView(
     modifier: Modifier = Modifier,
     forecast: Daily,
-    pressureUnit: PressureValues
+    pressureUnit: PressureValues,
+    windSpeedUnit: WindSpeedValues
 ) {
     ConstraintLayout(
         modifier = modifier
@@ -527,8 +528,8 @@ fun DailyWeatherValuesView(
                 absoluteLeft.linkTo(windIcon.absoluteRight, 2.dp)
                 absoluteRight.linkTo(windDeg.absoluteLeft, 2.dp)
             },
-            text = forecast.windSpeed.toInt()
-                .toString() + " " + stringResource(id = R.string.wind_speed_units)
+            text = windSpeedUnit.getWindSpeedInt(forecast.windSpeed.toDouble())
+                    + " " + stringResource(windSpeedUnit.stringRes),
         )
         Icon(
             modifier = Modifier

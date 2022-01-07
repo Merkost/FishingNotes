@@ -123,6 +123,16 @@ enum class WindSpeedValues(val stringRes: Int) {
         })
     }
 
+    fun getWindSpeedInt(windSpeed: Double): String {
+        return (when (this) {
+            metersps -> windSpeed
+            knots -> (windSpeed * 1.9438444924574)
+            milesph -> (windSpeed * 2.2369362920544)
+            ftps -> (windSpeed * 3.28084)
+            kmph -> (windSpeed * 3.6)
+        }).toInt().toString()
+    }
+
     //for graphic
     /*fun getMpsWindSpeed(windSpeed: Float): Int {
         return when (this) {
