@@ -46,8 +46,6 @@ fun UserPlacesScreen(
                     navigateToMap = {
                         navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
                             Arguments.PLACE to it)
-                        /*navController.navigate(MainDestinations.MAP_ROUTE,
-                            Arguments.PLACE to it)*/
                     }
                 )
             }

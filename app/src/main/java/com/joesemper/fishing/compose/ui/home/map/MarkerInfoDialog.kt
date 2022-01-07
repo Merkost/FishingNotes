@@ -53,7 +53,6 @@ fun MarkerInfoDialog(
     modifier: Modifier = Modifier,
     navController: NavController,
     scaffoldState: BottomSheetScaffoldState,
-    upPress: (UserMapMarker) -> Unit,
     onWeatherIconClicked: (UserMapMarker) -> Unit,
     onMarkerIconClicked: (UserMapMarker) -> Unit,
 ) {
@@ -76,22 +75,6 @@ fun MarkerInfoDialog(
     var distance: String? by remember { mutableStateOf(null) }
     val fishActivity: Int? by remember { viewModel.fishActivity }
     val currentWeather: CurrentWeatherFree? by remember { viewModel.currentWeather }
-
-    /*val weather = marker?.let {
-        if (connectionState is ConnectionState.Available) {
-            val result by viewModel.getWeather(it.latitude, it.longitude)
-                .collectAsState(RetrofitWrapper.Success<WeatherForecast?>(null))
-
-            when (result) {
-                is RetrofitWrapper.Success<*> -> {
-                    return@let mutableStateOf((result as RetrofitWrapper.Success<WeatherForecast?>).data)
-                }
-                else -> return@let null
-            }
-        } else {
-            null
-        }
-    }*/
 
     marker?.let {
         LaunchedEffect(marker) {
@@ -155,7 +138,7 @@ fun MarkerInfoDialog(
             .wrapContentHeight()
             .padding(paddingDp),
     ) {
-        Spacer(modifier = Modifier.size(1.dp))
+
         viewModel.currentMarker.value?.let { marker ->
 
             AnimatedVisibility(
@@ -224,7 +207,6 @@ fun MarkerInfoDialog(
                                 )
                             ),
                         text = address ?: "",
-                        textColor = if (address == null) Color.LightGray else secondaryTextColor
                     )
 
                     //Distance
@@ -250,7 +232,6 @@ fun MarkerInfoDialog(
                         SubtitleText(
                             /*overflow = TextOverflow.Ellipsis,*/
                             text = distance ?: "",
-                            textColor = if (distance == null) Color.LightGray else secondaryTextColor,
                             textAlign = TextAlign.Center,
                         )
                     }
@@ -283,7 +264,6 @@ fun MarkerInfoDialog(
                         )
                         SubtitleText(
                             text = if (fishActivity != null) fishActivity.toString() + "%" else "",
-                            textColor = if (fishActivity == null) Color.LightGray else secondaryTextColor
                         )
                     }
 

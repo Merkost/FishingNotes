@@ -490,7 +490,7 @@ fun CatchItemView(
                         },
                     painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
                     contentDescription = stringResource(id = R.string.location),
-                    tint = secondaryTextColor
+                    tint = MaterialTheme.colors.secondaryVariant
                 )
 
                 SecondaryText(
@@ -523,7 +523,7 @@ fun CatchItemView(
                 },
                 count = catch.downloadPhotoLinks.size,
                 icon = R.drawable.ic_baseline_photo_24,
-                tint = supportTextColor
+                tint = MaterialTheme.colors.primaryVariant
             )
 
         }

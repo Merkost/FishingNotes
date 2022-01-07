@@ -75,18 +75,25 @@ fun MapScreen(
 
     val viewModel: MapViewModel = getViewModel()
 
+    val scaffoldState = rememberBottomSheetScaffoldState()
+    val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val coroutineScope = rememberCoroutineScope()
+
     chosenPlace?.let {
         viewModel.currentMarker.value = chosenPlace
         viewModel.lastMapCameraPosition.value =
             Pair(LatLng(it.latitude, it.longitude), DEFAULT_ZOOM)
+        coroutineScope.launch {
+            scaffoldState.bottomSheetState.expand()
+        }
+
     }
-    val coroutineScope = rememberCoroutineScope()
+
     val userPreferences: UserPreferences = get()
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
     val useZoomButtons by userPreferences.useMapZoomButons.collectAsState(false)
 
-    val scaffoldState = rememberBottomSheetScaffoldState()
-    val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+
     val dialogAddPlaceIsShowing = remember { mutableStateOf(false) }
 
     val mapLayersSelection = rememberSaveable { mutableStateOf(false) }
@@ -139,8 +146,10 @@ fun MapScreen(
         viewModel.sheetState = scaffoldState.bottomSheetState.currentValue
         if (!addingPlace) {
             when (scaffoldState.bottomSheetState.currentValue) {
-                BottomSheetValue.Collapsed -> mapUiState = MapUiState.NormalMode
-                BottomSheetValue.Expanded -> mapUiState == MapUiState.BottomSheetInfoMode
+                BottomSheetValue.Collapsed -> if (mapUiState !is MapUiState.NormalMode)
+                    mapUiState = MapUiState.NormalMode
+                BottomSheetValue.Expanded -> if (mapUiState !is MapUiState.BottomSheetInfoMode)
+                    mapUiState = MapUiState.BottomSheetInfoMode
 
             }
         }
@@ -217,12 +226,7 @@ fun MapScreen(
                     navController = navController,
                     mapBearing = mapBearing,
                     scaffoldState = scaffoldState,
-                    upPress = { markerToUpdate ->
-                        coroutineScope.launch {
-                            viewModel.updateCurrentPlace(markerToUpdate)
-                            scaffoldState.bottomSheetState.collapse()
-                        }
-                    },
+
                     onWeatherIconClicked = { marker ->
                         navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.WEATHER_ROUTE}",
                             Arguments.PLACE to marker)
@@ -260,7 +264,9 @@ fun MapScreen(
                     currentCameraPosition = currentCameraPosition,
                     mapType = mapType, mapBearing = mapBearing,
                     onMapClick = {
-                        mapUiState = MapUiState.NormalMode
+                        coroutineScope.launch {
+                            scaffoldState.bottomSheetState.collapse()
+                        }
                     }
                 )
 

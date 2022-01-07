@@ -133,17 +133,6 @@ enum class WindSpeedValues(val stringRes: Int) {
         }).toInt().toString()
     }
 
-    //for graphic
-    /*fun getMpsWindSpeed(windSpeed: Float): Int {
-        return when (this) {
-            mph -> windSpeed.toInt().toString()
-            knots -> (windSpeed * 9f/5f + 32).toInt().toString()
-            mps -> (windSpeed + 273.15).toInt().toString()
-            ftps -> (windSpeed + 273.15).toInt().toString()
-            kmph -> (windSpeed + 273.15).toInt().toString()
-        }
-    }*/
-
 }
 
 fun navigateToDailyWeatherScreen(
