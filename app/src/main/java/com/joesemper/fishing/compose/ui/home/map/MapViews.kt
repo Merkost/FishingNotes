@@ -91,7 +91,7 @@ fun MapScaffold(
         sheetPeekHeight = dp.value,
         floatingActionButton = fab,
         sheetContent = bottomSheet,
-        sheetGesturesEnabled = scaffoldState.currentFraction != 1f,
+        sheetGesturesEnabled = /*scaffoldState.currentFraction != 1f*/false,
         content = content
     )
 }

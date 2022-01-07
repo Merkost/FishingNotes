@@ -23,6 +23,7 @@ class UserPreferences(private val context: Context) {
         val MAP_HIDDEN_PLACES_KEY = booleanPreferencesKey("should_show_hidden_places_on_map")
         val TIME_FORMAT_KEY = booleanPreferencesKey("use_12h_time_format")
         val FAB_FAST_ADD = booleanPreferencesKey("fab_fast_add")
+        val MAP_ZOOM_BUTTONS_KEY = booleanPreferencesKey("map_zoom_buttons")
         val APP_THEME_KEY = stringPreferencesKey("app_theme")
     }
 
@@ -54,6 +55,11 @@ class UserPreferences(private val context: Context) {
             preferences[FAB_FAST_ADD] ?: false
         }
 
+    val useMapZoomButons: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[MAP_ZOOM_BUTTONS_KEY] ?: false
+        }
+
     //save values
     suspend fun saveLocationPermissionStatus(shouldShow: Boolean) {
         context.dataStore.edit { preferences ->
@@ -82,6 +88,11 @@ class UserPreferences(private val context: Context) {
     suspend fun saveFabFastAdd(fastAdd: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[FAB_FAST_ADD] = fastAdd
+        }
+    }
+    suspend fun saveMapZoomButtons(useZoomButtons: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[MAP_ZOOM_BUTTONS_KEY] = useZoomButtons
         }
     }
 

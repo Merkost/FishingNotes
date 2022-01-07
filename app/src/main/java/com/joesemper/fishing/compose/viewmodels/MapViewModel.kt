@@ -49,10 +49,10 @@ class MapViewModel(
     val uiState: StateFlow<UiState?>
         get() = _uiState
 
-    val firstLaunchLocation = mutableStateOf(true)
+    //val firstLaunchLocation = mutableStateOf(true)
 
     val lastKnownLocation = mutableStateOf<LatLng?>(null)
-    val lastMapCameraPosition = mutableStateOf<Pair<LatLng, Float>?>(null)
+    val lastMapCameraPosition = mutableStateOf<Pair<LatLng, Float>>(Pair(LatLng(0.0, 0.0), 0f))
 
     var currentMarker: MutableState<UserMapMarker?> = mutableStateOf(null)
 

@@ -170,10 +170,10 @@ fun MarkerInfoDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(144.dp)
-                        .noRippleClickable(
+                        /*.noRippleClickable(
                             onClick = onDescriptionClick,
                             enabled = scaffoldState.bottomSheetState.isCollapsed
-                        )
+                        )*/
                 ) {
                     val (locationIcon, title, area, distanceTo,
                         fish, divider, weather) = createRefs()
@@ -188,12 +188,15 @@ fun MarkerInfoDialog(
                             absoluteLeft.linkTo(parent.absoluteLeft)
                             top.linkTo(parent.top)
                         }) {
-                        Icon(
-                            modifier = Modifier.fillMaxSize(),
-                            painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                            contentDescription = "Marker",
-                            tint = Color(marker.markerColor)
-                        )
+                        IconButton(onClick = onDescriptionClick) {
+                            Icon(
+                                modifier = Modifier.fillMaxSize(),
+                                painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+                                contentDescription = "Marker",
+                                tint = Color(marker.markerColor)
+                            )
+                        }
+
                     }
 
                     PrimaryText(
@@ -337,138 +340,22 @@ fun MarkerInfoDialog(
 
 
                     }
-
-
-                    /* //weatherForecast
-                    if (connectionState is ConnectionState.Available) {
-                        weather?.value?.let { forecast ->
-
-                            val guideline = createGuidelineFromAbsoluteLeft(0.5f)
-
-                            SecondaryTextSmall(
-                                modifier = Modifier.constrainAs(timeNow) {
-                                    top.linkTo(area.bottom, 16.dp)
-                                    absoluteLeft.linkTo(parent.absoluteLeft)
-                                    absoluteRight.linkTo(guideline, 16.dp)
-                                },
-                                text = stringResource(id = R.string.now)
-                            )
-
-                            SecondaryTextSmall(
-                                modifier = Modifier.constrainAs(time8) {
-                                    top.linkTo(area.bottom, 16.dp)
-                                    absoluteLeft.linkTo(guideline)
-                                    absoluteRight.linkTo(guideline)
-                                },
-                                text = stringResource(R.string.in_8h)
-                            )
-
-                            SecondaryTextSmall(
-                                modifier = Modifier.constrainAs(time16) {
-                                    top.linkTo(area.bottom, 16.dp)
-                                    absoluteLeft.linkTo(guideline, 16.dp)
-                                    absoluteRight.linkTo(parent.absoluteRight)
-                                },
-                                text = stringResource(R.string.in_16h)
-                            )
-
-                            PrimaryTextSmall(
-                                modifier = Modifier.constrainAs(pressNowVal) {
-                                    top.linkTo(timeNow.bottom, 4.dp)
-                                    absoluteLeft.linkTo(timeNow.absoluteLeft)
-                                    absoluteRight.linkTo(timeNow.absoluteRight)
-                                },
-                                text = pressureUnit.getPressure(
-                                    forecast.hourly.first().pressure) + " " + pressureUnit.name
-                            )
-
-                            PrimaryTextSmall(
-                                modifier = Modifier.constrainAs(press8Val) {
-                                    top.linkTo(time8.bottom, 4.dp)
-                                    absoluteLeft.linkTo(time8.absoluteLeft)
-                                    absoluteRight.linkTo(time8.absoluteRight)
-                                },
-                                text = pressureUnit.getPressure(
-                                    forecast.hourly[7].pressure) + " " + pressureUnit.name
-                            )
-
-                            Icon(
-                                modifier = Modifier
-                                    .constrainAs(press8Icon) {
-                                        top.linkTo(press8Val.top)
-                                        bottom.linkTo(press8Val.bottom)
-                                        absoluteLeft.linkTo(press8Val.absoluteRight)
-                                    }
-                                    .rotate(getIconRotationByWeatherIn8H(forecast)),
-                                painter = painterResource(id = R.drawable.ic_baseline_arrow_drop_up_24),
-                                contentDescription = stringResource(id = R.string.pressure),
-                                tint = getIconTintByWeatherIn8H(forecast)
-                            )
-
-                            PrimaryTextSmall(
-                                modifier = Modifier.constrainAs(press16Val) {
-                                    top.linkTo(time16.bottom, 4.dp)
-                                    absoluteLeft.linkTo(time16.absoluteLeft)
-                                    absoluteRight.linkTo(time16.absoluteRight)
-                                },
-                                text = pressureUnit.getPressure(
-                                    forecast.hourly[15].pressure) + " " + pressureUnit.name
-                            )
-
-                            Icon(
-                                modifier = Modifier
-                                    .constrainAs(press16Icon) {
-                                        top.linkTo(press16Val.top)
-                                        bottom.linkTo(press16Val.bottom)
-                                        absoluteLeft.linkTo(press16Val.absoluteRight)
-                                    }
-                                    .rotate(getIconRotationByWeatherIn16H(forecast)),
-                                painter = painterResource(id = R.drawable.ic_baseline_arrow_drop_up_24),
-                                contentDescription = stringResource(id = R.string.pressure),
-                                tint = getIconTintByWeatherIn16H(forecast)
-                            )
-                        }
-
-                        if (weather?.value == null) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.constrainAs(loading) {
-                                    top.linkTo(area.bottom)
-                                    bottom.linkTo(parent.bottom)
-                                    absoluteRight.linkTo(parent.absoluteRight)
-                                    absoluteLeft.linkTo(parent.absoluteLeft)
-                                }
-                            )
-                        }
-                    } else {
-                        SecondaryTextSmall(
-                            modifier = Modifier.constrainAs(noNetwork) {
-                                top.linkTo(area.bottom)
-                                bottom.linkTo(parent.bottom)
-                                absoluteLeft.linkTo(parent.absoluteLeft)
-                                absoluteRight.linkTo(parent.absoluteRight)
-                            },
-                            text = stringResource(R.string.no_internet_connection)
-                        )
-                    }*/
                 }
-            }
-            AnimatedVisibility(scaffoldState.currentFraction != 0f) {
-                UserPlaceScreen({ upPress(marker) }, navController, place = marker)
             }
 
         }
 
     }
-    AnimatedVisibility(
+    /*AnimatedVisibility(
         scaffoldState.bottomSheetState.progress.fraction != 0f,
         enter = fadeIn(tween(500)),
         exit = fadeOut(tween(500)),
-        /*paddingDp.value == 0.dp
-            && !scaffoldState.bottomSheetState.isAnimationRunning*/
-        /*scaffoldState.currentFraction != 0.0f*/
+        *//*paddingDp.value == 0.dp
+            && !scaffoldState.bottomSheetState.isAnimationRunning*//*
+        *//*scaffoldState.currentFraction != 0.0f*//*
     ) {
         Spacer(modifier = Modifier.fillMaxSize())
-    }
+    }*/
 
 }
 

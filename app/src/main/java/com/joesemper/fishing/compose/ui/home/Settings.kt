@@ -185,6 +185,7 @@ fun MainAppSettings(userPreferences: UserPreferences) {
     val appTheme by userPreferences.appTheme.collectAsState(AppThemeValues.Blue)
     val use12hTimeFormat by userPreferences.use12hTimeFormat.collectAsState(false)
     val useFastFabAdd by userPreferences.useFabFastAdd.collectAsState(false)
+    val useZoomButtons by userPreferences.useMapZoomButons.collectAsState(false)
 
     var isPermissionDialogOpen by remember { mutableStateOf(false) }
     var isAppThemeDialogOpen by remember { mutableStateOf(false) }
@@ -277,6 +278,20 @@ fun MainAppSettings(userPreferences: UserPreferences) {
                 coroutineScope.launch { userPreferences.saveFabFastAdd(useFastFabAdd) }
             },
             state = if (useFastFabAdd) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
+        )
+        SettingsCheckbox(
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.ZoomIn,
+                    contentDescription = Icons.Default.ZoomIn.name
+                )
+            },
+            title = { Text(text = stringResource(R.string.map_zoom_buttons)) },
+            subtitle = { Text(text = stringResource(R.string.map_zoom_buttons_description)) },
+            onCheckedChange = { useZoomButtons ->
+                coroutineScope.launch { userPreferences.saveMapZoomButtons(useZoomButtons) }
+            },
+            state = if (useZoomButtons) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
         )
     }
 }
