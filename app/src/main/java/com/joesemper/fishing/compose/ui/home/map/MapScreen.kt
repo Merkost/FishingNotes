@@ -229,6 +229,10 @@ fun MapScreen(
                             viewModel.updateCurrentPlace(markerToUpdate)
                             scaffoldState.bottomSheetState.collapse()
                         }
+                    },
+                    onWeatherIconClicked = { marker ->
+                        navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.WEATHER_ROUTE}",
+                            Arguments.PLACE to marker)
                     }
                 ) {
                     viewModel.currentMarker.value?.let {

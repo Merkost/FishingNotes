@@ -205,16 +205,20 @@ fun WeatherAppBarText(
 }
 
 @Composable
-fun WeatherLocationIcon(
-    color: Color = MaterialTheme.colors.onSurface
+fun WeatherLocationIconButton(
+    color: Color = MaterialTheme.colors.onSurface,
+    onClick: () -> Unit,
 ) {
-    Icon(
-        modifier = Modifier
-            .padding(horizontal = 8.dp),
-        painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-        tint = color,
-        contentDescription = ""
-    )
+    IconButton(onClick = onClick) {
+        Icon(
+            modifier = Modifier
+                .padding(horizontal = 8.dp),
+            painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+            tint = color,
+            contentDescription = ""
+        )
+    }
+
 }
 
 @Composable

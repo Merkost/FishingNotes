@@ -268,20 +268,6 @@ fun MainAppSettings(userPreferences: UserPreferences) {
         SettingsCheckbox(
             icon = {
                 Icon(
-                    imageVector = Icons.Default.LocationCity,
-                    contentDescription = Icons.Default.LocationCity.name
-                )
-            },
-            title = { Text(text = stringResource(R.string.fab_fast_add)) },
-            subtitle = { Text(text = stringResource(R.string.fast_fab_description)) },
-            onCheckedChange = { useFastFabAdd ->
-                coroutineScope.launch { userPreferences.saveFabFastAdd(useFastFabAdd) }
-            },
-            state = if (useFastFabAdd) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
-        )
-        SettingsCheckbox(
-            icon = {
-                Icon(
                     imageVector = Icons.Default.ZoomIn,
                     contentDescription = Icons.Default.ZoomIn.name
                 )
@@ -293,6 +279,21 @@ fun MainAppSettings(userPreferences: UserPreferences) {
             },
             state = if (useZoomButtons) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
         )
+        SettingsCheckbox(
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.LocationCity,
+                    contentDescription = Icons.Default.LocationCity.name
+                )
+            },
+            title = { Text(text = stringResource(R.string.fab_fast_add)) },
+            subtitle = { Text(text = stringResource(R.string.fast_fab_description)) },
+            onCheckedChange = { useFastFabAdd ->
+                coroutineScope.launch { userPreferences.saveFabFastAdd(useFastFabAdd) }
+            },
+            state = if (useFastFabAdd) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
+        )
+
     }
 }
 

@@ -50,6 +50,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.text.DecimalFormat
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
@@ -389,6 +390,18 @@ fun rememberMapViewWithLifecycle(): MapView {
         }
     }
     return mapView
+}
+
+object DistanceFormat {
+    val df = DecimalFormat("#.#")
+}
+
+fun convertDistance(distanceInMeters: Double): String {
+    return when (distanceInMeters.toInt()) {
+        in 0..999 -> distanceInMeters.toInt().toString() + " m"
+        in 1001..9999 -> DistanceFormat.df.format(distanceInMeters / 1000f).toString() + " km"
+        else -> distanceInMeters.div(1000).toInt().toString() + " km"
+    }
 }
 
 fun getIconRotationByWeatherIn8H(forecast: WeatherForecast): Float {

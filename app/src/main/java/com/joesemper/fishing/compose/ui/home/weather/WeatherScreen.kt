@@ -43,6 +43,7 @@ import com.joesemper.fishing.compose.ui.home.views.DefaultButtonOutlined
 import com.joesemper.fishing.compose.ui.home.views.PrimaryText
 import com.joesemper.fishing.compose.ui.home.views.SecondaryText
 import com.joesemper.fishing.compose.ui.home.views.SupportText
+import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.theme.primaryWhiteColor
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.WeatherViewModel
@@ -72,6 +73,7 @@ import kotlin.math.min
 fun WeatherScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
+    place: UserMapMarker? = null,
     upPress: () -> Unit,
 ) {
     val viewModel: WeatherViewModel = getViewModel()
@@ -80,7 +82,7 @@ fun WeatherScreen(
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
 
     val selectedPlace = remember {
-        mutableStateOf<UserMapMarker?>(null)
+        mutableStateOf<UserMapMarker?>(place)
     }
 
     LaunchedEffect(permissionsState.allPermissionsGranted) {
@@ -90,7 +92,9 @@ fun WeatherScreen(
                     index = 0,
                     element = createCurrentPlaceItem(locationState.location, context)
                 )
-                selectedPlace.value = viewModel.markersList.value.first()
+                selectedPlace.value?.let {
+                    selectedPlace.value = viewModel.markersList.value.first()
+                }
             }
         }
     }
@@ -122,7 +126,12 @@ fun WeatherScreen(
                 elevation = elevation.value,
                 backgroundColor = MaterialTheme.colors.primary
             ) {
-                WeatherLocationIcon(color = MaterialTheme.colors.onPrimary)
+                WeatherLocationIconButton(color = MaterialTheme.colors.onPrimary) {
+                    selectedPlace.value?.let {
+                        navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
+                            Arguments.PLACE to it)
+                    }
+                }
                 selectedPlace.value?.let {
 
                     WeatherPlaceSelectItem(

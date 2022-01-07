@@ -11,7 +11,13 @@ import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.Daily
+import com.joesemper.fishing.utils.format
 import com.joesemper.fishing.utils.hPaToMmHg
+import java.text.DecimalFormat
+
+object WindFormat {
+    val df = DecimalFormat("#.#")
+}
 
 fun createCurrentPlaceItem(latLng: LatLng, context: Context): UserMapMarker {
     return UserMapMarker(
@@ -107,14 +113,14 @@ enum class WindSpeedValues(val stringRes: Int) {
     ftps (R.string.wind_ftps),
     kmph (R.string.wind_kmph);
 
-    fun getWindSpeed(windSpeed: Double): Double {
-        return when (this) {
+    fun getWindSpeed(windSpeed: Double): String {
+        return WindFormat.df.format (when (this) {
             metersps -> windSpeed
             knots -> (windSpeed * 1.9438444924574)
             milesph -> (windSpeed * 2.2369362920544)
             ftps -> (windSpeed * 3.28084)
             kmph -> (windSpeed * 3.6)
-        }
+        })
     }
 
     //for graphic

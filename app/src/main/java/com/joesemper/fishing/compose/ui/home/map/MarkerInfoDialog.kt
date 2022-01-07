@@ -28,14 +28,12 @@ import com.google.android.libraries.maps.model.LatLng
 import com.google.maps.android.SphericalUtil
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
-import com.joesemper.fishing.compose.ui.home.place.UserPlaceScreen
 import com.joesemper.fishing.compose.ui.home.views.PrimaryText
 import com.joesemper.fishing.compose.ui.home.views.SubtitleText
 import com.joesemper.fishing.compose.ui.home.weather.WindSpeedValues
 import com.joesemper.fishing.compose.ui.resources
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.compose.ui.utils.currentFraction
-import com.joesemper.fishing.compose.ui.utils.noRippleClickable
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.CurrentWeatherFree
@@ -44,8 +42,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
-import java.text.DecimalFormat
-import kotlin.math.floor
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -58,7 +54,8 @@ fun MarkerInfoDialog(
     navController: NavController,
     scaffoldState: BottomSheetScaffoldState,
     upPress: (UserMapMarker) -> Unit,
-    onDescriptionClick: () -> Unit,
+    onWeatherIconClicked: (UserMapMarker) -> Unit,
+    onMarkerIconClicked: (UserMapMarker) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -188,7 +185,7 @@ fun MarkerInfoDialog(
                             absoluteLeft.linkTo(parent.absoluteLeft)
                             top.linkTo(parent.top)
                         }) {
-                        IconButton(onClick = onDescriptionClick) {
+                        IconButton(onClick = { onMarkerIconClicked(marker) }) {
                             Icon(
                                 modifier = Modifier.fillMaxSize(),
                                 painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
@@ -302,7 +299,6 @@ fun MarkerInfoDialog(
                     )
 
                     //Weather
-
                     Row(
                         modifier = Modifier
                             .constrainAs(weather) {
@@ -322,18 +318,17 @@ fun MarkerInfoDialog(
                         ),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Icon(painterResource(R.drawable.ic_baseline_navigation_24), "",
-                            modifier = Modifier.rotate(currentWeather?.wind_degrees?.let {
-                                it.minus(
-                                    mapBearing.value
-                                )
-                            } ?: mapBearing.value),
-                            tint = if (fishActivity == null) Color.LightGray else MaterialTheme.colors.primaryVariant
-                        )
+                        IconButton(onClick = { onWeatherIconClicked(marker) }) {
+                            Icon(painterResource(R.drawable.ic_baseline_navigation_24), "",
+                                modifier = Modifier.rotate(currentWeather?.wind_degrees?.let {
+                                    it.minus(mapBearing.value) } ?: mapBearing.value),
+                                tint = if (fishActivity == null) Color.LightGray else MaterialTheme.colors.primaryVariant
+                            )
+                        }
+
                         currentWeather?.let {
                             SubtitleText(
-                                text = windUnit.getWindSpeed(currentWeather!!.wind_speed)
-                                    .toString() + " " +
+                                text = windUnit.getWindSpeed(currentWeather!!.wind_speed) + " " +
                                         stringResource(windUnit.stringRes)
                             )
                         }
@@ -359,41 +354,7 @@ fun MarkerInfoDialog(
 
 }
 
-fun getWindFromDouble(windSpeed: Double?, unit: String): String {
-    return when (windSpeed) {
-        null -> ""
-        else -> {
-            return if ((windSpeed == floor(windSpeed))) {
-                // integer type
-                val wind = windSpeed.toInt()
-                if (wind == 0) wind.toWindString(unit) else wind.toWindString(unit)
-            } else {
-                val rounded = Math.round(windSpeed * 10.0) / 10.0
-                if ((rounded == floor(rounded))) getWindFromDouble(
-                    rounded,
-                    unit
-                )
-                else rounded.toWindString(unit)
-            }
-        }
-    }
 
-}
-
-private fun Number.toWindString(unit: String): String {
-    return "$this $unit"
-}
-
-
-fun convertDistance(distanceInMeters: Double): String {
-    val df = DecimalFormat("#.#")
-
-    return when (distanceInMeters.toInt()) {
-        in 0..999 -> distanceInMeters.toInt().toString() + " m"
-        in 1001..9999 -> df.format(distanceInMeters / 1000f).toString() + " km"
-        else -> distanceInMeters.div(1000).toInt().toString() + " km"
-    }
-}
 
 
 

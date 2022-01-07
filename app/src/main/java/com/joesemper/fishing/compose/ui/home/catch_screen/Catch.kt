@@ -179,8 +179,10 @@ fun CatchContent(
                 userPlaceClicked = {
                     onPlaceItemClick(place = it, navController = navController)
                 }, navigateToMap = {
-                    navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
-                        Arguments.PLACE to (viewModel.mapMarker.value ?: UserMapMarker()))
+                    viewModel.mapMarker.value?.let {
+                        navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
+                            Arguments.PLACE to it)
+                    }
                 }
             )
 
