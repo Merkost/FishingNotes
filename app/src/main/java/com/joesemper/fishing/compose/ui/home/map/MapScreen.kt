@@ -762,8 +762,7 @@ fun MapLayout(
     private val FabSize = 56.dp
 
     private fun onAddNewCatchClick(navController: NavController, viewModel: MapViewModel) {
-        val marker: UserMapMarker? = viewModel.currentMarker.value
-        marker?.let {
+        viewModel.currentMarker.value?.let {
             navController.navigate(
                 MainDestinations.NEW_CATCH_ROUTE,
                 Arguments.PLACE to it

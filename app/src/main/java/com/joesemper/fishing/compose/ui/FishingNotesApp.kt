@@ -119,7 +119,7 @@ private fun NavGraphBuilder.NavGraph(
                 route = MainDestinations.NEW_CATCH_ROUTE,
                 inclusive = true
             )
-        }, it.requiredArg(Arguments.PLACE))
+        }, it.arguments?.getParcelable(Arguments.PLACE))
     }
 
     composable(
