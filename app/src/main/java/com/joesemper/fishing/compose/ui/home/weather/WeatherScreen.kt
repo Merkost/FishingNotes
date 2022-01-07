@@ -86,14 +86,20 @@ fun WeatherScreen(
     }
 
     LaunchedEffect(permissionsState.allPermissionsGranted) {
-        getCurrentLocationFlow(context, permissionsState).collect { locationState ->
-            if (locationState is LocationState.LocationGranted) {
-                viewModel.markersList.value.add(
-                    index = 0,
-                    element = createCurrentPlaceItem(locationState.location, context)
-                )
-                selectedPlace.value?.let {
-                    selectedPlace.value = viewModel.markersList.value.first()
+        checkPermission(context)
+        if (permissionsState.allPermissionsGranted) {
+            getCurrentLocationFlow(context, permissionsState).collect { locationState ->
+                if (locationState is LocationState.LocationGranted) {
+
+                    //TODO: check if currentPlaceItem already exists!!
+
+                    viewModel.markersList.value.add(
+                        index = 0,
+                        element = createCurrentPlaceItem(locationState.location, context)
+                    )
+                    if (selectedPlace.value == null) {
+                        selectedPlace.value = viewModel.markersList.value.first()
+                    }
                 }
             }
         }
