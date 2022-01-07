@@ -87,10 +87,12 @@ fun Notes(
                     items = listOf(
                         FabMenuItem(
                             icon = R.drawable.ic_add_catch,
+                            text = stringResource(R.string.add_new_catch),
                             onClick = { onAddNewCatchClick(navController) }
                         ),
                         FabMenuItem(
                             icon = R.drawable.ic_baseline_add_location_24,
+                            text = stringResource(R.string.add_new_place),
                             onClick = { onAddNewPlaceClick(navController) }
                         )
                     ), shouldShowBlur
@@ -102,7 +104,7 @@ fun Notes(
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
-                Surface(color = Color.Black.copy(0.5f)) { }
+                Surface(color = Color.Black.copy(0.6f)) { }
             }
             Column() {
                 Tabs(tabs = tabs, pagerState = pagerState)
