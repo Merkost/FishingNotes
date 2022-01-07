@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -65,33 +66,18 @@ fun MapScaffold(
     content: @Composable (PaddingValues) -> Unit,
 
     ) {
-    val dp = animateDpAsState(
-        when (mapUiState) {
-            is MapUiState.BottomSheetInfoMode,
-            MapUiState.BottomSheetFullyExpanded -> 158.dp
-            else -> 0.dp
-        }
-    )
 
-    val sheetColor = animateColorAsState(
-        if (scaffoldState.currentFraction != 1f) {
-            MaterialTheme.colors.surface.copy(0f)
-        } else MaterialTheme.colors.surface.copy(scaffoldState.currentFraction)
-
-    )
-
-    val radius = (30 * (1f - scaffoldState.currentFraction)).dp
 
     BottomSheetScaffold(
         modifier = modifier.fillMaxSize(),
         scaffoldState = scaffoldState,
-        sheetBackgroundColor = sheetColor.value,
+        sheetBackgroundColor = MaterialTheme.colors.surface.copy(0f),
         sheetElevation = 0.dp,
-        sheetShape = RoundedCornerShape(radius),
-        sheetPeekHeight = dp.value,
+        sheetShape = RectangleShape/*RoundedCornerShape(30.dp)*/,
+        sheetPeekHeight = 0.dp,
         floatingActionButton = fab,
         sheetContent = bottomSheet,
-        sheetGesturesEnabled = /*scaffoldState.currentFraction != 1f*/false,
+        sheetGesturesEnabled = true,
         content = content
     )
 }

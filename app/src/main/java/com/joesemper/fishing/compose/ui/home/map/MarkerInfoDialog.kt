@@ -141,32 +141,32 @@ fun MarkerInfoDialog(
         }
     }
 
-    val paddingDp = animateDpAsState(((1f - scaffoldState.currentFraction) * 6).dp)
-    val cornersDp = animateDpAsState(((1f - scaffoldState.currentFraction) * 16).dp)
-    val elevationDp = animateDpAsState(((1f - scaffoldState.currentFraction) * 6).dp)
+    val paddingDp = 8.dp
+    val cornersDp = 16.dp
+    val elevationDp = 6.dp
 
     Card(
-        shape = RoundedCornerShape(cornersDp.value),
-        elevation = elevationDp.value,
+        shape = RoundedCornerShape(cornersDp),
+        elevation = elevationDp,
         backgroundColor = MaterialTheme.colors.surface,
         modifier = Modifier
             .zIndex(1.0f)
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(paddingDp.value),
+            .padding(paddingDp),
     ) {
-
+        Spacer(modifier = Modifier.size(1.dp))
         viewModel.currentMarker.value?.let { marker ->
 
             AnimatedVisibility(
-                scaffoldState.currentFraction == 0f,
+                true,
                 enter = fadeIn(tween(500)),
                 exit = fadeOut(tween(500)),
             ) {
                 ConstraintLayout(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(144.dp)
+                        .height(150.dp)
                         /*.noRippleClickable(
                             onClick = onDescriptionClick,
                             enabled = scaffoldState.bottomSheetState.isCollapsed
@@ -176,7 +176,7 @@ fun MarkerInfoDialog(
                         fish, divider, weather) = createRefs()
 
                     val horizontalLine = createGuidelineFromAbsoluteLeft(0.5f)
-
+                    val verticalFabLine = createGuidelineFromAbsoluteRight(100.dp)
 
                     Box(modifier = Modifier
                         .size(64.dp).padding(16.dp)
@@ -200,13 +200,14 @@ fun MarkerInfoDialog(
                         modifier = Modifier
                             .constrainAs(title) {
                                 top.linkTo(locationIcon.top)
-                                linkTo(locationIcon.end, parent.end, 0.dp, 32.dp, 0f)
+                                linkTo(locationIcon.end, verticalFabLine, 0.dp, 0.dp, 0f)
                                 bottom.linkTo(locationIcon.bottom)
                             },
                         text = when {
                             marker.title.isNotEmpty() -> marker.title
                             else -> stringResource(R.string.no_name_place)
                         } + "",
+                        maxLines = 2,
                     )
 
                     //Area name

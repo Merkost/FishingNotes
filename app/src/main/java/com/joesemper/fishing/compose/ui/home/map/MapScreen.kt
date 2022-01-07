@@ -125,13 +125,10 @@ fun MapScreen(
                 }
                 is MapUiState.BottomSheetInfoMode -> {
                     addingPlace = false
-                    scaffoldState.bottomSheetState.collapse()
+                    scaffoldState.bottomSheetState.expand()
                 }
                 is MapUiState.PlaceSelectMode -> {
 
-                }
-                is MapUiState.BottomSheetFullyExpanded -> {
-                    scaffoldState.bottomSheetState.expand()
                 }
             }
         }
@@ -142,12 +139,9 @@ fun MapScreen(
         viewModel.sheetState = scaffoldState.bottomSheetState.currentValue
         if (!addingPlace) {
             when (scaffoldState.bottomSheetState.currentValue) {
-                BottomSheetValue.Collapsed -> if (viewModel.currentMarker.value != null &&
-                    mapUiState == MapUiState.BottomSheetFullyExpanded
-                )
-                    mapUiState = MapUiState.BottomSheetInfoMode
-                BottomSheetValue.Expanded -> if (mapUiState == MapUiState.BottomSheetInfoMode)
-                    mapUiState = MapUiState.BottomSheetFullyExpanded
+                BottomSheetValue.Collapsed -> mapUiState = MapUiState.NormalMode
+                BottomSheetValue.Expanded -> mapUiState == MapUiState.BottomSheetInfoMode
+
             }
         }
     }
@@ -157,10 +151,10 @@ fun MapScreen(
         navController = navController,
     ) {
         mapUiState = when (mapUiState) {
-            is MapUiState.BottomSheetFullyExpanded -> {
-                MapUiState.BottomSheetInfoMode
+            !is MapUiState.NormalMode -> {
+                MapUiState.NormalMode
             }
-            else -> MapUiState.NormalMode
+            else -> { MapUiState.NormalMode }
         }
     }
 
@@ -213,7 +207,6 @@ fun MapScreen(
                         }
                     },
                     userSettings = userPreferences,
-                    currentFraction = scaffoldState.currentFraction
                 )
             },
             bottomSheet = {
@@ -511,11 +504,14 @@ fun MapLayout(
                 getCurrentLocationFlow(context, permissionsState).collect { state ->
                     if (state is LocationState.LocationGranted) {
                         viewModel.lastKnownLocation.value = state.location
-                        /*if (viewModel.firstLaunchLocation.value) {
-                            viewModel.lastMapCameraPosition.value =
-                                Pair(state.location, DEFAULT_ZOOM)
-                            viewModel.firstLaunchLocation.value = false
-                        }*/
+                        if (viewModel.firstLaunchLocation.value) {
+                            viewModel.currentMarker.value?.let {
+                                viewModel.firstLaunchLocation.value = false
+                            } ?: kotlin.run {
+                                viewModel.lastMapCameraPosition.value =
+                                    Pair(state.location, DEFAULT_ZOOM)
+                            }
+                        }
                     }
                 }
             }
@@ -530,7 +526,7 @@ fun MapLayout(
         }
 
         LaunchedEffect(viewModel.lastMapCameraPosition.value) {
-            viewModel.lastMapCameraPosition.value.let {
+            viewModel.lastMapCameraPosition.value?.let {
                 moveCameraToLocation(this, map, it.first, it.second, mapBearing.value)
             }
         }
@@ -602,7 +598,6 @@ fun MapLayout(
         onClick: () -> Unit,
         onLongPress: () -> Unit,
         userSettings: UserPreferences,
-        currentFraction: Float
     ) {
         val useFastFabAdd by userSettings.useFabFastAdd.collectAsState(false)
         val fabImg = remember { mutableStateOf(R.drawable.ic_baseline_add_location_24) }
@@ -614,10 +609,9 @@ fun MapLayout(
                 MapUiState.NormalMode -> {
                     defaultFabBottomPadding
                 }
-                MapUiState.BottomSheetInfoMode, MapUiState.BottomSheetFullyExpanded -> {
-                    24.dp
+                MapUiState.BottomSheetInfoMode -> {
+                    34.dp
                 }
-                //MapUiState.BottomSheetFullyExpanded -> { 0.dp }
                 MapUiState.PlaceSelectMode -> {
                     defaultFabBottomPadding
                 }
@@ -629,50 +623,17 @@ fun MapLayout(
                 MapUiState.NormalMode -> {
                     0.dp
                 }
-                MapUiState.BottomSheetInfoMode, MapUiState.BottomSheetFullyExpanded -> {
-                    38.dp
-                }
-                //MapUiState.BottomSheetFullyExpanded -> { 82.dp }
+                MapUiState.BottomSheetInfoMode -> { 26.dp }
                 MapUiState.PlaceSelectMode -> {
                     0.dp
                 }
             }
         )
 
-        when (state) {
-            MapUiState.NormalMode -> {
-                fabImg.value = R.drawable.ic_baseline_add_location_24
-            }
-            MapUiState.BottomSheetInfoMode -> {
-                fabImg.value = R.drawable.ic_add_catch
-                //fabImg.value = R.drawable.ic_baseline_add_location_24
-            }
-            MapUiState.BottomSheetFullyExpanded -> {
-                //fabImg.value = R.drawable.ic_add_catch
-            }
-            MapUiState.PlaceSelectMode -> {
-                fabImg.value = R.drawable.ic_baseline_check_24
-            }
-
-        }
-
-        /*FloatingActionButton(
-            modifier = Modifier
-                .animateContentSize()
-                .padding(bottom = paddingBottom.value, top = paddingTop.value),
-            onClick = onClick,
-        ) {
-            Icon(
-                painter = painterResource(id = fabImg.value),
-                contentDescription = stringResource(R.string.new_place),
-                tint = Color.White,
-            )
-        }*/
-
         val adding_place = stringResource(R.string.adding_place_on_current_location)
         val permissions_required = stringResource(R.string.location_permissions_required)
         AnimatedVisibility(
-            currentFraction == 0f,
+            true,
             exit = fadeOut(),
             enter = fadeIn()
         ) {
