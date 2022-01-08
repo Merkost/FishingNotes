@@ -58,7 +58,6 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun MapScaffold(
     mapUiState: MapUiState,
-    currentPlace: MutableState<UserMapMarker?>,
     modifier: Modifier = Modifier,
     scaffoldState: BottomSheetScaffoldState,
     fab: @Composable() (() -> Unit)?,
@@ -67,6 +66,12 @@ fun MapScaffold(
 
     ) {
 
+    val dp = animateDpAsState(
+        when (mapUiState) {
+            is MapUiState.BottomSheetInfoMode -> 168.dp
+            else -> 0.dp
+        }
+    )
 
     BottomSheetScaffold(
         modifier = modifier.fillMaxSize(),
@@ -74,7 +79,7 @@ fun MapScaffold(
         sheetBackgroundColor = MaterialTheme.colors.surface.copy(0f),
         sheetElevation = 0.dp,
         sheetShape = RectangleShape/*RoundedCornerShape(30.dp)*/,
-        sheetPeekHeight = 0.dp,
+        sheetPeekHeight = dp.value,
         floatingActionButton = fab,
         sheetContent = bottomSheet,
         sheetGesturesEnabled = true,

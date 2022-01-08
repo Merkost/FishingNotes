@@ -351,26 +351,27 @@ fun BackPressHandler(
     mapUiState: MapUiState,
     navController: NavController,
     onBackPressedCallback: () -> Unit,
-
-    ) {
+) {
     val context = LocalContext.current
     val exitString = stringResource(R.string.app_exit_message)
     var lastPressed: Long = 0
 
     BackHandler(onBack = {
-        if (navController.navigateUp()) {
-            return@BackHandler
-        } else {
-            when (mapUiState) {
-                MapUiState.NormalMode -> {
+        when (mapUiState) {
+            MapUiState.NormalMode -> {
+                if (navController.navigateUp()) {
+                    return@BackHandler
+                } else {
                     val currentMillis = System.currentTimeMillis()
                     if (currentMillis - lastPressed < 2000) {
                         (context as MainActivity).finish()
-                    } else { showToast(context, exitString) }
+                    } else {
+                        showToast(context, exitString)
+                    }
                     lastPressed = currentMillis
                 }
-                else -> onBackPressedCallback()
             }
+            else -> onBackPressedCallback()
         }
     })
 }

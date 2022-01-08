@@ -69,31 +69,25 @@ fun MapScreen(
     place: UserMapMarker?
 ) {
     var addingPlace by remember { mutableStateOf(addPlaceOnStart) }
-    val chosenPlace by remember { mutableStateOf(place) }
+    var chosenPlace: UserMapMarker? by remember { mutableStateOf(place) }
 
     val map = rememberMapViewWithLifecycle()
 
     val viewModel: MapViewModel = getViewModel()
 
-    val scaffoldState = rememberBottomSheetScaffoldState()
-    val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    val coroutineScope = rememberCoroutineScope()
-
     chosenPlace?.let {
         viewModel.currentMarker.value = chosenPlace
         viewModel.lastMapCameraPosition.value =
             Pair(LatLng(it.latitude, it.longitude), DEFAULT_ZOOM)
-        coroutineScope.launch {
-            scaffoldState.bottomSheetState.expand()
-        }
-
+        chosenPlace = null
     }
-
+    val coroutineScope = rememberCoroutineScope()
     val userPreferences: UserPreferences = get()
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
     val useZoomButtons by userPreferences.useMapZoomButons.collectAsState(false)
 
-
+    val scaffoldState = rememberBottomSheetScaffoldState()
+    val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val dialogAddPlaceIsShowing = remember { mutableStateOf(false) }
 
     val mapLayersSelection = rememberSaveable { mutableStateOf(false) }
@@ -103,8 +97,8 @@ fun MapScreen(
 
     var mapUiState: MapUiState by remember {
         when {
-            addPlaceOnStart -> mutableStateOf(MapUiState.PlaceSelectMode)
-            chosenPlace != null -> {
+            addingPlace -> mutableStateOf(MapUiState.PlaceSelectMode)
+            viewModel.currentMarker.value != null -> {
                 mutableStateOf(MapUiState.BottomSheetInfoMode)
             }
             else -> mutableStateOf(viewModel.mapUiState.value)
@@ -126,49 +120,42 @@ fun MapScreen(
             viewModel.mapUiState.value = mapUiState
             when (mapUiState) {
                 is MapUiState.NormalMode -> {
-                    scaffoldState.bottomSheetState.collapse()
-                    //viewModel.currentMarker.value = null
+                    viewModel.currentMarker.value = null
                     addingPlace = false
                 }
                 is MapUiState.BottomSheetInfoMode -> {
                     addingPlace = false
-                    scaffoldState.bottomSheetState.expand()
                 }
                 is MapUiState.PlaceSelectMode -> {
-
                 }
+                /*is MapUiState.BottomSheetFullyExpanded -> {
+                    scaffoldState.bottomSheetState.expand()
+                }*/
             }
         }
 
     }
 
-    LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
+    /*LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
         viewModel.sheetState = scaffoldState.bottomSheetState.currentValue
         if (!addingPlace) {
             when (scaffoldState.bottomSheetState.currentValue) {
-                BottomSheetValue.Collapsed -> if (mapUiState !is MapUiState.NormalMode)
-                    mapUiState = MapUiState.NormalMode
-                BottomSheetValue.Expanded -> if (mapUiState !is MapUiState.BottomSheetInfoMode)
+                BottomSheetValue.Collapsed -> if (viewModel.currentMarker.value != null &&
+                    mapUiState == MapUiState.BottomSheetFullyExpanded
+                )
                     mapUiState = MapUiState.BottomSheetInfoMode
-
+                BottomSheetValue.Expanded -> if (mapUiState == MapUiState.BottomSheetInfoMode)
+                    mapUiState = MapUiState.BottomSheetFullyExpanded
             }
         }
-    }
+    }*/
 
     BackPressHandler(
         mapUiState = mapUiState,
         navController = navController,
-    ) {
-        mapUiState = when (mapUiState) {
-            !is MapUiState.NormalMode -> {
-                MapUiState.NormalMode
-            }
-            else -> { MapUiState.NormalMode }
-        }
-    }
+    ) { mapUiState = MapUiState.NormalMode }
 
     val noNamePlace = stringResource(R.string.no_name_place)
-
 
     ModalBottomSheetLayout(
         sheetState = modalBottomSheetState,
@@ -181,7 +168,6 @@ fun MapScreen(
     ) {
         MapScaffold(
             mapUiState = mapUiState,
-            currentPlace = viewModel.currentMarker,
             scaffoldState = scaffoldState,
             fab = {
                 MapFab(
@@ -264,9 +250,10 @@ fun MapScreen(
                     currentCameraPosition = currentCameraPosition,
                     mapType = mapType, mapBearing = mapBearing,
                     onMapClick = {
-                        coroutineScope.launch {
+                        mapUiState = MapUiState.NormalMode
+                        /*coroutineScope.launch {
                             scaffoldState.bottomSheetState.collapse()
-                        }
+                        }*/
                     }
                 )
 
