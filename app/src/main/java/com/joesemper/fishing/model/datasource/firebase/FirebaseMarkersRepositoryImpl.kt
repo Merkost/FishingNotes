@@ -1,10 +1,12 @@
-package com.joesemper.fishing.model.datasource
+package com.joesemper.fishing.model.datasource.firebase
 
 import android.net.Uri
 import android.util.Log
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
 import com.joesemper.fishing.domain.viewstates.BaseViewState
+import com.joesemper.fishing.model.repository.PhotoStorage
+import com.joesemper.fishing.model.datasource.utils.RepositoryCollections
 import com.joesemper.fishing.model.entity.common.LiteProgress
 import com.joesemper.fishing.model.entity.common.Note
 import com.joesemper.fishing.model.entity.common.Progress

@@ -31,7 +31,7 @@ import coil.compose.AsyncImage
 import coil.compose.AsyncImageContent
 import coil.compose.AsyncImagePainter
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.datastore.UserPreferences
+import com.joesemper.fishing.model.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.views.*
 import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.model.entity.content.UserCatch

@@ -1,4 +1,4 @@
-package com.joesemper.fishing.model.datasource
+package com.joesemper.fishing.model.datasource.firebase
 
 import android.content.Context
 import android.util.Log
@@ -7,7 +7,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.EventListener
-import com.joesemper.fishing.compose.datastore.AppPreferences
+import com.joesemper.fishing.model.datasource.utils.RepositoryCollections
+import com.joesemper.fishing.model.datastore.AppPreferences
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.repository.UserRepository

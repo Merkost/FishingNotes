@@ -37,7 +37,6 @@ import kotlinx.coroutines.InternalCoroutinesApi
 fun FishingNotesApp() {
     ProvideWindowInsets {
         val appStateHolder = rememberAppStateHolder()
-        var visible by remember { mutableStateOf(false) }
 
         Scaffold(
             bottomBar = {

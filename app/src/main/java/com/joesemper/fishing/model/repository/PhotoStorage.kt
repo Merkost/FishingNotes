@@ -1,4 +1,4 @@
-package com.joesemper.fishing.model.datasource
+package com.joesemper.fishing.model.repository
 
 import android.net.Uri
 import com.joesemper.fishing.model.entity.common.Progress

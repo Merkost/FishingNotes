@@ -1,14 +1,13 @@
-package com.joesemper.fishing.model.datasource
+package com.joesemper.fishing.model.datasource.firebase
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
-import android.provider.MediaStore
-import androidx.core.net.toFile
 import androidx.core.net.toUri
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
+import com.joesemper.fishing.model.repository.PhotoStorage
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.utils.getNewPhotoId
 import getPathFromURI
@@ -20,13 +19,12 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.take
 import java.io.File
 import java.lang.Exception
 
 
-class CloudPhotoStorage(private val context: Context) : PhotoStorage {
+class FirebaseCloudPhotoStorage(private val context: Context) : PhotoStorage {
 
     private val storage = Firebase.storage
     private var storageRef = storage.reference

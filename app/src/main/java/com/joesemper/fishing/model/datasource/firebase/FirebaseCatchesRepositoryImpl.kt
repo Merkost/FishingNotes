@@ -1,4 +1,4 @@
-package com.joesemper.fishing.model.datasource
+package com.joesemper.fishing.model.datasource.firebase
 
 import android.net.Uri
 import android.util.Log
@@ -6,7 +6,9 @@ import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
-import com.joesemper.fishing.model.datasource.RepositoryCollections.*
+import com.joesemper.fishing.model.repository.PhotoStorage
+import com.joesemper.fishing.model.datasource.utils.RepositoryCollections
+import com.joesemper.fishing.model.datasource.utils.RepositoryCollections.*
 import com.joesemper.fishing.model.entity.common.CatchesContentState
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserCatch

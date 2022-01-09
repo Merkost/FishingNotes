@@ -1,12 +1,12 @@
-package com.joesemper.fishing.model.datasource
+package com.joesemper.fishing.model.datasource.utils
 
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.joesemper.fishing.model.datasource.RepositoryConstants.CATCHES_COLLECTION
-import com.joesemper.fishing.model.datasource.RepositoryConstants.MARKERS_COLLECTION
-import com.joesemper.fishing.model.datasource.RepositoryConstants.USERS_COLLECTION
+import com.joesemper.fishing.model.datasource.utils.RepositoryConstants.CATCHES_COLLECTION
+import com.joesemper.fishing.model.datasource.utils.RepositoryConstants.MARKERS_COLLECTION
+import com.joesemper.fishing.model.datasource.utils.RepositoryConstants.USERS_COLLECTION
 import com.joesemper.fishing.utils.getCurrentUserId
 
 class RepositoryCollections(val db: FirebaseFirestore = Firebase.firestore) {

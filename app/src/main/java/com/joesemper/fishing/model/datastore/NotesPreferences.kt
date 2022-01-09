@@ -1,14 +1,11 @@
-package com.joesemper.fishing.compose.datastore
+package com.joesemper.fishing.model.datastore
 
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
-import com.joesemper.fishing.compose.ui.theme.AppThemeValues
 import com.joesemper.fishing.compose.ui.utils.CatchesSortValues
 import com.joesemper.fishing.compose.ui.utils.PlacesSortValues
 import kotlinx.coroutines.flow.Flow

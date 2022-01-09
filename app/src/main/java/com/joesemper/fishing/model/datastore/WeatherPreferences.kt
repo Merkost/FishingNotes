@@ -1,4 +1,4 @@
-package com.joesemper.fishing.compose.datastore
+package com.joesemper.fishing.model.datastore
 
 import android.content.Context
 import androidx.datastore.core.DataStore

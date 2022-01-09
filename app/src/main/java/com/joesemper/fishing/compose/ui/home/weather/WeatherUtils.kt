@@ -11,8 +11,6 @@ import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.Daily
-import com.joesemper.fishing.utils.format
-import com.joesemper.fishing.utils.hPaToMmHg
 import java.text.DecimalFormat
 
 object WindFormat {
