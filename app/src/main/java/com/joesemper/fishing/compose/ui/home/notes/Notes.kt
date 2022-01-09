@@ -31,6 +31,7 @@ import com.joesemper.fishing.compose.ui.home.SettingsHeader
 import com.joesemper.fishing.compose.ui.home.views.DefaultAppBar
 import com.joesemper.fishing.compose.ui.home.views.FabMenuItem
 import com.joesemper.fishing.compose.ui.home.views.FabWithMenu
+import com.joesemper.fishing.compose.ui.home.views.MultiFabState
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.theme.primaryTextColor
 import com.joesemper.fishing.compose.ui.utils.CatchesSortValues
@@ -64,6 +65,8 @@ fun Notes(
     var bottomSheetScreen by remember { mutableStateOf(BottomSheetScreen.Sort) }
     val shouldShowBlur = remember { mutableStateOf(false) }
 
+    val fabState = remember { mutableStateOf(MultiFabState.COLLAPSED) }
+
     ModalBottomSheetLayout(
         sheetState = bottomState,
         sheetShape = modalBottomSheetCorners,
@@ -84,6 +87,7 @@ fun Notes(
             floatingActionButton = {
                 FabWithMenu(
                     modifier = Modifier.padding(bottom = 20.dp).zIndex(5f),
+                    fabState = fabState,
                     items = listOf(
                         FabMenuItem(
                             icon = R.drawable.ic_add_catch,
@@ -95,16 +99,18 @@ fun Notes(
                             text = stringResource(R.string.add_new_place),
                             onClick = { onAddNewPlaceClick(navController) }
                         )
-                    ), shouldShowBlur
+                    )
                 )
             },
         ) {
-            AnimatedVisibility(shouldShowBlur.value,
+            AnimatedVisibility(fabState.value  == MultiFabState.EXPANDED,
                 modifier = Modifier.zIndex(4f).fillMaxSize(),
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
-                Surface(color = Color.Black.copy(0.6f)) { }
+                Surface(color = Color.Black.copy(0.6f), onClick = {
+                    fabState.value = MultiFabState.COLLAPSED
+                }) { }
             }
             Column() {
                 Tabs(tabs = tabs, pagerState = pagerState)

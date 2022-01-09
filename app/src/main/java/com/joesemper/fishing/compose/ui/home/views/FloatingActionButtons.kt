@@ -3,10 +3,10 @@ package com.joesemper.fishing.compose.ui.home.views
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -28,11 +28,10 @@ import com.joesemper.fishing.R
 fun FabWithMenu(
     modifier: Modifier = Modifier,
     items: List<FabMenuItem>,
-    shouldShowBlur: MutableState<Boolean>,
+    fabState: MutableState<MultiFabState>,
     ) {
-    val toState = remember { mutableStateOf(MultiFabState.COLLAPSED) }
-    val transition = updateTransition(targetState = toState, label = "")
-        .also { shouldShowBlur.value = (it.targetState.value == MultiFabState.EXPANDED) }
+    //val toState = remember { mutableStateOf(MultiFabState.COLLAPSED) }
+    val transition = updateTransition(targetState = fabState, label = "")
 
     val size = transition.animateDp(label = "") { state ->
         if (state.value == MultiFabState.EXPANDED) 48.dp else 0.dp
