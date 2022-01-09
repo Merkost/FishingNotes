@@ -39,9 +39,7 @@ class FirebaseUserRepositoryImpl(
 
     override val datastoreUser: Flow<User?>
         get() = callbackFlow {
-            appPreferences.userValue.collectLatest {
-                send(it)
-            }
+            appPreferences.userValue.collectLatest { send(it) }
             awaitClose { }
         }
 

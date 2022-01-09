@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import com.google.android.libraries.maps.model.LatLng
 import com.google.maps.android.SphericalUtil
@@ -76,6 +77,8 @@ fun MarkerInfoDialog(
     val fishActivity: Int? by remember { viewModel.fishActivity }
     val currentWeather: CurrentWeatherFree? by remember { viewModel.currentWeather }
 
+    val cant_recognize_place = stringResource(R.string.cant_recognize_place)
+
     marker?.let {
         LaunchedEffect(marker) {
             coroutineScope.launch(Dispatchers.Default) {
@@ -88,10 +91,13 @@ fun MarkerInfoDialog(
                             subAdminArea.replaceFirstChar { it.uppercase() }
                         } else if (!adminArea.isNullOrBlank()) {
                             adminArea.replaceFirstChar { it.uppercase() }
-                        } else "-"
+                        } else if (!countryName.isNullOrBlank())
+                            countryName.replaceFirstChar { it.uppercase() }
+                        else "-"
                     }
                 } catch (e: Throwable) {
-                    address = "Нет соединения с сервером"
+                    //TODO: Ошибка в океане!
+                    address = cant_recognize_place
                 }
             }
         }
@@ -137,6 +143,7 @@ fun MarkerInfoDialog(
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(paddingDp),
+        onClick = {}
     ) {
 
         viewModel.currentMarker.value?.let { marker ->
@@ -159,7 +166,7 @@ fun MarkerInfoDialog(
                         fish, divider, weather) = createRefs()
 
                     val horizontalLine = createGuidelineFromAbsoluteLeft(0.5f)
-                    val verticalFabLine = createGuidelineFromAbsoluteRight(100.dp)
+                    val verticalFabLine = createGuidelineFromAbsoluteRight(60.dp)
 
                     Box(modifier = Modifier
                         .size(64.dp).padding(16.dp)
@@ -185,6 +192,7 @@ fun MarkerInfoDialog(
                                 top.linkTo(locationIcon.top)
                                 linkTo(locationIcon.end, verticalFabLine, 0.dp, 0.dp, 0f)
                                 bottom.linkTo(locationIcon.bottom)
+                                width = Dimension.fillToConstraints
                             },
                         text = when {
                             marker.title.isNotEmpty() -> marker.title
@@ -198,7 +206,8 @@ fun MarkerInfoDialog(
                         modifier = Modifier
                             .constrainAs(area) {
                                 top.linkTo(title.bottom, 4.dp)
-                                linkTo(locationIcon.end, parent.end, 0.dp, 80.dp, 0f)
+                                linkTo(title.start, title.end, 0.dp, 80.dp, 0f)
+                                //width = Dimension.fillToConstraints
                             }
                             .animateContentSize(
                                 animationSpec = tween(
@@ -215,7 +224,8 @@ fun MarkerInfoDialog(
                             .constrainAs(distanceTo) {
                                 top.linkTo(area.top)
                                 bottom.linkTo(area.bottom)
-                                linkTo(area.absoluteRight, parent.absoluteRight, 0.dp, 16.dp, 1f)
+                                linkTo(area.absoluteRight, parent.absoluteRight, 8.dp, 16.dp, 1f)
+                                //width = Dimension.fillToConstraints
                             }/*.width(80.dp)*/
                             .animateContentSize(
                                 animationSpec = tween(

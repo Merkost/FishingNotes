@@ -232,7 +232,7 @@ fun MapScreen(
                     mapCompassButton, mapLayersButton, zoomInButton, zoomOutButton,
                     mapSettingsButton, mapLayersView, pointer) = createRefs()
                 val verticalMyLocationButtonGl = createGuidelineFromAbsoluteRight(56.dp)
-                val centerHorizontal = createGuidelineFromBottom(0.4f)
+                val centerHorizontal = createGuidelineFromBottom(0.5f)
 
                 MapLayout(
                     modifier = Modifier.constrainAs(mapLayout) {

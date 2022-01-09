@@ -78,7 +78,8 @@ fun SubtitleText(
         color = textColor ?: if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
         text = text,
         textAlign = textAlign,
-    )
+        overflow = TextOverflow.Ellipsis,
+        )
 }
 
 @Composable
@@ -99,7 +100,8 @@ fun PrimaryText(
         color = textColor,
         text = text,
         maxLines = maxLines,
-        softWrap = true
+        softWrap = true,
+        overflow = TextOverflow.Ellipsis
     )
 }
 
