@@ -4,7 +4,6 @@ import android.location.Geocoder
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -29,12 +28,13 @@ import com.google.android.libraries.maps.model.LatLng
 import com.google.maps.android.SphericalUtil
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.datastore.WeatherPreferences
+import com.joesemper.fishing.compose.ui.Arguments
+import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.views.PrimaryText
 import com.joesemper.fishing.compose.ui.home.views.SubtitleText
 import com.joesemper.fishing.compose.ui.home.weather.WindSpeedValues
+import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.resources
-import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
-import com.joesemper.fishing.compose.ui.utils.currentFraction
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.CurrentWeatherFree
@@ -48,13 +48,11 @@ import org.koin.androidx.compose.getViewModel
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MarkerInfoDialog(
-    marker: UserMapMarker?,
+    receivedMarker: UserMapMarker?,
     lastKnownLocation: MutableState<LatLng?>,
     mapBearing: MutableState<Float>,
     modifier: Modifier = Modifier,
     navController: NavController,
-    scaffoldState: BottomSheetScaffoldState,
-    onWeatherIconClicked: (UserMapMarker) -> Unit,
     onMarkerIconClicked: (UserMapMarker) -> Unit,
 ) {
     val context = LocalContext.current
@@ -79,13 +77,13 @@ fun MarkerInfoDialog(
 
     val cant_recognize_place = stringResource(R.string.cant_recognize_place)
 
-    marker?.let {
-        LaunchedEffect(marker) {
+    receivedMarker?.let {
+        LaunchedEffect(receivedMarker) {
             coroutineScope.launch(Dispatchers.Default) {
                 address = null
                 delay(800)
                 try {
-                    val position = geocoder.getFromLocation(marker.latitude, marker.longitude, 1)
+                    val position = geocoder.getFromLocation(receivedMarker.latitude, receivedMarker.longitude, 1)
                     position?.first()?.apply {
                         address = if (!subAdminArea.isNullOrBlank()) {
                             subAdminArea.replaceFirstChar { it.uppercase() }
@@ -102,25 +100,25 @@ fun MarkerInfoDialog(
             }
         }
 
-        LaunchedEffect(marker) {
+        LaunchedEffect(receivedMarker) {
             viewModel.fishActivity.value = null
-            viewModel.getFishActivity(marker.latitude, marker.longitude)
+            viewModel.getFishActivity(receivedMarker.latitude, receivedMarker.longitude)
         }
 
-        LaunchedEffect(marker) {
+        LaunchedEffect(receivedMarker) {
             viewModel.currentWeather.value = null
-            viewModel.getCurrentWeather(marker.latitude, marker.longitude)
+            viewModel.getCurrentWeather(receivedMarker.latitude, receivedMarker.longitude)
         }
 
-        LaunchedEffect(marker, viewModel.lastKnownLocation.value) {
+        LaunchedEffect(receivedMarker, viewModel.lastKnownLocation.value) {
             coroutineScope.launch(Dispatchers.Default) {
                 distance = null
                 lastKnownLocation.value?.let {
                     distance = convertDistance(
                         SphericalUtil.computeDistanceBetween(
                             com.google.android.gms.maps.model.LatLng(
-                                marker.latitude,
-                                marker.longitude
+                                receivedMarker.latitude,
+                                receivedMarker.longitude
                             ),
                             com.google.android.gms.maps.model.LatLng(it.latitude, it.longitude)
                         )
@@ -134,6 +132,7 @@ fun MarkerInfoDialog(
     val cornersDp = 16.dp
     val elevationDp = 6.dp
 
+    viewModel.currentMarker.value?.let { marker ->
     Card(
         shape = RoundedCornerShape(cornersDp),
         elevation = elevationDp,
@@ -143,11 +142,8 @@ fun MarkerInfoDialog(
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(paddingDp),
-        onClick = {}
+        onClick = { onMarkerClicked(marker, navController) }
     ) {
-
-        viewModel.currentMarker.value?.let { marker ->
-
             AnimatedVisibility(
                 true,
                 enter = fadeIn(tween(500)),
@@ -207,7 +203,7 @@ fun MarkerInfoDialog(
                             .constrainAs(area) {
                                 top.linkTo(title.bottom, 4.dp)
                                 linkTo(title.start, title.end, 0.dp, 80.dp, 0f)
-                                //width = Dimension.fillToConstraints
+
                             }
                             .animateContentSize(
                                 animationSpec = tween(
@@ -225,8 +221,8 @@ fun MarkerInfoDialog(
                                 top.linkTo(area.top)
                                 bottom.linkTo(area.bottom)
                                 linkTo(area.absoluteRight, parent.absoluteRight, 8.dp, 16.dp, 1f)
-                                //width = Dimension.fillToConstraints
-                            }/*.width(80.dp)*/
+
+                            }
                             .animateContentSize(
                                 animationSpec = tween(
                                     durationMillis = 300,
@@ -240,7 +236,6 @@ fun MarkerInfoDialog(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         SubtitleText(
-                            /*overflow = TextOverflow.Ellipsis,*/
                             text = distance ?: "",
                             textAlign = TextAlign.Center,
                         )
@@ -260,8 +255,7 @@ fun MarkerInfoDialog(
                                     easing = LinearOutSlowInEasing
                                 )
                             ),
-                        horizontalArrangement = Arrangement.spacedBy(
-                            6.dp,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp,
                             Alignment.CenterHorizontally
                         ),
                         verticalAlignment = Alignment.CenterVertically,
@@ -284,8 +278,7 @@ fun MarkerInfoDialog(
                                 top.linkTo(area.bottom, 4.dp)
                                 linkTo(horizontalLine, horizontalLine, 0.dp, 0.dp, 0.5f)
                                 bottom.linkTo(parent.bottom)
-                            }.height(20.dp)
-                            .width(1.dp),
+                            }.height(20.dp).width(1.dp),
                         color = Color.Gray,
                     )
 
@@ -298,18 +291,12 @@ fun MarkerInfoDialog(
                                 bottom.linkTo(parent.bottom)
                             }
                             .animateContentSize(
-                                animationSpec = tween(
-                                    durationMillis = 300,
-                                    easing = LinearOutSlowInEasing
-                                )
-                            ),
-                        horizontalArrangement = Arrangement.spacedBy(
-                            6.dp,
-                            Alignment.CenterHorizontally
-                        ),
+                                animationSpec =
+                                tween(durationMillis = 300, easing = LinearOutSlowInEasing)),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        IconButton(onClick = { onWeatherIconClicked(marker) }) {
+                        IconButton(onClick = { onWeatherIconClicked(marker, navController) }) {
                             Icon(painterResource(R.drawable.ic_baseline_navigation_24), "",
                                 modifier = Modifier.rotate(currentWeather?.wind_degrees?.let {
                                     it.minus(mapBearing.value) } ?: mapBearing.value),
@@ -319,30 +306,29 @@ fun MarkerInfoDialog(
 
                         currentWeather?.let {
                             SubtitleText(
-                                text = windUnit.getWindSpeed(currentWeather!!.wind_speed) + " " +
+                                text = windUnit.getWindSpeed(it.wind_speed) + " " +
                                         stringResource(windUnit.stringRes)
                             )
                         }
-
-
                     }
                 }
             }
-
         }
-
     }
-    /*AnimatedVisibility(
-        scaffoldState.bottomSheetState.progress.fraction != 0f,
-        enter = fadeIn(tween(500)),
-        exit = fadeOut(tween(500)),
-        *//*paddingDp.value == 0.dp
-            && !scaffoldState.bottomSheetState.isAnimationRunning*//*
-        *//*scaffoldState.currentFraction != 0.0f*//*
-    ) {
-        Spacer(modifier = Modifier.fillMaxSize())
-    }*/
+}
 
+fun onMarkerClicked(marker: UserMapMarker, navController: NavController) {
+    navController.navigate(
+        MainDestinations.PLACE_ROUTE,
+        Arguments.PLACE to marker
+    )
+}
+
+fun onWeatherIconClicked(marker: UserMapMarker, navController: NavController) {
+    navController.navigate(
+        "${MainDestinations.HOME_ROUTE}/${MainDestinations.WEATHER_ROUTE}",
+        Arguments.PLACE to marker
+    )
 }
 
 

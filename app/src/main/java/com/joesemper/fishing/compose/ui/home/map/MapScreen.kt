@@ -43,7 +43,6 @@ import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.navigate
-import com.joesemper.fishing.compose.ui.utils.currentFraction
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
@@ -207,23 +206,19 @@ fun MapScreen(
             bottomSheet = {
 
                 MarkerInfoDialog(
-                    marker = viewModel.currentMarker.value,
+                    receivedMarker = viewModel.currentMarker.value,
                     lastKnownLocation = viewModel.lastKnownLocation,
                     navController = navController,
                     mapBearing = mapBearing,
-                    scaffoldState = scaffoldState,
-
-                    onWeatherIconClicked = { marker ->
-                        navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.WEATHER_ROUTE}",
-                            Arguments.PLACE to marker)
+                    onMarkerIconClicked = {
+                        viewModel.currentMarker.value?.let {
+                            moveCameraToLocation(
+                                coroutineScope, map,
+                                LatLng(it.latitude, it.longitude), DEFAULT_ZOOM, mapBearing.value
+                            )
+                        }
                     }
-                ) {
-                    viewModel.currentMarker.value?.let {
-                        moveCameraToLocation(coroutineScope, map,
-                            LatLng(it.latitude, it.longitude), DEFAULT_ZOOM, mapBearing.value)
-                    }
-
-                }
+                )
 
             }
         ) {
@@ -508,225 +503,228 @@ fun MapLayout(
                     }
                 }
             }
-        }}
-        //}
-
-        LaunchedEffect(map, permissionsState.allPermissionsGranted) {
-            val googleMap = map.awaitMap()
-            checkPermission(context)
-            googleMap.isMyLocationEnabled = permissionsState.allPermissionsGranted
-            isMapVisible = true
         }
+    }
+    //}
 
-        LaunchedEffect(viewModel.lastMapCameraPosition.value) {
-            viewModel.lastMapCameraPosition.value?.let {
-                moveCameraToLocation(this, map, it.first, it.second, mapBearing.value)
-            }
-        }
+    LaunchedEffect(map, permissionsState.allPermissionsGranted) {
+        val googleMap = map.awaitMap()
+        checkPermission(context)
+        googleMap.isMyLocationEnabled = permissionsState.allPermissionsGranted
+        isMapVisible = true
+    }
 
-        LaunchedEffect(mapType.value) {
-            val googleMap = map.awaitMap()
-            googleMap.mapType = mapType.value
-        }
-
-        DisposableEffect(map) {
-            onDispose {
-                viewModel.lastMapCameraPosition.value = currentCameraPosition.value
-            }
+    LaunchedEffect(viewModel.lastMapCameraPosition.value) {
+        viewModel.lastMapCameraPosition.value?.let {
+            moveCameraToLocation(this, map, it.first, it.second, mapBearing.value)
         }
     }
 
-    @OptIn(ExperimentalComposeUiApi::class)
-    @ExperimentalPermissionsApi
-    @Composable
-    fun LocationPermissionDialog(
-        modifier: Modifier = Modifier,
-        userPreferences: UserPreferences,
-        onCloseCallback: () -> Unit = { },
-    ) {
-        val context = LocalContext.current
-        var isDialogOpen by remember {
-            mutableStateOf(true)
-        }
-        val coroutineScope = rememberCoroutineScope()
+    LaunchedEffect(mapType.value) {
+        val googleMap = map.awaitMap()
+        googleMap.mapType = mapType.value
+    }
 
-        val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
-        PermissionsRequired(
-            multiplePermissionsState = permissionsState,
-            permissionsNotGrantedContent = {
-                if (isDialogOpen) {
-                    GrantLocationPermissionsDialog(
-                        onDismiss = {
-                            isDialogOpen = false
-                            onCloseCallback()
-                        },
-                        onNegativeClick = {
-                            isDialogOpen = false
-                            onCloseCallback()
-                        },
-                        onPositiveClick = {
-                            isDialogOpen = false
-                            permissionsState.launchMultiplePermissionRequest()
-                            onCloseCallback()
-                        },
-                        onDontAskClick = {
-                            isDialogOpen = false
-                            SnackbarManager.showMessage(R.string.location_dont_ask)
-                            coroutineScope.launch {
-                                userPreferences.saveLocationPermissionStatus(false)
-                            }
-                            onCloseCallback()
+    DisposableEffect(map) {
+        onDispose {
+            viewModel.lastMapCameraPosition.value = currentCameraPosition.value
+        }
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@ExperimentalPermissionsApi
+@Composable
+fun LocationPermissionDialog(
+    modifier: Modifier = Modifier,
+    userPreferences: UserPreferences,
+    onCloseCallback: () -> Unit = { },
+) {
+    val context = LocalContext.current
+    var isDialogOpen by remember {
+        mutableStateOf(true)
+    }
+    val coroutineScope = rememberCoroutineScope()
+
+    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
+    PermissionsRequired(
+        multiplePermissionsState = permissionsState,
+        permissionsNotGrantedContent = {
+            if (isDialogOpen) {
+                GrantLocationPermissionsDialog(
+                    onDismiss = {
+                        isDialogOpen = false
+                        onCloseCallback()
+                    },
+                    onNegativeClick = {
+                        isDialogOpen = false
+                        onCloseCallback()
+                    },
+                    onPositiveClick = {
+                        isDialogOpen = false
+                        permissionsState.launchMultiplePermissionRequest()
+                        onCloseCallback()
+                    },
+                    onDontAskClick = {
+                        isDialogOpen = false
+                        SnackbarManager.showMessage(R.string.location_dont_ask)
+                        coroutineScope.launch {
+                            userPreferences.saveLocationPermissionStatus(false)
                         }
-                    )
-                }
-            },
-            permissionsNotAvailableContent = { SnackbarManager.showMessage(R.string.location_permission_denied) })
-        { checkPermission(context) }
-    }
-
-    @ExperimentalMaterialApi
-    @Composable
-    fun MapFab(
-        state: MapUiState,
-        onClick: () -> Unit,
-        onLongPress: () -> Unit,
-        userSettings: UserPreferences,
-    ) {
-        val useFastFabAdd by userSettings.useFabFastAdd.collectAsState(false)
-        val fabImg = remember { mutableStateOf(R.drawable.ic_baseline_add_location_24) }
-
-        val context = LocalContext.current
-
-        val paddingBottom = animateDpAsState(
-            when (state) {
-                MapUiState.NormalMode -> {
-                    defaultFabBottomPadding
-                }
-                MapUiState.BottomSheetInfoMode -> {
-                    34.dp
-                }
-                MapUiState.PlaceSelectMode -> {
-                    defaultFabBottomPadding
-                }
-            }
-        )
-
-        val paddingTop = animateDpAsState(
-            when (state) {
-                MapUiState.NormalMode -> {
-                    0.dp
-                }
-                MapUiState.BottomSheetInfoMode -> { 26.dp }
-                MapUiState.PlaceSelectMode -> {
-                    0.dp
-                }
-            }
-        )
-
-        val adding_place = stringResource(R.string.adding_place_on_current_location)
-        val permissions_required = stringResource(R.string.location_permissions_required)
-        AnimatedVisibility(
-            true,
-            exit = fadeOut(),
-            enter = fadeIn()
-        ) {
-
-            FishingFab(
-                modifier = Modifier
-                    .animateContentSize()
-                    .padding(bottom = paddingBottom.value, top = paddingTop.value),
-                onClick = onClick,
-                onLongPress = {
-                    if (state == MapUiState.NormalMode && useFastFabAdd) {
-                        if (!checkPermission(context)) {
-                            Toast.makeText(context, adding_place, Toast.LENGTH_SHORT).show()
-                            onLongPress()
-                        } else Toast.makeText(context, permissions_required, Toast.LENGTH_SHORT)
-                            .show()
+                        onCloseCallback()
                     }
-                }
-            ) {
-                AnimatedVisibility(state is MapUiState.NormalMode) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_add_location_24),
-                        contentDescription = stringResource(R.string.new_place),
-                        tint = MaterialTheme.colors.onPrimary,
-                    )
-                }
-                AnimatedVisibility(state is MapUiState.BottomSheetInfoMode) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_add_catch),
-                        contentDescription = stringResource(R.string.new_place),
-                        tint = MaterialTheme.colors.onPrimary,
-                    )
-                }
-                AnimatedVisibility(state is MapUiState.PlaceSelectMode) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_baseline_check_24),
-                        contentDescription = stringResource(R.string.new_place),
-                        tint = MaterialTheme.colors.onPrimary,
-                    )
-                }
+                )
+            }
+        },
+        permissionsNotAvailableContent = { SnackbarManager.showMessage(R.string.location_permission_denied) })
+    { checkPermission(context) }
+}
+
+@ExperimentalMaterialApi
+@Composable
+fun MapFab(
+    state: MapUiState,
+    onClick: () -> Unit,
+    onLongPress: () -> Unit,
+    userSettings: UserPreferences,
+) {
+    val useFastFabAdd by userSettings.useFabFastAdd.collectAsState(false)
+    val fabImg = remember { mutableStateOf(R.drawable.ic_baseline_add_location_24) }
+
+    val context = LocalContext.current
+
+    val paddingBottom = animateDpAsState(
+        when (state) {
+            MapUiState.NormalMode -> {
+                defaultFabBottomPadding
+            }
+            MapUiState.BottomSheetInfoMode -> {
+                34.dp
+            }
+            MapUiState.PlaceSelectMode -> {
+                defaultFabBottomPadding
             }
         }
-    }
+    )
 
-    @OptIn(ExperimentalFoundationApi::class)
-    @Composable
-    fun FishingFab(
-        onClick: () -> Unit,
-        onLongPress: () -> Unit,
-        modifier: Modifier = Modifier,
-        interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-        shape: Shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
-        backgroundColor: Color = MaterialTheme.colors.secondary,
-        contentColor: Color = contentColorFor(backgroundColor),
-        elevation: FloatingActionButtonElevation = FloatingActionButtonDefaults.elevation(),
-        content: @Composable () -> Unit
+    val paddingTop = animateDpAsState(
+        when (state) {
+            MapUiState.NormalMode -> {
+                0.dp
+            }
+            MapUiState.BottomSheetInfoMode -> {
+                26.dp
+            }
+            MapUiState.PlaceSelectMode -> {
+                0.dp
+            }
+        }
+    )
+
+    val adding_place = stringResource(R.string.adding_place_on_current_location)
+    val permissions_required = stringResource(R.string.location_permissions_required)
+    AnimatedVisibility(
+        true,
+        exit = fadeOut(),
+        enter = fadeIn()
     ) {
-        Surface(
-            modifier = modifier,
-            shape = shape,
-            color = backgroundColor,
-            contentColor = contentColor.copy(alpha = 1f),
 
-            elevation = elevation.elevation(interactionSource).value,
-        ) {
-            CompositionLocalProvider(LocalContentAlpha provides contentColor.alpha) {
-                ProvideTextStyle(MaterialTheme.typography.button) {
-                    Box(
-                        modifier = Modifier
-                            .defaultMinSize(minWidth = FabSize, minHeight = FabSize)
-                            .combinedClickable(
-                                interactionSource = interactionSource,
-                                indication = rememberRipple(),
-                                enabled = true,
-                                role = Role.Button,
-                                onClick = onClick,
-                                onDoubleClick = { },
-                                onLongClick = onLongPress
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) { content() }
+        FishingFab(
+            modifier = Modifier
+                .animateContentSize()
+                .padding(bottom = paddingBottom.value, top = paddingTop.value),
+            onClick = onClick,
+            onLongPress = {
+                if (state == MapUiState.NormalMode && useFastFabAdd) {
+                    if (!checkPermission(context)) {
+                        Toast.makeText(context, adding_place, Toast.LENGTH_SHORT).show()
+                        onLongPress()
+                    } else Toast.makeText(context, permissions_required, Toast.LENGTH_SHORT)
+                        .show()
                 }
+            }
+        ) {
+            AnimatedVisibility(state is MapUiState.NormalMode) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_baseline_add_location_24),
+                    contentDescription = stringResource(R.string.new_place),
+                    tint = MaterialTheme.colors.onPrimary,
+                )
+            }
+            AnimatedVisibility(state is MapUiState.BottomSheetInfoMode) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_add_catch),
+                    contentDescription = stringResource(R.string.new_place),
+                    tint = MaterialTheme.colors.onPrimary,
+                )
+            }
+            AnimatedVisibility(state is MapUiState.PlaceSelectMode) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_baseline_check_24),
+                    contentDescription = stringResource(R.string.new_place),
+                    tint = MaterialTheme.colors.onPrimary,
+                )
             }
         }
     }
+}
 
-    private val FabSize = 56.dp
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun FishingFab(
+    onClick: () -> Unit,
+    onLongPress: () -> Unit,
+    modifier: Modifier = Modifier,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    shape: Shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
+    backgroundColor: Color = MaterialTheme.colors.secondary,
+    contentColor: Color = contentColorFor(backgroundColor),
+    elevation: FloatingActionButtonElevation = FloatingActionButtonDefaults.elevation(),
+    content: @Composable () -> Unit
+) {
+    Surface(
+        modifier = modifier,
+        shape = shape,
+        color = backgroundColor,
+        contentColor = contentColor.copy(alpha = 1f),
 
-    private fun onAddNewCatchClick(navController: NavController, viewModel: MapViewModel) {
-        viewModel.currentMarker.value?.let {
-            navController.navigate(
-                MainDestinations.NEW_CATCH_ROUTE,
-                Arguments.PLACE to it
-            )
+        elevation = elevation.elevation(interactionSource).value,
+    ) {
+        CompositionLocalProvider(LocalContentAlpha provides contentColor.alpha) {
+            ProvideTextStyle(MaterialTheme.typography.button) {
+                Box(
+                    modifier = Modifier
+                        .defaultMinSize(minWidth = FabSize, minHeight = FabSize)
+                        .combinedClickable(
+                            interactionSource = interactionSource,
+                            indication = rememberRipple(),
+                            enabled = true,
+                            role = Role.Button,
+                            onClick = onClick,
+                            onDoubleClick = { },
+                            onLongClick = onLongPress
+                        ),
+                    contentAlignment = Alignment.Center
+                ) { content() }
+            }
         }
     }
+}
 
-    private fun onMarkerDetailsClick(navController: NavController, marker: UserMapMarker) {
-        navController.navigate(MainDestinations.PLACE_ROUTE, Arguments.PLACE to marker)
+private val FabSize = 56.dp
+
+private fun onAddNewCatchClick(navController: NavController, viewModel: MapViewModel) {
+    viewModel.currentMarker.value?.let {
+        navController.navigate(
+            MainDestinations.NEW_CATCH_ROUTE,
+            Arguments.PLACE to it
+        )
     }
+}
+
+private fun onMarkerDetailsClick(navController: NavController, marker: UserMapMarker) {
+    navController.navigate(MainDestinations.PLACE_ROUTE, Arguments.PLACE to marker)
+}
 
 
 
