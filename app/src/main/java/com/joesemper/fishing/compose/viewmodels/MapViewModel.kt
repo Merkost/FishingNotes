@@ -105,9 +105,6 @@ class MapViewModel(
                         is RetrofitWrapper.Success<CurrentWeatherFree> -> {
                             currentWeather.value = result.data
                         }
-                        is RetrofitWrapper.Loading -> {
-
-                        }
                         is RetrofitWrapper.Error -> {
                             Log.d("CURRENT WEATHER ERROR", result.errorType.error.toString())
                             //_weatherState.value = RetrofitWrapper.Error(result.errorType)
@@ -127,9 +124,6 @@ class MapViewModel(
                         val currentHour24 = calendar[Calendar.HOUR_OF_DAY]
                         fishActivity.value = solunar.hourlyRating[currentHour24]
                         //_weatherState.value = RetrofitWrapper.Success(result.data)
-                    }
-                    is RetrofitWrapper.Loading -> {
-                        //_weatherState.value = RetrofitWrapper.Loading()
                     }
                     is RetrofitWrapper.Error -> {
                         Log.d("SOLUNAR ERROR", result.errorType.error.toString())
