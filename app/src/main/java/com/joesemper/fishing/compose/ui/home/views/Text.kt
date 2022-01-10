@@ -1,6 +1,5 @@
 package com.joesemper.fishing.compose.ui.home.views
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -20,8 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.theme.secondaryFigmaTextColor
-import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
+import com.joesemper.fishing.compose.ui.theme.customColors
 
 @Composable
 fun BigText(
@@ -61,7 +59,7 @@ fun HeaderTextSecondary(
     text: String,
     textAlign: TextAlign = TextAlign.Start
 ) {
-    HeaderText(modifier, text, textAlign, secondaryFigmaTextColor)
+    HeaderText(modifier, text, textAlign, MaterialTheme.customColors.secondaryTextColor)
 }
 
 @Composable
@@ -70,12 +68,11 @@ fun SubtitleText(
     textColor: Color? = null, singleLine: Boolean = true,
     textAlign: TextAlign = TextAlign.Start
 ) {
-    val darkTheme = isSystemInDarkTheme()
 
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.subtitle1,
-        color = textColor ?: if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
+        color = MaterialTheme.customColors.secondaryTextColor,
         text = text,
         textAlign = textAlign,
         overflow = TextOverflow.Ellipsis,
@@ -160,7 +157,7 @@ fun SecondaryText(
     modifier: Modifier = Modifier, text: String,
     maxLines: Int = Int.MAX_VALUE,
     textAlign: TextAlign = TextAlign.Center,
-    textColor: Color = secondaryTextColor
+    textColor: Color = MaterialTheme.customColors.secondaryTextColor
 ) {
     Text(
         textAlign = textAlign,
@@ -178,7 +175,7 @@ fun SecondaryTextSmall(
     modifier: Modifier = Modifier, text: String,
     maxLines: Int = Int.MAX_VALUE,
     textAlign: TextAlign = TextAlign.Center,
-    textColor: Color = secondaryTextColor
+    textColor: Color = MaterialTheme.customColors.secondaryTextColor
 ) {
     Text(
         textAlign = textAlign,
@@ -201,7 +198,7 @@ fun SupportText(
     Text(
         modifier = modifier,
         style = style,
-        color = Color.Gray,
+        color = MaterialTheme.customColors.secondaryTextColor,
         text = text,
         maxLines = 1
     )
@@ -209,9 +206,6 @@ fun SupportText(
 
 @Composable
 fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
-    val darkTheme = isSystemInDarkTheme()
-    //TODO: Remove dark theme checking
-
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
@@ -219,7 +213,7 @@ fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: Int, text: String) {
         Icon(
             painter = painterResource(id = icon),
             contentDescription = stringResource(R.string.place),
-            tint = if (darkTheme) Color.LightGray else secondaryFigmaTextColor,
+            tint = MaterialTheme.customColors.secondaryTextColor,
             modifier = Modifier
                 .padding(end = 8.dp)
                 .size(24.dp)

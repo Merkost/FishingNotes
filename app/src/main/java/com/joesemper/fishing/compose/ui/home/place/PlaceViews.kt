@@ -107,7 +107,8 @@ fun PlaceTitleView(
                 absoluteLeft.linkTo(date.absoluteRight, 8.dp)
             },
             count = catchesAmount,
-            icon = R.drawable.ic_fishing
+            icon = R.drawable.ic_fishing,
+            tint = MaterialTheme.colors.primaryVariant
         )
     }
 }

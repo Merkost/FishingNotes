@@ -341,7 +341,8 @@ fun ItemUserPlace(
                     absoluteLeft.linkTo(date.absoluteRight, 8.dp)
                 },
                 count = place.catchesCount,
-                icon = R.drawable.ic_fishing
+                icon = R.drawable.ic_fishing,
+                tint = MaterialTheme.colors.primaryVariant.copy(0.25f)
             )
         }
     }
@@ -479,6 +480,7 @@ fun CatchItemView(
                 text = "${catch.fishWeight} ${stringResource(id = R.string.kg)}"
             )
 
+            //TODO: if place is hidden
             if (showPlace) {
                 Icon(
                     modifier = Modifier
@@ -503,7 +505,8 @@ fun CatchItemView(
                     },
                     text = catch.placeTitle,
                     textAlign = TextAlign.Start,
-                    maxLines = 1
+                    maxLines = 1,
+                    textColor = Color.Gray
                 )
             }
 
@@ -523,7 +526,7 @@ fun CatchItemView(
                 },
                 count = catch.downloadPhotoLinks.size,
                 icon = R.drawable.ic_baseline_photo_24,
-                tint = MaterialTheme.colors.primaryVariant
+                tint = MaterialTheme.colors.primaryVariant.copy(0.25f)
             )
 
         }
@@ -535,7 +538,7 @@ fun ItemCounter(
     modifier: Modifier = Modifier,
     count: Number,
     icon: Int,
-    tint: Color = secondaryTextColor
+    tint: Color = MaterialTheme.customColors.secondaryIconColor
 ) {
     Row(modifier = modifier) {
         Icon(

@@ -101,6 +101,7 @@ fun FishingNotesTheme(
 
     CompositionLocalProvider(
         LocalColors provides customColors
+
     ) {
         MaterialTheme(
             colors = colors,
