@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "767301429798-e4v6gprcni67g4a16af16qahnjaj99ch.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.joesemper.fishing",
+            "certificate_hash": "c1e2b37768b8c21bc2dc7313edb62e0438b4bcf3"
+          }
+        },
+        {
           "client_id": "767301429798-esk4k7k6c7fk4i0dgcilg46kmtfpco15.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

@@ -1,4 +1,4 @@
-package com.joesemper.fishing.compose.datastore
+package com.joesemper.fishing.model.datastore
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -8,7 +8,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.joesemper.fishing.compose.ui.theme.AppThemeValues
-import com.joesemper.fishing.compose.ui.utils.PlacesSortValues
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map

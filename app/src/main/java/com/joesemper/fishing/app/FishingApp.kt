@@ -1,7 +1,7 @@
-package com.joesemper.fishing
+package com.joesemper.fishing.app
 
 import android.app.Application
-import android.util.Log.ERROR
+import com.joesemper.fishing.BuildConfig
 import com.joesemper.fishing.di.*
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger

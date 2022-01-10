@@ -248,5 +248,7 @@
     <string name="choose_wind_speed_unit">Выберите единицу измерения скорости ветра</string>
     <string name="map_zoom_buttons">Кнопки изменения масштаба</string>
     <string name="map_zoom_buttons_description">Отображать кнопки изменения масштаба на карте</string>
+    <string name="catches_desc">Уловы: по убыванию</string>
+    <string name="fish_desc">Количество рыб: по убыванию</string>
 
 </resources>
