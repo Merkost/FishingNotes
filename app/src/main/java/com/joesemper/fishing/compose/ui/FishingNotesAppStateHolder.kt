@@ -40,6 +40,7 @@ object MainDestinations {
 
 
     const val MAP_ROUTE = "map"
+    const val WEATHER_ROUTE = "weather"
 
     const val NOTES_ROUTE = "notes"
     const val NOTES_TO_NEW_CATCH_ROUTE = "${HOME_ROUTE}/${NOTES_ROUTE}/${NEW_CATCH_ROUTE}"

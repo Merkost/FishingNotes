@@ -24,7 +24,7 @@ import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.airbnb.lottie.compose.*
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.datastore.UserPreferences
+import com.joesemper.fishing.model.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.views.BigText
 import com.joesemper.fishing.compose.ui.home.views.PrimaryText
 import com.joesemper.fishing.compose.ui.home.views.SecondaryText
@@ -205,16 +205,20 @@ fun WeatherAppBarText(
 }
 
 @Composable
-fun WeatherLocationIcon(
-    color: Color = MaterialTheme.colors.onSurface
+fun WeatherLocationIconButton(
+    color: Color = MaterialTheme.colors.onSurface,
+    onClick: () -> Unit,
 ) {
-    Icon(
-        modifier = Modifier
-            .padding(horizontal = 8.dp),
-        painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-        tint = color,
-        contentDescription = ""
-    )
+    IconButton(onClick = onClick) {
+        Icon(
+            modifier = Modifier
+                .padding(horizontal = 8.dp),
+            painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+            tint = color,
+            contentDescription = ""
+        )
+    }
+
 }
 
 @Composable
@@ -434,7 +438,8 @@ fun SunriseSunsetView(
 fun DailyWeatherValuesView(
     modifier: Modifier = Modifier,
     forecast: Daily,
-    pressureUnit: PressureValues
+    pressureUnit: PressureValues,
+    windSpeedUnit: WindSpeedValues
 ) {
     ConstraintLayout(
         modifier = modifier
@@ -523,8 +528,8 @@ fun DailyWeatherValuesView(
                 absoluteLeft.linkTo(windIcon.absoluteRight, 2.dp)
                 absoluteRight.linkTo(windDeg.absoluteLeft, 2.dp)
             },
-            text = forecast.windSpeed.toInt()
-                .toString() + " " + stringResource(id = R.string.wind_speed_units)
+            text = windSpeedUnit.getWindSpeedInt(forecast.windSpeed.toDouble())
+                    + " " + stringResource(windSpeedUnit.stringRes),
         )
         Icon(
             modifier = Modifier

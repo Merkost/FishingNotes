@@ -17,4 +17,5 @@ object Constants {
 
     const val ITEM_ADD_PHOTO = "ITEM_ADD_PHOTO"
     const val ITEM_PHOTO = "ITEM_PHOTO"
+
 }

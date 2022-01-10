@@ -1,44 +1,43 @@
 package com.joesemper.fishing.compose.ui.home.map
 
 import android.location.Geocoder
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
+import com.google.android.libraries.maps.model.LatLng
+import com.google.maps.android.SphericalUtil
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.datastore.WeatherPreferences
-import com.joesemper.fishing.compose.ui.home.*
-import com.joesemper.fishing.compose.ui.home.place.UserPlaceScreen
+import com.joesemper.fishing.model.datastore.WeatherPreferences
+import com.joesemper.fishing.compose.ui.Arguments
+import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.views.PrimaryText
-import com.joesemper.fishing.compose.ui.home.views.PrimaryTextSmall
-import com.joesemper.fishing.compose.ui.home.views.SecondaryTextSmall
 import com.joesemper.fishing.compose.ui.home.views.SubtitleText
-import com.joesemper.fishing.compose.ui.home.weather.PressureValues
+import com.joesemper.fishing.compose.ui.home.weather.WindSpeedValues
+import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.resources
-import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
-import com.joesemper.fishing.compose.ui.utils.currentFraction
-import com.joesemper.fishing.compose.ui.utils.noRippleClickable
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
-import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.model.entity.weather.WeatherForecast
-import com.joesemper.fishing.utils.network.ConnectionState
-import com.joesemper.fishing.utils.network.currentConnectivityState
-import com.joesemper.fishing.utils.network.observeConnectivityAsFlow
+import com.joesemper.fishing.model.entity.weather.CurrentWeatherFree
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -49,142 +48,162 @@ import org.koin.androidx.compose.getViewModel
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MarkerInfoDialog(
-    marker: UserMapMarker?,
-    mapUiState: MapUiState,
+    receivedMarker: UserMapMarker?,
+    lastKnownLocation: MutableState<LatLng?>,
+    mapBearing: MutableState<Float>,
     modifier: Modifier = Modifier,
     navController: NavController,
-    scaffoldState: BottomSheetScaffoldState,
-    upPress: (UserMapMarker) -> Unit,
-    onDescriptionClick: () -> Unit,
-
+    onMarkerIconClicked: (UserMapMarker) -> Unit,
 ) {
     val context = LocalContext.current
 
     val viewModel: MapViewModel = getViewModel()
+    val weatherPreferences: WeatherPreferences = get()
     val coroutineScope = rememberCoroutineScope()
     val geocoder = Geocoder(context, resources().configuration.locale)
 
-    val weatherPrefs: WeatherPreferences = get()
+    val windUnit by weatherPreferences.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
+
+    /*val weatherPrefs: WeatherPreferences = get()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
 
     val connectionState by context.observeConnectivityAsFlow()
-        .collectAsState(initial = context.currentConnectivityState)
+        .collectAsState(initial = context.currentConnectivityState)*/
 
-    var address: String? by remember {
-        mutableStateOf(null)
-    }
+    var address: String? by remember { mutableStateOf(null) }
+    var distance: String? by remember { mutableStateOf(null) }
+    val fishActivity: Int? by remember { viewModel.fishActivity }
+    val currentWeather: CurrentWeatherFree? by remember { viewModel.currentWeather }
 
-    val weather = marker?.let {
-        if (connectionState is ConnectionState.Available) {
-            val result by viewModel.getWeather(it.latitude, it.longitude)
-                .collectAsState(RetrofitWrapper.Success<WeatherForecast?>(null))
+    val cant_recognize_place = stringResource(R.string.cant_recognize_place)
 
-            when (result) {
-                is RetrofitWrapper.Success<*> -> {
-                    return@let mutableStateOf((result as RetrofitWrapper.Success<WeatherForecast?>).data)
-                }
-                else -> return@let null
-            }
-        } else {
-            null
-        }
-    }
-
-    marker?.let {
-
-
-        LaunchedEffect(marker) {
-            address = null
+    receivedMarker?.let {
+        LaunchedEffect(receivedMarker) {
             coroutineScope.launch(Dispatchers.Default) {
+                address = null
                 delay(800)
                 try {
-                    val addresses = geocoder.getFromLocation(
-                        marker.latitude,
-                        marker.longitude,
-                        1
-                    )
-                    address =
-                        if (addresses != null && addresses.size > 0) {
-                            addresses[0].getAddressLine(0)
-                        } else "Не удалось получить адрес"
-                    /*addresses?.first()?.let { address ->
-                    viewModel.showMarker.value = true
-                    if (!address.subAdminArea.isNullOrBlank()) {
-                        viewModel.chosenPlace.value =
-                            address.subAdminArea.replaceFirstChar { it.uppercase() }
-                    } else if (!address.adminArea.isNullOrBlank()) {
-                        viewModel.chosenPlace.value = address.adminArea
-                            .replaceFirstChar { it.uppercase() }
-                    } else viewModel.chosenPlace.value = "Место без названия"
-                }*/
+                    val position = geocoder.getFromLocation(receivedMarker.latitude, receivedMarker.longitude, 1)
+                    position?.first()?.apply {
+                        address = if (!subAdminArea.isNullOrBlank()) {
+                            subAdminArea.replaceFirstChar { it.uppercase() }
+                        } else if (!adminArea.isNullOrBlank()) {
+                            adminArea.replaceFirstChar { it.uppercase() }
+                        } else if (!countryName.isNullOrBlank())
+                            countryName.replaceFirstChar { it.uppercase() }
+                        else "-"
+                    }
                 } catch (e: Throwable) {
-                    address = "Нет соединения с сервером"
+                    //TODO: Ошибка в океане!
+                    address = cant_recognize_place
+                }
+            }
+        }
+
+        LaunchedEffect(receivedMarker) {
+            viewModel.fishActivity.value = null
+            viewModel.getFishActivity(receivedMarker.latitude, receivedMarker.longitude)
+        }
+
+        LaunchedEffect(receivedMarker) {
+            viewModel.currentWeather.value = null
+            viewModel.getCurrentWeather(receivedMarker.latitude, receivedMarker.longitude)
+        }
+
+        LaunchedEffect(receivedMarker, viewModel.lastKnownLocation.value) {
+            coroutineScope.launch(Dispatchers.Default) {
+                distance = null
+                lastKnownLocation.value?.let {
+                    distance = convertDistance(
+                        SphericalUtil.computeDistanceBetween(
+                            com.google.android.gms.maps.model.LatLng(
+                                receivedMarker.latitude,
+                                receivedMarker.longitude
+                            ),
+                            com.google.android.gms.maps.model.LatLng(it.latitude, it.longitude)
+                        )
+                    )
                 }
             }
         }
     }
 
+    val paddingDp = 8.dp
+    val cornersDp = 16.dp
+    val elevationDp = 6.dp
 
-    val paddingDp = animateDpAsState(((1f - scaffoldState.currentFraction) * 8).dp)
-    val cornersDp = animateDpAsState(((1f - scaffoldState.currentFraction) * 16).dp)
-    val elevationDp = animateDpAsState(((1f - scaffoldState.currentFraction) * 6).dp)
-
+    viewModel.currentMarker.value?.let { marker ->
     Card(
-        shape = RoundedCornerShape(cornersDp.value),
-        elevation = elevationDp.value,
+        shape = RoundedCornerShape(cornersDp),
+        elevation = elevationDp,
         backgroundColor = MaterialTheme.colors.surface,
         modifier = Modifier
             .zIndex(1.0f)
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(paddingDp.value),
+            .padding(paddingDp),
+        onClick = { onMarkerClicked(marker, navController) }
     ) {
-
-        viewModel.currentMarker.value?.let { marker ->
-
-            AnimatedVisibility(scaffoldState.currentFraction == 0f,
+            AnimatedVisibility(
+                true,
                 enter = fadeIn(tween(500)),
-                exit = fadeOut(tween(500)),) {
+                exit = fadeOut(tween(500)),
+            ) {
                 ConstraintLayout(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(142.dp)
-                        .noRippleClickable(
+                        .height(150.dp)
+                        /*.noRippleClickable(
                             onClick = onDescriptionClick,
                             enabled = scaffoldState.bottomSheetState.isCollapsed
-                        )
+                        )*/
                 ) {
-                    val (locationIcon, title, street, timeNow, time8, time16, pressNowVal, press8Val,
-                        press16Val, press8Icon, press16Icon, loading, noNetwork) = createRefs()
+                    val (locationIcon, title, area, distanceTo,
+                        fish, divider, weather) = createRefs()
 
-                    Icon(
-                        modifier = Modifier
-                            .size(28.dp)
-                            .constrainAs(locationIcon) {
-                                absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-                                top.linkTo(title.top)
-                                bottom.linkTo(title.bottom)
-                            },
-                        painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                        contentDescription = "Marker",
-                        tint = Color(marker.markerColor)
-                    )
+                    val horizontalLine = createGuidelineFromAbsoluteLeft(0.5f)
+                    val verticalFabLine = createGuidelineFromAbsoluteRight(60.dp)
+
+                    Box(modifier = Modifier
+                        .size(64.dp).padding(16.dp)
+
+                        .constrainAs(locationIcon) {
+                            absoluteLeft.linkTo(parent.absoluteLeft)
+                            top.linkTo(parent.top)
+                        }) {
+                        IconButton(onClick = { onMarkerIconClicked(marker) }) {
+                            Icon(
+                                modifier = Modifier.fillMaxSize(),
+                                painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+                                contentDescription = "Marker",
+                                tint = Color(marker.markerColor)
+                            )
+                        }
+
+                    }
 
                     PrimaryText(
                         modifier = Modifier
                             .constrainAs(title) {
-                                top.linkTo(parent.top, 16.dp)
-                                linkTo(locationIcon.end, parent.end, 8.dp, 8.dp, 0f)
+                                top.linkTo(locationIcon.top)
+                                linkTo(locationIcon.end, verticalFabLine, 0.dp, 0.dp, 0f)
+                                bottom.linkTo(locationIcon.bottom)
+                                width = Dimension.fillToConstraints
                             },
-                        text = marker.title,
+                        text = when {
+                            marker.title.isNotEmpty() -> marker.title
+                            else -> stringResource(R.string.no_name_place)
+                        } + "",
+                        maxLines = 2,
                     )
 
+                    //Area name
                     SubtitleText(
                         modifier = Modifier
-                            .constrainAs(street) {
+                            .constrainAs(area) {
                                 top.linkTo(title.bottom, 4.dp)
-                                /*bottom.linkTo(timeNow.top, 8.dp)*/
-                                linkTo(title.start, parent.end, 0.dp, 0.dp, 0f)
+                                linkTo(title.start, title.end, 0.dp, 80.dp, 0f)
+
                             }
                             .animateContentSize(
                                 animationSpec = tween(
@@ -192,142 +211,127 @@ fun MarkerInfoDialog(
                                     easing = LinearOutSlowInEasing
                                 )
                             ),
-                        /*overflow = TextOverflow.Ellipsis,*/
                         text = address ?: "",
-                        textColor = if (address == null) Color.LightGray else secondaryTextColor
                     )
 
-                    //weatherForecast
-                    if (connectionState is ConnectionState.Available) {
-                        weather?.value?.let { forecast ->
+                    //Distance
+                    Row(
+                        modifier = Modifier
+                            .constrainAs(distanceTo) {
+                                top.linkTo(area.top)
+                                bottom.linkTo(area.bottom)
+                                linkTo(area.absoluteRight, parent.absoluteRight, 8.dp, 16.dp, 1f)
 
-                            val guideline = createGuidelineFromAbsoluteLeft(0.5f)
-
-                            SecondaryTextSmall(
-                                modifier = Modifier.constrainAs(timeNow) {
-                                    top.linkTo(street.bottom, 16.dp)
-                                    absoluteLeft.linkTo(parent.absoluteLeft)
-                                    absoluteRight.linkTo(guideline, 16.dp)
-                                },
-                                text = stringResource(id = R.string.now)
-                            )
-
-                            SecondaryTextSmall(
-                                modifier = Modifier.constrainAs(time8) {
-                                    top.linkTo(street.bottom, 16.dp)
-                                    absoluteLeft.linkTo(guideline)
-                                    absoluteRight.linkTo(guideline)
-                                },
-                                text = stringResource(R.string.in_8h)
-                            )
-
-                            SecondaryTextSmall(
-                                modifier = Modifier.constrainAs(time16) {
-                                    top.linkTo(street.bottom, 16.dp)
-                                    absoluteLeft.linkTo(guideline, 16.dp)
-                                    absoluteRight.linkTo(parent.absoluteRight)
-                                },
-                                text = stringResource(R.string.in_16h)
-                            )
-
-                            PrimaryTextSmall(
-                                modifier = Modifier.constrainAs(pressNowVal) {
-                                    top.linkTo(timeNow.bottom, 4.dp)
-                                    absoluteLeft.linkTo(timeNow.absoluteLeft)
-                                    absoluteRight.linkTo(timeNow.absoluteRight)
-                                },
-                                text = pressureUnit.getPressure(
-                                    forecast.hourly.first().pressure) + " " + pressureUnit.name
-                            )
-
-                            PrimaryTextSmall(
-                                modifier = Modifier.constrainAs(press8Val) {
-                                    top.linkTo(time8.bottom, 4.dp)
-                                    absoluteLeft.linkTo(time8.absoluteLeft)
-                                    absoluteRight.linkTo(time8.absoluteRight)
-                                },
-                                text = pressureUnit.getPressure(
-                                    forecast.hourly[7].pressure) + " " + pressureUnit.name
-                            )
-
-                            Icon(
-                                modifier = Modifier
-                                    .constrainAs(press8Icon) {
-                                        top.linkTo(press8Val.top)
-                                        bottom.linkTo(press8Val.bottom)
-                                        absoluteLeft.linkTo(press8Val.absoluteRight)
-                                    }
-                                    .rotate(getIconRotationByWeatherIn8H(forecast)),
-                                painter = painterResource(id = R.drawable.ic_baseline_arrow_drop_up_24),
-                                contentDescription = stringResource(id = R.string.pressure),
-                                tint = getIconTintByWeatherIn8H(forecast)
-                            )
-
-                            PrimaryTextSmall(
-                                modifier = Modifier.constrainAs(press16Val) {
-                                    top.linkTo(time16.bottom, 4.dp)
-                                    absoluteLeft.linkTo(time16.absoluteLeft)
-                                    absoluteRight.linkTo(time16.absoluteRight)
-                                },
-                                text = pressureUnit.getPressure(
-                                    forecast.hourly[15].pressure) + " " + pressureUnit.name
-                            )
-
-                            Icon(
-                                modifier = Modifier
-                                    .constrainAs(press16Icon) {
-                                        top.linkTo(press16Val.top)
-                                        bottom.linkTo(press16Val.bottom)
-                                        absoluteLeft.linkTo(press16Val.absoluteRight)
-                                    }
-                                    .rotate(getIconRotationByWeatherIn16H(forecast)),
-                                painter = painterResource(id = R.drawable.ic_baseline_arrow_drop_up_24),
-                                contentDescription = stringResource(id = R.string.pressure),
-                                tint = getIconTintByWeatherIn16H(forecast)
-                            )
-                        }
-
-                        if (weather?.value == null) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.constrainAs(loading) {
-                                    top.linkTo(street.bottom)
-                                    bottom.linkTo(parent.bottom)
-                                    absoluteRight.linkTo(parent.absoluteRight)
-                                    absoluteLeft.linkTo(parent.absoluteLeft)
-                                }
-                            )
-                        }
-                    } else {
-                        SecondaryTextSmall(
-                            modifier = Modifier.constrainAs(noNetwork) {
-                                top.linkTo(street.bottom)
-                                bottom.linkTo(parent.bottom)
-                                absoluteLeft.linkTo(parent.absoluteLeft)
-                                absoluteRight.linkTo(parent.absoluteRight)
-                            },
-                            text = stringResource(R.string.no_internet_connection)
+                            }
+                            .animateContentSize(
+                                animationSpec = tween(
+                                    durationMillis = 300,
+                                    easing = LinearOutSlowInEasing
+                                )
+                            ),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            6.dp,
+                            Alignment.CenterHorizontally
+                        ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        SubtitleText(
+                            text = distance ?: "",
+                            textAlign = TextAlign.Center,
                         )
+                    }
+
+                    //Fish activity
+                    Row(
+                        modifier = Modifier
+                            .constrainAs(fish) {
+                                top.linkTo(area.bottom, 4.dp)
+                                linkTo(parent.absoluteLeft, horizontalLine, 0.dp, 0.dp, 0.5f)
+                                bottom.linkTo(parent.bottom)
+                            }
+                            .animateContentSize(
+                                animationSpec = tween(
+                                    durationMillis = 300,
+                                    easing = LinearOutSlowInEasing
+                                )
+                            ),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp,
+                            Alignment.CenterHorizontally
+                        ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.fish),
+                            contentDescription = "Marker",
+                            modifier = Modifier.size(45.dp).padding(6.dp),
+                            tint = if (fishActivity == null) Color.LightGray else MaterialTheme.colors.primary
+                        )
+                        SubtitleText(
+                            text = if (fishActivity != null) fishActivity.toString() + "%" else "",
+                        )
+                    }
+
+                    //Divider
+                    Divider(
+                        modifier = Modifier
+                            .constrainAs(divider) {
+                                top.linkTo(area.bottom, 4.dp)
+                                linkTo(horizontalLine, horizontalLine, 0.dp, 0.dp, 0.5f)
+                                bottom.linkTo(parent.bottom)
+                            }.height(20.dp).width(1.dp),
+                        color = Color.Gray,
+                    )
+
+                    //Weather
+                    Row(
+                        modifier = Modifier
+                            .constrainAs(weather) {
+                                top.linkTo(area.bottom, 4.dp)
+                                linkTo(horizontalLine, parent.absoluteRight, 0.dp, 0.dp, 0.5f)
+                                bottom.linkTo(parent.bottom)
+                            }
+                            .animateContentSize(
+                                animationSpec =
+                                tween(durationMillis = 300, easing = LinearOutSlowInEasing)),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        IconButton(onClick = { onWeatherIconClicked(marker, navController) }) {
+                            Icon(painterResource(R.drawable.ic_baseline_navigation_24), "",
+                                modifier = Modifier.rotate(currentWeather?.wind_degrees?.let {
+                                    it.minus(mapBearing.value) } ?: mapBearing.value),
+                                tint = if (fishActivity == null) Color.LightGray else MaterialTheme.colors.primaryVariant
+                            )
+                        }
+
+                        currentWeather?.let {
+                            SubtitleText(
+                                text = windUnit.getWindSpeed(it.wind_speed) + " " +
+                                        stringResource(windUnit.stringRes)
+                            )
+                        }
                     }
                 }
             }
-            AnimatedVisibility(scaffoldState.currentFraction != 0f) {
-                UserPlaceScreen({ upPress(marker) }, navController, place = marker)
-            }
-
         }
-
     }
-    AnimatedVisibility(
-        scaffoldState.bottomSheetState.progress.fraction != 0f,
-        enter = fadeIn(tween(500)),
-        exit = fadeOut(tween(500)),
-        /*paddingDp.value == 0.dp
-            && !scaffoldState.bottomSheetState.isAnimationRunning*/
-        /*scaffoldState.currentFraction != 0.0f*/
-    ) {
-        Spacer(modifier = Modifier.fillMaxSize())
-    }
-
 }
+
+fun onMarkerClicked(marker: UserMapMarker, navController: NavController) {
+    navController.navigate(
+        MainDestinations.PLACE_ROUTE,
+        Arguments.PLACE to marker
+    )
+}
+
+fun onWeatherIconClicked(marker: UserMapMarker, navController: NavController) {
+    navController.navigate(
+        "${MainDestinations.HOME_ROUTE}/${MainDestinations.WEATHER_ROUTE}",
+        Arguments.PLACE to marker
+    )
+}
+
+
+
 
 

@@ -16,7 +16,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.datastore.WeatherPreferences
+import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.views.SecondaryText
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
@@ -25,8 +25,8 @@ import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.model.mappers.getWeatherNameByIcon
-import com.joesemper.fishing.utils.MILLISECONDS_IN_SECOND
 import com.joesemper.fishing.utils.calcMoonPhase
+import com.joesemper.fishing.utils.time.TimeConstants.MILLISECONDS_IN_SECOND
 import com.joesemper.fishing.utils.time.toHours
 import org.koin.androidx.compose.get
 import java.util.*

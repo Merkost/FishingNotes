@@ -21,21 +21,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
-import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.*
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task
 import com.google.android.libraries.maps.CameraUpdateFactory
 import com.google.android.libraries.maps.GoogleMap
 import com.google.android.libraries.maps.MapView
+import com.google.android.libraries.maps.model.CameraPosition
 import com.google.android.libraries.maps.model.LatLng
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
@@ -50,7 +50,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.net.URI.create
+import java.text.DecimalFormat
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
@@ -65,7 +65,7 @@ object MapTypes {
 fun getHue(red: Float, green: Float, blue: Float): Float {
     val min = min(min(red, green), blue)
     val max = max(max(red, green), blue)
-    val c = max-min
+    val c = max - min
     if (min == max) {
         return 0f
     }
@@ -113,7 +113,7 @@ sealed class MapUiState {
     object NormalMode : MapUiState()
     object PlaceSelectMode : MapUiState()
     object BottomSheetInfoMode : MapUiState()
-    object BottomSheetFullyExpanded : MapUiState()
+    //object BottomSheetFullyExpanded : MapUiState()
 }
 
 const val DEFAULT_ZOOM = 15f
@@ -127,15 +127,43 @@ fun moveCameraToLocation(
     coroutineScope: CoroutineScope,
     map: MapView,
     location: LatLng,
-    zoom: Float = DEFAULT_ZOOM
+    zoom: Float = DEFAULT_ZOOM,
+    bearing: Float = 0f
 ) {
     coroutineScope.launch {
         val googleMap = map.awaitMap()
         googleMap.stopAnimation()
         googleMap.animateCamera(
-            CameraUpdateFactory.newLatLngZoom(
+            /*CameraUpdateFactory.newLatLngZoom(
                 location,
                 zoom
+            )*/
+            CameraUpdateFactory.newCameraPosition(
+                CameraPosition.Builder()
+                    .zoom(zoom)
+                    .target(location)
+                    .bearing(bearing)
+                    .build()
+            )
+        )
+    }
+}
+
+fun setCameraBearing(
+    coroutineScope: CoroutineScope,
+    map: MapView,
+    location: LatLng,
+    zoom: Float = DEFAULT_ZOOM
+) {
+    coroutineScope.launch {
+        val googleMap = map.awaitMap()
+        googleMap.animateCamera(
+            CameraUpdateFactory.newCameraPosition(
+                CameraPosition.Builder()
+                    .zoom(zoom)
+                    .target(location)
+                    .bearing(0f)
+                    .build()
             )
         )
     }
@@ -246,14 +274,16 @@ private fun turnOnGPS(context: Context) {
     val client: SettingsClient = LocationServices.getSettingsClient(context as MainActivity)
     val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
     task.addOnFailureListener { exception ->
-        if (exception is ResolvableApiException){
+        if (exception is ResolvableApiException) {
             // Location settings are not satisfied, but this can be fixed
             // by showing the user a dialog.
             try {
                 // Show the dialog by calling startResolutionForResult(),
                 // and check the result in onActivityResult().
-                exception.startResolutionForResult(context as MainActivity,
-                    /*REQUEST_CHECK_SETTINGS*/12345)
+                exception.startResolutionForResult(
+                    context as MainActivity,
+                    /*REQUEST_CHECK_SETTINGS*/12345
+                )
             } catch (sendEx: IntentSender.SendIntentException) {
                 // Ignore the error.
             }
@@ -319,20 +349,27 @@ fun startMapsActivityForNavigation(mapMarker: UserMapMarker, context: Context) {
 @Composable
 fun BackPressHandler(
     mapUiState: MapUiState,
-    onBackPressedCallback: () -> Unit
+    navController: NavController,
+    onBackPressedCallback: () -> Unit,
 ) {
     val context = LocalContext.current
+    val exitString = stringResource(R.string.app_exit_message)
     var lastPressed: Long = 0
+
     BackHandler(onBack = {
         when (mapUiState) {
             MapUiState.NormalMode -> {
-                val currentMillis = System.currentTimeMillis()
-                if (currentMillis - lastPressed < 2000) {
-                    (context as MainActivity).finish()
+                if (navController.navigateUp()) {
+                    return@BackHandler
                 } else {
-                    showToast(context, "Do it again to close the app")
+                    val currentMillis = System.currentTimeMillis()
+                    if (currentMillis - lastPressed < 2000) {
+                        (context as MainActivity).finish()
+                    } else {
+                        showToast(context, exitString)
+                    }
+                    lastPressed = currentMillis
                 }
-                lastPressed = currentMillis
             }
             else -> onBackPressedCallback()
         }
@@ -354,6 +391,18 @@ fun rememberMapViewWithLifecycle(): MapView {
         }
     }
     return mapView
+}
+
+object DistanceFormat {
+    val df = DecimalFormat("#.#")
+}
+
+fun convertDistance(distanceInMeters: Double): String {
+    return when (distanceInMeters.toInt()) {
+        in 0..999 -> distanceInMeters.toInt().toString() + " m"
+        in 1001..9999 -> DistanceFormat.df.format(distanceInMeters / 1000f).toString() + " km"
+        else -> distanceInMeters.div(1000).toInt().toString() + " km"
+    }
 }
 
 fun getIconRotationByWeatherIn8H(forecast: WeatherForecast): Float {

@@ -31,7 +31,7 @@ import coil.compose.AsyncImage
 import coil.compose.AsyncImageContent
 import coil.compose.AsyncImagePainter
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.datastore.UserPreferences
+import com.joesemper.fishing.model.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.views.*
 import com.joesemper.fishing.compose.ui.theme.*
 import com.joesemper.fishing.model.entity.content.UserCatch
@@ -277,7 +277,8 @@ fun ItemUserCatch(
 fun ItemUserPlace(
     modifier: Modifier = Modifier,
     place: UserMapMarker,
-    userPlaceClicked: (UserMapMarker) -> Unit
+    userPlaceClicked: (UserMapMarker) -> Unit,
+    navigateToMap: () -> Unit,
 ) {
 
     DefaultCardClickable(
@@ -321,7 +322,7 @@ fun ItemUserPlace(
                     absoluteRight.linkTo(parent.absoluteRight, 8.dp)
                 },
                 icon = painterResource(id = R.drawable.ic_place_on_map),
-                onClick = { }
+                onClick = { navigateToMap() }
             )
 
             SupportText(
@@ -489,7 +490,7 @@ fun CatchItemView(
                         },
                     painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
                     contentDescription = stringResource(id = R.string.location),
-                    tint = secondaryTextColor
+                    tint = MaterialTheme.colors.secondaryVariant
                 )
 
                 SecondaryText(
@@ -522,7 +523,7 @@ fun CatchItemView(
                 },
                 count = catch.downloadPhotoLinks.size,
                 icon = R.drawable.ic_baseline_photo_24,
-                tint = supportTextColor
+                tint = MaterialTheme.colors.primaryVariant
             )
 
         }

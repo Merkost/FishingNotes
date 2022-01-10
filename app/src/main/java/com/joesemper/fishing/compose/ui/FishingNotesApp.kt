@@ -35,10 +35,8 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @InternalCoroutinesApi
 @Composable
 fun FishingNotesApp() {
-
     ProvideWindowInsets {
         val appStateHolder = rememberAppStateHolder()
-        var visible by remember { mutableStateOf(false) }
 
         Scaffold(
             bottomBar = {
@@ -120,7 +118,7 @@ private fun NavGraphBuilder.NavGraph(
                 route = MainDestinations.NEW_CATCH_ROUTE,
                 inclusive = true
             )
-        }, it.requiredArg(Arguments.PLACE))
+        }, it.arguments?.getParcelable(Arguments.PLACE))
     }
 
     composable(

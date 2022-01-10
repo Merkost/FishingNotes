@@ -11,7 +11,11 @@ import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.Daily
-import com.joesemper.fishing.utils.hPaToMmHg
+import java.text.DecimalFormat
+
+object WindFormat {
+    val df = DecimalFormat("#.#")
+}
 
 fun createCurrentPlaceItem(latLng: LatLng, context: Context): UserMapMarker {
     return UserMapMarker(
@@ -42,18 +46,6 @@ data class Point(
     val x: Float,
     val y: Float
 )
-
-
-
-@Composable
-fun getTemperatureNameFromUnit(temperatureUnit: String): String {
-    return when (temperatureUnit) {
-        TemperatureValues.C.name -> stringResource(R.string.celsius)
-        TemperatureValues.F.name -> stringResource(R.string.fahrenheit)
-        TemperatureValues.K.name -> stringResource(R.string.kelvin)
-        else -> { stringResource(R.string.celsius) }
-    }
-}
 
 enum class PressureValues(val stringRes: Int) {
     Pa (R.string.pressure_pa),
@@ -108,6 +100,35 @@ enum class TemperatureValues(val stringRes: Int) {
             F -> ((temperaturInC - 32)*(5/9)).toInt()
             K -> (temperaturInC - 273.15).toInt()
         }
+    }
+
+}
+
+enum class WindSpeedValues(val stringRes: Int) {
+    metersps (R.string.wind_mps),
+    milesph (R.string.wind_mph),
+    knots (R.string.wind_knots),
+    ftps (R.string.wind_ftps),
+    kmph (R.string.wind_kmph);
+
+    fun getWindSpeed(windSpeed: Double): String {
+        return WindFormat.df.format (when (this) {
+            metersps -> windSpeed
+            knots -> (windSpeed * 1.9438444924574)
+            milesph -> (windSpeed * 2.2369362920544)
+            ftps -> (windSpeed * 3.28084)
+            kmph -> (windSpeed * 3.6)
+        })
+    }
+
+    fun getWindSpeedInt(windSpeed: Double): String {
+        return (when (this) {
+            metersps -> windSpeed
+            knots -> (windSpeed * 1.9438444924574)
+            milesph -> (windSpeed * 2.2369362920544)
+            ftps -> (windSpeed * 3.28084)
+            kmph -> (windSpeed * 3.6)
+        }).toInt().toString()
     }
 
 }

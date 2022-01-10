@@ -31,8 +31,8 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.datastore.UserPreferences
-import com.joesemper.fishing.compose.datastore.WeatherPreferences
+import com.joesemper.fishing.model.datastore.UserPreferences
+import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.map.LocationState
@@ -43,6 +43,7 @@ import com.joesemper.fishing.compose.ui.home.views.DefaultButtonOutlined
 import com.joesemper.fishing.compose.ui.home.views.PrimaryText
 import com.joesemper.fishing.compose.ui.home.views.SecondaryText
 import com.joesemper.fishing.compose.ui.home.views.SupportText
+import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.theme.primaryWhiteColor
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.WeatherViewModel
@@ -58,7 +59,6 @@ import com.joesemper.fishing.utils.time.toDayOfWeek
 import com.joesemper.fishing.utils.time.toDayOfWeekAndDate
 import com.joesemper.fishing.utils.time.toTime
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import kotlin.math.min
@@ -72,6 +72,7 @@ import kotlin.math.min
 fun WeatherScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
+    place: UserMapMarker? = null,
     upPress: () -> Unit,
 ) {
     val viewModel: WeatherViewModel = getViewModel()
@@ -80,17 +81,25 @@ fun WeatherScreen(
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
 
     val selectedPlace = remember {
-        mutableStateOf<UserMapMarker?>(null)
+        mutableStateOf<UserMapMarker?>(place)
     }
 
     LaunchedEffect(permissionsState.allPermissionsGranted) {
-        getCurrentLocationFlow(context, permissionsState).collect { locationState ->
-            if (locationState is LocationState.LocationGranted) {
-                viewModel.markersList.value.add(
-                    index = 0,
-                    element = createCurrentPlaceItem(locationState.location, context)
-                )
-                selectedPlace.value = viewModel.markersList.value.first()
+        checkPermission(context)
+        if (permissionsState.allPermissionsGranted) {
+            getCurrentLocationFlow(context, permissionsState).collect { locationState ->
+                if (locationState is LocationState.LocationGranted) {
+
+                    //TODO: check if currentPlaceItem already exists!!
+
+                    viewModel.markersList.value.add(
+                        index = 0,
+                        element = createCurrentPlaceItem(locationState.location, context)
+                    )
+                    if (selectedPlace.value == null) {
+                        selectedPlace.value = viewModel.markersList.value.first()
+                    }
+                }
             }
         }
     }
@@ -108,6 +117,7 @@ fun WeatherScreen(
     val weatherPrefs: WeatherPreferences = get()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
     val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
+    val windSpeedUnit by weatherPrefs.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -120,9 +130,14 @@ fun WeatherScreen(
 
             TopAppBar(
                 elevation = elevation.value,
-                backgroundColor = MaterialTheme.colors.primaryVariant
+                backgroundColor = MaterialTheme.colors.primary
             ) {
-                WeatherLocationIcon(color = MaterialTheme.colors.onPrimary)
+                WeatherLocationIconButton(color = MaterialTheme.colors.onPrimary) {
+                    selectedPlace.value?.let {
+                        navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
+                            Arguments.PLACE to it)
+                    }
+                }
                 selectedPlace.value?.let {
 
                     WeatherPlaceSelectItem(
@@ -149,6 +164,7 @@ fun WeatherScreen(
                         forecast = forecast,
                         pressureUnit = pressureUnit,
                         temperatureUnit = temperatureUnit,
+                        windSpeedUnit = windSpeedUnit,
                     )
 
                     PressureChartItem(
@@ -248,12 +264,13 @@ fun CurrentWeather(
     forecast: WeatherForecast,
     temperatureUnit: TemperatureValues,
     pressureUnit: PressureValues,
+    windSpeedUnit: WindSpeedValues,
 ) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .height(350.dp),
-        color = MaterialTheme.colors.primaryVariant
+        color = MaterialTheme.colors.primary
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -271,12 +288,13 @@ fun CurrentWeather(
 
             CurrentWeatherValuesView(
                 forecast = forecast.hourly.first(),
-                pressureUnit = pressureUnit
+                pressureUnit = pressureUnit,
             )
 
             HourlyWeather(
                 forecastHourly = forecast.hourly,
                 temperatureUnit = temperatureUnit,
+                windSpeedUnit = windSpeedUnit,
             )
         }
     }
@@ -287,6 +305,7 @@ fun HourlyWeather(
     modifier: Modifier = Modifier,
     forecastHourly: List<Hourly>,
     temperatureUnit: TemperatureValues,
+    windSpeedUnit: WindSpeedValues,
 ) {
     val preferences: UserPreferences = get()
     val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
@@ -303,7 +322,8 @@ fun HourlyWeather(
                 } else {
                     forecastHourly[index].date.toTime(is12hTimeFormat)
                 },
-                temperatureUnit = temperatureUnit
+                temperatureUnit = temperatureUnit,
+                windSpeedUnit = windSpeedUnit,
             )
         }
     }
@@ -314,7 +334,8 @@ fun HourlyWeatherItem(
     modifier: Modifier = Modifier,
     timeTitle: String,
     forecast: Hourly,
-    temperatureUnit: TemperatureValues
+    temperatureUnit: TemperatureValues,
+    windSpeedUnit: WindSpeedValues
 ) {
     Column(
         modifier = modifier.padding(horizontal = 12.dp),
@@ -347,8 +368,8 @@ fun HourlyWeatherItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             PrimaryText(
-                text = forecast.windSpeed.toInt()
-                    .toString() + " " + stringResource(id = R.string.wind_speed_units),
+                text = windSpeedUnit.getWindSpeedInt(forecast.windSpeed.toDouble())
+                        + " " + stringResource(windSpeedUnit.stringRes),
                 textColor = MaterialTheme.colors.onPrimary
             )
             Icon(

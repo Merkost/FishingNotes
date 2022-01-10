@@ -20,12 +20,13 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.theme.supportTextColor
+import com.joesemper.fishing.model.entity.common.Note
 
 @ExperimentalComposeUiApi
 @Composable
 fun DefaultNoteView(
     modifier: Modifier = Modifier,
-    note: String,
+    note: Note,
     onClick: () -> Unit,
 ) {
 
@@ -51,7 +52,7 @@ fun DefaultNoteView(
                 text = stringResource(id = R.string.note)
             )
 
-            if (note.isBlank()) {
+            if (note.description.isEmpty()) {
                 NoContentView(
                     modifier = Modifier
                         .padding(bottom = 16.dp)
@@ -74,7 +75,7 @@ fun DefaultNoteView(
                         width = Dimension.fillToConstraints
                     },
                     singleLine = false,
-                    text = note,
+                    text = note.description,
                     onClick = onClick
                 )
             }

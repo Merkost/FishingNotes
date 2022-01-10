@@ -1,6 +1,7 @@
 package com.joesemper.fishing.domain.viewstates
 
 sealed class RetrofitWrapper<out T> {
+    //TODO: Убрать loading и перенести Error сюда
     class Success<T>(val data: T) : RetrofitWrapper<T>()
     class Error(val errorType: ErrorType) : RetrofitWrapper<Nothing>()
     class Loading(val progress: Int? = null) : RetrofitWrapper<Nothing>()

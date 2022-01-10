@@ -12,6 +12,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -33,7 +34,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.datastore.UserPreferences
+import com.joesemper.fishing.model.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.login.LoginScreen
 import com.joesemper.fishing.compose.ui.theme.AppThemeValues
@@ -44,9 +45,9 @@ import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.utils.Logger
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.getViewModel
 import java.util.*
 
 class MainActivity : ComponentActivity() {
@@ -73,66 +74,61 @@ class MainActivity : ComponentActivity() {
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val viewModel: MainViewModel = get()
+        val viewModel: MainViewModel = getViewModel()
 
-        val userStateFlow: StateFlow<BaseViewState> = viewModel.subscribe()
+        val userStateFlow: StateFlow<BaseViewState> = viewModel.mutableStateFlow
 
         val userPreferences: UserPreferences = get()
-        var appTheme: AppThemeValues? = null
+        val appTheme = mutableStateOf<AppThemeValues?>(null)
 
         lifecycleScope.launchWhenStarted {
             userPreferences.appTheme.collect {
-                appTheme = it
+                appTheme.value = it
             }
         }
 
-        if (Build.VERSION.SDK_INT < 31) {
-            val splashWasDisplayed = savedInstanceState != null
-            if (true /*!splashWasDisplayed*/) {
-                val splashScreen = installSplashScreen()
+        installSplashScreen().apply {
+            setKeepVisibleCondition {
+                userStateFlow.value is BaseViewState.Loading
+                        && appTheme.value == null
+            }
+            setOnExitAnimationListener { splashScreenViewProvider ->
+                // Get icon instance and start a fade out animation
+                splashScreenViewProvider.view
+                    .animate()
+                    .setDuration(splashFadeDurationMillis.toLong())
+                    .alpha(0f)
+                    .withEndAction {
 
-                splashScreen.setKeepVisibleCondition {
-                    userStateFlow.value is BaseViewState.Loading
-                            && appTheme == null
-                }
-
-                splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
-                    // Get icon instance and start a fade out animation
-                    splashScreenViewProvider.iconView
-                        .animate()
-                        .setDuration(splashFadeDurationMillis.toLong())
-                        .alpha(0f)
-                        .withEndAction {
-                            // After the fade out, remove the splash and set content view
-                            splashScreenViewProvider.remove()
+                        if (Build.VERSION.SDK_INT < 31) {
                             setContent {
-                                FishingNotesTheme(appTheme) {
-                                    if (viewModel.user == null)
-                                        Navigation()
-                                    else
-                                        FishingNotesApp()
+                                FishingNotesTheme(appTheme.value) {
+                                    DistributionScreen(viewModel.user)
                                 }
                             }
-                        }.start()
-                }
-            } else {
-                setTheme(R.style.Theme_SplashScreen)
-                setContent {
-                    FishingNotesTheme(appTheme) {
-                        if (viewModel.user == null)
-                            Navigation()
-                        else
-                            FishingNotesApp()
+                        }
                     }
-                }
+                    .start()
+
+                splashScreenViewProvider.iconView
+                    .animate()
+                    .setDuration(splashFadeDurationMillis*2.toLong())
+                    .alpha(0f)
+                    .scaleX(20f)
+                    .scaleY(20f)
+                    .withEndAction {
+                        splashScreenViewProvider.remove()
+                    }
+                    .start()
+
             }
-        } else {
+
+        }
+
+        if (Build.VERSION.SDK_INT >= 31) {
             setContent {
-                FishingNotesTheme(appTheme) {
-                    if (viewModel.user == null)
-                        Navigation()
-                    else
-                        FishingNotesApp()
+                FishingNotesTheme(appTheme.value) {
+                    DistributionScreen(viewModel.user)
                 }
             }
         }
@@ -149,6 +145,18 @@ class MainActivity : ComponentActivity() {
         val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
         MobileAds.setRequestConfiguration(configuration)
         setAppMuted(true)
+    }
+
+    @ExperimentalAnimationApi
+    @ExperimentalPermissionsApi
+    @ExperimentalPagerApi
+    @ExperimentalComposeUiApi
+    @ExperimentalMaterialApi
+    @InternalCoroutinesApi
+    @Composable
+    private fun DistributionScreen(user: User?) {
+        if (user != null) FishingNotesApp()
+        else Navigation()
     }
 
     // This app draws behind the system bars, so we want to handle fitting system windows

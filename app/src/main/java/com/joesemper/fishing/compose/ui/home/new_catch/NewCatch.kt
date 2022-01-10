@@ -50,7 +50,7 @@ object Constants {
 @ExperimentalMaterialApi
 @ExperimentalCoilApi
 @Composable
-fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
+fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker?) {
     val viewModel: NewCatchViewModel by viewModel()
     val calendar = Calendar.getInstance()
 
@@ -71,8 +71,8 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker) {
         mutableStateOf(true)
     }
 
-    LaunchedEffect(key1 = place.id) {
-        if (place.id.isNotEmpty()) {
+    LaunchedEffect(key1 = place) {
+        if (place != null) {
             viewModel.marker.value = place; isNull = false
         }
     }

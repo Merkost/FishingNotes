@@ -38,7 +38,7 @@ class UserViewModel(
 
     fun getCurrentUser() = viewModelScope.run {
         viewModelScope.launch {
-            userRepository.currentUser.collect {
+            userRepository.datastoreUser.collect {
                 currentUser.value = it
             }
         }

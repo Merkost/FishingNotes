@@ -1,6 +1,7 @@
 package com.joesemper.fishing.model.entity.content
 
 import android.os.Parcelable
+import com.joesemper.fishing.model.entity.common.Note
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -8,6 +9,7 @@ data class UserCatch(
     val id: String = "",
     val userId: String = "",
     val description: String = "",
+    val note: Note = Note(),
     val date: Long = 0,
     val fishType: String = "",
     val fishAmount: Int = 0,

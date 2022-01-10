@@ -15,7 +15,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.catch_screen.AddPhotoDialog
 import com.joesemper.fishing.domain.NewCatchViewModel
-import com.joesemper.fishing.utils.MILLISECONDS_IN_DAY
+import com.joesemper.fishing.utils.time.TimeConstants.MILLISECONDS_IN_DAY
 import org.koin.androidx.compose.getViewModel
 import java.util.*
 

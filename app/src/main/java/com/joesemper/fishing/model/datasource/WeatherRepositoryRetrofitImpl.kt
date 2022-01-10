@@ -20,6 +20,7 @@ class WeatherRepositoryRetrofitImpl : WeatherRepository {
 
     companion object {
         private const val BASE_WEATHER_URL = "https://api.openweathermap.org/data/2.5/"
+        private const val FREE_WEATHER_URL = "https://weather-by-api-ninjas.p.rapidapi.com/"
 
         private fun getService(): WeatherApiService {
             return createRetrofit().create(WeatherApiService::class.java)

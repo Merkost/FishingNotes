@@ -6,9 +6,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 
-inline fun Modifier.noRippleClickable(
+fun Modifier.noRippleClickable(
     enabled: Boolean = true,
-    noinline onClick: () -> Unit
+    onClick: () -> Unit
 ): Modifier = composed {
     clickable(
         enabled = enabled,

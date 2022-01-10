@@ -1,9 +1,7 @@
 package com.joesemper.fishing.compose.ui.home.map
 
 import android.location.Geocoder
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -16,16 +14,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.GpsOff
-import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -35,18 +32,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.airbnb.lottie.compose.*
+import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
+import com.alorma.compose.settings.ui.SettingsCheckbox
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.datastore.UserPreferences
+import com.joesemper.fishing.model.datastore.UserPreferences
+import com.joesemper.fishing.compose.ui.home.SettingsHeader
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.views.DefaultDialog
 import com.joesemper.fishing.compose.ui.theme.RedGoogleChrome
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.compose.ui.theme.supportTextColor
-import com.joesemper.fishing.compose.ui.utils.currentFraction
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
-import com.joesemper.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -57,7 +55,6 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun MapScaffold(
     mapUiState: MapUiState,
-    currentPlace: MutableState<UserMapMarker?>,
     modifier: Modifier = Modifier,
     scaffoldState: BottomSheetScaffoldState,
     fab: @Composable() (() -> Unit)?,
@@ -65,35 +62,61 @@ fun MapScaffold(
     content: @Composable (PaddingValues) -> Unit,
 
     ) {
+
     val dp = animateDpAsState(
         when (mapUiState) {
-            is MapUiState.BottomSheetInfoMode,
-            MapUiState.BottomSheetFullyExpanded -> 158.dp
+            is MapUiState.BottomSheetInfoMode -> 168.dp
             else -> 0.dp
         }
     )
 
-    val sheetColor = animateColorAsState(
-        if (scaffoldState.currentFraction != 1f) {
-            MaterialTheme.colors.surface.copy(0f)
-        } else MaterialTheme.colors.surface.copy(scaffoldState.currentFraction)
-
-    )
-
-    val radius = (30 * (1f - scaffoldState.currentFraction)).dp
-
     BottomSheetScaffold(
         modifier = modifier.fillMaxSize(),
         scaffoldState = scaffoldState,
-        sheetBackgroundColor = sheetColor.value,
+        sheetBackgroundColor = MaterialTheme.colors.surface.copy(0f),
         sheetElevation = 0.dp,
-        sheetShape = RoundedCornerShape(radius),
+        sheetShape = RectangleShape/*RoundedCornerShape(30.dp)*/,
         sheetPeekHeight = dp.value,
         floatingActionButton = fab,
         sheetContent = bottomSheet,
-        sheetGesturesEnabled = scaffoldState.currentFraction != 1f,
+        sheetGesturesEnabled = true,
         content = content
     )
+}
+
+@Composable
+fun MapModalBottomSheet(
+    mapPreferences: UserPreferences
+) {
+    val coroutineScope = rememberCoroutineScope()
+    val showHiddenPlaces by mapPreferences.shouldShowHiddenPlacesOnMap.collectAsState(false)
+
+    val color = animateColorAsState(
+        targetValue = if (showHiddenPlaces) {
+            MaterialTheme.colors.onSurface
+        } else {
+            supportTextColor
+        },
+        animationSpec = tween(800)
+    )
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        SettingsHeader(stringResource(R.string.settings))
+        SettingsCheckbox(
+            icon = {
+                Icon(
+                    Icons.Default.Visibility, Icons.Default.Visibility.name,
+                    tint = color.value
+                )
+            },
+            title = { Text(text = stringResource(R.string.hidden_places)) },
+            subtitle = { Text(text = stringResource(R.string.show_hidden_places)) },
+            onCheckedChange = { newValue ->
+                coroutineScope.launch { mapPreferences.saveMapHiddenPlaces(newValue) }
+            },
+            state = if (showHiddenPlaces) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
+        )
+    }
 }
 
 @ExperimentalPermissionsApi
@@ -118,8 +141,12 @@ fun MyLocationButton(
 
     val color = animateColorAsState(
         when {
-            !shouldShowPermissions || lastKnownLocation.value == null -> { RedGoogleChrome }
-            else -> { LocalContentColor.current.copy(alpha = LocalContentAlpha.current) }
+            !shouldShowPermissions || lastKnownLocation.value == null -> {
+                RedGoogleChrome
+            }
+            else -> {
+                LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+            }
         }
     )
 
@@ -138,9 +165,89 @@ fun MyLocationButton(
         ) {
             Icon(
                 if (!shouldShowPermissions) Icons.Default.GpsOff
-                    else Icons.Default.MyLocation,
+                else Icons.Default.MyLocation,
                 stringResource(R.string.my_location),
                 tint = color.value
+            )
+        }
+    }
+}
+
+@Composable
+fun CompassButton(
+    modifier: Modifier = Modifier,
+    mapBearing: MutableState<Float>,
+    onClick: () -> Unit
+) {
+    val rotation =  mapBearing.value
+
+    AnimatedVisibility(
+        modifier = modifier,
+        visible = mapBearing.value < 356f && mapBearing.value > 4f,
+        enter = fadeIn(), exit = fadeOut(animationSpec = tween(delayMillis = 3000, durationMillis = 1000))
+    ) {
+        Card(
+            shape = CircleShape,
+            modifier = Modifier.size(40.dp)
+        ) {
+            IconButton(modifier = Modifier
+                .padding(8.dp)
+                .fillMaxSize(),
+                onClick = { onClick() }) {
+                Icon(
+                    painterResource(if (mapBearing.value > 356f ||
+                        mapBearing.value < 4f) R.drawable.north
+                    else R.drawable.gps),
+                    stringResource(R.string.compass),
+                    modifier = Modifier.rotate(mapBearing.value).fillMaxSize()
+                )
+            }
+        }
+    }
+
+}
+
+@Composable
+fun MapZoomInButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+
+        Card(
+            shape = CircleShape,
+            modifier = modifier.size(40.dp)
+        ) {
+            IconButton(modifier = Modifier
+                .padding(8.dp)
+                .fillMaxSize(),
+                onClick = { onClick() }) {
+                Icon(
+                    Icons.Default.Add,
+                    Icons.Default.Add.name,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+}
+
+@Composable
+fun MapZoomOutButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+
+    Card(
+        shape = CircleShape,
+        modifier = modifier.size(40.dp)
+    ) {
+        IconButton(modifier = Modifier
+            .padding(8.dp)
+            .fillMaxSize(),
+            onClick = { onClick() }) {
+            Icon(
+                Icons.Default.Remove,
+                Icons.Default.Remove.name,
+                modifier = Modifier.fillMaxSize()
             )
         }
     }
@@ -252,33 +359,21 @@ fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name:
 }
 
 @Composable
-fun MapFilterButton(
-    modifier: Modifier, showHiddenPlaces: Boolean,
-    onCLick: (Boolean) -> Unit,
+fun MapSettingsButton(
+    modifier: Modifier,
+    onCLick: () -> Unit,
 ) {
-
-
-    val color = animateColorAsState(
-        targetValue = if (showHiddenPlaces) {
-            MaterialTheme.colors.onSurface
-        } else {
-            supportTextColor
-        },
-        animationSpec = tween(800)
-    )
 
     Card(
         shape = CircleShape,
         modifier = modifier.size(40.dp)
     ) {
-        IconToggleButton(checked = showHiddenPlaces,
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxSize(),
-            onCheckedChange = { onCLick(it) }) {
+        IconButton(
+            modifier = Modifier.padding(8.dp).fillMaxSize(),
+            onClick = onCLick
+            ) {
             Icon(
-                Icons.Default.Visibility, Icons.Default.Visibility.name,
-                tint = color.value
+                Icons.Default.Settings, Icons.Default.Settings.name,
             )
         }
     }

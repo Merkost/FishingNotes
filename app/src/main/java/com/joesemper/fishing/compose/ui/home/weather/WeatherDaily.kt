@@ -16,7 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.*
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.datastore.WeatherPreferences
+import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.advertising.BannerAdvertView
 import com.joesemper.fishing.compose.ui.home.views.DefaultAppBar
 import com.joesemper.fishing.model.entity.weather.Daily
@@ -124,6 +124,7 @@ fun DailyWeatherScreen(
     val weatherPrefs: WeatherPreferences = get()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
     val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
+    val windSpeedUnit by weatherPrefs.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
 
     Column(
         modifier = modifier
@@ -162,7 +163,8 @@ fun DailyWeatherScreen(
 
         DailyWeatherValuesView(
             forecast = forecast,
-            pressureUnit = pressureUnit
+            pressureUnit = pressureUnit,
+            windSpeedUnit = windSpeedUnit
         )
 
         Spacer(modifier = Modifier.size(Constants.bottomBannerPadding))

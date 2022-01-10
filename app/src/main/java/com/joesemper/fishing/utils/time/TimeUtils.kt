@@ -2,9 +2,21 @@ package com.joesemper.fishing.utils.time
 
 import android.content.Context
 import com.joesemper.fishing.R
-import com.joesemper.fishing.utils.MILLISECONDS_IN_SECOND
+import com.joesemper.fishing.utils.time.TimeConstants.MILLISECONDS_IN_SECOND
+import com.joesemper.fishing.utils.time.TimeConstants.SECONDS_IN_HOUR
+import com.joesemper.fishing.utils.time.TimeConstants.SECONDS_IN_MINUTE
 import java.text.SimpleDateFormat
 import java.util.*
+
+object TimeConstants {
+    const val MILLISECONDS_IN_DAY = 86400000L
+    const val SECONDS_IN_DAY = 86400L
+    const val MILLISECONDS_IN_SECOND = 1000L
+    const val MILLISECONDS_IN_HOUR = 3600000L
+    const val SECONDS_IN_HOUR = 3600L
+    const val SECONDS_IN_MINUTE = 60L
+    const val MOON_PHASE_INCREMENT_IN_DAY = 0.03f
+}
 
 fun Long.toTime(is12hFormat: Boolean = false): String {
     val date = Date(formatToMilliseconds(this))
@@ -59,9 +71,9 @@ private fun formatToMilliseconds(time: Long): Long {
 }
 
 private fun getHoursBySeconds(s: Long): String {
-    return (s / com.joesemper.fishing.utils.SECONDS_IN_HOUR).toString()
+    return (s / SECONDS_IN_HOUR).toString()
 }
 
 private fun getMinutesBySeconds(s: Long): String {
-    return ((s % com.joesemper.fishing.utils.SECONDS_IN_HOUR) / com.joesemper.fishing.utils.SECONDS_IN_MINUTE).toString()
+    return ((s % SECONDS_IN_HOUR) / SECONDS_IN_MINUTE).toString()
 }

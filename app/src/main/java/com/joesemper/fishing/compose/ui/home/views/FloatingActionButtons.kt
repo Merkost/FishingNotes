@@ -1,22 +1,26 @@
 package com.joesemper.fishing.compose.ui.home.views
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.joesemper.fishing.R
 
@@ -24,11 +28,10 @@ import com.joesemper.fishing.R
 fun FabWithMenu(
     modifier: Modifier = Modifier,
     items: List<FabMenuItem>,
-    shouldShowBlur: MutableState<Boolean>,
+    fabState: MutableState<MultiFabState>,
     ) {
-    val toState = remember { mutableStateOf(MultiFabState.COLLAPSED) }
-    val transition = updateTransition(targetState = toState, label = "")
-        .also { shouldShowBlur.value = (it.targetState.value == MultiFabState.EXPANDED) }
+    //val toState = remember { mutableStateOf(MultiFabState.COLLAPSED) }
+    val transition = updateTransition(targetState = fabState, label = "")
 
     val size = transition.animateDp(label = "") { state ->
         if (state.value == MultiFabState.EXPANDED) 48.dp else 0.dp
@@ -40,12 +43,12 @@ fun FabWithMenu(
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.End
     ) {
 
 
         items.forEach {
-            FabMenuItem(item = it, modifier = Modifier.size(size.value))
+            FabMenuItem(item = it, size = size.value)
         }
 
         FloatingActionButton(onClick = {
@@ -64,19 +67,35 @@ fun FabWithMenu(
 }
 
 @Composable
-fun FabMenuItem(item: FabMenuItem, modifier: Modifier = Modifier) {
-    FloatingActionButton(
-        backgroundColor = MaterialTheme.colors.primary,
-        modifier = modifier,
-        onClick = item.onClick
-    ) {
-        Icon(
-            tint = MaterialTheme.colors.onPrimary,
-            painter = painterResource(id = item.icon),
-            contentDescription = ""
-        )
+fun FabMenuItem(item: FabMenuItem, modifier: Modifier = Modifier, size: Dp) {
+    AnimatedVisibility(size != 0.dp,
+    enter = fadeIn(),
+    exit = fadeOut()) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.End),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.clip(RoundedCornerShape(8.dp))
+        ) {
+            Text(item.text, color = Color.White)
+
+            Box(modifier = Modifier.size(FabSize).padding((FabSize - size) / 2)) {
+                FloatingActionButton(
+                    backgroundColor = MaterialTheme.colors.primary,
+                    modifier = modifier.size(size),
+                    onClick = item.onClick
+                ) {
+                    Icon(
+                        tint = MaterialTheme.colors.onPrimary,
+                        painter = painterResource(id = item.icon),
+                        contentDescription = ""
+                    )
+                }
+            }
+        }
     }
 }
+
+private val FabSize = 56.dp
 
 
 class FabMenuItem(

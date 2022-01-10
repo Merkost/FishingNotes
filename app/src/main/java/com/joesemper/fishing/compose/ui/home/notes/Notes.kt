@@ -1,7 +1,6 @@
 package com.joesemper.fishing.compose.ui.home.notes
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
@@ -24,13 +23,14 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.*
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.datastore.NotesPreferences
+import com.joesemper.fishing.model.datastore.NotesPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.SettingsHeader
 import com.joesemper.fishing.compose.ui.home.views.DefaultAppBar
 import com.joesemper.fishing.compose.ui.home.views.FabMenuItem
 import com.joesemper.fishing.compose.ui.home.views.FabWithMenu
+import com.joesemper.fishing.compose.ui.home.views.MultiFabState
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.theme.primaryTextColor
 import com.joesemper.fishing.compose.ui.utils.CatchesSortValues
@@ -64,6 +64,8 @@ fun Notes(
     var bottomSheetScreen by remember { mutableStateOf(BottomSheetScreen.Sort) }
     val shouldShowBlur = remember { mutableStateOf(false) }
 
+    val fabState = remember { mutableStateOf(MultiFabState.COLLAPSED) }
+
     ModalBottomSheetLayout(
         sheetState = bottomState,
         sheetShape = modalBottomSheetCorners,
@@ -84,25 +86,30 @@ fun Notes(
             floatingActionButton = {
                 FabWithMenu(
                     modifier = Modifier.padding(bottom = 20.dp).zIndex(5f),
+                    fabState = fabState,
                     items = listOf(
                         FabMenuItem(
                             icon = R.drawable.ic_add_catch,
+                            text = stringResource(R.string.add_new_catch),
                             onClick = { onAddNewCatchClick(navController) }
                         ),
                         FabMenuItem(
                             icon = R.drawable.ic_baseline_add_location_24,
+                            text = stringResource(R.string.add_new_place),
                             onClick = { onAddNewPlaceClick(navController) }
                         )
-                    ), shouldShowBlur
+                    )
                 )
             },
         ) {
-            AnimatedVisibility(shouldShowBlur.value,
+            AnimatedVisibility(fabState.value  == MultiFabState.EXPANDED,
                 modifier = Modifier.zIndex(4f).fillMaxSize(),
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
-                Surface(color = Color.Black.copy(0.5f)) { }
+                Surface(color = Color.Black.copy(0.6f), onClick = {
+                    fabState.value = MultiFabState.COLLAPSED
+                }) { }
             }
             Column() {
                 Tabs(tabs = tabs, pagerState = pagerState)
