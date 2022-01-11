@@ -48,6 +48,7 @@ fun PlaceTitleView(
     modifier: Modifier = Modifier,
     place: UserMapMarker,
     catchesAmount: Int,
+    navigateToMap: () -> Unit
 ) {
 
     ConstraintLayout(
@@ -89,7 +90,7 @@ fun PlaceTitleView(
                     absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                 },
             icon = painterResource(id = R.drawable.ic_place_on_map),
-            onClick = { }
+            onClick = { navigateToMap() }
         )
 
         SupportText(
@@ -315,6 +316,7 @@ fun PlaceButtonsView(
     if (deleteDialogIsShowing) {
         DeletePlaceDialog(place, onDismiss = { deleteDialogIsShowing = false }) {
             viewModel.deletePlace()
+            deleteDialogIsShowing = false
             navController.popBackStack()
         }
     }
@@ -378,6 +380,7 @@ fun DeletePlaceDialog(
         content = {
             LottieWarning(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .height(150.dp)
             )
         }

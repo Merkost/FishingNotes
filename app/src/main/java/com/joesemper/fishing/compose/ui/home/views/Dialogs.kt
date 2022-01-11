@@ -84,7 +84,8 @@ fun DefaultDialog(
                             absoluteLeft.linkTo(parent.absoluteLeft)
                             absoluteRight.linkTo(parent.absoluteRight)
                             width = Dimension.fillToConstraints
-                        }
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
                     content?.invoke()
                 }
