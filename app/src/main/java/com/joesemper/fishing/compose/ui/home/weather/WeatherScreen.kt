@@ -17,12 +17,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
@@ -31,6 +33,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.bar_chart.BarChartUtils.toLegacyInt
 import com.joesemper.fishing.model.datastore.UserPreferences
 import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.Arguments
@@ -44,7 +47,7 @@ import com.joesemper.fishing.compose.ui.home.views.PrimaryText
 import com.joesemper.fishing.compose.ui.home.views.SecondaryText
 import com.joesemper.fishing.compose.ui.home.views.SupportText
 import com.joesemper.fishing.compose.ui.navigate
-import com.joesemper.fishing.compose.ui.theme.primaryWhiteColor
+import com.joesemper.fishing.compose.ui.theme.customColors
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.WeatherViewModel
 import com.joesemper.fishing.domain.viewstates.ErrorType
@@ -132,7 +135,7 @@ fun WeatherScreen(
                 elevation = elevation.value,
                 backgroundColor = MaterialTheme.colors.primary
             ) {
-                WeatherLocationIconButton(color = MaterialTheme.colors.onPrimary) {
+                WeatherLocationIconButton(color = Color.White) {
                     selectedPlace.value?.let {
                         navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
                             Arguments.PLACE to it)
@@ -281,8 +284,8 @@ fun CurrentWeather(
             PrimaryWeatherItemView(
                 temperature = forecast.hourly.first().temperature,
                 weather = forecast.hourly.first().weather.first(),
-                textTint = primaryWhiteColor,
-                iconTint = primaryWhiteColor,
+                textTint = Color.White,
+                iconTint = Color.White,
                 temperatureUnit = temperatureUnit
             )
 
@@ -335,7 +338,8 @@ fun HourlyWeatherItem(
     timeTitle: String,
     forecast: Hourly,
     temperatureUnit: TemperatureValues,
-    windSpeedUnit: WindSpeedValues
+    windSpeedUnit: WindSpeedValues,
+    color: Color = Color.White
 ) {
     Column(
         modifier = modifier.padding(horizontal = 12.dp),
@@ -344,7 +348,7 @@ fun HourlyWeatherItem(
     ) {
         SecondaryText(
             text = timeTitle,
-            textColor = MaterialTheme.colors.onPrimary
+            textColor = color
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(2.dp),
@@ -354,12 +358,12 @@ fun HourlyWeatherItem(
                 modifier = Modifier.size(32.dp),
                 painter = painterResource(id = getWeatherIconByName(forecast.weather.first().icon)),
                 contentDescription = "",
-                colorFilter = ColorFilter.tint(color = MaterialTheme.colors.onPrimary)
+                //colorFilter = ColorFilter.tint(color = color)
             )
             PrimaryText(
                 text = temperatureUnit.getTemperature(
                     forecast.temperature) + stringResource(temperatureUnit.stringRes),
-                textColor = MaterialTheme.colors.onPrimary
+                textColor = color
             )
         }
 
@@ -370,14 +374,14 @@ fun HourlyWeatherItem(
             PrimaryText(
                 text = windSpeedUnit.getWindSpeedInt(forecast.windSpeed.toDouble())
                         + " " + stringResource(windSpeedUnit.stringRes),
-                textColor = MaterialTheme.colors.onPrimary
+                textColor = color
             )
             Icon(
                 modifier = Modifier
                     .rotate(forecast.windDeg.toFloat()),
                 painter = painterResource(id = R.drawable.ic_baseline_navigation_24),
                 contentDescription = "",
-                tint = MaterialTheme.colors.onPrimary
+                tint = MaterialTheme.colors.primaryVariant
             )
         }
     }
@@ -428,7 +432,7 @@ fun DailyWeatherItem(
                 absoluteRight.linkTo(parent.absoluteRight, 16.dp)
             },
             text = stringResource(temperatureUnit.stringRes),
-            textColor = secondaryTextColor
+            textColor = MaterialTheme.customColors.secondaryTextColor
         )
         WeatherPrimaryText(
             modifier = Modifier.constrainAs(temp) {
@@ -500,7 +504,6 @@ fun PressureChartItem(
             weather = forecast,
             pressureUnit = pressureUnit,
         )
-        Spacer(modifier = Modifier.padding(4.dp))
         Divider()
     }
 }
@@ -509,7 +512,8 @@ fun PressureChartItem(
 fun PressureChart(
     modifier: Modifier = Modifier,
     weather: List<Daily>,
-    pressureUnit: PressureValues
+    pressureUnit: PressureValues,
+    textColor: Color = MaterialTheme.colors.onSurface
 ) {
     val x = remember { Animatable(0f) }
     val yValues = remember(weather) { mutableStateOf(getPressureList(weather, pressureUnit)) }
@@ -528,7 +532,7 @@ fun PressureChart(
     val color = MaterialTheme.colors.primaryVariant
 
 
-    Canvas(modifier = modifier.padding(start = 32.dp, end = 32.dp, bottom = 18.dp, top = 32.dp)) {
+    Canvas(modifier = modifier.padding(start = 32.dp, end = 32.dp, bottom = 14.dp, top = 32.dp)) {
         val xbounds = Pair(0f, xTarget)
         val ybounds = getBounds(yValues.value)
         val scaleX = size.width / (xbounds.second - xbounds.first)
@@ -537,9 +541,9 @@ fun PressureChart(
 
         val paint = Paint()
         paint.textAlign = Paint.Align.CENTER
-        paint.textSize = 36f
+        paint.textSize = 36.sp.value
         paint.typeface = Typeface.DEFAULT_BOLD
-        paint.color = 0xDE000000.toInt()
+        paint.color = textColor.toLegacyInt()
 
         val linesList = mutableListOf<Point>()
 
@@ -585,6 +589,8 @@ fun CurrentWeatherValuesView(
     modifier: Modifier = Modifier,
     forecast: Hourly,
     pressureUnit: PressureValues,
+    iconColor: Color = Color.White,
+    textColor: Color = Color.White
 ) {
     ConstraintLayout(
         modifier = modifier
@@ -605,7 +611,6 @@ fun CurrentWeatherValuesView(
                 top.linkTo(parent.top, 4.dp)
             },
             text = stringResource(id = R.string.pressure),
-            textColor = MaterialTheme.colors.onPrimary
         )
 
         SecondaryText(
@@ -615,7 +620,6 @@ fun CurrentWeatherValuesView(
                 top.linkTo(pressText.top)
             },
             text = stringResource(id = R.string.humidity),
-            textColor = MaterialTheme.colors.onPrimary
         )
         SecondaryText(
             modifier = Modifier.constrainAs(popText) {
@@ -624,7 +628,6 @@ fun CurrentWeatherValuesView(
                 top.linkTo(pressText.top)
             },
             text = stringResource(id = R.string.precipitation),
-            textColor = MaterialTheme.colors.onPrimary
         )
 
         Icon(
@@ -637,7 +640,7 @@ fun CurrentWeatherValuesView(
                 },
             painter = painterResource(id = R.drawable.ic_gauge),
             contentDescription = stringResource(id = R.string.pressure),
-            tint = MaterialTheme.colors.onPrimary
+            tint = iconColor
         )
         PrimaryText(
             modifier = Modifier.constrainAs(pressValue) {
@@ -648,7 +651,7 @@ fun CurrentWeatherValuesView(
             },
             text = pressureUnit.getPressure(
                 forecast.pressure) + " " + stringResource(pressureUnit.stringRes),
-            textColor = MaterialTheme.colors.onPrimary
+            textColor = Color.White
         )
 
         Icon(
@@ -661,7 +664,7 @@ fun CurrentWeatherValuesView(
                 },
             painter = painterResource(id = R.drawable.ic_baseline_opacity_24),
             contentDescription = stringResource(id = R.string.humidity),
-            tint = MaterialTheme.colors.onPrimary
+            tint = iconColor
         )
         PrimaryText(
             modifier = Modifier.constrainAs(humidValue) {
@@ -671,7 +674,7 @@ fun CurrentWeatherValuesView(
                 absoluteRight.linkTo(humidText.absoluteRight)
             },
             text = forecast.humidity.toString() + " " + stringResource(id = R.string.percent),
-            textColor = MaterialTheme.colors.onPrimary
+            textColor = textColor
         )
 
         Icon(
@@ -684,7 +687,7 @@ fun CurrentWeatherValuesView(
                 },
             painter = painterResource(id = R.drawable.ic_baseline_umbrella_24),
             contentDescription = stringResource(id = R.string.precipitation),
-            tint = MaterialTheme.colors.onPrimary
+            tint = iconColor
         )
         PrimaryText(
             modifier = Modifier.constrainAs(popValue) {
@@ -695,7 +698,7 @@ fun CurrentWeatherValuesView(
             },
             text = (forecast.probabilityOfPrecipitation * 100).toInt().toString()
                     + " " + stringResource(id = R.string.percent),
-            textColor = MaterialTheme.colors.onPrimary
+            textColor = textColor
         )
 
     }
