@@ -261,6 +261,7 @@
     <string name="map_zoom_buttons_description">Отображать кнопки изменения масштаба на карте</string>
     <string name="catches_desc">Уловы: по убыванию</string>
     <string name="fish_desc">Количество рыб: по убыванию</string>
+    <string name="new_catch_text">+ Add new catch</string>
 
 
 </resources>

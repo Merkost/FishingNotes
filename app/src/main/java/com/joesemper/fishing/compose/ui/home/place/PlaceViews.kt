@@ -168,6 +168,7 @@ fun PlaceTabsContentView(
     navController: NavController,
     catches: List<UserCatch>,
     notes: MutableState<List<Note>?>,
+    onNewCatchClick: () -> Unit,
     onNoteSelected: (Note) -> Unit
 ) {
     HorizontalPager(
@@ -176,16 +177,16 @@ fun PlaceTabsContentView(
         count = tabs.size,
         verticalAlignment = Alignment.Top
     ) { page ->
-
-
         Column(
             modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
             when (page) {
                 0 -> PlaceCatchesView(
                     catches = catches,
-                    userCatchClicked = { onCatchItemClick(it, navController) }
+                    userCatchClicked = { onCatchItemClick(it, navController) },
+                    navigateToNewCatch = { onNewCatchClick() }
                 )
                 1 -> PlaceNotes(notes.value) {
                     onNoteSelected(it)
@@ -257,9 +258,11 @@ fun PlaceCatchesView(
     modifier: Modifier = Modifier,
     catches: List<UserCatch>,
     userCatchClicked: (UserCatch) -> Unit,
+    navigateToNewCatch: () -> Unit
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(horizontal = 4.dp),
     ) {
         when {
@@ -287,10 +290,15 @@ fun PlaceCatchesView(
             }
             catches.isEmpty() -> {
                 item {
-                    NoElementsView(
-                        mainText = stringResource(R.string.no_cathces_added),
-                        secondaryText = stringResource(R.string.add_catch_text),
-                        onClickAction = { }
+                    NoContentView(
+                        modifier = Modifier.padding(top = 128.dp),
+                        text = stringResource(id = R.string.no_cathces_added),
+                        icon = painterResource(id = R.drawable.ic_fishing)
+                    )
+                    Spacer(modifier = Modifier.size(16.dp))
+                    DefaultButtonOutlined(
+                        text = stringResource(R.string.new_catch_text),
+                        onClick = navigateToNewCatch
                     )
                 }
             }

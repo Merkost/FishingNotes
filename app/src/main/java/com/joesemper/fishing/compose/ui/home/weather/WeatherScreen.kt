@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
-import com.airbnb.lottie.compose.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -37,10 +36,7 @@ import com.joesemper.fishing.compose.ui.home.map.LocationState
 import com.joesemper.fishing.compose.ui.home.map.checkPermission
 import com.joesemper.fishing.compose.ui.home.map.getCurrentLocationFlow
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
-import com.joesemper.fishing.compose.ui.home.views.DefaultButtonOutlined
-import com.joesemper.fishing.compose.ui.home.views.PrimaryText
-import com.joesemper.fishing.compose.ui.home.views.SecondaryText
-import com.joesemper.fishing.compose.ui.home.views.SupportText
+import com.joesemper.fishing.compose.ui.home.views.*
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.theme.primaryWhiteColor
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
@@ -132,28 +128,34 @@ fun WeatherScreen(
 
             TopAppBar(
                 elevation = elevation.value,
-                backgroundColor = MaterialTheme.colors.primary
-            ) {
-                WeatherLocationIconButton(color = MaterialTheme.colors.onPrimary) {
+                backgroundColor = MaterialTheme.colors.primary,
+                title = {
                     selectedPlace.value?.let {
-                        navController.navigate(
-                            "${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
-                            Arguments.PLACE to it
+
+                        WeatherLocationIconButton(color = MaterialTheme.colors.onPrimary) {
+                            selectedPlace.value?.let {
+                                navController.navigate(
+                                    "${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
+                                    Arguments.PLACE to it
+                                )
+                            }
+                        }
+
+                        WeatherPlaceSelectItem(
+                            selectedPlace = it,
+                            userPlaces = viewModel.markersList.value,
+                            onItemClick = { clickedItem ->
+                                selectedPlace.value = clickedItem
+                            }
                         )
                     }
-                }
-                selectedPlace.value?.let {
 
-                    WeatherPlaceSelectItem(
-                        selectedPlace = it,
-                        userPlaces = viewModel.markersList.value,
-                        onItemClick = { clickedItem ->
-                            selectedPlace.value = clickedItem
-                        }
-                    )
-                }
+                    if (selectedPlace.value == null) {
+                        Text(text = stringResource(id = R.string.weather))
+                    }
 
-            }
+                }
+            )
         }
     ) {
 
@@ -195,20 +197,23 @@ fun WeatherScreen(
             AnimatedVisibility(weatherState is RetrofitWrapper.Loading) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.SpaceAround,
+                    verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
                     if (checkPermission(context) && viewModel.markersList.value.isEmpty()) {
-                        SecondaryText(text = "No places yet. \nAdd new place now!")
-                        WeatherLoading(
-                            modifier = Modifier
-                                .size(250.dp)
-                            /*.align(Alignment.CenterHorizontally)*/
+
+                        NoContentView(
+                            text = stringResource(id = R.string.no_places_added),
+                            icon = painterResource(id = R.drawable.ic_no_place_on_map)
                         )
-                        DefaultButtonOutlined(text = "Add", onClick = {
-                            navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${true}")
-                        })
+
+                        Spacer(modifier = Modifier.size(16.dp))
+
+                        DefaultButtonOutlined(
+                            text = stringResource(id = R.string.new_place_text),
+                            onClick = { navigateToAddNewPlace(navController) }
+                        )
                     } else {
                         WeatherLoading(
                             modifier = Modifier
@@ -226,8 +231,7 @@ fun WeatherScreen(
                             NoInternetView(Modifier.fillMaxWidth())
                         }
                         is ErrorType.OtherError -> {
-                            //TODO: OtherErrorView()
-                            NoInternetView(Modifier.fillMaxWidth())
+                            ErrorView(Modifier.fillMaxWidth())
                         }
                     }
                 }
@@ -236,29 +240,6 @@ fun WeatherScreen(
 
     }
 
-
-}
-
-@Composable
-fun NoInternetView(modifier: Modifier = Modifier) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.error))
-    val progress by animateLottieCompositionAsState(
-        composition,
-        iterations = LottieConstants.IterateForever,
-    )
-
-    Column(
-        Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.SpaceAround,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        LottieAnimation(
-            composition,
-            progress,
-            modifier = modifier
-        )
-        SupportText(text = "Can't connect to the server!")
-    }
 
 }
 

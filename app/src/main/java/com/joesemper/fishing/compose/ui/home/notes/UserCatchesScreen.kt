@@ -3,6 +3,10 @@ package com.joesemper.fishing.compose.ui.home.notes
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
@@ -10,18 +14,24 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.datastore.NotesPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
+import com.joesemper.fishing.compose.ui.home.views.DefaultButtonOutlined
+import com.joesemper.fishing.compose.ui.home.views.NoContentView
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.utils.CatchesSortValues
 import com.joesemper.fishing.domain.UserCatchesViewModel
+import com.joesemper.fishing.model.datastore.NotesPreferences
 import com.joesemper.fishing.model.entity.content.UserCatch
+import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.utils.time.toDateTextMonth
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
@@ -38,15 +48,19 @@ fun UserCatchesScreen(
         .collectAsState(CatchesSortValues.Default)
 
     Scaffold(backgroundColor = Color.Transparent) {
-        val catches by viewModel.currentContent.collectAsState()
+        val catches: List<UserCatch> = viewModel.currentContent
         Crossfade(catches) { animatedUiState ->
-            if (animatedUiState != null) {
-                UserCatches(
-                    catches = catchesSortValue.sort(animatedUiState),
-                    userCatchClicked = { catch -> onCatchItemClick(catch, navController) },
-                    sortValue = catchesSortValue
-                )
-            }
+            UserCatches(
+                catches = catchesSortValue.sort(animatedUiState),
+                userCatchClicked = { catch -> onCatchItemClick(catch, navController) },
+                sortValue = catchesSortValue,
+                navigateToNewCatch = {
+                    navController.navigate(
+                        MainDestinations.NEW_CATCH_ROUTE,
+                        Arguments.PLACE to UserMapMarker()
+                    )
+                }
+            )
         }
     }
 }
@@ -60,12 +74,15 @@ fun UserCatches(
     catches: List<UserCatch>,
     sortValue: CatchesSortValues,
     userCatchClicked: (UserCatch) -> Unit,
-
+    navigateToNewCatch: () -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-    LazyColumn(modifier = modifier) {
         when {
             catches.isNotEmpty() -> {
-                when(sortValue) {
+                when (sortValue) {
                     CatchesSortValues.TimeAsc, CatchesSortValues.TimeDesc -> {
                         getDatesList(catches).forEach { catchDate ->
                             stickyHeader {
@@ -100,10 +117,15 @@ fun UserCatches(
             }
             catches.isEmpty() -> {
                 item {
-                    NoElementsView(
-                        mainText = stringResource(R.string.no_cathces_added),
-                        secondaryText = stringResource(R.string.add_catch_text),
-                        onClickAction = { }
+                    NoContentView(
+                        modifier = Modifier.padding(top = 128.dp),
+                        text = stringResource(id = R.string.no_cathces_added),
+                        icon = painterResource(id = R.drawable.ic_fishing)
+                    )
+                    Spacer(modifier = Modifier.size(16.dp))
+                    DefaultButtonOutlined(
+                        text = stringResource(R.string.new_catch_text),
+                        onClick = navigateToNewCatch
                     )
                 }
             }

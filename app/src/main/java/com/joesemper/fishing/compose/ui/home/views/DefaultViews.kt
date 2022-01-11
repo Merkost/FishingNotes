@@ -1,11 +1,13 @@
 package com.joesemper.fishing.compose.ui.home.views
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -18,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import com.airbnb.lottie.compose.*
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.theme.supportTextColor
 import com.joesemper.fishing.model.entity.common.Note
@@ -123,6 +126,43 @@ fun WeatherIconItem(
             .clickable(onClick = onIconSelected)
     ) {
         Icon(painterResource(iconResource), "", tint = iconTint)
+    }
+}
+
+@Composable
+fun NoInternetView(modifier: Modifier = Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.error))
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever,
+    )
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.SpaceAround,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        LottieAnimation(
+            composition,
+            progress,
+            modifier = modifier
+        )
+        SupportText(text = "Can't connect to the server!")
+    }
+}
+
+@Composable
+fun ErrorView(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.SpaceAround,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            modifier = Modifier.size(48.dp),
+            painter = painterResource(id = R.drawable.ic_error), contentDescription = null
+        )
+        SupportText(text = "Something went wrong!")
     }
 }
 

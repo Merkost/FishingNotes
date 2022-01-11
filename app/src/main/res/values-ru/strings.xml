@@ -149,7 +149,7 @@
     <string name="add_place_success">Место сохранено на карте</string>
     <string name="no_cathces_added">Уловы не добавлены</string>
     <string name="add_catch_text">+ Добавить новый улов</string>
-    <string name="no_places_added">Отсутствуют добавленные места</string>
+    <string name="no_places_added">Нет добавленных мест</string>
     <string name="new_place_text">+ Добавить новое место</string>
     <string name="for_today">Сегодня</string>
     <string name="for_a_week">На неделю</string>
@@ -244,11 +244,31 @@
     <string name="hidden_places">Скрытые места</string>
     <string name="show_hidden_places">Показывать скрытые места на карте</string>
     <string name="wind_ftps">ft/s</string>
+    <string name="wind_mph">mph</string>
+    <string name="wind_knots">knots</string>
+    <string name="wind_kmph">km/h</string>
+    <string name="wind_mps">m/s</string>
     <string name="wind_speed_unit">Единица измерения скорости ветра</string>
     <string name="choose_wind_speed_unit">Выберите единицу измерения скорости ветра</string>
     <string name="map_zoom_buttons">Кнопки изменения масштаба</string>
     <string name="map_zoom_buttons_description">Отображать кнопки изменения масштаба на карте</string>
     <string name="catches_desc">Уловы: по убыванию</string>
     <string name="fish_desc">Количество рыб: по убыванию</string>
+    <string name="new_catch_text">+ Добавить улов</string>
+
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+
 
 </resources>
