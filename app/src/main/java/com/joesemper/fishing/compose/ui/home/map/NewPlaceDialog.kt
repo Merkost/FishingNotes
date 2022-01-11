@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -132,7 +133,7 @@ fun NewPlaceDialog(
                         exit = fadeOut()
                     ) {
                         IconButton(onClick = { titleValue.value = "" }) {
-                            Icon(Icons.Default.Delete, Icons.Default.Delete.name)
+                            Icon(Icons.Default.Close, Icons.Default.Delete.name)
                         }
                     }
                 },

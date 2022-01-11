@@ -25,6 +25,7 @@ import com.joesemper.fishing.compose.ui.home.new_catch.NewCatchScreen
 import com.joesemper.fishing.compose.ui.home.place.UserPlaceScreen
 import com.joesemper.fishing.compose.ui.home.weather.WeatherDaily
 import com.joesemper.fishing.compose.ui.login.LoginScreen
+import com.joesemper.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.InternalCoroutinesApi
 
 @ExperimentalComposeUiApi
@@ -113,12 +114,15 @@ private fun NavGraphBuilder.NavGraph(
     composable(
         route = MainDestinations.NEW_CATCH_ROUTE,
     ) {
+        val place: UserMapMarker? = it.arguments?.getParcelable(Arguments.PLACE)
+        it.arguments?.clear()
+
         NewCatchScreen({
             navController.popBackStack(
                 route = MainDestinations.NEW_CATCH_ROUTE,
                 inclusive = true
             )
-        }, it.arguments?.getParcelable(Arguments.PLACE))
+        }, place)
     }
 
     composable(
