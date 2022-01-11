@@ -24,16 +24,17 @@ import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.airbnb.lottie.compose.*
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.views.BigText
 import com.joesemper.fishing.compose.ui.home.views.PrimaryText
 import com.joesemper.fishing.compose.ui.home.views.SecondaryText
+import com.joesemper.fishing.model.datastore.UserPreferences
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.model.entity.weather.Temperature
 import com.joesemper.fishing.model.entity.weather.Weather
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
+import com.joesemper.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import com.joesemper.fishing.utils.time.calculateDaylightTime
 import com.joesemper.fishing.utils.time.toTime
 import org.koin.androidx.compose.get
@@ -164,7 +165,7 @@ fun WeatherDropdownMenu(
                     Icon(
                         painter = painterResource(
                             id =
-                            if (index == 0) {
+                            if (userMapMarker.id == CURRENT_PLACE_ITEM_ID) {
                                 R.drawable.ic_baseline_my_location_24
                             } else {
                                 R.drawable.ic_baseline_location_on_24

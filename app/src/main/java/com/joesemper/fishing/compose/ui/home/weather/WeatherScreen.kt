@@ -31,8 +31,6 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.datastore.UserPreferences
-import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.map.LocationState
@@ -49,6 +47,8 @@ import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.WeatherViewModel
 import com.joesemper.fishing.domain.viewstates.ErrorType
 import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
+import com.joesemper.fishing.model.datastore.UserPreferences
+import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.model.entity.weather.Hourly
@@ -90,12 +90,14 @@ fun WeatherScreen(
             getCurrentLocationFlow(context, permissionsState).collect { locationState ->
                 if (locationState is LocationState.LocationGranted) {
 
-                    //TODO: check if currentPlaceItem already exists!!
+                    val newCurrentPlaceItem =
+                        createCurrentPlaceItem(locationState.location, context)
 
-                    viewModel.markersList.value.add(
-                        index = 0,
-                        element = createCurrentPlaceItem(locationState.location, context)
-                    )
+                    viewModel.markersList.value.apply {
+                        removeAll { it.id == newCurrentPlaceItem.id }
+                        add(index = 0, element = newCurrentPlaceItem)
+                    }
+
                     if (selectedPlace.value == null) {
                         selectedPlace.value = viewModel.markersList.value.first()
                     }
@@ -134,8 +136,10 @@ fun WeatherScreen(
             ) {
                 WeatherLocationIconButton(color = MaterialTheme.colors.onPrimary) {
                     selectedPlace.value?.let {
-                        navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
-                            Arguments.PLACE to it)
+                        navController.navigate(
+                            "${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
+                            Arguments.PLACE to it
+                        )
                     }
                 }
                 selectedPlace.value?.let {
@@ -358,7 +362,8 @@ fun HourlyWeatherItem(
             )
             PrimaryText(
                 text = temperatureUnit.getTemperature(
-                    forecast.temperature) + stringResource(temperatureUnit.stringRes),
+                    forecast.temperature
+                ) + stringResource(temperatureUnit.stringRes),
                 textColor = MaterialTheme.colors.onPrimary
             )
         }
@@ -555,7 +560,8 @@ fun PressureChart(
 
             drawContext.canvas.nativeCanvas.drawText(
                 pressureUnit.getPressure(
-                    weather[index].pressure),
+                    weather[index].pressure
+                ),
                 pointX, pointY - 48f, paint
             )
 
@@ -647,7 +653,8 @@ fun CurrentWeatherValuesView(
                 absoluteRight.linkTo(pressText.absoluteRight)
             },
             text = pressureUnit.getPressure(
-                forecast.pressure) + " " + stringResource(pressureUnit.stringRes),
+                forecast.pressure
+            ) + " " + stringResource(pressureUnit.stringRes),
             textColor = MaterialTheme.colors.onPrimary
         )
 

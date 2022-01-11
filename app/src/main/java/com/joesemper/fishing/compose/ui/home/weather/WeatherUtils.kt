@@ -1,8 +1,6 @@
 package com.joesemper.fishing.compose.ui.home.weather
 
 import android.content.Context
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.R
@@ -11,6 +9,7 @@ import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.Daily
+import com.joesemper.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import java.text.DecimalFormat
 
 object WindFormat {
@@ -19,11 +18,13 @@ object WindFormat {
 
 fun createCurrentPlaceItem(latLng: LatLng, context: Context): UserMapMarker {
     return UserMapMarker(
+        id = CURRENT_PLACE_ITEM_ID,
         title = context.getString(R.string.current_location),
         latitude = latLng.latitude,
         longitude = latLng.longitude
     )
 }
+
 
 fun getPressureList(
     forecast: List<Daily>,
