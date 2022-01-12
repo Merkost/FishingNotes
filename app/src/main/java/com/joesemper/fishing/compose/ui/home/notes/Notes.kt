@@ -349,10 +349,7 @@ fun TabsContent(tabs: List<TabItem>, pagerState: PagerState, navController: NavC
 
 
 private fun onAddNewCatchClick(navController: NavController) {
-    navController.navigate(
-        MainDestinations.NEW_CATCH_ROUTE,
-        Arguments.PLACE to UserMapMarker()
-    )
+    navController.navigate(MainDestinations.NEW_CATCH_ROUTE)
 }
 
 private fun onAddNewPlaceClick(navController: NavController) {

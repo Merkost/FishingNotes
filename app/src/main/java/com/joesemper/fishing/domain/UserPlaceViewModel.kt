@@ -38,7 +38,6 @@ class UserPlaceViewModel(
             marker.value?.let {
                 markersRepo.deleteMarker(it)
             }
-
         }
     }
 

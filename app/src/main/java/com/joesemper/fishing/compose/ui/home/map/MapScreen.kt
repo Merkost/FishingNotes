@@ -75,7 +75,7 @@ fun MapScreen(
     val viewModel: MapViewModel = getViewModel()
 
     chosenPlace?.let {
-        viewModel.currentMarker.value = chosenPlace
+        if (it.id.isNotEmpty()) { viewModel.currentMarker.value = chosenPlace }
         viewModel.lastMapCameraPosition.value =
             Pair(LatLng(it.latitude, it.longitude), DEFAULT_ZOOM)
         chosenPlace = null

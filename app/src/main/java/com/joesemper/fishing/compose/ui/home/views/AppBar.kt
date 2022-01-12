@@ -22,7 +22,7 @@ fun DefaultAppBar(
     title: String,
     subtitle: String? = null,
     elevation: Dp = 4.dp,
-    backgroundColor: Color = MaterialTheme.colors.primarySurface,
+    backgroundColor: Color = MaterialTheme.colors.primary,
     actions: @Composable() (RowScope.() -> Unit) = {}
 
 ) {

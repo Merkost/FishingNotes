@@ -510,7 +510,6 @@ fun ProfileAppBar(navController: NavController, viewModel: UserViewModel) {
             }
         },
         elevation = 0.dp,
-        backgroundColor = MaterialTheme.colors.primary
     )
     if (dialogOnLogout.value) LogoutDialog(dialogOnLogout, navController)
 }

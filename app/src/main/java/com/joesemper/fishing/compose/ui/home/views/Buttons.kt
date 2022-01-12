@@ -128,7 +128,7 @@ fun DefaultIconButton(
             modifier = Modifier.size(24.dp),
             painter = icon,
             contentDescription = null,
-            tint = primaryTextColor
+            tint = MaterialTheme.colors.onSurface
         )
     }
 }

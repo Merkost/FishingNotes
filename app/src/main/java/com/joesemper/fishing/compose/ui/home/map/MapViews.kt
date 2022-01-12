@@ -329,7 +329,7 @@ fun LayersView(
 @Composable
 fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name: String) {
     val animatedColor by animateColorAsState(
-        if (mapType.value == layer) Color.Blue else Color.White,
+        if (mapType.value == layer) MaterialTheme.colors.primary else Color.White,
         animationSpec = tween(300)
     )
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(70.dp)) {

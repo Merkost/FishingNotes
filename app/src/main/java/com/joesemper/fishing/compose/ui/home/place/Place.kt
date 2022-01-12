@@ -15,8 +15,11 @@ import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.Arguments
+import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.advertising.BannerAdvertView
 import com.joesemper.fishing.compose.ui.home.notes.TabItem
+import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserPlaceViewModel
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.utils.Constants
@@ -86,7 +89,10 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
                     PlaceTitleView(
                         place = userPlace,
                         catchesAmount = userCatches.size,
-                    )
+                    ) {
+                        navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
+                            Arguments.PLACE to userPlace)
+                    }
 
                     PlaceButtonsView(
                         modifier = Modifier.padding(vertical = 16.dp),

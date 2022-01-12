@@ -6,6 +6,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
@@ -81,6 +82,8 @@ fun FishingNotesTheme(
 
     val colors = chooseTheme(appTheme.value, darkTheme)
 
+    val customColors = if (darkTheme) darkCustomColors() else lightCustomColors()
+
     val systemUiController = rememberSystemUiController()
     SideEffect {
         if (darkTheme) {
@@ -96,12 +99,17 @@ fun FishingNotesTheme(
         }
     }
 
-    MaterialTheme(
-        colors = colors,
-        typography = Typography,
-        shapes = Shapes,
-        content = content
-    )
+    CompositionLocalProvider(
+        LocalColors provides customColors
+
+    ) {
+        MaterialTheme(
+            colors = colors,
+            typography = Typography,
+            shapes = Shapes,
+            content = content
+        )
+    }
 }
 
 

@@ -23,6 +23,7 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.advertising.BannerAdvertView
 import com.joesemper.fishing.compose.ui.home.advertising.showInterstitialAd
+import com.joesemper.fishing.compose.ui.home.place.DeletePlaceDialog
 import com.joesemper.fishing.compose.ui.home.views.DefaultAppBar
 import com.joesemper.fishing.compose.ui.home.views.LoadingDialog
 import com.joesemper.fishing.compose.ui.home.views.PhotosView
@@ -50,9 +51,57 @@ object Constants {
 @ExperimentalMaterialApi
 @ExperimentalCoilApi
 @Composable
-fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker?) {
+fun NewCatchScreen(upPress: () -> Unit, receivedPlace: UserMapMarker?) {
+
+    val place by remember { mutableStateOf(receivedPlace) }
     val viewModel: NewCatchViewModel by viewModel()
     val calendar = Calendar.getInstance()
+
+    var isNull by remember { mutableStateOf(true) }
+    place?.let {
+        viewModel.marker.value = place; isNull = false
+    }
+
+    /*var deleteDialogIsShowing by remember { mutableStateOf(false) }
+
+    if (deleteDialogIsShowing) {
+        DeletePlaceDialog()
+    }
+
+    @ExperimentalComposeUiApi
+    fun DeletePlaceDialog() {
+        DefaultDialog(
+            primaryText = stringResource(R.string.delete_place_dialog),
+            neutralButtonText = stringResource(id = R.string.dont_ask_again),
+            onNeutralClick = onDontAskClick,
+            negativeButtonText = stringResource(id = R.string.cancel),
+            onNegativeClick = onNegativeClick,
+            positiveButtonText = stringResource(id = R.string.ok_button),
+            onPositiveClick = onPositiveClick,
+            onDismiss = onDismiss,
+            content = {
+                LottieMyLocation(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                )
+            }
+        )
+    }
+
+    @Composable
+    fun LottieMyLocation(modifier: Modifier) {
+        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.my_location))
+        val progress by animateLottieCompositionAsState(
+            composition,
+            iterations = LottieConstants.IterateForever,
+        )
+        LottieAnimation(
+            composition,
+            progress,
+            modifier = modifier
+        )
+    }*/
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -65,16 +114,6 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker?) {
 
     LaunchedEffect(key1 = null) {
         viewModel.date.value = calendar.timeInMillis
-    }
-
-    var isNull by remember {
-        mutableStateOf(true)
-    }
-
-    LaunchedEffect(key1 = place) {
-        if (place != null) {
-            viewModel.marker.value = place; isNull = false
-        }
     }
 
     LaunchedEffect(key1 = viewModel.marker.value, key2 = viewModel.date.value, connectionState) {
@@ -91,21 +130,19 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker?) {
         bottomSheetState = BottomSheetState(BottomSheetValue.Expanded)
     )
 
-    val bottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     var currentBottomSheet: BottomSheetNewCatchScreen? by remember { mutableStateOf(null) }
 
     val closeSheet: () -> Unit = {
-        coroutineScope.launch { bottomSheetState.hide() }
+        coroutineScope.launch { modalBottomSheetState.hide() }
     }
 
     val openSheet: (BottomSheetNewCatchScreen) -> Unit = {
         currentBottomSheet = it
-        coroutineScope.launch { bottomSheetState.show() }
+        coroutineScope.launch { modalBottomSheetState.show() }
     }
 
-    if (!bottomSheetState.isVisible) {
-        currentBottomSheet = null
-    }
+    if (!modalBottomSheetState.isVisible) { currentBottomSheet = null }
 
     DisposableEffect(key1 = null) {
         onDispose { calendar.timeInMillis = Date().time }
@@ -114,7 +151,7 @@ fun NewCatchScreen(upPress: () -> Unit, place: UserMapMarker?) {
     ModalBottomSheetLayout(
         modifier = Modifier,
         sheetShape = modalBottomSheetCorners,
-        sheetState = bottomSheetState,
+        sheetState = modalBottomSheetState,
         sheetContent = {
             Spacer(modifier = Modifier.height(1.dp))
             currentBottomSheet?.let { currentSheet ->

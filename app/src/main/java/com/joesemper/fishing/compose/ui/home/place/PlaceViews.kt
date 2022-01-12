@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
+import com.airbnb.lottie.compose.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
@@ -47,6 +48,7 @@ fun PlaceTitleView(
     modifier: Modifier = Modifier,
     place: UserMapMarker,
     catchesAmount: Int,
+    navigateToMap: () -> Unit
 ) {
 
     ConstraintLayout(
@@ -88,7 +90,7 @@ fun PlaceTitleView(
                     absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                 },
             icon = painterResource(id = R.drawable.ic_place_on_map),
-            onClick = { }
+            onClick = { navigateToMap() }
         )
 
         SupportText(
@@ -107,7 +109,8 @@ fun PlaceTitleView(
                 absoluteLeft.linkTo(date.absoluteRight, 8.dp)
             },
             count = catchesAmount,
-            icon = R.drawable.ic_fishing
+            icon = R.drawable.ic_fishing,
+            tint = MaterialTheme.colors.primaryVariant
         )
     }
 }
@@ -306,6 +309,7 @@ fun PlaceCatchesView(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PlaceButtonsView(
     modifier: Modifier = Modifier,
@@ -314,6 +318,16 @@ fun PlaceButtonsView(
     viewModel: UserPlaceViewModel
 ) {
     val context = LocalContext.current
+
+    var deleteDialogIsShowing by remember { mutableStateOf(false) }
+
+    if (deleteDialogIsShowing) {
+        DeletePlaceDialog(place, onDismiss = { deleteDialogIsShowing = false }) {
+            viewModel.deletePlace()
+            deleteDialogIsShowing = false
+            navController.popBackStack()
+        }
+    }
 
     Row(
         modifier = modifier.horizontalScroll(rememberScrollState()),
@@ -349,11 +363,50 @@ fun PlaceButtonsView(
         DefaultButtonOutlined(
             text = stringResource(id = R.string.delete),
             icon = painterResource(id = R.drawable.ic_baseline_delete_24),
-            onClick = { }
+            onClick = { deleteDialogIsShowing = true }
         )
 
         Spacer(modifier = Modifier.padding(4.dp))
     }
+}
+
+@ExperimentalComposeUiApi
+@Composable
+fun DeletePlaceDialog(
+    place: UserMapMarker,
+    onDismiss: () -> Unit,
+    onPositiveClick: () -> Unit
+) {
+    DefaultDialog(
+        primaryText = String.format(stringResource(R.string.delete_place_dialog), place.title),
+        secondaryText = stringResource(R.string.sure_delete_place_dialog),
+        negativeButtonText = stringResource(id = R.string.No),
+        onNegativeClick = onDismiss,
+        positiveButtonText = stringResource(id = R.string.Yes),
+        onPositiveClick = onPositiveClick,
+        onDismiss = onDismiss,
+        content = {
+            LottieWarning(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+            )
+        }
+    )
+}
+
+@Composable
+fun LottieWarning(modifier: Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.warning))
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever,
+    )
+    LottieAnimation(
+        composition,
+        progress,
+        modifier = modifier
+    )
 }
 
 @Composable
