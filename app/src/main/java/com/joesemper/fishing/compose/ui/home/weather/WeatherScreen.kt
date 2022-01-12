@@ -33,8 +33,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.bar_chart.BarChartUtils.toLegacyInt
-import com.joesemper.fishing.model.datastore.UserPreferences
-import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.map.LocationState
@@ -44,10 +42,12 @@ import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
 import com.joesemper.fishing.compose.ui.home.views.*
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.theme.customColors
-import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
+import com.joesemper.fishing.compose.ui.theme.primaryWhiteColor
 import com.joesemper.fishing.domain.WeatherViewModel
 import com.joesemper.fishing.domain.viewstates.ErrorType
 import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
+import com.joesemper.fishing.model.datastore.UserPreferences
+import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.model.entity.weather.Hourly
@@ -90,14 +90,20 @@ fun WeatherScreen(
             getCurrentLocationFlow(context, permissionsState).collect { locationState ->
                 if (locationState is LocationState.LocationGranted) {
 
-                    //TODO: check if currentPlaceItem already exists!!
+                    val newLocation = createCurrentPlaceItem(locationState.location, context)
+                    val oldLocation = viewModel.markersList.find { it.id == newLocation.id }
 
-                    viewModel.markersList.value.add(
-                        index = 0,
-                        element = createCurrentPlaceItem(locationState.location, context)
-                    )
+                    if (oldLocation != null) {
+                        if (isLocationsTooFar(oldLocation, newLocation)) {
+                            viewModel.markersList.remove(oldLocation)
+                            viewModel.markersList.add(index = 0, element = newLocation)
+                        }
+                    } else {
+                        viewModel.markersList.add(index = 0, element = newLocation)
+                    }
+
                     if (selectedPlace.value == null) {
-                        selectedPlace.value = viewModel.markersList.value.first()
+                        selectedPlace.value = viewModel.markersList.first()
                     }
                 }
             }
@@ -124,8 +130,8 @@ fun WeatherScreen(
         topBar = {
             val elevation =
                 animateDpAsState(targetValue = if (scrollState.value > 0) 4.dp else 0.dp)
-            if (checkPermission(context) && viewModel.markersList.value.isNotEmpty()) {
-                selectedPlace.value = viewModel.markersList.value.first()
+            if (checkPermission(context) && viewModel.markersList.isNotEmpty()) {
+                selectedPlace.value = viewModel.markersList.first()
             }
 
             TopAppBar(
@@ -145,7 +151,7 @@ fun WeatherScreen(
 
                         WeatherPlaceSelectItem(
                             selectedPlace = it,
-                            userPlaces = viewModel.markersList.value,
+                            userPlaces = viewModel.markersList,
                             onItemClick = { clickedItem ->
                                 selectedPlace.value = clickedItem
                             }
@@ -203,7 +209,7 @@ fun WeatherScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    if (checkPermission(context) && viewModel.markersList.value.isEmpty()) {
+                    if (checkPermission(context) && viewModel.markersList.isEmpty()) {
 
                         NoContentView(
                             text = stringResource(id = R.string.no_places_added),
@@ -342,7 +348,7 @@ fun HourlyWeatherItem(
                 modifier = Modifier.size(32.dp),
                 painter = painterResource(id = getWeatherIconByName(forecast.weather.first().icon)),
                 contentDescription = "",
-                //colorFilter = ColorFilter.tint(color = color)
+                colorFilter = ColorFilter.tint(color = color)
             )
             PrimaryText(
                 text = temperatureUnit.getTemperature(
@@ -366,7 +372,7 @@ fun HourlyWeatherItem(
                     .rotate(forecast.windDeg.toFloat()),
                 painter = painterResource(id = R.drawable.ic_baseline_navigation_24),
                 contentDescription = "",
-                tint = MaterialTheme.colors.primaryVariant
+                tint = primaryWhiteColor
             )
         }
     }
@@ -595,6 +601,7 @@ fun CurrentWeatherValuesView(
                 top.linkTo(parent.top, 4.dp)
             },
             text = stringResource(id = R.string.pressure),
+            textColor = primaryWhiteColor
         )
 
         SecondaryText(
@@ -604,6 +611,7 @@ fun CurrentWeatherValuesView(
                 top.linkTo(pressText.top)
             },
             text = stringResource(id = R.string.humidity),
+            textColor = primaryWhiteColor
         )
         SecondaryText(
             modifier = Modifier.constrainAs(popText) {
@@ -612,6 +620,7 @@ fun CurrentWeatherValuesView(
                 top.linkTo(pressText.top)
             },
             text = stringResource(id = R.string.precipitation),
+            textColor = primaryWhiteColor
         )
 
         Icon(
@@ -636,7 +645,7 @@ fun CurrentWeatherValuesView(
             text = pressureUnit.getPressure(
                 forecast.pressure
             ) + " " + stringResource(pressureUnit.stringRes),
-            textColor = Color.White
+            textColor = primaryWhiteColor
         )
 
         Icon(
@@ -649,7 +658,7 @@ fun CurrentWeatherValuesView(
                 },
             painter = painterResource(id = R.drawable.ic_baseline_opacity_24),
             contentDescription = stringResource(id = R.string.humidity),
-            tint = iconColor
+            tint = primaryWhiteColor
         )
         PrimaryText(
             modifier = Modifier.constrainAs(humidValue) {
@@ -659,7 +668,7 @@ fun CurrentWeatherValuesView(
                 absoluteRight.linkTo(humidText.absoluteRight)
             },
             text = forecast.humidity.toString() + " " + stringResource(id = R.string.percent),
-            textColor = textColor
+            textColor = primaryWhiteColor
         )
 
         Icon(
@@ -672,7 +681,7 @@ fun CurrentWeatherValuesView(
                 },
             painter = painterResource(id = R.drawable.ic_baseline_umbrella_24),
             contentDescription = stringResource(id = R.string.precipitation),
-            tint = iconColor
+            tint = primaryWhiteColor
         )
         PrimaryText(
             modifier = Modifier.constrainAs(popValue) {
@@ -683,7 +692,7 @@ fun CurrentWeatherValuesView(
             },
             text = (forecast.probabilityOfPrecipitation * 100).toInt().toString()
                     + " " + stringResource(id = R.string.percent),
-            textColor = textColor
+            textColor = primaryWhiteColor
         )
 
     }

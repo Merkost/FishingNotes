@@ -1,5 +1,6 @@
 package com.joesemper.fishing.domain
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,7 +11,6 @@ import com.joesemper.fishing.model.repository.app.MarkersRepository
 import com.joesemper.fishing.model.repository.app.WeatherRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class WeatherViewModel(
@@ -22,7 +22,7 @@ class WeatherViewModel(
     val weatherState: StateFlow<RetrofitWrapper<WeatherForecast>>
         get() = _weatherState
 
-    val markersList = mutableStateOf<MutableList<UserMapMarker>>(mutableListOf())
+    val markersList = mutableStateListOf<UserMapMarker>()
     val currentWeather = mutableStateOf<WeatherForecast?>(null)
 
     init {
@@ -32,7 +32,8 @@ class WeatherViewModel(
     private fun getAllMarkers() {
         viewModelScope.launch {
             repository.getAllUserMarkersList().collect {
-                markersList.value = it as MutableList<UserMapMarker>
+                markersList.clear()
+                markersList.addAll(it as List<UserMapMarker>)
             }
         }
 
