@@ -50,6 +50,7 @@ import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.model.entity.weather.Hourly
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
+import com.joesemper.fishing.utils.isLocationsTooFar
 import com.joesemper.fishing.utils.time.toDateTextMonth
 import com.joesemper.fishing.utils.time.toDayOfWeek
 import com.joesemper.fishing.utils.time.toDayOfWeekAndDate
@@ -86,12 +87,16 @@ fun WeatherScreen(
             getCurrentLocationFlow(context, permissionsState).collect { locationState ->
                 if (locationState is LocationState.LocationGranted) {
 
-                    val newCurrentPlaceItem =
-                        createCurrentPlaceItem(locationState.location, context)
+                    val newLocation = createCurrentPlaceItem(locationState.location, context)
+                    val oldLocation = viewModel.markersList.value.find { it.id == newLocation.id }
 
-                    viewModel.markersList.value.apply {
-                        removeAll { it.id == newCurrentPlaceItem.id }
-                        add(index = 0, element = newCurrentPlaceItem)
+                    if (oldLocation != null) {
+                        if (isLocationsTooFar(oldLocation, newLocation)) {
+                            viewModel.markersList.value.remove(oldLocation)
+                            viewModel.markersList.value.add(index = 0, element = newLocation)
+                        }
+                    } else {
+                        viewModel.markersList.value.add(index = 0, element = newLocation)
                     }
 
                     if (selectedPlace.value == null) {
