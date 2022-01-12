@@ -38,12 +38,12 @@ import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.*
 import com.google.maps.android.ktx.awaitMap
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
+import com.joesemper.fishing.model.datastore.UserPreferences
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.utils.Constants
@@ -67,6 +67,9 @@ fun MapScreen(
     addPlaceOnStart: Boolean = false,
     place: UserMapMarker?
 ) {
+    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
+    val context = LocalContext.current
+
     var addingPlace by remember { mutableStateOf(addPlaceOnStart) }
     var chosenPlace: UserMapMarker? by remember { mutableStateOf(place) }
 
@@ -75,7 +78,9 @@ fun MapScreen(
     val viewModel: MapViewModel = getViewModel()
 
     chosenPlace?.let {
-        if (it.id.isNotEmpty()) { viewModel.currentMarker.value = chosenPlace }
+        if (it.id.isNotEmpty()) {
+            viewModel.currentMarker.value = chosenPlace
+        }
         viewModel.lastMapCameraPosition.value =
             Pair(LatLng(it.latitude, it.longitude), DEFAULT_ZOOM)
         chosenPlace = null
@@ -132,7 +137,24 @@ fun MapScreen(
                 }*/
             }
         }
+    }
 
+    val currentLocationFlow = remember { getCurrentLocationFlow(context, permissionsState) }
+
+    LaunchedEffect(currentLocationFlow) {
+        currentLocationFlow.collect { currentLocationState ->
+            if (currentLocationState is LocationState.LocationGranted) {
+                viewModel.lastKnownLocation.value = currentLocationState.location
+                if (viewModel.firstLaunchLocation.value) {
+                    viewModel.currentMarker.value?.let {
+                        viewModel.firstLaunchLocation.value = false
+                    } ?: kotlin.run {
+                        viewModel.lastMapCameraPosition.value =
+                            Pair(currentLocationState.location, DEFAULT_ZOOM)
+                    }
+                }
+            }
+        }
     }
 
     /*LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
@@ -261,7 +283,10 @@ fun MapScreen(
                 )
 
                 if (mapLayersSelection.value)
-                    Surface(modifier = Modifier.fillMaxSize().alpha(0f).zIndex(4f)
+                    Surface(modifier = Modifier
+                        .fillMaxSize()
+                        .alpha(0f)
+                        .zIndex(4f)
                         .clickable { mapLayersSelection.value = false }) {}
                 AnimatedVisibility(
                     mapLayersSelection.value,
@@ -273,10 +298,12 @@ fun MapScreen(
                         shrinkTowards = Alignment.TopStart,
                         animationSpec = tween(380)
                     ) + fadeOut(animationSpec = tween(480)),
-                    modifier = Modifier.constrainAs(mapLayersView) {
-                        top.linkTo(parent.top, 16.dp)
-                        absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                    }.zIndex(5f)
+                    modifier = Modifier
+                        .constrainAs(mapLayersView) {
+                            top.linkTo(parent.top, 16.dp)
+                            absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                        }
+                        .zIndex(5f)
                 ) {
                     LayersView(mapLayersSelection, mapType)
                 }
@@ -488,20 +515,6 @@ fun MapLayout(
                     MapStyleOptions.loadRawResourceStyle(context, R.raw.mapstyle_night)
                 )
                 googleMap.uiSettings.isMyLocationButtonEnabled = false
-
-                getCurrentLocationFlow(context, permissionsState).collect { state ->
-                    if (state is LocationState.LocationGranted) {
-                        viewModel.lastKnownLocation.value = state.location
-                        if (viewModel.firstLaunchLocation.value) {
-                            viewModel.currentMarker.value?.let {
-                                viewModel.firstLaunchLocation.value = false
-                            } ?: kotlin.run {
-                                viewModel.lastMapCameraPosition.value =
-                                    Pair(state.location, DEFAULT_ZOOM)
-                            }
-                        }
-                    }
-                }
             }
         }
     }

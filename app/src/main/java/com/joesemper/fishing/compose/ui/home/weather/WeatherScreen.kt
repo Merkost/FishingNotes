@@ -161,7 +161,6 @@ fun WeatherScreen(
                     if (selectedPlace.value == null) {
                         Text(text = stringResource(id = R.string.weather))
                     }
-
                 }
             )
         }

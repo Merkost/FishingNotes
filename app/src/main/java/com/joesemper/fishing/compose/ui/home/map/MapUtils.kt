@@ -1,11 +1,9 @@
 package com.joesemper.fishing.compose.ui.home.map
 
 import android.Manifest
-
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.LocationManager
@@ -29,7 +27,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
-import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
 import com.google.android.libraries.maps.CameraUpdateFactory
@@ -43,6 +41,7 @@ import com.joesemper.fishing.compose.ui.MainActivity
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
+import com.joesemper.fishing.utils.isCoordinatesFar
 import com.joesemper.fishing.utils.showToast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -217,37 +216,36 @@ fun getCurrentLocationFlow(
     permissionsState: MultiplePermissionsState,
 ) = callbackFlow {
 
+    var previousCoordinates = LatLng(0.0, 0.0)
 
     val fusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
 
     checkPermission(context)
 
-    val result = mutableStateOf(LatLng(0.0, 0.0))
-
     if (permissionsState.allPermissionsGranted) {
         val locationResult = fusedLocationProviderClient.lastLocation
         locationResult.addOnSuccessListener { task ->
+            val newCoordinates = LatLng(task.latitude, task.longitude)
 
-            try {
-                result.value = LatLng(task.latitude, task.longitude)
-                trySend(
-                    LocationState.LocationGranted(
-                        location = LatLng(
-                            task.latitude,
-                            task.longitude
+            if (isCoordinatesFar(previousCoordinates, newCoordinates)) {
+                try {
+                    trySend(
+                        LocationState.LocationGranted(
+                            location = newCoordinates
                         )
                     )
-                )
-            } catch (e: Exception) {
-                Log.d("MAP", "GPS is off")
+                    previousCoordinates = newCoordinates
+                } catch (e: Exception) {
+                    Log.d("MAP", "GPS is off")
 
-                checkGPSEnabled(context)
+                    checkGPSEnabled(context)
 
-                SnackbarManager.showMessage(R.string.gps_is_off)
-                /*Toast.makeText(context, R.string.cant_get_current_location, Toast.LENGTH_SHORT)
-                    .show()*/
+                    SnackbarManager.showMessage(R.string.gps_is_off)
+                    /*Toast.makeText(context, R.string.cant_get_current_location, Toast.LENGTH_SHORT)
+                        .show()*/
 
+                }
             }
 
         }

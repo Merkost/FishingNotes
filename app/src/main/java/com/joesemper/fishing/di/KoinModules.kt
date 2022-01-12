@@ -1,19 +1,21 @@
 package com.joesemper.fishing.di
 
-import com.joesemper.fishing.model.datastore.AppPreferences
-import com.joesemper.fishing.model.datastore.NotesPreferences
-import com.joesemper.fishing.model.datastore.UserPreferences
-import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.viewmodels.MainViewModel
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
 import com.joesemper.fishing.domain.*
-import com.joesemper.fishing.model.datasource.*
-import com.joesemper.fishing.model.datasource.firebase.FirebaseCloudPhotoStorage
+import com.joesemper.fishing.model.datasource.FreeWeatherRepositoryImpl
+import com.joesemper.fishing.model.datasource.SolunarRetrofitRepositoryImpl
+import com.joesemper.fishing.model.datasource.WeatherRepositoryRetrofitImpl
 import com.joesemper.fishing.model.datasource.firebase.FirebaseCatchesRepositoryImpl
+import com.joesemper.fishing.model.datasource.firebase.FirebaseCloudPhotoStorage
 import com.joesemper.fishing.model.datasource.firebase.FirebaseMarkersRepositoryImpl
 import com.joesemper.fishing.model.datasource.firebase.FirebaseUserRepositoryImpl
 import com.joesemper.fishing.model.datasource.utils.RepositoryCollections
+import com.joesemper.fishing.model.datastore.AppPreferences
+import com.joesemper.fishing.model.datastore.NotesPreferences
+import com.joesemper.fishing.model.datastore.UserPreferences
+import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.model.repository.PhotoStorage
 import com.joesemper.fishing.model.repository.UserRepository
 import com.joesemper.fishing.model.repository.app.*
@@ -22,11 +24,9 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
-
 val appModule = module {
     single { Logger() }
     single { SnackbarManager }
-
 }
 
 val repositoryModule = module {
