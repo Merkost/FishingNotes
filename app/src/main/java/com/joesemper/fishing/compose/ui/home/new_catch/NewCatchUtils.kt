@@ -2,6 +2,11 @@ package com.joesemper.fishing.compose.ui.home.new_catch
 
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 
+sealed class NewCatchPlacesState() {
+    object NotReceived : NewCatchPlacesState()
+    class Received(val locations: List<UserMapMarker>) : NewCatchPlacesState()
+}
+
 fun isThatPlaceInList(
     textFieldValue: String,
     suggestions: List<UserMapMarker>

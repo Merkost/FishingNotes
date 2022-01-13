@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.painterResource
@@ -23,16 +24,23 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.PopupProperties
+import androidx.navigation.NavController
+import com.airbnb.lottie.compose.*
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.Arguments
+import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.views.*
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.domain.viewstates.ErrorType
 import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
+import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getAllWeatherIcons
 import com.joesemper.fishing.utils.roundTo
 import com.joesemper.fishing.utils.showToast
@@ -40,8 +48,9 @@ import com.joesemper.fishing.utils.time.toDate
 import com.joesemper.fishing.utils.time.toTime
 import org.koin.androidx.compose.getViewModel
 
+@ExperimentalComposeUiApi
 @Composable
-fun Places(viewModel: NewCatchViewModel, isNull: Boolean) {
+fun Places(viewModel: NewCatchViewModel, isNull: Boolean, navController: NavController) {
     val context = LocalContext.current
 
     val changePlaceError = stringResource(R.string.Another_place_in_new_catch)
@@ -54,10 +63,28 @@ fun Places(viewModel: NewCatchViewModel, isNull: Boolean) {
             marker?.title ?: ""
         )
     }
-    val suggestions by viewModel.getAllUserMarkersList().collectAsState(listOf())
+
+    val suggestions = remember { mutableStateListOf<UserMapMarker>() }
+
+    viewModel.markersListState.value.let {
+        when (it) {
+            is NewCatchPlacesState.NotReceived -> {
+            }
+            is NewCatchPlacesState.Received -> {
+                if (it.locations.isEmpty()) {
+                    NewCatchNoPlaceDialog(navController)
+                } else {
+                    suggestions.apply {
+                        clear()
+                        addAll(it.locations)
+                    }
+                }
+            }
+        }
+    }
+
     val filteredList by rememberSaveable { mutableStateOf(suggestions.toMutableList()) }
     if (textFieldValue == "") searchFor("", suggestions, filteredList)
-
 
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Spacer(modifier = Modifier.padding(1.dp))
@@ -494,4 +521,75 @@ fun DateAndTime(
 
             })
     }
+}
+
+@Composable
+fun NewCatchLoadingDialog(dialogSate: MutableState<Boolean>) {
+    if (dialogSate.value) {
+        Dialog(
+            onDismissRequest = { },
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(64.dp)
+                )
+                PrimaryText(
+                    text = stringResource(id = R.string.saving_new_catch),
+                    textColor = Color.White
+                )
+            }
+        }
+    }
+}
+
+@ExperimentalComposeUiApi
+@Composable
+fun NewCatchNoPlaceDialog(
+    navController: NavController
+) {
+    DefaultDialog(
+        primaryText = stringResource(R.string.no_places_added),
+        secondaryText = stringResource(R.string.add_location_dialog),
+        negativeButtonText = stringResource(id = R.string.cancel),
+        onNegativeClick = { navController.popBackStack() },
+        positiveButtonText = stringResource(id = R.string.add),
+        onPositiveClick = { onAddNewPlaceClick(navController) },
+        onDismiss = { navController.popBackStack() },
+        content = {
+            LottieNoPlaces(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+            )
+        }
+    )
+}
+
+@Composable
+fun LottieNoPlaces(modifier: Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.no_loaction))
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever,
+    )
+    LottieAnimation(
+        composition,
+        progress,
+        modifier = modifier
+    )
+}
+
+private fun onAddNewPlaceClick(navController: NavController) {
+    val addNewPlace = true
+    navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${addNewPlace}")
 }

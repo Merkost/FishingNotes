@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.joesemper.fishing.compose.ui.home.new_catch.NewCatchPlacesState
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
@@ -18,10 +19,8 @@ import com.joesemper.fishing.model.repository.app.CatchesRepository
 import com.joesemper.fishing.model.repository.app.MarkersRepository
 import com.joesemper.fishing.model.repository.app.WeatherRepository
 import com.joesemper.fishing.utils.time.toHours
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class NewCatchViewModel(
@@ -30,11 +29,16 @@ class NewCatchViewModel(
     private val weatherRepository: WeatherRepository
 ) : ViewModel() {
 
+    init {
+        getAllUserMarkersList()
+    }
+
     private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
     val uiState: StateFlow<BaseViewState>
         get() = _uiState
 
-    private val _weatherState = MutableStateFlow<RetrofitWrapper<WeatherForecast>>(RetrofitWrapper.Loading())
+    private val _weatherState =
+        MutableStateFlow<RetrofitWrapper<WeatherForecast>>(RetrofitWrapper.Loading())
     val weatherState: StateFlow<RetrofitWrapper<WeatherForecast>>
         get() = _weatherState
 
@@ -109,15 +113,17 @@ class NewCatchViewModel(
 
     }
 
-    fun addPhoto(uri: Uri) {
-        images.add(uri)
-    }
+    val markersListState: MutableState<NewCatchPlacesState> =
+        mutableStateOf(NewCatchPlacesState.NotReceived)
 
-    fun deletePhoto(uri: Uri) {
-        images.remove(uri)
+    fun getAllUserMarkersList() {
+        viewModelScope.launch {
+            markersRepo.getAllUserMarkersList().collect { markers ->
+                markersListState.value =
+                    NewCatchPlacesState.Received(markers as List<UserMapMarker>)
+            }
+        }
     }
-
-    fun getAllUserMarkersList() = markersRepo.getAllUserMarkersList() as Flow<List<UserMapMarker>>
 
     private fun saveNewCatch(newCatch: RawUserCatch) {
         _uiState.value = BaseViewState.Loading(0)

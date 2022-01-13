@@ -31,7 +31,6 @@ import com.joesemper.fishing.compose.ui.utils.CatchesSortValues
 import com.joesemper.fishing.domain.UserCatchesViewModel
 import com.joesemper.fishing.model.datastore.NotesPreferences
 import com.joesemper.fishing.model.entity.content.UserCatch
-import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.utils.time.toDateTextMonth
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
@@ -54,12 +53,7 @@ fun UserCatchesScreen(
                 catches = catchesSortValue.sort(animatedUiState),
                 userCatchClicked = { catch -> onCatchItemClick(catch, navController) },
                 sortValue = catchesSortValue,
-                navigateToNewCatch = {
-                    navController.navigate(
-                        MainDestinations.NEW_CATCH_ROUTE,
-                        Arguments.PLACE to UserMapMarker()
-                    )
-                }
+                navigateToNewCatch = { navController.navigate(MainDestinations.NEW_CATCH_ROUTE) }
             )
         }
     }
