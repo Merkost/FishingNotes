@@ -282,7 +282,7 @@ fun ItemUserPlace(
 ) {
 
     DefaultCardClickable(
-        modifier = modifier,
+        modifier = modifier.padding(bottom = 4.dp),
         onClick = { userPlaceClicked(place) }
     ) {
         ConstraintLayout(
@@ -442,7 +442,7 @@ fun CatchItemView(
     val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
 
     DefaultCardClickable(
-        modifier = modifier,
+        modifier = modifier.padding(bottom = 4.dp),
         onClick = { onClick(catch) }
     ) {
         ConstraintLayout(

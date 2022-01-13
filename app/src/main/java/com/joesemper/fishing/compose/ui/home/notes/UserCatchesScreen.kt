@@ -3,6 +3,8 @@ package com.joesemper.fishing.compose.ui.home.notes
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
@@ -13,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.datastore.NotesPreferences
@@ -62,7 +65,10 @@ fun UserCatches(
     userCatchClicked: (UserCatch) -> Unit,
 
     ) {
-    LazyColumn(modifier = modifier) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(4.dp)
+    ) {
         when {
             catches.isNotEmpty() -> {
                 when(sortValue) {
