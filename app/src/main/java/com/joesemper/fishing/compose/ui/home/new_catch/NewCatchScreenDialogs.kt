@@ -77,6 +77,7 @@ fun TimePicker(
 
     TimePickerDialog(
         context,
+        android.R.style.Theme_Material_Dialog_Alert,
         TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
             calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
             calendar.set(Calendar.MINUTE, minute)
@@ -98,6 +99,7 @@ fun DatePicker(
 
     DatePickerDialog(
         context,
+        android.R.style.Theme_Material_Dialog_Alert,
         { _, year, monthOfYear, dayOfMonth ->
             calendar.set(Calendar.YEAR, year)
             calendar.set(Calendar.MONTH, monthOfYear)
