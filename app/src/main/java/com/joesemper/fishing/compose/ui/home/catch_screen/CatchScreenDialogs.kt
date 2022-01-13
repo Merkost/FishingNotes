@@ -181,9 +181,8 @@ fun FishTypeAmountAndWeightDialog(
                 bottom.linkTo(saveButton.bottom)
                 absoluteRight.linkTo(saveButton.absoluteLeft, 8.dp)
             },
-            text = stringResource(id = R.string.cancel),
-            onClick = { onCloseBottomSheet() }
-        )
+            text = stringResource(id = R.string.cancel)
+        ) { onCloseBottomSheet() }
     }
 
 }
@@ -282,9 +281,8 @@ fun EditWayOfFishingDialog(
                 bottom.linkTo(saveButton.bottom)
                 absoluteRight.linkTo(saveButton.absoluteLeft, 8.dp)
             },
-            text = stringResource(id = R.string.cancel),
-            onClick = { onCloseBottomSheet() }
-        )
+            text = stringResource(id = R.string.cancel)
+        ) { onCloseBottomSheet() }
 
     }
 }
@@ -369,10 +367,10 @@ fun EditNoteDialog(
                 bottom.linkTo(saveButton.bottom)
                 absoluteRight.linkTo(saveButton.absoluteLeft, 8.dp)
             },
-            text = stringResource(id = R.string.cancel),
-            onClick = {
-                onClose() }
-        )
+            text = stringResource(id = R.string.cancel)
+        ) {
+            onClose()
+        }
 
     }
 }

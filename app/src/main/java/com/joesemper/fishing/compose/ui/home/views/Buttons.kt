@@ -7,9 +7,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
-import com.joesemper.fishing.compose.ui.theme.primaryTextColor
+import com.joesemper.fishing.compose.ui.theme.customColors
+import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 
 @Composable
 fun DefaultButton(
@@ -17,6 +19,7 @@ fun DefaultButton(
     icon: Painter? = null,
     text: String,
     enabled: Boolean = true,
+    textColor: Color = MaterialTheme.colors.primaryVariant,
     onClick: () -> Unit
 ) {
     TextButton(
@@ -38,10 +41,48 @@ fun DefaultButton(
         Text(
             modifier = Modifier.padding(start = 4.dp, end = 4.dp),
             text = text.uppercase(),
-            color = MaterialTheme.colors.primaryVariant,
+            color = textColor,
             maxLines = 1
         )
     }
+}
+
+@Composable
+fun DefaultButtonSecondary(
+    modifier: Modifier = Modifier,
+    icon: Painter? = null,
+    text: String,
+    enabled: Boolean = true,
+    textColor: Color = MaterialTheme.customColors.secondaryTextColor,
+    onClick: () -> Unit
+) {
+    DefaultButton(
+        modifier = modifier,
+        icon = icon,
+        text = text,
+        enabled = enabled,
+        textColor = textColor,
+        onClick = onClick
+    )
+}
+
+@Composable
+fun DefaultButtonSecondaryLight(
+    modifier: Modifier = Modifier,
+    icon: Painter? = null,
+    text: String,
+    enabled: Boolean = true,
+    textColor: Color = secondaryTextColor,
+    onClick: () -> Unit
+) {
+    DefaultButton(
+        modifier = modifier,
+        icon = icon,
+        text = text,
+        enabled = enabled,
+        textColor = textColor,
+        onClick = onClick
+    )
 }
 
 @Composable

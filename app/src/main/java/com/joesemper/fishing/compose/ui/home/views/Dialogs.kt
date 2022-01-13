@@ -91,7 +91,7 @@ fun DefaultDialog(
                 }
 
                 if (neutralButtonText.isNotEmpty()) {
-                    DefaultButton(
+                    DefaultButtonSecondaryLight(
                         modifier = Modifier.constrainAs(neutralButton) {
                             top.linkTo(mainContent.bottom, 16.dp)
                             absoluteLeft.linkTo(parent.absoluteLeft)

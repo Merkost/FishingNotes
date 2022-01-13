@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.theme.customColors
+import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 
 @Composable
 fun BigText(
@@ -165,6 +166,22 @@ fun SecondaryText(
         style = MaterialTheme.typography.body1,
         fontSize = 18.sp,
         color = textColor,
+        text = text,
+        maxLines = maxLines
+    )
+}
+
+@Composable
+fun SecondaryTextLight(
+    modifier: Modifier = Modifier, text: String,
+    maxLines: Int = Int.MAX_VALUE,
+    textAlign: TextAlign = TextAlign.Center,
+    textColor: Color = MaterialTheme.customColors.secondaryTextColor
+) {
+    SecondaryText(
+        textAlign = textAlign,
+        modifier = modifier,
+        textColor = secondaryTextColor,
         text = text,
         maxLines = maxLines
     )
