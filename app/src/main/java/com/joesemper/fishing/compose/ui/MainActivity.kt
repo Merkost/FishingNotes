@@ -36,7 +36,6 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
-import com.joesemper.fishing.compose.ui.login.LoginScreen
 import com.joesemper.fishing.compose.ui.theme.AppThemeValues
 import com.joesemper.fishing.compose.ui.theme.FishingNotesTheme
 import com.joesemper.fishing.compose.viewmodels.MainViewModel

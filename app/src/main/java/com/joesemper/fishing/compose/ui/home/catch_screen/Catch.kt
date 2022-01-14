@@ -29,6 +29,7 @@ import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.notes.ItemUserPlace
+import com.joesemper.fishing.compose.ui.home.place.LottieWarning
 import com.joesemper.fishing.compose.ui.home.views.*
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
@@ -39,32 +40,28 @@ import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.utils.Constants
-import com.joesemper.fishing.utils.time.toDateTextMonth
-import com.joesemper.fishing.utils.time.toTime
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import com.joesemper.fishing.compose.ui.navigate
+import com.joesemper.fishing.utils.time.toDateTextMonth
+import com.joesemper.fishing.utils.time.toTime
 
 @ExperimentalPermissionsApi
 @ExperimentalComposeUiApi
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @Composable
-fun UserCatchScreen(navController: NavController, catch: UserCatch?) {
+fun UserCatchScreen(navController: NavController, catch: UserCatch) {
     val coroutineScope = rememberCoroutineScope()
 
     val viewModel = getViewModel<UserCatchViewModel>()
 
     LaunchedEffect(key1 = catch) {
-        catch?.let {
-            viewModel.catch.value = it
-        }
+            viewModel.catch.value = catch
     }
 
-    if (viewModel.loadingState.value is Progress.Loading) {
-        LoadingDialog()
-    }
+    if (viewModel.loadingState.value is Progress.Loading) { LoadingDialog() }
 
     val bottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     var currentBottomSheet: BottomSheetCatchScreen? by remember { mutableStateOf(null) }
@@ -80,6 +77,16 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch?) {
 
     if (!bottomSheetState.isVisible) {
         currentBottomSheet = null
+    }
+
+    var deleteDialogIsShowing by remember { mutableStateOf(false) }
+
+    if (deleteDialogIsShowing) {
+        DeleteCatchDialog(catch, onDismiss = { deleteDialogIsShowing = false }) {
+            viewModel.deleteCatch()
+            deleteDialogIsShowing = false
+            navController.popBackStack()
+        }
     }
 
     ModalBottomSheetLayout(
@@ -102,8 +109,8 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch?) {
             topBar = {
                 CatchTopBar(
                     navController = navController,
-                    viewModel = viewModel
-                )
+                    catch = catch
+                ) { deleteDialogIsShowing = true }
             }
         ) {
             CatchContent(
@@ -116,20 +123,43 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch?) {
 }
 
 @Composable
-fun CatchTopBar(navController: NavController, viewModel: UserCatchViewModel) {
+fun CatchTopBar(navController: NavController, catch: UserCatch, onDeleteCatch: () -> Unit) {
     DefaultAppBar(
         title = stringResource(id = R.string.user_catch),
-        subtitle = viewModel.catch.value?.let { it.date.toDateTextMonth() + " " + it.date.toTime() },
+        subtitle = catch.date.toDateTextMonth() + " " + catch.date.toTime(),
         onNavClick = { navController.popBackStack() }
     ) {
-        IconButton(modifier = Modifier.padding(horizontal = 4.dp),
-            onClick = {
-                viewModel.deleteCatch()
-                navController.popBackStack()
-            }) {
+        IconButton(
+            modifier = Modifier.padding(horizontal = 4.dp),
+            onClick = onDeleteCatch) {
             Icon(imageVector = Icons.Filled.Delete, contentDescription = "", tint = Color.White)
         }
     }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun DeleteCatchDialog(
+    catch: UserCatch,
+    onDismiss: () -> Unit,
+    onPositiveClick: () -> Unit
+) {
+    DefaultDialog(
+        primaryText = String.format(stringResource(R.string.delete_catch_dialog), catch.fishType),
+        secondaryText = stringResource(R.string.catch_delete_confirmantion),
+        negativeButtonText = stringResource(id = R.string.No),
+        onNegativeClick = onDismiss,
+        positiveButtonText = stringResource(id = R.string.Yes),
+        onPositiveClick = onPositiveClick,
+        onDismiss = onDismiss,
+        content = {
+            LottieWarning(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+            )
+        }
+    )
 }
 
 @ExperimentalMaterialApi

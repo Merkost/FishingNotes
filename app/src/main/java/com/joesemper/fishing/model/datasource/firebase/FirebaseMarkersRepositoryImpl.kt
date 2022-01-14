@@ -146,10 +146,8 @@ class FirebaseMarkersRepositoryImpl(
                             val mapMarker = dc.document.toObject<UserMapMarker>()
                             scope.trySend(mapMarker)
                         }
-                        DocumentChange.Type.MODIFIED -> {
-                        }
-                        DocumentChange.Type.REMOVED -> {
-                        }
+                        DocumentChange.Type.MODIFIED -> {}
+                        DocumentChange.Type.REMOVED -> {}
                     }
                 }
             }

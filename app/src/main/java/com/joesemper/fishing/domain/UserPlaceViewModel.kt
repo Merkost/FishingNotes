@@ -1,6 +1,7 @@
 package com.joesemper.fishing.domain
 
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +15,8 @@ import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.repository.app.CatchesRepository
 import com.joesemper.fishing.model.repository.app.MarkersRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class UserPlaceViewModel(
@@ -22,10 +25,16 @@ class UserPlaceViewModel(
 ) : ViewModel() {
 
     var markerVisibility: MutableState<Boolean?> = mutableStateOf(null)
-    val marker: MutableState<UserMapMarker?> = mutableStateOf(null)
+    private val _marker: MutableStateFlow<UserMapMarker?> = MutableStateFlow(null)
+    val marker: StateFlow<UserMapMarker?>
+        get() = _marker
+
+    private val _markerNotes = MutableStateFlow<List<Note>>(listOf())
+    val markerNotes: StateFlow<List<Note>>
+        get() = _markerNotes
 
     val currentNote: MutableState<Note?> = mutableStateOf(null)
-    val markerNotes = marker.value?.notes ?: listOf()
+
 
     fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>> {
         return viewModelScope.run {
@@ -35,7 +44,7 @@ class UserPlaceViewModel(
 
     fun deletePlace() {
         viewModelScope.launch {
-            marker.value?.let {
+            _marker.value?.let {
                 markersRepo.deleteMarker(it)
             }
         }
@@ -43,7 +52,7 @@ class UserPlaceViewModel(
 
     fun changeVisibility(newIsVisible: Boolean) {
         viewModelScope.launch {
-            marker.value?.let {
+            _marker.value?.let {
                 markerVisibility.value = newIsVisible
                 markersRepo.changeMarkerVisibility(it, changeTo = newIsVisible).collect {
                     when (it) {
@@ -63,9 +72,7 @@ class UserPlaceViewModel(
     }
 
     fun updateMarkerNotes(note: Note) {
-        marker.value?.let { marker ->
-            val mutableList = marker.notes.toMutableList()
-
+        _marker.value?.let { marker ->
             viewModelScope.launch {
                 markersRepo.updateUserMarkerNote(
                     markerId = marker.id,
@@ -75,10 +82,12 @@ class UserPlaceViewModel(
                     when (baseViewState) {
                         is BaseViewState.Success<*> -> {
                             val newNotesList = baseViewState.data as List<Note>
-                            this@UserPlaceViewModel.marker.value?.notes = newNotesList
+                            _markerNotes.value = newNotesList
                         }
-                        else -> {//TODO не удалось добавить заметку
-                         }
+                        is BaseViewState.Error -> {
+                            SnackbarManager.showMessage(R.string.place_note_not_saved)
+                        }
+                        else -> {}
                     }
 
                 }
@@ -90,6 +99,11 @@ class UserPlaceViewModel(
 
 
         }
+    }
+
+    fun setMarker(m: UserMapMarker) {
+        _marker.value = m
+        _markerNotes.value = m.notes
     }
 
 }

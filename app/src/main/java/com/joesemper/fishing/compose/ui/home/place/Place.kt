@@ -31,23 +31,22 @@ import org.koin.androidx.compose.viewModel
     ExperimentalAnimationApi::class, ExperimentalPagerApi::class, ExperimentalComposeUiApi::class
 )
 @Composable
-fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: UserMapMarker?) {
+fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: UserMapMarker) {
 
     val viewModel: UserPlaceViewModel by viewModel()
-    place?.let { marker ->
-        viewModel.marker.value = marker
+    LaunchedEffect(place) {
+        viewModel.setMarker(place)
     }
     DisposableEffect(Unit) {
-        viewModel.markerVisibility.value = place?.visible
+        viewModel.markerVisibility.value = place.visible
         onDispose { }
     }
     val scaffoldState = rememberBottomSheetScaffoldState()
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
 
     val coroutineScope = rememberCoroutineScope()
-    val marker by remember { viewModel.marker }
-    val notes = remember(marker?.notes) { mutableStateOf(marker?.notes) }
-
+    val marker by viewModel.marker.collectAsState()
+    val notes by viewModel.markerNotes.collectAsState()
 
     ModalBottomSheetLayout(
         sheetState = modalBottomSheetState,

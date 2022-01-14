@@ -24,7 +24,6 @@ import com.joesemper.fishing.compose.ui.home.catch_screen.UserCatchScreen
 import com.joesemper.fishing.compose.ui.home.new_catch.NewCatchScreen
 import com.joesemper.fishing.compose.ui.home.place.UserPlaceScreen
 import com.joesemper.fishing.compose.ui.home.weather.WeatherDaily
-import com.joesemper.fishing.compose.ui.login.LoginScreen
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.InternalCoroutinesApi
 

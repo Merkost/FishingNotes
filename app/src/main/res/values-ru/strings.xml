@@ -252,5 +252,7 @@
     <string name="fish_desc">Количество рыб: по убыванию</string>
     <string name="delete_place_dialog">Удаление места \"%s\"</string>
     <string name="sure_delete_place_dialog">Все ваши уловы также будут удалены с этого места. Вы уверены?</string>
+    <string name="place_note_not_saved">Не удалось сохранить заметку</string>
+    <string name="delete_catch_dialog">Удаление улова \"%s\"</string>
 
 </resources>

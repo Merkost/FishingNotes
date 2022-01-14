@@ -1,4 +1,4 @@
-package com.joesemper.fishing.compose.ui.login
+package com.joesemper.fishing.compose.ui
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.CubicBezierEasing
@@ -21,17 +21,12 @@ import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 import com.google.accompanist.insets.systemBarsPadding
 import com.joesemper.fishing.R
-import com.joesemper.fishing.compose.ui.MainActivity
-import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.AppSnackbar
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
-import com.joesemper.fishing.compose.ui.resources
-import com.joesemper.fishing.compose.ui.theme.Typography
 import com.joesemper.fishing.domain.LoginViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.common.User
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
@@ -222,7 +217,7 @@ fun LoginScreen(navController: NavController) {
                         //Title
                         Text(
                             stringResource(R.string.login_title),
-                            style = Typography.h5,
+                            style = MaterialTheme.typography.h5,
                             //color = Color.DarkGray
                         )
 

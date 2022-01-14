@@ -14,11 +14,8 @@ import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import java.util.*
 
-fun newCatchClicked(navController: NavController, viewModel: UserPlaceViewModel) {
-    val marker: UserMapMarker? = viewModel.marker.value
-    marker?.let {
-        navController.navigate(MainDestinations.NEW_CATCH_ROUTE, Arguments.PLACE to it)
-    }
+fun newCatchClicked(navController: NavController, place: UserMapMarker) {
+        navController.navigate(MainDestinations.NEW_CATCH_ROUTE, Arguments.PLACE to place)
 }
 
 fun onRouteClicked(context: Context, marker: UserMapMarker) {

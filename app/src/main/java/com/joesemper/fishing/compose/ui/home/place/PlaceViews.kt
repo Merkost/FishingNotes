@@ -170,7 +170,7 @@ fun PlaceTabsContentView(
     pagerState: PagerState,
     navController: NavController,
     catches: List<UserCatch>,
-    notes: MutableState<List<Note>?>,
+    notes: List<Note>,
     onNoteSelected: (Note) -> Unit
 ) {
     HorizontalPager(
@@ -190,7 +190,7 @@ fun PlaceTabsContentView(
                     catches = catches,
                     userCatchClicked = { onCatchItemClick(it, navController) }
                 )
-                1 -> PlaceNotes(notes.value) {
+                1 -> PlaceNotes(notes) {
                     onNoteSelected(it)
                 }
             }
@@ -286,7 +286,9 @@ fun PlaceCatchesView(
                             onClick = { userCatch -> userCatchClicked(userCatch) }
                         )
                     }
+
                 }
+                item { Spacer(modifier = Modifier.size(bottomBannerPadding)) }
             }
             catches.isEmpty() -> {
                 item {
@@ -331,7 +333,7 @@ fun PlaceButtonsView(
         DefaultButtonOutlined(
             text = stringResource(id = R.string.new_catch),
             icon = painterResource(id = R.drawable.ic_add_catch),
-            onClick = { newCatchClicked(navController, viewModel) }
+            onClick = { newCatchClicked(navController, place) }
         )
 
         DefaultButtonOutlined(
