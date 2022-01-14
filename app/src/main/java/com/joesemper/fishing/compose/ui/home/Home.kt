@@ -15,7 +15,10 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.Menu
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,8 +52,8 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.home.map.MapScreen
 import com.joesemper.fishing.compose.ui.home.notes.Notes
+import com.joesemper.fishing.compose.ui.home.profile.Profile
 import com.joesemper.fishing.compose.ui.home.weather.WeatherScreen
-import com.joesemper.fishing.compose.ui.requiredArg
 import com.joesemper.fishing.compose.ui.theme.FishingNotesTheme
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.ExperimentalCoroutinesApi

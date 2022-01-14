@@ -7,10 +7,7 @@ import com.joesemper.fishing.domain.*
 import com.joesemper.fishing.model.datasource.FreeWeatherRepositoryImpl
 import com.joesemper.fishing.model.datasource.SolunarRetrofitRepositoryImpl
 import com.joesemper.fishing.model.datasource.WeatherRepositoryRetrofitImpl
-import com.joesemper.fishing.model.datasource.firebase.FirebaseCatchesRepositoryImpl
-import com.joesemper.fishing.model.datasource.firebase.FirebaseCloudPhotoStorage
-import com.joesemper.fishing.model.datasource.firebase.FirebaseMarkersRepositoryImpl
-import com.joesemper.fishing.model.datasource.firebase.FirebaseUserRepositoryImpl
+import com.joesemper.fishing.model.datasource.firebase.*
 import com.joesemper.fishing.model.datasource.utils.RepositoryCollections
 import com.joesemper.fishing.model.datastore.AppPreferences
 import com.joesemper.fishing.model.datastore.NotesPreferences
@@ -39,6 +36,7 @@ val repositoryModule = module {
     single<PhotoStorage> { FirebaseCloudPhotoStorage(androidContext()) }
     single<WeatherRepository> { WeatherRepositoryRetrofitImpl() }
     single<FreeWeatherRepository> { FreeWeatherRepositoryImpl() }
+    single<OfflineRepository> { FirebaseOfflineRepositoryImpl(dbCollections = get()) }
 }
 
 val settingsModule = module {
@@ -55,7 +53,7 @@ val mainModule = module {
 
     viewModel { MapViewModel(get(), get(), get()) }
     viewModel { NewCatchViewModel(get(), get(), get()) }
-    viewModel { UserViewModel(get(), get(), get()) }
+    viewModel { UserViewModel(get(), get()) }
     viewModel { NewPlaceViewModel(get()) }
     viewModel { UserCatchViewModel(get(), get(), get()) }
     viewModel { WeatherViewModel(get(), get()) }

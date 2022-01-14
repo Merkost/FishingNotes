@@ -6,7 +6,6 @@ import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
-import com.joesemper.fishing.model.repository.PhotoStorage
 import com.joesemper.fishing.model.datasource.utils.RepositoryCollections
 import com.joesemper.fishing.model.datasource.utils.RepositoryCollections.*
 import com.joesemper.fishing.model.entity.common.CatchesContentState
@@ -14,6 +13,7 @@ import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.raw.RawUserCatch
 import com.joesemper.fishing.model.mappers.UserCatchMapper
+import com.joesemper.fishing.model.repository.PhotoStorage
 import com.joesemper.fishing.model.repository.app.CatchesRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
@@ -109,23 +109,6 @@ class FirebaseCatchesRepositoryImpl(
                     }
             }
         }
-
-    @ExperimentalCoroutinesApi
-    private fun getCatchesFromDoc(docs: List<DocumentSnapshot>) = callbackFlow {
-        docs.forEach { doc ->
-            doc.reference.collection(CATCHES_COLLECTION)
-                .addSnapshotListener { snapshots, error ->
-                    if (snapshots != null) {
-                        val catches = snapshots.toObjects(UserCatch::class.java)
-                        trySend(catches)
-                    } else {
-                        trySend(listOf<UserCatch>())
-                    }
-
-                }
-        }
-        awaitClose { }
-    }
 
     override fun getCatchesByMarkerId(markerId: String) = channelFlow {
         val listener = dbCollections.getUserCatchesCollection(markerId)
