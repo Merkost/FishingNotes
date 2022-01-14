@@ -272,6 +272,11 @@
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="add_location_dialog">Пожалуйста, добавте место для добавления уловов</string>
+    <string name="register_date">Дата регистрации</string>
+    <string name="catches_count">Catches count</string>
+    <string name="places_count">Places count</string>
+    <string name="best_catch">Лучший улов</string>
+    <string name="favorite_place">Любимое место</string>
 
 
 </resources>

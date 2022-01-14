@@ -12,7 +12,8 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,12 +47,8 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun Profile(navController: NavController, modifier: Modifier = Modifier) {
     val viewModel = getViewModel<UserViewModel>()
-    var visible by remember { mutableStateOf(false) }
-    val user by viewModel.currentUser.collectAsState()
-    val userPlacesNum by viewModel.currentPlaces.collectAsState()
-    val userCatchesNum by viewModel.currentCatches.collectAsState()
 
-    //val firebaseUser = Firebase.auth.currentUser
+    val user by viewModel.currentUser
 
     val imgSize: Dp = 120.dp
     val bgHeight: Dp = 180.dp
@@ -65,7 +62,7 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
                 .scrollable(rememberScrollState(0), Orientation.Vertical, true)
         ) {
 
-            val (background, card, image, name, places, catches, content, stats, box, logout, settings) = createRefs()
+            val (background, card, image, name, places, catches, registerDate, content, stats, box, logout, settings) = createRefs()
             val bgGl = createGuidelineFromTop(120.dp)
             val verticalCenterGl = createGuidelineFromAbsoluteLeft(0.5f)
             Surface(//shape = RoundedCornerShape(0.dp,0.dp,15.dp,15.dp),
@@ -88,6 +85,7 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
                     centerAround(bgGl)
                 }
                 .zIndex(2f))
+
             UserText(user, modifier = Modifier
                 .constrainAs(name) {
                     top.linkTo(image.bottom)
@@ -95,6 +93,18 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
                     absoluteRight.linkTo(card.absoluteRight)
                 }
                 .zIndex(2f))
+
+            SecondaryText(
+                modifier = Modifier
+                    .constrainAs(registerDate) {
+                        top.linkTo(name.bottom)
+                        absoluteLeft.linkTo(name.absoluteLeft)
+                        absoluteRight.linkTo(name.absoluteRight)
+                    }
+                    .zIndex(2f),
+                text = "${stringResource(id = R.string.register_date)}: " +
+                        (user?.registerDate?.toDateTextMonth() ?: "")
+            )
 
             Card(
                 modifier = Modifier
@@ -119,18 +129,25 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
                     verticalArrangement = Arrangement.Center,
                 ) {
 
-                    OutlinedTextField(value = /*user?.login ?: */"@fisherman",
-                        label = { Text(text = "Login") },
-                        readOnly = true,
-                        onValueChange = {})
-                    OutlinedTextField(value = user?.email ?: "",
-                        label = { Text(text = "Email") },
-                        readOnly = true,
-                        onValueChange = {})
-                    OutlinedTextField(value = user?.registerDate?.toDateTextMonth() ?: "",
-                        label = { Text(text = "Register date") },
-                        readOnly = true,
-                        onValueChange = {})
+//                    CatchesCountView(catchesCount = viewModel.currentCatches.value?.size ?: 0)
+//                    PlacesCountView(placesCount = viewModel.currentPlaces.value?.size ?: 0)
+
+                    BestCatchView(bestCatch = viewModel.bestCatch.value)
+                    Spacer(modifier = Modifier.size(32.dp))
+                    FavoritePlaceView(bestPlace = viewModel.favoritePlace.value)
+
+//                    OutlinedTextField(value = /*user?.login ?: */"@fisherman",
+//                        label = { Text(text = "Login") },
+//                        readOnly = true,
+//                        onValueChange = {})
+//                    OutlinedTextField(value = user?.email ?: "",
+//                        label = { Text(text = "Email") },
+//                        readOnly = true,
+//                        onValueChange = {})
+//                    OutlinedTextField(value = user?.registerDate?.toDateTextMonth() ?: "",
+//                        label = { Text(text = stringResource(R.string.register_date)) },
+//                        readOnly = true,
+//                        onValueChange = {})
 
                     /*userPlacesNum?.let {
                         if (it.isEmpty()) {
@@ -142,7 +159,7 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
                 }
             }
 
-            PlacesNumber(userPlacesNum,
+            PlacesNumber(viewModel.currentPlaces.value,
                 Modifier
                     .constrainAs(places) {
                         top.linkTo(bgGl)
@@ -151,7 +168,7 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
                         bottom.linkTo(image.bottom)
                     }
                     .zIndex(3f))
-            CatchesNumber(userCatchesNum,
+            CatchesNumber(viewModel.currentCatches.value,
                 Modifier
                     .constrainAs(catches) {
                         top.linkTo(bgGl)
@@ -173,13 +190,15 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
 
 @Composable
 fun NoPlacesStats() {
-    Column(modifier = Modifier.fillMaxWidth(),
+    Column(
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceAround) {
+        verticalArrangement = Arrangement.SpaceAround
+    ) {
         SecondaryText(text = "Добавьте места и уловы чтобы увидеть статистику!")
         LottieMyStats(modifier = Modifier.fillMaxWidth())
     }
-    
+
 }
 
 @Composable
