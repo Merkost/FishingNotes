@@ -21,6 +21,7 @@ import androidx.constraintlayout.compose.Dimension
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.theme.supportTextColor
 import com.joesemper.fishing.model.entity.common.Note
+import com.joesemper.fishing.utils.time.toDate
 
 @ExperimentalComposeUiApi
 @Composable
@@ -41,7 +42,7 @@ fun DefaultNoteView(
                 .fillMaxWidth()
                 .wrapContentHeight(),
         ) {
-            val (subtitle, text) = createRefs()
+            val (subtitle, text, noteDate) = createRefs()
 
             SubtitleWithIcon(
                 modifier = Modifier.constrainAs(subtitle) {
@@ -78,6 +79,11 @@ fun DefaultNoteView(
                     text = note.description,
                     onClick = onClick
                 )
+                SupportText(modifier = Modifier.constrainAs(noteDate) {
+                    top.linkTo(text.bottom, 4.dp)
+                    bottom.linkTo(parent.bottom, 4.dp)
+                    absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+                }, text = note.dateCreated.toDate())
             }
         }
     }
