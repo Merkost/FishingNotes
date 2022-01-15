@@ -273,7 +273,10 @@ fun ItemUserCatch(
     }
 }
 
-
+/**
+ * @param[childModifier] This is a modifier which is used in all child views
+ * in order to show placeholder loading
+ */
 @Composable
 fun ItemUserPlace(
     modifier: Modifier = Modifier,
@@ -436,7 +439,10 @@ fun NoElementsView(
     }
 }
 
-
+/**
+ * @param[childModifier] This is a modifier which is used in all child views
+ * in order to show placeholder loading
+ */
 @ExperimentalMaterialApi
 @Composable
 fun CatchItemView(
