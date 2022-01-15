@@ -158,7 +158,9 @@ fun DefaultButtonFilled(
 @Composable
 fun DefaultIconButton(
     modifier: Modifier = Modifier,
+    childModifier: Modifier = Modifier,
     icon: Painter,
+    tint: Color = MaterialTheme.colors.onSurface,
     onClick: () -> Unit
 ) {
     IconButton(
@@ -166,10 +168,10 @@ fun DefaultIconButton(
         onClick = { onClick() }
     ) {
         Icon(
-            modifier = Modifier.size(24.dp),
+            modifier = childModifier.size(24.dp),
             painter = icon,
             contentDescription = null,
-            tint = MaterialTheme.colors.onSurface
+            tint = tint
         )
     }
 }

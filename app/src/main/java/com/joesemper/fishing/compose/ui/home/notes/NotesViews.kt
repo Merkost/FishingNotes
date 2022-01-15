@@ -276,6 +276,7 @@ fun ItemUserCatch(
 @Composable
 fun ItemUserPlace(
     modifier: Modifier = Modifier,
+    childModifier: Modifier = Modifier,
     place: UserMapMarker,
     userPlaceClicked: (UserMapMarker) -> Unit,
     navigateToMap: () -> Unit,
@@ -299,7 +300,7 @@ fun ItemUserPlace(
                         top.linkTo(title.top)
                         bottom.linkTo(date.bottom)
                         absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-                    },
+                    }.then(childModifier),
                 painter = painterResource(R.drawable.ic_baseline_location_on_24),
                 contentDescription = stringResource(R.string.place),
                 tint = Color(place.markerColor)
@@ -311,8 +312,8 @@ fun ItemUserPlace(
                     absoluteRight.linkTo(navigateButton.absoluteLeft, 8.dp)
                     top.linkTo(parent.top, 16.dp)
                     width = Dimension.fillToConstraints
-                },
-                text = place.title
+                }.then(childModifier),
+                text = place.title,
             )
 
             DefaultIconButton(
@@ -321,7 +322,10 @@ fun ItemUserPlace(
                     bottom.linkTo(date.bottom)
                     absoluteRight.linkTo(parent.absoluteRight, 8.dp)
                 },
+                childModifier = childModifier,
                 icon = painterResource(id = R.drawable.ic_place_on_map),
+                tint = if (!place.visible) MaterialTheme.customColors.secondaryTextColor
+                        else MaterialTheme.colors.onSurface,
                 onClick = { navigateToMap() }
             )
 
@@ -330,7 +334,7 @@ fun ItemUserPlace(
                     top.linkTo(title.bottom, 4.dp)
                     bottom.linkTo(parent.bottom, 16.dp)
                     absoluteLeft.linkTo(title.absoluteLeft)
-                },
+                }.then(childModifier),
                 text = place.dateOfCreation.toDateTextMonth()
             )
 
@@ -338,6 +342,7 @@ fun ItemUserPlace(
                 modifier = Modifier.constrainAs(amount) {
                     bottom.linkTo(date.bottom)
                     top.linkTo(date.top)
+                    height = Dimension.fillToConstraints
                     absoluteLeft.linkTo(date.absoluteRight, 8.dp)
                 },
                 count = place.catchesCount,
