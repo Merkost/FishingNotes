@@ -283,7 +283,8 @@ fun PlaceCatchesView(
                         CatchItemView(
                             catch = it,
                             showPlace = false,
-                            onClick = { userCatch -> userCatchClicked(userCatch) }
+                            onClick = { userCatch -> userCatchClicked(userCatch) },
+                            childModifier = Modifier
                         )
                     }
 

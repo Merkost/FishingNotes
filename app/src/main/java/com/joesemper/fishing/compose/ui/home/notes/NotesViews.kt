@@ -273,6 +273,7 @@ fun ItemUserCatch(
     }
 }
 
+
 @Composable
 fun ItemUserPlace(
     modifier: Modifier = Modifier,
@@ -300,7 +301,7 @@ fun ItemUserPlace(
                         top.linkTo(title.top)
                         bottom.linkTo(date.bottom)
                         absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-                    }.then(childModifier),
+                    },
                 painter = painterResource(R.drawable.ic_baseline_location_on_24),
                 contentDescription = stringResource(R.string.place),
                 tint = Color(place.markerColor)
@@ -435,13 +436,16 @@ fun NoElementsView(
     }
 }
 
+
 @ExperimentalMaterialApi
 @Composable
 fun CatchItemView(
     modifier: Modifier = Modifier,
+    childModifier: Modifier = Modifier,
     catch: UserCatch,
     showPlace: Boolean = true,
-    onClick: (UserCatch) -> Unit
+    onClick: (UserCatch) -> Unit,
+
 ) {
     val preferences: UserPreferences = get()
     val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
@@ -463,16 +467,16 @@ fun CatchItemView(
                     absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
                     absoluteRight.linkTo(weight.absoluteLeft, 16.dp)
                     width = Dimension.fillToConstraints
-                },
+                }.then(childModifier),
                 text = catch.fishType,
                 maxLines = 1
             )
 
             SecondaryTextSmall(
                 modifier = Modifier.constrainAs(amount) {
-                    top.linkTo(fishType.bottom)
+                    top.linkTo(fishType.bottom, 4.dp)
                     absoluteLeft.linkTo(fishType.absoluteLeft)
-                },
+                }.then(childModifier),
                 text = "${stringResource(id = R.string.amount)}: ${catch.fishAmount}" +
                         " ${stringResource(id = R.string.pc)}"
             )
@@ -481,7 +485,7 @@ fun CatchItemView(
                 modifier = Modifier.constrainAs(weight) {
                     top.linkTo(fishType.top)
                     absoluteRight.linkTo(parent.absoluteRight, 8.dp)
-                },
+                }.then(childModifier),
                 text = "${catch.fishWeight} ${stringResource(id = R.string.kg)}"
             )
 
@@ -507,7 +511,7 @@ fun CatchItemView(
                         top.linkTo(placeIcon.top)
                         bottom.linkTo(placeIcon.bottom)
                         width = Dimension.fillToConstraints
-                    },
+                    }.then(childModifier),
                     text = catch.placeTitle,
                     textAlign = TextAlign.Start,
                     maxLines = 1,
@@ -519,7 +523,7 @@ fun CatchItemView(
                 modifier = Modifier.constrainAs(time) {
                     absoluteRight.linkTo(parent.absoluteRight, 8.dp)
                     top.linkTo(amount.bottom, 16.dp)
-                },
+                }.then(childModifier),
                 text = catch.date.toTime(is12hTimeFormat)
             )
 
@@ -527,8 +531,9 @@ fun CatchItemView(
                 modifier = Modifier.constrainAs(photosCount) {
                     top.linkTo(time.top)
                     bottom.linkTo(time.bottom)
+                    height = Dimension.fillToConstraints
                     absoluteRight.linkTo(time.absoluteLeft, 12.dp)
-                },
+                }.then(childModifier),
                 count = catch.downloadPhotoLinks.size,
                 icon = R.drawable.ic_baseline_photo_24,
                 tint = MaterialTheme.colors.primaryVariant.copy(0.25f)
