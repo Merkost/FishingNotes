@@ -6,13 +6,13 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 class Hourly(
-    @field:SerializedName("dt") val date: Long,
-    @field:SerializedName("temp") val temperature: Float,
-    @field:SerializedName("pressure") val pressure: Int,
-    @field:SerializedName("humidity") val humidity: Int,
-    @field:SerializedName("clouds") val clouds: Int,
-    @field:SerializedName("wind_speed") val windSpeed: Float,
-    @field:SerializedName("wind_deg") val windDeg: Int,
-    @field:SerializedName("weather") val weather: List<Weather>,
-    @field:SerializedName("pop") val probabilityOfPrecipitation: Float,
+    @field:SerializedName("dt") val date: Long = 0,
+    @field:SerializedName("temp") val temperature: Float = 0f,
+    @field:SerializedName("pressure") val pressure: Int = 0,
+    @field:SerializedName("humidity") val humidity: Int = 0,
+    @field:SerializedName("clouds") val clouds: Int = 0,
+    @field:SerializedName("wind_speed") val windSpeed: Float = 0f,
+    @field:SerializedName("wind_deg") val windDeg: Int = 0,
+    @field:SerializedName("weather") val weather: List<Weather> = listOf(Weather()),
+    @field:SerializedName("pop") val probabilityOfPrecipitation: Float = 0f,
 ): Parcelable

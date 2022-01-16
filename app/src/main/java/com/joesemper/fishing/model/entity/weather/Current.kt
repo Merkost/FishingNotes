@@ -14,5 +14,5 @@ class Current(
     @field:SerializedName("humidity") val humidity: Int = 0,
     @field:SerializedName("wind_speed") val windSpeed: Float = 0.0f,
     @field:SerializedName("wind_deg") val windDeg: Int = 0,
-    @field:SerializedName("weather") val weather: List<Weather> = listOf()
+    @field:SerializedName("weather") val weather: List<Weather> = listOf(Weather())
 ) : Parcelable

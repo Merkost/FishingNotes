@@ -2,7 +2,6 @@ package com.joesemper.fishing.compose.ui.home.weather
 
 import android.graphics.Paint
 import android.graphics.Typeface
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
@@ -11,6 +10,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -32,6 +31,9 @@ import com.airbnb.lottie.compose.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.fade
+import com.google.accompanist.placeholder.placeholder
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.bar_chart.BarChartUtils.toLegacyInt
 import com.joesemper.fishing.model.datastore.UserPreferences
@@ -42,13 +44,11 @@ import com.joesemper.fishing.compose.ui.home.map.LocationState
 import com.joesemper.fishing.compose.ui.home.map.checkPermission
 import com.joesemper.fishing.compose.ui.home.map.getCurrentLocationFlow
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
-import com.joesemper.fishing.compose.ui.home.views.DefaultButtonOutlined
 import com.joesemper.fishing.compose.ui.home.views.PrimaryText
 import com.joesemper.fishing.compose.ui.home.views.SecondaryText
 import com.joesemper.fishing.compose.ui.home.views.SupportText
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.theme.customColors
-import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.WeatherViewModel
 import com.joesemper.fishing.domain.viewstates.ErrorType
 import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
@@ -76,16 +76,13 @@ fun WeatherScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     place: UserMapMarker? = null,
+    viewModel: WeatherViewModel = getViewModel(),
     upPress: () -> Unit,
 ) {
-    val viewModel: WeatherViewModel = getViewModel()
     val context = LocalContext.current
-
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
 
-    val selectedPlace = remember {
-        mutableStateOf<UserMapMarker?>(place)
-    }
+    var selectedPlace by remember { mutableStateOf(place) }
 
     LaunchedEffect(permissionsState.allPermissionsGranted) {
         checkPermission(context)
@@ -99,36 +96,30 @@ fun WeatherScreen(
                         index = 0,
                         element = createCurrentPlaceItem(locationState.location, context)
                     )
-                    if (selectedPlace.value == null) {
-                        selectedPlace.value = viewModel.markersList.value.first()
+                    if (selectedPlace == null) {
+                        selectedPlace = viewModel.markersList.value.first()
                     }
                 }
             }
         }
     }
 
-    LaunchedEffect(selectedPlace.value) {
-        selectedPlace.value?.let { place ->
+    LaunchedEffect(selectedPlace) {
+        selectedPlace?.let { place ->
             viewModel.getWeather(place.latitude, place.longitude)
         }
     }
 
     val scrollState = rememberScrollState()
-
     val weatherState by viewModel.weatherState.collectAsState()
-
-    val weatherPrefs: WeatherPreferences = get()
-    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
-    val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
-    val windSpeedUnit by weatherPrefs.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
-
+    val forecast by viewModel.weather.collectAsState()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             val elevation =
                 animateDpAsState(targetValue = if (scrollState.value > 0) 4.dp else 0.dp)
             if (checkPermission(context) && viewModel.markersList.value.isNotEmpty()) {
-                selectedPlace.value = viewModel.markersList.value.first()
+                selectedPlace = viewModel.markersList.value.first()
             }
 
             TopAppBar(
@@ -136,18 +127,17 @@ fun WeatherScreen(
                 backgroundColor = MaterialTheme.colors.primary
             ) {
                 WeatherLocationIconButton(color = Color.White) {
-                    selectedPlace.value?.let {
+                    selectedPlace?.let {
                         navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
                             Arguments.PLACE to it)
                     }
                 }
-                selectedPlace.value?.let {
-
+                selectedPlace?.let {
                     WeatherPlaceSelectItem(
                         selectedPlace = it,
                         userPlaces = viewModel.markersList.value,
                         onItemClick = { clickedItem ->
-                            selectedPlace.value = clickedItem
+                            selectedPlace = clickedItem
                         }
                     )
                 }
@@ -157,38 +147,40 @@ fun WeatherScreen(
     ) {
 
         Column(modifier = Modifier.fillMaxSize()) {
-            AnimatedVisibility(weatherState is RetrofitWrapper.Success/*viewModel.currentWeather.value != null*/) {
-                val forecast = viewModel.currentWeather.value!!
-                Column(
-                    modifier = Modifier.verticalScroll(scrollState)
-                ) {
-
-                    CurrentWeather(
-                        forecast = forecast,
-                        pressureUnit = pressureUnit,
-                        temperatureUnit = temperatureUnit,
-                        windSpeedUnit = windSpeedUnit,
-                    )
-
-                    PressureChartItem(
-                        forecast = forecast.daily,
-                        pressureUnit = pressureUnit,
-                    )
-
-                    forecast.daily.forEachIndexed { index, daily ->
-                        DailyWeatherItem(
-                            forecast = daily,
-                            temperatureUnit = temperatureUnit,
-                            onDailyWeatherClick = {
-                                navigateToDailyWeatherScreen(
-                                    navController = navController,
-                                    index = index,
-                                    forecastDaily = forecast.daily
-                                )
-                            }
+            when(weatherState) {
+                is RetrofitWrapper.Loading -> {
+                    MainWeatherScreen(childModifier = Modifier.placeholder(
+                        true,
+                        color = Color.Gray,
+                        shape = CircleShape,
+                        highlight = PlaceholderHighlight.fade()
+                    ), forecast, scrollState, navigateToDaily = {})
+                }
+                is RetrofitWrapper.Success -> {
+                    MainWeatherScreen(childModifier = Modifier, forecast, scrollState)
+                    { index ->
+                        navigateToDailyWeatherScreen(
+                            navController = navController,
+                            index = index,
+                            forecastDaily = forecast.daily
                         )
                     }
                 }
+                is RetrofitWrapper.Error -> {
+                    val errorType = (weatherState as RetrofitWrapper.Error).errorType
+                    when (errorType) {
+                        is ErrorType.NetworkError -> {
+                            NoInternetView(Modifier.fillMaxWidth())
+                        }
+                        is ErrorType.OtherError -> {
+                            //TODO: OtherErrorView()
+                            NoInternetView(Modifier.fillMaxWidth())
+                        }
+                    }
+                }
+            }
+            /*AnimatedVisibility(weatherState is RetrofitWrapper.Success, RetrofitWrapper.Loading*//*viewModel.currentWeather.value != null*//*) {
+
             }
 
             AnimatedVisibility(weatherState is RetrofitWrapper.Loading) {
@@ -203,7 +195,7 @@ fun WeatherScreen(
                         WeatherLoading(
                             modifier = Modifier
                                 .size(250.dp)
-                            /*.align(Alignment.CenterHorizontally)*/
+                            *//*.align(Alignment.CenterHorizontally)*//*
                         )
                         DefaultButtonOutlined(text = "Add", onClick = {
                             navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${true}")
@@ -230,12 +222,59 @@ fun WeatherScreen(
                         }
                     }
                 }
-            }
+            }*/
         }
 
     }
 
 
+}
+
+@Composable
+fun MainWeatherScreen(
+    childModifier: Modifier = Modifier,
+    forecast: WeatherForecast,
+    scrollState: ScrollState,
+    navigateToDaily: (Int) -> Unit,
+
+) {
+    val weatherPrefs: WeatherPreferences = get()
+    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
+    val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
+    val windSpeedUnit by weatherPrefs.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
+
+
+    Column(
+        modifier = Modifier.verticalScroll(scrollState)
+    ) {
+
+        CurrentWeather(
+            childModifier = childModifier,
+            forecast = forecast,
+            pressureUnit = pressureUnit,
+            temperatureUnit = temperatureUnit,
+            windSpeedUnit = windSpeedUnit,
+        )
+
+        if (forecast.daily.all { it.date != 0L }) {
+            PressureChartItem(
+                childModifier = childModifier,
+                forecast = forecast.daily,
+                pressureUnit = pressureUnit,
+            )
+        }
+
+        forecast.daily.forEachIndexed { index, daily ->
+            DailyWeatherItem(
+                childModifier = childModifier,
+                forecast = daily,
+                temperatureUnit = temperatureUnit,
+                onDailyWeatherClick = {
+                    navigateToDaily(index)
+                }
+            )
+        }
+    }
 }
 
 @Composable
@@ -264,10 +303,11 @@ fun NoInternetView(modifier: Modifier = Modifier) {
 @Composable
 fun CurrentWeather(
     modifier: Modifier = Modifier,
-    forecast: WeatherForecast,
+    childModifier: Modifier = Modifier,
     temperatureUnit: TemperatureValues,
     pressureUnit: PressureValues,
     windSpeedUnit: WindSpeedValues,
+    forecast: WeatherForecast,
 ) {
     Surface(
         modifier = modifier
@@ -282,6 +322,7 @@ fun CurrentWeather(
         ) {
 
             PrimaryWeatherItemView(
+                childModifier = childModifier,
                 temperature = forecast.hourly.first().temperature,
                 weather = forecast.hourly.first().weather.first(),
                 textTint = Color.White,
@@ -290,11 +331,13 @@ fun CurrentWeather(
             )
 
             CurrentWeatherValuesView(
+                childModifier = childModifier,
                 forecast = forecast.hourly.first(),
                 pressureUnit = pressureUnit,
             )
 
             HourlyWeather(
+                childModifier = childModifier,
                 forecastHourly = forecast.hourly,
                 temperatureUnit = temperatureUnit,
                 windSpeedUnit = windSpeedUnit,
@@ -306,19 +349,21 @@ fun CurrentWeather(
 @Composable
 fun HourlyWeather(
     modifier: Modifier = Modifier,
-    forecastHourly: List<Hourly>,
+    childModifier: Modifier = Modifier,
     temperatureUnit: TemperatureValues,
     windSpeedUnit: WindSpeedValues,
+    forecastHourly: List<Hourly>,
 ) {
     val preferences: UserPreferences = get()
     val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
 
     LazyRow(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start)
     ) {
         items(forecastHourly.size) { index ->
             HourlyWeatherItem(
+                childModifier = childModifier,
                 forecast = forecastHourly[index],
                 timeTitle = if (index == 0) {
                     stringResource(R.string.now)
@@ -335,11 +380,12 @@ fun HourlyWeather(
 @Composable
 fun HourlyWeatherItem(
     modifier: Modifier = Modifier,
-    timeTitle: String,
+    childModifier: Modifier = Modifier,
     forecast: Hourly,
     temperatureUnit: TemperatureValues,
     windSpeedUnit: WindSpeedValues,
-    color: Color = Color.White
+    color: Color = Color.White,
+    timeTitle: String
 ) {
     Column(
         modifier = modifier.padding(horizontal = 12.dp),
@@ -355,12 +401,13 @@ fun HourlyWeatherItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                modifier = Modifier.size(32.dp),
+                modifier = childModifier.size(32.dp),
                 painter = painterResource(id = getWeatherIconByName(forecast.weather.first().icon)),
                 contentDescription = "",
                 //colorFilter = ColorFilter.tint(color = color)
             )
             PrimaryText(
+                modifier = childModifier,
                 text = temperatureUnit.getTemperature(
                     forecast.temperature) + stringResource(temperatureUnit.stringRes),
                 textColor = color
@@ -372,6 +419,7 @@ fun HourlyWeatherItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             PrimaryText(
+                modifier = childModifier,
                 text = windSpeedUnit.getWindSpeedInt(forecast.windSpeed.toDouble())
                         + " " + stringResource(windSpeedUnit.stringRes),
                 textColor = color
@@ -381,7 +429,7 @@ fun HourlyWeatherItem(
                     .rotate(forecast.windDeg.toFloat()),
                 painter = painterResource(id = R.drawable.ic_baseline_navigation_24),
                 contentDescription = "",
-                tint = MaterialTheme.colors.primaryVariant
+                tint = color
             )
         }
     }
@@ -390,9 +438,10 @@ fun HourlyWeatherItem(
 @Composable
 fun DailyWeatherItem(
     modifier: Modifier = Modifier,
-    forecast: Daily,
+    childModifier: Modifier = Modifier,
     temperatureUnit: TemperatureValues,
     onDailyWeatherClick: () -> Unit,
+    forecast: Daily,
 ) {
     ConstraintLayout(
         modifier = modifier
@@ -403,7 +452,7 @@ fun DailyWeatherItem(
         val (date, day, divider, temp, tempUnits, weatherIcon, pop, popIcon) = createRefs()
         val guideline = createGuidelineFromAbsoluteLeft(0.6f)
         WeatherHeaderText(
-            modifier = Modifier.constrainAs(date) {
+            modifier = childModifier.constrainAs(date) {
                 top.linkTo(parent.top, 8.dp)
                 bottom.linkTo(day.top)
                 absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
@@ -411,7 +460,7 @@ fun DailyWeatherItem(
             text = forecast.date.toDateTextMonth()
         )
         SecondaryText(
-            modifier = Modifier.constrainAs(day) {
+            modifier = childModifier.constrainAs(day) {
                 absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
                 top.linkTo(date.bottom)
                 bottom.linkTo(parent.bottom, 8.dp)
@@ -435,7 +484,7 @@ fun DailyWeatherItem(
             textColor = MaterialTheme.customColors.secondaryTextColor
         )
         WeatherPrimaryText(
-            modifier = Modifier.constrainAs(temp) {
+            modifier = childModifier.constrainAs(temp) {
                 top.linkTo(tempUnits.top)
                 bottom.linkTo(tempUnits.bottom)
                 absoluteRight.linkTo(tempUnits.absoluteLeft, 2.dp)
@@ -443,7 +492,7 @@ fun DailyWeatherItem(
             text = temperatureUnit.getTemperature(forecast.temperature.day),
         )
         Image(
-            modifier = Modifier
+            modifier = childModifier
                 .size(42.dp)
                 .constrainAs(weatherIcon) {
                     top.linkTo(parent.top)
@@ -457,7 +506,7 @@ fun DailyWeatherItem(
         )
         if (forecast.probabilityOfPrecipitation >= 0.2f) {
             Image(
-                modifier = Modifier
+                modifier = childModifier
                     .size(24.dp)
                     .constrainAs(popIcon) {
                         top.linkTo(parent.top)
@@ -470,7 +519,7 @@ fun DailyWeatherItem(
                 contentDescription = "",
             )
             SecondaryText(
-                modifier = Modifier.constrainAs(pop) {
+                modifier = childModifier.constrainAs(pop) {
                     top.linkTo(popIcon.top)
                     bottom.linkTo(popIcon.bottom)
                     absoluteLeft.linkTo(popIcon.absoluteRight, 4.dp)
@@ -485,14 +534,15 @@ fun DailyWeatherItem(
 @Composable
 fun PressureChartItem(
     modifier: Modifier = Modifier,
-    forecast: List<Daily>,
+    childModifier: Modifier = Modifier,
     pressureUnit: PressureValues,
+    forecast: List<Daily>,
 ) {
     Column(
         modifier = modifier
     ) {
         WeatherHeaderText(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier.padding(8.dp).then(childModifier),
             text = stringResource(id = R.string.pressure) + ", " + stringResource(pressureUnit.stringRes)
         )
         PressureChart(
@@ -501,7 +551,8 @@ fun PressureChartItem(
                 .width(500.dp)
                 .height(120.dp)
                 .padding(top = 16.dp),
-            weather = forecast,
+            childModifier = childModifier,
+            receivedWeather = forecast,
             pressureUnit = pressureUnit,
         )
         Divider()
@@ -511,10 +562,19 @@ fun PressureChartItem(
 @Composable
 fun PressureChart(
     modifier: Modifier = Modifier,
-    weather: List<Daily>,
+    childModifier: Modifier = Modifier,
     pressureUnit: PressureValues,
-    textColor: Color = MaterialTheme.colors.onSurface
+    textColor: Color = MaterialTheme.colors.onSurface,
+    receivedWeather: List<Daily>
 ) {
+    val weather: List<Daily> by remember { mutableStateOf(
+        /*if (receivedWeather.all { it.date == 0L }) {
+            (0..8).mapIndexed { index, i ->
+                Daily(date = index.toLong())
+            }
+        } else*/ receivedWeather
+    ) }
+
     val x = remember { Animatable(0f) }
     val yValues = remember(weather) { mutableStateOf(getPressureList(weather, pressureUnit)) }
     val xTarget = (yValues.value.size - 1).toFloat()
@@ -587,10 +647,11 @@ fun PressureChart(
 @Composable
 fun CurrentWeatherValuesView(
     modifier: Modifier = Modifier,
-    forecast: Hourly,
+    childModifier: Modifier = Modifier,
     pressureUnit: PressureValues,
     iconColor: Color = Color.White,
-    textColor: Color = Color.White
+    textColor: Color = Color.White,
+    forecast: Hourly
 ) {
     ConstraintLayout(
         modifier = modifier
@@ -643,7 +704,7 @@ fun CurrentWeatherValuesView(
             tint = iconColor
         )
         PrimaryText(
-            modifier = Modifier.constrainAs(pressValue) {
+            modifier = childModifier.constrainAs(pressValue) {
                 top.linkTo(pressIcon.top)
                 bottom.linkTo(pressIcon.bottom)
                 absoluteLeft.linkTo(pressIcon.absoluteRight, 2.dp)
@@ -667,7 +728,7 @@ fun CurrentWeatherValuesView(
             tint = iconColor
         )
         PrimaryText(
-            modifier = Modifier.constrainAs(humidValue) {
+            modifier = childModifier.constrainAs(humidValue) {
                 top.linkTo(humidIcon.top)
                 bottom.linkTo(humidIcon.bottom)
                 absoluteLeft.linkTo(humidIcon.absoluteRight, 2.dp)
@@ -690,7 +751,7 @@ fun CurrentWeatherValuesView(
             tint = iconColor
         )
         PrimaryText(
-            modifier = Modifier.constrainAs(popValue) {
+            modifier = childModifier.constrainAs(popValue) {
                 top.linkTo(popIcon.top)
                 bottom.linkTo(popIcon.bottom)
                 absoluteLeft.linkTo(popIcon.absoluteRight, 2.dp)

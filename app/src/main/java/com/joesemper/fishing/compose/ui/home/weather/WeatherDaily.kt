@@ -135,8 +135,8 @@ fun DailyWeatherScreen(
 
         PrimaryWeatherItemView(
             temperature = forecast.temperature.max,
-            weather = forecast.weather.first(),
-            temperatureUnit = temperatureUnit
+            temperatureUnit = temperatureUnit,
+            weather = forecast.weather.first()
         )
 
         DayTemperatureView(

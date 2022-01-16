@@ -41,11 +41,12 @@ import org.koin.androidx.compose.get
 @Composable
 fun PrimaryWeatherItemView(
     modifier: Modifier = Modifier,
-    weather: Weather,
+    childModifier: Modifier = Modifier,
     temperature: Float,
     textTint: Color = MaterialTheme.colors.primaryVariant,
     iconTint: Color = Color.Unspecified,
-    temperatureUnit: TemperatureValues
+    temperatureUnit: TemperatureValues,
+    weather: Weather
 ) {
 
     ConstraintLayout(
@@ -58,7 +59,7 @@ fun PrimaryWeatherItemView(
         createHorizontalChain(icon, temp, chainStyle = ChainStyle.Spread)
 
         Icon(
-            modifier = Modifier
+            modifier = childModifier
                 .size(64.dp)
                 .constrainAs(icon) {
                     top.linkTo(parent.top, 8.dp)
@@ -71,7 +72,7 @@ fun PrimaryWeatherItemView(
         )
 
         PrimaryText(
-            modifier = Modifier
+            modifier = childModifier
                 .width(150.dp)
                 .constrainAs(description) {
                     top.linkTo(icon.bottom, 4.dp)
@@ -84,7 +85,7 @@ fun PrimaryWeatherItemView(
         )
 
         BigText(
-            modifier = Modifier
+            modifier = childModifier
                 .constrainAs(temp) {
                     top.linkTo(parent.top)
                     absoluteLeft.linkTo(icon.absoluteRight)

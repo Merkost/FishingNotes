@@ -3,6 +3,7 @@ package com.joesemper.fishing.domain
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
@@ -22,14 +23,18 @@ class WeatherViewModel(
     val weatherState: StateFlow<RetrofitWrapper<WeatherForecast>>
         get() = _weatherState
 
+    private val _weather = MutableStateFlow<WeatherForecast>(WeatherForecast())
+    val weather: StateFlow<WeatherForecast>
+        get() = _weather
+
     val markersList = mutableStateOf<MutableList<UserMapMarker>>(mutableListOf())
-    val currentWeather = mutableStateOf<WeatherForecast?>(null)
 
     init {
         getAllMarkers()
     }
 
     private fun getAllMarkers() {
+        _weatherState.value = RetrofitWrapper.Loading()
         viewModelScope.launch {
             repository.getAllUserMarkersList().collect {
                 markersList.value = it as MutableList<UserMapMarker>
@@ -39,13 +44,14 @@ class WeatherViewModel(
     }
 
     fun getWeather(latitude: Double, longitude: Double) {
+        _weatherState.value = RetrofitWrapper.Loading()
         viewModelScope.launch {
             weatherRepository.getWeather(latitude, longitude).collect { result ->
                 when (result) {
                     is RetrofitWrapper.Success<WeatherForecast> -> {
                         //weather.value = result.data
                         _weatherState.value = RetrofitWrapper.Success(result.data)
-                        currentWeather.value = result.data
+                        _weather.value = result.data
                     }
                     is RetrofitWrapper.Loading -> {
                         _weatherState.value = RetrofitWrapper.Loading()

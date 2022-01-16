@@ -8,6 +8,6 @@ import kotlinx.parcelize.Parcelize
 class Weather(
     @field:SerializedName("id") val id: Int = 0,
     @field:SerializedName("main") val main: String = "",
-    @field:SerializedName("description") val description: String = "",
+    @field:SerializedName("description") val description: String = "Rainy",
     @field:SerializedName("icon") val icon: String = ""
 ) : Parcelable
