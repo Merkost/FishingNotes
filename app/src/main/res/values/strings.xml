@@ -261,8 +261,15 @@
     <string name="map_zoom_buttons_description">Отображать кнопки изменения масштаба на карте</string>
     <string name="catches_desc">Уловы: по убыванию</string>
     <string name="fish_desc">Количество рыб: по убыванию</string>
+    <string name="new_catch_text">+ Add new catch</string>
     <string name="delete_place_dialog">Delete place \"%s\"</string>
     <string name="sure_delete_place_dialog">All catches on this place also will be deleted.\nAre you sure?</string>
+    <string name="add_location_dialog">Please add location for adding catches</string>
+    <string name="register_date">Register date</string>
+    <string name="catches_count">Catches count</string>
+    <string name="places_count">Places count</string>
+    <string name="best_catch">Best catch</string>
+    <string name="favorite_place">Favorite place</string>
     <string name="place_note_not_saved">Не удалось сохранить заметку</string>
     <string name="delete_catch_dialog">Удаление улова \"%s\"</string>
 

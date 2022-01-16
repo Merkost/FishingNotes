@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
@@ -116,12 +116,16 @@ private fun NavGraphBuilder.NavGraph(
         val place: UserMapMarker? = it.arguments?.getParcelable(Arguments.PLACE)
         it.arguments?.clear()
 
-        NewCatchScreen({
-            navController.popBackStack(
-                route = MainDestinations.NEW_CATCH_ROUTE,
-                inclusive = true
-            )
-        }, place)
+        NewCatchScreen(
+            {
+                navController.popBackStack(
+                    route = MainDestinations.NEW_CATCH_ROUTE,
+                    inclusive = true
+                )
+            },
+            place,
+            navController
+        )
     }
 
     composable(

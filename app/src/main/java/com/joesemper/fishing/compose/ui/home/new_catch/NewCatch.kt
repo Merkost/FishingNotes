@@ -17,15 +17,14 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.advertising.BannerAdvertView
 import com.joesemper.fishing.compose.ui.home.advertising.showInterstitialAd
-import com.joesemper.fishing.compose.ui.home.place.DeletePlaceDialog
 import com.joesemper.fishing.compose.ui.home.views.DefaultAppBar
-import com.joesemper.fishing.compose.ui.home.views.LoadingDialog
 import com.joesemper.fishing.compose.ui.home.views.PhotosView
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
@@ -51,7 +50,11 @@ object Constants {
 @ExperimentalMaterialApi
 @ExperimentalCoilApi
 @Composable
-fun NewCatchScreen(upPress: () -> Unit, receivedPlace: UserMapMarker?) {
+fun NewCatchScreen(
+    upPress: () -> Unit,
+    receivedPlace: UserMapMarker?,
+    navController: NavController
+) {
 
     val place by remember { mutableStateOf(receivedPlace) }
     val viewModel: NewCatchViewModel by viewModel()
@@ -61,47 +64,6 @@ fun NewCatchScreen(upPress: () -> Unit, receivedPlace: UserMapMarker?) {
     place?.let {
         viewModel.marker.value = place; isNull = false
     }
-
-    /*var deleteDialogIsShowing by remember { mutableStateOf(false) }
-
-    if (deleteDialogIsShowing) {
-        DeletePlaceDialog()
-    }
-
-    @ExperimentalComposeUiApi
-    fun DeletePlaceDialog() {
-        DefaultDialog(
-            primaryText = stringResource(R.string.delete_place_dialog),
-            neutralButtonText = stringResource(id = R.string.dont_ask_again),
-            onNeutralClick = onDontAskClick,
-            negativeButtonText = stringResource(id = R.string.cancel),
-            onNegativeClick = onNegativeClick,
-            positiveButtonText = stringResource(id = R.string.ok_button),
-            onPositiveClick = onPositiveClick,
-            onDismiss = onDismiss,
-            content = {
-                LottieMyLocation(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                )
-            }
-        )
-    }
-
-    @Composable
-    fun LottieMyLocation(modifier: Modifier) {
-        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.my_location))
-        val progress by animateLottieCompositionAsState(
-            composition,
-            iterations = LottieConstants.IterateForever,
-        )
-        LottieAnimation(
-            composition,
-            progress,
-            modifier = modifier
-        )
-    }*/
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -142,7 +104,11 @@ fun NewCatchScreen(upPress: () -> Unit, receivedPlace: UserMapMarker?) {
         coroutineScope.launch { modalBottomSheetState.show() }
     }
 
-    if (!modalBottomSheetState.isVisible) { currentBottomSheet = null }
+    if (!modalBottomSheetState.isVisible) {
+        currentBottomSheet = null
+    }
+
+    val loadingDialogState = remember { mutableStateOf(false) }
 
     DisposableEffect(key1 = null) {
         onDispose { calendar.timeInMillis = Date().time }
@@ -177,9 +143,12 @@ fun NewCatchScreen(upPress: () -> Unit, receivedPlace: UserMapMarker?) {
                     modifier = Modifier.padding(bottom = defaultFabBottomPadding),
                     onClick = {
                         if (viewModel.isInputCorrect()) {
+                            loadingDialogState.value = true
                             showInterstitialAd(
                                 context = context,
-                                onAdLoaded = { viewModel.createNewUserCatch() }
+                                onAdLoaded = {
+                                    viewModel.createNewUserCatch()
+                                }
                             )
                         } else {
                             SnackbarManager.showMessage(R.string.not_all_fields_are_filled)
@@ -199,6 +168,7 @@ fun NewCatchScreen(upPress: () -> Unit, receivedPlace: UserMapMarker?) {
             sheetGesturesEnabled = false,
             sheetPeekHeight = 0.dp
         ) {
+            NewCatchLoadingDialog(dialogSate = loadingDialogState)
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween,
@@ -214,7 +184,7 @@ fun NewCatchScreen(upPress: () -> Unit, receivedPlace: UserMapMarker?) {
 
                 ) {
 
-                    Places(viewModel, isNull)  //Выпадающий список мест
+                    Places(viewModel, isNull, navController)  //Выпадающий список мест
                     FishAndWeight(viewModel.fishAmount, viewModel.weight)
                     Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
                     DateAndTime(viewModel.date)
@@ -249,7 +219,7 @@ fun SubscribeToProgress(vmUiState: StateFlow<BaseViewState>, upPress: () -> Unit
             }
         }
         is BaseViewState.Loading -> {
-            LoadingDialog()
+//            LoadingDialog()
         }
         is BaseViewState.Error -> {
             ErrorDialog(errorDialog)

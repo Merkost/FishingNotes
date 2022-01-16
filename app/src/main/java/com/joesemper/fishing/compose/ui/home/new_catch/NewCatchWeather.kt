@@ -16,11 +16,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.home.views.SecondaryText
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
 import com.joesemper.fishing.domain.NewCatchViewModel
+import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
@@ -51,6 +51,7 @@ fun WeatherLayout(
         val currentMoonPhase = remember {
             weather.daily.first().moonPhase
         }
+
         viewModel.moonPhase.value = calcMoonPhase(
             currentMoonPhase,
             Date().time / MILLISECONDS_IN_SECOND,
@@ -95,7 +96,6 @@ fun WeatherLayout(
                 viewModel.weatherToSave.value.windInMs = intValue
             }
         }
-
 
         if (weatherIconDialogState) PickWeatherIconDialog(
             onDismiss = { weatherIconDialogState = false },

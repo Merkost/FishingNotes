@@ -1,5 +1,6 @@
 package com.joesemper.fishing.domain
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -27,7 +28,7 @@ class WeatherViewModel(
     val weather: StateFlow<WeatherForecast>
         get() = _weather
 
-    val markersList = mutableStateOf<MutableList<UserMapMarker>>(mutableListOf())
+    val markersList = mutableStateListOf<UserMapMarker>()
 
     init {
         getAllMarkers()
@@ -37,7 +38,8 @@ class WeatherViewModel(
         _weatherState.value = RetrofitWrapper.Loading()
         viewModelScope.launch {
             repository.getAllUserMarkersList().collect {
-                markersList.value = it as MutableList<UserMapMarker>
+                markersList.clear()
+                markersList.addAll(it as List<UserMapMarker>)
             }
         }
 

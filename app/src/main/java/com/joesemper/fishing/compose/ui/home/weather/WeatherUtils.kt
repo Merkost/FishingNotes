@@ -1,8 +1,6 @@
 package com.joesemper.fishing.compose.ui.home.weather
 
 import android.content.Context
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.R
@@ -11,6 +9,7 @@ import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.Daily
+import com.joesemper.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import java.text.DecimalFormat
 
 object WindFormat {
@@ -19,6 +18,7 @@ object WindFormat {
 
 fun createCurrentPlaceItem(latLng: LatLng, context: Context): UserMapMarker {
     return UserMapMarker(
+        id = CURRENT_PLACE_ITEM_ID,
         title = context.getString(R.string.current_location),
         latitude = latLng.latitude,
         longitude = latLng.longitude
@@ -48,10 +48,10 @@ data class Point(
 )
 
 enum class PressureValues(val stringRes: Int) {
-    Pa (R.string.pressure_pa),
-    Bar (R.string.pressure_bar),
-    mmHg (R.string.pressure_mm),
-    Psi (R.string.pressure_psi);
+    Pa(R.string.pressure_pa),
+    Bar(R.string.pressure_bar),
+    mmHg(R.string.pressure_mm),
+    Psi(R.string.pressure_psi);
 
     fun getPressure(hPa: Int): String {
         return when (this) {
@@ -82,14 +82,14 @@ enum class PressureValues(val stringRes: Int) {
 }
 
 enum class TemperatureValues(val stringRes: Int) {
-    C (R.string.celsius),
-    F (R.string.fahrenheit),
-    K (R.string.kelvin);
+    C(R.string.celsius),
+    F(R.string.fahrenheit),
+    K(R.string.kelvin);
 
     fun getTemperature(temperature: Float): String {
         return when (this) {
             C -> temperature.toInt().toString()
-            F -> (temperature * 9f/5f + 32).toInt().toString()
+            F -> (temperature * 9f / 5f + 32).toInt().toString()
             K -> (temperature + 273.15).toInt().toString()
         }
     }
@@ -97,7 +97,7 @@ enum class TemperatureValues(val stringRes: Int) {
     fun getCelciusTemperature(temperaturInC: Float): Int {
         return when (this) {
             C -> temperaturInC.toInt()
-            F -> ((temperaturInC - 32)*(5/9)).toInt()
+            F -> ((temperaturInC - 32) * (5 / 9)).toInt()
             K -> (temperaturInC - 273.15).toInt()
         }
     }
@@ -105,20 +105,22 @@ enum class TemperatureValues(val stringRes: Int) {
 }
 
 enum class WindSpeedValues(val stringRes: Int) {
-    metersps (R.string.wind_mps),
-    milesph (R.string.wind_mph),
-    knots (R.string.wind_knots),
-    ftps (R.string.wind_ftps),
-    kmph (R.string.wind_kmph);
+    metersps(R.string.wind_mps),
+    milesph(R.string.wind_mph),
+    knots(R.string.wind_knots),
+    ftps(R.string.wind_ftps),
+    kmph(R.string.wind_kmph);
 
     fun getWindSpeed(windSpeed: Double): String {
-        return WindFormat.df.format (when (this) {
-            metersps -> windSpeed
-            knots -> (windSpeed * 1.9438444924574)
-            milesph -> (windSpeed * 2.2369362920544)
-            ftps -> (windSpeed * 3.28084)
-            kmph -> (windSpeed * 3.6)
-        })
+        return WindFormat.df.format(
+            when (this) {
+                metersps -> windSpeed
+                knots -> (windSpeed * 1.9438444924574)
+                milesph -> (windSpeed * 2.2369362920544)
+                ftps -> (windSpeed * 3.28084)
+                kmph -> (windSpeed * 3.6)
+            }
+        )
     }
 
     fun getWindSpeedInt(windSpeed: Double): String {
@@ -146,4 +148,8 @@ fun navigateToDailyWeatherScreen(
         MainDestinations.DAILY_WEATHER_ROUTE,
         Arguments.WEATHER_DATA to argument
     )
+}
+
+fun navigateToAddNewPlace(navController: NavController) {
+    navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${true}")
 }

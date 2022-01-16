@@ -18,4 +18,6 @@ object Constants {
     const val ITEM_ADD_PHOTO = "ITEM_ADD_PHOTO"
     const val ITEM_PHOTO = "ITEM_PHOTO"
 
+    const val CURRENT_PLACE_ITEM_ID = "Current_place"
+
 }

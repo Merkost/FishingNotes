@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
-import com.airbnb.lottie.compose.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -36,27 +35,30 @@ import com.google.accompanist.placeholder.material.fade
 import com.google.accompanist.placeholder.placeholder
 import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.bar_chart.BarChartUtils.toLegacyInt
-import com.joesemper.fishing.model.datastore.UserPreferences
-import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.map.LocationState
 import com.joesemper.fishing.compose.ui.home.map.checkPermission
 import com.joesemper.fishing.compose.ui.home.map.getCurrentLocationFlow
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
+import com.joesemper.fishing.compose.ui.home.views.DefaultButtonOutlined
 import com.joesemper.fishing.compose.ui.home.views.PrimaryText
 import com.joesemper.fishing.compose.ui.home.views.SecondaryText
 import com.joesemper.fishing.compose.ui.home.views.SupportText
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.theme.customColors
+import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.WeatherViewModel
 import com.joesemper.fishing.domain.viewstates.ErrorType
 import com.joesemper.fishing.domain.viewstates.RetrofitWrapper
+import com.joesemper.fishing.model.datastore.UserPreferences
+import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.weather.Daily
 import com.joesemper.fishing.model.entity.weather.Hourly
 import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
+import com.joesemper.fishing.utils.isLocationsTooFar
 import com.joesemper.fishing.utils.time.toDateTextMonth
 import com.joesemper.fishing.utils.time.toDayOfWeek
 import com.joesemper.fishing.utils.time.toDayOfWeekAndDate
@@ -90,14 +92,20 @@ fun WeatherScreen(
             getCurrentLocationFlow(context, permissionsState).collect { locationState ->
                 if (locationState is LocationState.LocationGranted) {
 
-                    //TODO: check if currentPlaceItem already exists!!
+                    val newLocation = createCurrentPlaceItem(locationState.location, context)
+                    val oldLocation = viewModel.markersList.find { it.id == newLocation.id }
 
-                    viewModel.markersList.value.add(
-                        index = 0,
-                        element = createCurrentPlaceItem(locationState.location, context)
-                    )
-                    if (selectedPlace == null) {
-                        selectedPlace = viewModel.markersList.value.first()
+                    if (oldLocation != null) {
+                        if (isLocationsTooFar(oldLocation, newLocation)) {
+                            viewModel.markersList.remove(oldLocation)
+                            viewModel.markersList.add(index = 0, element = newLocation)
+                        }
+                    } else {
+                        viewModel.markersList.add(index = 0, element = newLocation)
+                    }
+
+                    if (selectedPlace.value == null) {
+                        selectedPlace.value = viewModel.markersList.first()
                     }
                 }
             }
@@ -118,31 +126,39 @@ fun WeatherScreen(
         topBar = {
             val elevation =
                 animateDpAsState(targetValue = if (scrollState.value > 0) 4.dp else 0.dp)
-            if (checkPermission(context) && viewModel.markersList.value.isNotEmpty()) {
-                selectedPlace = viewModel.markersList.value.first()
+            if (checkPermission(context) && viewModel.markersList.isNotEmpty()) {
+                selectedPlace = viewModel.markersList.first()
             }
 
             TopAppBar(
                 elevation = elevation.value,
-                backgroundColor = MaterialTheme.colors.primary
-            ) {
-                WeatherLocationIconButton(color = Color.White) {
+                backgroundColor = MaterialTheme.colors.primary,
+                title = {
                     selectedPlace?.let {
-                        navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
-                            Arguments.PLACE to it)
+
+                        WeatherLocationIconButton(color = Color.White) {
+                            selectedPlace?.let {
+                                navController.navigate(
+                                    "${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
+                                    Arguments.PLACE to it
+                                )
+                            }
+                        }
+
+                        WeatherPlaceSelectItem(
+                            selectedPlace = it,
+                            userPlaces = viewModel.markersList,
+                            onItemClick = { clickedItem ->
+                                selectedPlace = clickedItem
+                            }
+                        )
+                    }
+
+                    if (selectedPlace == null) {
+                        Text(text = stringResource(id = R.string.weather))
                     }
                 }
-                selectedPlace?.let {
-                    WeatherPlaceSelectItem(
-                        selectedPlace = it,
-                        userPlaces = viewModel.markersList.value,
-                        onItemClick = { clickedItem ->
-                            selectedPlace = clickedItem
-                        }
-                    )
-                }
-
-            }
+            )
         }
     ) {
 
@@ -167,16 +183,15 @@ fun WeatherScreen(
                     }
                 }
                 is RetrofitWrapper.Error -> {
-                    val errorType = (weatherState as RetrofitWrapper.Error).errorType
-                    when (errorType) {
-                        is ErrorType.NetworkError -> {
-                            NoInternetView(Modifier.fillMaxWidth())
+                        val errorType = (weatherState as RetrofitWrapper.Error).errorType
+                        when (errorType) {
+                            is ErrorType.NetworkError -> {
+                                NoInternetView(Modifier.fillMaxWidth())
+                            }
+                            is ErrorType.OtherError -> {
+                                ErrorView(Modifier.fillMaxWidth())
+                            }
                         }
-                        is ErrorType.OtherError -> {
-                            //TODO: OtherErrorView()
-                            NoInternetView(Modifier.fillMaxWidth())
-                        }
-                    }
                 }
             }
             /*AnimatedVisibility(weatherState is RetrofitWrapper.Success, RetrofitWrapper.Loading*//*viewModel.currentWeather.value != null*//*) {
@@ -186,20 +201,23 @@ fun WeatherScreen(
             AnimatedVisibility(weatherState is RetrofitWrapper.Loading) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.SpaceAround,
+                    verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    if (checkPermission(context) && viewModel.markersList.value.isEmpty()) {
-                        SecondaryText(text = "No places yet. \nAdd new place now!")
-                        WeatherLoading(
-                            modifier = Modifier
-                                .size(250.dp)
-                            *//*.align(Alignment.CenterHorizontally)*//*
+                    if (checkPermission(context) && viewModel.markersList.isEmpty()) {
+
+                        NoContentView(
+                            text = stringResource(id = R.string.no_places_added),
+                            icon = painterResource(id = R.drawable.ic_no_place_on_map)
                         )
-                        DefaultButtonOutlined(text = "Add", onClick = {
-                            navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${true}")
-                        })
+
+                        Spacer(modifier = Modifier.size(16.dp))
+
+                        DefaultButtonOutlined(
+                            text = stringResource(id = R.string.new_place_text),
+                            onClick = { navigateToAddNewPlace(navController) }
+                        )
                     } else {
                         WeatherLoading(
                             modifier = Modifier
@@ -217,8 +235,7 @@ fun WeatherScreen(
                             NoInternetView(Modifier.fillMaxWidth())
                         }
                         is ErrorType.OtherError -> {
-                            //TODO: OtherErrorView()
-                            NoInternetView(Modifier.fillMaxWidth())
+                            ErrorView(Modifier.fillMaxWidth())
                         }
                     }
                 }
@@ -275,29 +292,6 @@ fun MainWeatherScreen(
             )
         }
     }
-}
-
-@Composable
-fun NoInternetView(modifier: Modifier = Modifier) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.error))
-    val progress by animateLottieCompositionAsState(
-        composition,
-        iterations = LottieConstants.IterateForever,
-    )
-
-    Column(
-        Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.SpaceAround,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        LottieAnimation(
-            composition,
-            progress,
-            modifier = modifier
-        )
-        SupportText(text = "Can't connect to the server!")
-    }
-
 }
 
 @Composable
@@ -409,7 +403,8 @@ fun HourlyWeatherItem(
             PrimaryText(
                 modifier = childModifier,
                 text = temperatureUnit.getTemperature(
-                    forecast.temperature) + stringResource(temperatureUnit.stringRes),
+                    forecast.temperature
+                ) + stringResource(temperatureUnit.stringRes),
                 textColor = color
             )
         }
@@ -568,11 +563,7 @@ fun PressureChart(
     receivedWeather: List<Daily>
 ) {
     val weather: List<Daily> by remember { mutableStateOf(
-        /*if (receivedWeather.all { it.date == 0L }) {
-            (0..8).mapIndexed { index, i ->
-                Daily(date = index.toLong())
-            }
-        } else*/ receivedWeather
+        receivedWeather
     ) }
 
     val x = remember { Animatable(0f) }
@@ -672,6 +663,7 @@ fun CurrentWeatherValuesView(
                 top.linkTo(parent.top, 4.dp)
             },
             text = stringResource(id = R.string.pressure),
+            textColor = textColor
         )
 
         SecondaryText(
@@ -681,6 +673,7 @@ fun CurrentWeatherValuesView(
                 top.linkTo(pressText.top)
             },
             text = stringResource(id = R.string.humidity),
+            textColor = textColor
         )
         SecondaryText(
             modifier = Modifier.constrainAs(popText) {
@@ -689,6 +682,7 @@ fun CurrentWeatherValuesView(
                 top.linkTo(pressText.top)
             },
             text = stringResource(id = R.string.precipitation),
+            textColor = textColor
         )
 
         Icon(
@@ -712,7 +706,7 @@ fun CurrentWeatherValuesView(
             },
             text = pressureUnit.getPressure(
                 forecast.pressure) + " " + stringResource(pressureUnit.stringRes),
-            textColor = Color.White
+            textColor = textColor
         )
 
         Icon(

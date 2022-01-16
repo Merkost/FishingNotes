@@ -4,11 +4,13 @@ import android.content.Context
 import android.widget.Toast
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.compose.ui.home.map.DEFAULT_ZOOM
+import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.utils.time.TimeConstants.MOON_PHASE_INCREMENT_IN_DAY
 import com.joesemper.fishing.utils.time.TimeConstants.SECONDS_IN_DAY
 import java.util.*
 import kotlin.math.pow
 import kotlin.math.roundToInt
+import kotlin.math.sqrt
 
 
 fun getNewMarkerNoteId() = getRandomString(6)
@@ -58,5 +60,19 @@ fun getCameraPosition(latLng: LatLng): Pair<LatLng, Float> {
     val lat = latLng.latitude + ((-100..100).random() * 0.000000001)
     val lng = latLng.longitude + ((-100..100).random() * 0.000000001)
     return Pair(LatLng(lat, lng), DEFAULT_ZOOM)
+}
+
+fun isLocationsTooFar(first: UserMapMarker, second: UserMapMarker): Boolean {
+    return (sqrt(
+        ((first.latitude - second.latitude).pow(2))
+                + ((first.longitude - second.longitude).pow(2))
+    ) > 0.3)
+}
+
+fun isCoordinatesFar(first: LatLng, second: LatLng): Boolean {
+    return (sqrt(
+        ((first.latitude - second.latitude).pow(2))
+                + ((first.longitude - second.longitude).pow(2))
+    ) > 0.1)
 }
 
