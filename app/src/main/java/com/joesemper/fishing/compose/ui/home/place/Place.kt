@@ -111,7 +111,7 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
                         navController = navController,
                         catches = userCatches,
                         notes = notes,
-                        onNewCatchClick = { newCatchClicked(navController, viewModel) }
+                        onNewCatchClick = { newCatchClicked(navController, place) }
                     ) { note ->
                         viewModel.currentNote.value = note
                         coroutineScope.launch {

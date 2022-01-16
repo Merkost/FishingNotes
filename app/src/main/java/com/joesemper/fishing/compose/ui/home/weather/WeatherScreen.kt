@@ -41,10 +41,7 @@ import com.joesemper.fishing.compose.ui.home.map.LocationState
 import com.joesemper.fishing.compose.ui.home.map.checkPermission
 import com.joesemper.fishing.compose.ui.home.map.getCurrentLocationFlow
 import com.joesemper.fishing.compose.ui.home.map.locationPermissionsList
-import com.joesemper.fishing.compose.ui.home.views.DefaultButtonOutlined
-import com.joesemper.fishing.compose.ui.home.views.PrimaryText
-import com.joesemper.fishing.compose.ui.home.views.SecondaryText
-import com.joesemper.fishing.compose.ui.home.views.SupportText
+import com.joesemper.fishing.compose.ui.home.views.*
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.theme.customColors
 import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
@@ -104,8 +101,8 @@ fun WeatherScreen(
                         viewModel.markersList.add(index = 0, element = newLocation)
                     }
 
-                    if (selectedPlace.value == null) {
-                        selectedPlace.value = viewModel.markersList.first()
+                    if (selectedPlace == null) {
+                        selectedPlace = viewModel.markersList.first()
                     }
                 }
             }

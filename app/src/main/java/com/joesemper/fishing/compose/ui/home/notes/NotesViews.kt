@@ -414,31 +414,6 @@ fun ItemDate(text: String) {
     }
 }
 
-@Composable
-fun NoElementsView(
-    modifier: Modifier = Modifier,
-    mainText: String,
-    secondaryText: String,
-    onClickAction: () -> Unit
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(200.dp)
-    ) {
-        SecondaryText(text = mainText)
-        Spacer(modifier = Modifier.height(8.dp))
-        SecondaryTextColored(
-            modifier = Modifier.clickable {
-                onClickAction()
-            },
-            text = secondaryText
-        )
-    }
-}
-
 /**
  * @param[childModifier] This is a modifier which is used in all child views
  * in order to show placeholder loading

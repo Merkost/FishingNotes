@@ -171,6 +171,7 @@ fun PlaceTabsContentView(
     navController: NavController,
     catches: List<UserCatch>,
     notes: List<Note>,
+    onNewCatchClick: () -> Unit,
     onNoteSelected: (Note) -> Unit
 ) {
     HorizontalPager(
@@ -188,8 +189,8 @@ fun PlaceTabsContentView(
             when (page) {
                 0 -> PlaceCatchesView(
                     catches = catches,
-                    userCatchClicked = { onCatchItemClick(it, navController) }
-                )
+                    onNewCatchClick = onNewCatchClick
+                ) { onCatchItemClick(it, navController) }
                 1 -> PlaceNotes(notes) {
                     onNoteSelected(it)
                 }
@@ -259,10 +260,12 @@ fun PlaceNotes(
 fun PlaceCatchesView(
     modifier: Modifier = Modifier,
     catches: List<UserCatch>,
+    onNewCatchClick: () -> Unit,
     userCatchClicked: (UserCatch) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(horizontal = 4.dp),
     ) {
         when {
@@ -293,10 +296,15 @@ fun PlaceCatchesView(
             }
             catches.isEmpty() -> {
                 item {
-                    NoElementsView(
-                        mainText = stringResource(R.string.no_cathces_added),
-                        secondaryText = stringResource(R.string.add_catch_text),
-                        onClickAction = { }
+                    NoContentView(
+                        modifier = Modifier.padding(top = 128.dp),
+                        text = stringResource(id = R.string.no_cathces_added),
+                        icon = painterResource(id = R.drawable.ic_fishing)
+                    )
+                    Spacer(modifier = Modifier.size(16.dp))
+                    DefaultButtonOutlined(
+                        text = stringResource(R.string.new_catch_text),
+                        onClick = { onNewCatchClick() }
                     )
                 }
             }

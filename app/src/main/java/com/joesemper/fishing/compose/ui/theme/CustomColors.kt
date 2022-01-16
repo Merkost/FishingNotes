@@ -20,7 +20,6 @@ fun darkCustomColors(
     secondaryTextColor,
     secondaryIconColor,
 
-
 )
 
 fun lightCustomColors(

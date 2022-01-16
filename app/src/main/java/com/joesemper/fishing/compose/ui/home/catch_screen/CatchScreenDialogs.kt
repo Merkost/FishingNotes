@@ -81,7 +81,7 @@ fun CatchModalBottomSheetContent(
                     if (newPhotos.find { !it.toString().startsWith("http") } != null) {
                         showInterstitialAd(
                             context = context,
-                            onAdLoaded = { }
+                            onAdLoaded = {  }
                         )
                     }
                 },

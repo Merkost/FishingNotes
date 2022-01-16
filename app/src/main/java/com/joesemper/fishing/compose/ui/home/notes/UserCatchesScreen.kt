@@ -2,12 +2,10 @@ package com.joesemper.fishing.compose.ui.home.notes
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
@@ -16,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -26,6 +25,8 @@ import com.joesemper.fishing.R
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.UiState
+import com.joesemper.fishing.compose.ui.home.views.DefaultButtonOutlined
+import com.joesemper.fishing.compose.ui.home.views.NoContentView
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.utils.CatchesSortValues
 import com.joesemper.fishing.domain.UserCatchesViewModel
@@ -52,7 +53,8 @@ fun UserCatchesScreen(
             catchesState = uiState,
             catches = catchesSortValue.sort(catches),
             userCatchClicked = { catch -> onCatchItemClick(catch, navController) },
-            sortValue = catchesSortValue
+            sortValue = catchesSortValue,
+            navigateToNewCatch = { navController.navigate(MainDestinations.NEW_CATCH_ROUTE) }
         )
     }
 }
@@ -67,13 +69,13 @@ fun UserCatches(
     sortValue: CatchesSortValues,
     userCatchClicked: (UserCatch) -> Unit,
     catches: List<UserCatch>,
-
-    ) {
+    navigateToNewCatch: () -> Unit,
+) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(4.dp)
     ) {
-        when(catchesState.value) {
+        when (catchesState.value) {
             UiState.Success -> {
                 when {
                     catches.isNotEmpty() -> {
@@ -114,10 +116,15 @@ fun UserCatches(
                     }
                     catches.isEmpty() -> {
                         item {
-                            NoElementsView(
-                                mainText = stringResource(R.string.no_cathces_added),
-                                secondaryText = stringResource(R.string.add_catch_text),
-                                onClickAction = { }
+                            NoContentView(
+                                modifier = Modifier.padding(top = 128.dp),
+                                text = stringResource(id = R.string.no_cathces_added),
+                                icon = painterResource(id = R.drawable.ic_fishing)
+                            )
+                            Spacer(modifier = Modifier.size(16.dp))
+                            DefaultButtonOutlined(
+                                text = stringResource(R.string.new_catch_text),
+                                onClick = navigateToNewCatch
                             )
                         }
                     }
