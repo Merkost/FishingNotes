@@ -11,8 +11,8 @@ import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,11 +30,12 @@ import androidx.navigation.compose.rememberNavController
 import coil.annotation.ExperimentalCoilApi
 import com.airbnb.lottie.compose.*
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.Arguments
+import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.views.SecondaryText
+import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserViewModel
 import com.joesemper.fishing.model.entity.common.User
-import com.joesemper.fishing.model.entity.content.MapMarker
-import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.utils.time.toDateTextMonth
 import kotlinx.coroutines.InternalCoroutinesApi
 import me.vponomarenko.compose.shimmer.shimmer
@@ -45,26 +46,32 @@ import org.koin.androidx.compose.getViewModel
 @ExperimentalMaterialApi
 @ExperimentalCoilApi
 @Composable
-fun Profile(navController: NavController, modifier: Modifier = Modifier) {
+fun Profile(
+    navController: NavController,
+    modifier: Modifier = Modifier
+) {
     val viewModel = getViewModel<UserViewModel>()
 
-    val user by viewModel.currentUser
+    val user by viewModel.currentUser.collectAsState()
 
     val imgSize: Dp = 120.dp
     val bgHeight: Dp = 180.dp
 
-    val uiState = viewModel.uiState
-    Scaffold(modifier = Modifier.fillMaxSize(),
+    Scaffold(modifier = modifier.fillMaxSize(),
         topBar = { ProfileAppBar(navController, viewModel) }) {
         ConstraintLayout(
             modifier = Modifier
                 .fillMaxSize()
                 .scrollable(rememberScrollState(0), Orientation.Vertical, true)
         ) {
+            val (background, card, image, name, places, catches, registerDate) = createRefs()
 
-            val (background, card, image, name, places, catches, registerDate, content, stats, box, logout, settings) = createRefs()
-            val bgGl = createGuidelineFromTop(120.dp)
+            val bgGl = createGuidelineFromTop(80.dp)
             val verticalCenterGl = createGuidelineFromAbsoluteLeft(0.5f)
+
+            val placesState by viewModel.currentPlaces.collectAsState()
+            val catchesState by viewModel.currentCatches.collectAsState()
+
             Surface(//shape = RoundedCornerShape(0.dp,0.dp,15.dp,15.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -73,7 +80,8 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
                         top.linkTo(parent.top)
                         absoluteLeft.linkTo(parent.absoluteLeft)
                         absoluteRight.linkTo(parent.absoluteRight)
-                    }, color = MaterialTheme.colors.primary
+                    },
+                color = MaterialTheme.colors.primary
             ) {}
 
             UserImage(user, imgSize, modifier = Modifier
@@ -128,61 +136,62 @@ fun Profile(navController: NavController, modifier: Modifier = Modifier) {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
+                    val bestCatch by viewModel.bestCatch.collectAsState()
+                    val favoritePlace by viewModel.favoritePlace.collectAsState()
 
-//                    CatchesCountView(catchesCount = viewModel.currentCatches.value?.size ?: 0)
-//                    PlacesCountView(placesCount = viewModel.currentPlaces.value?.size ?: 0)
-
-                    BestCatchView(bestCatch = viewModel.bestCatch.value)
-                    Spacer(modifier = Modifier.size(32.dp))
-                    FavoritePlaceView(bestPlace = viewModel.favoritePlace.value)
-
-//                    OutlinedTextField(value = /*user?.login ?: */"@fisherman",
-//                        label = { Text(text = "Login") },
-//                        readOnly = true,
-//                        onValueChange = {})
-//                    OutlinedTextField(value = user?.email ?: "",
-//                        label = { Text(text = "Email") },
-//                        readOnly = true,
-//                        onValueChange = {})
-//                    OutlinedTextField(value = user?.registerDate?.toDateTextMonth() ?: "",
-//                        label = { Text(text = stringResource(R.string.register_date)) },
-//                        readOnly = true,
-//                        onValueChange = {})
-
-                    /*userPlacesNum?.let {
-                        if (it.isEmpty()) {
-                            NoPlacesStats()
-                        } else {
-                            CatchesChart()
+                    BestCatchView(
+                        bestCatch = bestCatch,
+                        onCatchItemClick = {
+                            navController.navigate(
+                                MainDestinations.CATCH_ROUTE,
+                                Arguments.CATCH to it
+                            )
                         }
-                    }*/
+                    )
+
+                    Spacer(modifier = Modifier.size(16.dp))
+
+                    FavoritePlaceView(
+                        favoritePlace = favoritePlace,
+                        userPlaceClicked = {
+                            navController.navigate(
+                                MainDestinations.PLACE_ROUTE,
+                                Arguments.PLACE to it
+                            )
+                        },
+                        navigateToMap = {
+                            navController.navigate(
+                                "${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
+                                Arguments.PLACE to it
+                            )
+                        }
+                    )
                 }
             }
 
-            PlacesNumber(viewModel.currentPlaces.value,
-                Modifier
+            PlacesNumber(
+                modifier = Modifier
                     .constrainAs(places) {
                         top.linkTo(bgGl)
                         absoluteLeft.linkTo(verticalCenterGl, imgSize / 2)
                         absoluteRight.linkTo(parent.absoluteRight)
                         bottom.linkTo(image.bottom)
                     }
-                    .zIndex(3f))
-            CatchesNumber(viewModel.currentCatches.value,
-                Modifier
+                    .zIndex(3f),
+                userPlacesNum = placesState?.size
+            )
+
+            CatchesNumber(
+                modifier = Modifier
                     .constrainAs(catches) {
                         top.linkTo(bgGl)
                         absoluteLeft.linkTo(parent.absoluteLeft)
                         absoluteRight.linkTo(verticalCenterGl, imgSize / 2)
                         bottom.linkTo(image.bottom)
                     }
-                    .zIndex(3f))
-            /*SettingsIcon(Modifier.constrainAs(settings) {
-                top.linkTo(parent.top, 60.dp)
-                absoluteLeft.linkTo(verticalCenterGl, imgSize / 2)
-                absoluteRight.linkTo(parent.absoluteRight)
-                bottom.linkTo(card.top)
-            }) { navController.popBackStack() }*/
+                    .zIndex(3f),
+                userCatchesNum = catchesState?.size
+            )
         }
 
     }
@@ -216,13 +225,6 @@ fun LottieMyStats(modifier: Modifier) {
 }
 
 @Composable
-fun SettingsIcon(modifier: Modifier, settingsClicked: () -> Unit) {
-    IconButton(onClick = settingsClicked, modifier = modifier) {
-        Icon(Icons.Default.Settings, stringResource(R.string.settings))
-    }
-}
-
-@Composable
 fun UserText(user: User?, modifier: Modifier) {
     user?.let {
         Text(
@@ -237,8 +239,7 @@ fun UserText(user: User?, modifier: Modifier) {
 }
 
 @Composable
-fun PlacesNumber(userPlacesNum: List<MapMarker>?, modifier: Modifier = Modifier) {
-    //val userPlacesNum by viewModel.getUserPlaces().collectAsState(null)
+fun PlacesNumber(modifier: Modifier = Modifier, userPlacesNum: Int?) {
     userPlacesNum?.let {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -248,7 +249,7 @@ fun PlacesNumber(userPlacesNum: List<MapMarker>?, modifier: Modifier = Modifier)
                 Icons.Default.Place, stringResource(R.string.place),
                 modifier = Modifier.size(25.dp)
             )
-            Text(it.size.toString())
+            Text(it.toString())
         }
     } ?: Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -273,8 +274,7 @@ fun PlacesNumber(userPlacesNum: List<MapMarker>?, modifier: Modifier = Modifier)
 }
 
 @Composable
-fun CatchesNumber(userCatchesNum: List<UserCatch>?, modifier: Modifier = Modifier) {
-//    val userCatchesNum by viewModel.getUserCatches().collectAsState(null)
+fun CatchesNumber(modifier: Modifier = Modifier, userCatchesNum: Int?) {
     userCatchesNum?.let {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -284,7 +284,7 @@ fun CatchesNumber(userCatchesNum: List<UserCatch>?, modifier: Modifier = Modifie
                 painterResource(R.drawable.ic_fishing), stringResource(R.string.place),
                 modifier = Modifier.size(25.dp)
             )
-            Text(it.size.toString())
+            Text(it.toString())
         }
     } ?: Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -307,39 +307,6 @@ fun CatchesNumber(userCatchesNum: List<UserCatch>?, modifier: Modifier = Modifie
     }
 }
 
-@InternalCoroutinesApi
-@ExperimentalMaterialApi
-@Composable
-fun UserButtons(navController: NavController) {
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 80.dp),
-        verticalArrangement = Arrangement.spacedBy(15.dp, Alignment.Bottom)
-    ) {
-//        ColumnButton(painterResource(R.drawable.ic_friends), stringResource(R.string.friends)) {
-//            //notReadyYetToast()
-//        }
-//
-//        ColumnButton(
-//            painterResource(R.drawable.ic_edit),
-//            stringResource(R.string.edit_profile)
-//        ) {
-//            //notReadyYetToast()
-//        }
-//
-//        ColumnButton(
-//            painterResource(R.drawable.ic_settings),
-//            stringResource(R.string.settings)
-//        ) {
-//            val action =
-//                UserFragmentDirections.actionUserFragmentToSettingsFragment()
-//            findNavController().navigate(action)
-//        }
-    }
-}
 
 @ExperimentalAnimationApi
 @ExperimentalCoilApi

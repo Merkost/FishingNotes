@@ -1,6 +1,5 @@
 package com.joesemper.fishing.domain
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.compose.ui.home.profile.findBestCatch
@@ -13,6 +12,7 @@ import com.joesemper.fishing.model.repository.UserRepository
 import com.joesemper.fishing.model.repository.app.OfflineRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class UserViewModel(
@@ -20,12 +20,20 @@ class UserViewModel(
     private val repository: OfflineRepository
 ) : ViewModel() {
 
-    val currentUser = mutableStateOf<User?>(null)
+    private val _currentUser = MutableStateFlow<User?>(null)
+    val currentUser = _currentUser.asStateFlow()
 
-    val currentPlaces = mutableStateOf<List<UserMapMarker>?>(null)
-    val currentCatches = mutableStateOf<List<UserCatch>?>(null)
-    val bestCatch = mutableStateOf<UserCatch?>(null)
-    val favoritePlace = mutableStateOf<UserMapMarker?>(null)
+    private val _currentPlaces = MutableStateFlow<List<UserMapMarker>?>(null)
+    val currentPlaces = _currentPlaces.asStateFlow()
+
+    private val _currentCatches = MutableStateFlow<List<UserCatch>?>(null)
+    val currentCatches = _currentCatches.asStateFlow()
+
+    private val _bestCatch = MutableStateFlow<UserCatch?>(null)
+    val bestCatch = _bestCatch.asStateFlow()
+
+    private val _favoritePlace = MutableStateFlow<UserMapMarker?>(null)
+    val favoritePlace = _favoritePlace.asStateFlow()
 
     init {
         getCurrentUser()
@@ -39,29 +47,26 @@ class UserViewModel(
 
     private fun getCurrentUser() = viewModelScope.launch {
         userRepository.datastoreUser.collect {
-            currentUser.value = it
+            _currentUser.value = it
         }
     }
-
 
     private fun getUserPlaces() = viewModelScope.launch {
         repository.getAllUserMarkersList().collect {
             if (it.isEmpty()) {
-                currentCatches.value = listOf()
+                _currentCatches.value = listOf()
             }
-            currentPlaces.value = it
-            favoritePlace.value = findFavoritePlace(it)
+            _currentPlaces.value = it
+            _favoritePlace.value = findFavoritePlace(it)
         }
     }
-
 
     private fun getUserCatches() = viewModelScope.launch {
         repository.getAllUserCatchesList().collect {
-            currentCatches.value = it
-            bestCatch.value = findBestCatch(it)
+            _currentCatches.value = it
+            _bestCatch.value = findBestCatch(it)
         }
     }
-
 
     suspend fun logoutCurrentUser() = viewModelScope.run {
         userRepository.logoutCurrentUser()

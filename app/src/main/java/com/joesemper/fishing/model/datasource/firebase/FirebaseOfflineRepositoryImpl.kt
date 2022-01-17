@@ -36,13 +36,16 @@ class FirebaseOfflineRepositoryImpl(
                 val result = mutableListOf<UserCatch>()
 
                 launch {
-                    getCatchesFromDoc(it.documents).take(it.documents.size).onCompletion {
-                        trySend(result)
-                        db.enableNetwork()
-                    }.collect {
-                        result.addAll(it)
+                    if (it.documents.size > 0) {
+                        getCatchesFromDoc(it.documents).take(it.documents.size).onCompletion {
+                            trySend(result)
+                            db.enableNetwork()
+                        }.collect {
+                            result.addAll(it)
+                        }
                     }
                 }
+
             }
         }
         awaitClose { }

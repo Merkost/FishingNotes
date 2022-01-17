@@ -9,27 +9,30 @@ import androidx.compose.ui.graphics.Color
 data class CustomColors(
     val secondaryTextColor: Color,
     val secondaryIconColor: Color,
+    val backgroundSecondaryColor: Color,
 
     )
 
 fun darkCustomColors(
     secondaryTextColor: Color = Color.LightGray,
     secondaryIconColor: Color = Color.Gray,
+    backgroundSecondaryColor: Color = secondaryBlueLightColorTransparent
 
 ): CustomColors = CustomColors(
     secondaryTextColor,
     secondaryIconColor,
+    backgroundSecondaryColor
 
 )
 
 fun lightCustomColors(
     secondaryTextColor: Color = secondaryFigmaTextColor,
     secondaryIconColor: Color = Color.Gray,
+    backgroundSecondaryColor: Color = secondaryBlueLightColorTransparent
     ): CustomColors = CustomColors(
     secondaryTextColor,
     secondaryIconColor,
-
-
+    backgroundSecondaryColor
 )
 
 val LocalColors = compositionLocalOf { lightCustomColors() }

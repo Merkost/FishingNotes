@@ -4,10 +4,8 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Settings
@@ -19,13 +17,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import com.airbnb.lottie.compose.*
@@ -34,8 +31,8 @@ import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.notes.CatchItemView
 import com.joesemper.fishing.compose.ui.home.notes.ItemUserPlace
 import com.joesemper.fishing.compose.ui.home.views.*
+import com.joesemper.fishing.compose.ui.theme.customColors
 import com.joesemper.fishing.compose.ui.theme.primaryTextColor
-import com.joesemper.fishing.compose.ui.theme.secondaryTextColor
 import com.joesemper.fishing.domain.UserViewModel
 import com.joesemper.fishing.model.entity.common.User
 import com.joesemper.fishing.model.entity.content.UserCatch
@@ -167,91 +164,62 @@ fun LottieLogout(modifier: Modifier) {
 }
 
 @Composable
-fun CatchesCountView(
+fun ProfileItemsTitleView(
     modifier: Modifier = Modifier,
-    catchesCount: Int
+    icon: Painter,
+    title: String,
+    subtitle: String
 ) {
-    ConstraintLayout(
+    Box(
+        contentAlignment = Alignment.Center,
         modifier = modifier
-            .padding(vertical = 8.dp)
+            .wrapContentHeight()
             .fillMaxWidth()
     ) {
-        val (icon, text, count) = createRefs()
-        Icon(
+        Surface(
             modifier = Modifier
-                .size(24.dp)
-                .constrainAs(icon) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                },
-            painter = painterResource(id = R.drawable.ic_fishing),
-            contentDescription = null,
-            tint = secondaryTextColor
-        )
+                .wrapContentSize()
+                .padding(top = 8.dp, bottom = 4.dp),
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.customColors.backgroundSecondaryColor
+        ) {
+            Row(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
-        SecondaryText(
-            modifier = Modifier.constrainAs(text) {
-                top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
-                absoluteLeft.linkTo(icon.absoluteRight, 16.dp)
-            },
-            text = stringResource(R.string.catches_count)
-        )
+                Icon(
+                    modifier = Modifier
+                        .size(24.dp),
+                    painter = icon,
+                    contentDescription = null,
+                    tint = primaryTextColor
+                )
 
-        PrimaryText(
-            modifier = Modifier.constrainAs(count) {
-                top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
-                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-            },
-            text = catchesCount.toString()
-        )
+                Column(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    PrimaryText(
+                        modifier = Modifier,
+                        text = title
+                    )
+
+                    SecondaryTextSmall(
+                        modifier = Modifier,
+                        text = subtitle
+                    )
+                }
+
+
+            }
+        }
     }
-}
 
-@Composable
-fun PlacesCountView(
-    modifier: Modifier = Modifier,
-    placesCount: Int
-) {
-    ConstraintLayout(
-        modifier = modifier
-            .padding(vertical = 16.dp)
-            .fillMaxWidth()
-    ) {
-        val (icon, text, count) = createRefs()
-        Icon(
-            modifier = Modifier
-                .size(24.dp)
-                .constrainAs(icon) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                },
-            painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-            contentDescription = null,
-            tint = secondaryTextColor
-        )
-
-        SecondaryText(
-            modifier = Modifier.constrainAs(text) {
-                top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
-                absoluteLeft.linkTo(icon.absoluteRight, 16.dp)
-            },
-            text = stringResource(R.string.places_count)
-        )
-
-        PrimaryText(
-            modifier = Modifier.constrainAs(count) {
-                top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
-                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-            },
-            text = placesCount.toString()
-        )
-    }
 }
 
 @ExperimentalMaterialApi
@@ -259,54 +227,33 @@ fun PlacesCountView(
 @Composable
 fun BestCatchView(
     modifier: Modifier = Modifier,
-    bestCatch: UserCatch?
+    bestCatch: UserCatch?,
+    onCatchItemClick: (UserCatch) -> Unit
 ) {
-    ConstraintLayout(modifier = modifier.fillMaxWidth()) {
-        val (title, icon, subtitle, bestCatchItem) = createRefs()
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
 
-        Icon(
-            modifier = Modifier
-                .size(24.dp)
-                .constrainAs(icon) {
-                    top.linkTo(title.top)
-                    bottom.linkTo(subtitle.bottom)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                },
-            painter = painterResource(id = R.drawable.ic_fish),
-            contentDescription = null,
-            tint = primaryTextColor
-        )
-
-        PrimaryText(
-            modifier = Modifier.constrainAs(title) {
-                top.linkTo(parent.top)
-                absoluteLeft.linkTo(icon.absoluteRight, 16.dp)
-            },
-            text = stringResource(R.string.best_catch)
+        ProfileItemsTitleView(
+            title = stringResource(id = R.string.best_catch),
+            subtitle = bestCatch?.date?.toDateTextMonth() ?: stringResource(R.string.not_avalable),
+            icon = painterResource(id = R.drawable.ic_cup)
         )
 
         if (bestCatch != null) {
-            SecondaryTextSmall(
-                modifier = Modifier.constrainAs(subtitle) {
-                    top.linkTo(title.bottom)
-                    absoluteLeft.linkTo(title.absoluteLeft)
-                },
-                text = bestCatch.date.toDateTextMonth()
-            )
-
             CatchItemView(
-                modifier = Modifier.constrainAs(bestCatchItem) {
-                    top.linkTo(subtitle.bottom, 2.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                    absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-                    width = Dimension.fillToConstraints
-
-                },
+                modifier = Modifier.padding(horizontal = 8.dp),
                 catch = bestCatch,
-                onClick = {}
+                onClick = onCatchItemClick
+            )
+        } else {
+            NoContentView(
+                text = stringResource(id = R.string.no_cathces_added),
+                icon = painterResource(id = R.drawable.ic_fish)
             )
         }
-
 
     }
 }
@@ -316,52 +263,35 @@ fun BestCatchView(
 @Composable
 fun FavoritePlaceView(
     modifier: Modifier = Modifier,
-    bestPlace: UserMapMarker?
+    favoritePlace: UserMapMarker?,
+    userPlaceClicked: (UserMapMarker) -> Unit,
+    navigateToMap: (UserMapMarker) -> Unit
 ) {
-    ConstraintLayout(modifier = modifier.fillMaxWidth()) {
-        val (title, icon, subtitle, bestCatchItem) = createRefs()
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
 
-        Icon(
-            modifier = Modifier
-                .size(24.dp)
-                .constrainAs(icon) {
-                    top.linkTo(title.top)
-                    bottom.linkTo(subtitle.bottom)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                },
-            painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-            contentDescription = null,
-            tint = primaryTextColor
+        ProfileItemsTitleView(
+            title = stringResource(id = R.string.favorite_place),
+            subtitle = favoritePlace?.dateOfCreation?.toDateTextMonth()
+                ?: stringResource(R.string.not_avalable),
+            icon = painterResource(id = R.drawable.ic_baseline_star_24)
+
         )
 
-        PrimaryText(
-            modifier = Modifier.constrainAs(title) {
-                top.linkTo(parent.top)
-                absoluteLeft.linkTo(icon.absoluteRight, 16.dp)
-            },
-            text = stringResource(R.string.favorite_place)
-        )
-
-        if (bestPlace != null) {
-            SecondaryTextSmall(
-                modifier = Modifier.constrainAs(subtitle) {
-                    top.linkTo(title.bottom)
-                    absoluteLeft.linkTo(title.absoluteLeft)
-                },
-                text = bestPlace.dateOfCreation.toDateTextMonth()
-            )
-
+        if (favoritePlace != null) {
             ItemUserPlace(
-                modifier = Modifier.constrainAs(bestCatchItem) {
-                    top.linkTo(subtitle.bottom, 2.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                    absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-                    width = Dimension.fillToConstraints
-
-                },
-                place = bestPlace,
-                userPlaceClicked = { },
-                navigateToMap = { }
+                modifier = Modifier.padding(horizontal = 8.dp),
+                place = favoritePlace,
+                userPlaceClicked = userPlaceClicked,
+                navigateToMap = { navigateToMap(favoritePlace) }
+            )
+        } else {
+            NoContentView(
+                text = stringResource(id = R.string.no_places_added),
+                icon = painterResource(id = R.drawable.ic_no_place_on_map)
             )
         }
 
