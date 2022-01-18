@@ -57,9 +57,7 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch) {
 
     val viewModel = getViewModel<UserCatchViewModel>()
 
-    LaunchedEffect(key1 = catch) {
-        viewModel.catch.value = catch
-    }
+    LaunchedEffect(key1 = catch) { viewModel.setCatch(catch) }
 
     val loadingState by viewModel.loadingState.collectAsState()
     val loadingDialogState = remember { mutableStateOf(false) }
@@ -185,7 +183,11 @@ fun CatchContent(
 ) {
     val photosState = remember { mutableStateOf(listOf<Uri>()) }
 
-    viewModel.catch.value?.let { catch ->
+    val catchState by viewModel.catch.collectAsState()
+
+    catchState?.let { catch ->
+
+        val placeState by viewModel.mapMarker.collectAsState()
 
         LaunchedEffect(key1 = catch) {
             viewModel.getMapMarker(catch.userMarkerId)
@@ -216,20 +218,20 @@ fun CatchContent(
                 onEditClick = { openSheet(BottomSheetCatchScreen.EditPhotosScreen) }
             )
 
-            ItemUserPlace(
-                place = viewModel.mapMarker.value ?: UserMapMarker(),
-                userPlaceClicked = {
-                    onPlaceItemClick(place = it, navController = navController)
-                },
-                navigateToMap = {
-                    viewModel.mapMarker.value?.let {
+            placeState?.let { place ->
+                ItemUserPlace(
+                    place = place,
+                    userPlaceClicked = {
+                        onPlaceItemClick(place = it, navController = navController)
+                    },
+                    navigateToMap = {
                         navController.navigate(
                             "${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
-                            Arguments.PLACE to it
+                            Arguments.PLACE to place
                         )
-                    }
-                },
-            )
+                    },
+                )
+            }
 
             DefaultNoteView(
                 note = catch.note,

@@ -1,8 +1,6 @@
 package com.joesemper.fishing.domain
 
 import android.net.Uri
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.model.entity.common.Progress
@@ -21,11 +19,18 @@ class UserCatchViewModel(
     private val userRepository: UserRepository,
 ) : ViewModel() {
 
-    val catch: MutableState<UserCatch?> = mutableStateOf(null)
-    val mapMarker: MutableState<UserMapMarker?> = mutableStateOf(null)
+    private val _catch = MutableStateFlow<UserCatch?>(null)
+    val catch = _catch.asStateFlow()
+
+    private val _mapMarker = MutableStateFlow<UserMapMarker?>(null)
+    val mapMarker = _mapMarker.asStateFlow()
 
     private val _loadingState = MutableStateFlow<Progress>(Progress.Complete)
     val loadingState = _loadingState.asStateFlow()
+
+    fun setCatch(userCatch: UserCatch) {
+        _catch.value = userCatch
+    }
 
     fun updateCatch(data: Map<String, Any>) {
         mapMarker.value?.let { marker ->
@@ -54,7 +59,7 @@ class UserCatchViewModel(
     fun getMapMarker(markerId: String) {
         viewModelScope.launch {
             markersRepository.getMapMarker(markerId).collect {
-                mapMarker.value = it
+                _mapMarker.value = it
                 subscribeOnCatchChanges()
             }
         }
@@ -84,7 +89,7 @@ class UserCatchViewModel(
                     markerId = marker.id,
                     catchId = oldCatch.id
                 ).collect {
-                    catch.value = it
+                    _catch.value = it
                 }
             }
         }
