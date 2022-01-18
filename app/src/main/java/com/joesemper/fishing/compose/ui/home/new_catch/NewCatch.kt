@@ -25,6 +25,7 @@ import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.advertising.BannerAdvertView
 import com.joesemper.fishing.compose.ui.home.advertising.showInterstitialAd
 import com.joesemper.fishing.compose.ui.home.views.DefaultAppBar
+import com.joesemper.fishing.compose.ui.home.views.ModalLoadingDialog
 import com.joesemper.fishing.compose.ui.home.views.PhotosView
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
@@ -168,7 +169,11 @@ fun NewCatchScreen(
             sheetGesturesEnabled = false,
             sheetPeekHeight = 0.dp
         ) {
-            NewCatchLoadingDialog(dialogSate = loadingDialogState)
+            ModalLoadingDialog(
+                dialogSate = loadingDialogState,
+                text = stringResource(id = R.string.saving_new_catch)
+            )
+
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween,

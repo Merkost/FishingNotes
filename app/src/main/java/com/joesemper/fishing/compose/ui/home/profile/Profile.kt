@@ -270,7 +270,6 @@ fun PlacesNumber(modifier: Modifier = Modifier, userPlacesNum: Int?) {
                 .shimmer()
         )
     }
-
 }
 
 @Composable

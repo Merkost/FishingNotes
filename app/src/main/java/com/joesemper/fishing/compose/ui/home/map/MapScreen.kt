@@ -467,6 +467,7 @@ fun MapLayout(
         ) { mapView ->
             coroutineScope.launch {
                 val googleMap = mapView.awaitMap()
+
                 googleMap.clear()
                 markersToShow.forEach {
                     val position = LatLng(it.latitude, it.longitude)
@@ -518,7 +519,6 @@ fun MapLayout(
             }
         }
     }
-    //}
 
     LaunchedEffect(map, permissionsState.allPermissionsGranted) {
         val googleMap = map.awaitMap()

@@ -282,4 +282,7 @@
     <string name="delete_catch_dialog">Удаление улова \"%s\"</string>
     <string name="not_avalable">N/A</string>
 
+    <string name="map_id">74ee6ebad34bd1fc</string>
+    <string name="saving_photos">Saving photos</string>
+
 </resources>

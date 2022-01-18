@@ -5,7 +5,6 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -26,7 +25,6 @@ import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.notes.ItemUserPlace
@@ -34,19 +32,20 @@ import com.joesemper.fishing.compose.ui.home.place.LottieWarning
 import com.joesemper.fishing.compose.ui.home.views.*
 import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
+import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserCatchViewModel
+import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserCatch
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.mappers.getMoonIconByPhase
 import com.joesemper.fishing.model.mappers.getWeatherIconByName
 import com.joesemper.fishing.utils.Constants
+import com.joesemper.fishing.utils.time.toDateTextMonth
+import com.joesemper.fishing.utils.time.toTime
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
-import com.joesemper.fishing.compose.ui.navigate
-import com.joesemper.fishing.utils.time.toDateTextMonth
-import com.joesemper.fishing.utils.time.toTime
 
 @ExperimentalPermissionsApi
 @ExperimentalComposeUiApi
@@ -59,10 +58,16 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch) {
     val viewModel = getViewModel<UserCatchViewModel>()
 
     LaunchedEffect(key1 = catch) {
-            viewModel.catch.value = catch
+        viewModel.catch.value = catch
     }
 
-    if (viewModel.loadingState.value is Progress.Loading) { LoadingDialog() }
+    val loadingState by viewModel.loadingState.collectAsState()
+    val loadingDialogState = remember { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = loadingState) {
+        loadingDialogState.value = loadingState is Progress.Loading
+    }
+
 
     val bottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     var currentBottomSheet: BottomSheetCatchScreen? by remember { mutableStateOf(null) }
@@ -89,6 +94,11 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch) {
             navController.popBackStack()
         }
     }
+
+    ModalLoadingDialog(
+        dialogSate = loadingDialogState,
+        text = stringResource(R.string.saving_photos)
+    )
 
     ModalBottomSheetLayout(
         modifier = Modifier,
@@ -132,7 +142,8 @@ fun CatchTopBar(navController: NavController, catch: UserCatch, onDeleteCatch: (
     ) {
         IconButton(
             modifier = Modifier.padding(horizontal = 4.dp),
-            onClick = onDeleteCatch) {
+            onClick = onDeleteCatch
+        ) {
             Icon(imageVector = Icons.Filled.Delete, contentDescription = "", tint = Color.White)
         }
     }
@@ -212,8 +223,10 @@ fun CatchContent(
                 },
                 navigateToMap = {
                     viewModel.mapMarker.value?.let {
-                        navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
-                            Arguments.PLACE to it)
+                        navController.navigate(
+                            "${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
+                            Arguments.PLACE to it
+                        )
                     }
                 },
             )
