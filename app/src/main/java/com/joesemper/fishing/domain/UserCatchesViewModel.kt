@@ -4,23 +4,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.compose.ui.home.UiState
 import com.joesemper.fishing.model.entity.content.UserCatch
-import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.repository.app.CatchesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.util.Collections.addAll
 
 class UserCatchesViewModel(private val repository: CatchesRepository) : ViewModel() {
 
     private val _currentContent = MutableStateFlow<MutableList<UserCatch>>(mutableListOf())
-    val currentContent: StateFlow<List<UserCatch>>
-        get() = _currentContent
+    val currentContent = _currentContent.asStateFlow()
 
     private val _uiState = MutableStateFlow<UiState>(UiState.InProgress)
-    val uiState: StateFlow<UiState>
-        get() = _uiState
+    val uiState = _uiState.asStateFlow()
 
     init {
         loadAllUserCatches()

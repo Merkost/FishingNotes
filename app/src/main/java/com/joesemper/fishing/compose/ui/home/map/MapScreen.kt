@@ -53,7 +53,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
+import org.koin.core.annotation.KoinInternalApi
+import org.koin.core.context.GlobalContext
 
+@KoinInternalApi
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
 @ExperimentalCoroutinesApi
@@ -75,16 +78,10 @@ fun MapScreen(
 
     val map = rememberMapViewWithLifecycle()
 
-    val viewModel: MapViewModel = getViewModel()
+    val viewModel: MapViewModel = getViewModel(
+        scope = GlobalContext.get().scopeRegistry.rootScope
+    )
 
-    chosenPlace?.let {
-        if (it.id.isNotEmpty()) {
-            viewModel.currentMarker.value = chosenPlace
-        }
-        viewModel.lastMapCameraPosition.value =
-            Pair(LatLng(it.latitude, it.longitude), DEFAULT_ZOOM)
-        chosenPlace = null
-    }
     val coroutineScope = rememberCoroutineScope()
     val userPreferences: UserPreferences = get()
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
@@ -98,83 +95,74 @@ fun MapScreen(
     val mapType = rememberSaveable { mutableStateOf(MapTypes.roadmap) }
     val mapBearing = remember { mutableStateOf(0f) }
 
+    val mapUiState = viewModel.mapUiState.collectAsState()
+    val currentMarker = viewModel.currentMarker.collectAsState()
 
-    var mapUiState: MapUiState by remember {
-        when {
-            addingPlace -> mutableStateOf(MapUiState.PlaceSelectMode)
-            viewModel.currentMarker.value != null -> {
-                mutableStateOf(MapUiState.BottomSheetInfoMode)
-            }
-            else -> mutableStateOf(viewModel.mapUiState.value)
-        }
-    }
+    var cameraMoveState: CameraMoveState by remember { mutableStateOf(CameraMoveState.MoveFinish) }
 
-    var cameraMoveState: CameraMoveState by remember {
-        mutableStateOf(CameraMoveState.MoveFinish)
-    }
-
-    val pointerState: MutableState<PointerState> = remember {
-        mutableStateOf(PointerState.HideMarker)
-    }
+    val pointerState: MutableState<PointerState> =
+        remember { mutableStateOf(PointerState.HideMarker) }
 
     val currentCameraPosition = remember { mutableStateOf(Pair(LatLng(0.0, 0.0), 0f)) }
 
-    LaunchedEffect(mapUiState) {
-        if (mapUiState != viewModel.mapUiState) {
-            viewModel.mapUiState.value = mapUiState
-            when (mapUiState) {
-                is MapUiState.NormalMode -> {
-                    viewModel.currentMarker.value = null
-                    addingPlace = false
-                }
-                is MapUiState.BottomSheetInfoMode -> {
-                    addingPlace = false
-                }
-                is MapUiState.PlaceSelectMode -> {
-                }
-                /*is MapUiState.BottomSheetFullyExpanded -> {
-                    scaffoldState.bottomSheetState.expand()
-                }*/
+    val lastKnownLocation = viewModel.lastKnownLocation.collectAsState()
+
+    chosenPlace?.let {
+        if (it.id.isNotEmpty()) {
+            viewModel.updateCurrentMarker(it)
+        }
+        viewModel.updateLastCameraPosition(Pair(LatLng(it.latitude, it.longitude), DEFAULT_ZOOM))
+        chosenPlace = null
+    }
+
+    LaunchedEffect(key1 = addingPlace, key2 = currentMarker.value) {
+        if (addingPlace) {
+            viewModel.updateMapUiState(MapUiState.PlaceSelectMode)
+        }
+        if (currentMarker.value != null) {
+            viewModel.updateMapUiState(MapUiState.BottomSheetInfoMode)
+        }
+    }
+
+    LaunchedEffect(mapUiState.value) {
+        when (mapUiState.value) {
+            is MapUiState.NormalMode -> {
+                viewModel.updateCurrentMarker(null)
+                addingPlace = false
+            }
+            is MapUiState.BottomSheetInfoMode -> {
+                addingPlace = false
+            }
+            is MapUiState.PlaceSelectMode -> {
+
             }
         }
     }
 
-    val currentLocationFlow = remember { getCurrentLocationFlow(context, permissionsState) }
+    val currentLocationState = getCurrentLocationFlow(context, permissionsState)
 
-    LaunchedEffect(currentLocationFlow) {
-        currentLocationFlow.collect { currentLocationState ->
-            if (currentLocationState is LocationState.LocationGranted) {
-                viewModel.lastKnownLocation.value = currentLocationState.location
-                if (viewModel.firstLaunchLocation.value) {
-                    viewModel.currentMarker.value?.let {
-                        viewModel.firstLaunchLocation.value = false
-                    } ?: kotlin.run {
-                        viewModel.lastMapCameraPosition.value =
-                            Pair(currentLocationState.location, DEFAULT_ZOOM)
-                    }
-                }
-            }
-        }
-    }
-
-    /*LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
-        viewModel.sheetState = scaffoldState.bottomSheetState.currentValue
-        if (!addingPlace) {
-            when (scaffoldState.bottomSheetState.currentValue) {
-                BottomSheetValue.Collapsed -> if (viewModel.currentMarker.value != null &&
-                    mapUiState == MapUiState.BottomSheetFullyExpanded
-                )
-                    mapUiState = MapUiState.BottomSheetInfoMode
-                BottomSheetValue.Expanded -> if (mapUiState == MapUiState.BottomSheetInfoMode)
-                    mapUiState = MapUiState.BottomSheetFullyExpanded
-            }
-        }
-    }*/
+//    LaunchedEffect(currentLocationState) {
+//        currentLocationState.collect { currentLocationState ->
+//            if (currentLocationState is LocationState.LocationGranted) {
+//                viewModel.updateLastKnownLocation(currentLocationState.location)
+//                if (viewModel.firstLaunchLocation.value) {
+//                    viewModel.currentMarker.value?.let {
+//                        viewModel.setFirstLaunchLocation(false)
+//                    } ?: launch {
+//                        viewModel.updateLastCameraPosition(
+//                            Pair(currentLocationState.location, DEFAULT_ZOOM)
+//                        )
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     BackPressHandler(
-        mapUiState = mapUiState,
+        mapUiState = mapUiState.value,
         navController = navController,
-    ) { mapUiState = MapUiState.NormalMode }
+        onBackPressedCallback = { viewModel.updateMapUiState(MapUiState.NormalMode) }
+    )
 
     val noNamePlace = stringResource(R.string.no_name_place)
 
@@ -188,19 +176,19 @@ fun MapScreen(
         }
     ) {
         MapScaffold(
-            mapUiState = mapUiState,
+            mapUiState = mapUiState.value,
             scaffoldState = scaffoldState,
             fab = {
                 MapFab(
-                    state = mapUiState,
+                    state = mapUiState.value,
                     onClick = {
-                        when (mapUiState) {
+                        when (mapUiState.value) {
                             MapUiState.NormalMode -> {
-                                mapUiState = MapUiState.PlaceSelectMode
+                                viewModel.updateMapUiState(MapUiState.PlaceSelectMode)
                             }
                             MapUiState.PlaceSelectMode -> {
                                 dialogAddPlaceIsShowing.value = true
-                                mapUiState = MapUiState.NormalMode
+                                viewModel.updateMapUiState(MapUiState.NormalMode)
                             }
                             MapUiState.BottomSheetInfoMode -> {
                                 onAddNewCatchClick(navController, viewModel)
@@ -208,9 +196,9 @@ fun MapScreen(
                         }
                     },
                     onLongPress = {
-                        when (mapUiState) {
+                        when (mapUiState.value) {
                             MapUiState.NormalMode -> {
-                                viewModel.lastKnownLocation.value?.let {
+                                lastKnownLocation.value?.let {
                                     viewModel.addNewMarker(
                                         RawMapMarker(
                                             noNamePlace,
@@ -228,8 +216,7 @@ fun MapScreen(
             bottomSheet = {
 
                 MarkerInfoDialog(
-                    receivedMarker = viewModel.currentMarker.value,
-                    lastKnownLocation = viewModel.lastKnownLocation,
+                    receivedMarker = currentMarker.value,
                     navController = navController,
                     mapBearing = mapBearing,
                     onMarkerIconClicked = {
@@ -248,6 +235,7 @@ fun MapScreen(
                 val (mapLayout, addMarkerFragment, mapMyLocationButton,
                     mapCompassButton, mapLayersButton, zoomInButton, zoomOutButton,
                     mapSettingsButton, mapLayersView, pointer) = createRefs()
+
                 val verticalMyLocationButtonGl = createGuidelineFromAbsoluteRight(56.dp)
                 val centerHorizontal = createGuidelineFromBottom(0.5f)
 
@@ -259,15 +247,14 @@ fun MapScreen(
                         absoluteRight.linkTo(parent.absoluteRight)
                     }, map = map,
                     onMarkerClick = {
-                        viewModel.currentMarker.value = it
-                        mapUiState = MapUiState.BottomSheetInfoMode
+                        viewModel.updateCurrentMarker(it)
+                        viewModel.updateMapUiState(MapUiState.BottomSheetInfoMode)
                     },
-                    showHiddenPlacess = showHiddenPlaces,
                     cameraMoveCallback = { state -> cameraMoveState = state },
                     currentCameraPosition = currentCameraPosition,
                     mapType = mapType, mapBearing = mapBearing,
                     onMapClick = {
-                        mapUiState = MapUiState.NormalMode
+                        viewModel.updateMapUiState(MapUiState.NormalMode)
                         /*coroutineScope.launch {
                             scaffoldState.bottomSheetState.collapse()
                         }*/
@@ -325,11 +312,11 @@ fun MapScreen(
                         top.linkTo(parent.top, 16.dp)
                         absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                     },
-                    lastKnownLocation = viewModel.lastKnownLocation,
+                    lastKnownLocation = lastKnownLocation.value,
                     userPreferences = userPreferences,
                 ) {
-                    viewModel.lastKnownLocation.value?.let {
-                        viewModel.lastMapCameraPosition.value = getCameraPosition(it)
+                    lastKnownLocation.value?.let {
+                        viewModel.updateLastCameraPosition(getCameraPosition(it))
                     }
                 }
 
@@ -381,8 +368,7 @@ fun MapScreen(
                     }
                 }
 
-
-                AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode,
+                AnimatedVisibility(mapUiState.value == MapUiState.PlaceSelectMode,
                     modifier = Modifier.constrainAs(pointer) {
                         top.linkTo(parent.top)
                         bottom.linkTo(parent.bottom, 65.dp)
@@ -392,7 +378,7 @@ fun MapScreen(
                     PointerIcon(pointerState)
                 }
 
-                AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection.value,
+                AnimatedVisibility(mapUiState.value == MapUiState.PlaceSelectMode && !mapLayersSelection.value,
                     enter = fadeIn(animationSpec = tween(300)),
                     exit = fadeOut(animationSpec = tween(300)),
                     modifier = Modifier.constrainAs(addMarkerFragment) {
@@ -409,12 +395,14 @@ fun MapScreen(
                     )
                 }
 
+                val chosenPlaceState by viewModel.chosenPlace.collectAsState()
+
                 if (dialogAddPlaceIsShowing.value)
                     Dialog(onDismissRequest = { dialogAddPlaceIsShowing.value = false }) {
                         NewPlaceDialog(
                             currentCameraPosition = currentCameraPosition,
                             dialogState = dialogAddPlaceIsShowing,
-                            chosenPlace = viewModel.chosenPlace
+                            chosenPlace = chosenPlaceState
                         )
                     }
             }
@@ -431,7 +419,6 @@ fun MapLayout(
     modifier: Modifier = Modifier,
     map: MapView,
     onMarkerClick: (marker: UserMapMarker) -> Unit,
-    showHiddenPlacess: Boolean,
     cameraMoveCallback: (state: CameraMoveState) -> Unit,
     currentCameraPosition: MutableState<Pair<LatLng, Float>>,
     mapType: MutableState<Int>,
@@ -441,6 +428,8 @@ fun MapLayout(
     ) {
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
+
+    val lastMapCameraPosition by viewModel.lastMapCameraPosition.collectAsState()
 
     val userPreferences: UserPreferences = get()
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
@@ -503,7 +492,7 @@ fun MapLayout(
                 }
                 googleMap.setOnMarkerClickListener { marker ->
                     onMarkerClick(markers.first { it.id == marker.tag })
-                    viewModel.lastMapCameraPosition.value = Pair(marker.position, DEFAULT_ZOOM)
+                    viewModel.updateLastCameraPosition(Pair(marker.position, DEFAULT_ZOOM))
                     true
                 }
                 googleMap.setOnMapClickListener {
@@ -527,8 +516,8 @@ fun MapLayout(
         isMapVisible = true
     }
 
-    LaunchedEffect(viewModel.lastMapCameraPosition.value) {
-        viewModel.lastMapCameraPosition.value?.let {
+    LaunchedEffect(lastMapCameraPosition) {
+        lastMapCameraPosition?.let {
             moveCameraToLocation(this, map, it.first, it.second, mapBearing.value)
         }
     }
@@ -540,7 +529,7 @@ fun MapLayout(
 
     DisposableEffect(map) {
         onDispose {
-            viewModel.lastMapCameraPosition.value = currentCameraPosition.value
+            viewModel.updateLastCameraPosition(currentCameraPosition.value)
         }
     }
 }

@@ -24,10 +24,8 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
-import com.google.android.libraries.maps.model.LatLng
 import com.google.maps.android.SphericalUtil
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.compose.ui.Arguments
 import com.joesemper.fishing.compose.ui.MainDestinations
 import com.joesemper.fishing.compose.ui.home.views.PrimaryText
@@ -36,8 +34,8 @@ import com.joesemper.fishing.compose.ui.home.weather.WindSpeedValues
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.compose.ui.resources
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
+import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.model.entity.content.UserMapMarker
-import com.joesemper.fishing.model.entity.weather.CurrentWeatherFree
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -48,21 +46,32 @@ import org.koin.androidx.compose.getViewModel
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MarkerInfoDialog(
-    receivedMarker: UserMapMarker?,
-    lastKnownLocation: MutableState<LatLng?>,
-    mapBearing: MutableState<Float>,
     modifier: Modifier = Modifier,
+    receivedMarker: UserMapMarker?,
+    mapBearing: MutableState<Float>,
     navController: NavController,
     onMarkerIconClicked: (UserMapMarker) -> Unit,
 ) {
     val context = LocalContext.current
 
     val viewModel: MapViewModel = getViewModel()
+
+    val lastKnownLocation = viewModel.lastKnownLocation.collectAsState()
+
+    val fishActivity by viewModel.fishActivity.collectAsState()
+    val currentWeather by viewModel.currentWeather.collectAsState()
+
+    var address: String? by remember { mutableStateOf(null) }
+    var distance: String? by remember { mutableStateOf(null) }
+
     val weatherPreferences: WeatherPreferences = get()
     val coroutineScope = rememberCoroutineScope()
     val geocoder = Geocoder(context, resources().configuration.locale)
 
     val windUnit by weatherPreferences.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
+
+    val currentMarker by viewModel.currentMarker.collectAsState()
+
 
     /*val weatherPrefs: WeatherPreferences = get()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
@@ -70,20 +79,17 @@ fun MarkerInfoDialog(
     val connectionState by context.observeConnectivityAsFlow()
         .collectAsState(initial = context.currentConnectivityState)*/
 
-    var address: String? by remember { mutableStateOf(null) }
-    var distance: String? by remember { mutableStateOf(null) }
-    val fishActivity: Int? by remember { viewModel.fishActivity }
-    val currentWeather: CurrentWeatherFree? by remember { viewModel.currentWeather }
-
-    val cant_recognize_place = stringResource(R.string.cant_recognize_place)
-
     receivedMarker?.let {
         LaunchedEffect(receivedMarker) {
             coroutineScope.launch(Dispatchers.Default) {
                 address = null
                 delay(800)
                 try {
-                    val position = geocoder.getFromLocation(receivedMarker.latitude, receivedMarker.longitude, 1)
+                    val position = geocoder.getFromLocation(
+                        receivedMarker.latitude,
+                        receivedMarker.longitude,
+                        1
+                    )
                     position?.first()?.apply {
                         address = if (!subAdminArea.isNullOrBlank()) {
                             subAdminArea.replaceFirstChar { it.uppercase() }
@@ -95,18 +101,18 @@ fun MarkerInfoDialog(
                     }
                 } catch (e: Throwable) {
                     //TODO: Ошибка в океане!
-                    address = cant_recognize_place
+                    address = context.getString(R.string.cant_recognize_place)
                 }
             }
         }
 
         LaunchedEffect(receivedMarker) {
-            viewModel.fishActivity.value = null
+//            viewModel.fishActivity.value = null
             viewModel.getFishActivity(receivedMarker.latitude, receivedMarker.longitude)
         }
 
         LaunchedEffect(receivedMarker) {
-            viewModel.currentWeather.value = null
+//            viewModel.currentWeather.value = null
             viewModel.getCurrentWeather(receivedMarker.latitude, receivedMarker.longitude)
         }
 
@@ -132,18 +138,18 @@ fun MarkerInfoDialog(
     val cornersDp = 16.dp
     val elevationDp = 6.dp
 
-    viewModel.currentMarker.value?.let { marker ->
-    Card(
-        shape = RoundedCornerShape(cornersDp),
-        elevation = elevationDp,
-        backgroundColor = MaterialTheme.colors.surface,
-        modifier = Modifier
-            .zIndex(1.0f)
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(paddingDp),
-        onClick = { onMarkerClicked(marker, navController) }
-    ) {
+    currentMarker?.let { marker ->
+        Card(
+            shape = RoundedCornerShape(cornersDp),
+            elevation = elevationDp,
+            backgroundColor = MaterialTheme.colors.surface,
+            modifier = Modifier
+                .zIndex(1.0f)
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(paddingDp),
+            onClick = { onMarkerClicked(marker, navController) }
+        ) {
             AnimatedVisibility(
                 true,
                 enter = fadeIn(tween(500)),
@@ -153,10 +159,10 @@ fun MarkerInfoDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(150.dp)
-                        /*.noRippleClickable(
-                            onClick = onDescriptionClick,
-                            enabled = scaffoldState.bottomSheetState.isCollapsed
-                        )*/
+                    /*.noRippleClickable(
+                        onClick = onDescriptionClick,
+                        enabled = scaffoldState.bottomSheetState.isCollapsed
+                    )*/
                 ) {
                     val (locationIcon, title, area, distanceTo,
                         fish, divider, weather) = createRefs()
@@ -165,7 +171,8 @@ fun MarkerInfoDialog(
                     val verticalFabLine = createGuidelineFromAbsoluteRight(60.dp)
 
                     Box(modifier = Modifier
-                        .size(64.dp).padding(16.dp)
+                        .size(64.dp)
+                        .padding(16.dp)
 
                         .constrainAs(locationIcon) {
                             absoluteLeft.linkTo(parent.absoluteLeft)
@@ -255,7 +262,8 @@ fun MarkerInfoDialog(
                                     easing = LinearOutSlowInEasing
                                 )
                             ),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp,
+                        horizontalArrangement = Arrangement.spacedBy(
+                            6.dp,
                             Alignment.CenterHorizontally
                         ),
                         verticalAlignment = Alignment.CenterVertically,
@@ -263,7 +271,9 @@ fun MarkerInfoDialog(
                         Icon(
                             painter = painterResource(R.drawable.fish),
                             contentDescription = "Marker",
-                            modifier = Modifier.size(45.dp).padding(6.dp),
+                            modifier = Modifier
+                                .size(45.dp)
+                                .padding(6.dp),
                             tint = if (fishActivity == null) Color.LightGray else MaterialTheme.colors.primary
                         )
                         SubtitleText(
@@ -278,7 +288,9 @@ fun MarkerInfoDialog(
                                 top.linkTo(area.bottom, 4.dp)
                                 linkTo(horizontalLine, horizontalLine, 0.dp, 0.dp, 0.5f)
                                 bottom.linkTo(parent.bottom)
-                            }.height(20.dp).width(1.dp),
+                            }
+                            .height(20.dp)
+                            .width(1.dp),
                         color = Color.Gray,
                     )
 
@@ -292,14 +304,19 @@ fun MarkerInfoDialog(
                             }
                             .animateContentSize(
                                 animationSpec =
-                                tween(durationMillis = 300, easing = LinearOutSlowInEasing)),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                                tween(durationMillis = 300, easing = LinearOutSlowInEasing)
+                            ),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            6.dp,
+                            Alignment.CenterHorizontally
+                        ),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         IconButton(onClick = { onWeatherIconClicked(marker, navController) }) {
                             Icon(painterResource(R.drawable.ic_baseline_navigation_24), "",
                                 modifier = Modifier.rotate(currentWeather?.wind_degrees?.let {
-                                    it.minus(mapBearing.value) } ?: mapBearing.value),
+                                    it.minus(mapBearing.value)
+                                } ?: mapBearing.value),
                                 tint = if (fishActivity == null) Color.LightGray else MaterialTheme.colors.primaryVariant
                             )
                         }

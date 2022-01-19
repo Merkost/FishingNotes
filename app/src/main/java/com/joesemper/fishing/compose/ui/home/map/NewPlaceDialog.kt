@@ -49,7 +49,7 @@ import org.koin.androidx.compose.get
 fun NewPlaceDialog(
     currentCameraPosition: MutableState<Pair<LatLng, Float>>,
     dialogState: MutableState<Boolean>,
-    chosenPlace: MutableState<String?>,
+    chosenPlace: String?,
 ) {
     val viewModel = get<MapViewModel>()
     val context = LocalContext.current
@@ -94,8 +94,8 @@ fun NewPlaceDialog(
             val descriptionValue = remember { mutableStateOf("") }
             val titleValue = remember { mutableStateOf(/*chosenPlace.value ?:*/ "") }
             val markerColor = remember { mutableStateOf(Color(0xFFEC407A).hashCode()) }
-            LaunchedEffect(chosenPlace.value) {
-                chosenPlace.value?.let {
+            LaunchedEffect(chosenPlace) {
+                chosenPlace?.let {
                     titleValue.value = it
                 }
             }

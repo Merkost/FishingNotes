@@ -37,7 +37,6 @@ import com.alorma.compose.settings.ui.SettingsCheckbox
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.R
-import com.joesemper.fishing.model.datastore.UserPreferences
 import com.joesemper.fishing.compose.ui.home.SettingsHeader
 import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.views.DefaultDialog
@@ -45,6 +44,7 @@ import com.joesemper.fishing.compose.ui.theme.RedGoogleChrome
 import com.joesemper.fishing.compose.ui.theme.secondaryFigmaColor
 import com.joesemper.fishing.compose.ui.theme.supportTextColor
 import com.joesemper.fishing.compose.viewmodels.MapViewModel
+import com.joesemper.fishing.model.datastore.UserPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -114,7 +114,9 @@ fun MapModalBottomSheet(
             onCheckedChange = { newValue ->
                 coroutineScope.launch { mapPreferences.saveMapHiddenPlaces(newValue) }
             },
-            state = if (showHiddenPlaces) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
+            state = if (showHiddenPlaces) rememberBooleanSettingState(true) else rememberBooleanSettingState(
+                false
+            )
         )
     }
 }
@@ -123,7 +125,7 @@ fun MapModalBottomSheet(
 @Composable
 fun MyLocationButton(
     modifier: Modifier = Modifier,
-    lastKnownLocation: MutableState<LatLng?>,
+    lastKnownLocation: LatLng?,
     userPreferences: UserPreferences,
     onClick: () -> Unit,
 ) {
@@ -141,7 +143,7 @@ fun MyLocationButton(
 
     val color = animateColorAsState(
         when {
-            !shouldShowPermissions || lastKnownLocation.value == null -> {
+            !shouldShowPermissions || lastKnownLocation == null -> {
                 RedGoogleChrome
             }
             else -> {
@@ -159,7 +161,7 @@ fun MyLocationButton(
                 .padding(8.dp)
                 .fillMaxSize(),
             onClick = {
-                if (lastKnownLocation.value == null) locationDialogIsShowing = true
+                if (lastKnownLocation == null) locationDialogIsShowing = true
                 else onClick()
             }
         ) {
@@ -179,12 +181,13 @@ fun CompassButton(
     mapBearing: MutableState<Float>,
     onClick: () -> Unit
 ) {
-    val rotation =  mapBearing.value
+    val rotation = mapBearing.value
 
     AnimatedVisibility(
         modifier = modifier,
         visible = mapBearing.value < 356f && mapBearing.value > 4f,
-        enter = fadeIn(), exit = fadeOut(animationSpec = tween(delayMillis = 3000, durationMillis = 1000))
+        enter = fadeIn(),
+        exit = fadeOut(animationSpec = tween(delayMillis = 3000, durationMillis = 1000))
     ) {
         Card(
             shape = CircleShape,
@@ -195,11 +198,16 @@ fun CompassButton(
                 .fillMaxSize(),
                 onClick = { onClick() }) {
                 Icon(
-                    painterResource(if (mapBearing.value > 356f ||
-                        mapBearing.value < 4f) R.drawable.north
-                    else R.drawable.gps),
+                    painterResource(
+                        if (mapBearing.value > 356f ||
+                            mapBearing.value < 4f
+                        ) R.drawable.north
+                        else R.drawable.gps
+                    ),
                     stringResource(R.string.compass),
-                    modifier = Modifier.rotate(mapBearing.value).fillMaxSize()
+                    modifier = Modifier
+                        .rotate(mapBearing.value)
+                        .fillMaxSize()
                 )
             }
         }
@@ -213,21 +221,21 @@ fun MapZoomInButton(
     onClick: () -> Unit
 ) {
 
-        Card(
-            shape = CircleShape,
-            modifier = modifier.size(40.dp)
-        ) {
-            IconButton(modifier = Modifier
-                .padding(8.dp)
-                .fillMaxSize(),
-                onClick = { onClick() }) {
-                Icon(
-                    Icons.Default.Add,
-                    Icons.Default.Add.name,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
+    Card(
+        shape = CircleShape,
+        modifier = modifier.size(40.dp)
+    ) {
+        IconButton(modifier = Modifier
+            .padding(8.dp)
+            .fillMaxSize(),
+            onClick = { onClick() }) {
+            Icon(
+                Icons.Default.Add,
+                Icons.Default.Add.name,
+                modifier = Modifier.fillMaxSize()
+            )
         }
+    }
 }
 
 @Composable
@@ -369,9 +377,11 @@ fun MapSettingsButton(
         modifier = modifier.size(40.dp)
     ) {
         IconButton(
-            modifier = Modifier.padding(8.dp).fillMaxSize(),
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxSize(),
             onClick = onCLick
-            ) {
+        ) {
             Icon(
                 Icons.Default.Settings, Icons.Default.Settings.name,
             )
@@ -459,7 +469,8 @@ fun PlaceTileView(
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
     val geocoder = Geocoder(context)
-    var selectedPlace by remember { mutableStateOf<String?>(null) }
+
+    val selectedPlace by viewModel.chosenPlace.collectAsState()
 
     val unnamedPlaceStr = stringResource(R.string.unnamed_place)
     val cantRecognizePlace = stringResource(R.string.cant_recognize_place)
@@ -467,10 +478,10 @@ fun PlaceTileView(
     when (cameraMoveState) {
         CameraMoveState.MoveStart -> {
             pointerState.value = PointerState.ShowMarker
-            selectedPlace = null
-            viewModel.chosenPlace.value = null
-            viewModel.showMarker.value = false
+            viewModel.setChosenPlace(null)
+            viewModel.setShowMarker(false)
         }
+
         CameraMoveState.MoveFinish -> {
             LaunchedEffect(cameraMoveState) {
                 delay(1200)
@@ -482,20 +493,21 @@ fun PlaceTileView(
                             1
                         )
                         position?.first()?.let { address ->
-                            viewModel.showMarker.value = true
+                            viewModel.setShowMarker(true)
                             if (!address.subAdminArea.isNullOrBlank()) {
-                                viewModel.chosenPlace.value =
-                                    address.subAdminArea.replaceFirstChar { it.uppercase() }
+                                viewModel.setChosenPlace(
+                                    address.subAdminArea.replaceFirstChar { it.uppercase() })
                             } else if (!address.adminArea.isNullOrBlank()) {
-                                viewModel.chosenPlace.value = address.adminArea
-                                    .replaceFirstChar { it.uppercase() }
-                            } else viewModel.chosenPlace.value = "Место без названия"
+                                viewModel.setChosenPlace(address.adminArea
+                                    .replaceFirstChar { it.uppercase() })
+                            } else {
+                                viewModel.setChosenPlace(context.getString(R.string.not_avalable))
+                            }
                         }
                     } catch (e: Throwable) {
-                        viewModel.chosenPlace.value = "Не удалось определить место"
+                        viewModel.setChosenPlace(context.getString(R.string.failed_to_determine_location))
                     }
                     pointerState.value = PointerState.HideMarker
-                    selectedPlace = viewModel.chosenPlace.value
                 }
             }
         }
@@ -510,7 +522,7 @@ fun PlaceTileView(
         if (selectedPlace != null) MaterialTheme.colors.onSurface
         else Color.LightGray
     )
-    val shimmerModifier = if (viewModel.chosenPlace.value != null) Modifier else Modifier.shimmer()
+    val shimmerModifier = if (selectedPlace != null) Modifier else Modifier.shimmer()
 
     Card(
         shape = RoundedCornerShape(size = 20.dp),
