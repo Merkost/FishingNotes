@@ -54,7 +54,6 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import org.koin.core.annotation.KoinInternalApi
-import org.koin.core.context.GlobalContext
 
 @KoinInternalApi
 @ExperimentalComposeUiApi
@@ -78,9 +77,7 @@ fun MapScreen(
 
     val map = rememberMapViewWithLifecycle()
 
-    val viewModel: MapViewModel = getViewModel(
-        scope = GlobalContext.get().scopeRegistry.rootScope
-    )
+    val viewModel = getViewModel<MapViewModel>()
 
     val coroutineScope = rememberCoroutineScope()
     val userPreferences: UserPreferences = get()
@@ -141,22 +138,22 @@ fun MapScreen(
 
     val currentLocationState = getCurrentLocationFlow(context, permissionsState)
 
-//    LaunchedEffect(currentLocationState) {
-//        currentLocationState.collect { currentLocationState ->
-//            if (currentLocationState is LocationState.LocationGranted) {
-//                viewModel.updateLastKnownLocation(currentLocationState.location)
-//                if (viewModel.firstLaunchLocation.value) {
-//                    viewModel.currentMarker.value?.let {
-//                        viewModel.setFirstLaunchLocation(false)
-//                    } ?: launch {
-//                        viewModel.updateLastCameraPosition(
-//                            Pair(currentLocationState.location, DEFAULT_ZOOM)
-//                        )
-//                    }
-//                }
-//            }
-//        }
-//    }
+    LaunchedEffect(currentLocationState) {
+        currentLocationState.collect { currentLocationState ->
+            if (currentLocationState is LocationState.LocationGranted) {
+                viewModel.updateLastKnownLocation(currentLocationState.location)
+                if (viewModel.firstLaunchLocation.value) {
+                    viewModel.currentMarker.value?.let {
+                        viewModel.setFirstLaunchLocation(false)
+                    } ?: launch {
+                        viewModel.updateLastCameraPosition(
+                            Pair(currentLocationState.location, DEFAULT_ZOOM)
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     BackPressHandler(
         mapUiState = mapUiState.value,
@@ -216,7 +213,7 @@ fun MapScreen(
             bottomSheet = {
 
                 MarkerInfoDialog(
-                    receivedMarker = currentMarker.value,
+                    receivedMarker = place,
                     navController = navController,
                     mapBearing = mapBearing,
                     onMarkerIconClicked = {

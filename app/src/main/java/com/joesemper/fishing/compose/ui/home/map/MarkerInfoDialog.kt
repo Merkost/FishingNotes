@@ -72,6 +72,11 @@ fun MarkerInfoDialog(
 
     val currentMarker by viewModel.currentMarker.collectAsState()
 
+    LaunchedEffect(receivedMarker) {
+        if (receivedMarker != null) {
+            viewModel.updateCurrentMarker(receivedMarker)
+        }
+    }
 
     /*val weatherPrefs: WeatherPreferences = get()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
