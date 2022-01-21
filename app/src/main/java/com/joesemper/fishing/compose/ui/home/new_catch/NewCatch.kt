@@ -88,10 +88,6 @@ fun NewCatchScreen(
         }
     }
 
-    val scaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = BottomSheetState(BottomSheetValue.Expanded)
-    )
-
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     var currentBottomSheet: BottomSheetNewCatchScreen? by remember { mutableStateOf(null) }
 
@@ -129,8 +125,7 @@ fun NewCatchScreen(
             }
         }
     ) {
-        BottomSheetScaffold(
-            scaffoldState = scaffoldState,
+        Scaffold(
             modifier = Modifier,
             topBar = {
                 DefaultAppBar(
@@ -160,13 +155,7 @@ fun NewCatchScreen(
                         tint = MaterialTheme.colors.onPrimary
                     )
                 }
-            },
-            sheetContent = {
-                BannerAdvertView(adId = stringResource(R.string.new_catch_admob_banner_id))
-            },
-            sheetShape = RectangleShape,
-            sheetGesturesEnabled = false,
-            sheetPeekHeight = 0.dp
+            }
         ) {
             NewCatchLoadingDialog(dialogSate = loadingDialogState)
             Column(
@@ -186,6 +175,7 @@ fun NewCatchScreen(
 
                     Places(viewModel, isNull, navController)  //Выпадающий список мест
                     FishAndWeight(viewModel.fishAmount, viewModel.weight)
+                    BannerAdvertView(adId = stringResource(R.string.new_catch_admob_banner_id))
                     Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
                     DateAndTime(viewModel.date)
                     NewCatchWeatherItem(viewModel)
