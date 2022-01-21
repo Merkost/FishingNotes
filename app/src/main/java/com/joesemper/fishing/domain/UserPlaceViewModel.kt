@@ -76,7 +76,7 @@ class UserPlaceViewModel(
             viewModelScope.launch {
                 markersRepo.updateUserMarkerNote(
                     markerId = marker.id,
-                    marker.notes,
+                    _markerNotes.value,
                     note = note
                 ).collect { baseViewState ->
                     when (baseViewState) {
@@ -99,7 +99,7 @@ class UserPlaceViewModel(
             viewModelScope.launch {
                 markersRepo.deleteMarkerNote(
                     markerId = marker.id,
-                    currentNotes = marker.notes,
+                    currentNotes = _markerNotes.value,
                     noteToDelete = note
                 ).collect { baseViewState ->
                     when (baseViewState) {
