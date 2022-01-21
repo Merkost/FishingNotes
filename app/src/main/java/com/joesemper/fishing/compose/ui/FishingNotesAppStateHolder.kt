@@ -132,7 +132,6 @@ class AppStateHolder(
                 restoreState = true
                 // Pop up backstack to the first destination and save state. This makes going back
                 // to the start destination when pressing back in any other bottom tab.
-
                 popUpTo(findStartDestination(navController.graph).id) {
                     saveState = true
                 }
@@ -142,7 +141,18 @@ class AppStateHolder(
 }
 
 fun NavController.navigate(route: String, vararg args: Pair<String, Parcelable>) {
-    navigate(route)
+    navigate(route) {
+        if (HomeSections.values().map { it.route }.contains(route)) {
+            launchSingleTop = true
+            restoreState = true
+            // Pop up backstack to the first destination and save state. This makes going back
+            // to the start destination when pressing back in any other bottom tab.
+            popUpTo(findStartDestination(this@navigate.graph).id) {
+                saveState = true
+            }
+        }
+    }
+
 
     requireNotNull(currentBackStackEntry?.arguments).apply {
         args.forEach { (key: String, arg: Parcelable) ->
