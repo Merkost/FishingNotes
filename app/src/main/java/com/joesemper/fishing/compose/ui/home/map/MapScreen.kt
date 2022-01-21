@@ -149,11 +149,11 @@ fun MapScreen(
                 viewModel.lastKnownLocation.value = currentLocationState.location
                 if (viewModel.firstLaunchLocation.value) {
                     viewModel.currentMarker.value?.let {
-                        viewModel.firstLaunchLocation.value = false
                     } ?: kotlin.run {
                         viewModel.lastMapCameraPosition.value =
                             Pair(currentLocationState.location, DEFAULT_ZOOM)
                     }
+                    viewModel.firstLaunchLocation.value = false
                 }
             }
         }
