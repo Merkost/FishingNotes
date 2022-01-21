@@ -22,5 +22,5 @@ interface CatchesRepository {
     ): StateFlow<Progress>
 
     suspend fun deleteCatch(userCatch: UserCatch)
-    suspend fun addNewCatch(markerId: String, newCatch: RawUserCatch): StateFlow<Progress>
+    suspend fun addNewCatch(markerId: String, newCatch: RawUserCatch): Flow<Progress>
 }
