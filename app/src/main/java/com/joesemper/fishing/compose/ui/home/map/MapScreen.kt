@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -589,8 +590,8 @@ fun LocationPermissionDialog(
                 )
             }
         },
-        permissionsNotAvailableContent = { SnackbarManager.showMessage(R.string.location_permission_denied) })
-    { checkPermission(context) }
+        permissionsNotAvailableContent = { onCloseCallback(); SnackbarManager.showMessage(R.string.location_permission_denied) })
+    { checkPermission(context);  }
 }
 
 @ExperimentalMaterialApi

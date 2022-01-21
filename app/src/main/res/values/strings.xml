@@ -272,6 +272,7 @@
     <string name="favorite_place">Favorite place</string>
     <string name="place_note_not_saved">Не удалось сохранить заметку</string>
     <string name="delete_catch_dialog">Удаление улова \"%s\"</string>
+    <string name="place_note_not_deleted">Не удалось удалить заметку!</string>
 
 
 </resources>

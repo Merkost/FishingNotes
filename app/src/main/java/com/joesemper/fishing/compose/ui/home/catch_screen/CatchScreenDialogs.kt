@@ -10,6 +10,10 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -81,7 +85,7 @@ fun CatchModalBottomSheetContent(
                     if (newPhotos.find { !it.toString().startsWith("http") } != null) {
                         showInterstitialAd(
                             context = context,
-                            onAdLoaded = {  }
+                            onAdLoaded = { }
                         )
                     }
                 },
@@ -292,6 +296,8 @@ fun EditWayOfFishingDialog(
 fun EditNoteDialog(
     note: Note,
     onSaveNote: (Note) -> Unit,
+    deleteOption: Boolean = false,
+    onDeleteNote: (Note) -> Unit = {},
     onCloseDialog: () -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -320,7 +326,7 @@ fun EditNoteDialog(
             .fillMaxWidth()
             .fillMaxHeight()
     ) {
-        val (title, editNote, saveButton, cancelButton) = createRefs()
+        val (title, editNote, saveButton, cancelButton, deleteButton) = createRefs()
 
         PrimaryText(
             modifier = Modifier.constrainAs(title) {
@@ -372,7 +378,28 @@ fun EditNoteDialog(
             onClose()
         }
 
+        if (deleteOption) {
+            IconButton(modifier = Modifier.constrainAs(deleteButton) {
+                top.linkTo(saveButton.top)
+                bottom.linkTo(saveButton.bottom)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+            }, onClick = {
+                onDeleteNote(
+                    Note(
+                        noteId.value,
+                        noteTitle.value,
+                        noteDescriptionState.value,
+                        noteDateCreated.value
+                    )
+                )
+                onClose()
+            }) {
+                Icon(Icons.Default.Delete, "Delete note")
+            }
+        }
+
     }
+
 }
 
 @ExperimentalAnimationApi
