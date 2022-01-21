@@ -139,7 +139,9 @@ fun MapScreen(
         }
     }
 
-    val currentLocationFlow = remember { getCurrentLocationFlow(context, permissionsState) }
+    val currentLocationFlow = remember(permissionsState.allPermissionsGranted) {
+        getCurrentLocationFlow(context, permissionsState)
+    }
 
     LaunchedEffect(currentLocationFlow) {
         currentLocationFlow.collect { currentLocationState ->
