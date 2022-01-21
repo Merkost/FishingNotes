@@ -284,5 +284,6 @@
 
     <string name="map_id">74ee6ebad34bd1fc</string>
     <string name="saving_photos">Saving photos</string>
+    <string name="place_note_not_deleted">Не удалось удалить заметку!</string>
 
 </resources>

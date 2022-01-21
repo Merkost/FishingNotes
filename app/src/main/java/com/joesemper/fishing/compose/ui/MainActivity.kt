@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
         }
 
         installSplashScreen().apply {
-            setKeepVisibleCondition {
+            setKeepOnScreenCondition {
                 userStateFlow.value is BaseViewState.Loading
                         && appTheme.value == null
             }

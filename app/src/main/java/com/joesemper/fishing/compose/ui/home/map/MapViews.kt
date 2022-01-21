@@ -35,6 +35,7 @@ import com.airbnb.lottie.compose.*
 import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
 import com.alorma.compose.settings.ui.SettingsCheckbox
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.libraries.maps.model.LatLng
 import com.joesemper.fishing.R
 import com.joesemper.fishing.model.datastore.UserPreferences
@@ -127,13 +128,15 @@ fun MyLocationButton(
     userPreferences: UserPreferences,
     onClick: () -> Unit,
 ) {
-
+    val context = LocalContext.current
     var locationDialogIsShowing by remember { mutableStateOf(false) }
     val shouldShowPermissions by userPreferences.shouldShowLocationPermission.collectAsState(false)
+    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
 
     if (locationDialogIsShowing) {
         if (shouldShowPermissions) {
             LocationPermissionDialog(userPreferences = userPreferences) {
+                checkPermission(context)
                 locationDialogIsShowing = false
             }
         } else SnackbarManager.showMessage(R.string.location_permission_denied)
@@ -141,7 +144,7 @@ fun MyLocationButton(
 
     val color = animateColorAsState(
         when {
-            !shouldShowPermissions || lastKnownLocation.value == null -> {
+            !shouldShowPermissions || !permissionsState.allPermissionsGranted -> {
                 RedGoogleChrome
             }
             else -> {
@@ -159,8 +162,12 @@ fun MyLocationButton(
                 .padding(8.dp)
                 .fillMaxSize(),
             onClick = {
-                if (lastKnownLocation.value == null) locationDialogIsShowing = true
-                else onClick()
+                when (permissionsState.allPermissionsGranted) {
+                    true -> onClick()
+                    false -> {
+                        locationDialogIsShowing = true
+                    }
+                }
             }
         ) {
             Icon(

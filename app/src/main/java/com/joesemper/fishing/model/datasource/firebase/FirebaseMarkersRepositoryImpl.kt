@@ -103,7 +103,29 @@ class FirebaseMarkersRepositoryImpl(
                     }
                 }
         }
-        //TODO: Update array problem
+        return flow
+    }
+
+    override suspend fun deleteMarkerNote(
+        markerId: String,
+        currentNotes: List<Note>,
+        noteToDelete: Note
+    ): StateFlow<BaseViewState> {
+        val flow = MutableStateFlow<BaseViewState>(BaseViewState.Loading())
+
+        val newNotes = currentNotes.toMutableList().apply {
+            remove(noteToDelete)
+        }
+
+        dbCollections.getUserMapMarkersCollection().document(markerId)
+            .update("notes", newNotes).addOnCompleteListener {
+                it.exception?.let { exp ->
+                    flow.tryEmit(BaseViewState.Error(exp))
+                }
+                if (it.isSuccessful) {
+                    flow.tryEmit(BaseViewState.Success(newNotes))
+                }
+            }
         return flow
     }
 

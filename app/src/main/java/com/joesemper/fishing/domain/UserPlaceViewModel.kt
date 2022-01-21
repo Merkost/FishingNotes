@@ -76,7 +76,7 @@ class UserPlaceViewModel(
             viewModelScope.launch {
                 markersRepo.updateUserMarkerNote(
                     markerId = marker.id,
-                    marker.notes,
+                    _markerNotes.value,
                     note = note
                 ).collect { baseViewState ->
                     when (baseViewState) {
@@ -89,15 +89,31 @@ class UserPlaceViewModel(
                         }
                         else -> {}
                     }
-
                 }
-                //TODO: Check on success
-
-
-
             }
+        }
+    }
 
-
+    fun deleteMarkerNote(note: Note) {
+        _marker.value?.let { marker ->
+            viewModelScope.launch {
+                markersRepo.deleteMarkerNote(
+                    markerId = marker.id,
+                    currentNotes = _markerNotes.value,
+                    noteToDelete = note
+                ).collect { baseViewState ->
+                    when (baseViewState) {
+                        is BaseViewState.Success<*> -> {
+                            val newNotesList = baseViewState.data as List<Note>
+                            _markerNotes.value = newNotesList
+                        }
+                        is BaseViewState.Error -> {
+                            SnackbarManager.showMessage(R.string.place_note_not_deleted)
+                        }
+                        else -> {}
+                    }
+                }
+            }
         }
     }
 

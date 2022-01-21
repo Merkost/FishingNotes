@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -67,6 +68,7 @@ fun MapScreen(
     addPlaceOnStart: Boolean = false,
     place: UserMapMarker?
 ) {
+    val viewModel: MapViewModel = getViewModel()
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     val context = LocalContext.current
 
@@ -75,7 +77,7 @@ fun MapScreen(
 
     val map = rememberMapViewWithLifecycle()
 
-    val viewModel: MapViewModel = getViewModel()
+
 
     chosenPlace?.let {
         if (it.id.isNotEmpty()) {
@@ -149,11 +151,11 @@ fun MapScreen(
                 viewModel.lastKnownLocation.value = currentLocationState.location
                 if (viewModel.firstLaunchLocation.value) {
                     viewModel.currentMarker.value?.let {
-                        viewModel.firstLaunchLocation.value = false
                     } ?: kotlin.run {
                         viewModel.lastMapCameraPosition.value =
                             Pair(currentLocationState.location, DEFAULT_ZOOM)
                     }
+                    viewModel.firstLaunchLocation.value = false
                 }
             }
         }
@@ -591,8 +593,8 @@ fun LocationPermissionDialog(
                 )
             }
         },
-        permissionsNotAvailableContent = { SnackbarManager.showMessage(R.string.location_permission_denied) })
-    { checkPermission(context) }
+        permissionsNotAvailableContent = { onCloseCallback(); SnackbarManager.showMessage(R.string.location_permission_denied) })
+    { checkPermission(context);  }
 }
 
 @ExperimentalMaterialApi

@@ -16,11 +16,14 @@ interface MarkersRepository {
     fun getAllUserMarkersList(): Flow<List<MapMarker>>
 
     suspend fun updateUserMarkerNote(markerId: String, currentNotes: List<Note>, note: Note)
-    : StateFlow<BaseViewState>
+            : StateFlow<BaseViewState>
+    suspend fun deleteMarkerNote(markerId: String, currentNotes: List<Note>, noteToDelete: Note)
+            : StateFlow<BaseViewState>
 
     suspend fun changeMarkerVisibility(marker: UserMapMarker, changeTo: Boolean): StateFlow<LiteProgress>
 
     suspend fun deleteMarker(userMapMarker: UserMapMarker)
     suspend fun addNewMarker(newMarker: RawMapMarker): StateFlow<Progress>
+
 
 }
