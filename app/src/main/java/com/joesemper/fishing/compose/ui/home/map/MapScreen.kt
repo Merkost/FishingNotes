@@ -68,6 +68,7 @@ fun MapScreen(
     addPlaceOnStart: Boolean = false,
     place: UserMapMarker?
 ) {
+    val viewModel: MapViewModel = getViewModel()
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     val context = LocalContext.current
 
@@ -76,7 +77,7 @@ fun MapScreen(
 
     val map = rememberMapViewWithLifecycle()
 
-    val viewModel: MapViewModel = getViewModel()
+
 
     chosenPlace?.let {
         if (it.id.isNotEmpty()) {
