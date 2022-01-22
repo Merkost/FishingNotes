@@ -67,7 +67,7 @@
     <string name="edit_profile">Редактировать профиль</string>
     <string name="settings">Настройки</string>
     <string name="logout">Выйти</string>
-    <string name="anonymous">Anonymous</string>
+    <string name="anonymous">Анонимный пользователь</string>
 
     <string name="fisher">Fisher</string>
     <string name="places">Места</string>
@@ -101,7 +101,7 @@
     <string name="Yes">Да</string>
     <string name="No">Нет</string>
     <string name="Another_place_in_new_catch">Начните добавлять улов с экрана уловов, чтобы выбрать другое место!</string>
-    <string name="locked">Locked</string>
+    <string name="locked">Заблокировано</string>
     <string name="failed_to_determine">Не удалось определить</string>
     <string name="fish_species">Вид рыбы</string>
     <string name="apply">Сохранить</string>
@@ -141,7 +141,7 @@
     <string name="saving_new_catch">Сохраняем улов</string>
     <string name="no_added_photos">Нет добавленных фото</string>
     <string name="main">Основное</string>
-    <string name="icon">Icon</string>
+    <string name="icon">Иконка</string>
     <string name="google_login">Вход с помощью google</string>
     <string name="start_screen_title">Стартовый экран</string>
     <string name="signin_error">Произошла ошибка при входе, попробуйте еще раз!</string>
@@ -169,7 +169,7 @@
     <string name="precipitation">Осадки</string>
     <string name="humidity">Влажность</string>
     <string name="sunrise_sunset">Восход/Закат</string>
-    <string name="hourly">Hourly</string>
+    <string name="hourly">Почасовой прогноз</string>
     <string name="transparent">Прозрачный</string>
     <string name="location_dont_ask">Запрос на доступ к вашему местоположению больше не будет показываться</string>
     <string name="location_permission_denied">Вы отказали в доступе к вашему местоположению. Предоставьте разрешения в настройках вашего устройства.</string>
@@ -217,7 +217,7 @@
     <string name="new_catch_error_description">Не удалось добавить улов. Проверьте интернет соединение и попробуйте еще раз.</string>
     <string name="choose_weather_icon">Выберите иконку погоды:</string>
     <string name="adding_place_on_current_location">Место добавлено на текущее местоположение</string>
-    <string name="location_permissions_required">Location permissions required</string>
+    <string name="location_permissions_required">Необходимо разрешение местоположения</string>
     <string name="fab_fast_add">Быстрое добавление точки на карте</string>
     <string name="marker_visibility_change_error">Не удалось изменить видимость места!</string>
     <string name="marker_visibility_change_success">Видимость места успешно сохранена</string>
@@ -243,11 +243,11 @@
     <string name="app_exit_message">Нажмите еще раз для выхода из приложения</string>
     <string name="hidden_places">Скрытые места</string>
     <string name="show_hidden_places">Показывать скрытые места на карте</string>
-    <string name="wind_ftps">ft/s</string>
-    <string name="wind_mph">mph</string>
-    <string name="wind_knots">knots</string>
-    <string name="wind_kmph">km/h</string>
-    <string name="wind_mps">m/s</string>
+    <string name="wind_ftps">футов/с</string>
+    <string name="wind_mph">миль/ч</string>
+    <string name="wind_knots">узел(ов)</string>
+    <string name="wind_kmph">км/ч</string>
+    <string name="wind_mps">м/с</string>
     <string name="wind_speed_unit">Единица измерения скорости ветра</string>
     <string name="choose_wind_speed_unit">Выберите единицу измерения скорости ветра</string>
     <string name="map_zoom_buttons">Кнопки изменения масштаба</string>
@@ -258,23 +258,13 @@
     <string name="sure_delete_place_dialog">Все ваши уловы также будут удалены с этого места. Вы уверены?</string>
     <string name="new_catch_text">+ Добавить улов</string>
 
-    <string name="messages_header">Messages</string>
-    <string name="sync_header">Sync</string>
-
     <!-- Messages Preferences -->
-    <string name="signature_title">Your signature</string>
-    <string name="reply_title">Default reply action</string>
 
     <!-- Sync Preferences -->
-    <string name="sync_title">Sync email periodically</string>
-    <string name="attachment_title">Download incoming attachments</string>
-    <string name="attachment_summary_on">Automatically download attachments for incoming emails
-    </string>
-    <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="add_location_dialog">Пожалуйста, добавте место для добавления уловов</string>
     <string name="register_date">Дата регистрации</string>
-    <string name="catches_count">Catches count</string>
-    <string name="places_count">Places count</string>
+    <string name="catches_count">Количество уловов</string>
+    <string name="places_count">Количество мест</string>
     <string name="best_catch">Лучший улов</string>
     <string name="favorite_place">Любимое место</string>
 
@@ -282,7 +272,7 @@
     <string name="delete_catch_dialog">Удаление улова \"%s\"</string>
     <string name="not_avalable">N/A</string>
 
-    <string name="saving_photos">Saving photos</string>
+    <string name="saving_photos">Сохранение фото</string>
     <string name="place_note_not_deleted">Не удалось удалить заметку!</string>
 
 </resources>

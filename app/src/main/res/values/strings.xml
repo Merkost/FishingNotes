@@ -65,19 +65,10 @@
     <string name="fisher">Fisher</string>
 
     <!-- Preference Titles -->
-    <string name="messages_header">Messages</string>
-    <string name="sync_header">Sync</string>
 
     <!-- Messages Preferences -->
-    <string name="signature_title">Your signature</string>
-    <string name="reply_title">Default reply action</string>
 
     <!-- Sync Preferences -->
-    <string name="sync_title">Sync email periodically</string>
-    <string name="attachment_title">Download incoming attachments</string>
-    <string name="attachment_summary_on">Automatically download attachments for incoming emails
-    </string>
-    <string name="attachment_summary_off">Only download attachments when manually requested</string>
 
     <string name="places">Places</string>
     <string name="catches">Catches</string>
@@ -97,8 +88,8 @@
     <string name="permission_denied_message">Permission is denied, Please allow permissions from App Settings.</string>
     <string name="goto_app_settings">App Settings</string>
     <string name="not_all_fields_are_filled">Not all fields are filled in. Please, double check</string>
-    <string name="marker_icon" translatable="false">marker icon</string>
-    <string name="catch_photo" translatable="false">photo of the catch</string>
+    <string name="marker_icon">Marker icon</string>
+    <string name="catch_photo">Photo of the catch</string>
     <string name="test_description">"Ловля судака, как и, впрочем, ловля любой рыбы, очень интересное и захватывающее занятие. Получите хороший и удачный улов. "</string>
     <string name="location">Location</string>
     <string name="calculating">Calculating…</string>
