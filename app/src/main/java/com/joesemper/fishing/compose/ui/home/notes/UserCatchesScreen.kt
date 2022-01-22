@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -116,22 +117,42 @@ fun UserCatches(
                     }
                     catches.isEmpty() -> {
                         item {
-                            NoContentView(
-                                modifier = Modifier.padding(top = 128.dp),
-                                text = stringResource(id = R.string.no_cathces_added),
-                                icon = painterResource(id = R.drawable.ic_fishing)
-                            )
-                            Spacer(modifier = Modifier.size(16.dp))
-                            DefaultButtonOutlined(
-                                text = stringResource(R.string.new_catch_text),
-                                onClick = navigateToNewCatch
-                            )
+                                NoContentView(
+                                    modifier = Modifier.padding(top = 128.dp),
+                                    text = stringResource(id = R.string.no_cathces_added),
+                                    icon = painterResource(id = R.drawable.ic_fishing)
+                                )
+                                Spacer(modifier = Modifier.size(16.dp))
+                            Column(modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally) {
+                                DefaultButtonOutlined(
+                                    text = stringResource(R.string.new_catch_text),
+                                    onClick = navigateToNewCatch
+                                )
+                            }
+
+
                         }
                     }
                 }
             }
             else -> {
-                items(3) {
+                item {
+                    NoContentView(
+                        modifier = Modifier.padding(top = 128.dp),
+                        text = stringResource(id = R.string.no_cathces_added),
+                        icon = painterResource(id = R.drawable.ic_fishing)
+                    )
+                    Spacer(modifier = Modifier.size(16.dp))
+                    Column(modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        DefaultButtonOutlined(
+                            text = stringResource(R.string.new_catch_text),
+                            onClick = navigateToNewCatch
+                        )
+                    }
+                }
+                /*items(3) {
                     CatchItemView(
                         childModifier = Modifier.placeholder(
                             true,
@@ -142,7 +163,7 @@ fun UserCatches(
                         catch = UserCatch(),
                         onClick = userCatchClicked
                     )
-                }
+                }*/
             }
 
         }
