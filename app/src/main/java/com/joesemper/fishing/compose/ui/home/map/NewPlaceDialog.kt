@@ -56,9 +56,11 @@ fun NewPlaceDialog(
     val coroutineScope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsState()
 
-    MyCard(shape = Shapes.large, modifier = Modifier
-        .wrapContentHeight()
-        .fillMaxWidth()) {
+    MyCard(
+        shape = Shapes.large, modifier = Modifier
+            .wrapContentHeight()
+            .fillMaxWidth()
+    ) {
         ConstraintLayout(
             modifier = Modifier
                 .wrapContentHeight()
@@ -239,7 +241,10 @@ fun NewPlaceDialog(
             }, shape = RoundedCornerShape(24.dp), onClick = {
                 viewModel.addNewMarker(
                     RawMapMarker(
-                        title = titleValue.value,
+                        title = when (titleValue.value.isNotEmpty()) {
+                            true -> titleValue.value
+                            false -> context.resources.getString(R.string.no_name_place)
+                        },
                         description = descriptionValue.value,
                         latitude = currentCameraPosition.component1().first.latitude,
                         longitude = currentCameraPosition.component1().first.longitude,

@@ -159,27 +159,48 @@ fun WeatherScreen(
         }
     ) {
 
-        Column(modifier = Modifier.fillMaxSize()) {
-            when(weatherState) {
-                is RetrofitWrapper.Loading -> {
-                    MainWeatherScreen(childModifier = Modifier.placeholder(
-                        true,
-                        color = Color.Gray,
-                        shape = CircleShape,
-                        highlight = PlaceholderHighlight.fade()
-                    ), forecast, scrollState, navigateToDaily = {})
+        Column(modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally) {
+            if (!permissionsState.allPermissionsGranted && viewModel.markersList.isEmpty()) {
+                NoContentView(
+                    text = stringResource(id = R.string.no_places_added),
+                    icon = painterResource(id = R.drawable.ic_no_place_on_map)
+                )
+
+                Spacer(modifier = Modifier.size(16.dp))
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    DefaultButtonOutlined(
+                        text = stringResource(id = R.string.new_place_text),
+                        onClick = { navigateToAddNewPlace(navController) }
+                    )
                 }
-                is RetrofitWrapper.Success -> {
-                    MainWeatherScreen(childModifier = Modifier, forecast, scrollState)
-                    { index ->
-                        navigateToDailyWeatherScreen(
-                            navController = navController,
-                            index = index,
-                            forecastDaily = forecast.daily
-                        )
+
+            } else
+                when (weatherState) {
+                    is RetrofitWrapper.Loading -> {
+                        MainWeatherScreen(childModifier = Modifier.placeholder(
+                            true,
+                            color = Color.Gray,
+                            shape = CircleShape,
+                            highlight = PlaceholderHighlight.fade()
+                        ), forecast, scrollState, navigateToDaily = {})
                     }
-                }
-                is RetrofitWrapper.Error -> {
+                    is RetrofitWrapper.Success -> {
+                        MainWeatherScreen(childModifier = Modifier, forecast, scrollState)
+                        { index ->
+                            navigateToDailyWeatherScreen(
+                                navController = navController,
+                                index = index,
+                                forecastDaily = forecast.daily
+                            )
+                        }
+                    }
+                    is RetrofitWrapper.Error -> {
                         val errorType = (weatherState as RetrofitWrapper.Error).errorType
                         when (errorType) {
                             is ErrorType.NetworkError -> {
@@ -189,8 +210,8 @@ fun WeatherScreen(
                                 ErrorView(Modifier.fillMaxWidth())
                             }
                         }
+                    }
                 }
-            }
             /*AnimatedVisibility(weatherState is RetrofitWrapper.Success, RetrofitWrapper.Loading*//*viewModel.currentWeather.value != null*//*) {
 
             }
@@ -251,7 +272,7 @@ fun MainWeatherScreen(
     scrollState: ScrollState,
     navigateToDaily: (Int) -> Unit,
 
-) {
+    ) {
     val weatherPrefs: WeatherPreferences = get()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
     val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
@@ -534,7 +555,9 @@ fun PressureChartItem(
         modifier = modifier
     ) {
         WeatherHeaderText(
-            modifier = Modifier.padding(8.dp).then(childModifier),
+            modifier = Modifier
+                .padding(8.dp)
+                .then(childModifier),
             text = stringResource(id = R.string.pressure) + ", " + stringResource(pressureUnit.stringRes)
         )
         PressureChart(
@@ -559,9 +582,11 @@ fun PressureChart(
     textColor: Color = MaterialTheme.colors.onSurface,
     receivedWeather: List<Daily>
 ) {
-    val weather: List<Daily> by remember { mutableStateOf(
-        receivedWeather
-    ) }
+    val weather: List<Daily> by remember {
+        mutableStateOf(
+            receivedWeather
+        )
+    }
 
     val x = remember { Animatable(0f) }
     val yValues = remember(weather) { mutableStateOf(getPressureList(weather, pressureUnit)) }
@@ -607,7 +632,8 @@ fun PressureChart(
 
             drawContext.canvas.nativeCanvas.drawText(
                 pressureUnit.getPressure(
-                    weather[index].pressure),
+                    weather[index].pressure
+                ),
                 pointX, pointY - 48f, paint
             )
 
@@ -702,7 +728,8 @@ fun CurrentWeatherValuesView(
                 absoluteRight.linkTo(pressText.absoluteRight)
             },
             text = pressureUnit.getPressure(
-                forecast.pressure) + " " + stringResource(pressureUnit.stringRes),
+                forecast.pressure
+            ) + " " + stringResource(pressureUnit.stringRes),
             textColor = textColor
         )
 
