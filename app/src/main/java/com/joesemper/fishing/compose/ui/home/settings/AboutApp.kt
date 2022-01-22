@@ -16,14 +16,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joesemper.fishing.R
+import com.joesemper.fishing.R.mipmap.ic_launcher_round
 import com.joesemper.fishing.compose.ui.home.views.DefaultAppBar
 import com.joesemper.fishing.compose.ui.home.views.MyClickableCard
 import com.joesemper.fishing.compose.ui.home.views.PrimaryText
@@ -66,7 +69,7 @@ fun AboutApp(upPress: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Image(
-                    painterResource(R.mipmap.ic_launcher), "appIcon",
+                    painter = painterResource(R.mipmap.ic_launcher), contentDescription = "appIcon",
                     modifier = Modifier.size(150.dp)
                 )
                 PrimaryText(text = "Fishing Notes")
