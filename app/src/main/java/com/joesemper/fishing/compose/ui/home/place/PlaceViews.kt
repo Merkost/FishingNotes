@@ -358,11 +358,11 @@ fun PlaceButtonsView(
             onClick = { onShareClicked(context, place) }
         )
 
-        DefaultButtonOutlined(
+        /*DefaultButtonOutlined(
             text = stringResource(id = R.string.edit),
             icon = painterResource(id = R.drawable.ic_baseline_edit_24),
             onClick = { }
-        )
+        )*/
 
         DefaultButtonOutlined(
             text = stringResource(id = R.string.delete),
