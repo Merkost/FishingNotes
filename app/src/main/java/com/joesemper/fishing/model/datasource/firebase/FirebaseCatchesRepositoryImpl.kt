@@ -139,20 +139,21 @@ class FirebaseCatchesRepositoryImpl(
     override suspend fun addNewCatch(
         markerId: String,
         newCatch: RawUserCatch
-    ): StateFlow<Progress> {
+    ) = callbackFlow {
 
-        val flow = MutableStateFlow<Progress>(Progress.Loading(0))
-        val photoDownloadLinks = savePhotos(newCatch.photos, flow)
+        trySend(Progress.Loading(0))
+
+        val photoDownloadLinks = savePhotos(newCatch.photos)
         val userCatch = UserCatchMapper().mapRawCatch(newCatch, photoDownloadLinks)
-
 
         dbCollections.getUserCatchesCollection(markerId).document(userCatch.id).set(userCatch)
             .addOnCompleteListener {
-                flow.tryEmit(Progress.Complete)
+                trySend(Progress.Complete)
                 incrementNumOfCatches(markerId)
             }
-        return flow
+        awaitClose { }
     }
+
 
     private fun incrementNumOfCatches(markerId: String) {
         dbCollections.getUserMapMarkersCollection().document(markerId)
@@ -215,7 +216,7 @@ class FirebaseCatchesRepositoryImpl(
         val flow = MutableStateFlow<Progress>(Progress.Loading(0))
 
         val newPhotoDownloadLinks =
-            savePhotos(newPhotos.filter { !it.toString().startsWith("http") }, flow)
+            savePhotos(newPhotos.filter { !it.toString().startsWith("http") })
 
         val oldPhotos = newPhotos.filter { it.toString().startsWith("http") }
 
@@ -228,11 +229,7 @@ class FirebaseCatchesRepositoryImpl(
 
     }
 
-    private suspend fun savePhotos(
-        photos: List<Uri>,
-        progressFlow: MutableStateFlow<Progress>
-    ) =
-        cloudPhotoStorage.uploadPhotos(photos, progressFlow)
+    private suspend fun savePhotos(photos: List<Uri>) = cloudPhotoStorage.uploadPhotos(photos)
 
     companion object {
         private const val USERS_COLLECTION = "users"

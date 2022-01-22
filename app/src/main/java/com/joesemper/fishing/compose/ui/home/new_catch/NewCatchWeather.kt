@@ -205,6 +205,14 @@ fun WeatherLayout(
                 }
 
                 //Wind and Moon
+                val windDeg by remember(hour, animatedWeather) {
+                    mutableStateOf(animatedWeather.hourly[hour].windDeg.toFloat())
+                }
+
+                LaunchedEffect(key1 = windDeg) {
+                    viewModel.weatherToSave.value.windDirInDeg = windDeg
+                }
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -214,7 +222,7 @@ fun WeatherLayout(
                         value = wind,
                         leadingIcon = {
                             Icon(
-                                modifier = Modifier.rotate(animatedWeather.hourly[hour].windDeg.toFloat()),
+                                modifier = Modifier.rotate(windDeg),
                                 painter = painterResource(id = R.drawable.ic_arrow_up),
                                 contentDescription = "",
                                 tint = MaterialTheme.colors.primary,

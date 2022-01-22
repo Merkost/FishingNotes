@@ -141,7 +141,9 @@ fun MapScreen(
         }
     }
 
-    val currentLocationFlow = remember { getCurrentLocationFlow(context, permissionsState) }
+    val currentLocationFlow = remember(permissionsState.allPermissionsGranted) {
+        getCurrentLocationFlow(context, permissionsState)
+    }
 
     LaunchedEffect(currentLocationFlow) {
         currentLocationFlow.collect { currentLocationState ->
@@ -469,6 +471,7 @@ fun MapLayout(
         ) { mapView ->
             coroutineScope.launch {
                 val googleMap = mapView.awaitMap()
+
                 googleMap.clear()
                 markersToShow.forEach {
                     val position = LatLng(it.latitude, it.longitude)
@@ -512,15 +515,14 @@ fun MapLayout(
                     return@setOnMapClickListener
                 }
 
-                //Map styles: https://mapstyle.withgoogle.com
+                /*//Map styles: https://mapstyle.withgoogle.com
                 if (darkTheme) googleMap.setMapStyle(
                     MapStyleOptions.loadRawResourceStyle(context, R.raw.mapstyle_night)
-                )
+                )*/
                 googleMap.uiSettings.isMyLocationButtonEnabled = false
             }
         }
     }
-    //}
 
     LaunchedEffect(map, permissionsState.allPermissionsGranted) {
         val googleMap = map.awaitMap()

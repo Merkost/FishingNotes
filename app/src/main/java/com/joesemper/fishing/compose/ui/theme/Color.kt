@@ -34,6 +34,7 @@ val primaryBlueDarkColor = Color(0xFF0069c0)
 val primaryBlueDarkColorTransparent = Color(0xE60069C0)
 val secondaryBlueColor = Color(0xFFff6d00)
 val secondaryBlueLightColor = Color(0xFFff9e40)
+val secondaryBlueLightColorTransparent = Color(0x19FF9E40)
 val secondaryBlueDarkColor = Color(0xFFc43c00)
 
 

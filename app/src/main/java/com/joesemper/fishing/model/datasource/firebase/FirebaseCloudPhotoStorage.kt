@@ -8,7 +8,6 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
 import com.joesemper.fishing.model.repository.PhotoStorage
-import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.utils.getNewPhotoId
 import getPathFromURI
 import id.zelory.compressor.Compressor
@@ -17,11 +16,9 @@ import id.zelory.compressor.constraint.quality
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.take
 import java.io.File
-import java.lang.Exception
 
 
 class FirebaseCloudPhotoStorage(private val context: Context) : PhotoStorage {
@@ -31,17 +28,13 @@ class FirebaseCloudPhotoStorage(private val context: Context) : PhotoStorage {
 
     override suspend fun uploadPhotos(
         photos: List<Uri>,
-        progressFlow: MutableStateFlow<Progress>
     ): List<String> {
         val downloadLinks = mutableListOf<String>()
         if (photos.isNotEmpty()) {
-            val progressPoint = 100 / photos.size
             savePhotosToDb(photos, context)
                 .take(photos.size)
                 .collect { downloadLink ->
                     downloadLinks.add(downloadLink)
-                    val currentProgress = progressFlow.value as Progress.Loading
-                    progressFlow.value = Progress.Loading(currentProgress.percents + progressPoint)
                 }
         }
         return downloadLinks

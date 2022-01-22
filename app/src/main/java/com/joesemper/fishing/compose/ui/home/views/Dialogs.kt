@@ -2,15 +2,19 @@ package com.joesemper.fishing.compose.ui.home.views
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.airbnb.lottie.compose.LottieAnimation
@@ -159,6 +163,38 @@ fun LoadingDialog() {
                 iterations = LottieConstants.IterateForever,
                 isPlaying = true
             )
+        }
+    }
+}
+
+@Composable
+fun ModalLoadingDialog(
+    dialogSate: MutableState<Boolean>,
+    text: String
+) {
+    if (dialogSate.value) {
+        Dialog(
+            onDismissRequest = { },
+            properties = DialogProperties(
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(64.dp)
+                )
+                PrimaryText(
+                    text = text,
+                    textColor = Color.White
+                )
+            }
         }
     }
 }

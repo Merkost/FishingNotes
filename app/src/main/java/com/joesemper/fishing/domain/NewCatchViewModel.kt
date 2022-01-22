@@ -18,7 +18,6 @@ import com.joesemper.fishing.model.entity.weather.WeatherForecast
 import com.joesemper.fishing.model.repository.app.CatchesRepository
 import com.joesemper.fishing.model.repository.app.MarkersRepository
 import com.joesemper.fishing.model.repository.app.WeatherRepository
-import com.joesemper.fishing.utils.time.toHours
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -87,7 +86,6 @@ class NewCatchViewModel(
         }
     }
 
-
     fun getHistoricalWeather() {
         viewModelScope.launch {
             marker.value?.run {
@@ -138,8 +136,7 @@ class NewCatchViewModel(
                             _uiState.value = BaseViewState.Loading(progress.percents)
                         }
                         is Progress.Error -> {
-                            _uiState.value =
-                                BaseViewState.Error(progress.error)
+                            _uiState.value = BaseViewState.Error(progress.error)
                         }
                     }
                 }
@@ -155,37 +152,33 @@ class NewCatchViewModel(
         viewModelScope.launch {
             if (isInputCorrect()) {
                 marker.value?.let { userMapMarker ->
-                    val hour = date.value.toHours().toInt()
-                    weather.value?.let { forecast ->
-                        saveNewCatch(
-                            RawUserCatch(
-                                fishType = fishType.value,
-                                description = description.value,
-                                date = date.value.toLong(),
-                                fishAmount = fishAmount.value.toInt(),
-                                fishWeight = weight.value.toDouble(),
-                                fishingRodType = rod.value,
-                                fishingBait = bite.value,
-                                fishingLure = lure.value,
-                                markerId = userMapMarker.id,
-                                placeTitle = userMapMarker.title,
-                                isPublic = false,
-                                photos = images,
-                                weatherPrimary = weatherToSave.value.weatherDescription,
-                                weatherIcon = weatherToSave.value.icon,
-                                weatherTemperature = weatherToSave.value.temperatureInC.toFloat(),
-                                weatherWindSpeed = weatherToSave.value.windInMs.toFloat(),
-                                weatherWindDeg = forecast.hourly[hour].windDeg,
-                                weatherPressure = weatherToSave.value.pressureInMmhg,
-                                weatherMoonPhase = weatherToSave.value.moonPhase
-                            )
-                        )
-                    }
+                    saveNewCatch(createRowUserCatch(userMapMarker))
                 }
             }
         }
-
     }
+
+    private fun createRowUserCatch(marker: UserMapMarker) = RawUserCatch(
+        fishType = fishType.value,
+        description = description.value,
+        date = date.value.toLong(),
+        fishAmount = fishAmount.value.toInt(),
+        fishWeight = weight.value.toDouble(),
+        fishingRodType = rod.value,
+        fishingBait = bite.value,
+        fishingLure = lure.value,
+        markerId = marker.id,
+        placeTitle = marker.title,
+        isPublic = false,
+        photos = images,
+        weatherPrimary = weatherToSave.value.weatherDescription,
+        weatherIcon = weatherToSave.value.icon,
+        weatherTemperature = weatherToSave.value.temperatureInC.toFloat(),
+        weatherWindSpeed = weatherToSave.value.windInMs.toFloat(),
+        weatherWindDeg = weatherToSave.value.windDirInDeg.toInt(),
+        weatherPressure = weatherToSave.value.pressureInMmhg,
+        weatherMoonPhase = weatherToSave.value.moonPhase
+    )
 
     fun getTemperatureForHour(hour: Int, temperatureValue: TemperatureValues): String {
         return temperatureValue.getTemperature(weather.value!!.hourly[hour].temperature)

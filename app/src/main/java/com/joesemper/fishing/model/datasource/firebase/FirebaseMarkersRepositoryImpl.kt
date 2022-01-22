@@ -1,11 +1,9 @@
 package com.joesemper.fishing.model.datasource.firebase
 
-import android.net.Uri
 import android.util.Log
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
 import com.joesemper.fishing.domain.viewstates.BaseViewState
-import com.joesemper.fishing.model.repository.PhotoStorage
 import com.joesemper.fishing.model.datasource.utils.RepositoryCollections
 import com.joesemper.fishing.model.entity.common.LiteProgress
 import com.joesemper.fishing.model.entity.common.Note
@@ -15,6 +13,7 @@ import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.entity.raw.RawMapMarker
 import com.joesemper.fishing.model.mappers.MapMarkerMapper
 import com.joesemper.fishing.model.mappers.MarkerNoteMapper
+import com.joesemper.fishing.model.repository.PhotoStorage
 import com.joesemper.fishing.model.repository.app.MarkersRepository
 import com.joesemper.fishing.utils.getCurrentUserId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -227,11 +226,11 @@ class FirebaseMarkersRepositoryImpl(
         awaitClose {}
     }
 
-    private suspend fun savePhotos(
-        photos: List<Uri>,
-        progressFlow: MutableStateFlow<Progress>
-    ) =
-        cloudPhotoStorage.uploadPhotos(photos, progressFlow)
+//    private suspend fun savePhotos(
+//        photos: List<Uri>,
+//        progressFlow: MutableStateFlow<Progress>
+//    ) =
+//        cloudPhotoStorage.uploadPhotos(photos, progressFlow)
 
     override suspend fun deleteMarker(userMapMarker: UserMapMarker) {
         dbCollections.getUserMapMarkersCollection().document(userMapMarker.id).delete()
