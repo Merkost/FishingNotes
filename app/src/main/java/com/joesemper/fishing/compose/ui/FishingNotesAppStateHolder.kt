@@ -38,7 +38,6 @@ object MainDestinations {
     const val CATCH_ROUTE = "catch"
     const val DAILY_WEATHER_ROUTE = "daily_weather"
 
-
     const val MAP_ROUTE = "map"
     const val WEATHER_ROUTE = "weather"
 

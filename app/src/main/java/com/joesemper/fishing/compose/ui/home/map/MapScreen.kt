@@ -515,10 +515,10 @@ fun MapLayout(
                     return@setOnMapClickListener
                 }
 
-                //Map styles: https://mapstyle.withgoogle.com
+                /*//Map styles: https://mapstyle.withgoogle.com
                 if (darkTheme) googleMap.setMapStyle(
                     MapStyleOptions.loadRawResourceStyle(context, R.raw.mapstyle_night)
-                )
+                )*/
                 googleMap.uiSettings.isMyLocationButtonEnabled = false
             }
         }

@@ -136,10 +136,10 @@ fun Profile(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    val bestCatch by viewModel.bestCatch.collectAsState()
+                    //val bestCatch by viewModel.bestCatch.collectAsState()
                     val favoritePlace by viewModel.favoritePlace.collectAsState()
 
-                    BestCatchView(
+                    /*BestCatchView(
                         bestCatch = bestCatch,
                         onCatchItemClick = {
                             navController.navigate(
@@ -147,9 +147,9 @@ fun Profile(
                                 Arguments.CATCH to it
                             )
                         }
-                    )
+                    )*/
 
-                    Spacer(modifier = Modifier.size(16.dp))
+                    //Spacer(modifier = Modifier.size(16.dp))
 
                     FavoritePlaceView(
                         favoritePlace = favoritePlace,
@@ -307,7 +307,7 @@ fun CatchesNumber(modifier: Modifier = Modifier, userCatchesNum: Int?) {
 }
 
 
-@ExperimentalAnimationApi
+/*@ExperimentalAnimationApi
 @ExperimentalCoilApi
 @ExperimentalMaterialApi
 @InternalCoroutinesApi
@@ -319,5 +319,5 @@ fun ProfilePreview() {
     //FigmaTheme {
     Profile(rememberNavController())
     //}
-}
+}*/
 
