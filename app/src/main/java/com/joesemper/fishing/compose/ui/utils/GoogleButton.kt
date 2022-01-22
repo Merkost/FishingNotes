@@ -85,7 +85,7 @@ fun GoogleButton(
     }
 }
 
-@ExperimentalMaterialApi
+/*@ExperimentalMaterialApi
 @Composable
 @Preview
 private fun GoogleButtonPreview() {
@@ -94,4 +94,4 @@ private fun GoogleButtonPreview() {
         loadingText = "Signing In...",
         onClicked = {}
     )
-}
+}*/

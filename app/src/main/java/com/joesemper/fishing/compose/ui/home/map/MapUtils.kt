@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
@@ -30,9 +31,7 @@ import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
-import com.google.android.libraries.maps.CameraUpdateFactory
-import com.google.android.libraries.maps.GoogleMap
-import com.google.android.libraries.maps.MapView
+import com.google.android.libraries.maps.*
 import com.google.android.libraries.maps.model.CameraPosition
 import com.google.android.libraries.maps.model.LatLng
 import com.google.maps.android.ktx.awaitMap
@@ -377,7 +376,22 @@ fun BackPressHandler(
 @Composable
 fun rememberMapViewWithLifecycle(): MapView {
     val context = (LocalContext.current as MainActivity)
-    val mapView: MapView = remember { MapView(context).apply { id = R.id.map } }
+    val isDarkMode = isSystemInDarkTheme()
+    val mapView: MapView = remember(isSystemInDarkTheme()) {
+        MapView(
+            context,
+            when (isDarkMode) {
+                true -> {
+                    GoogleMapOptions().mapId(context.resources.getString(R.string.dark_map_id))
+                }
+                false -> {
+                    GoogleMapOptions().mapId(context.resources.getString(R.string.light_map_id))
+                }
+            }
+        )
+    }
+        .apply { id = R.id.map }
+
 
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle, mapView) {

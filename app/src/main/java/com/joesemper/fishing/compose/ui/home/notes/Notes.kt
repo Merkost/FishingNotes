@@ -358,21 +358,6 @@ private fun onAddNewPlaceClick(navController: NavController) {
 }
 
 
-@OptIn(ExperimentalFoundationApi::class)
-@ExperimentalAnimationApi
-@ExperimentalMaterialApi
-@ExperimentalPagerApi
-@Preview(showBackground = true)
-@Composable
-fun TabsContentPreview() {
-    val tabs = listOf(
-        TabItem.Places,
-        TabItem.Catches,
-    )
-    val pagerState = rememberPagerState(1)
-    TabsContent(tabs = tabs, pagerState = pagerState, rememberNavController())
-}
-
 
 
 

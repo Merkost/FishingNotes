@@ -13,7 +13,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -25,13 +24,14 @@ import com.joesemper.fishing.compose.ui.home.SnackbarManager
 import com.joesemper.fishing.compose.ui.home.advertising.BannerAdvertView
 import com.joesemper.fishing.compose.ui.home.advertising.showInterstitialAd
 import com.joesemper.fishing.compose.ui.home.views.DefaultAppBar
+import com.joesemper.fishing.compose.ui.home.views.ModalLoadingDialog
 import com.joesemper.fishing.compose.ui.home.views.PhotosView
 import com.joesemper.fishing.domain.NewCatchViewModel
 import com.joesemper.fishing.domain.viewstates.BaseViewState
 import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.utils.Constants.bottomBannerPadding
-import com.joesemper.fishing.utils.Constants.defaultFabBottomPadding
 import com.joesemper.fishing.utils.Constants.modalBottomSheetCorners
+import com.joesemper.fishing.utils.network.ConnectionState
 import com.joesemper.fishing.utils.network.currentConnectivityState
 import com.joesemper.fishing.utils.network.observeConnectivityAsFlow
 import com.joesemper.fishing.utils.time.toDate
@@ -133,22 +133,29 @@ fun NewCatchScreen(
                     title = stringResource(R.string.new_catch)
                 )
             },
+            floatingActionButtonPosition = FabPosition.End,
             floatingActionButton = {
                 FloatingActionButton(
-                    modifier = Modifier.padding(bottom = defaultFabBottomPadding),
                     onClick = {
                         if (viewModel.isInputCorrect()) {
                             loadingDialogState.value = true
-                            showInterstitialAd(
-                                context = context,
-                                onAdLoaded = {
-                                    viewModel.createNewUserCatch()
-                                }
-                            )
+
+                            if (connectionState is ConnectionState.Unavailable) {
+                                viewModel.createNewUserCatch()
+                            } else {
+                                showInterstitialAd(
+                                    context = context,
+                                    onAdLoaded = {
+                                        viewModel.createNewUserCatch()
+                                    }
+                                )
+                            }
+
                         } else {
                             SnackbarManager.showMessage(R.string.not_all_fields_are_filled)
                         }
-                    }) {
+                    }
+                ) {
                     Icon(
                         Icons.Filled.Done,
                         stringResource(R.string.create),
@@ -157,7 +164,11 @@ fun NewCatchScreen(
                 }
             }
         ) {
-            NewCatchLoadingDialog(dialogSate = loadingDialogState)
+            ModalLoadingDialog(
+                dialogSate = loadingDialogState,
+                text = stringResource(id = R.string.saving_new_catch)
+            )
+
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween,

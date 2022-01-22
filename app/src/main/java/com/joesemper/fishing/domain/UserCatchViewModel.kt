@@ -1,8 +1,6 @@
 package com.joesemper.fishing.domain
 
 import android.net.Uri
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joesemper.fishing.model.entity.common.Progress
@@ -11,7 +9,8 @@ import com.joesemper.fishing.model.entity.content.UserMapMarker
 import com.joesemper.fishing.model.repository.UserRepository
 import com.joesemper.fishing.model.repository.app.CatchesRepository
 import com.joesemper.fishing.model.repository.app.MarkersRepository
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class UserCatchViewModel(
@@ -20,10 +19,18 @@ class UserCatchViewModel(
     private val userRepository: UserRepository,
 ) : ViewModel() {
 
-    val catch: MutableState<UserCatch?> = mutableStateOf(null)
-    val mapMarker: MutableState<UserMapMarker?> = mutableStateOf(null)
+    private val _catch = MutableStateFlow<UserCatch?>(null)
+    val catch = _catch.asStateFlow()
 
-    val loadingState = mutableStateOf<Progress>(Progress.Complete)
+    private val _mapMarker = MutableStateFlow<UserMapMarker?>(null)
+    val mapMarker = _mapMarker.asStateFlow()
+
+    private val _loadingState = MutableStateFlow<Progress>(Progress.Complete)
+    val loadingState = _loadingState.asStateFlow()
+
+    fun setCatch(userCatch: UserCatch) {
+        _catch.value = userCatch
+    }
 
     fun updateCatch(data: Map<String, Any>) {
         mapMarker.value?.let { marker ->
@@ -52,7 +59,7 @@ class UserCatchViewModel(
     fun getMapMarker(markerId: String) {
         viewModelScope.launch {
             markersRepository.getMapMarker(markerId).collect {
-                mapMarker.value = it
+                _mapMarker.value = it
                 subscribeOnCatchChanges()
             }
         }
@@ -62,13 +69,13 @@ class UserCatchViewModel(
         mapMarker.value?.let { marker ->
             catch.value?.let { catch ->
                 viewModelScope.launch {
-                    loadingState.value = Progress.Loading()
+                    _loadingState.value = Progress.Loading()
                     catchesRepository.updateUserCatchPhotos(
                         markerId = marker.id,
                         catchId = catch.id,
                         newPhotos = photos
                     ).collect {
-                        loadingState.value = it
+                        _loadingState.value = it
                     }
                 }
             }
@@ -82,7 +89,7 @@ class UserCatchViewModel(
                     markerId = marker.id,
                     catchId = oldCatch.id
                 ).collect {
-                    catch.value = it
+                    _catch.value = it
                 }
             }
         }
