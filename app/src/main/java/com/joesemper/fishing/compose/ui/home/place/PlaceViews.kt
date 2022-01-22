@@ -307,6 +307,7 @@ fun PlaceCatchesView(
                         onClick = { onNewCatchClick() }
                     )
                 }
+                item { Spacer(modifier = Modifier.size(bottomBannerPadding)) }
             }
         }
     }
