@@ -49,19 +49,19 @@ fun NewCatchModalBottomSheetContent(
 }
 
 @Composable
-fun ErrorDialog(errorDialog: MutableState<Boolean>) {
+fun ErrorDialog(onClose: () -> Unit) {
     val viewModel: NewCatchViewModel = getViewModel()
     AlertDialog(
         title = { Text(stringResource(R.string.error_occured)) },
         text = { Text(stringResource(R.string.new_catch_error_description)) },
-        onDismissRequest = { errorDialog.value = false },
+        onDismissRequest = { onClose() },
         confirmButton = {
             OutlinedButton(
                 onClick = { viewModel.createNewUserCatch() },
                 content = { Text(stringResource(R.string.Try_again)) })
         }, dismissButton = {
             OutlinedButton(
-                onClick = { errorDialog.value = false },
+                onClick = { onClose() },
                 content = { Text(stringResource(R.string.Cancel)) })
         }
     )

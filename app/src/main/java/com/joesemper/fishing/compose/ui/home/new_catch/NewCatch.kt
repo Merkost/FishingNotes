@@ -67,11 +67,12 @@ fun NewCatchScreen(
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val loadingDialogState = remember { mutableStateOf(false) }
 
     val connectionState by context.observeConnectivityAsFlow()
         .collectAsState(initial = context.currentConnectivityState)
 
-    SubscribeToProgress(viewModel.uiState, upPress)
+    SubscribeToProgress(viewModel.uiState, loadingDialogState, upPress)
     val scrollState = rememberScrollState()
 
     LaunchedEffect(key1 = null) {
@@ -103,8 +104,6 @@ fun NewCatchScreen(
     if (!modalBottomSheetState.isVisible) {
         currentBottomSheet = null
     }
-
-    val loadingDialogState = remember { mutableStateOf(false) }
 
     DisposableEffect(key1 = null) {
         onDispose { calendar.timeInMillis = Date().time }
@@ -138,7 +137,6 @@ fun NewCatchScreen(
                 FloatingActionButton(
                     onClick = {
                         if (viewModel.isInputCorrect()) {
-                            loadingDialogState.value = true
 
                             if (connectionState is ConnectionState.Unavailable) {
                                 viewModel.createNewUserCatch()
@@ -204,32 +202,39 @@ fun NewCatchScreen(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun SubscribeToProgress(vmUiState: StateFlow<BaseViewState>, upPress: () -> Unit) {
-    val errorDialog = rememberSaveable { mutableStateOf(false) }
+fun SubscribeToProgress(
+    vmUiState: StateFlow<BaseViewState>,
+    loadingDialogState: MutableState<Boolean>,
+    upPress: () -> Unit
+) {
+    var errorDialog by rememberSaveable { mutableStateOf(false) }
+    if (errorDialog) ErrorDialog { errorDialog = false }
+    val context = LocalContext.current
 
     val uiState by vmUiState.collectAsState()
-    when (uiState) {
-        is BaseViewState.Success<*> -> {
-            if ((uiState as BaseViewState.Success<*>).data != null) {
+    LaunchedEffect(key1 = uiState) {
+        when (uiState) {
+            is BaseViewState.Success<*> -> {
+                if ((uiState as BaseViewState.Success<*>).data != null) {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.catch_added_successfully),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    upPress()
+                }
+            }
+            is BaseViewState.Loading -> {
+                loadingDialogState.value = true
+            }
+            is BaseViewState.Error -> {
+                errorDialog = true
                 Toast.makeText(
-                    LocalContext.current,
-                    stringResource(R.string.catch_added_successfully),
+                    context,
+                    "Error: ${(uiState as BaseViewState.Error).error.message}",
                     Toast.LENGTH_SHORT
                 ).show()
-                upPress()
             }
-        }
-        is BaseViewState.Loading -> {
-//            LoadingDialog()
-        }
-        is BaseViewState.Error -> {
-            ErrorDialog(errorDialog)
-            errorDialog.value = true
-            Toast.makeText(
-                LocalContext.current,
-                "Error: ${(uiState as BaseViewState.Error).error.message}",
-                Toast.LENGTH_SHORT
-            ).show()
         }
     }
 }
