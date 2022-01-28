@@ -105,7 +105,7 @@ fun Profile(
             SecondaryText(
                 modifier = Modifier
                     .constrainAs(registerDate) {
-                        top.linkTo(name.bottom)
+                        top.linkTo(name.bottom, 2.dp)
                         absoluteLeft.linkTo(name.absoluteLeft)
                         absoluteRight.linkTo(name.absoluteRight)
                     }
