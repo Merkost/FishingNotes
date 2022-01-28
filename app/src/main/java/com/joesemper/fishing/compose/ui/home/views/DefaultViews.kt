@@ -22,6 +22,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.airbnb.lottie.compose.*
 import com.joesemper.fishing.R
+import com.joesemper.fishing.compose.ui.theme.customColors
 import com.joesemper.fishing.compose.ui.theme.supportTextColor
 import com.joesemper.fishing.model.entity.common.Note
 import com.joesemper.fishing.utils.time.toDate
@@ -107,12 +108,12 @@ fun NoContentView(
             modifier = Modifier.size(32.dp),
             painter = icon,
             contentDescription = null,
-            tint = supportTextColor
+            tint = MaterialTheme.customColors.secondaryIconColor
         )
         Text(
             text = text,
             textAlign = TextAlign.Center,
-            color = supportTextColor
+            color = MaterialTheme.customColors.secondaryTextColor
         )
     }
 }
