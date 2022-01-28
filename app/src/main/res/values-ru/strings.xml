@@ -187,7 +187,6 @@
     <string name="pressure_unit">Единица измерения давления</string>
     <string name="temperature_unit">Единица измерения температуры</string>
     <string name="fahrenheit">°F</string>
-    <string name="Kelvin">K</string>
     <string name="kelvin">K</string>
     <string name="now">Сейчас</string>
 

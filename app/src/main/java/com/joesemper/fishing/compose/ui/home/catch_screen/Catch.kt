@@ -34,6 +34,7 @@ import com.joesemper.fishing.compose.ui.home.weather.PressureValues
 import com.joesemper.fishing.compose.ui.home.weather.TemperatureValues
 import com.joesemper.fishing.compose.ui.navigate
 import com.joesemper.fishing.domain.UserCatchViewModel
+import com.joesemper.fishing.model.datastore.UserPreferences
 import com.joesemper.fishing.model.datastore.WeatherPreferences
 import com.joesemper.fishing.model.entity.common.Progress
 import com.joesemper.fishing.model.entity.content.UserCatch
@@ -133,9 +134,11 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch) {
 
 @Composable
 fun CatchTopBar(navController: NavController, catch: UserCatch, onDeleteCatch: () -> Unit) {
+    val userPreferences: UserPreferences = get()
+    val is12hTime by userPreferences.use12hTimeFormat.collectAsState(initial = false)
     DefaultAppBar(
         title = stringResource(id = R.string.user_catch),
-        subtitle = catch.date.toDateTextMonth() + " " + catch.date.toTime(),
+        subtitle = catch.date.toDateTextMonth() + " " + catch.date.toTime(is12hTime),
         onNavClick = { navController.popBackStack() }
     ) {
         IconButton(
