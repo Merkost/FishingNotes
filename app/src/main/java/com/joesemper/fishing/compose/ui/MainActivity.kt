@@ -138,9 +138,10 @@ class MainActivity : ComponentActivity() {
 
         /*
             Kostya's Pixel XL = 7254B9BDD30F1D2EACA4C4EAD6B31F2C
+            Oleg = F70916713215C0BC73564CDFEC4D3ECB
 
         */
-        val testDeviceIds = Arrays.asList("7254B9BDD30F1D2EACA4C4EAD6B31F2C")
+        val testDeviceIds = Arrays.asList("7254B9BDD30F1D2EACA4C4EAD6B31F2C", "F70916713215C0BC73564CDFEC4D3ECB")
         val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
         MobileAds.setRequestConfiguration(configuration)
         setAppMuted(true)
