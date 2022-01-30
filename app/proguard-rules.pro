@@ -21,4 +21,4 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class com.google.android.libraries.maps.** { *; }
--keep class com.joesemper.fishing.** { *; }
+-keep class com.mobileprism.fishing.** { *; }
