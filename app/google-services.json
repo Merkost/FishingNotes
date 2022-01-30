@@ -7,66 +7,50 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:767301429798:android:3524c5643c7025ea7a14e7",
+        "mobilesdk_app_id": "1:767301429798:android:5a6164720842f0217a14e7",
         "android_client_info": {
-          "package_name": "com.joesemper.fishing"
+          "package_name": "com.mobileprism.fishing"
         }
       },
       "oauth_client": [
         {
-          "client_id": "767301429798-5037kaol1g39c8p07rkvful7u6ksdcg8.apps.googleusercontent.com",
+          "client_id": "767301429798-055chq4pk61sc83mvnlk7vfni4c17ni0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.joesemper.fishing",
-            "certificate_hash": "c0d088b9c0a8fe4ebf285d0408e2a5080c63188a"
+            "package_name": "com.mobileprism.fishing",
+            "certificate_hash": "0af3cb2a3ba054dba7cb72a64212faec5c23ff56"
           }
         },
         {
-          "client_id": "767301429798-dvhppqkqrebm29n7lfnm2t3kg9r1fs0n.apps.googleusercontent.com",
+          "client_id": "767301429798-0tidsf5ct4jb1hl3jt6bg5s70knqq6qf.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.joesemper.fishing",
+            "package_name": "com.mobileprism.fishing",
             "certificate_hash": "c8ff5cdd354b65daaca40097600d41069572472c"
           }
         },
         {
-          "client_id": "767301429798-e4v6gprcni67g4a16af16qahnjaj99ch.apps.googleusercontent.com",
+          "client_id": "767301429798-6rbd7onvmic1sesacqrmc76ckvddeigo.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.joesemper.fishing",
-            "certificate_hash": "c1e2b37768b8c21bc2dc7313edb62e0438b4bcf3"
+            "package_name": "com.mobileprism.fishing",
+            "certificate_hash": "4e0d00aa3c4684c1297e8bce9626a837722d798d"
           }
         },
         {
-          "client_id": "767301429798-esk4k7k6c7fk4i0dgcilg46kmtfpco15.apps.googleusercontent.com",
+          "client_id": "767301429798-9jgm59b9atqg9v88lkv3k41j6297qj3p.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.joesemper.fishing",
-            "certificate_hash": "dbb44d1d8cea7a75cca501de1b6fab1f10159304"
-          }
-        },
-        {
-          "client_id": "767301429798-kon5111lbee10bde7q8n3l9inslq530n.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.joesemper.fishing",
-            "certificate_hash": "40a2189d1c48ac28379dec76ea16a80c52f2aaaa"
-          }
-        },
-        {
-          "client_id": "767301429798-m9sflo8758nmf64rjjro770v82c5u6c1.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.joesemper.fishing",
+            "package_name": "com.mobileprism.fishing",
             "certificate_hash": "b5b0153f6b2f7151d8048417aa1542c270f9b3c6"
           }
         },
         {
-          "client_id": "767301429798-ssmrmuckcmfad3gvaclrnvdb59f60tpk.apps.googleusercontent.com",
+          "client_id": "767301429798-o3hnhpkfj9tjl7194jq7i0e96b4n247m.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.joesemper.fishing",
-            "certificate_hash": "0af3cb2a3ba054dba7cb72a64212faec5c23ff56"
+            "package_name": "com.mobileprism.fishing",
+            "certificate_hash": "40a2189d1c48ac28379dec76ea16a80c52f2aaaa"
           }
         },
         {

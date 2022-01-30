@@ -20,6 +20,7 @@ import androidx.navigation.NavController
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.fade
 import com.google.accompanist.placeholder.placeholder
+import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.Arguments
 import com.mobileprism.fishing.compose.ui.MainDestinations
 import com.mobileprism.fishing.compose.ui.home.UiState

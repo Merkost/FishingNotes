@@ -461,7 +461,8 @@ fun MapLayout(
         mutableStateOf(false)
     }
 
-    AnimatedVisibility(visible = isMapVisible) {
+    AnimatedVisibility(visible = isMapVisible,
+    enter = fadeIn(), exit = fadeOut()) {
         AndroidView(
             { map },
             modifier = modifier

@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.mobileprism.fishing.R
 
 @Composable
 fun DefaultAppBar(
@@ -55,4 +56,5 @@ fun DefaultAppBar(
         actions = actions,
         backgroundColor = backgroundColor
     )
+
 }

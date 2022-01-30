@@ -1,4 +1,4 @@
-import com.joesemper.fishing.buildsrc.Libs
+import com.mobileprism.fishing.buildsrc.Libs
 
 plugins {
     id 'com.android.application'

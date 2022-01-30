@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.compose.ui.home.views
 
+import com.mobileprism.fishing.R
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
