@@ -260,7 +260,7 @@ fun checkGPSEnabled(context: Context) {
     if (manager.isProviderEnabled(LocationManager.GPS_PROVIDER).not()) {
         SnackbarManager.showMessage(R.string.gps_is_off)
         turnOnGPS(context)
-    } else SnackbarManager.showMessage(R.string.unable_to_get_location)
+    } /*else SnackbarManager.showMessage(R.string.unable_to_get_location)*/
 }
 
 private fun turnOnGPS(context: Context) {
