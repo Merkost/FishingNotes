@@ -225,27 +225,29 @@ fun getCurrentLocationFlow(
     if (permissionsState.allPermissionsGranted) {
         val locationResult = fusedLocationProviderClient.lastLocation
         locationResult.addOnSuccessListener { task ->
-            val newCoordinates = LatLng(task.latitude, task.longitude)
-
-            if (isCoordinatesFar(previousCoordinates, newCoordinates)) {
-                try {
-                    trySend(
-                        LocationState.LocationGranted(
-                            location = newCoordinates
+            if (task.latitude != null && task.longitude != null) {
+                val newCoordinates = LatLng(task.latitude, task.longitude)
+                if (isCoordinatesFar(previousCoordinates, newCoordinates)) {
+                    try {
+                        trySend(
+                            LocationState.LocationGranted(
+                                location = newCoordinates
+                            )
                         )
-                    )
-                    previousCoordinates = newCoordinates
-                } catch (e: Exception) {
-                    Log.d("MAP", "GPS is off")
+                        previousCoordinates = newCoordinates
+                    } catch (e: Exception) {
+                        Log.d("MAP", "GPS is off")
 
-                    checkGPSEnabled(context)
+                        checkGPSEnabled(context)
 
-                    SnackbarManager.showMessage(R.string.gps_is_off)
-                    /*Toast.makeText(context, R.string.cant_get_current_location, Toast.LENGTH_SHORT)
-                        .show()*/
+                        SnackbarManager.showMessage(R.string.gps_is_off)
+                        /*Toast.makeText(context, R.string.cant_get_current_location, Toast.LENGTH_SHORT)
+                            .show()*/
 
+                    }
                 }
             }
+
 
         }
     } else {
