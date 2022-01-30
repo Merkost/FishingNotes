@@ -14,9 +14,7 @@
     <string name="fish_catch">Улов</string>
     <string name="pc">шт.</string>
     <string name="amount">Количество</string>
-    <string name="sample_amount">1</string>
     <string name="weight">Вес</string>
-    <string name="sample_weight">0.1</string>
     <string name="kg">кг</string>
     <string name="fishing_method">Способ ловли</string>
     <string name="fish_rod">Удочка</string>
@@ -72,7 +70,6 @@
     <string name="fisher">Fisher</string>
     <string name="places">Места</string>
     <string name="catches">Уловы</string>
-    <string name="add_new_place">Новое место</string>
     <string name="permissions_required">Необходимы разрешения</string>
 
     <string name="plus">+</string>
@@ -100,7 +97,7 @@
     <string name="save">Сохранить</string>
     <string name="Yes">Да</string>
     <string name="No">Нет</string>
-    <string name="Another_place_in_new_catch">Начните добавлять улов с экрана уловов, чтобы выбрать другое место!</string>
+    <string name="another_place_in_new_catch">Начните добавлять улов с экрана заметок, чтобы выбрать другое место!</string>
     <string name="locked">Заблокировано</string>
     <string name="failed_to_determine">Не удалось определить</string>
     <string name="fish_species">Вид рыбы</string>
@@ -130,10 +127,8 @@
     <string name="no_rod">Удочка не указана</string>
     <string name="no_bait">Наживка не указана</string>
     <string name="no_lure">Подкормка не указана</string>
-    <string name="celsius">°C</string>
     <string name="pressure_units">мм рт.ст.</string>
     <string name="wind_speed_units">м/с</string>
-    <string name="percent">%</string>
     <string name="pressure">Давление</string>
     <string name="temperature">Температура</string>
     <string name="moon_phase">Фаза луны</string>
@@ -186,8 +181,6 @@
     <string name="choose_pressure_unit">Выберите единицу измерения давления</string>
     <string name="pressure_unit">Единица измерения давления</string>
     <string name="temperature_unit">Единица измерения температуры</string>
-    <string name="fahrenheit">°F</string>
-    <string name="kelvin">K</string>
     <string name="now">Сейчас</string>
 
     <string name="mode_place_selecting">Режим выбора места включен!</string>
@@ -273,5 +266,6 @@
 
     <string name="saving_photos">Сохранение фото</string>
     <string name="place_note_not_deleted">Не удалось удалить заметку!</string>
+    <string name="add_new_place">Добавить новое место</string>
 
 </resources>

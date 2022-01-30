@@ -241,9 +241,9 @@ fun NewPlaceDialog(
             }, shape = RoundedCornerShape(24.dp), onClick = {
                 viewModel.addNewMarker(
                     RawMapMarker(
-                        title = when (titleValue.value.isNotEmpty()) {
-                            true -> titleValue.value
-                            false -> context.resources.getString(R.string.no_name_place)
+                        title = when (titleValue.value.isEmpty()) {
+                            true -> context.resources.getString(R.string.no_name_place)
+                            false -> titleValue.value
                         },
                         description = descriptionValue.value,
                         latitude = currentCameraPosition.component1().first.latitude,

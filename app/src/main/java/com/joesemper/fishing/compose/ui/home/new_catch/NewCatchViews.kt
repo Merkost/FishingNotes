@@ -50,7 +50,7 @@ import org.koin.androidx.compose.getViewModel
 fun Places(viewModel: NewCatchViewModel, isNull: Boolean, navController: NavController) {
     val context = LocalContext.current
 
-    val changePlaceError = stringResource(R.string.Another_place_in_new_catch)
+    val changePlaceError = stringResource(R.string.another_place_in_new_catch)
     val marker by rememberSaveable { viewModel.marker }
 
     var isDropMenuOpen by rememberSaveable { mutableStateOf(false) }
