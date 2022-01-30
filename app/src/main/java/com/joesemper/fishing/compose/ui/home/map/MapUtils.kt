@@ -225,7 +225,7 @@ fun getCurrentLocationFlow(
     if (permissionsState.allPermissionsGranted) {
         val locationResult = fusedLocationProviderClient.lastLocation
         locationResult.addOnSuccessListener { task ->
-            if (task.latitude != null && task.longitude != null) {
+            if (task != null) {
                 val newCoordinates = LatLng(task.latitude, task.longitude)
                 if (isCoordinatesFar(previousCoordinates, newCoordinates)) {
                     try {
@@ -238,9 +238,8 @@ fun getCurrentLocationFlow(
                     } catch (e: Exception) {
                         Log.d("MAP", "GPS is off")
 
-                        checkGPSEnabled(context)
 
-                        SnackbarManager.showMessage(R.string.gps_is_off)
+
                         /*Toast.makeText(context, R.string.cant_get_current_location, Toast.LENGTH_SHORT)
                             .show()*/
 
@@ -256,9 +255,10 @@ fun getCurrentLocationFlow(
     awaitClose { }
 }
 
-private fun checkGPSEnabled(context: Context) {
+fun checkGPSEnabled(context: Context) {
     val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     if (manager.isProviderEnabled(LocationManager.GPS_PROVIDER).not()) {
+        SnackbarManager.showMessage(R.string.gps_is_off)
         turnOnGPS(context)
     } else SnackbarManager.showMessage(R.string.unable_to_get_location)
 }

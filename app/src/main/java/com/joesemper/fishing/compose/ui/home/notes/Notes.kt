@@ -95,7 +95,7 @@ fun Notes(
                         ),
                         FabMenuItem(
                             icon = R.drawable.ic_baseline_add_location_24,
-                            text = stringResource(R.string.add_new_place),
+                            text = stringResource(R.string.new_place),
                             onClick = { onAddNewPlaceClick(navController) }
                         )
                     )

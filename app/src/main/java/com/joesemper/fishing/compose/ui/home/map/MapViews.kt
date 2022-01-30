@@ -134,6 +134,7 @@ fun MyLocationButton(
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
 
     if (locationDialogIsShowing) {
+
         if (shouldShowPermissions) {
             LocationPermissionDialog(userPreferences = userPreferences) {
                 checkPermission(context)
@@ -163,7 +164,10 @@ fun MyLocationButton(
                 .fillMaxSize(),
             onClick = {
                 when (permissionsState.allPermissionsGranted) {
-                    true -> onClick()
+                    true -> {
+                        checkGPSEnabled(context)
+                        onClick()
+                    }
                     false -> {
                         locationDialogIsShowing = true
                     }
@@ -206,7 +210,9 @@ fun CompassButton(
                         mapBearing.value < 4f) R.drawable.north
                     else R.drawable.gps),
                     stringResource(R.string.compass),
-                    modifier = Modifier.rotate(mapBearing.value).fillMaxSize()
+                    modifier = Modifier
+                        .rotate(mapBearing.value)
+                        .fillMaxSize()
                 )
             }
         }
@@ -376,7 +382,9 @@ fun MapSettingsButton(
         modifier = modifier.size(40.dp)
     ) {
         IconButton(
-            modifier = Modifier.padding(8.dp).fillMaxSize(),
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxSize(),
             onClick = onCLick
             ) {
             Icon(

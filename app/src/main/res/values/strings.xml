@@ -2,7 +2,7 @@
     <string name="app_name">Fishing</string>
     <string name="groups">Groups</string>
     <string name="logout_dialog_title">Logout</string>
-    <string name="logout_dialog_message">Are you sure to logout? Your data will be saved</string>
+    <string name="logout_dialog_message">Are you sure to logout?\\nYour data will be saved</string>
     <string name="ok_button">OK</string>
     <string name="logout_dialog_cancel">Close</string>
     <string name="title">Title</string>
@@ -13,9 +13,9 @@
     <string name="fish_catch">Catch</string>
     <string name="pc">PC.</string>
     <string name="amount">Amount</string>
-    <string name="sample_amount">1</string>
+    <string name="sample_amount" translatable="false">1</string>
     <string name="weight">Weight</string>
-    <string name="sample_weight">0.1</string>
+    <string name="sample_weight" translatable="false">0.1</string>
     <string name="kg">kg</string>
     <string name="fishing_method">Fishing method</string>
     <string name="fish_rod">Fish rod</string>
@@ -72,7 +72,7 @@
 
     <string name="places">Places</string>
     <string name="catches">Catches</string>
-    <string name="add_new_place">Add new place</string>
+    <string name="add_new_place">add new place</string>
     <string name="save">Save</string>
 
     <string name="permissions_required">Permissions required</string>
@@ -90,7 +90,7 @@
     <string name="not_all_fields_are_filled">Not all fields are filled in. Please, double check</string>
     <string name="marker_icon">Marker icon</string>
     <string name="catch_photo">Photo of the catch</string>
-    <string name="test_description">"Ловля судака, как и, впрочем, ловля любой рыбы, очень интересное и захватывающее занятие. Получите хороший и удачный улов. "</string>
+    <string name="test_description">"Walleye fishing, as well as, by the way, catching any fish, is a very interesting and exciting activity. Get a good and successful catch."</string>
     <string name="location">Location</string>
     <string name="calculating">Calculating…</string>
     <string name="new_place">New place</string>
@@ -99,7 +99,7 @@
     <string name="Choose_a_place">Choose a place</string>
     <string name="Yes">Yes</string>
     <string name="No">No</string>
-    <string name="Another_place_in_new_catch">Начните добавлять улов с экрана уловов, чтобы выбрать другое место!</string>
+    <string name="another_place_in_new_catch">Start adding a catch from the notes screen to choose another location!</string>
     <string name="locked">Locked</string>
     <string name="failed_to_determine">Failed to determine</string>
     <string name="fish_species">Fish species</string>
@@ -118,21 +118,21 @@
     <string name="note">Note</string>
     <string name="user_catch">Catch</string>
     <string name="cant_get_current_location">Can\'t get current location</string>
-    <string name="my_location">Моё местоположение</string>
-    <string name="layers">Слои</string>
-    <string name="terrain">Рельеф</string>
-    <string name="satellite">Спутник</string>
-    <string name="roadmap">По умолчанию</string>
-    <string name="close">Закрыть</string>
-    <string name="map_type">Тип карты</string>
+    <string name="my_location">My location</string>
+    <string name="layers">Layers</string>
+    <string name="terrain">Relief</string>
+    <string name="satellite">Satellite</string>
+    <string name="roadmap">By default</string>
+    <string name="close">Close</string>
+    <string name="map_type">Map type</string>
     <string name="way_of_fishing">Way of fishing</string>
     <string name="no_rod">No rod</string>
     <string name="no_bait">No bait</string>
     <string name="no_lure">No lure</string>
-    <string name="celsius">°C</string>
+    <string name="celsius" translatable="false">°C</string>
     <string name="pressure_units">mmHg</string>
     <string name="wind_speed_units">m/s</string>
-    <string name="percent">%</string>
+    <string name="percent" translatable="false">%</string>
     <string name="pressure">Pressure</string>
     <string name="temperature">Temperature</string>
     <string name="wind">Wind</string>
@@ -148,30 +148,30 @@
 
     <!--    For Testing    -->
     <string name="mode_place_selecting">You are in place selecting mode!</string>
-    <string name="mode_place_selecting_off">Режим выбора места выключен!</string>
-    <string name="mode_place_info">Вы в режиме просмотра информации о месте!</string>
+    <string name="mode_place_selecting_off">Location selection mode is off!</string>
+    <string name="mode_place_info">You are in the mode of viewing information about the place!</string>
     <string name="login_title">Let\'s get it started!</string>
     <string name="google_login">Sign with google</string>
 
     <string name="start_screen_title">Start Screen</string>
-    <string name="signin_error">Произошла ошибка при входе, попробуйте еще раз!</string>
+    <string name="signin_error">An error occurred while logging in, try again!</string>
     <string name="google_login_failed">An error occurred while Google Sign In. Try again!</string>
     <string name="add_place_success">Place added successfully</string>
-    <string name="for_today">Сегодня</string>
-    <string name="for_a_week">На неделю</string>
+    <string name="for_today">Today</string>
+    <string name="for_a_week">For a week</string>
     <string name="signing_in">Signing In</string>
     <string name="sign_with_google">Sign In with Google</string>
     <string name="back_clicked">Do it again to close the app</string>
     <string name="searching">Searching…</string>
-    <string name="unnamed_place">Место без названия</string>
-    <string name="cant_recognize_place">Не удалось определить место</string>
+    <string name="unnamed_place">Unnamed place</string>
+    <string name="cant_recognize_place">Couldn\'t determine location</string>
     <string name="current_location">Current location</string>
     <string name="install_maps_app">Please install a maps application</string>
-    <string name="choose_place_first">Для начала выберите место!</string>
-    <string name="transparent">Прозрачный</string>
+    <string name="choose_place_first">Choose a place first!</string>
+    <string name="transparent">Transparent</string>
     <string name="dont_ask_again">Don\'t ask</string>
-    <string name="location_dont_ask">Запрос больше не будет показываться. Чтобы дать необходимые разрешения - пройдите в настройки вашего устройства</string>
-    <string name="location_permission_denied">Вы отказали в доступе к вашему местоположению. Предоставьте разрешения в настройках вашего устройства.</string>
+    <string name="location_dont_ask">The request will no longer be displayed. To give the necessary permissions, go to your device settings</string>
+    <string name="location_permission_denied">You have denied access to your location. Grant permissions in your device settings.</string>
     <string name="location_permission_dialog">Allow app to determine your location?</string>
     <string name="precipitation">Precipitation</string>
     <string name="humidity">Humidity</string>
@@ -188,8 +188,8 @@
     <string name="choose_pressure_unit">Choose pressure unit</string>
     <string name="pressure_unit">Pressure unit</string>
     <string name="temperature_unit">Temperature unit</string>
-    <string name="fahrenheit">°F</string>
-    <string name="kelvin">K</string>
+    <string name="fahrenheit" translatable="false">°F</string>
+    <string name="kelvin" translatable="false">K</string>
     <string name="now">Now</string>
     <string name="morning">Morning</string>
     <string name="day">Day</string>
@@ -208,49 +208,49 @@
     <string name="no_name_place">No name place</string>
     <string name="select_place_for_weather">Select a place to load weather!</string>
     <string name="no_internet">No internet connection</string>
-    <string name="reset">Сбросить</string>
-    <string name="catch_added_successfully">Ваш улов успешно добавлен!</string>
-    <string name="error_occured">Произошла ошибка!</string>
-    <string name="new_catch_error_description">Не удалось добавить улов. Проверьте интернет соединение и попробуйте еще раз.</string>
+    <string name="reset">Discard</string>
+    <string name="catch_added_successfully">Your catch has been successfully added!</string>
+    <string name="error_occured">An error has occurred!</string>
+    <string name="new_catch_error_description">Failed to add a new catch. Check your internet connection and try again.</string>
     <string name="choose_weather_icon">Choose weather icon:</string>
     <string name="adding_place_on_current_location">Adding place on your location</string>
     <string name="location_permissions_required">Location permissions required</string>
-    <string name="fab_fast_add">Быстрое добавление точки на карте</string>
-    <string name="marker_visibility_change_error">Не удалось изменить видимость места!</string>
-    <string name="marker_visibility_change_success">Видимость места успешно сохранена</string>
-    <string name="settings_main">Основные настройки</string>
-    <string name="fast_fab_description">Удерживайте кнопку добавления места на карте, чтобы быстро сохранить ваше текущее местоположение</string>
+    <string name="marker_visibility_change_error">Couldn\'t change the visibility of the place!</string>
+    <string name="marker_visibility_change_success">The visibility of the place has been successfully saved</string>
+    <string name="settings_main">Main settings</string>
+    <string name="fab_fast_add">Quickly add a point to the map</string>
+    <string name="fast_fab_description">Hold down the add location button on the map to quickly save your current location</string>
     <string name="settings_weather">Weather settings</string>
-    <string name="settings_about">О приложении</string>
+    <string name="settings_about">About the app</string>
     <string name="current_app_version">"Current version: "</string>
-    <string name="sort">Сортировка</string>
-    <string name="default_word">По умолчанию</string>
-    <string name="time_asc">Время: по возрастанию</string>
-    <string name="time_desc">Время: по убыванию</string>
-    <string name="name_asc">Имя: по возрастанию</string>
-    <string name="name_desc">Имя: по убыванию</string>
+    <string name="sort">Sorting</string>
+    <string name="default_word">By default</string>
+    <string name="time_asc">Time: ascending</string>
+    <string name="time_desc">Time: descending</string>
+    <string name="name_asc">Name: ascending</string>
+    <string name="name_desc">Name: descending</string>
 
     <string name="photos_not_available">No Internet connection\nPhotos not available</string>
     <string name="no_photos_added">No photos added</string>
-    <string name="loading">Загрузка. Пожалуйста, подождите</string>
+    <string name="loading">Loading. Please wait</string>
     <string name="edit_note">Edit note</string>
-    <string name="unable_to_get_location">Не удается получить ваше местоположение. Проверьте, что на устройстве включен GPS</string>
+    <string name="unable_to_get_location">Can\'t get your location. Make sure that GPS is enabled on the device</string>
     <string name="gps_is_off">You need to turn on GPS on your device</string>
     <string name="compass">Compass</string>
     <string name="app_exit_message">Do it again to close the app</string>
-    <string name="hidden_places">Скрытые места</string>
-    <string name="show_hidden_places">Показывать скрытые места на карте</string>
+    <string name="hidden_places">Hidden places</string>
+    <string name="show_hidden_places">Show hidden places on the map</string>
     <string name="wind_mph">mph</string>
     <string name="wind_knots">knots</string>
     <string name="wind_mps">m/s</string>
     <string name="wind_ftps">ft/s</string>
     <string name="wind_kmph">km/h</string>
-    <string name="wind_speed_unit">Единица измерения скорости ветра</string>
-    <string name="choose_wind_speed_unit">Выберите единицу измерения скорости ветра</string>
-    <string name="map_zoom_buttons">Кнопки изменения масштаба</string>
-    <string name="map_zoom_buttons_description">Отображать кнопки изменения масштаба на карте</string>
-    <string name="catches_desc">Уловы: по убыванию</string>
-    <string name="fish_desc">Количество рыб: по убыванию</string>
+    <string name="wind_speed_unit">Unit of measurement of wind speed</string>
+    <string name="choose_wind_speed_unit">Select the wind speed measurement unit</string>
+    <string name="map_zoom_buttons">Zoom buttons</string>
+    <string name="map_zoom_buttons_description">Display zoom buttons on the map</string>
+    <string name="catches_desc">Number of catches: descending</string>
+    <string name="fish_desc">Number of fish: descending</string>
     <string name="new_catch_text">+ Add new catch</string>
     <string name="delete_place_dialog">Delete place \"%s\"</string>
     <string name="sure_delete_place_dialog">All catches on this place also will be deleted.\nAre you sure?</string>
@@ -260,13 +260,13 @@
     <string name="places_count">Places count</string>
     <string name="best_catch">Best catch</string>
     <string name="favorite_place">Favorite place</string>
-    <string name="place_note_not_saved">Не удалось сохранить заметку</string>
-    <string name="delete_catch_dialog">Удаление улова \"%s\"</string>
+    <string name="place_note_not_saved">Couldn\'t save the note!</string>
+    <string name="delete_catch_dialog">Removing the catch \"%s\"</string>
     <string name="not_avalable">N/A</string>
 
 
     <string name="saving_photos">Saving photos</string>
-    <string name="place_note_not_deleted">Не удалось удалить заметку!</string>
+    <string name="place_note_not_deleted">Couldn\'t delete the note!</string>
 
 
 </resources>

@@ -1,5 +1,7 @@
 package com.joesemper.fishing.compose.ui.home.map
 
+import android.content.Context
+import android.location.LocationManager
 import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
