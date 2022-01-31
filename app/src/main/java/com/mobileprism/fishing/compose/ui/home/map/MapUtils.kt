@@ -13,10 +13,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -105,6 +102,7 @@ sealed class LocationState() {
     object NoPermission : LocationState()
     class LocationGranted(val location: LatLng) : LocationState()
     object LocationNotGranted : LocationState()
+    object GpsNotEnabled : LocationState()
 }
 
 sealed class MapUiState {
@@ -221,49 +219,51 @@ fun getCurrentLocationFlow(
         LocationServices.getFusedLocationProviderClient(context)
 
     checkPermission(context)
+    val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
-    if (permissionsState.allPermissionsGranted) {
-        val locationResult = fusedLocationProviderClient.lastLocation
-        locationResult.addOnSuccessListener { task ->
-            if (task != null) {
-                val newCoordinates = LatLng(task.latitude, task.longitude)
-                if (isCoordinatesFar(previousCoordinates, newCoordinates)) {
-                    try {
-                        trySend(
-                            LocationState.LocationGranted(
-                                location = newCoordinates
+    when {
+        manager.isProviderEnabled(LocationManager.GPS_PROVIDER).not() -> trySend(LocationState.GpsNotEnabled)
+        permissionsState.allPermissionsGranted -> {
+            val locationResult = fusedLocationProviderClient.lastLocation
+            locationResult.addOnSuccessListener { task ->
+                if (task != null) {
+                    val newCoordinates = LatLng(task.latitude, task.longitude)
+                    if (isCoordinatesFar(previousCoordinates, newCoordinates)) {
+                        try {
+                            trySend(
+                                LocationState.LocationGranted(
+                                    location = newCoordinates
+                                )
                             )
-                        )
-                        previousCoordinates = newCoordinates
-                    } catch (e: Exception) {
-                        Log.d("MAP", "GPS is off")
-
-
-
-                        /*Toast.makeText(context, R.string.cant_get_current_location, Toast.LENGTH_SHORT)
-                            .show()*/
-
+                            previousCoordinates = newCoordinates
+                        } catch (e: Exception) {
+                            Log.d("MAP", "GPS is off")
+                            Toast.makeText(context, R.string.cant_get_current_location, Toast.LENGTH_SHORT)
+                                .show()
+                        }
                     }
                 }
+
+
             }
-
-
         }
-    } else {
-        trySend(LocationState.NoPermission)
+        else -> {
+            trySend(LocationState.NoPermission)
+        }
     }
+
     awaitClose { }
 }
 
-fun checkGPSEnabled(context: Context) {
+fun checkGPSEnabled(context: Context, onGpsEnabled: () -> Unit = {}) {
     val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     if (manager.isProviderEnabled(LocationManager.GPS_PROVIDER).not()) {
         SnackbarManager.showMessage(R.string.gps_is_off)
-        turnOnGPS(context)
-    } /*else SnackbarManager.showMessage(R.string.unable_to_get_location)*/
+        turnOnGPS(context, onGpsEnabled)
+    } else onGpsEnabled()
 }
 
-private fun turnOnGPS(context: Context) {
+private fun turnOnGPS(context: Context, onGpsEnabled: () -> Unit = {}) {
     val request = LocationRequest.create().apply {
         interval = 8000
         fastestInterval = 5000
@@ -288,7 +288,8 @@ private fun turnOnGPS(context: Context) {
             }
         }
     }.addOnSuccessListener {
-        //here GPS is On
+
+        onGpsEnabled()
     }
 }
 

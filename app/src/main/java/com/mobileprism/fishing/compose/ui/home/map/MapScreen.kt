@@ -1,5 +1,7 @@
 package com.mobileprism.fishing.compose.ui.home.map
 
+import android.content.Context
+import android.location.LocationManager
 import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
@@ -50,6 +52,7 @@ import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
 import com.mobileprism.fishing.utils.getCameraPosition
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
@@ -146,15 +149,20 @@ fun MapScreen(
 
     LaunchedEffect(currentLocationFlow) {
         currentLocationFlow.collect { currentLocationState ->
-            if (currentLocationState is LocationState.LocationGranted) {
-                viewModel.lastKnownLocation.value = currentLocationState.location
-                if (viewModel.firstLaunchLocation.value) {
-                    viewModel.currentMarker.value?.let {
-                    } ?: kotlin.run {
-                        viewModel.lastMapCameraPosition.value =
-                            Pair(currentLocationState.location, DEFAULT_ZOOM)
+            when (currentLocationState) {
+                is LocationState.LocationGranted -> {
+                    viewModel.lastKnownLocation.value = currentLocationState.location
+                    if (viewModel.firstLaunchLocation.value) {
+                        viewModel.currentMarker.value?.let {
+                        } ?: kotlin.run {
+                            viewModel.lastMapCameraPosition.value =
+                                Pair(currentLocationState.location, DEFAULT_ZOOM)
+                        }
+                        viewModel.firstLaunchLocation.value = false
                     }
-                    viewModel.firstLaunchLocation.value = false
+                }
+                is LocationState.GpsNotEnabled -> {
+                    //checkGPSEnabled(context) { currentLocationFlow.collectAsState() }
                 }
             }
         }

@@ -165,8 +165,7 @@ fun MyLocationButton(
             onClick = {
                 when (permissionsState.allPermissionsGranted) {
                     true -> {
-                        checkGPSEnabled(context)
-                        onClick()
+                        checkGPSEnabled(context, onClick)
                     }
                     false -> {
                         locationDialogIsShowing = true
