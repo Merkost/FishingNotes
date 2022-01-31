@@ -1,10 +1,10 @@
-package com.mobileprism.fishing.compose.ui.utils
+package com.mobileprism.fishing.compose.ui.utils.enums
 
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 
-enum class PlacesSortValues(val stringRes: Int) {
+enum class PlacesSortValues(override val stringRes: Int) : StringOperation {
     Default (R.string.default_word),
     TimeAsc (R.string.time_asc),
     TimeDesc (R.string.time_desc),
@@ -24,7 +24,7 @@ enum class PlacesSortValues(val stringRes: Int) {
     }
 }
 
-enum class CatchesSortValues(val stringRes: Int) {
+enum class CatchesSortValues(override val stringRes: Int) : StringOperation {
     Default (R.string.default_word),
     TimeAsc (R.string.time_asc),
     TimeDesc (R.string.time_desc),

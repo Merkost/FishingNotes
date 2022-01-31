@@ -7,6 +7,7 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.Arguments
 import com.mobileprism.fishing.compose.ui.MainDestinations
 import com.mobileprism.fishing.compose.ui.navigate
+import com.mobileprism.fishing.compose.ui.utils.enums.StringOperation
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.weather.Daily
 import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
@@ -47,7 +48,7 @@ data class Point(
     val y: Float
 )
 
-enum class PressureValues(val stringRes: Int) {
+enum class PressureValues(override val stringRes: Int) : StringOperation {
     Pa(R.string.pressure_pa),
     Bar(R.string.pressure_bar),
     mmHg(R.string.pressure_mm),
@@ -81,7 +82,7 @@ enum class PressureValues(val stringRes: Int) {
     }
 }
 
-enum class TemperatureValues(val stringRes: Int) {
+enum class TemperatureValues(override val stringRes: Int) : StringOperation {
     C(R.string.celsius),
     F(R.string.fahrenheit),
     K(R.string.kelvin);
@@ -104,7 +105,7 @@ enum class TemperatureValues(val stringRes: Int) {
 
 }
 
-enum class WindSpeedValues(val stringRes: Int) {
+enum class WindSpeedValues(override val stringRes: Int) : StringOperation {
     metersps(R.string.wind_mps),
     milesph(R.string.wind_mph),
     knots(R.string.wind_knots),

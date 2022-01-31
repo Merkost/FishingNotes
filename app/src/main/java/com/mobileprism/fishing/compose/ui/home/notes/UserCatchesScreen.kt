@@ -25,7 +25,7 @@ import com.mobileprism.fishing.compose.ui.home.UiState
 import com.mobileprism.fishing.compose.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.compose.ui.home.views.NoContentView
 import com.mobileprism.fishing.compose.ui.navigate
-import com.mobileprism.fishing.compose.ui.utils.CatchesSortValues
+import com.mobileprism.fishing.compose.ui.utils.enums.CatchesSortValues
 import com.mobileprism.fishing.domain.UserCatchesViewModel
 import com.mobileprism.fishing.model.datastore.NotesPreferences
 import com.mobileprism.fishing.model.entity.content.UserCatch

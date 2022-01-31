@@ -30,8 +30,8 @@ import com.mobileprism.fishing.compose.ui.home.views.FabMenuItem
 import com.mobileprism.fishing.compose.ui.home.views.FabWithMenu
 import com.mobileprism.fishing.compose.ui.home.views.MultiFabState
 import com.mobileprism.fishing.compose.ui.theme.primaryTextColor
-import com.mobileprism.fishing.compose.ui.utils.CatchesSortValues
-import com.mobileprism.fishing.compose.ui.utils.PlacesSortValues
+import com.mobileprism.fishing.compose.ui.utils.enums.CatchesSortValues
+import com.mobileprism.fishing.compose.ui.utils.enums.PlacesSortValues
 import com.mobileprism.fishing.utils.Constants.modalBottomSheetCorners
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
