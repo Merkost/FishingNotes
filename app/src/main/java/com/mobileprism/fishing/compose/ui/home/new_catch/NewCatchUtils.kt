@@ -4,6 +4,11 @@ import android.net.Uri
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.raw.RawUserCatch
 
+sealed class ReceivedPlaceState() {
+    object NotReceived : ReceivedPlaceState()
+    class Received(val place: UserMapMarker) : ReceivedPlaceState()
+}
+
 sealed class NewCatchPlacesState() {
     object NotReceived : NewCatchPlacesState()
     class Received(val locations: List<UserMapMarker>) : NewCatchPlacesState()

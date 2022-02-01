@@ -34,6 +34,7 @@ import com.mobileprism.fishing.compose.ui.Arguments
 import com.mobileprism.fishing.compose.ui.MainDestinations
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.compose.ui.home.views.*
+import com.mobileprism.fishing.domain.NewCatchMasterViewModel
 import com.mobileprism.fishing.domain.NewCatchViewModel
 import com.mobileprism.fishing.domain.viewstates.ErrorType
 import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
@@ -560,4 +561,9 @@ fun LottieNoPlaces(modifier: Modifier) {
 private fun onAddNewPlaceClick(navController: NavController) {
     val addNewPlace = true
     navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${addNewPlace}")
+}
+
+@Composable
+fun NewCatchPlaceView(viewModel: NewCatchMasterViewModel, navController: NavController) {
+
 }

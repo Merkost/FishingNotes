@@ -1,14 +1,15 @@
 package com.mobileprism.fishing.compose.ui.home.new_catch
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.consumeAllChanges
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -27,6 +28,7 @@ import com.mobileprism.fishing.domain.NewCatchMasterViewModel
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.viewModel
+import org.koin.core.parameter.parametersOf
 
 @ExperimentalPagerApi
 @Composable
@@ -35,6 +37,16 @@ fun NewCatchMasterScreen(
     receivedPlace: UserMapMarker?,
     navController: NavController
 ) {
+    val viewModel: NewCatchMasterViewModel by viewModel {
+        parametersOf(
+            if (receivedPlace != null) {
+                ReceivedPlaceState.Received(receivedPlace)
+            } else {
+                ReceivedPlaceState.NotReceived
+            }
+        )
+    }
+
     val pagerState = rememberPagerState(0)
     val pages = remember {
         listOf(
@@ -63,6 +75,8 @@ fun NewCatchMasterScreen(
                     height = Dimension.fillToConstraints
                     width = Dimension.fillToConstraints
                 },
+                navController = navController,
+                viewModel = viewModel,
                 pagerState = pagerState,
                 pages = pages
             )
@@ -85,18 +99,33 @@ fun NewCatchMasterScreen(
 @Composable
 fun NewCatchPager(
     modifier: Modifier = Modifier,
+    navController: NavController,
     pages: List<NewCatchPage>,
+    viewModel: NewCatchMasterViewModel,
     pagerState: PagerState
 ) {
-
-    val viewModel: NewCatchMasterViewModel by viewModel()
 
     HorizontalPager(
         modifier = modifier,
         count = pages.size,
         state = pagerState
     ) { page ->
-        pages[page].screen(viewModel)
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectDragGestures(
+                        onDrag = { change, _ ->
+                            change.consumeAllChanges()
+                        }
+                    )
+                },
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            pages[page].screen(viewModel, navController)
+        }
+
     }
 }
 
