@@ -132,14 +132,14 @@ fun LoginScreen(navController: NavController) {
                     )
                 )
             ) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(450.dp)
-                        .constrainAs(background) {
-                            top.linkTo(parent.top)
-                        }, color = MaterialTheme.colors.primary
-                ) {}
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(6.5f), color = MaterialTheme.colors.primary
+                    ) {}
+                    Box(modifier = Modifier.weight(4f))
+                }
             }
 
             AnimatedVisibility(
@@ -208,7 +208,7 @@ fun LoginScreen(navController: NavController) {
                     ) {
                         //AppIcon
                         Image(
-                            painterResource(R.mipmap.ic_launcher), stringResource(R.string.icon),
+                            painterResource(R.drawable.ic_launcher), stringResource(R.string.icon),
                             modifier = Modifier
                                 .padding(30.dp)
                                 .size(140.dp)
@@ -241,7 +241,8 @@ fun LoginScreen(navController: NavController) {
                         ) {
                             Row(
                                 modifier = Modifier
-                                    .padding(10.dp).padding(end = 2.dp)
+                                    .padding(10.dp)
+                                    .padding(end = 2.dp)
                                     .animateContentSize(
                                         animationSpec = tween(
                                             durationMillis = 300,

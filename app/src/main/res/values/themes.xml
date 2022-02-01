@@ -24,7 +24,7 @@
 
     <style name="Theme.AppSplash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/white</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/icon_splashscreen</item>
         <item name="android:windowSplashScreenBrandingImage" tools:targetApi="s">@drawable/ic_fish</item>
         <item name="postSplashScreenTheme">@style/Theme.AnimatedSplashScreen</item>
     </style>

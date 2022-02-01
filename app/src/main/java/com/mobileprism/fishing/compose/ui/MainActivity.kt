@@ -93,12 +93,22 @@ class MainActivity : ComponentActivity() {
             }
             setOnExitAnimationListener { splashScreenViewProvider ->
                 // Get icon instance and start a fade out animation
-                splashScreenViewProvider.view
+                if (Build.VERSION.SDK_INT >= 31) {
+                    splashScreenViewProvider.view
+                        .animate()
+                        .setDuration(splashFadeDurationMillis.toLong())
+                        .alpha(0f)
+                        .start()
+                }
+
+                splashScreenViewProvider.iconView
                     .animate()
                     .setDuration(splashFadeDurationMillis.toLong())
                     .alpha(0f)
+                    /*.scaleX(50f)
+                    .scaleY(50f)*/
                     .withEndAction {
-
+                        splashScreenViewProvider.remove()
                         if (Build.VERSION.SDK_INT < 31) {
                             setContent {
                                 FishingNotesTheme(appTheme.value) {
@@ -106,17 +116,6 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         }
-                    }
-                    .start()
-
-                splashScreenViewProvider.iconView
-                    .animate()
-                    .setDuration(splashFadeDurationMillis*2.toLong())
-                    .alpha(0f)
-                    .scaleX(20f)
-                    .scaleY(20f)
-                    .withEndAction {
-                        splashScreenViewProvider.remove()
                     }
                     .start()
 
