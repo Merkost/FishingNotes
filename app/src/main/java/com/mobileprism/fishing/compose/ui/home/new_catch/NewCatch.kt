@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
+import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
@@ -44,6 +45,7 @@ object Constants {
     const val TAG = "NEW_CATCH_LOG"
 }
 
+@ExperimentalPagerApi
 @ExperimentalComposeUiApi
 @ExperimentalPermissionsApi
 @ExperimentalAnimationApi

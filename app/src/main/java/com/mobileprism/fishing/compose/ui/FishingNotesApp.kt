@@ -21,7 +21,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.compose.ui.home.*
 import com.mobileprism.fishing.compose.ui.home.catch_screen.UserCatchScreen
-import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchScreen
+import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchMasterScreen
 import com.mobileprism.fishing.compose.ui.home.place.UserPlaceScreen
 import com.mobileprism.fishing.compose.ui.home.weather.WeatherDaily
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
@@ -116,7 +116,7 @@ private fun NavGraphBuilder.NavGraph(
         val place: UserMapMarker? = it.arguments?.getParcelable(Arguments.PLACE)
         it.arguments?.clear()
 
-        NewCatchScreen(
+        NewCatchMasterScreen(
             {
                 navController.popBackStack(
                     route = MainDestinations.NEW_CATCH_ROUTE,

@@ -267,5 +267,8 @@
     <string name="saving_photos">Сохранение фото</string>
     <string name="place_note_not_deleted">Не удалось удалить заметку!</string>
     <string name="add_new_place">Добавить новое место</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+    <string name="finish">Finish</string>
 
 </resources>
