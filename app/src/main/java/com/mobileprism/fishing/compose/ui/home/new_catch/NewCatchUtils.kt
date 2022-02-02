@@ -44,6 +44,7 @@ interface NewCatchBuilder {
     fun setDescription(description: String)
     fun setFishType(fish: String)
     fun setFishWeight(weight: Double)
+    fun setFishAmount(amount: Int)
     fun setRodType(rod: String)
     fun setBait(bait: String)
     fun setLure(lure: String)
@@ -83,6 +84,10 @@ class NewCatchBuilderImpl() : NewCatchBuilder {
 
     override fun setFishWeight(weight: Double) {
         result.fishWeight = weight
+    }
+
+    override fun setFishAmount(amount: Int) {
+        result.fishAmount = amount
     }
 
     override fun setRodType(rod: String) {

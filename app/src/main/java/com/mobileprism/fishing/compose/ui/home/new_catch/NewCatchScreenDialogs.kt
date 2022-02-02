@@ -69,9 +69,9 @@ fun ErrorDialog(onClose: () -> Unit) {
 
 @Composable
 fun TimePicker(
-    date: MutableState<Long>,
     timeSetState: MutableState<Boolean>,
-    context: Context
+    context: Context,
+    onTimeChange: (Long) -> Unit
 ) {
     val calendar = Calendar.getInstance()
 
@@ -81,7 +81,7 @@ fun TimePicker(
         TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
             calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
             calendar.set(Calendar.MINUTE, minute)
-            date.value = calendar.timeInMillis
+            onTimeChange(calendar.timeInMillis)
         },
         calendar.get(Calendar.HOUR_OF_DAY),
         calendar.get(Calendar.MINUTE), true
@@ -91,9 +91,9 @@ fun TimePicker(
 
 @Composable
 fun DatePicker(
-    date: MutableState<Long>,
     dateSetState: MutableState<Boolean>,
-    context: Context
+    context: Context,
+    onDateChange: (Long) -> Unit
 ) {
     val calendar = Calendar.getInstance()
 
@@ -104,7 +104,7 @@ fun DatePicker(
             calendar.set(Calendar.YEAR, year)
             calendar.set(Calendar.MONTH, monthOfYear)
             calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-            date.value = calendar.timeInMillis
+            onDateChange(calendar.timeInMillis)
         },
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),

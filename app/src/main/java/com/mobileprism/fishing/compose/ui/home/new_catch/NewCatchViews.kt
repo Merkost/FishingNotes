@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.painterResource
@@ -34,7 +35,6 @@ import com.mobileprism.fishing.compose.ui.Arguments
 import com.mobileprism.fishing.compose.ui.MainDestinations
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.compose.ui.home.views.*
-import com.mobileprism.fishing.domain.NewCatchMasterViewModel
 import com.mobileprism.fishing.domain.NewCatchViewModel
 import com.mobileprism.fishing.domain.viewstates.ErrorType
 import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
@@ -470,8 +470,8 @@ fun DateAndTime(
     val timeSetState = remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    if (dateSetState.value) DatePicker(date, dateSetState, context)
-    if (timeSetState.value) TimePicker(date, timeSetState, context)
+//    if (dateSetState.value) DatePicker(date, dateSetState, context)
+//    if (timeSetState.value) TimePicker(date, timeSetState, context)
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         OutlinedTextField(
@@ -563,7 +563,369 @@ private fun onAddNewPlaceClick(navController: NavController) {
     navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${addNewPlace}")
 }
 
+@ExperimentalComposeUiApi
 @Composable
-fun NewCatchPlaceView(viewModel: NewCatchMasterViewModel, navController: NavController) {
+fun NewCatchPlaceSelectView(
+    modifier: Modifier = Modifier,
+    marker: State<UserMapMarker?>,
+    markersList: State<NewCatchPlacesState>,
+    isLocationLocked: Boolean,
+    onNewPlaceSelected: (UserMapMarker) -> Unit,
+    onInputError: (Boolean) -> Unit
+) {
+    val context = LocalContext.current
 
+    val changePlaceError = stringResource(R.string.another_place_in_new_catch)
+
+    var isDropMenuOpen by rememberSaveable { mutableStateOf(false) }
+
+    var textFieldValue by rememberSaveable {
+        mutableStateOf(marker.value?.title ?: "")
+    }
+
+    val suggestions = remember { mutableStateListOf<UserMapMarker>() }
+
+    LaunchedEffect(key1 = markersList.value) {
+        markersList.value.let { state ->
+            when (state) {
+                is NewCatchPlacesState.NotReceived -> {
+                }
+                is NewCatchPlacesState.Received -> {
+                    if (state.locations.isEmpty()) {
+//                        NewCatchNoPlaceDialog(navController)
+                    } else {
+                        suggestions.apply {
+                            clear()
+                            addAll(state.locations)
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    val filteredList by rememberSaveable { mutableStateOf(suggestions.toMutableList()) }
+    if (textFieldValue == "") searchFor("", suggestions, filteredList)
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+
+        if (isLocationLocked) {
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true,
+                singleLine = true,
+                label = { Text(text = stringResource(R.string.place)) },
+                value = marker.value?.title ?: "",
+                onValueChange = { },
+                trailingIcon = {
+                    IconButton(
+                        onClick = { showToast(context, changePlaceError) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = stringResource(R.string.locked),
+                            tint = MaterialTheme.colors.primary,
+                        )
+                    }
+                }
+            )
+        } else {
+            OutlinedTextField(
+                readOnly = false,
+                singleLine = true,
+                value = textFieldValue,
+                onValueChange = {
+                    textFieldValue = it
+                    if (suggestions.isNotEmpty()) {
+                        searchFor(textFieldValue, suggestions, filteredList)
+                        isDropMenuOpen = true
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged {
+                        isDropMenuOpen = it.isFocused
+                    },
+                label = { Text(text = stringResource(R.string.place)) },
+                trailingIcon = {
+                    if (textFieldValue.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                textFieldValue = ""
+                                isDropMenuOpen = true
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = null,
+                                tint = MaterialTheme.colors.primary
+                            )
+                        }
+
+                    } else {
+                        IconButton(
+                            onClick = {
+                                if (!isDropMenuOpen) isDropMenuOpen = true
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = null,
+                                tint = MaterialTheme.colors.primary
+                            )
+                        }
+                    }
+                },
+                isError = !isThatPlaceInList(
+                    textFieldValue,
+                    suggestions
+                ).apply { onInputError(this) }
+            )
+        }
+
+        DropdownMenu(
+            modifier = Modifier
+                .wrapContentWidth()
+                .defaultMinSize(minWidth = 200.dp),
+            expanded = isDropMenuOpen && suggestions.isNotEmpty(),
+            onDismissRequest = {
+                if (isDropMenuOpen) isDropMenuOpen = false
+            },
+            properties = PopupProperties(focusable = false)
+        ) {
+            filteredList.forEach { suggestion ->
+                DropdownMenuItem(
+                    onClick = {
+                        textFieldValue = suggestion.title
+                        onNewPlaceSelected(suggestion)
+                        isDropMenuOpen = false
+                    }) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
+                            contentDescription = null,
+                            tint = Color(suggestion.markerColor)
+                        )
+                        Text(text = suggestion.title)
+                    }
+
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DateAndTimeItem(
+    modifier: Modifier = Modifier,
+    date: State<Long>,
+    onDateChange: (Long) -> Unit,
+) {
+    val viewModel: NewCatchViewModel = getViewModel()
+    val dateSetState = remember { mutableStateOf(false) }
+    val timeSetState = remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    if (dateSetState.value) {
+        DatePicker(dateSetState = dateSetState, context = context, onDateChange = onDateChange)
+    }
+
+    if (timeSetState.value) {
+        TimePicker(timeSetState = timeSetState, context = context, onTimeChange = onDateChange)
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(horizontal = 32.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        OutlinedTextField(
+            value = date.value.toDate(),
+            onValueChange = {},
+            label = { Text(text = stringResource(R.string.date)) },
+            readOnly = true,
+            modifier = Modifier
+                .fillMaxWidth(),
+            trailingIcon = {
+                IconButton(onClick = {
+                    if (viewModel.noErrors.value) dateSetState.value = true
+                    else {
+                        SnackbarManager.showMessage(R.string.choose_place_first)
+                    }
+                }) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_baseline_event_24),
+                        tint = MaterialTheme.colors.primary,
+                        contentDescription = stringResource(R.string.date)
+                    )
+                }
+
+            })
+        OutlinedTextField(
+            value = date.value.toTime(),
+            onValueChange = {},
+            label = { Text(text = stringResource(R.string.time)) },
+            readOnly = true,
+            modifier = Modifier
+                .fillMaxWidth(),
+            trailingIcon = {
+                IconButton(onClick = {
+                    if (viewModel.noErrors.value) timeSetState.value = true
+                    else {
+                        SnackbarManager.showMessage(R.string.choose_place_first)
+                    }
+                }) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_baseline_access_time_24),
+                        tint = MaterialTheme.colors.primary,
+                        contentDescription = stringResource(R.string.time)
+                    )
+                }
+
+            })
+    }
+}
+
+@Composable
+fun FishAmountAndWeightViewItem(
+    modifier: Modifier = Modifier,
+    amountState: State<String>,
+    weightState: State<String>,
+    onAmountChange: (String) -> Unit,
+    onWeightChange: (String) -> Unit
+) {
+    Row(modifier = modifier) {
+        Column(Modifier.weight(1F)) {
+            OutlinedTextField(
+                value = amountState.value,
+                onValueChange = {
+                    if (it.isEmpty()) onAmountChange(it)
+                    else {
+                        when (it.toIntOrNull()) {
+                            null -> onAmountChange(amountState.value) //old value
+                            else -> onAmountChange(it)   //new value
+                        }
+                    }
+                },
+                isError = amountState.value.isEmpty(),
+                label = { Text(text = stringResource(R.string.amount)) },
+                trailingIcon = { Text(stringResource(R.string.pc)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                )
+            )
+            Spacer(modifier = Modifier.size(6.dp))
+            Row(Modifier.fillMaxWidth()) {
+                OutlinedButton(
+                    onClick = {
+                        if (amountState.value.toInt() >= 1 && amountState.value.isNotBlank())
+                            onAmountChange(((amountState.value.toInt() - 1).toString()))
+                    },
+                    Modifier
+                        .weight(1F)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_minus),
+                        tint = MaterialTheme.colors.primary,
+                        contentDescription = ""
+                    )
+                }
+                Spacer(modifier = Modifier.size(6.dp))
+                OutlinedButton(
+                    onClick = {
+                        if (amountState.value.isEmpty()) onAmountChange(1.toString())
+                        else onAmountChange((amountState.value.toInt() + 1).toString())
+                    },
+                    Modifier
+                        .weight(1F)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_plus),
+                        tint = MaterialTheme.colors.primary,
+                        contentDescription = ""
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.size(6.dp))
+        Column(Modifier.weight(1F)) {
+            OutlinedTextField(
+                value = weightState.value,
+                onValueChange = {
+                    if (it.isEmpty()) onWeightChange(it)
+                    else {
+                        when (it.toDoubleOrNull()) {
+                            null -> onWeightChange(weightState.value) //old value
+                            else -> onWeightChange(it)   //new value
+                        }
+                    }
+                },
+                label = { Text(text = stringResource(R.string.weight)) },
+                trailingIcon = {
+                    Text(stringResource(R.string.kg))
+                },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                )
+            )
+            Spacer(modifier = Modifier.size(6.dp))
+            Row(Modifier.fillMaxWidth()) {
+                OutlinedButton(
+                    onClick = {
+                        if (weightState.value.toDouble() >= 0.1 && weightState.value.isNotBlank())
+                            onWeightChange(
+                                (weightState.value.toDouble() - 0.1).roundTo(1).toString()
+                            )
+                    },
+                    Modifier
+                        .weight(1F)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_minus),
+                        tint = MaterialTheme.colors.primary,
+                        contentDescription = ""
+                    )
+                }
+                Spacer(modifier = Modifier.size(6.dp))
+                OutlinedButton(
+                    onClick = {
+                        if (weightState.value.isEmpty()) onWeightChange(
+                            0.1f.roundTo(1).toString()
+                        )
+                        else onWeightChange(
+                            (weightState.value.toDouble() + 0.1).roundTo(1).toString()
+                        )
+                    },
+                    Modifier
+                        .weight(1F)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_plus),
+                        tint = MaterialTheme.colors.primary,
+                        contentDescription = ""
+                    )
+                }
+            }
+        }
+    }
 }

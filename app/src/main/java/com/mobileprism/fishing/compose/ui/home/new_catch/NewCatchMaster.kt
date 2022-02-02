@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.compose.ui.home.new_catch
 
+import android.widget.Toast
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Scaffold
@@ -7,9 +8,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -30,6 +33,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.viewModel
 import org.koin.core.parameter.parametersOf
 
+@ExperimentalComposeUiApi
 @ExperimentalPagerApi
 @Composable
 fun NewCatchMasterScreen(
@@ -46,6 +50,9 @@ fun NewCatchMasterScreen(
             }
         )
     }
+
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     val pagerState = rememberPagerState(0)
     val pages = remember {
@@ -89,6 +96,36 @@ fun NewCatchMasterScreen(
                 },
                 pagerState = pagerState,
                 onFinishClick = { },
+                onNextClick = {
+                    coroutineScope.launch {
+                        when (pagerState.currentPage) {
+                            0 -> {
+                                if (viewModel.currentPlace.value != null && viewModel.isPlaceInputCorrect.value) {
+                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Please select place",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                            1 -> {
+                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                            }
+                            else -> {
+                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                            }
+                        }
+
+
+                    }
+                },
+                onPreviousClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                    }
+                },
                 onCloseClick = upPress
             )
         }
@@ -135,9 +172,10 @@ fun NewCatchButtons(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
     onFinishClick: () -> Unit,
+    onNextClick: () -> Unit,
+    onPreviousClick: () -> Unit,
     onCloseClick: () -> Unit
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val isLastPage = remember(pagerState.currentPage) {
         pagerState.currentPage == (pagerState.pageCount - 1)
     }
@@ -165,13 +203,12 @@ fun NewCatchButtons(
                 stringResource(R.string.next)
             },
             onClick = {
-                coroutineScope.launch {
-                    if (isLastPage) {
-                        onFinishClick()
-                    } else {
-                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                    }
+                if (isLastPage) {
+                    onFinishClick()
+                } else {
+                    onNextClick()
                 }
+
             }
         )
 
@@ -183,11 +220,7 @@ fun NewCatchButtons(
             },
             enabled = !isFirstPage,
             text = stringResource(R.string.previous),
-            onClick = {
-                coroutineScope.launch {
-                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                }
-            }
+            onClick = { onPreviousClick() }
         )
 
         DefaultButton(
