@@ -181,11 +181,17 @@ fun Places(viewModel: NewCatchViewModel, isNull: Boolean, navController: NavCont
 }
 
 @Composable
-fun FishSpecies(name: MutableState<String>) {
-    Column {
+fun FishSpecies(
+    modifier: Modifier = Modifier,
+    name: State<String>,
+    onNameChange: (String) -> Unit
+) {
+    Column(
+        modifier = modifier
+    ) {
         OutlinedTextField(
             value = name.value,
-            onValueChange = { name.value = it },
+            onValueChange = { onNameChange(it) },
             label = { Text(stringResource(R.string.fish_species)) },
             modifier = Modifier.fillMaxWidth(),
             isError = name.value.isBlank(),
@@ -236,7 +242,7 @@ fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<Str
             text = stringResource(id = R.string.fish_catch)
         )
 
-        FishSpecies(viewModel.fishType)
+//        FishSpecies(viewModel.fishType)
 
         SimpleOutlinedTextField(
             textState = viewModel.description,
@@ -799,25 +805,25 @@ fun DateAndTimeItem(
 @Composable
 fun FishAmountAndWeightViewItem(
     modifier: Modifier = Modifier,
-    amountState: State<String>,
-    weightState: State<String>,
-    onAmountChange: (String) -> Unit,
-    onWeightChange: (String) -> Unit
+    amountState: State<Int>,
+    weightState: State<Double>,
+    onAmountChange: (Int) -> Unit,
+    onWeightChange: (Double) -> Unit
 ) {
     Row(modifier = modifier) {
         Column(Modifier.weight(1F)) {
             OutlinedTextField(
-                value = amountState.value,
+                value = amountState.value.toString(),
                 onValueChange = {
-                    if (it.isEmpty()) onAmountChange(it)
+                    if (it.isEmpty()) onAmountChange(it.toInt())
                     else {
                         when (it.toIntOrNull()) {
                             null -> onAmountChange(amountState.value) //old value
-                            else -> onAmountChange(it)   //new value
+                            else -> onAmountChange(it.toInt())   //new value
                         }
                     }
                 },
-                isError = amountState.value.isEmpty(),
+                isError = amountState.value.toString().isEmpty(),
                 label = { Text(text = stringResource(R.string.amount)) },
                 trailingIcon = { Text(stringResource(R.string.pc)) },
                 modifier = Modifier.fillMaxWidth(),
@@ -831,8 +837,10 @@ fun FishAmountAndWeightViewItem(
             Row(Modifier.fillMaxWidth()) {
                 OutlinedButton(
                     onClick = {
-                        if (amountState.value.toInt() >= 1 && amountState.value.isNotBlank())
-                            onAmountChange(((amountState.value.toInt() - 1).toString()))
+                        if (amountState.value >= 1 && amountState.value.toString().isNotBlank()) {
+                            onAmountChange(amountState.value - 1)
+                        }
+
                     },
                     Modifier
                         .weight(1F)
@@ -847,8 +855,8 @@ fun FishAmountAndWeightViewItem(
                 Spacer(modifier = Modifier.size(6.dp))
                 OutlinedButton(
                     onClick = {
-                        if (amountState.value.isEmpty()) onAmountChange(1.toString())
-                        else onAmountChange((amountState.value.toInt() + 1).toString())
+                        if (amountState.value.toString().isEmpty()) onAmountChange(1)
+                        else onAmountChange((amountState.value + 1))
                     },
                     Modifier
                         .weight(1F)
@@ -865,13 +873,13 @@ fun FishAmountAndWeightViewItem(
         Spacer(modifier = Modifier.size(6.dp))
         Column(Modifier.weight(1F)) {
             OutlinedTextField(
-                value = weightState.value,
+                value = weightState.value.toString(),
                 onValueChange = {
-                    if (it.isEmpty()) onWeightChange(it)
+                    if (it.isEmpty()) onWeightChange(it.toDouble())
                     else {
                         when (it.toDoubleOrNull()) {
                             null -> onWeightChange(weightState.value) //old value
-                            else -> onWeightChange(it)   //new value
+                            else -> onWeightChange(it.toDouble())   //new value
                         }
                     }
                 },
@@ -890,10 +898,9 @@ fun FishAmountAndWeightViewItem(
             Row(Modifier.fillMaxWidth()) {
                 OutlinedButton(
                     onClick = {
-                        if (weightState.value.toDouble() >= 0.1 && weightState.value.isNotBlank())
-                            onWeightChange(
-                                (weightState.value.toDouble() - 0.1).roundTo(1).toString()
-                            )
+                        if (weightState.value >= 0.1 && weightState.value.toString().isNotBlank()) {
+                            onWeightChange((weightState.value - 0.1).roundTo(1))
+                        }
                     },
                     Modifier
                         .weight(1F)
@@ -908,11 +915,11 @@ fun FishAmountAndWeightViewItem(
                 Spacer(modifier = Modifier.size(6.dp))
                 OutlinedButton(
                     onClick = {
-                        if (weightState.value.isEmpty()) onWeightChange(
-                            0.1f.roundTo(1).toString()
+                        if (weightState.value.toString().isEmpty()) onWeightChange(
+                            0.1.roundTo(1)
                         )
                         else onWeightChange(
-                            (weightState.value.toDouble() + 0.1).roundTo(1).toString()
+                            (weightState.value + 0.1).roundTo(1)
                         )
                     },
                     Modifier

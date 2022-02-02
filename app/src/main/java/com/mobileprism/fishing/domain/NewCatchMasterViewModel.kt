@@ -25,11 +25,6 @@ class NewCatchMasterViewModel(
         getAllUserMarkersList()
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        calendar.timeInMillis = Date().time
-    }
-
     private val calendar = Calendar.getInstance()
 
     private val builder: NewCatchBuilder = NewCatchBuilderImpl()
@@ -38,11 +33,7 @@ class NewCatchMasterViewModel(
     val isPlaceInputCorrect = MutableStateFlow(true)
 
     val currentPlace = MutableStateFlow(
-        if (placeState is ReceivedPlaceState.Received) {
-            placeState.place
-        } else {
-            null
-        }
+        if (placeState is ReceivedPlaceState.Received) placeState.place else null
     )
 
     val markersListState = MutableStateFlow<NewCatchPlacesState>(NewCatchPlacesState.NotReceived)
@@ -50,6 +41,7 @@ class NewCatchMasterViewModel(
     val fishType = MutableStateFlow("")
     val fishAmount = MutableStateFlow(0)
     val fishWeight = MutableStateFlow(0.0)
+    val description = MutableStateFlow("")
 
 
     fun setSelectedPlace(place: UserMapMarker) {
@@ -82,6 +74,11 @@ class NewCatchMasterViewModel(
         builder.setFishWeight(weight)
     }
 
+    fun setNote(note: String) {
+        description.value = note
+        builder.setDescription(note)
+    }
+
     private fun getAllUserMarkersList() {
         viewModelScope.launch {
             markersRepository.getAllUserMarkersList().collect { markers ->
@@ -89,6 +86,11 @@ class NewCatchMasterViewModel(
                     NewCatchPlacesState.Received(markers as List<UserMapMarker>)
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        calendar.timeInMillis = Date().time
     }
 
 }
