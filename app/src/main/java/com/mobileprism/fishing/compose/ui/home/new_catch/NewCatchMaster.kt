@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.compose.ui.home.new_catch
 
-import android.widget.Toast
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Scaffold
@@ -29,6 +28,7 @@ import com.mobileprism.fishing.compose.ui.home.views.DefaultButtonFilled
 import com.mobileprism.fishing.compose.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.domain.NewCatchMasterViewModel
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
+import com.mobileprism.fishing.utils.showToast
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.viewModel
 import org.koin.core.parameter.parametersOf
@@ -103,15 +103,16 @@ fun NewCatchMasterScreen(
                                 if (viewModel.currentPlace.value != null && viewModel.isPlaceInputCorrect.value) {
                                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
                                 } else {
-                                    Toast.makeText(
-                                        context,
-                                        "Please select place",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    showToast(context, "Please select place")
                                 }
                             }
                             1 -> {
-                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                if (viewModel.fishType.value.isNotBlank()) {
+                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                } else {
+                                    showToast(context, "Please enter fish species")
+                                }
+
                             }
                             else -> {
                                 pagerState.animateScrollToPage(pagerState.currentPage + 1)

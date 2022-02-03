@@ -42,7 +42,9 @@ class NewCatchMasterViewModel(
     val fishAmount = MutableStateFlow(0)
     val fishWeight = MutableStateFlow(0.0)
     val description = MutableStateFlow("")
-
+    val rod = MutableStateFlow("")
+    val bait = MutableStateFlow("")
+    val lure = MutableStateFlow("")
 
     fun setSelectedPlace(place: UserMapMarker) {
         currentPlace.value = place
@@ -77,6 +79,21 @@ class NewCatchMasterViewModel(
     fun setNote(note: String) {
         description.value = note
         builder.setDescription(note)
+    }
+
+    fun setRod(rodValue: String) {
+        rod.value = rodValue
+        builder.setRodType(rodValue)
+    }
+
+    fun setBait(baitValue: String) {
+        bait.value = baitValue
+        builder.setBait(baitValue)
+    }
+
+    fun setLure(lureValue: String) {
+        lure.value = lureValue
+        builder.setLure(lureValue)
     }
 
     private fun getAllUserMarkersList() {

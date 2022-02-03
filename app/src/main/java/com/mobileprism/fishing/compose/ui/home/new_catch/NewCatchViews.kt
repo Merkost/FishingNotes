@@ -608,7 +608,6 @@ fun NewCatchPlaceSelectView(
                 }
             }
         }
-
     }
 
     val filteredList by rememberSaveable { mutableStateOf(suggestions.toMutableList()) }
@@ -934,5 +933,44 @@ fun FishAmountAndWeightViewItem(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun WayOfFishingView(
+    modifier: Modifier = Modifier,
+    rodState: State<String>,
+    biteState: State<String>,
+    lureState: State<String>,
+    onRodChange: (String) -> Unit,
+    onBiteChange: (String) -> Unit,
+    onLureChange: (String) -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = rodState.value,
+            onValueChange = { onRodChange(it) },
+            label = { Text(text = stringResource(R.string.fish_rod)) }
+        )
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = biteState.value,
+            onValueChange = { onBiteChange(it) },
+            label = { Text(text = stringResource(R.string.bait)) }
+        )
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = lureState.value,
+            onValueChange = { onLureChange(it) },
+            label = { Text(text = stringResource(R.string.lure)) }
+        )
     }
 }

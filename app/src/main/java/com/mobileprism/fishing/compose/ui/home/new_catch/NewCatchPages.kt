@@ -53,8 +53,7 @@ fun NewCatchPlace(viewModel: NewCatchMasterViewModel, navController: NavControll
         SubtitleWithIcon(
             modifier = Modifier.constrainAs(titleLocation) {
                 top.linkTo(parent.top, 16.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
+                absoluteLeft.linkTo(parent.absoluteLeft, 32.dp)
             },
             icon = R.drawable.ic_baseline_location_on_24,
             text = stringResource(R.string.location)
@@ -89,8 +88,7 @@ fun NewCatchPlace(viewModel: NewCatchMasterViewModel, navController: NavControll
         SubtitleWithIcon(
             modifier = Modifier.constrainAs(titleDate) {
                 top.linkTo(button.bottom, 48.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
+                absoluteLeft.linkTo(parent.absoluteLeft, 32.dp)
             },
             icon = R.drawable.ic_baseline_access_time_24,
             text = "Date and time"
@@ -121,7 +119,6 @@ fun NewCatchFishInfo(viewModel: NewCatchMasterViewModel, navController: NavContr
             modifier = Modifier.constrainAs(subtitleFish) {
                 top.linkTo(parent.top, 16.dp)
                 absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
             },
             icon = R.drawable.ic_fish,
             text = stringResource(R.string.fish_catch)
@@ -153,7 +150,6 @@ fun NewCatchFishInfo(viewModel: NewCatchMasterViewModel, navController: NavContr
             modifier = Modifier.constrainAs(subtitleNote) {
                 top.linkTo(amountAndWeight.bottom, 48.dp)
                 absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
             },
             icon = R.drawable.ic_baseline_edit_note_24,
             text = stringResource(id = R.string.note)
@@ -178,7 +174,36 @@ fun NewCatchFishInfo(viewModel: NewCatchMasterViewModel, navController: NavContr
 
 @Composable
 fun NewCatchWayOfFishing(viewModel: NewCatchMasterViewModel, navController: NavController) {
-    Text(text = "WayOfFishing")
+    ConstraintLayout(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 32.dp)
+    ) {
+        val (subtitle, fields) = createRefs()
+        SubtitleWithIcon(
+            modifier = Modifier.constrainAs(subtitle) {
+                top.linkTo(parent.top, 16.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+            },
+            icon = R.drawable.ic_fishing_rod,
+            text = stringResource(R.string.way_of_fishing)
+        )
+
+        WayOfFishingView(
+            modifier = Modifier.constrainAs(fields) {
+                top.linkTo(subtitle.bottom, 16.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            rodState = viewModel.rod.collectAsState(),
+            biteState = viewModel.bait.collectAsState(),
+            lureState = viewModel.lure.collectAsState(),
+            onRodChange = { viewModel.setRod(it) },
+            onBiteChange = { viewModel.setBait(it) },
+            onLureChange = { viewModel.setLure(it) }
+        )
+
+    }
 }
 
 @Composable
