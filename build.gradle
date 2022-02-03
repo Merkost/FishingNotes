@@ -7,6 +7,7 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        jcenter()
         maven {
             url 'https://storage.googleapis.com/r8-releases/raw'
         }
@@ -18,11 +19,11 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$navigation_version"
         classpath 'com.google.gms:google-services:4.3.10'
-        
+
         classpath "com.github.ben-manes:gradle-versions-plugin:0.40.0"
 
-        // Add the Crashlytics Gradle plugin
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.8.1'
+        classpath 'com.google.firebase:perf-plugin:1.4.1'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files

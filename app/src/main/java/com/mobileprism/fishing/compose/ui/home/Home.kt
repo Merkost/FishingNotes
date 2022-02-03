@@ -82,7 +82,7 @@ fun NavGraphBuilder.addHomeGraph(
         //from.arguments?.getBoolean(Arguments.MAP_NEW_PLACE)!!
         MapScreen(modifier, upPress = upPress, navController, addPlace, place)
     }
-    composable(HomeSections.NOTES.route) { from ->
+    composable(HomeSections.NOTES.route) {
         Notes(modifier, navController, upPress)
     }
     composable(HomeSections.WEATHER.route) { from ->
