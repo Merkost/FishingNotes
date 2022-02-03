@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.compose.ui.home.profile
 
+import android.os.Bundle
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -26,6 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import com.airbnb.lottie.compose.*
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.MainDestinations
 import com.mobileprism.fishing.compose.ui.home.notes.CatchItemView
@@ -42,6 +46,7 @@ import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalCoilApi
@@ -89,7 +94,8 @@ fun UserImage(user: User?, imgSize: Dp, modifier: Modifier = Modifier) {
 
 @OptIn(InternalCoroutinesApi::class)
 @Composable
-fun ProfileAppBar(navController: NavController, viewModel: UserViewModel) {
+fun ProfileAppBar(navController: NavController) {
+
     val dialogOnLogout = rememberSaveable { mutableStateOf(false) }
     DefaultAppBar(
         title = stringResource(R.string.profile),
@@ -100,7 +106,10 @@ fun ProfileAppBar(navController: NavController, viewModel: UserViewModel) {
                     contentDescription = stringResource(R.string.logout)
                 )
             }
-            IconButton(onClick = { navController.navigate(MainDestinations.SETTINGS) }) {
+            IconButton(onClick = {
+                Firebase.analytics.logEvent("logout", null)
+                navController.navigate(MainDestinations.SETTINGS)
+            }) {
                 Icon(Icons.Default.Settings, stringResource(R.string.settings))
             }
         },
