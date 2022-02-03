@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.views.DefaultAppBar
 import com.mobileprism.fishing.compose.ui.home.views.MyClickableCard
@@ -36,7 +38,7 @@ fun AboutApp(upPress: () -> Unit) {
     val currentVersion = context.packageManager.getPackageInfo(context.packageName, 0).versionName
 
     var isRotating by remember { mutableStateOf(0) }
-    val animationModifier = Modifier.graphicsLayer (
+    val animationModifier = Modifier.graphicsLayer(
         /*rotationY = animateFloatAsState(
             if (isRotating % 3 == 0) 360f else 0f, tween(800)
         ).value,*/
@@ -65,7 +67,8 @@ fun AboutApp(upPress: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Image(
-                    painter = painterResource(R.mipmap.ic_launcher), contentDescription = "appIcon",
+                    painter = painterResource(R.drawable.ic_launcher),
+                    contentDescription = "appIcon",
                     modifier = Modifier.size(150.dp)
                 )
                 PrimaryText(text = "Fishing Notes")
@@ -94,6 +97,15 @@ fun AboutApp(upPress: () -> Unit) {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+
+                //test crash
+                if (BuildConfig.DEBUG) {
+                    Button(onClick = {
+                        throw RuntimeException("Test Crash") // Force a crash
+                    }) {
+                        Text(text = "Test Crash")
+                    }
+                }
 
 
                 MyClickableCard(

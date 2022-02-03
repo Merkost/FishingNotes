@@ -133,11 +133,13 @@ object Libs {
         private const val version = "20.0.2"
 
         // Import the Firebase BoM
-        const val platform = "com.google.firebase:firebase-bom:29.0.3"
+        const val platform = "com.google.firebase:firebase-bom:29.0.4"
 
         // When using the BoM, you don't specify versions in Firebase library dependencies
         const val auth = "com.google.firebase:firebase-auth-ktx"
         const val analytics = "com.google.firebase:firebase-analytics-ktx"
+        const val crashlytics = "com.google.firebase:firebase-crashlytics-ktx"
+        const val performance = "com.google.firebase:firebase-perf-ktx"
         const val storage = "com.google.firebase:firebase-storage-ktx"
         const val core = "com.google.firebase:firebase-core"
 

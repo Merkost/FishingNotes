@@ -271,25 +271,14 @@ fun LoginScreen(navController: NavController) {
                                         color = MaterialTheme.colors.primary
                                     )
                                 }
-                                //Text("Sign in with Google", style = Typography.body1)
                             }
                         }
-
-                        /*GoogleButton(
-                            text = "Sign In with Google",
-                            loadingText = "Signing In...",
-                            onClicked = {activity.startGoogleLogin()}
-                        )*/
-
-                        //Space
                         Spacer(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(30.dp)
                         )
                     }
-
-
                 }
             }
             LaunchedEffect(this) {

@@ -4,15 +4,15 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.joesemper.fishing",
+  "applicationId": "com.mobileprism.fishing",
   "variantName": "release",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 9,
-      "versionName": "1.0.7",
+      "versionCode": 1,
+      "versionName": "1.0.0",
       "outputFile": "app-release.apk"
     }
   ],

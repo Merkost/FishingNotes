@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
@@ -240,7 +241,8 @@ class MainActivity : ComponentActivity() {
         vb.warning.setOnClickListener {
             Toast.makeText(this, error.message, Toast.LENGTH_LONG).show()
         }*/
-        SnackbarManager.showMessage(R.string.google_login_failed)
+        //SnackbarManager.showMessage(R.string.google_login_failed)
+        Toast.makeText(this, error.stackTrace.toString(), Toast.LENGTH_LONG).show()
         logger.log(error.message)
     }
 
