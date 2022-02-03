@@ -17,11 +17,15 @@ object Libs {
         const val pagerindicators = "com.google.accompanist:accompanist-pager-indicators:$version"
         const val permissions = "com.google.accompanist:accompanist-permissions:$version"
         const val appCompatTheme = "com.google.accompanist:accompanist-appcompat-theme:$version"
+        const val placeholder = "com.google.accompanist:accompanist-placeholder-material:$version"
     }
 
     object GoogleMaps {
         const val maps = "com.google.android.libraries.maps:maps:3.1.0-beta"
         const val mapsKtx = "com.google.maps.android:maps-v3-ktx:3.3.0"
+
+        //Google maps distance between two latlng
+        const val mapUtils = "com.google.maps.android:android-maps-utils:0.4.4"
     }
 
     object PlayServices {
@@ -146,6 +150,8 @@ object Libs {
         const val firestore = "com.google.firebase:firebase-firestore-ktx:24.0.0"
         const val authUi = "com.firebaseui:firebase-ui-auth:8.0.0"
 
+        //Firebase Coroutine dependency:
+        const val coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.0"
 
     }
 
