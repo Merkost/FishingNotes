@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.domain
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchBuilder
@@ -7,11 +8,14 @@ import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchBuilderImpl
 import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchPlacesState
 import com.mobileprism.fishing.compose.ui.home.new_catch.ReceivedPlaceState
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
+import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
+import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
+import com.mobileprism.fishing.utils.time.toDate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -28,22 +32,27 @@ class NewCatchMasterViewModel(
         getAllUserMarkersList()
     }
 
-    private val calendar = Calendar.getInstance()
-
     private val builder: NewCatchBuilder = NewCatchBuilderImpl()
 
     val isLocationLocked = MutableStateFlow(placeState is ReceivedPlaceState.Received)
     val isPlaceInputCorrect = MutableStateFlow(true)
+    val isWeatherInputCorrect = mutableStateListOf<Boolean>()
 
     val currentPlace = MutableStateFlow(
         if (placeState is ReceivedPlaceState.Received) placeState.place else null
     )
 
+    private val loadedWeather = MutableStateFlow(WeatherForecast())
+
     private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
     val uiState = _uiState.asStateFlow()
 
+    private val _weatherState =
+        MutableStateFlow<RetrofitWrapper<WeatherForecast>>(RetrofitWrapper.Loading())
+    val weatherState = _weatherState.asStateFlow()
+
     val markersListState = MutableStateFlow<NewCatchPlacesState>(NewCatchPlacesState.NotReceived)
-    val catchDate = MutableStateFlow(calendar.timeInMillis)
+    val catchDate = MutableStateFlow(Date().time)
     val fishType = MutableStateFlow("")
     val fishAmount = MutableStateFlow(0)
     val fishWeight = MutableStateFlow(0.0)
@@ -51,6 +60,14 @@ class NewCatchMasterViewModel(
     val rod = MutableStateFlow("")
     val bait = MutableStateFlow("")
     val lure = MutableStateFlow("")
+    val weatherPrimary = MutableStateFlow("")
+    val weatherIconId = MutableStateFlow("01")
+    val weatherTemperature = MutableStateFlow(0.0f)
+    val weatherPressure = MutableStateFlow(0)
+    val weatherWindSpeed = MutableStateFlow(0.0f)
+    val weatherWindDeg = MutableStateFlow(0)
+    val weatherMoonPhase = MutableStateFlow(0.0f)
+
 
     fun setSelectedPlace(place: UserMapMarker) {
         currentPlace.value = place
@@ -102,14 +119,122 @@ class NewCatchMasterViewModel(
         builder.setLure(lureValue)
     }
 
-    private fun getAllUserMarkersList() {
-        viewModelScope.launch {
-            markersRepository.getAllUserMarkersList().collect { markers ->
-                markersListState.value =
-                    NewCatchPlacesState.Received(markers as List<UserMapMarker>)
+    fun setWeatherPrimary(weather: String) {
+        weatherPrimary.value = weather
+        builder.setWeatherPrimary(weather)
+    }
+
+    fun setWeatherTemperature(temperature: Int) {
+        weatherTemperature.value = temperature.toFloat()
+        builder.setWeatherTemperature(temperature.toFloat())
+    }
+
+    fun setWeatherIconId(icon: String) {
+        weatherIconId.value = icon
+        builder.setWeatherIcon(icon)
+    }
+
+    fun setWeatherPressure(pressure: Int) {
+        weatherPressure.value = pressure
+        builder.setWeatherPressure(pressure)
+    }
+
+    fun setWeatherWindSpeed(windSpeed: Float) {
+        weatherWindSpeed.value = windSpeed
+        builder.setWeatherWindSpeed(windSpeed)
+    }
+
+    fun setWeatherWindDeg(windDeg: Int) {
+        weatherWindDeg.value = windDeg
+        builder.setWeatherWindDegrees(windDeg)
+    }
+
+    fun setWeatherMoonPhase(moonPhase: Float) {
+        weatherMoonPhase.value = moonPhase
+        builder.setWeatherMoonPhase(moonPhase)
+    }
+
+    fun setWeatherIsError(isError: Boolean) {
+        if (isError) {
+            isWeatherInputCorrect.add(isError)
+        } else {
+            if (isWeatherInputCorrect.isNotEmpty()) {
+                isWeatherInputCorrect.removeLast()
             }
         }
     }
+
+    fun loadWeather() {
+        if (catchDate.value.toDate() != Date().time.toDate()) {
+            getHistoricalWeather()
+        } else {
+            getWeatherForecast()
+        }
+    }
+
+    private fun getWeatherForecast() {
+        viewModelScope.launch {
+            currentPlace.value?.run {
+                _weatherState.value = RetrofitWrapper.Loading()
+
+                weatherRepository.getWeather(latitude, longitude).collect { result ->
+
+                    when (result) {
+                        is RetrofitWrapper.Success<WeatherForecast> -> {
+                            loadedWeather.value = result.data
+                            _weatherState.value = RetrofitWrapper.Success(result.data)
+                            updateWeatherState()
+                        }
+                        is RetrofitWrapper.Loading -> {
+                            _weatherState.value = RetrofitWrapper.Loading()
+                        }
+                        is RetrofitWrapper.Error -> {
+                            _weatherState.value = RetrofitWrapper.Error(result.errorType)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getHistoricalWeather() {
+        viewModelScope.launch {
+            currentPlace.value?.run {
+                _weatherState.value = RetrofitWrapper.Loading()
+                weatherRepository
+                    .getHistoricalWeather(latitude, longitude, (catchDate.value / 1000))
+                    .collect { result ->
+                        when (result) {
+                            is RetrofitWrapper.Success<WeatherForecast> -> {
+                                loadedWeather.value = result.data
+                                _weatherState.value = RetrofitWrapper.Success(result.data)
+                                updateWeatherState()
+                            }
+                            is RetrofitWrapper.Loading -> {
+                                _weatherState.value = RetrofitWrapper.Loading()
+                            }
+                            is RetrofitWrapper.Error -> {
+                                _weatherState.value = RetrofitWrapper.Error(result.errorType)
+                            }
+                        }
+                    }
+            }
+        }
+    }
+
+    private fun updateWeatherState() {
+        loadedWeather.value.run {
+            setWeatherPrimary(hourly.first().weather.first().description)
+            setWeatherIconId(hourly.first().weather.first().icon)
+            setWeatherTemperature(hourly.first().temperature.toInt())
+            setWeatherPressure(hourly.first().pressure)
+            setWeatherWindSpeed(hourly.first().windSpeed)
+            setWeatherWindDeg(hourly.first().windDeg)
+            setWeatherMoonPhase(daily.first().moonPhase)
+        }
+
+    }
+
 
     fun saveNewCatch() {
         _uiState.value = BaseViewState.Loading(0)
@@ -134,9 +259,18 @@ class NewCatchMasterViewModel(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        calendar.timeInMillis = Date().time
+    private fun getAllUserMarkersList() {
+        viewModelScope.launch {
+            markersRepository.getAllUserMarkersList().collect { markers ->
+                markersListState.value =
+                    NewCatchPlacesState.Received(markers as List<UserMapMarker>)
+            }
+        }
     }
+
+//    override fun onCleared() {
+//        super.onCleared()
+//        calendar.timeInMillis = Date().time
+//    }
 
 }

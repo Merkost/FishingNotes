@@ -113,6 +113,7 @@ fun NewCatchMasterScreen(
                             0 -> {
                                 if (viewModel.currentPlace.value != null && viewModel.isPlaceInputCorrect.value) {
                                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                    viewModel.loadWeather()
                                 } else {
                                     showToast(context, "Please select place")
                                 }
@@ -124,6 +125,11 @@ fun NewCatchMasterScreen(
                                     showToast(context, "Please enter fish species")
                                 }
 
+                            }
+                            3 -> {
+                                if (viewModel.isWeatherInputCorrect.isEmpty()) {
+                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                }
                             }
                             else -> {
                                 pagerState.animateScrollToPage(pagerState.currentPage + 1)

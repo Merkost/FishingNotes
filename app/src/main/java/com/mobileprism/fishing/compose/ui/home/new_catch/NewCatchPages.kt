@@ -35,6 +35,7 @@ sealed class NewCatchPage(var screen: NewCatchScreenItem) {
         NewCatchWayOfFishing(viewModel, navController)
     })
 
+    @ExperimentalComposeUiApi
     class NewCatchWeatherPage() : NewCatchPage(screen = { viewModel, navController ->
         NewCatchWeather(viewModel, navController)
     })
@@ -180,6 +181,7 @@ fun NewCatchWayOfFishing(viewModel: NewCatchMasterViewModel, navController: NavC
             .padding(horizontal = 32.dp)
     ) {
         val (subtitle, fields) = createRefs()
+
         SubtitleWithIcon(
             modifier = Modifier.constrainAs(subtitle) {
                 top.linkTo(parent.top, 16.dp)
@@ -206,9 +208,81 @@ fun NewCatchWayOfFishing(viewModel: NewCatchMasterViewModel, navController: NavC
     }
 }
 
+@ExperimentalComposeUiApi
 @Composable
 fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavController) {
-    Text(text = "Weather")
+    ConstraintLayout(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 32.dp)
+    ) {
+        val (subtitle, description, temp, press, wind, moon, refreshButton) = createRefs()
+
+        SubtitleWithIcon(
+            modifier = Modifier.constrainAs(subtitle) {
+                top.linkTo(parent.top, 16.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+            },
+            icon = R.drawable.weather_cloudy,
+            text = stringResource(R.string.weather)
+        )
+
+        NewCatchWeatherPrimary(
+            modifier = Modifier.constrainAs(description) {
+                top.linkTo(subtitle.bottom, 16.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            weatherDescription = viewModel.weatherPrimary.collectAsState(),
+            weatherIconId = viewModel.weatherIconId.collectAsState(),
+            onDescriptionChange = { viewModel.setWeatherPrimary(it) },
+            onIconChange = { viewModel.setWeatherIconId(it) },
+            onError = { viewModel.setWeatherIsError(it) }
+        )
+
+        NewCatchTemperatureView(
+            modifier = Modifier.constrainAs(temp) {
+                top.linkTo(description.bottom, 8.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            temperature = viewModel.weatherTemperature.collectAsState(),
+            onTemperatureChange = { viewModel.setWeatherTemperature(it) },
+            onError = { viewModel.setWeatherIsError(it) }
+        )
+
+        NewCatchPressureView(
+            modifier = Modifier.constrainAs(press) {
+                top.linkTo(temp.bottom, 8.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            pressure = viewModel.weatherPressure.collectAsState(),
+            onPressureChange = { viewModel.setWeatherPressure(it) },
+            onError = { viewModel.setWeatherIsError(it) }
+        )
+
+        NewCatchWindView(
+            modifier = Modifier.constrainAs(wind) {
+                top.linkTo(press.bottom, 8.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            wind = viewModel.weatherWindSpeed.collectAsState(),
+            windDeg = viewModel.weatherWindDeg.collectAsState(),
+            onWindChange = { viewModel.setWeatherWindSpeed(it) },
+            onError = { viewModel.setWeatherIsError(it) }
+        )
+
+        NewCatchMoonView(
+            modifier = Modifier.constrainAs(moon) {
+                top.linkTo(wind.bottom, 8.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            moonPhase = viewModel.weatherMoonPhase.collectAsState()
+        )
+    }
 }
 
 @Composable
