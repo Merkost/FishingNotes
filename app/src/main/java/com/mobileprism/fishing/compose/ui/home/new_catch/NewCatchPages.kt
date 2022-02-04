@@ -1,7 +1,10 @@
 package com.mobileprism.fishing.compose.ui.home.new_catch
 
+import android.net.Uri
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +19,8 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.views.DefaultButtonOutlined
+import com.mobileprism.fishing.compose.ui.home.views.DefaultIconButton
+import com.mobileprism.fishing.compose.ui.home.views.PhotosView
 import com.mobileprism.fishing.compose.ui.home.views.SubtitleWithIcon
 import com.mobileprism.fishing.domain.NewCatchMasterViewModel
 
@@ -40,6 +45,8 @@ sealed class NewCatchPage(var screen: NewCatchScreenItem) {
         NewCatchWeather(viewModel, navController)
     })
 
+    @ExperimentalAnimationApi
+    @ExperimentalComposeUiApi
     class NewCatchPhotosPage() : NewCatchPage(screen = { viewModel, navController ->
         NewCatchPhotos(viewModel, navController)
     })
@@ -88,7 +95,7 @@ fun NewCatchPlace(viewModel: NewCatchMasterViewModel, navController: NavControll
 
         SubtitleWithIcon(
             modifier = Modifier.constrainAs(titleDate) {
-                top.linkTo(button.bottom, 48.dp)
+                top.linkTo(button.bottom, 32.dp)
                 absoluteLeft.linkTo(parent.absoluteLeft, 32.dp)
             },
             icon = R.drawable.ic_baseline_access_time_24,
@@ -112,7 +119,7 @@ fun NewCatchFishInfo(viewModel: NewCatchMasterViewModel, navController: NavContr
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 32.dp)
+            .padding(horizontal = 16.dp)
     ) {
         val (subtitleFish, subtitleNote, fish, amountAndWeight, note) = createRefs()
 
@@ -149,7 +156,7 @@ fun NewCatchFishInfo(viewModel: NewCatchMasterViewModel, navController: NavContr
 
         SubtitleWithIcon(
             modifier = Modifier.constrainAs(subtitleNote) {
-                top.linkTo(amountAndWeight.bottom, 48.dp)
+                top.linkTo(amountAndWeight.bottom, 32.dp)
                 absoluteLeft.linkTo(parent.absoluteLeft)
             },
             icon = R.drawable.ic_baseline_edit_note_24,
@@ -178,7 +185,7 @@ fun NewCatchWayOfFishing(viewModel: NewCatchMasterViewModel, navController: NavC
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 32.dp)
+            .padding(horizontal = 16.dp)
     ) {
         val (subtitle, fields) = createRefs()
 
@@ -227,6 +234,17 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
             },
             icon = R.drawable.weather_cloudy,
             text = stringResource(R.string.weather)
+        )
+
+        DefaultIconButton(
+            modifier = Modifier.constrainAs(refreshButton) {
+                absoluteRight.linkTo(parent.absoluteRight)
+                top.linkTo(subtitle.top)
+                bottom.linkTo(subtitle.bottom)
+            },
+            icon = painterResource(id = R.drawable.ic_baseline_refresh_24),
+            tint = MaterialTheme.colors.primaryVariant,
+            onClick = { viewModel.refreshWeatherState() }
         )
 
         NewCatchWeatherPrimary(
@@ -291,7 +309,14 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
     }
 }
 
+@ExperimentalComposeUiApi
+@ExperimentalAnimationApi
 @Composable
 fun NewCatchPhotos(viewModel: NewCatchMasterViewModel, navController: NavController) {
-    Text(text = "Photos")
+    val photos = listOf<Uri>()
+
+    PhotosView(
+        photos = photos,
+        onEditClick = { }
+    )
 }

@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.compose.ui.home.new_catch
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Scaffold
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.viewModel
 import org.koin.core.parameter.parametersOf
 
+@ExperimentalAnimationApi
 @ExperimentalComposeUiApi
 @ExperimentalPagerApi
 @Composable

@@ -167,7 +167,7 @@ class NewCatchMasterViewModel(
                         is RetrofitWrapper.Success<WeatherForecast> -> {
                             loadedWeather.value = result.data
                             _weatherState.value = RetrofitWrapper.Success(result.data)
-                            updateWeatherState()
+                            refreshWeatherState()
                         }
                         is RetrofitWrapper.Loading -> {
                             _weatherState.value = RetrofitWrapper.Loading()
@@ -192,7 +192,7 @@ class NewCatchMasterViewModel(
                             is RetrofitWrapper.Success<WeatherForecast> -> {
                                 loadedWeather.value = result.data
                                 _weatherState.value = RetrofitWrapper.Success(result.data)
-                                updateWeatherState()
+                                refreshWeatherState()
                             }
                             is RetrofitWrapper.Loading -> {
                                 _weatherState.value = RetrofitWrapper.Loading()
@@ -206,7 +206,7 @@ class NewCatchMasterViewModel(
         }
     }
 
-    private fun updateWeatherState() {
+    fun refreshWeatherState() {
         loadedWeather.value.run {
 
             viewModelScope.launch {
@@ -260,10 +260,5 @@ class NewCatchMasterViewModel(
             }
         }
     }
-
-//    override fun onCleared() {
-//        super.onCleared()
-//        calendar.timeInMillis = Date().time
-//    }
 
 }
