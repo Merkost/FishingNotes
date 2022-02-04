@@ -6,11 +6,14 @@ import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchBuilder
 import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchBuilderImpl
 import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchPlacesState
 import com.mobileprism.fishing.compose.ui.home.new_catch.ReceivedPlaceState
+import com.mobileprism.fishing.domain.viewstates.BaseViewState
+import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -35,6 +38,9 @@ class NewCatchMasterViewModel(
     val currentPlace = MutableStateFlow(
         if (placeState is ReceivedPlaceState.Received) placeState.place else null
     )
+
+    private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
+    val uiState = _uiState.asStateFlow()
 
     val markersListState = MutableStateFlow<NewCatchPlacesState>(NewCatchPlacesState.NotReceived)
     val catchDate = MutableStateFlow(calendar.timeInMillis)
@@ -101,6 +107,29 @@ class NewCatchMasterViewModel(
             markersRepository.getAllUserMarkersList().collect { markers ->
                 markersListState.value =
                     NewCatchPlacesState.Received(markers as List<UserMapMarker>)
+            }
+        }
+    }
+
+    fun saveNewCatch() {
+        _uiState.value = BaseViewState.Loading(0)
+        val newCatch = builder.create()
+
+        viewModelScope.launch {
+            currentPlace.value?.let { userMapMarker ->
+                catchesRepository.addNewCatch(userMapMarker.id, newCatch).collect { progress ->
+                    when (progress) {
+                        is Progress.Complete -> {
+                            _uiState.value = BaseViewState.Success(progress)
+                        }
+                        is Progress.Loading -> {
+                            _uiState.value = BaseViewState.Loading(progress.percents)
+                        }
+                        is Progress.Error -> {
+                            _uiState.value = BaseViewState.Error(progress.error)
+                        }
+                    }
+                }
             }
         }
     }

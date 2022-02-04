@@ -974,3 +974,66 @@ fun WayOfFishingView(
         )
     }
 }
+
+@Composable
+fun NewCatchWeatherView(viewModel: NewCatchViewModel) {
+
+    val weather by viewModel.weather.collectAsState()
+    val weatherState by viewModel.weatherState.collectAsState()
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween.also { Arrangement.Center },
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            SubtitleWithIcon(
+                icon = R.drawable.weather_sunny,
+                text = stringResource(id = R.string.weather)
+            )
+            if (weather != null) {
+                IconButton(onClick = { viewModel.getWeather() }) {
+                    Icon(Icons.Default.Refresh, "", tint = MaterialTheme.colors.primary)
+                }
+            } else Spacer(modifier = Modifier.size(LocalViewConfiguration.current.minimumTouchTargetSize))
+        }
+
+        AnimatedVisibility(weatherState is RetrofitWrapper.Success) {
+            WeatherLayout(weather, viewModel)
+        }
+
+        AnimatedVisibility(weatherState is RetrofitWrapper.Loading) {
+            if (viewModel.marker.value == null) {
+                NoContentView(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    text = stringResource(R.string.select_place_for_weather),
+                    icon = painterResource(id = R.drawable.ic_baseline_location_on_24)
+                )
+            } else {
+                WeatherLayoutLoading()
+            }
+
+        }
+
+        AnimatedVisibility(weatherState is RetrofitWrapper.Error) {
+            if (weatherState is RetrofitWrapper.Error) {
+                when ((weatherState as RetrofitWrapper.Error).errorType) {
+                    is ErrorType.NetworkError -> {
+                        SecondaryText(
+                            modifier = Modifier.padding(8.dp),
+                            text = stringResource(R.string.no_internet)
+                        )
+                    }
+                    is ErrorType.OtherError -> {
+                        SecondaryText(
+                            modifier = Modifier.padding(8.dp),
+                            text = "Произошла ошибка!"
+                        )
+                    }
+                }
+            }
+        }
+    }
+}

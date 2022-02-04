@@ -4,6 +4,7 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -65,6 +66,16 @@ fun NewCatchMasterScreen(
         )
     }
 
+    val loadingDialogState = remember {
+        mutableStateOf(false)
+    }
+
+    SubscribeToProgress(
+        vmUiState = viewModel.uiState,
+        loadingDialogState = loadingDialogState,
+        upPress = { upPress() }
+    )
+
     Scaffold(
         topBar = {
             DefaultAppBar(title = stringResource(id = R.string.new_catch))
@@ -95,7 +106,7 @@ fun NewCatchMasterScreen(
                     absoluteRight.linkTo(parent.absoluteRight)
                 },
                 pagerState = pagerState,
-                onFinishClick = { },
+                onFinishClick = { viewModel.saveNewCatch() },
                 onNextClick = {
                     coroutineScope.launch {
                         when (pagerState.currentPage) {
