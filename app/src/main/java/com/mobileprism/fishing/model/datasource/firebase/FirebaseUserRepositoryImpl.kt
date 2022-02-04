@@ -84,7 +84,8 @@ class FirebaseUserRepositoryImpl(
 
             val bundle = Bundle()
             bundle.putString(FirebaseAnalytics.Param.METHOD, "Google")
-            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)
+            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN, bundle)
+
 
             appPreferences.saveUserValue(userFromDatabase)
             flow.tryEmit(Progress.Complete)
@@ -94,7 +95,7 @@ class FirebaseUserRepositoryImpl(
 
                     val bundle = Bundle()
                     bundle.putString(FirebaseAnalytics.Param.METHOD, "Google")
-                    firebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN, bundle)
+                    firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)
 
                     runBlocking {
                         appPreferences.saveUserValue(user)
