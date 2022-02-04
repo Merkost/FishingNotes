@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.model.datasource.firebase
 
 import android.util.Log
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.*
 
 class FirebaseMarkersRepositoryImpl(
     private val dbCollections: RepositoryCollections,
+    private val firebaseAnalytics: FirebaseAnalytics,
     private val cloudPhotoStorage: PhotoStorage
 ) : MarkersRepository {
 
@@ -84,6 +86,7 @@ class FirebaseMarkersRepositoryImpl(
                     }
 
                     if (it.isSuccessful) {
+                        firebaseAnalytics.logEvent("add_marker_note", null)
                         flow.tryEmit(BaseViewState.Success(currentNotes + newNote))
                     }
                 }
@@ -98,6 +101,7 @@ class FirebaseMarkersRepositoryImpl(
                         flow.tryEmit(BaseViewState.Error(exp))
                     }
                     if (it.isSuccessful) {
+                        firebaseAnalytics.logEvent("edit_marker_note", null)
                         flow.tryEmit(BaseViewState.Success(newNotes))
                     }
                 }
@@ -122,6 +126,7 @@ class FirebaseMarkersRepositoryImpl(
                     flow.tryEmit(BaseViewState.Error(exp))
                 }
                 if (it.isSuccessful) {
+                    firebaseAnalytics.logEvent("delete_marker_note", null)
                     flow.tryEmit(BaseViewState.Success(newNotes))
                 }
             }
@@ -135,6 +140,7 @@ class FirebaseMarkersRepositoryImpl(
         val task = documentRef.update("visible", changeTo)
         task.addOnCompleteListener {
             if (it.isSuccessful) {
+                firebaseAnalytics.logEvent("marker_visibility_change", null)
                 flow.tryEmit(LiteProgress.Complete)
             }
             if (it.isCanceled || it.exception != null) {
@@ -221,7 +227,14 @@ class FirebaseMarkersRepositoryImpl(
         val documentRef = dbCollections.getUserMapMarkersCollection().document(userMapMarker.id)
         val task = documentRef.set(userMapMarker)
         task.addOnCompleteListener {
-            trySend(userMapMarker.id)
+            if (it.isSuccessful) {
+                firebaseAnalytics.logEvent("new_marker", null)
+                trySend(userMapMarker.id)
+            }
+            //todo: Если ошибка?
+            if (it.isCanceled || it.exception != null) {
+                trySend("")
+            }
         }
         awaitClose {}
     }
@@ -234,6 +247,11 @@ class FirebaseMarkersRepositoryImpl(
 
     override suspend fun deleteMarker(userMapMarker: UserMapMarker) {
         dbCollections.getUserMapMarkersCollection().document(userMapMarker.id).delete()
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    firebaseAnalytics.logEvent("delete_marker", null)
+                }
+            }
     }
 
 }

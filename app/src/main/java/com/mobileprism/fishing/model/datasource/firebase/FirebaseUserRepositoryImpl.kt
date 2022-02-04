@@ -24,11 +24,10 @@ import kotlinx.coroutines.tasks.await
 import java.util.*
 
 class FirebaseUserRepositoryImpl(
-
     private val appPreferences: AppPreferences,
     private val dbCollections: RepositoryCollections,
+    private val firebaseAnalytics: FirebaseAnalytics,
     private val context: Context,
-    private val firebaseAnalytics: FirebaseAnalytics = Firebase.analytics,
 ) : UserRepository {
 
     private val fireBaseAuth = FirebaseAuth.getInstance()
@@ -52,8 +51,11 @@ class FirebaseUserRepositoryImpl(
         }
 
     override suspend fun logoutCurrentUser() = callbackFlow {
-        AuthUI.getInstance().signOut(context).addOnSuccessListener {
-            trySend(true)
+        AuthUI.getInstance().signOut(context).addOnCompleteListener {
+            if (it.isSuccessful) {
+                Firebase.analytics.logEvent("logout", null)
+                trySend(true)
+            } else trySend(false)
         }
         awaitClose {}
     }

@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.compose.ui.home.map
 
 import android.location.Geocoder
+import android.os.Bundle
 import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -37,6 +38,9 @@ import com.alorma.compose.settings.ui.SettingsCheckbox
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.libraries.maps.model.LatLng
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.compose.ui.home.SettingsHeader
@@ -285,6 +289,13 @@ fun LayersView(
     mapLayersSelection: MutableState<Boolean>,
     mapType: MutableState<Int>
 ) {
+    val context = LocalContext.current
+
+    DisposableEffect(context) {
+        Firebase.analytics.logEvent("map_layers", null)
+        onDispose {}
+    }
+
     Card(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier

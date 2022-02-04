@@ -107,7 +107,6 @@ fun ProfileAppBar(navController: NavController) {
                 )
             }
             IconButton(onClick = {
-                Firebase.analytics.logEvent("logout", null)
                 navController.navigate(MainDestinations.SETTINGS)
             }) {
                 Icon(Icons.Default.Settings, stringResource(R.string.settings))
@@ -123,7 +122,6 @@ fun ProfileAppBar(navController: NavController) {
 @Composable
 fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavController) {
     val scope = rememberCoroutineScope()
-
     val viewModel = getViewModel<UserViewModel>()
 
     DefaultDialog(

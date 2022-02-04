@@ -22,6 +22,10 @@ fun newCatchClicked(navController: NavController, place: UserMapMarker) {
 }
 
 fun onRouteClicked(context: Context, marker: UserMapMarker) {
+    val bundle = Bundle()
+    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "marker")
+    Firebase.analytics.logEvent("navigate", bundle)
+
     val uri = String.format(
         Locale.ENGLISH,
         "http://maps.google.com/maps?daddr=%f,%f (%s)",
@@ -49,10 +53,9 @@ fun onShareClicked(
     context: Context,
     marker: UserMapMarker
 ) {
-    val firebaseAnalytics = Firebase.analytics
     val bundle = Bundle()
     bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "marker")
-    firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SHARE, bundle)
+    Firebase.analytics.logEvent(FirebaseAnalytics.Event.SHARE, bundle)
 
     val text =
         "${marker.title}\nhttps://www.google.com/maps/search/?api=1&query=${marker.latitude}" +
