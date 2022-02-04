@@ -19,6 +19,7 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.views.SecondaryText
 import com.mobileprism.fishing.compose.ui.home.weather.PressureValues
 import com.mobileprism.fishing.compose.ui.home.weather.TemperatureValues
+import com.mobileprism.fishing.compose.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.domain.NewCatchViewModel
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.entity.weather.WeatherForecast
@@ -336,8 +337,8 @@ fun NewCatchWeatherPrimary(
 @Composable
 fun NewCatchTemperatureView(
     modifier: Modifier = Modifier,
-    temperature: State<Float>,
-    onTemperatureChange: (Int) -> Unit,
+    temperature: State<String>,
+    onTemperatureChange: (String) -> Unit,
     onError: (Boolean) -> Unit
 ) {
 
@@ -347,7 +348,7 @@ fun NewCatchTemperatureView(
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
         readOnly = false,
-        value = temperatureUnit.getTemperature(temperature.value),
+        value = temperature.value,
         leadingIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_thermometer),
@@ -356,11 +357,9 @@ fun NewCatchTemperatureView(
             )
         },
         trailingIcon = { Text(text = stringResource(temperatureUnit.stringRes)) },
-        onValueChange = {
-            onTemperatureChange(temperatureUnit.getCelciusTemperature(it.toFloat()))
-        },
-        isError = (temperature.value.toString()
-            .toIntOrNull() == null || temperature.value.toString().length > 3)
+        onValueChange = { onTemperatureChange(it) },
+        isError = (temperature.value
+            .toIntOrNull() == null || temperature.value.length > 3)
             .apply { onError(this) },
         label = { Text(text = stringResource(R.string.temperature)) },
         keyboardOptions = KeyboardOptions(
@@ -374,8 +373,8 @@ fun NewCatchTemperatureView(
 @Composable
 fun NewCatchPressureView(
     modifier: Modifier = Modifier,
-    pressure: State<Int>,
-    onPressureChange: (Int) -> Unit,
+    pressure: State<String>,
+    onPressureChange: (String) -> Unit,
     onError: (Boolean) -> Unit
 ) {
     val weatherSettings: WeatherPreferences = get()
@@ -384,7 +383,7 @@ fun NewCatchPressureView(
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
         readOnly = false,
-        value = pressureUnit.getPressure(pressure.value),
+        value = pressure.value,
         leadingIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_gauge),
@@ -392,16 +391,11 @@ fun NewCatchPressureView(
                 tint = MaterialTheme.colors.primary
             )
         },
-        trailingIcon = {
-            Text(
-                modifier = Modifier.padding(horizontal = 8.dp),
-                text = stringResource(pressureUnit.stringRes)
-            )
-        },
-        isError = (pressure.value.toString().endsWith(".") || pressure.value.toString()
-            .isEmpty() || pressure.value.toString().toDoubleOrNull() == null)
+        trailingIcon = { Text(text = stringResource(pressureUnit.stringRes)) },
+        isError = (pressure.value.toDoubleOrNull() == null || pressure.value.endsWith(".") || pressure.value
+            .isEmpty())
             .apply { onError(this) },
-        onValueChange = { onPressureChange(pressureUnit.getDefaultPressure(it.toFloat())) },
+        onValueChange = { onPressureChange(it) },
         label = { Text(text = stringResource(R.string.pressure)) },
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Next,
@@ -415,15 +409,18 @@ fun NewCatchPressureView(
 @Composable
 fun NewCatchWindView(
     modifier: Modifier = Modifier,
-    wind: State<Float>,
+    wind: State<String>,
     windDeg: State<Int>,
-    onWindChange: (Float) -> Unit,
+    onWindChange: (String) -> Unit,
     onError: (Boolean) -> Unit
 ) {
+    val weatherSettings: WeatherPreferences = get()
+    val windSpeedUnit by weatherSettings.getWindSpeedUnit.collectAsState(WindSpeedValues.kmph)
+
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
         readOnly = false,
-        value = wind.value.toString(),
+        value = wind.value,
         leadingIcon = {
             Icon(
                 modifier = Modifier.rotate(windDeg.value.toFloat()),
@@ -432,10 +429,10 @@ fun NewCatchWindView(
                 tint = MaterialTheme.colors.primary,
             )
         },
-        trailingIcon = { Text(text = stringResource(R.string.wind_speed_units)) },
-        onValueChange = { onWindChange(it.toFloat()) },
-        isError = (wind.value.toString()
-            .toIntOrNull() == null || wind.value.toString().length >= 3)
+        trailingIcon = { Text(text = stringResource(windSpeedUnit.stringRes)) },
+        onValueChange = { onWindChange(it) },
+        isError = (wind.value
+            .toIntOrNull() == null || wind.value.length >= 3)
             .apply { onError(this) },
         label = { Text(text = stringResource(R.string.wind)) },
         keyboardOptions = KeyboardOptions(

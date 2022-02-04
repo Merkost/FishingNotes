@@ -214,9 +214,11 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 32.dp)
+            .padding(horizontal = 16.dp)
     ) {
         val (subtitle, description, temp, press, wind, moon, refreshButton) = createRefs()
+
+        val guideline = createGuidelineFromAbsoluteLeft(0.5f)
 
         SubtitleWithIcon(
             modifier = Modifier.constrainAs(subtitle) {
@@ -244,7 +246,8 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
             modifier = Modifier.constrainAs(temp) {
                 top.linkTo(description.bottom, 8.dp)
                 absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
+                absoluteRight.linkTo(guideline, 4.dp)
+                width = Dimension.fillToConstraints
             },
             temperature = viewModel.weatherTemperature.collectAsState(),
             onTemperatureChange = { viewModel.setWeatherTemperature(it) },
@@ -253,9 +256,10 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
 
         NewCatchPressureView(
             modifier = Modifier.constrainAs(press) {
-                top.linkTo(temp.bottom, 8.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
+                top.linkTo(temp.top)
+                absoluteLeft.linkTo(guideline, 4.dp)
                 absoluteRight.linkTo(parent.absoluteRight)
+                width = Dimension.fillToConstraints
             },
             pressure = viewModel.weatherPressure.collectAsState(),
             onPressureChange = { viewModel.setWeatherPressure(it) },
@@ -266,7 +270,8 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
             modifier = Modifier.constrainAs(wind) {
                 top.linkTo(press.bottom, 8.dp)
                 absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
+                absoluteRight.linkTo(guideline, 4.dp)
+                width = Dimension.fillToConstraints
             },
             wind = viewModel.weatherWindSpeed.collectAsState(),
             windDeg = viewModel.weatherWindDeg.collectAsState(),
@@ -276,9 +281,10 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
 
         NewCatchMoonView(
             modifier = Modifier.constrainAs(moon) {
-                top.linkTo(wind.bottom, 8.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
+                top.linkTo(wind.top)
+                absoluteLeft.linkTo(guideline, 4.dp)
                 absoluteRight.linkTo(parent.absoluteRight)
+                width = Dimension.fillToConstraints
             },
             moonPhase = viewModel.weatherMoonPhase.collectAsState()
         )

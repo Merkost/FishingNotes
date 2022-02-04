@@ -65,6 +65,7 @@ val mainModule = module {
             placeState = parameters.get(),
             get(),
             get(),
+            get(),
             get()
         )
     }
