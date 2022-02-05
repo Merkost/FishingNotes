@@ -343,14 +343,17 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleError(error: Exception?) {
-        val bundle = bundleOf()
         error?.let {
+
+            val bundle = bundleOf()
             bundle.putString(FirebaseAnalytics.Param.SCORE, error.message)
+            Firebase.analytics.logEvent("signin_error", bundle)
+
             //Toast.makeText(this,  error.message, Toast.LENGTH_LONG).show()
             logger.log(error.message)
-            SnackbarManager.showMessage(R.string.google_login_failed)
-        } ?: SnackbarManager.showMessage(R.string.google_login_failed)
-        Firebase.analytics.logEvent("signin_error", bundle)
+        }
+        SnackbarManager.showMessage(R.string.google_login_failed)
+
     }
 }
 
