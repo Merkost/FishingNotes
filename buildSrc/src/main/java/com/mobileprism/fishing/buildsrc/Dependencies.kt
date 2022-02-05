@@ -34,6 +34,7 @@ object Libs {
 
         const val auth = "com.google.android.gms:play-services-auth:$version"
         const val ads = "com.google.android.gms:play-services-ads:20.4.0"
+        const val core = "com.google.android.play:core-ktx:1.8.1"
 
         //Maps
         const val maps = "com.google.android.gms:play-services-maps:$oldVersion"

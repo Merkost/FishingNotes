@@ -97,6 +97,7 @@ dependencies {
     implementation Libs.PlayServices.maps
     implementation Libs.PlayServices.location
     implementation Libs.PlayServices.ads
+    implementation Libs.PlayServices.core
     //implementation Libs.PlayServices.auth
 
     implementation Libs.AndroidX.coreKtx

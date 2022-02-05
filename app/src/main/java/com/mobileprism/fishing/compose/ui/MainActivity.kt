@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.compose.ui
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Build
@@ -11,6 +12,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.SnackbarData
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.mutableStateOf
@@ -19,7 +21,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -32,15 +33,24 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.appupdate.testing.FakeAppUpdateManager
+import com.google.android.play.core.install.InstallState
+import com.google.android.play.core.install.InstallStateUpdatedListener
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.InstallStatus
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.compose.ui.theme.AppThemeValues
 import com.mobileprism.fishing.compose.ui.theme.FishingNotesTheme
 import com.mobileprism.fishing.compose.viewmodels.MainViewModel
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
+import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.entity.common.User
 import com.mobileprism.fishing.utils.Logger
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -54,9 +64,11 @@ class MainActivity : ComponentActivity() {
 
     private val logger: Logger by inject()
 
+    private lateinit var appUpdateManager: AppUpdateManager
+    private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var auth: FirebaseAuth
-    //private lateinit var user: State<BaseViewState?>
+
 
     private val registeredActivity =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -65,6 +77,7 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val splashFadeDurationMillis = 300
+        const val UPDATE_REQUEST_CODE = 984165687
     }
 
     @OptIn(
@@ -141,10 +154,89 @@ class MainActivity : ComponentActivity() {
             Oleg = F70916713215C0BC73564CDFEC4D3ECB
 
         */
-        val testDeviceIds = Arrays.asList("7254B9BDD30F1D2EACA4C4EAD6B31F2C", "F70916713215C0BC73564CDFEC4D3ECB")
+        val testDeviceIds =
+            Arrays.asList("7254B9BDD30F1D2EACA4C4EAD6B31F2C", "F70916713215C0BC73564CDFEC4D3ECB")
         val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
         MobileAds.setRequestConfiguration(configuration)
         setAppMuted(true)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkForUpdates()
+    }
+
+    private fun checkForUpdates() {
+        appUpdateManager = AppUpdateManagerFactory.create(this)
+
+        // Create a listener to track request state updates.
+        installStateUpdatedListener = InstallStateUpdatedListener { state ->
+            when(state.installStatus()) {
+                InstallStatus.DOWNLOADING -> {
+                    val bytesDownloaded = state.bytesDownloaded()
+                    val totalBytesToDownload = state.totalBytesToDownload()
+                    // Show update progress bar.
+                }
+                InstallStatus.DOWNLOADED -> {
+                    appUpdateManager.completeUpdate()
+                }
+                InstallStatus.INSTALLED -> { appUpdateManager.unregisterListener(installStateUpdatedListener) }
+                InstallStatus.CANCELED -> { appUpdateManager.unregisterListener(installStateUpdatedListener) }
+                InstallStatus.FAILED -> { appUpdateManager.unregisterListener(installStateUpdatedListener) }
+            }
+
+        }
+
+        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+
+        // Checks that the platform will allow the specified type of update.
+        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)
+            ) {
+                // Before starting an update, register a listener for updates.
+                appUpdateManager.registerListener(installStateUpdatedListener)
+                appUpdateManager.startUpdateFlowForResult(
+                    appUpdateInfo, AppUpdateType.FLEXIBLE,
+                    this, UPDATE_REQUEST_CODE
+                )
+            } else if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
+                appUpdateManager.completeUpdate()
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == UPDATE_REQUEST_CODE) {
+            when (resultCode) {
+                RESULT_CANCELED -> {
+                    Toast.makeText(
+                        applicationContext,
+                        "Update canceled by user! Result Code: $resultCode", Toast.LENGTH_LONG
+                    ).show()
+                }
+                RESULT_OK -> {
+                    Toast.makeText(
+                        applicationContext,
+                        "Update success! Result Code: $resultCode", Toast.LENGTH_LONG
+                    ).show()
+                }
+                else -> {
+                    Toast.makeText(
+                        applicationContext,
+                        "Update Failed! Result Code: $resultCode",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    checkForUpdates()
+                }
+            }
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        //appUpdateManager?.let { appUpdateManager.unregisterListener(installStateUpdatedListener) }
     }
 
     @ExperimentalAnimationApi
@@ -244,15 +336,6 @@ class MainActivity : ComponentActivity() {
         //SnackbarManager.showMessage(R.string.google_login_failed)
         Toast.makeText(this, error.stackTrace.toString(), Toast.LENGTH_LONG).show()
         logger.log(error.message)
-    }
-
-    private fun onSuccess(user: User?, navController: NavController) {
-        if (user != null) {
-            //vb.progressAnimationView.playAnimation()
-            //Timer().schedule(2250) {
-            navController.navigate("main_screen")
-            //}
-        } //TODO: Else
     }
 }
 
