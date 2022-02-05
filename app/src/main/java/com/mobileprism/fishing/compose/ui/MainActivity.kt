@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.os.bundleOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
@@ -42,8 +43,11 @@ import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.compose.ui.theme.AppThemeValues
@@ -58,6 +62,7 @@ import kotlinx.coroutines.flow.StateFlow
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.getViewModel
+import java.lang.Exception
 import java.util.*
 
 class MainActivity : ComponentActivity() {
@@ -163,15 +168,20 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        checkForUpdates()
+        try {
+
+            checkForUpdates()
+        } catch (e: Exception) {
+            handleError(e)
+        }
     }
 
     private fun checkForUpdates() {
-        appUpdateManager = AppUpdateManagerFactory.create(this)
+        appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
 
         // Create a listener to track request state updates.
         installStateUpdatedListener = InstallStateUpdatedListener { state ->
-            when(state.installStatus()) {
+            when (state.installStatus()) {
                 InstallStatus.DOWNLOADING -> {
                     val bytesDownloaded = state.bytesDownloaded()
                     val totalBytesToDownload = state.totalBytesToDownload()
@@ -180,9 +190,15 @@ class MainActivity : ComponentActivity() {
                 InstallStatus.DOWNLOADED -> {
                     appUpdateManager.completeUpdate()
                 }
-                InstallStatus.INSTALLED -> { appUpdateManager.unregisterListener(installStateUpdatedListener) }
-                InstallStatus.CANCELED -> { appUpdateManager.unregisterListener(installStateUpdatedListener) }
-                InstallStatus.FAILED -> { appUpdateManager.unregisterListener(installStateUpdatedListener) }
+                InstallStatus.INSTALLED -> {
+                    appUpdateManager.unregisterListener(installStateUpdatedListener)
+                }
+                InstallStatus.CANCELED -> {
+                    appUpdateManager.unregisterListener(installStateUpdatedListener)
+                }
+                InstallStatus.FAILED -> {
+                    appUpdateManager.unregisterListener(installStateUpdatedListener)
+                }
             }
 
         }
@@ -232,11 +248,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    override fun onStop() {
-        super.onStop()
-        //appUpdateManager?.let { appUpdateManager.unregisterListener(installStateUpdatedListener) }
     }
 
     @ExperimentalAnimationApi
@@ -298,17 +309,20 @@ class MainActivity : ComponentActivity() {
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         val exception = task.exception
-        if (task.isSuccessful) {
-            try {
-                // Google Sign In was successful, authenticate with Firebase
-                val account = task.getResult(ApiException::class.java)
-                firebaseAuthWithGoogle(account.idToken!!)
-            } catch (e: ApiException) {
-                // Google Sign In failed, update UI appropriately
-                handleError(exception as Throwable)
+        when {
+            task.isSuccessful -> {
+                try {
+                    // Google Sign In was successful, authenticate with Firebase
+                    val account = task.getResult(ApiException::class.java)
+                    firebaseAuthWithGoogle(account.idToken!!)
+                } catch (e: ApiException) {
+                    // Google Sign In failed, update UI appropriately
+                    handleError(e)
+                }
             }
-        } else {
-            handleError(exception as Throwable)
+            else -> {
+                handleError(exception)
+            }
         }
     }
 
@@ -317,25 +331,26 @@ class MainActivity : ComponentActivity() {
 
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    // Sign in success, update UI with the signed-in user's information
-                } else {
-                    // If sign in fails, display a message to the user.
-                    handleError(task.exception as Throwable)
+                when {
+                    task.isSuccessful -> {
+                        // Sign in success, update UI with the signed-in user's information
+                    }
+                    else -> {
+                        handleError(task.exception)
+                    }
                 }
             }
     }
 
-    private fun handleError(error: Throwable) {
-        /*setViews(false)
-        vb.warning.visibility = View.VISIBLE
-        Toast.makeText(this, error.message, Toast.LENGTH_SHORT).show()
-        vb.warning.setOnClickListener {
-            Toast.makeText(this, error.message, Toast.LENGTH_LONG).show()
-        }*/
-        //SnackbarManager.showMessage(R.string.google_login_failed)
-        Toast.makeText(this, error.stackTrace.toString(), Toast.LENGTH_LONG).show()
-        logger.log(error.message)
+    private fun handleError(error: Exception?) {
+        val bundle = bundleOf()
+        error?.let {
+            bundle.putString(FirebaseAnalytics.Param.SCORE, error.message)
+            //Toast.makeText(this,  error.message, Toast.LENGTH_LONG).show()
+            logger.log(error.message)
+            SnackbarManager.showMessage(R.string.google_login_failed)
+        } ?: SnackbarManager.showMessage(R.string.google_login_failed)
+        Firebase.analytics.logEvent("signin_error", bundle)
     }
 }
 
