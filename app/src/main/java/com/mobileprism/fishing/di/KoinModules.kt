@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.di
 
+import com.android.billingclient.api.BillingClient
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
@@ -19,6 +20,12 @@ val appModule = module {
     single { Logger() }
     single { SnackbarManager }
     single { Firebase.analytics }
+    single { params ->
+        BillingClient.newBuilder(androidContext())
+            .setListener(params.get())
+            .enablePendingPurchases()
+            .build()
+    }
 }
 
 val settingsModule = module {

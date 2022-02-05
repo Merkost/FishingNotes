@@ -267,6 +267,8 @@
 
     <string name="saving_photos">Saving photos</string>
     <string name="place_note_not_deleted">Couldn\'t delete the note!</string>
+    <string name="billing_unavaliable">Couldn\'t connect to billing service</string>
+    <string name="thanks_developers">Thank developers</string>
 
 
 </resources>

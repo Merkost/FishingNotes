@@ -8,10 +8,9 @@ object Libs {
     const val androidGradlePlugin = "com.android.tools.build:gradle:7.0.3"
 
     object Accompanist {
-        private const val version = "0.22.0-rc"
+        private const val version = "0.24.1-alpha"
         const val insets = "com.google.accompanist:accompanist-insets:$version"
-        const val systemuicontroller =
-            "com.google.accompanist:accompanist-systemuicontroller:$version"
+        const val systemuicontroller = "com.google.accompanist:accompanist-systemuicontroller:$version"
         const val flowlayouts = "com.google.accompanist:accompanist-flowlayout:$version"
         const val pager = "com.google.accompanist:accompanist-pager:$version"
         const val pagerindicators = "com.google.accompanist:accompanist-pager-indicators:$version"
@@ -24,8 +23,8 @@ object Libs {
         const val maps = "com.google.android.libraries.maps:maps:3.1.0-beta"
         const val mapsKtx = "com.google.maps.android:maps-v3-ktx:3.3.0"
 
-        //Google maps distance between two latlng
-        const val mapUtils = "com.google.maps.android:android-maps-utils:0.4.4"
+        //Google maps distance between two latlng /*0.4.4*/
+        const val mapUtils = "com.google.maps.android:android-maps-utils:2.3.0"
     }
 
     object PlayServices {
@@ -34,6 +33,7 @@ object Libs {
 
         const val auth = "com.google.android.gms:play-services-auth:$version"
         const val ads = "com.google.android.gms:play-services-ads:20.4.0"
+        const val billing = "com.android.billingclient:billing-ktx:4.0.0"
         const val core = "com.google.android.play:core-ktx:1.8.1"
 
         //Maps
