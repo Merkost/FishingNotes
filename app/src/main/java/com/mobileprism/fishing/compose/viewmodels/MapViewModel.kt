@@ -7,7 +7,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.libraries.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.compose.ui.home.UiState
 import com.mobileprism.fishing.compose.ui.home.map.MapUiState
 import com.mobileprism.fishing.domain.viewstates.BaseViewState

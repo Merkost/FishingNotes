@@ -30,7 +30,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.google.android.libraries.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.compose.ui.home.UiState

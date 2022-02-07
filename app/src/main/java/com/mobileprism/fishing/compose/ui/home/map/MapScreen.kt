@@ -36,8 +36,10 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.android.libraries.maps.MapView
-import com.google.android.libraries.maps.model.*
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.google.maps.android.ktx.awaitMap
@@ -500,7 +502,7 @@ fun MapLayout(
                                 .icon(BitmapDescriptorFactory.defaultMarker(hue))
 
                         )
-                    marker.tag = it.id
+                    marker?.tag = it.id
                 }
                 googleMap.setOnCameraMoveStartedListener {
                     cameraMoveCallback(CameraMoveState.MoveStart)
@@ -753,23 +755,3 @@ private fun onAddNewCatchClick(navController: NavController, viewModel: MapViewM
 private fun onMarkerDetailsClick(navController: NavController, marker: UserMapMarker) {
     navController.navigate(MainDestinations.PLACE_ROUTE, Arguments.PLACE to marker)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

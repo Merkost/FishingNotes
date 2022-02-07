@@ -89,9 +89,8 @@ dependencies {
     implementation Libs.Coroutines.android
     implementation Libs.Coroutines.core
 
-    //implementation Libs.GoogleMaps.maps
     implementation Libs.GoogleMaps.mapsKtx
-    implementation Libs.GoogleMaps.mapUtils
+    implementation Libs.GoogleMaps.mapUtilsKtx
 
     implementation Libs.PlayServices.maps
     implementation Libs.PlayServices.location

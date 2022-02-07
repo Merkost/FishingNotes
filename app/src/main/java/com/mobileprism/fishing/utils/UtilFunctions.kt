@@ -2,7 +2,7 @@ package com.mobileprism.fishing.utils
 
 import android.content.Context
 import android.widget.Toast
-import com.google.android.libraries.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.compose.ui.home.map.DEFAULT_ZOOM
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.utils.time.TimeConstants.MOON_PHASE_INCREMENT_IN_DAY

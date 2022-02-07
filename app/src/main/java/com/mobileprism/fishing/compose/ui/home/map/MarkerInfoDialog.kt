@@ -24,7 +24,7 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
-import com.google.android.libraries.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.SphericalUtil
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
@@ -75,8 +75,6 @@ fun MarkerInfoDialog(
     val fishActivity: Int? by remember { viewModel.fishActivity }
     val currentWeather: CurrentWeatherFree? by remember { viewModel.currentWeather }
 
-    val cant_recognize_place = stringResource(R.string.cant_recognize_place)
-
     receivedMarker?.let {
         LaunchedEffect(receivedMarker) {
             coroutineScope.launch(Dispatchers.Default) {
@@ -95,7 +93,7 @@ fun MarkerInfoDialog(
                     }
                 } catch (e: Throwable) {
                     //TODO: Ошибка в океане!
-                    address = cant_recognize_place
+                    address = context.getString(R.string.cant_recognize_place)
                 }
             }
         }
