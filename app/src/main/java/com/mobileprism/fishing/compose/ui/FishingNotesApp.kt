@@ -23,6 +23,7 @@ import com.mobileprism.fishing.compose.ui.home.*
 import com.mobileprism.fishing.compose.ui.home.catch_screen.UserCatchScreen
 import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchMasterScreen
 import com.mobileprism.fishing.compose.ui.home.place.UserPlaceScreen
+import com.mobileprism.fishing.compose.ui.home.settings.AboutApp
 import com.mobileprism.fishing.compose.ui.home.weather.WeatherDaily
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.InternalCoroutinesApi

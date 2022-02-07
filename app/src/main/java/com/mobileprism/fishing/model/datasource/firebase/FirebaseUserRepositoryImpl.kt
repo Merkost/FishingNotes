@@ -1,12 +1,17 @@
 package com.mobileprism.fishing.model.datasource.firebase
 
 import android.content.Context
+import android.os.Bundle
 import android.util.Log
 import com.firebase.ui.auth.AuthUI
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.FirebaseAnalyticsKtxRegistrar
+import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.EventListener
+import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.datastore.AppPreferences
 import com.mobileprism.fishing.model.entity.common.Progress
@@ -21,7 +26,8 @@ import java.util.*
 class FirebaseUserRepositoryImpl(
     private val appPreferences: AppPreferences,
     private val dbCollections: RepositoryCollections,
-    private val context: Context
+    private val firebaseAnalytics: FirebaseAnalytics,
+    private val context: Context,
 ) : UserRepository {
 
     private val fireBaseAuth = FirebaseAuth.getInstance()
@@ -45,8 +51,11 @@ class FirebaseUserRepositoryImpl(
         }
 
     override suspend fun logoutCurrentUser() = callbackFlow {
-        AuthUI.getInstance().signOut(context).addOnSuccessListener {
-            trySend(true)
+        AuthUI.getInstance().signOut(context).addOnCompleteListener {
+            if (it.isSuccessful) {
+                Firebase.analytics.logEvent("logout", null)
+                trySend(true)
+            } else trySend(false)
         }
         awaitClose {}
     }
@@ -72,11 +81,22 @@ class FirebaseUserRepositoryImpl(
                 .toObject(User::class.java)
 
         if (userFromDatabase != null && userFromDatabase.registerDate != 0L) {
+
+            val bundle = Bundle()
+            bundle.putString(FirebaseAnalytics.Param.METHOD, "Google")
+            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN, bundle)
+
+
             appPreferences.saveUserValue(userFromDatabase)
             flow.tryEmit(Progress.Complete)
         } else {
             dbCollections.getUsersCollection().document(user.uid).set(user)
                 .addOnCompleteListener {
+
+                    val bundle = Bundle()
+                    bundle.putString(FirebaseAnalytics.Param.METHOD, "Google")
+                    firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)
+
                     runBlocking {
                         appPreferences.saveUserValue(user)
                     }

@@ -55,7 +55,7 @@ fun Profile(
     val bgHeight: Dp = 180.dp
 
     Scaffold(modifier = modifier.fillMaxSize(),
-        topBar = { ProfileAppBar(navController, viewModel) }) {
+        topBar = { ProfileAppBar(navController) }) {
         ConstraintLayout(
             modifier = Modifier
                 .fillMaxSize()

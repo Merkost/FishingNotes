@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.model.datasource
 
 import androidx.core.os.LocaleListCompat
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.mobileprism.fishing.domain.viewstates.ErrorType
 import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
@@ -14,7 +15,9 @@ import okio.IOException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class WeatherRepositoryRetrofitImpl : WeatherRepository {
+class WeatherRepositoryRetrofitImpl(
+    private val firebaseAnalytics: FirebaseAnalytics,
+) : WeatherRepository {
 
     val locale = LocaleListCompat.getAdjustedDefault().toLanguageTags().take(2)
 
@@ -45,6 +48,7 @@ class WeatherRepositoryRetrofitImpl : WeatherRepository {
         try {
             val weather = getService().getWeather(latitude = lat, longitude = lon,
                 lang = locale)
+            firebaseAnalytics.logEvent("get_weather", null)
             emit(RetrofitWrapper.Success(weather))
         } catch (e: IOException) {
             emit(RetrofitWrapper.Error(ErrorType.NetworkError(e)))

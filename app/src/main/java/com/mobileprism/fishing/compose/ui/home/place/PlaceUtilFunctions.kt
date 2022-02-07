@@ -4,8 +4,12 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.widget.Toast
 import androidx.navigation.NavController
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.compose.ui.Arguments
 import com.mobileprism.fishing.compose.ui.MainDestinations
 import com.mobileprism.fishing.compose.ui.navigate
@@ -18,6 +22,10 @@ fun newCatchClicked(navController: NavController, place: UserMapMarker) {
 }
 
 fun onRouteClicked(context: Context, marker: UserMapMarker) {
+    val bundle = Bundle()
+    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "marker")
+    Firebase.analytics.logEvent("navigate", bundle)
+
     val uri = String.format(
         Locale.ENGLISH,
         "http://maps.google.com/maps?daddr=%f,%f (%s)",
@@ -45,6 +53,10 @@ fun onShareClicked(
     context: Context,
     marker: UserMapMarker
 ) {
+    val bundle = Bundle()
+    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "marker")
+    Firebase.analytics.logEvent(FirebaseAnalytics.Event.SHARE, bundle)
+
     val text =
         "${marker.title}\nhttps://www.google.com/maps/search/?api=1&query=${marker.latitude}" +
                 ",${marker.longitude}"
