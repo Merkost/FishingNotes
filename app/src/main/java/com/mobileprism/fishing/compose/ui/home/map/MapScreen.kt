@@ -83,8 +83,6 @@ fun MapScreen(
 
     val map = rememberMapViewWithLifecycle()
 
-
-
     chosenPlace?.let {
         if (it.id.isNotEmpty()) {
             viewModel.currentMarker.value = chosenPlace
@@ -115,10 +113,6 @@ fun MapScreen(
             }
             else -> mutableStateOf(viewModel.mapUiState.value)
         }
-    }
-
-    var cameraMoveState: CameraMoveState by remember {
-        mutableStateOf(CameraMoveState.MoveFinish)
     }
 
     val pointerState: MutableState<PointerState> = remember {
@@ -166,7 +160,7 @@ fun MapScreen(
                     }
                 }
                 is LocationState.GpsNotEnabled -> {
-                    //checkGPSEnabled(context) { currentLocationFlow.collectAsState() }
+                    checkGPSEnabled(context) //{ currentLocationFlow.collectAsState() }
                 }
             }
         }
@@ -277,15 +271,10 @@ fun MapScreen(
                         viewModel.currentMarker.value = it
                         mapUiState = MapUiState.BottomSheetInfoMode
                     },
-                    showHiddenPlacess = showHiddenPlaces,
-                    cameraMoveCallback = { state -> cameraMoveState = state },
                     currentCameraPosition = currentCameraPosition,
                     mapType = mapType, mapBearing = mapBearing,
                     onMapClick = {
                         mapUiState = MapUiState.NormalMode
-                        /*coroutineScope.launch {
-                            scaffoldState.bottomSheetState.collapse()
-                        }*/
                     }
                 )
 
@@ -419,7 +408,6 @@ fun MapScreen(
                 ) {
                     PlaceTileView(
                         modifier = Modifier.wrapContentSize(),
-                        cameraMoveState = cameraMoveState,
                         currentCameraPosition = currentCameraPosition,
                         pointerState = pointerState
                     )
@@ -447,13 +435,10 @@ fun MapLayout(
     modifier: Modifier = Modifier,
     map: MapView,
     onMarkerClick: (marker: UserMapMarker) -> Unit,
-    showHiddenPlacess: Boolean,
-    cameraMoveCallback: (state: CameraMoveState) -> Unit,
     currentCameraPosition: MutableState<Pair<LatLng, Float>>,
     mapType: MutableState<Int>,
     mapBearing: MutableState<Float>,
     onMapClick: () -> Unit,
-
     ) {
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
@@ -461,7 +446,6 @@ fun MapLayout(
     val userPreferences: UserPreferences = get()
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
     val context = LocalContext.current
-    val darkTheme = isSystemInDarkTheme()
     val markers by viewModel.mapMarkers.collectAsState()
     val markersToShow by remember(markers, showHiddenPlaces) {
         mutableStateOf(if (showHiddenPlaces) markers
@@ -505,7 +489,8 @@ fun MapLayout(
                     marker?.tag = it.id
                 }
                 googleMap.setOnCameraMoveStartedListener {
-                    cameraMoveCallback(CameraMoveState.MoveStart)
+                    viewModel.setCameraMoveState(CameraMoveState.MoveStart)
+
                 }
                 googleMap.setOnCameraMoveListener {
                     mapBearing.value = googleMap.cameraPosition.bearing
@@ -513,7 +498,7 @@ fun MapLayout(
                         Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom)
                 }
                 googleMap.setOnCameraIdleListener {
-                    cameraMoveCallback(CameraMoveState.MoveFinish)
+                    viewModel.setCameraMoveState(CameraMoveState.MoveFinish)
                     /*currentCameraPosition.value =
                         Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom)*/
                     //mapBearing.value = googleMap.cameraPosition.bearing

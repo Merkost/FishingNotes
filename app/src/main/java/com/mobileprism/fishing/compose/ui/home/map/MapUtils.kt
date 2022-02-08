@@ -391,7 +391,7 @@ fun BackPressHandler(
 fun rememberMapViewWithLifecycle(): MapView {
     val context = (LocalContext.current as MainActivity)
     val isDarkMode = isSystemInDarkTheme()
-    val mapView: MapView = remember(isSystemInDarkTheme()) {
+    val mapView: MapView = remember(isDarkMode) {
         MapView(
             context,
             when (isDarkMode) {

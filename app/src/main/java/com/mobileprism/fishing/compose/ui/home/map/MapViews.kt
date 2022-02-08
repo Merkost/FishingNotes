@@ -480,12 +480,12 @@ fun FishLoading(modifier: Modifier) {
 @Composable
 fun PlaceTileView(
     modifier: Modifier,
-    cameraMoveState: CameraMoveState,
     currentCameraPosition: MutableState<Pair<LatLng, Float>>,
     pointerState: MutableState<PointerState>
 ) {
     val context = LocalContext.current
     val viewModel: MapViewModel = getViewModel()
+    val cameraMoveState by viewModel.cameraMoveState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val geocoder = Geocoder(context)
     var selectedPlace by remember { mutableStateOf<String?>(null) }
@@ -530,6 +530,7 @@ fun PlaceTileView(
     }
 
     val placeName = viewModel.chosenPlace.value ?: stringResource(R.string.searching)
+    val shimmerModifier = if (viewModel.chosenPlace.value != null) Modifier else Modifier.shimmer()
     val pointerIconColor by animateColorAsState(
         if (selectedPlace != null) secondaryFigmaColor
         else Color.LightGray
@@ -538,7 +539,7 @@ fun PlaceTileView(
         if (selectedPlace != null) MaterialTheme.colors.onSurface
         else Color.LightGray
     )
-    val shimmerModifier = if (viewModel.chosenPlace.value != null) Modifier else Modifier.shimmer()
+
 
     Card(
         shape = RoundedCornerShape(size = 20.dp),
@@ -635,6 +636,6 @@ fun BottomSheetLine(modifier: Modifier = Modifier) {
                 .size(width = 25.dp, height = 3.dp)
                 .clip(CircleShape)
                 .background(Color.Gray)
-        ) {}
+        )
     }
 }
