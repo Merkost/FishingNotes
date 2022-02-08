@@ -36,6 +36,7 @@ import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+
 import com.google.android.gms.tasks.Task
 import com.google.maps.android.ktx.awaitMap
 import com.mobileprism.fishing.R
@@ -391,20 +392,16 @@ fun BackPressHandler(
 fun rememberMapViewWithLifecycle(): MapView {
     val context = (LocalContext.current as MainActivity)
     val isDarkMode = isSystemInDarkTheme()
+    val mapOptions = when (isDarkMode) {
+        true -> { GoogleMapOptions().mapId(context.resources.getString(R.string.dark_map_id)) }
+        false -> { GoogleMapOptions().mapId(context.resources.getString(R.string.light_map_id)) }
+    }
     val mapView: MapView = remember(isDarkMode) {
         MapView(
             context,
-            when (isDarkMode) {
-                true -> {
-                    GoogleMapOptions().mapId(context.resources.getString(R.string.dark_map_id))
-                }
-                false -> {
-                    GoogleMapOptions().mapId(context.resources.getString(R.string.light_map_id))
-                }
-            }
+            mapOptions
         )
-    }
-        .apply { id = R.id.map }
+    }.apply { id = R.id.map }
 
 
     val lifecycle = LocalLifecycleOwner.current.lifecycle

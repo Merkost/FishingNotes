@@ -9,6 +9,7 @@ plugins {
     id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
     id 'com.google.firebase.firebase-perf'
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
 
 android {
@@ -90,6 +91,7 @@ dependencies {
     implementation Libs.Coroutines.core
 
     implementation Libs.GoogleMaps.mapsKtx
+    //implementation Libs.GoogleMaps.maps
     implementation Libs.GoogleMaps.mapUtilsKtx
 
     implementation Libs.PlayServices.maps
