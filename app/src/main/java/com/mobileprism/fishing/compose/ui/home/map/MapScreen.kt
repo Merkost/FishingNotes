@@ -38,6 +38,8 @@ import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.libraries.maps.MapView
 import com.google.android.libraries.maps.model.*
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.ktx.Firebase
 import com.google.maps.android.ktx.awaitMap
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.Arguments
@@ -326,6 +328,7 @@ fun MapScreen(
                     },
                 ) {
                     coroutineScope.launch {
+                        Firebase.analytics.logEvent("map_settings", null)
                         modalBottomSheetState.show()
                     }
                 }

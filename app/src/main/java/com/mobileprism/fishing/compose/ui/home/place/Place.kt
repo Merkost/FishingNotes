@@ -17,7 +17,7 @@ import com.google.accompanist.pager.rememberPagerState
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.Arguments
 import com.mobileprism.fishing.compose.ui.MainDestinations
-import com.mobileprism.fishing.compose.ui.home.advertising.BannerAdvertView
+import com.mobileprism.fishing.compose.ui.home.advertising.AdaptiveBannerAdvertView
 import com.mobileprism.fishing.compose.ui.home.notes.TabItem
 import com.mobileprism.fishing.compose.ui.navigate
 import com.mobileprism.fishing.domain.UserPlaceViewModel
@@ -65,7 +65,7 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
                 PlaceTopBar(backPress, viewModel)
             },
             sheetContent = {
-                BannerAdvertView(adId = stringResource(R.string.place_admob_banner_id))
+                AdaptiveBannerAdvertView(adId = stringResource(R.string.place_admob_banner_id))
             },
             sheetShape = RectangleShape,
             sheetGesturesEnabled = false,

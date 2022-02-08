@@ -272,6 +272,8 @@
     <string name="finish">Finish</string>
     <string name="select_on_map">Select on map</string>
     <string name="location_and_time">Location and time</string>
+    <string name="billing_unavaliable">Couldn\'t connect to billing service</string>
+    <string name="thanks_developers">Thank developers</string>
 
 
 </resources>

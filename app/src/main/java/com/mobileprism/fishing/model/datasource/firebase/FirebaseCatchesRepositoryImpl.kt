@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
@@ -22,6 +23,7 @@ import kotlinx.coroutines.launch
 
 class FirebaseCatchesRepositoryImpl(
     private val dbCollections: RepositoryCollections,
+    private val firebaseAnalytics: FirebaseAnalytics,
     private val cloudPhotoStorage: PhotoStorage
 ) : CatchesRepository {
 
@@ -147,8 +149,15 @@ class FirebaseCatchesRepositoryImpl(
 
         dbCollections.getUserCatchesCollection(markerId).document(userCatch.id).set(userCatch)
             .addOnCompleteListener {
-                trySend(Progress.Complete)
-                incrementNumOfCatches(markerId)
+                if (it.exception != null) {
+                    trySend(Progress.Error(it.exception!!))
+                }
+
+                if (it.isSuccessful) {
+                    firebaseAnalytics.logEvent("new_catch", null)
+                    trySend(Progress.Complete)
+                    incrementNumOfCatches(markerId)
+                }
             }
         awaitClose { }
     }

@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.model.datasource
 
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.mobileprism.fishing.domain.viewstates.ErrorType
 import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
@@ -19,7 +20,9 @@ import okhttp3.logging.HttpLoggingInterceptor
 
 
 
-class SolunarRetrofitRepositoryImpl : SolunarRepository {
+class SolunarRetrofitRepositoryImpl(
+    private val firebaseAnalytics: FirebaseAnalytics,
+) : SolunarRepository {
 
     companion object {
         private const val BASE_SOLUNAR_URL = "https://api.solunar.org/"
@@ -62,6 +65,8 @@ class SolunarRetrofitRepositoryImpl : SolunarRepository {
                     date = date,
                     tz = timeZone.toIntOrNull() ?: 0
                 )
+
+                firebaseAnalytics.logEvent("get_solunar", null)
 
                 emit(RetrofitWrapper.Success(solunar))
             } catch (e: IOException) {

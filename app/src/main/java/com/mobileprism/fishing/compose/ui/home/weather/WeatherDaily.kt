@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.*
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
-import com.mobileprism.fishing.compose.ui.home.advertising.BannerAdvertView
+import com.mobileprism.fishing.compose.ui.home.advertising.AdaptiveBannerAdvertView
 import com.mobileprism.fishing.compose.ui.home.views.DefaultAppBar
 import com.mobileprism.fishing.model.entity.weather.Daily
 import com.mobileprism.fishing.utils.Constants
@@ -44,7 +44,7 @@ fun WeatherDaily(
             )
         },
         sheetContent = {
-            BannerAdvertView(adId = stringResource(R.string.weather_daily_admob_banner_id))
+            AdaptiveBannerAdvertView(adId = stringResource(R.string.weather_daily_admob_banner_id))
         },
         sheetShape = RectangleShape,
         sheetGesturesEnabled = false,

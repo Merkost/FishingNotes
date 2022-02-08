@@ -186,7 +186,7 @@ fun NewCatchScreen(
 
                     Places(viewModel, isNull, navController)  //Выпадающий список мест
                     FishAndWeight(viewModel.fishAmount, viewModel.weight)
-                    BannerAdvertView(adId = stringResource(R.string.new_catch_admob_banner_id))
+                    BannerAdvertView(adId = stringResource(R.string.new_catch_admob_banner_id), padding = 16.dp)
                     Fishing(viewModel.rod, viewModel.bite, viewModel.lure)
                     DateAndTime(viewModel.date)
                     NewCatchWeatherItem(viewModel)
