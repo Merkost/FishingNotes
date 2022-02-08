@@ -3,14 +3,13 @@ package com.mobileprism.fishing.compose.ui.home.new_catch
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
+import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -23,6 +22,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.views.DefaultAppBar
 import com.mobileprism.fishing.compose.ui.home.views.DefaultButton
@@ -30,11 +30,14 @@ import com.mobileprism.fishing.compose.ui.home.views.DefaultButtonFilled
 import com.mobileprism.fishing.compose.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.domain.NewCatchMasterViewModel
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
+import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.showToast
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.viewModel
 import org.koin.core.parameter.parametersOf
 
+@ExperimentalPermissionsApi
+@ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @ExperimentalComposeUiApi
 @ExperimentalPagerApi
@@ -57,6 +60,36 @@ fun NewCatchMasterScreen(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
+    val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    var currentBottomSheet: BottomSheetNewCatchScreen? by remember { mutableStateOf(null) }
+
+    val closeSheet: () -> Unit = {
+        coroutineScope.launch { modalBottomSheetState.hide() }
+    }
+
+    val openSheet: (BottomSheetNewCatchScreen) -> Unit = {
+        currentBottomSheet = it
+        coroutineScope.launch { modalBottomSheetState.show() }
+    }
+
+    if (!modalBottomSheetState.isVisible) {
+        currentBottomSheet = null
+    }
+
+    LaunchedEffect(key1 = viewModel.addPhotoState.value) {
+        if (viewModel.addPhotoState.value) {
+            openSheet(BottomSheetNewCatchScreen.EditPhotosScreen)
+        } else {
+            closeSheet()
+        }
+    }
+
+    LaunchedEffect(key1 = modalBottomSheetState.isVisible) {
+        if (!modalBottomSheetState.isVisible) {
+            viewModel.addPhotoState.value = false
+        }
+    }
+
     val pagerState = rememberPagerState(0)
     val pages = remember {
         listOf(
@@ -78,76 +111,94 @@ fun NewCatchMasterScreen(
         upPress = { upPress() }
     )
 
-    Scaffold(
-        topBar = {
-            DefaultAppBar(title = stringResource(id = R.string.new_catch))
+    ModalBottomSheetLayout(
+        modifier = Modifier,
+        sheetShape = Constants.modalBottomSheetCorners,
+        sheetState = modalBottomSheetState,
+        sheetContent = {
+            Spacer(modifier = Modifier.height(1.dp))
+            currentBottomSheet?.let { currentSheet ->
+                NewCatchModalBottomSheetContent(
+                    currentScreen = currentSheet,
+                    photos = viewModel.photos.collectAsState(),
+                    onSavePhotos = { viewModel.setPhotos(it) },
+                    onCloseBottomSheet = { viewModel.addPhotoState.value = false }
+                )
+            }
         }
     ) {
-        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (pager, buttons) = createRefs()
 
-            NewCatchPager(
-                modifier = Modifier.constrainAs(pager) {
-                    top.linkTo(parent.top)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                    absoluteRight.linkTo(parent.absoluteRight)
-                    bottom.linkTo(buttons.top)
-                    height = Dimension.fillToConstraints
-                    width = Dimension.fillToConstraints
-                },
-                navController = navController,
-                viewModel = viewModel,
-                pagerState = pagerState,
-                pages = pages
-            )
+        Scaffold(
+            topBar = {
+                DefaultAppBar(title = stringResource(id = R.string.new_catch))
+            }
+        ) {
+            ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+                val (pager, buttons) = createRefs()
 
-            NewCatchButtons(
-                modifier = Modifier.constrainAs(buttons) {
-                    bottom.linkTo(parent.bottom)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                    absoluteRight.linkTo(parent.absoluteRight)
-                },
-                pagerState = pagerState,
-                onFinishClick = { viewModel.saveNewCatch() },
-                onNextClick = {
-                    coroutineScope.launch {
-                        when (pagerState.currentPage) {
-                            0 -> {
-                                if (viewModel.currentPlace.value != null && viewModel.isPlaceInputCorrect.value) {
+                NewCatchPager(
+                    modifier = Modifier.constrainAs(pager) {
+                        top.linkTo(parent.top)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                        bottom.linkTo(buttons.top)
+                        height = Dimension.fillToConstraints
+                        width = Dimension.fillToConstraints
+                    },
+                    navController = navController,
+                    viewModel = viewModel,
+                    pagerState = pagerState,
+                    pages = pages
+                )
+
+                NewCatchButtons(
+                    modifier = Modifier.constrainAs(buttons) {
+                        bottom.linkTo(parent.bottom)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                    },
+                    pagerState = pagerState,
+                    onFinishClick = { viewModel.saveNewCatch() },
+                    onNextClick = {
+                        coroutineScope.launch {
+                            when (pagerState.currentPage) {
+                                0 -> {
+                                    if (viewModel.currentPlace.value != null && viewModel.isPlaceInputCorrect.value) {
+                                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                        viewModel.loadWeather()
+                                    } else {
+                                        showToast(context, "Please select place")
+                                    }
+                                }
+                                1 -> {
+                                    if (viewModel.fishType.value.isNotBlank()) {
+                                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                    } else {
+                                        showToast(context, "Please enter fish species")
+                                    }
+
+                                }
+                                3 -> {
+                                    if (viewModel.isWeatherInputCorrect.isEmpty()) {
+                                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                    }
+                                }
+                                else -> {
                                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                    viewModel.loadWeather()
-                                } else {
-                                    showToast(context, "Please select place")
                                 }
                             }
-                            1 -> {
-                                if (viewModel.fishType.value.isNotBlank()) {
-                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                } else {
-                                    showToast(context, "Please enter fish species")
-                                }
 
-                            }
-                            3 -> {
-                                if (viewModel.isWeatherInputCorrect.isEmpty()) {
-                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                }
-                            }
-                            else -> {
-                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                            }
+
                         }
-
-
-                    }
-                },
-                onPreviousClick = {
-                    coroutineScope.launch {
-                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                    }
-                },
-                onCloseClick = upPress
-            )
+                    },
+                    onPreviousClick = {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                        }
+                    },
+                    onCloseClick = upPress
+                )
+            }
         }
     }
 }
@@ -173,6 +224,8 @@ fun NewCatchPager(
                 .pointerInput(Unit) {
                     detectDragGestures(
                         onDrag = { change, _ ->
+                            change.changedToDownIgnoreConsumed()
+                            change.changedToUpIgnoreConsumed()
                             change.consumeAllChanges()
                         }
                     )

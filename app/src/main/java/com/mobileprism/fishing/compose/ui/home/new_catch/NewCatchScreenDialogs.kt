@@ -3,12 +3,14 @@ package com.mobileprism.fishing.compose.ui.home.new_catch
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
+import android.net.Uri
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.res.stringResource
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -29,19 +31,15 @@ sealed class BottomSheetNewCatchScreen() {
 @Composable
 fun NewCatchModalBottomSheetContent(
     currentScreen: BottomSheetNewCatchScreen,
-    viewModel: NewCatchViewModel,
+    photos: State<List<Uri>>,
+    onSavePhotos: (List<Uri>) -> Unit,
     onCloseBottomSheet: () -> Unit,
 ) {
     when (currentScreen) {
         BottomSheetNewCatchScreen.EditPhotosScreen -> {
             AddPhotoDialog(
-                photos = viewModel.images,
-                onSavePhotosClick = { newPhotos ->
-                    viewModel.images.apply {
-                        clear()
-                        addAll(newPhotos)
-                    }
-                },
+                photos = photos.value,
+                onSavePhotosClick = { onSavePhotos(it) },
                 onCloseBottomSheet = onCloseBottomSheet
             )
         }

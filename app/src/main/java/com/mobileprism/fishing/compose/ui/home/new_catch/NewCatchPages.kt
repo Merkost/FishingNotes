@@ -1,9 +1,11 @@
 package com.mobileprism.fishing.compose.ui.home.new_catch
 
-import android.net.Uri
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
@@ -37,7 +39,7 @@ sealed class NewCatchPage(var screen: NewCatchScreenItem) {
     })
 
     class NewCatchWayOfFishingPage() : NewCatchPage(screen = { viewModel, navController ->
-        NewCatchWayOfFishing(viewModel, navController)
+        NewCatchNote(viewModel, navController)
     })
 
     @ExperimentalComposeUiApi
@@ -55,13 +57,17 @@ sealed class NewCatchPage(var screen: NewCatchScreenItem) {
 @ExperimentalComposeUiApi
 @Composable
 fun NewCatchPlace(viewModel: NewCatchMasterViewModel, navController: NavController) {
-    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+    ConstraintLayout(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
         val (titleLocation, titleDate, field, date, button) = createRefs()
 
         SubtitleWithIcon(
             modifier = Modifier.constrainAs(titleLocation) {
                 top.linkTo(parent.top, 16.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft, 32.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
             },
             icon = R.drawable.ic_baseline_location_on_24,
             text = stringResource(R.string.location)
@@ -118,10 +124,11 @@ fun NewCatchPlace(viewModel: NewCatchMasterViewModel, navController: NavControll
 fun NewCatchFishInfo(viewModel: NewCatchMasterViewModel, navController: NavController) {
     ConstraintLayout(
         modifier = Modifier
+            .verticalScroll(rememberScrollState())
             .fillMaxSize()
             .padding(horizontal = 16.dp)
     ) {
-        val (subtitleFish, subtitleNote, fish, amountAndWeight, note) = createRefs()
+        val (subtitleFish, subtitleRod, fish, amountAndWeight, rod) = createRefs()
 
         SubtitleWithIcon(
             modifier = Modifier.constrainAs(subtitleFish) {
@@ -155,43 +162,8 @@ fun NewCatchFishInfo(viewModel: NewCatchMasterViewModel, navController: NavContr
         )
 
         SubtitleWithIcon(
-            modifier = Modifier.constrainAs(subtitleNote) {
-                top.linkTo(amountAndWeight.bottom, 32.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-            },
-            icon = R.drawable.ic_baseline_edit_note_24,
-            text = stringResource(id = R.string.note)
-        )
-
-        OutlinedTextField(
-            modifier = Modifier.constrainAs(note) {
-                top.linkTo(subtitleNote.bottom, 16.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
-                width = Dimension.fillToConstraints
-            },
-            singleLine = false,
-            maxLines = 7,
-            label = { Text(text = stringResource(id = R.string.note)) },
-            value = viewModel.description.collectAsState().value,
-            onValueChange = { viewModel.setNote(it) }
-        )
-
-    }
-}
-
-@Composable
-fun NewCatchWayOfFishing(viewModel: NewCatchMasterViewModel, navController: NavController) {
-    ConstraintLayout(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
-    ) {
-        val (subtitle, fields) = createRefs()
-
-        SubtitleWithIcon(
-            modifier = Modifier.constrainAs(subtitle) {
-                top.linkTo(parent.top, 16.dp)
+            modifier = Modifier.constrainAs(subtitleRod) {
+                top.linkTo(amountAndWeight.bottom, 16.dp)
                 absoluteLeft.linkTo(parent.absoluteLeft)
             },
             icon = R.drawable.ic_fishing_rod,
@@ -199,8 +171,8 @@ fun NewCatchWayOfFishing(viewModel: NewCatchMasterViewModel, navController: NavC
         )
 
         WayOfFishingView(
-            modifier = Modifier.constrainAs(fields) {
-                top.linkTo(subtitle.bottom, 16.dp)
+            modifier = Modifier.constrainAs(rod) {
+                top.linkTo(subtitleRod.bottom, 16.dp)
                 absoluteLeft.linkTo(parent.absoluteLeft)
                 absoluteRight.linkTo(parent.absoluteRight)
             },
@@ -210,6 +182,43 @@ fun NewCatchWayOfFishing(viewModel: NewCatchMasterViewModel, navController: NavC
             onRodChange = { viewModel.setRod(it) },
             onBiteChange = { viewModel.setBait(it) },
             onLureChange = { viewModel.setLure(it) }
+        )
+
+    }
+}
+
+@Composable
+fun NewCatchNote(viewModel: NewCatchMasterViewModel, navController: NavController) {
+    ConstraintLayout(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+    ) {
+        val (subtitle, note) = createRefs()
+
+        SubtitleWithIcon(
+            modifier = Modifier.constrainAs(subtitle) {
+                top.linkTo(parent.top, 16.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+            },
+            icon = R.drawable.ic_baseline_edit_note_24,
+            text = stringResource(id = R.string.note)
+        )
+
+        OutlinedTextField(
+            modifier = Modifier
+                .defaultMinSize(minHeight = 200.dp)
+                .constrainAs(note) {
+                    top.linkTo(subtitle.bottom, 16.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    absoluteRight.linkTo(parent.absoluteRight)
+                    width = Dimension.fillToConstraints
+                },
+            singleLine = false,
+            maxLines = 10,
+            label = { Text(text = stringResource(id = R.string.note)) },
+            value = viewModel.description.collectAsState().value,
+            onValueChange = { viewModel.setNote(it) }
         )
 
     }
@@ -313,10 +322,32 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
 @ExperimentalAnimationApi
 @Composable
 fun NewCatchPhotos(viewModel: NewCatchMasterViewModel, navController: NavController) {
-    val photos = listOf<Uri>()
 
-    PhotosView(
-        photos = photos,
-        onEditClick = { }
-    )
+    ConstraintLayout(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxSize()
+    ) {
+        val (subtitle, photosView) = createRefs()
+
+        SubtitleWithIcon(
+            modifier = Modifier.constrainAs(subtitle) {
+                top.linkTo(parent.top, 16.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+            },
+            icon = R.drawable.ic_baseline_photo_24,
+            text = stringResource(R.string.photos)
+        )
+
+        PhotosView(
+            modifier = Modifier.constrainAs(photosView) {
+                top.linkTo(subtitle.bottom, 32.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            photos = viewModel.photos.collectAsState().value,
+            onEditClick = { viewModel.addPhotoState.value = true }
+        )
+    }
+
 }

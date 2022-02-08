@@ -1,6 +1,8 @@
 package com.mobileprism.fishing.domain
 
+import android.net.Uri
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchPlacesState
@@ -16,6 +18,7 @@ import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
 import com.mobileprism.fishing.utils.time.toDate
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -52,6 +55,8 @@ class NewCatchMasterViewModel(
         MutableStateFlow<RetrofitWrapper<WeatherForecast>>(RetrofitWrapper.Loading())
     val weatherState = _weatherState.asStateFlow()
 
+    val addPhotoState = mutableStateOf(false)
+
     val markersListState = MutableStateFlow<NewCatchPlacesState>(NewCatchPlacesState.NotReceived)
     val catchDate = MutableStateFlow(Date().time)
     val fishType = MutableStateFlow("")
@@ -68,6 +73,8 @@ class NewCatchMasterViewModel(
     val weatherWindSpeed = MutableStateFlow("0")
     val weatherWindDeg = MutableStateFlow(0)
     val weatherMoonPhase = MutableStateFlow(0.0f)
+    private val _photos = MutableStateFlow<List<Uri>>(listOf())
+    val photos = _photos.asStateFlow()
 
 
     fun setSelectedPlace(place: UserMapMarker) {
@@ -148,6 +155,10 @@ class NewCatchMasterViewModel(
         }
     }
 
+    fun setPhotos(newPhotos: List<Uri>) {
+        _photos.value = newPhotos
+    }
+
     fun loadWeather() {
         if (catchDate.value.toDate() != Date().time.toDate()) {
             getHistoricalWeather()
@@ -157,7 +168,7 @@ class NewCatchMasterViewModel(
     }
 
     private fun getWeatherForecast() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             currentPlace.value?.run {
                 _weatherState.value = RetrofitWrapper.Loading()
 
@@ -182,7 +193,7 @@ class NewCatchMasterViewModel(
     }
 
     private fun getHistoricalWeather() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             currentPlace.value?.run {
                 _weatherState.value = RetrofitWrapper.Loading()
                 weatherRepository
@@ -233,7 +244,7 @@ class NewCatchMasterViewModel(
         _uiState.value = BaseViewState.Loading(0)
         val newCatch = RawUserCatch()
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             currentPlace.value?.let { userMapMarker ->
                 catchesRepository.addNewCatch(userMapMarker.id, newCatch).collect { progress ->
                     when (progress) {
@@ -253,7 +264,7 @@ class NewCatchMasterViewModel(
     }
 
     private fun getAllUserMarkersList() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             markersRepository.getAllUserMarkersList().collect { markers ->
                 markersListState.value =
                     NewCatchPlacesState.Received(markers as List<UserMapMarker>)

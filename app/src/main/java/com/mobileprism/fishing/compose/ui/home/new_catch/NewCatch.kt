@@ -118,11 +118,11 @@ fun NewCatchScreen(
         sheetContent = {
             Spacer(modifier = Modifier.height(1.dp))
             currentBottomSheet?.let { currentSheet ->
-                NewCatchModalBottomSheetContent(
-                    currentScreen = currentSheet,
-                    viewModel = viewModel,
-                    onCloseBottomSheet = closeSheet
-                )
+//                NewCatchModalBottomSheetContent(
+//                    currentScreen = currentSheet,
+//                    viewModel = viewModel,
+//                    onCloseBottomSheet = closeSheet
+//                )
             }
         }
     ) {
