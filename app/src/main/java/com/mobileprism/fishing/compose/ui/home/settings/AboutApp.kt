@@ -1,6 +1,9 @@
 package com.mobileprism.fishing.compose.ui.home.settings
 
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -11,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -116,11 +120,17 @@ fun AboutApp(upPress: () -> Unit) {
             }
             Column(
                 modifier = Modifier
-                    .weight(3f)
+                    .weight(4f)
                     .padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+
+                OutlinedButton(onClick = { goToPlayStore(context) }) {
+                    Text(text = stringResource(id = R.string.leave_review))
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Icon(Icons.Default.RateReview, Icons.Default.RateReview.name)
+                }
 
                 OutlinedButton(onClick = {
                     billingClient.startConnection(
@@ -244,4 +254,23 @@ fun AboutAppAppBar(backPress: () -> Unit) {
         title = stringResource(id = R.string.settings_about),
         onNavClick = { backPress() }
     )
+}
+
+fun goToPlayStore(context: Context) {
+    val packageName = context.packageName
+    try {
+        context.startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("market://details?id=$packageName")
+            )
+        )
+    } catch (e: ActivityNotFoundException) {
+        context.startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
+            )
+        )
+    }
 }

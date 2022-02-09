@@ -269,15 +269,16 @@
     <string name="place_note_not_deleted">Couldn\'t delete the note!</string>
     <string name="billing_unavaliable">Couldn\'t connect to billing service</string>
     <string name="update_ready">Update is ready</string>
-    <string name="reload_app">RESTART</string>
-    <string name="update_canceled">Обновление отменено пользователем</string>
-    <string name="update_downloading">Обновление загружается</string>
+    <string name="reload_app">Restart</string>
+    <string name="update_canceled">Update canceled by user</string>
+    <string name="update_downloading">The update is loading</string>
     <string name="update_failed">Update failed</string>
-    <string name="update_installed">Обновление установлено</string>
-    <string name="payment_no_content">Отсутствуют товары для покупки</string>
-    <string name="made_in_russia">"Made in Russia with love  ❤ "</string>
+    <string name="update_installed">Update installed</string>
+    <string name="payment_no_content"> There are no items to buy</string>
+    <string name="made_in_russia">Made in Russia with love  ❤ </string>
     <string name="app_donation">App support</string>
     <string name="unknown_version">Неизвестная версия</string>
+    <string name="leave_review">Leave a review</string>
 
 
 </resources>

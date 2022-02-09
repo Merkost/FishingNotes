@@ -221,7 +221,7 @@ class MainActivity : ComponentActivity() {
     private fun popupSnackbarForCompleteUpdate() {
         SnackbarManager.showMessage(
             R.string.update_ready,
-            SnackbarAction(getString(R.string.reload_app)) { appUpdateManager.completeUpdate() },
+            SnackbarAction(getString(R.string.reload_app).uppercase()) { appUpdateManager.completeUpdate() },
             duration = SnackbarDuration.Indefinite
         )
     }
