@@ -268,10 +268,15 @@
     <string name="place_note_not_deleted">Не удалось удалить заметку!</string>
     <string name="add_new_place">Добавить новое место</string>
     <string name="billing_unavaliable">Не удалось подключиться к billing service</string>
-    <string name="thanks_developers">Поблагодарить разработчиков</string>
     <string name="update_canceled">Обновление отменено пользователем</string>
     <string name="update_downloading">Обновление загружается</string>
     <string name="update_failed">Update failed</string>
     <string name="update_installed">Обновление установлено</string>
+    <string name="payment_no_content">Отсутствуют товары для покупки</string>
+    <string name="made_in_russia">"Сделано в России с ❤ "</string>
+    <string name="app_donation">Поддержка проекта</string>
+    <string name="update_ready">Обновление загружено</string>
+    <string name="reload_app">ПЕРЕЗАПУСТИТЬ</string>
+    <string name="unknown_version">Неизвестная версия</string>
 
 </resources>
