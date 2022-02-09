@@ -58,6 +58,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 object MapTypes {
+    const val none = GoogleMap.MAP_TYPE_NONE
     const val roadmap = GoogleMap.MAP_TYPE_NORMAL
     const val satellite = GoogleMap.MAP_TYPE_SATELLITE
     const val hybrid = GoogleMap.MAP_TYPE_HYBRID

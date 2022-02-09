@@ -39,6 +39,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
@@ -439,10 +440,10 @@ fun MapLayout(
     mapType: MutableState<Int>,
     mapBearing: MutableState<Float>,
     onMapClick: () -> Unit,
-    ) {
+) {
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
-
+    val darkTheme = isSystemInDarkTheme()
     val userPreferences: UserPreferences = get()
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
     val context = LocalContext.current
@@ -458,8 +459,10 @@ fun MapLayout(
         mutableStateOf(false)
     }
 
-    AnimatedVisibility(visible = isMapVisible,
-    enter = fadeIn(), exit = fadeOut()) {
+    AnimatedVisibility(
+        visible = isMapVisible,
+        enter = fadeIn(), exit = fadeOut()
+    ) {
         AndroidView(
             { map },
             modifier = modifier
@@ -468,6 +471,20 @@ fun MapLayout(
         ) { mapView ->
             coroutineScope.launch {
                 val googleMap = mapView.awaitMap()
+
+                //Map styles: https://mapstyle.withgoogle.com
+                when (darkTheme) {
+                    true -> {
+                        googleMap.setMapStyle(
+                            MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_fishing_night)
+                        )
+                    }
+                    false -> {
+                        googleMap.setMapStyle(
+                            MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_fishing)
+                        )
+                    }
+                }
 
                 googleMap.clear()
                 markersToShow.forEach {
@@ -513,10 +530,9 @@ fun MapLayout(
                     return@setOnMapClickListener
                 }
 
-                /*//Map styles: https://mapstyle.withgoogle.com
-                if (darkTheme) googleMap.setMapStyle(
-                    MapStyleOptions.loadRawResourceStyle(context, R.raw.mapstyle_night)
-                )*/
+
+
+                googleMap.uiSettings.isZoomGesturesEnabled = true
                 googleMap.uiSettings.isMyLocationButtonEnabled = false
             }
         }
@@ -592,7 +608,7 @@ fun LocationPermissionDialog(
             }
         },
         permissionsNotAvailableContent = { onCloseCallback(); SnackbarManager.showMessage(R.string.location_permission_denied) })
-    { checkPermission(context);  }
+    { checkPermission(context); }
 }
 
 @ExperimentalMaterialApi
