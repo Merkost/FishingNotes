@@ -269,5 +269,9 @@
     <string name="add_new_place">Добавить новое место</string>
     <string name="billing_unavaliable">Не удалось подключиться к billing service</string>
     <string name="thanks_developers">Поблагодарить разработчиков</string>
+    <string name="update_canceled">Обновление отменено пользователем</string>
+    <string name="update_downloading">Обновление загружается</string>
+    <string name="update_failed">Update failed</string>
+    <string name="update_installed">Обновление установлено</string>
 
 </resources>

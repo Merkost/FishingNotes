@@ -11,6 +11,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.SnackbarDuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +45,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.compose.ui.home.SnackbarAction
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.compose.ui.theme.AppThemeValues
 import com.mobileprism.fishing.compose.ui.theme.FishingNotesTheme
@@ -64,7 +66,7 @@ class MainActivity : ComponentActivity() {
     private val logger: Logger by inject()
 
     private lateinit var appUpdateManager: AppUpdateManager
-    private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
+    private var installStateUpdatedListener: InstallStateUpdatedListener? = null
     private lateinit var googleSignInClient: GoogleSignInClient
     private lateinit var auth: FirebaseAuth
 
@@ -157,21 +159,16 @@ class MainActivity : ComponentActivity() {
         val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
         MobileAds.setRequestConfiguration(configuration)
         setAppMuted(true)
-    }
 
-    override fun onResume() {
-        super.onResume()
-        try {
-
-            checkForUpdates()
-        } catch (e: Exception) {
-            handleError(e)
-        }
+        checkForUpdates()
     }
 
     private fun checkForUpdates() {
         appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
 
+        val unregisterListener = {
+            installStateUpdatedListener?.let { appUpdateManager.unregisterListener(it) }
+        }
         // Create a listener to track request state updates.
         installStateUpdatedListener = InstallStateUpdatedListener { state ->
             when (state.installStatus()) {
@@ -181,17 +178,21 @@ class MainActivity : ComponentActivity() {
                     // Show update progress bar.
                 }
                 InstallStatus.DOWNLOADED -> {
-                    appUpdateManager.completeUpdate()
+                    popupSnackbarForCompleteUpdate()
                 }
                 InstallStatus.INSTALLED -> {
-                    appUpdateManager.unregisterListener(installStateUpdatedListener)
+                    SnackbarManager.showMessage(R.string.update_installed)
+                    unregisterListener()
                 }
                 InstallStatus.CANCELED -> {
-                    appUpdateManager.unregisterListener(installStateUpdatedListener)
+                    SnackbarManager.showMessage(R.string.update_canceled)
+                    unregisterListener()
                 }
                 InstallStatus.FAILED -> {
-                    appUpdateManager.unregisterListener(installStateUpdatedListener)
+                    SnackbarManager.showMessage(R.string.update_failed)
+                    unregisterListener()
                 }
+                else -> {}
             }
 
         }
@@ -204,15 +205,25 @@ class MainActivity : ComponentActivity() {
                 && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)
             ) {
                 // Before starting an update, register a listener for updates.
-                appUpdateManager.registerListener(installStateUpdatedListener)
+                installStateUpdatedListener?.let {
+                    appUpdateManager.registerListener(it)
+                }
                 appUpdateManager.startUpdateFlowForResult(
                     appUpdateInfo, AppUpdateType.FLEXIBLE,
                     this, UPDATE_REQUEST_CODE
                 )
             } else if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
-                appUpdateManager.completeUpdate()
+                popupSnackbarForCompleteUpdate()
             }
         }
+    }
+
+    private fun popupSnackbarForCompleteUpdate() {
+        SnackbarManager.showMessage(
+            R.string.update_ready,
+            SnackbarAction(getString(R.string.reload_app)) { appUpdateManager.completeUpdate() },
+            duration = SnackbarDuration.Indefinite
+        )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -220,23 +231,13 @@ class MainActivity : ComponentActivity() {
         if (requestCode == UPDATE_REQUEST_CODE) {
             when (resultCode) {
                 RESULT_CANCELED -> {
-                    Toast.makeText(
-                        applicationContext,
-                        "Update canceled by user! Result Code: $resultCode", Toast.LENGTH_LONG
-                    ).show()
+                    SnackbarManager.showMessage(R.string.update_canceled)
                 }
                 RESULT_OK -> {
-                    Toast.makeText(
-                        applicationContext,
-                        "Update success! Result Code: $resultCode", Toast.LENGTH_LONG
-                    ).show()
+                    SnackbarManager.showMessage(R.string.update_downloading)
                 }
                 else -> {
-                    Toast.makeText(
-                        applicationContext,
-                        "Update Failed! Result Code: $resultCode",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    SnackbarManager.showMessage(R.string.update_failed)
                     checkForUpdates()
                 }
             }

@@ -46,6 +46,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.maps.android.ktx.awaitMap
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.Arguments
+import com.mobileprism.fishing.compose.ui.MainActivity
 import com.mobileprism.fishing.compose.ui.MainDestinations
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.compose.ui.navigate
@@ -236,7 +237,6 @@ fun MapScreen(
                 )
             },
             bottomSheet = {
-
                 MarkerInfoDialog(
                     receivedMarker = viewModel.currentMarker.value,
                     lastKnownLocation = viewModel.lastKnownLocation,
@@ -251,7 +251,6 @@ fun MapScreen(
                         }
                     }
                 )
-
             }
         ) {
             ConstraintLayout(modifier = Modifier.fillMaxSize()) {
