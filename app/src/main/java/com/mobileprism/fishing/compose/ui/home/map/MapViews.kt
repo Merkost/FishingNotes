@@ -1,7 +1,6 @@
 package com.mobileprism.fishing.compose.ui.home.map
 
 import android.location.Geocoder
-import android.os.Bundle
 import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -37,12 +36,10 @@ import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
 import com.alorma.compose.settings.ui.SettingsCheckbox
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.android.libraries.maps.model.LatLng
-import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.compose.ui.home.SettingsHeader
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.compose.ui.home.views.DefaultDialog
@@ -50,6 +47,7 @@ import com.mobileprism.fishing.compose.ui.theme.RedGoogleChrome
 import com.mobileprism.fishing.compose.ui.theme.secondaryFigmaColor
 import com.mobileprism.fishing.compose.ui.theme.supportTextColor
 import com.mobileprism.fishing.compose.viewmodels.MapViewModel
+import com.mobileprism.fishing.model.datastore.UserPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -119,7 +117,9 @@ fun MapModalBottomSheet(
             onCheckedChange = { newValue ->
                 coroutineScope.launch { mapPreferences.saveMapHiddenPlaces(newValue) }
             },
-            state = if (showHiddenPlaces) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
+            state = if (showHiddenPlaces) rememberBooleanSettingState(true) else rememberBooleanSettingState(
+                false
+            )
         )
     }
 }
@@ -193,12 +193,13 @@ fun CompassButton(
     mapBearing: MutableState<Float>,
     onClick: () -> Unit
 ) {
-    val rotation =  mapBearing.value
+    val rotation = mapBearing.value
 
     AnimatedVisibility(
         modifier = modifier,
         visible = mapBearing.value < 356f && mapBearing.value > 4f,
-        enter = fadeIn(), exit = fadeOut(animationSpec = tween(delayMillis = 3000, durationMillis = 1000))
+        enter = fadeIn(),
+        exit = fadeOut(animationSpec = tween(delayMillis = 3000, durationMillis = 1000))
     ) {
         Card(
             shape = CircleShape,
@@ -209,9 +210,12 @@ fun CompassButton(
                 .fillMaxSize(),
                 onClick = { onClick() }) {
                 Icon(
-                    painterResource(if (mapBearing.value > 356f ||
-                        mapBearing.value < 4f) R.drawable.north
-                    else R.drawable.gps),
+                    painterResource(
+                        if (mapBearing.value > 356f ||
+                            mapBearing.value < 4f
+                        ) R.drawable.north
+                        else R.drawable.gps
+                    ),
                     stringResource(R.string.compass),
                     modifier = Modifier
                         .rotate(mapBearing.value)
@@ -229,21 +233,21 @@ fun MapZoomInButton(
     onClick: () -> Unit
 ) {
 
-        Card(
-            shape = CircleShape,
-            modifier = modifier.size(40.dp)
-        ) {
-            IconButton(modifier = Modifier
-                .padding(8.dp)
-                .fillMaxSize(),
-                onClick = { onClick() }) {
-                Icon(
-                    Icons.Default.Add,
-                    Icons.Default.Add.name,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
+    Card(
+        shape = CircleShape,
+        modifier = modifier.size(40.dp)
+    ) {
+        IconButton(modifier = Modifier
+            .padding(8.dp)
+            .fillMaxSize(),
+            onClick = { onClick() }) {
+            Icon(
+                Icons.Default.Add,
+                Icons.Default.Add.name,
+                modifier = Modifier.fillMaxSize()
+            )
         }
+    }
 }
 
 @Composable
@@ -396,7 +400,7 @@ fun MapSettingsButton(
                 .padding(8.dp)
                 .fillMaxSize(),
             onClick = onCLick
-            ) {
+        ) {
             Icon(
                 Icons.Default.Settings, Icons.Default.Settings.name,
             )
@@ -476,18 +480,15 @@ fun FishLoading(modifier: Modifier) {
 @Composable
 fun PlaceTileView(
     modifier: Modifier,
-    cameraMoveState: CameraMoveState,
     currentCameraPosition: MutableState<Pair<LatLng, Float>>,
     pointerState: MutableState<PointerState>
 ) {
     val context = LocalContext.current
     val viewModel: MapViewModel = getViewModel()
+    val cameraMoveState by viewModel.cameraMoveState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val geocoder = Geocoder(context)
     var selectedPlace by remember { mutableStateOf<String?>(null) }
-
-    val unnamedPlaceStr = stringResource(R.string.unnamed_place)
-    val cantRecognizePlace = stringResource(R.string.cant_recognize_place)
 
     when (cameraMoveState) {
         CameraMoveState.MoveStart -> {
@@ -514,10 +515,12 @@ fun PlaceTileView(
                             } else if (!address.adminArea.isNullOrBlank()) {
                                 viewModel.chosenPlace.value = address.adminArea
                                     .replaceFirstChar { it.uppercase() }
-                            } else viewModel.chosenPlace.value = "Место без названия"
+                            } else viewModel.chosenPlace.value =
+                                context.getString(R.string.unnamed_place)
                         }
                     } catch (e: Throwable) {
-                        viewModel.chosenPlace.value = "Не удалось определить место"
+                        viewModel.chosenPlace.value =
+                            context.getString(R.string.cant_recognize_place)
                     }
                     pointerState.value = PointerState.HideMarker
                     selectedPlace = viewModel.chosenPlace.value
@@ -527,6 +530,7 @@ fun PlaceTileView(
     }
 
     val placeName = viewModel.chosenPlace.value ?: stringResource(R.string.searching)
+    val shimmerModifier = if (viewModel.chosenPlace.value != null) Modifier else Modifier.shimmer()
     val pointerIconColor by animateColorAsState(
         if (selectedPlace != null) secondaryFigmaColor
         else Color.LightGray
@@ -535,7 +539,7 @@ fun PlaceTileView(
         if (selectedPlace != null) MaterialTheme.colors.onSurface
         else Color.LightGray
     )
-    val shimmerModifier = if (viewModel.chosenPlace.value != null) Modifier else Modifier.shimmer()
+
 
     Card(
         shape = RoundedCornerShape(size = 20.dp),
@@ -632,6 +636,6 @@ fun BottomSheetLine(modifier: Modifier = Modifier) {
                 .size(width = 25.dp, height = 3.dp)
                 .clip(CircleShape)
                 .background(Color.Gray)
-        ) {}
+        )
     }
 }

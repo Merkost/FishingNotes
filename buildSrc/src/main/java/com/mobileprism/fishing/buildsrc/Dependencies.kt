@@ -21,15 +21,17 @@ object Libs {
 
     object GoogleMaps {
         const val maps = "com.google.android.libraries.maps:maps:3.1.0-beta"
-        const val mapsKtx = "com.google.maps.android:maps-v3-ktx:3.3.0"
+        const val mapsKtx = "com.google.maps.android:maps-ktx:3.3.0"
+        const val mapUtilsKtx = "com.google.maps.android:maps-utils-ktx:3.3.0"
 
         //Google maps distance between two latlng /*0.4.4*/
         const val mapUtils = "com.google.maps.android:android-maps-utils:2.3.0"
+
     }
 
     object PlayServices {
         private const val version = "19.0.0"
-        private const val oldVersion = "18.0.1"
+        private const val oldVersion = "18.0.2"
 
         const val auth = "com.google.android.gms:play-services-auth:$version"
         const val ads = "com.google.android.gms:play-services-ads:20.4.0"

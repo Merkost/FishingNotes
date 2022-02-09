@@ -2,7 +2,7 @@ package com.mobileprism.fishing.compose.ui.home.weather
 
 import android.content.Context
 import androidx.navigation.NavController
-import com.google.android.libraries.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.Arguments
 import com.mobileprism.fishing.compose.ui.MainDestinations

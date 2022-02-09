@@ -36,8 +36,11 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.android.libraries.maps.MapView
-import com.google.android.libraries.maps.model.*
+import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.google.maps.android.ktx.awaitMap
@@ -81,8 +84,6 @@ fun MapScreen(
 
     val map = rememberMapViewWithLifecycle()
 
-
-
     chosenPlace?.let {
         if (it.id.isNotEmpty()) {
             viewModel.currentMarker.value = chosenPlace
@@ -113,10 +114,6 @@ fun MapScreen(
             }
             else -> mutableStateOf(viewModel.mapUiState.value)
         }
-    }
-
-    var cameraMoveState: CameraMoveState by remember {
-        mutableStateOf(CameraMoveState.MoveFinish)
     }
 
     val pointerState: MutableState<PointerState> = remember {
@@ -164,7 +161,7 @@ fun MapScreen(
                     }
                 }
                 is LocationState.GpsNotEnabled -> {
-                    //checkGPSEnabled(context) { currentLocationFlow.collectAsState() }
+                    checkGPSEnabled(context) //{ currentLocationFlow.collectAsState() }
                 }
             }
         }
@@ -275,15 +272,10 @@ fun MapScreen(
                         viewModel.currentMarker.value = it
                         mapUiState = MapUiState.BottomSheetInfoMode
                     },
-                    showHiddenPlacess = showHiddenPlaces,
-                    cameraMoveCallback = { state -> cameraMoveState = state },
                     currentCameraPosition = currentCameraPosition,
                     mapType = mapType, mapBearing = mapBearing,
                     onMapClick = {
                         mapUiState = MapUiState.NormalMode
-                        /*coroutineScope.launch {
-                            scaffoldState.bottomSheetState.collapse()
-                        }*/
                     }
                 )
 
@@ -417,7 +409,6 @@ fun MapScreen(
                 ) {
                     PlaceTileView(
                         modifier = Modifier.wrapContentSize(),
-                        cameraMoveState = cameraMoveState,
                         currentCameraPosition = currentCameraPosition,
                         pointerState = pointerState
                     )
@@ -445,21 +436,17 @@ fun MapLayout(
     modifier: Modifier = Modifier,
     map: MapView,
     onMarkerClick: (marker: UserMapMarker) -> Unit,
-    showHiddenPlacess: Boolean,
-    cameraMoveCallback: (state: CameraMoveState) -> Unit,
     currentCameraPosition: MutableState<Pair<LatLng, Float>>,
     mapType: MutableState<Int>,
     mapBearing: MutableState<Float>,
     onMapClick: () -> Unit,
-
-    ) {
+) {
     val viewModel: MapViewModel = getViewModel()
     val coroutineScope = rememberCoroutineScope()
-
+    val darkTheme = isSystemInDarkTheme()
     val userPreferences: UserPreferences = get()
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
     val context = LocalContext.current
-    val darkTheme = isSystemInDarkTheme()
     val markers by viewModel.mapMarkers.collectAsState()
     val markersToShow by remember(markers, showHiddenPlaces) {
         mutableStateOf(if (showHiddenPlaces) markers
@@ -472,8 +459,10 @@ fun MapLayout(
         mutableStateOf(false)
     }
 
-    AnimatedVisibility(visible = isMapVisible,
-    enter = fadeIn(), exit = fadeOut()) {
+    AnimatedVisibility(
+        visible = isMapVisible,
+        enter = fadeIn(), exit = fadeOut()
+    ) {
         AndroidView(
             { map },
             modifier = modifier
@@ -482,6 +471,20 @@ fun MapLayout(
         ) { mapView ->
             coroutineScope.launch {
                 val googleMap = mapView.awaitMap()
+
+                //Map styles: https://mapstyle.withgoogle.com
+                when (darkTheme) {
+                    true -> {
+                        googleMap.setMapStyle(
+                            MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_fishing_night)
+                        )
+                    }
+                    false -> {
+                        googleMap.setMapStyle(
+                            MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_fishing)
+                        )
+                    }
+                }
 
                 googleMap.clear()
                 markersToShow.forEach {
@@ -500,10 +503,11 @@ fun MapLayout(
                                 .icon(BitmapDescriptorFactory.defaultMarker(hue))
 
                         )
-                    marker.tag = it.id
+                    marker?.tag = it.id
                 }
                 googleMap.setOnCameraMoveStartedListener {
-                    cameraMoveCallback(CameraMoveState.MoveStart)
+                    viewModel.setCameraMoveState(CameraMoveState.MoveStart)
+
                 }
                 googleMap.setOnCameraMoveListener {
                     mapBearing.value = googleMap.cameraPosition.bearing
@@ -511,7 +515,7 @@ fun MapLayout(
                         Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom)
                 }
                 googleMap.setOnCameraIdleListener {
-                    cameraMoveCallback(CameraMoveState.MoveFinish)
+                    viewModel.setCameraMoveState(CameraMoveState.MoveFinish)
                     /*currentCameraPosition.value =
                         Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom)*/
                     //mapBearing.value = googleMap.cameraPosition.bearing
@@ -526,10 +530,9 @@ fun MapLayout(
                     return@setOnMapClickListener
                 }
 
-                /*//Map styles: https://mapstyle.withgoogle.com
-                if (darkTheme) googleMap.setMapStyle(
-                    MapStyleOptions.loadRawResourceStyle(context, R.raw.mapstyle_night)
-                )*/
+
+
+                googleMap.uiSettings.isZoomGesturesEnabled = true
                 googleMap.uiSettings.isMyLocationButtonEnabled = false
             }
         }
@@ -605,7 +608,7 @@ fun LocationPermissionDialog(
             }
         },
         permissionsNotAvailableContent = { onCloseCallback(); SnackbarManager.showMessage(R.string.location_permission_denied) })
-    { checkPermission(context);  }
+    { checkPermission(context); }
 }
 
 @ExperimentalMaterialApi
@@ -753,23 +756,3 @@ private fun onAddNewCatchClick(navController: NavController, viewModel: MapViewM
 private fun onMarkerDetailsClick(navController: NavController, marker: UserMapMarker) {
     navController.navigate(MainDestinations.PLACE_ROUTE, Arguments.PLACE to marker)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

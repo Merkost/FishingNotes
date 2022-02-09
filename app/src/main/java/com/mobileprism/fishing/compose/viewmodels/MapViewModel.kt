@@ -3,13 +3,14 @@ package com.mobileprism.fishing.compose.viewmodels
 import android.util.Log
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.libraries.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.compose.ui.home.UiState
+import com.mobileprism.fishing.compose.ui.home.map.CameraMoveState
 import com.mobileprism.fishing.compose.ui.home.map.MapUiState
+import com.mobileprism.fishing.compose.ui.home.map.PointerState
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
 import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.entity.common.Progress
@@ -42,8 +43,9 @@ class MapViewModel(
 
     var mapUiState: MutableState<MapUiState> = mutableStateOf(MapUiState.NormalMode)
 
-    @ExperimentalMaterialApi
-    var sheetState: BottomSheetValue = BottomSheetValue.Collapsed
+    private val _cameraMoveState = MutableStateFlow<CameraMoveState>(CameraMoveState.MoveFinish)
+    val cameraMoveState: StateFlow<CameraMoveState>
+    get() = _cameraMoveState
 
     private val _uiState = MutableStateFlow<UiState?>(null)
     val uiState: StateFlow<UiState?>
@@ -70,6 +72,10 @@ class MapViewModel(
     override fun onCleared() {
         super.onCleared()
         viewStateFlow.value = BaseViewState.Loading(null)
+    }
+
+    fun setCameraMoveState(newState: CameraMoveState) {
+        _cameraMoveState.value = newState
     }
 
     private fun loadMarkers() {
