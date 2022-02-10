@@ -17,7 +17,6 @@ import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
-import com.mobileprism.fishing.utils.time.toDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -75,7 +74,6 @@ class NewCatchMasterViewModel(
     val weatherMoonPhase = MutableStateFlow(0.0f)
     private val _photos = MutableStateFlow<List<Uri>>(listOf())
     val photos = _photos.asStateFlow()
-
 
     fun setSelectedPlace(place: UserMapMarker) {
         currentPlace.value = place
@@ -156,11 +154,13 @@ class NewCatchMasterViewModel(
     }
 
     fun setPhotos(newPhotos: List<Uri>) {
-        _photos.value = newPhotos
+        val result = mutableListOf<Uri>()
+        result.addAll(newPhotos)
+        _photos.value = result
     }
 
     fun loadWeather() {
-        if (catchDate.value.toDate() != Date().time.toDate()) {
+        if (loadedWeather.value.hourly.first().date != catchDate.value) {
             getHistoricalWeather()
         } else {
             getWeatherForecast()
@@ -170,10 +170,10 @@ class NewCatchMasterViewModel(
     private fun getWeatherForecast() {
         viewModelScope.launch(Dispatchers.IO) {
             currentPlace.value?.run {
-                _weatherState.value = RetrofitWrapper.Loading()
+
+            _weatherState.value = RetrofitWrapper.Loading()
 
                 weatherRepository.getWeather(latitude, longitude).collect { result ->
-
                     when (result) {
                         is RetrofitWrapper.Success<WeatherForecast> -> {
                             loadedWeather.value = result.data
@@ -195,7 +195,9 @@ class NewCatchMasterViewModel(
     private fun getHistoricalWeather() {
         viewModelScope.launch(Dispatchers.IO) {
             currentPlace.value?.run {
+
                 _weatherState.value = RetrofitWrapper.Loading()
+
                 weatherRepository
                     .getHistoricalWeather(latitude, longitude, (catchDate.value / 1000))
                     .collect { result ->

@@ -2,7 +2,6 @@ package com.mobileprism.fishing.compose.ui.home.catch_screen
 
 import android.Manifest
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -38,6 +37,7 @@ import com.mobileprism.fishing.compose.ui.home.views.*
 import com.mobileprism.fishing.domain.UserCatchViewModel
 import com.mobileprism.fishing.model.entity.common.Note
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
+import com.mobileprism.fishing.utils.showToast
 
 
 sealed class BottomSheetCatchScreen() {
@@ -114,7 +114,7 @@ fun FishTypeAmountAndWeightDialog(
     val fishAmount = remember { mutableStateOf("") }
     val fishWeight = remember { mutableStateOf("") }
 
-    LaunchedEffect(key1 = viewModel.catch.value) {
+    LaunchedEffect(key1 = viewModel.catch.collectAsState().value) {
         viewModel.catch.value?.let {
             fishType.value = it.fishType
             fishAmount.value = it.fishAmount.toString()
@@ -201,7 +201,7 @@ fun EditWayOfFishingDialog(
     val bait = remember { mutableStateOf("") }
     val lure = remember { mutableStateOf("") }
 
-    LaunchedEffect(key1 = viewModel.catch.value) {
+    LaunchedEffect(key1 = viewModel.catch.collectAsState().value) {
         viewModel.catch.value?.let {
             rod.value = it.fishingRodType
             bait.value = it.fishingBait
@@ -422,19 +422,14 @@ fun AddPhotoDialog(
     val choosePhotoLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { value ->
             if ((value.size + tempDialogPhotosState.size) > MAX_PHOTOS) {
-                Toast.makeText(context, "5 photos maximum allowed", Toast.LENGTH_SHORT).show()
+                showToast(context, context.getString(R.string.max_photos_allowed))
             }
             tempDialogPhotosState.addAll(value)
         }
 
     LaunchedEffect(key1 = photos) {
-        if (photos.isEmpty()) {
-            addPhotoState.value = true
-        } else {
-            tempDialogPhotosState.addAll(photos)
-        }
+        tempDialogPhotosState.addAll(photos)
     }
-
 
     ConstraintLayout(
         modifier = Modifier
@@ -502,7 +497,7 @@ fun AddPhotoDialog(
             text = stringResource(id = R.string.save),
             onClick = {
                 if (tempDialogPhotosState.size > MAX_PHOTOS) {
-                    Toast.makeText(context, "5 photos maximum allowed", Toast.LENGTH_SHORT).show()
+                    showToast(context, context.getString(R.string.max_photos_allowed))
                 } else {
                     onSavePhotosClick(tempDialogPhotosState)
                     onCloseBottomSheet()

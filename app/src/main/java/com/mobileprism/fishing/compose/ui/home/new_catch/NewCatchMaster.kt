@@ -43,7 +43,7 @@ import org.koin.core.parameter.parametersOf
 @ExperimentalPagerApi
 @Composable
 fun NewCatchMasterScreen(
-    upPress: () -> Unit,
+//    upPress: () -> Unit,
     receivedPlace: UserMapMarker?,
     navController: NavController
 ) {
@@ -72,10 +72,6 @@ fun NewCatchMasterScreen(
         coroutineScope.launch { modalBottomSheetState.show() }
     }
 
-    if (!modalBottomSheetState.isVisible) {
-        currentBottomSheet = null
-    }
-
     LaunchedEffect(key1 = viewModel.addPhotoState.value) {
         if (viewModel.addPhotoState.value) {
             openSheet(BottomSheetNewCatchScreen.EditPhotosScreen)
@@ -87,6 +83,7 @@ fun NewCatchMasterScreen(
     LaunchedEffect(key1 = modalBottomSheetState.isVisible) {
         if (!modalBottomSheetState.isVisible) {
             viewModel.addPhotoState.value = false
+            currentBottomSheet = null
         }
     }
 
@@ -108,7 +105,9 @@ fun NewCatchMasterScreen(
     SubscribeToProgress(
         vmUiState = viewModel.uiState,
         loadingDialogState = loadingDialogState,
-        upPress = { upPress() }
+        upPress = {
+//            upPress()
+        }
     )
 
     ModalBottomSheetLayout(
@@ -118,10 +117,14 @@ fun NewCatchMasterScreen(
         sheetContent = {
             Spacer(modifier = Modifier.height(1.dp))
             currentBottomSheet?.let { currentSheet ->
+                val photos by viewModel.photos.collectAsState()
+
                 NewCatchModalBottomSheetContent(
                     currentScreen = currentSheet,
-                    photos = viewModel.photos.collectAsState(),
-                    onSavePhotos = { viewModel.setPhotos(it) },
+                    photos = photos,
+                    onSavePhotos = {
+                        viewModel.setPhotos(it)
+                    },
                     onCloseBottomSheet = { viewModel.addPhotoState.value = false }
                 )
             }
@@ -196,7 +199,9 @@ fun NewCatchMasterScreen(
                             pagerState.animateScrollToPage(pagerState.currentPage - 1)
                         }
                     },
-                    onCloseClick = upPress
+                    onCloseClick = {
+//                        upPress()
+                    }
                 )
             }
         }

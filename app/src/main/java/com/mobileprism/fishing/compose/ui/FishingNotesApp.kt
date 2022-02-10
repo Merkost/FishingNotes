@@ -118,12 +118,12 @@ private fun NavGraphBuilder.NavGraph(
         it.arguments?.clear()
 
         NewCatchMasterScreen(
-            {
-                navController.popBackStack(
-                    route = MainDestinations.NEW_CATCH_ROUTE,
-                    inclusive = true
-                )
-            },
+//            {
+//                navController.popBackStack(
+//                    route = MainDestinations.NEW_CATCH_ROUTE,
+//                    inclusive = true
+//                )
+//            },
             place,
             navController
         )

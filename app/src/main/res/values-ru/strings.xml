@@ -274,5 +274,6 @@
     <string name="location_and_time">Location and time</string>
     <string name="billing_unavaliable">Не удалось подключиться к billing service</string>
     <string name="thanks_developers">Поблагодарить разработчиков</string>
+    <string name="max_photos_allowed">3 photos maximum allowed</string>
 
 </resources>

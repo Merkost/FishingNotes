@@ -330,6 +330,8 @@ fun NewCatchPhotos(viewModel: NewCatchMasterViewModel, navController: NavControl
     ) {
         val (subtitle, photosView) = createRefs()
 
+        val photos = viewModel.photos.collectAsState()
+
         SubtitleWithIcon(
             modifier = Modifier.constrainAs(subtitle) {
                 top.linkTo(parent.top, 16.dp)
@@ -345,7 +347,7 @@ fun NewCatchPhotos(viewModel: NewCatchMasterViewModel, navController: NavControl
                 absoluteLeft.linkTo(parent.absoluteLeft)
                 absoluteRight.linkTo(parent.absoluteRight)
             },
-            photos = viewModel.photos.collectAsState().value,
+            photos = photos.value,
             onEditClick = { viewModel.addPhotoState.value = true }
         )
     }

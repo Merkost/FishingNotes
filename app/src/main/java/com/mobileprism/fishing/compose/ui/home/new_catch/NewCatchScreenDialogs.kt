@@ -10,7 +10,6 @@ import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.res.stringResource
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -31,15 +30,17 @@ sealed class BottomSheetNewCatchScreen() {
 @Composable
 fun NewCatchModalBottomSheetContent(
     currentScreen: BottomSheetNewCatchScreen,
-    photos: State<List<Uri>>,
+    photos: List<Uri>,
     onSavePhotos: (List<Uri>) -> Unit,
     onCloseBottomSheet: () -> Unit,
 ) {
     when (currentScreen) {
         BottomSheetNewCatchScreen.EditPhotosScreen -> {
             AddPhotoDialog(
-                photos = photos.value,
-                onSavePhotosClick = { onSavePhotos(it) },
+                photos = photos,
+                onSavePhotosClick = {
+                    onSavePhotos(it)
+                },
                 onCloseBottomSheet = onCloseBottomSheet
             )
         }

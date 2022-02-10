@@ -67,7 +67,6 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch) {
         loadingDialogState.value = loadingState is Progress.Loading
     }
 
-
     val bottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     var currentBottomSheet: BottomSheetCatchScreen? by remember { mutableStateOf(null) }
 
