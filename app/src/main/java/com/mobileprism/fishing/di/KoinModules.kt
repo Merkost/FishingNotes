@@ -1,7 +1,10 @@
 package com.mobileprism.fishing.di
 
 import com.android.billingclient.api.BillingClient
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.compose.viewmodels.MainViewModel
@@ -18,6 +21,8 @@ import org.koin.dsl.module
 
 val appModule = module {
     single { Logger() }
+    single<AppUpdateManager> { AppUpdateManagerFactory.create(androidContext()) }
+    single<FirebaseAuth> { FirebaseAuth.getInstance() }
     single { SnackbarManager }
     single { Firebase.analytics }
     single { params ->

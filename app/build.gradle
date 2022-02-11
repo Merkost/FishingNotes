@@ -20,8 +20,8 @@ android {
         applicationId "com.mobileprism.fishing"
         minSdkVersion 23
         targetSdkVersion 31
-        versionCode 8
-        versionName "1.0.3.004"
+        versionCode 10
+        versionName "1.0.3.006"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true

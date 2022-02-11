@@ -4,7 +4,6 @@ import android.content.Intent
 import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
@@ -34,7 +33,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.play.core.appupdate.AppUpdateManager
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
@@ -64,11 +62,11 @@ import java.util.*
 class MainActivity : ComponentActivity() {
 
     private val logger: Logger by inject()
+    private val appUpdateManager: AppUpdateManager = get()
+    private val auth: FirebaseAuth = get()
 
-    private lateinit var appUpdateManager: AppUpdateManager
-    private var installStateUpdatedListener: InstallStateUpdatedListener? = null
+    private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
     private lateinit var googleSignInClient: GoogleSignInClient
-    private lateinit var auth: FirebaseAuth
 
     private val registeredActivity =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -132,9 +130,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     .start()
-
             }
-
         }
 
         if (Build.VERSION.SDK_INT >= 31) {
@@ -145,7 +141,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        auth = FirebaseAuth.getInstance()
+
 
         MobileAds.initialize(this) {}
 
@@ -164,13 +160,30 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun checkForUpdates() {
-        appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
+        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+        installStateUpdatedListener = createUpdateListener()
 
-        val unregisterListener = {
-            installStateUpdatedListener?.let { appUpdateManager.unregisterListener(it) }
+        // Checks that the platform will allow the specified type of update.
+        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)
+            ) {
+                // Before starting an update, register a listener for updates.
+                appUpdateManager.registerListener(installStateUpdatedListener)
+
+                appUpdateManager.startUpdateFlowForResult(
+                    appUpdateInfo, AppUpdateType.FLEXIBLE,
+                    this, UPDATE_REQUEST_CODE
+                )
+            } else if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
+                popupSnackbarForCompleteUpdate()
+            }
         }
-        // Create a listener to track request state updates.
-        installStateUpdatedListener = InstallStateUpdatedListener { state ->
+    }
+
+    // Create a listener to track request state updates.
+    private fun createUpdateListener() =
+        InstallStateUpdatedListener { state ->
             when (state.installStatus()) {
                 InstallStatus.DOWNLOADING -> {
                     val bytesDownloaded = state.bytesDownloaded()
@@ -182,40 +195,20 @@ class MainActivity : ComponentActivity() {
                 }
                 InstallStatus.INSTALLED -> {
                     SnackbarManager.showMessage(R.string.update_installed)
-                    unregisterListener()
+                    removeInstallStateUpdateListener()
                 }
                 InstallStatus.CANCELED -> {
                     SnackbarManager.showMessage(R.string.update_canceled)
-                    unregisterListener()
                 }
                 InstallStatus.FAILED -> {
                     SnackbarManager.showMessage(R.string.update_failed)
-                    unregisterListener()
                 }
                 else -> {}
             }
-
         }
 
-        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
-
-        // Checks that the platform will allow the specified type of update.
-        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
-                && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)
-            ) {
-                // Before starting an update, register a listener for updates.
-                installStateUpdatedListener?.let {
-                    appUpdateManager.registerListener(it)
-                }
-                appUpdateManager.startUpdateFlowForResult(
-                    appUpdateInfo, AppUpdateType.FLEXIBLE,
-                    this, UPDATE_REQUEST_CODE
-                )
-            } else if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
-                popupSnackbarForCompleteUpdate()
-            }
-        }
+    private fun removeInstallStateUpdateListener() {
+       appUpdateManager.unregisterListener(installStateUpdatedListener)
     }
 
     private fun popupSnackbarForCompleteUpdate() {
@@ -348,6 +341,11 @@ class MainActivity : ComponentActivity() {
         }
         SnackbarManager.showMessage(R.string.google_login_failed)
 
+    }
+
+    override fun onStop() {
+        super.onStop()
+        removeInstallStateUpdateListener()
     }
 }
 
