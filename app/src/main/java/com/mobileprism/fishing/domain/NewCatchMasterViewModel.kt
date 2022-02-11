@@ -159,6 +159,20 @@ class NewCatchMasterViewModel(
         _photos.value = result
     }
 
+    fun addPhotos(newPhotos: List<Uri>) {
+        val result = mutableListOf<Uri>()
+        result.addAll(_photos.value)
+        result.addAll(newPhotos)
+        _photos.value = result
+    }
+
+    fun deletePhoto(deletedPhoto: Uri) {
+        val result = mutableListOf<Uri>()
+        result.addAll(_photos.value)
+        result.remove(deletedPhoto)
+        _photos.value = result
+    }
+
     fun loadWeather() {
         if (loadedWeather.value.hourly.first().date != catchDate.value) {
             getHistoricalWeather()
@@ -244,10 +258,10 @@ class NewCatchMasterViewModel(
 
     fun saveNewCatch() {
         _uiState.value = BaseViewState.Loading(0)
-        val newCatch = RawUserCatch()
 
         viewModelScope.launch(Dispatchers.IO) {
             currentPlace.value?.let { userMapMarker ->
+                val newCatch = createRawUserCatch(userMapMarker)
                 catchesRepository.addNewCatch(userMapMarker.id, newCatch).collect { progress ->
                     when (progress) {
                         is Progress.Complete -> {
@@ -273,5 +287,27 @@ class NewCatchMasterViewModel(
             }
         }
     }
+
+    private fun createRawUserCatch(marker: UserMapMarker) = RawUserCatch(
+        fishType = fishType.value,
+        description = description.value,
+        date = catchDate.value,
+        fishAmount = fishAmount.value,
+        fishWeight = fishWeight.value,
+        fishingRodType = rod.value,
+        fishingBait = bait.value,
+        fishingLure = lure.value,
+        markerId = marker.id,
+        placeTitle = marker.title,
+        isPublic = false,
+        photos = photos.value,
+        weatherPrimary = weatherPrimary.value,
+        weatherIcon = weatherIconId.value,
+        weatherTemperature = weatherTemperature.value.toFloat(),
+        weatherWindSpeed = weatherWindSpeed.value.toFloat(),
+        weatherWindDeg = weatherWindDeg.value,
+        weatherPressure = weatherPressure.value.toInt(),
+        weatherMoonPhase = weatherMoonPhase.value
+    )
 
 }

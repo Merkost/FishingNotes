@@ -428,6 +428,7 @@ fun AddPhotoDialog(
         }
 
     LaunchedEffect(key1 = photos) {
+        tempDialogPhotosState.clear()
         tempDialogPhotosState.addAll(photos)
     }
 
