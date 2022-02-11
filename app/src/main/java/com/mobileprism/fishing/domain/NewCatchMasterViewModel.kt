@@ -1,8 +1,6 @@
 package com.mobileprism.fishing.domain
 
 import android.net.Uri
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchPlacesState
@@ -39,11 +37,12 @@ class NewCatchMasterViewModel(
 
     val isLocationLocked = MutableStateFlow(placeState is ReceivedPlaceState.Received)
     val isPlaceInputCorrect = MutableStateFlow(true)
-    val isWeatherInputCorrect = mutableStateListOf<Boolean>()
+    val isWeatherInputCorrect = MutableStateFlow(true)
 
-    val currentPlace = MutableStateFlow(
+    private val _currentPlace = MutableStateFlow(
         if (placeState is ReceivedPlaceState.Received) placeState.place else null
     )
+    val currentPlace = _currentPlace.asStateFlow()
 
     private val loadedWeather = MutableStateFlow(WeatherForecast())
 
@@ -54,29 +53,60 @@ class NewCatchMasterViewModel(
         MutableStateFlow<RetrofitWrapper<WeatherForecast>>(RetrofitWrapper.Loading())
     val weatherState = _weatherState.asStateFlow()
 
-    val addPhotoState = mutableStateOf(false)
+    private val _markersListState =
+        MutableStateFlow<NewCatchPlacesState>(NewCatchPlacesState.NotReceived)
+    val markersListState = _markersListState.asStateFlow()
 
-    val markersListState = MutableStateFlow<NewCatchPlacesState>(NewCatchPlacesState.NotReceived)
-    val catchDate = MutableStateFlow(Date().time)
-    val fishType = MutableStateFlow("")
-    val fishAmount = MutableStateFlow(0)
-    val fishWeight = MutableStateFlow(0.0)
-    val description = MutableStateFlow("")
-    val rod = MutableStateFlow("")
-    val bait = MutableStateFlow("")
-    val lure = MutableStateFlow("")
-    val weatherPrimary = MutableStateFlow("")
-    val weatherIconId = MutableStateFlow("01")
-    val weatherTemperature = MutableStateFlow("0")
-    val weatherPressure = MutableStateFlow("0")
-    val weatherWindSpeed = MutableStateFlow("0")
-    val weatherWindDeg = MutableStateFlow(0)
-    val weatherMoonPhase = MutableStateFlow(0.0f)
+    private val _catchDate = MutableStateFlow(Date().time)
+    val catchDate = _catchDate.asStateFlow()
+
+    private val _fishType = MutableStateFlow("")
+    val fishType = _fishType.asStateFlow()
+
+    private val _fishAmount = MutableStateFlow(0)
+    val fishAmount = _fishAmount.asStateFlow()
+
+    private val _fishWeight = MutableStateFlow(0.0)
+    val fishWeight = _fishWeight.asStateFlow()
+
+    private val _description = MutableStateFlow("")
+    val description = _description.asStateFlow()
+
+    private val _rod = MutableStateFlow("")
+    val rod = _rod.asStateFlow()
+
+    private val _bait = MutableStateFlow("")
+    val bait = _bait.asStateFlow()
+
+    private val _lure = MutableStateFlow("")
+    val lure = _lure.asStateFlow()
+
+    private val _weatherPrimary = MutableStateFlow("")
+    val weatherPrimary = _weatherPrimary.asStateFlow()
+
+    private val _weatherIconId = MutableStateFlow("01")
+    val weatherIconId = _weatherIconId.asStateFlow()
+
+    private val _weatherTemperature = MutableStateFlow("0")
+    val weatherTemperature = _weatherTemperature.asStateFlow()
+
+    private val _weatherPressure = MutableStateFlow("0")
+    val weatherPressure = _weatherPressure.asStateFlow()
+
+    private val _weatherWindSpeed = MutableStateFlow("0")
+    val weatherWindSpeed = _weatherWindSpeed.asStateFlow()
+
+    private val _weatherWindDeg = MutableStateFlow(0)
+    val weatherWindDeg = _weatherWindDeg.asStateFlow()
+
+    private val _weatherMoonPhase = MutableStateFlow(0.0f)
+    val weatherMoonPhase = _weatherMoonPhase.asStateFlow()
+
     private val _photos = MutableStateFlow<List<Uri>>(listOf())
     val photos = _photos.asStateFlow()
 
     fun setSelectedPlace(place: UserMapMarker) {
-        currentPlace.value = place
+        _currentPlace.value = place
     }
 
     fun setPlaceInputError(isError: Boolean) {
@@ -84,93 +114,75 @@ class NewCatchMasterViewModel(
     }
 
     fun setDate(date: Long) {
-        catchDate.value = date
+        _catchDate.value = date
     }
 
     fun setFishType(fish: String) {
-        fishType.value = fish
+        _fishType.value = fish
     }
 
     fun setFishAmount(amount: Int) {
-        fishAmount.value = amount
+        _fishAmount.value = amount
     }
 
     fun setFishWeight(weight: Double) {
-        fishWeight.value = weight
+        _fishWeight.value = weight
     }
 
     fun setNote(note: String) {
-        description.value = note
+        _description.value = note
     }
 
     fun setRod(rodValue: String) {
-        rod.value = rodValue
+        _rod.value = rodValue
     }
 
     fun setBait(baitValue: String) {
-        bait.value = baitValue
+        _bait.value = baitValue
     }
 
     fun setLure(lureValue: String) {
-        lure.value = lureValue
+        _lure.value = lureValue
     }
 
     fun setWeatherPrimary(weather: String) {
-        weatherPrimary.value = weather
+        _weatherPrimary.value = weather
     }
 
     fun setWeatherTemperature(temperature: String) {
-        weatherTemperature.value = temperature
+        _weatherTemperature.value = temperature
     }
 
     fun setWeatherIconId(icon: String) {
-        weatherIconId.value = icon
+        _weatherIconId.value = icon
     }
 
     fun setWeatherPressure(pressure: String) {
-        weatherPressure.value = pressure
+        _weatherPressure.value = pressure
     }
 
     fun setWeatherWindSpeed(windSpeed: String) {
-        weatherWindSpeed.value = windSpeed
+        _weatherWindSpeed.value = windSpeed
     }
 
     fun setWeatherWindDeg(windDeg: Int) {
-        weatherWindDeg.value = windDeg
+        _weatherWindDeg.value = windDeg
     }
 
     fun setWeatherMoonPhase(moonPhase: Float) {
-        weatherMoonPhase.value = moonPhase
+        _weatherMoonPhase.value = moonPhase
     }
 
     fun setWeatherIsError(isError: Boolean) {
-        if (isError) {
-            isWeatherInputCorrect.add(isError)
-        } else {
-            if (isWeatherInputCorrect.isNotEmpty()) {
-                isWeatherInputCorrect.removeLast()
-            }
-        }
-    }
-
-    fun setPhotos(newPhotos: List<Uri>) {
-        val result = mutableListOf<Uri>()
-        result.addAll(newPhotos)
-        _photos.value = result
+        isWeatherInputCorrect.value = !isError
     }
 
     fun addPhotos(newPhotos: List<Uri>) {
-        val result = mutableListOf<Uri>()
-        result.addAll(_photos.value)
-        result.addAll(newPhotos)
-        _photos.value = result
+        _photos.value = photos.value.toMutableList().apply { addAll(newPhotos) }
     }
 
     fun deletePhoto(deletedPhoto: Uri) {
-        val result = mutableListOf<Uri>()
-        result.addAll(_photos.value)
-        result.remove(deletedPhoto)
-        _photos.value = result
+        _photos.value = photos.value.toMutableList().apply { remove(deletedPhoto) }
     }
 
     fun loadWeather() {
@@ -185,7 +197,7 @@ class NewCatchMasterViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             currentPlace.value?.run {
 
-            _weatherState.value = RetrofitWrapper.Loading()
+                _weatherState.value = RetrofitWrapper.Loading()
 
                 weatherRepository.getWeather(latitude, longitude).collect { result ->
                     when (result) {
@@ -282,7 +294,7 @@ class NewCatchMasterViewModel(
     private fun getAllUserMarkersList() {
         viewModelScope.launch(Dispatchers.IO) {
             markersRepository.getAllUserMarkersList().collect { markers ->
-                markersListState.value =
+                _markersListState.value =
                     NewCatchPlacesState.Received(markers as List<UserMapMarker>)
             }
         }

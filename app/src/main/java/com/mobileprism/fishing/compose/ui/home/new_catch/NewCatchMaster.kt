@@ -1,10 +1,15 @@
 package com.mobileprism.fishing.compose.ui.home.new_catch
 
+import android.content.Context
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -30,8 +35,8 @@ import com.mobileprism.fishing.compose.ui.home.views.DefaultButtonFilled
 import com.mobileprism.fishing.compose.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.domain.NewCatchMasterViewModel
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.showToast
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.viewModel
 import org.koin.core.parameter.parametersOf
@@ -43,7 +48,7 @@ import org.koin.core.parameter.parametersOf
 @ExperimentalPagerApi
 @Composable
 fun NewCatchMasterScreen(
-//    upPress: () -> Unit,
+    upPress: () -> Unit,
     receivedPlace: UserMapMarker?,
     navController: NavController
 ) {
@@ -59,33 +64,6 @@ fun NewCatchMasterScreen(
 
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-
-    val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    var currentBottomSheet: BottomSheetNewCatchScreen? by remember { mutableStateOf(null) }
-
-    val closeSheet: () -> Unit = {
-        coroutineScope.launch { modalBottomSheetState.hide() }
-    }
-
-    val openSheet: (BottomSheetNewCatchScreen) -> Unit = {
-        currentBottomSheet = it
-        coroutineScope.launch { modalBottomSheetState.show() }
-    }
-
-    LaunchedEffect(key1 = viewModel.addPhotoState.value) {
-        if (viewModel.addPhotoState.value) {
-            openSheet(BottomSheetNewCatchScreen.EditPhotosScreen)
-        } else {
-            closeSheet()
-        }
-    }
-
-    LaunchedEffect(key1 = modalBottomSheetState.isVisible) {
-        if (!modalBottomSheetState.isVisible) {
-            viewModel.addPhotoState.value = false
-            currentBottomSheet = null
-        }
-    }
 
     val pagerState = rememberPagerState(0)
     val pages = remember {
@@ -106,107 +84,62 @@ fun NewCatchMasterScreen(
         vmUiState = viewModel.uiState,
         loadingDialogState = loadingDialogState,
         upPress = {
-//            upPress()
+            upPress()
         }
     )
 
-    ModalBottomSheetLayout(
-        modifier = Modifier,
-        sheetShape = Constants.modalBottomSheetCorners,
-        sheetState = modalBottomSheetState,
-        sheetContent = {
-            Spacer(modifier = Modifier.height(1.dp))
-            currentBottomSheet?.let { currentSheet ->
-                val photos by viewModel.photos.collectAsState()
-
-                NewCatchModalBottomSheetContent(
-                    currentScreen = currentSheet,
-                    photos = photos,
-                    onSavePhotos = {
-                        viewModel.setPhotos(it)
-                    },
-                    onCloseBottomSheet = { viewModel.addPhotoState.value = false }
-                )
-            }
+    Scaffold(
+        topBar = {
+            DefaultAppBar(title = stringResource(id = R.string.new_catch))
         }
     ) {
+        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+            val (pager, buttons) = createRefs()
 
-        Scaffold(
-            topBar = {
-                DefaultAppBar(title = stringResource(id = R.string.new_catch))
-            }
-        ) {
-            ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-                val (pager, buttons) = createRefs()
+            NewCatchPager(
+                modifier = Modifier.constrainAs(pager) {
+                    top.linkTo(parent.top)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    absoluteRight.linkTo(parent.absoluteRight)
+                    bottom.linkTo(buttons.top)
+                    height = Dimension.fillToConstraints
+                    width = Dimension.fillToConstraints
+                },
+                navController = navController,
+                viewModel = viewModel,
+                pagerState = pagerState,
+                pages = pages
+            )
 
-                NewCatchPager(
-                    modifier = Modifier.constrainAs(pager) {
-                        top.linkTo(parent.top)
-                        absoluteLeft.linkTo(parent.absoluteLeft)
-                        absoluteRight.linkTo(parent.absoluteRight)
-                        bottom.linkTo(buttons.top)
-                        height = Dimension.fillToConstraints
-                        width = Dimension.fillToConstraints
-                    },
-                    navController = navController,
-                    viewModel = viewModel,
-                    pagerState = pagerState,
-                    pages = pages
-                )
-
-                NewCatchButtons(
-                    modifier = Modifier.constrainAs(buttons) {
-                        bottom.linkTo(parent.bottom)
-                        absoluteLeft.linkTo(parent.absoluteLeft)
-                        absoluteRight.linkTo(parent.absoluteRight)
-                    },
-                    pagerState = pagerState,
-                    onFinishClick = { viewModel.saveNewCatch() },
-                    onNextClick = {
-                        coroutineScope.launch {
-                            when (pagerState.currentPage) {
-                                0 -> {
-                                    if (viewModel.currentPlace.value != null && viewModel.isPlaceInputCorrect.value) {
-                                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                        viewModel.loadWeather()
-                                    } else {
-                                        showToast(context, "Please select place")
-                                    }
-                                }
-                                1 -> {
-                                    if (viewModel.fishType.value.isNotBlank()) {
-                                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                    } else {
-                                        showToast(context, "Please enter fish species")
-                                    }
-
-                                }
-                                3 -> {
-                                    if (viewModel.isWeatherInputCorrect.isEmpty()) {
-                                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                    }
-                                }
-                                else -> {
-                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                }
-                            }
-
-
-                        }
-                    },
-                    onPreviousClick = {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                        }
-                    },
-                    onCloseClick = {
-//                        upPress()
+            NewCatchButtons(
+                modifier = Modifier.constrainAs(buttons) {
+                    bottom.linkTo(parent.bottom)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    absoluteRight.linkTo(parent.absoluteRight)
+                },
+                pagerState = pagerState,
+                onFinishClick = { viewModel.saveNewCatch() },
+                onNextClick = {
+                    handlePagerNextClick(
+                        context = context,
+                        coroutineScope = coroutineScope,
+                        viewModel = viewModel,
+                        pagerState = pagerState
+                    )
+                },
+                onPreviousClick = {
+                    coroutineScope.launch {
+                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
                     }
-                )
-            }
+                },
+                onCloseClick = {
+                    upPress()
+                }
+            )
         }
     }
 }
+
 
 @ExperimentalPagerApi
 @Composable
@@ -267,7 +200,7 @@ fun NewCatchButtons(
             .fillMaxWidth()
             .wrapContentHeight(),
     ) {
-        val (next, previous, close) = createRefs()
+        val (next, previous, close, ad) = createRefs()
 
         DefaultButtonFilled(
             modifier = Modifier.constrainAs(next) {
@@ -286,14 +219,13 @@ fun NewCatchButtons(
                 } else {
                     onNextClick()
                 }
-
             }
         )
 
         DefaultButtonOutlined(
             modifier = Modifier.constrainAs(previous) {
-                top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
+                top.linkTo(next.top)
+                bottom.linkTo(next.bottom)
                 absoluteRight.linkTo(next.absoluteLeft, 16.dp)
             },
             enabled = !isFirstPage,
@@ -303,13 +235,62 @@ fun NewCatchButtons(
 
         DefaultButton(
             modifier = Modifier.constrainAs(close) {
-                top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
+                top.linkTo(next.top)
+                bottom.linkTo(next.bottom)
                 absoluteLeft.linkTo(parent.absoluteLeft)
             },
             text = stringResource(R.string.close),
             onClick = onCloseClick
         )
 
+//        BannerAdvertView(
+//            modifier = Modifier.constrainAs(ad) {
+//                bottom.linkTo(parent.bottom)
+//                absoluteLeft.linkTo(parent.absoluteLeft)
+//                absoluteRight.linkTo(parent.absoluteRight)
+//            },
+//            adId = stringResource(R.string.new_catch_admob_banner_id),
+//            padding = 4.dp
+//        )
     }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+private fun handlePagerNextClick(
+    context: Context,
+    coroutineScope: CoroutineScope,
+    pagerState: PagerState,
+    viewModel: NewCatchMasterViewModel
+) {
+    coroutineScope.launch {
+        when (pagerState.currentPage) {
+            0 -> {
+                if (viewModel.currentPlace.value != null && viewModel.isPlaceInputCorrect.value) {
+                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                    viewModel.loadWeather()
+                } else {
+                    showToast(context, context.getString(R.string.place_select_error))
+                }
+            }
+            1 -> {
+                if (viewModel.fishType.value.isNotBlank()) {
+                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                } else {
+                    showToast(context, context.getString(R.string.fish_error))
+                }
+
+            }
+            3 -> {
+                if (viewModel.isWeatherInputCorrect.value) {
+                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                } else {
+                    showToast(context, context.getString(R.string.weather_error))
+                }
+            }
+            else -> {
+                pagerState.animateScrollToPage(pagerState.currentPage + 1)
+            }
+        }
+    }
+
 }

@@ -57,6 +57,75 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
+@ExperimentalComposeUiApi
+@ExperimentalAnimationApi
+@Composable
+fun ItemPhoto(
+    photo: Uri,
+    clickedPhoto: (Uri) -> Unit,
+    deletedPhoto: (Uri) -> Unit,
+    deleteEnabled: Boolean = true
+) {
+
+    val fullScreenPhoto = remember {
+        mutableStateOf<Uri?>(null)
+    }
+
+    Box(
+        modifier = Modifier
+            .size(150.dp)
+            .padding(4.dp)
+    ) {
+
+        AsyncImage(
+            model = photo,
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(5.dp))
+                .clickable {
+                    clickedPhoto(photo)
+                    fullScreenPhoto.value = photo
+                },
+            contentScale = ContentScale.Crop,
+            filterQuality = FilterQuality.Low
+        ) { state ->
+            if (state is AsyncImagePainter.State.Loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(64.dp)
+                        .align(Alignment.Center)
+                )
+            } else {
+                AsyncImageContent()
+            }
+        }
+        if (deleteEnabled) {
+            Surface(
+                color = Color.LightGray.copy(alpha = 0.5f),
+                modifier = Modifier
+                    .size(32.dp)
+                    .align(Alignment.TopEnd)
+                    .padding(3.dp)
+                    .clip(CircleShape)
+            ) {
+                Icon(
+                    Icons.Default.Close,
+                    tint = Color.White,
+                    contentDescription = stringResource(R.string.delete_photo),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable { deletedPhoto(photo) })
+            }
+        }
+    }
+
+    AnimatedVisibility(fullScreenPhoto.value != null) {
+        FullScreenPhoto(fullScreenPhoto)
+    }
+}
+
 @OptIn(ExperimentalPermissionsApi::class)
 @ExperimentalAnimationApi
 @ExperimentalComposeUiApi

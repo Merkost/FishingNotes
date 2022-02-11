@@ -3,49 +3,17 @@ package com.mobileprism.fishing.compose.ui.home.new_catch
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
-import android.net.Uri
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.res.stringResource
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.compose.ui.home.catch_screen.AddPhotoDialog
 import com.mobileprism.fishing.domain.NewCatchViewModel
 import com.mobileprism.fishing.utils.time.TimeConstants.MILLISECONDS_IN_DAY
 import org.koin.androidx.compose.getViewModel
 import java.util.*
-
-sealed class BottomSheetNewCatchScreen() {
-    object EditPhotosScreen : BottomSheetNewCatchScreen()
-}
-
-@ExperimentalPermissionsApi
-@ExperimentalAnimationApi
-@ExperimentalComposeUiApi
-@Composable
-fun NewCatchModalBottomSheetContent(
-    currentScreen: BottomSheetNewCatchScreen,
-    photos: List<Uri>,
-    onSavePhotos: (List<Uri>) -> Unit,
-    onCloseBottomSheet: () -> Unit,
-) {
-    when (currentScreen) {
-        BottomSheetNewCatchScreen.EditPhotosScreen -> {
-            AddPhotoDialog(
-                photos = photos,
-                onSavePhotosClick = {
-                    onSavePhotos(it)
-                },
-                onCloseBottomSheet = onCloseBottomSheet
-            )
-        }
-    }
-}
 
 @Composable
 fun ErrorDialog(onClose: () -> Unit) {

@@ -4,7 +4,6 @@ import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -12,10 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -216,7 +212,6 @@ fun NewCatchNote(viewModel: NewCatchMasterViewModel, navController: NavControlle
 
         OutlinedTextField(
             modifier = Modifier
-                .defaultMinSize(minHeight = 200.dp)
                 .constrainAs(note) {
                     top.linkTo(subtitle.bottom, 16.dp)
                     absoluteLeft.linkTo(parent.absoluteLeft)
@@ -244,6 +239,22 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
         val (subtitle, description, temp, press, wind, moon, refreshButton) = createRefs()
 
         val guideline = createGuidelineFromAbsoluteLeft(0.5f)
+
+        var primaryWeatherError by remember { mutableStateOf(false) }
+        var temperatureError by remember { mutableStateOf(false) }
+        var pressureError by remember { mutableStateOf(false) }
+        var windError by remember { mutableStateOf(false) }
+
+        val isError1 by remember(primaryWeatherError, temperatureError) {
+            mutableStateOf(primaryWeatherError || temperatureError)
+        }
+        val isError2 by remember(pressureError, windError) {
+            mutableStateOf(pressureError || windError)
+        }
+
+        LaunchedEffect(key1 = isError1, isError2) {
+            viewModel.setWeatherIsError(isError1 || isError2)
+        }
 
         SubtitleWithIcon(
             modifier = Modifier.constrainAs(subtitle) {
@@ -275,7 +286,7 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
             weatherIconId = viewModel.weatherIconId.collectAsState(),
             onDescriptionChange = { viewModel.setWeatherPrimary(it) },
             onIconChange = { viewModel.setWeatherIconId(it) },
-            onError = { viewModel.setWeatherIsError(it) }
+            onError = { primaryWeatherError = it }
         )
 
         NewCatchTemperatureView(
@@ -287,7 +298,7 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
             },
             temperature = viewModel.weatherTemperature.collectAsState(),
             onTemperatureChange = { viewModel.setWeatherTemperature(it) },
-            onError = { viewModel.setWeatherIsError(it) }
+            onError = { temperatureError = it }
         )
 
         NewCatchPressureView(
@@ -299,7 +310,7 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
             },
             pressure = viewModel.weatherPressure.collectAsState(),
             onPressureChange = { viewModel.setWeatherPressure(it) },
-            onError = { viewModel.setWeatherIsError(it) }
+            onError = { pressureError = it }
         )
 
         NewCatchWindView(
@@ -312,7 +323,7 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
             wind = viewModel.weatherWindSpeed.collectAsState(),
             windDeg = viewModel.weatherWindDeg.collectAsState(),
             onWindChange = { viewModel.setWeatherWindSpeed(it) },
-            onError = { viewModel.setWeatherIsError(it) }
+            onError = { windError = it }
         )
 
         NewCatchMoonView(
@@ -402,16 +413,6 @@ fun NewCatchPhotos(viewModel: NewCatchMasterViewModel, navController: NavControl
             }
             addPhoto(permissionState, addPhotoState, choosePhotoLauncher)
         }
-
-//        PhotosView(
-//            modifier = Modifier.constrainAs(photosView) {
-//                top.linkTo(subtitle.bottom, 32.dp)
-//                absoluteLeft.linkTo(parent.absoluteLeft)
-//                absoluteRight.linkTo(parent.absoluteRight)
-//            },
-//            photos = photos.value,
-//            onEditClick = { viewModel.addPhotoState.value = true }
-//        )
     }
 
 

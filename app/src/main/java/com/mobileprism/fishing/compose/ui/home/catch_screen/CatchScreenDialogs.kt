@@ -32,7 +32,6 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.advertising.showInterstitialAd
 import com.mobileprism.fishing.compose.ui.home.new_catch.FishAmountAndWeightView
-import com.mobileprism.fishing.compose.ui.home.notes.ItemPhoto
 import com.mobileprism.fishing.compose.ui.home.views.*
 import com.mobileprism.fishing.domain.UserCatchViewModel
 import com.mobileprism.fishing.model.entity.common.Note
