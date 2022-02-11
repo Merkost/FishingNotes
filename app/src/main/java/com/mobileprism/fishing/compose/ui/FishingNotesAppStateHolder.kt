@@ -89,15 +89,21 @@ class AppStateHolder(
 
                     // Display the snackbar on the screen. `showSnackbar` is a function
                     // that suspends until the snackbar disappears from the screen
-                    val result = scaffoldState.snackbarHostState.showSnackbar(
-                        text.toString(),
-                        actionLabel = snackbarAction.text,
-                        duration = message.duration
-                    )
-                    when (result) {
-                        SnackbarResult.ActionPerformed -> snackbarAction.action
-                        SnackbarResult.Dismissed -> {}
+                    snackbarAction?.let {
+                        val actionText = resources.getText(snackbarAction.textId)
+                        val result = scaffoldState.snackbarHostState.showSnackbar(
+                            text.toString(),
+                            actionLabel = actionText.toString().uppercase(),
+                            duration = message.duration
+                        )
+                        when (result) {
+                            SnackbarResult.ActionPerformed -> snackbarAction.action
+                            SnackbarResult.Dismissed -> {}
+                        }
+                    } ?: run {
+                        scaffoldState.snackbarHostState.showSnackbar(text.toString())
                     }
+
                     // Once the snackbar is gone or dismissed, notify the SnackbarManager
                     snackbarManager.setMessageShown(message.id)
                 }

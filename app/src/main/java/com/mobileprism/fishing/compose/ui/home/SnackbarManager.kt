@@ -11,11 +11,11 @@ import java.util.*
 data class Message(
     val id: Long,
     @StringRes val messageId: Int,
-    val snackbarAction: SnackbarAction,
+    val snackbarAction: SnackbarAction?,
     val duration: SnackbarDuration = SnackbarDuration.Short
 )
 
-data class SnackbarAction(val text: String = "", val action: () -> Unit = {})
+data class SnackbarAction(@StringRes val textId: Int, val action: () -> Unit = {})
 
 /**
  * Class responsible for managing Snackbar messages to show on the screen
@@ -27,7 +27,7 @@ object SnackbarManager {
 
     fun showMessage(
         @StringRes messageTextId: Int,
-        snackbarAction: SnackbarAction = SnackbarAction(),
+        snackbarAction: SnackbarAction? = null,
         duration: SnackbarDuration = SnackbarDuration.Short
     ) {
         _messages.update { currentMessages ->
