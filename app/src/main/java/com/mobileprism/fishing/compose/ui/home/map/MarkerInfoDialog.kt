@@ -50,7 +50,6 @@ import org.koin.androidx.compose.getViewModel
 fun MarkerInfoDialog(
     receivedMarker: UserMapMarker?,
     lastKnownLocation: MutableState<LatLng?>,
-    mapBearing: MutableState<Float>,
     modifier: Modifier = Modifier,
     navController: NavController,
     onMarkerIconClicked: (UserMapMarker) -> Unit,
@@ -296,8 +295,7 @@ fun MarkerInfoDialog(
                     ) {
                         IconButton(onClick = { onWeatherIconClicked(marker, navController) }) {
                             Icon(painterResource(R.drawable.ic_baseline_navigation_24), "",
-                                modifier = Modifier.rotate(currentWeather?.wind_degrees?.let {
-                                    it.minus(mapBearing.value) } ?: mapBearing.value),
+                                modifier = Modifier.rotate(viewModel.windIconRotation),
                                 tint = if (fishActivity == null) Color.LightGray else MaterialTheme.colors.primaryVariant
                             )
                         }

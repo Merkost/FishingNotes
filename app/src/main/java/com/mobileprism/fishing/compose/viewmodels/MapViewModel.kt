@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.compose.ui.home.UiState
 import com.mobileprism.fishing.compose.ui.home.map.CameraMoveState
+import com.mobileprism.fishing.compose.ui.home.map.MapTypes
 import com.mobileprism.fishing.compose.ui.home.map.MapUiState
 import com.mobileprism.fishing.compose.ui.home.map.PointerState
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
@@ -32,6 +33,7 @@ class MapViewModel(
     private val solunarRepository: SolunarRepository,
 ) : ViewModel() {
 
+
     val showMarker: MutableState<Boolean> = mutableStateOf(false)
     private val viewStateFlow: MutableStateFlow<BaseViewState> =
         MutableStateFlow(BaseViewState.Loading(null))
@@ -51,10 +53,14 @@ class MapViewModel(
     val uiState: StateFlow<UiState?>
         get() = _uiState
 
+    val mapType = mutableStateOf(MapTypes.roadmap)
+    val mapBearing = mutableStateOf(0f)
+
     val firstLaunchLocation = mutableStateOf(true)
 
     val lastKnownLocation = mutableStateOf<LatLng?>(null)
     val lastMapCameraPosition = mutableStateOf<Pair<LatLng, Float>?>(null)
+    val currentCameraPosition = mutableStateOf(Pair(LatLng(0.0, 0.0), 0f))
 
     var currentMarker: MutableState<UserMapMarker?> = mutableStateOf(null)
 
@@ -62,6 +68,9 @@ class MapViewModel(
 
     val fishActivity: MutableState<Int?> = mutableStateOf(null)
     val currentWeather: MutableState<CurrentWeatherFree?> = mutableStateOf(null)
+
+    val windIconRotation: Float
+        get() = currentWeather.value?.wind_degrees?.minus(mapBearing.value) ?: mapBearing.value
 
     init {
         loadMarkers()
@@ -160,6 +169,5 @@ class MapViewModel(
             }
         }
     }
-
 
 }
