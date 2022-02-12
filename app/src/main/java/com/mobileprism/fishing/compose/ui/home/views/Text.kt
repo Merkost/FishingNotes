@@ -66,16 +66,17 @@ fun HeaderTextSecondary(
 @Composable
 fun SubtitleText(
     modifier: Modifier = Modifier, text: String,
-    textColor: Color? = null, singleLine: Boolean = true,
+    textColor: Color = MaterialTheme.customColors.secondaryTextColor, maxLines: Int = Int.MAX_VALUE,
     textAlign: TextAlign = TextAlign.Start
 ) {
 
     Text(
         modifier = modifier,
         style = MaterialTheme.typography.subtitle1,
-        color = MaterialTheme.customColors.secondaryTextColor,
+        color = textColor,
         text = text,
         textAlign = textAlign,
+        maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
         )
 }

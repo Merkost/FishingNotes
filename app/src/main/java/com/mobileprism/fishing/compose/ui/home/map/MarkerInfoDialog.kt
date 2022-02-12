@@ -20,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -111,13 +112,13 @@ fun MarkerInfoDialog(
             coroutineScope.launch(Dispatchers.Default) {
                 distance = null
                 lastKnownLocation.value?.let {
-                    distance = convertDistance(
+                    distance = context.convertDistance(
                         SphericalUtil.computeDistanceBetween(
-                            com.google.android.gms.maps.model.LatLng(
+                            LatLng(
                                 receivedMarker.latitude,
                                 receivedMarker.longitude
                             ),
-                            com.google.android.gms.maps.model.LatLng(it.latitude, it.longitude)
+                            LatLng(it.latitude, it.longitude)
                         )
                     )
                 }
@@ -162,7 +163,8 @@ fun MarkerInfoDialog(
                     val verticalFabLine = createGuidelineFromAbsoluteRight(60.dp)
 
                     Box(modifier = Modifier
-                        .size(64.dp).padding(16.dp)
+                        .size(64.dp)
+                        .padding(16.dp)
 
                         .constrainAs(locationIcon) {
                             absoluteLeft.linkTo(parent.absoluteLeft)
@@ -194,12 +196,13 @@ fun MarkerInfoDialog(
                         maxLines = 2,
                     )
 
+                    // TODO: Баг с наездом текста на дистанцию
                     //Area name
                     SubtitleText(
                         modifier = Modifier
                             .constrainAs(area) {
                                 top.linkTo(title.bottom, 4.dp)
-                                linkTo(title.start, title.end, 0.dp, 80.dp, 0f)
+                                linkTo(title.start, title.end, 0.dp, 32.dp, 0f)
 
                             }
                             .animateContentSize(
@@ -209,6 +212,7 @@ fun MarkerInfoDialog(
                                 )
                             ),
                         text = address ?: "",
+                        maxLines = 1
                     )
 
                     //Distance
@@ -260,7 +264,9 @@ fun MarkerInfoDialog(
                         Icon(
                             painter = painterResource(R.drawable.fish),
                             contentDescription = "Marker",
-                            modifier = Modifier.size(45.dp).padding(6.dp),
+                            modifier = Modifier
+                                .size(45.dp)
+                                .padding(6.dp),
                             tint = if (fishActivity == null) Color.LightGray else MaterialTheme.colors.primary
                         )
                         SubtitleText(
@@ -275,7 +281,9 @@ fun MarkerInfoDialog(
                                 top.linkTo(area.bottom, 4.dp)
                                 linkTo(horizontalLine, horizontalLine, 0.dp, 0.dp, 0.5f)
                                 bottom.linkTo(parent.bottom)
-                            }.height(20.dp).width(1.dp),
+                            }
+                            .height(20.dp)
+                            .width(1.dp),
                         color = Color.Gray,
                     )
 
@@ -289,7 +297,8 @@ fun MarkerInfoDialog(
                             }
                             .animateContentSize(
                                 animationSpec =
-                                tween(durationMillis = 300, easing = LinearOutSlowInEasing)),
+                                tween(durationMillis = 300, easing = LinearOutSlowInEasing)
+                            ),
                         horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
