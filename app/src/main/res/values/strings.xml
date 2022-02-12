@@ -278,6 +278,7 @@
     <string name="place_select_error">Please select place</string>
     <string name="fish_error">Please enter fish species</string>
     <string name="weather_error">Entered invalid values</string>
+    <string name="date_and_time">Дата и время</string>
 
 
 </resources>

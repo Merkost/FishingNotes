@@ -5,10 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -581,8 +578,6 @@ fun NewCatchPlaceSelectView(
 ) {
     val context = LocalContext.current
 
-    val changePlaceError = stringResource(R.string.another_place_in_new_catch)
-
     var isDropMenuOpen by rememberSaveable { mutableStateOf(false) }
 
     var textFieldValue by rememberSaveable {
@@ -632,7 +627,7 @@ fun NewCatchPlaceSelectView(
                 onValueChange = { },
                 trailingIcon = {
                     IconButton(
-                        onClick = { showToast(context, changePlaceError) }
+                        onClick = { SnackbarManager.showMessage(R.string.another_place_in_new_catch) }
                     ) {
                         Icon(
                             imageVector = Icons.Default.Lock,
@@ -670,7 +665,7 @@ fun NewCatchPlaceSelectView(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = null,
+                                contentDescription = Icons.Default.Close.name,
                                 tint = MaterialTheme.colors.primary
                             )
                         }
@@ -683,23 +678,19 @@ fun NewCatchPlaceSelectView(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowDown,
-                                contentDescription = null,
+                                contentDescription = Icons.Default.KeyboardArrowDown.name,
                                 tint = MaterialTheme.colors.primary
                             )
                         }
                     }
                 },
-                isError = !isThatPlaceInList(
-                    textFieldValue,
-                    suggestions
-                ).apply { onInputError(this) }
+                isError = !isThatPlaceInList(textFieldValue, suggestions).apply { onInputError(this) }
             )
         }
 
         DropdownMenu(
             modifier = Modifier
-                .wrapContentWidth()
-                .defaultMinSize(minWidth = 200.dp),
+                .wrapContentWidth(),
             expanded = isDropMenuOpen && suggestions.isNotEmpty(),
             onDismissRequest = {
                 if (isDropMenuOpen) isDropMenuOpen = false
@@ -715,8 +706,8 @@ fun NewCatchPlaceSelectView(
                     }) {
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                            contentDescription = null,
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = Icons.Default.LocationOn.name,
                             tint = Color(suggestion.markerColor)
                         )
                         Text(text = suggestion.title)

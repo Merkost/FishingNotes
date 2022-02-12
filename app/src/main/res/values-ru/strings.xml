@@ -270,13 +270,14 @@
     <string name="next">Далее</string>
     <string name="previous">Назад</string>
     <string name="finish">Готово</string>
-    <string name="select_on_map">Выбрать на крте</string>
+    <string name="select_on_map">Выбрать на карте</string>
     <string name="location_and_time">Location and time</string>
     <string name="billing_unavaliable">Не удалось подключиться к billing service</string>
     <string name="thanks_developers">Поблагодарить разработчиков</string>
     <string name="max_photos_allowed">Можно сохранить не более 3 фотографий</string>
-    <string name="place_select_error">Пожалуйста, выберете мксто</string>
+    <string name="place_select_error">Пожалуйста, выберите место</string>
     <string name="fish_error">Пожалуйста, введите вид рыбы</string>
     <string name="weather_error">Введены некорректные значения</string>
+    <string name="date_and_time">Дата и время</string>
 
 </resources>

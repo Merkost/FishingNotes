@@ -29,6 +29,7 @@ import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.compose.ui.home.views.DefaultAppBar
 import com.mobileprism.fishing.compose.ui.home.views.DefaultButton
 import com.mobileprism.fishing.compose.ui.home.views.DefaultButtonFilled
@@ -121,7 +122,6 @@ fun NewCatchMasterScreen(
                 onFinishClick = { viewModel.saveNewCatch() },
                 onNextClick = {
                     handlePagerNextClick(
-                        context = context,
                         coroutineScope = coroutineScope,
                         viewModel = viewModel,
                         pagerState = pagerState
@@ -257,7 +257,6 @@ fun NewCatchButtons(
 
 @OptIn(ExperimentalPagerApi::class)
 private fun handlePagerNextClick(
-    context: Context,
     coroutineScope: CoroutineScope,
     pagerState: PagerState,
     viewModel: NewCatchMasterViewModel
@@ -269,14 +268,14 @@ private fun handlePagerNextClick(
                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
                     viewModel.loadWeather()
                 } else {
-                    showToast(context, context.getString(R.string.place_select_error))
+                    SnackbarManager.showMessage(R.string.place_select_error)
                 }
             }
             1 -> {
                 if (viewModel.fishType.value.isNotBlank()) {
                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
                 } else {
-                    showToast(context, context.getString(R.string.fish_error))
+                    SnackbarManager.showMessage(R.string.fish_error)
                 }
 
             }
@@ -284,7 +283,7 @@ private fun handlePagerNextClick(
                 if (viewModel.isWeatherInputCorrect.value) {
                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
                 } else {
-                    showToast(context, context.getString(R.string.weather_error))
+                    SnackbarManager.showMessage(R.string.weather_error)
                 }
             }
             else -> {
