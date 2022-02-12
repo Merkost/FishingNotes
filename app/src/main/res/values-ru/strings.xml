@@ -237,7 +237,7 @@
     <string name="show_hidden_places">Показывать скрытые места на карте</string>
     <string name="wind_ftps">футов/с</string>
     <string name="wind_mph">миль/ч</string>
-    <string name="wind_knots">узел(ов)</string>
+    <string name="wind_knots">узелов</string>
     <string name="wind_kmph">км/ч</string>
     <string name="wind_mps">м/с</string>
     <string name="wind_speed_unit">Единица измерения скорости ветра</string>
@@ -279,5 +279,8 @@
     <string name="reload_app">Перезапустить</string>
     <string name="unknown_version">Неизвестная версия</string>
     <string name="leave_review">"Оставить отзыв"</string>
+    <string name="retry">Повторить</string>
+    <string name="km">км</string>
+    <string name="m">м</string>
 
 </resources>

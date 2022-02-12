@@ -279,6 +279,9 @@
     <string name="app_donation">App support</string>
     <string name="unknown_version">Неизвестная версия</string>
     <string name="leave_review">Leave a review</string>
+    <string name="retry">Повторить</string>
+    <string name="km">km</string>
+    <string name="m">m</string>
 
 
 </resources>
