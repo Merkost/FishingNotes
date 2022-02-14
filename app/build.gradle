@@ -20,8 +20,8 @@ android {
         applicationId "com.mobileprism.fishing"
         minSdkVersion 23
         targetSdkVersion 31
-        versionCode 6
-        versionName "1.0.3.002"
+        versionCode 10
+        versionName "1.0.3.006"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
@@ -54,7 +54,6 @@ android {
     buildFeatures {
           compose true
     }
-
 }
 
 dependencies {
@@ -69,8 +68,6 @@ dependencies {
     implementation "com.github.skydoves:landscapist-coil:1.4.4"
 
     implementation "androidx.core:core-splashscreen:1.0.0-beta01"
-
-
 
     //Compressor
     implementation 'id.zelory:compressor:3.0.1'
@@ -91,7 +88,6 @@ dependencies {
     implementation Libs.Coroutines.core
 
     implementation Libs.GoogleMaps.mapsKtx
-    //implementation Libs.GoogleMaps.maps
     implementation Libs.GoogleMaps.mapUtilsKtx
 
     implementation Libs.PlayServices.maps
@@ -99,7 +95,6 @@ dependencies {
     implementation Libs.PlayServices.ads
     implementation Libs.PlayServices.core
     implementation Libs.PlayServices.billing
-    //implementation Libs.PlayServices.auth
 
     implementation Libs.AndroidX.coreKtx
     implementation Libs.AndroidX.splashScreen

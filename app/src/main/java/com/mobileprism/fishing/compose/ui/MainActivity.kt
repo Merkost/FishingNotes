@@ -4,13 +4,13 @@ import android.content.Intent
 import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.SnackbarDuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +33,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.play.core.appupdate.AppUpdateManager
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
@@ -44,6 +43,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.compose.ui.home.SnackbarAction
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.compose.ui.theme.AppThemeValues
 import com.mobileprism.fishing.compose.ui.theme.FishingNotesTheme
@@ -62,11 +62,11 @@ import java.util.*
 class MainActivity : ComponentActivity() {
 
     private val logger: Logger by inject()
+    private val appUpdateManager: AppUpdateManager = get()
+    private val auth: FirebaseAuth = get()
 
-    private lateinit var appUpdateManager: AppUpdateManager
     private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
     private lateinit var googleSignInClient: GoogleSignInClient
-    private lateinit var auth: FirebaseAuth
 
     private val registeredActivity =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -130,9 +130,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     .start()
-
             }
-
         }
 
         if (Build.VERSION.SDK_INT >= 31) {
@@ -143,7 +141,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        auth = FirebaseAuth.getInstance()
+
 
         MobileAds.initialize(this) {}
 
@@ -157,46 +155,13 @@ class MainActivity : ComponentActivity() {
         val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
         MobileAds.setRequestConfiguration(configuration)
         setAppMuted(true)
-    }
 
-    override fun onResume() {
-        super.onResume()
-        try {
-
-            checkForUpdates()
-        } catch (e: Exception) {
-            handleError(e)
-        }
+        checkForUpdates()
     }
 
     private fun checkForUpdates() {
-        appUpdateManager = AppUpdateManagerFactory.create(applicationContext)
-
-        // Create a listener to track request state updates.
-        installStateUpdatedListener = InstallStateUpdatedListener { state ->
-            when (state.installStatus()) {
-                InstallStatus.DOWNLOADING -> {
-                    val bytesDownloaded = state.bytesDownloaded()
-                    val totalBytesToDownload = state.totalBytesToDownload()
-                    // Show update progress bar.
-                }
-                InstallStatus.DOWNLOADED -> {
-                    appUpdateManager.completeUpdate()
-                }
-                InstallStatus.INSTALLED -> {
-                    appUpdateManager.unregisterListener(installStateUpdatedListener)
-                }
-                InstallStatus.CANCELED -> {
-                    appUpdateManager.unregisterListener(installStateUpdatedListener)
-                }
-                InstallStatus.FAILED -> {
-                    appUpdateManager.unregisterListener(installStateUpdatedListener)
-                }
-            }
-
-        }
-
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+        installStateUpdatedListener = createUpdateListener()
 
         // Checks that the platform will allow the specified type of update.
         appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
@@ -205,14 +170,53 @@ class MainActivity : ComponentActivity() {
             ) {
                 // Before starting an update, register a listener for updates.
                 appUpdateManager.registerListener(installStateUpdatedListener)
+
                 appUpdateManager.startUpdateFlowForResult(
                     appUpdateInfo, AppUpdateType.FLEXIBLE,
                     this, UPDATE_REQUEST_CODE
                 )
             } else if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
-                appUpdateManager.completeUpdate()
+                popupSnackbarForCompleteUpdate()
             }
         }
+    }
+
+    // Create a listener to track request state updates.
+    private fun createUpdateListener() =
+        InstallStateUpdatedListener { state ->
+            when (state.installStatus()) {
+                InstallStatus.DOWNLOADING -> {
+                    val bytesDownloaded = state.bytesDownloaded()
+                    val totalBytesToDownload = state.totalBytesToDownload()
+                    // Show update progress bar.
+                }
+                InstallStatus.DOWNLOADED -> {
+                    popupSnackbarForCompleteUpdate()
+                }
+                InstallStatus.INSTALLED -> {
+                    SnackbarManager.showMessage(R.string.update_installed)
+                    removeInstallStateUpdateListener()
+                }
+                InstallStatus.CANCELED -> {
+                    SnackbarManager.showMessage(R.string.update_canceled)
+                }
+                InstallStatus.FAILED -> {
+                    SnackbarManager.showMessage(R.string.update_failed)
+                }
+                else -> {}
+            }
+        }
+
+    private fun removeInstallStateUpdateListener() {
+       appUpdateManager.unregisterListener(installStateUpdatedListener)
+    }
+
+    private fun popupSnackbarForCompleteUpdate() {
+        SnackbarManager.showMessage(
+            R.string.update_ready,
+            SnackbarAction(R.string.reload_app) { appUpdateManager.completeUpdate() },
+            duration = SnackbarDuration.Indefinite
+        )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -220,23 +224,13 @@ class MainActivity : ComponentActivity() {
         if (requestCode == UPDATE_REQUEST_CODE) {
             when (resultCode) {
                 RESULT_CANCELED -> {
-                    Toast.makeText(
-                        applicationContext,
-                        "Update canceled by user! Result Code: $resultCode", Toast.LENGTH_LONG
-                    ).show()
+                    SnackbarManager.showMessage(R.string.update_canceled)
                 }
                 RESULT_OK -> {
-                    Toast.makeText(
-                        applicationContext,
-                        "Update success! Result Code: $resultCode", Toast.LENGTH_LONG
-                    ).show()
+                    SnackbarManager.showMessage(R.string.update_downloading)
                 }
                 else -> {
-                    Toast.makeText(
-                        applicationContext,
-                        "Update Failed! Result Code: $resultCode",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    SnackbarManager.showMessage(R.string.update_failed)
                     checkForUpdates()
                 }
             }
@@ -347,6 +341,11 @@ class MainActivity : ComponentActivity() {
         }
         SnackbarManager.showMessage(R.string.google_login_failed)
 
+    }
+
+    override fun onStop() {
+        super.onStop()
+        removeInstallStateUpdateListener()
     }
 }
 

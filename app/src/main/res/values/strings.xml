@@ -279,6 +279,20 @@
     <string name="fish_error">Please enter fish species</string>
     <string name="weather_error">Entered invalid values</string>
     <string name="date_and_time">Дата и время</string>
+    <string name="update_ready">Update is ready</string>
+    <string name="reload_app">Restart</string>
+    <string name="update_canceled">Update canceled by user</string>
+    <string name="update_downloading">The update is loading</string>
+    <string name="update_failed">Update failed</string>
+    <string name="update_installed">Update installed</string>
+    <string name="payment_no_content"> There are no items to buy</string>
+    <string name="made_in_russia">Made in Russia with love  ❤ </string>
+    <string name="app_donation">App support</string>
+    <string name="unknown_version">Неизвестная версия</string>
+    <string name="leave_review">Leave a review</string>
+    <string name="retry">Повторить</string>
+    <string name="km">km</string>
+    <string name="m">m</string>
 
 
 </resources>

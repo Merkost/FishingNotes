@@ -421,11 +421,11 @@ object DistanceFormat {
     val df = DecimalFormat("#.#")
 }
 
-fun convertDistance(distanceInMeters: Double): String {
+fun Context.convertDistance(distanceInMeters: Double): String {
     return when (distanceInMeters.toInt()) {
-        in 0..999 -> distanceInMeters.toInt().toString() + " m"
-        in 1001..9999 -> DistanceFormat.df.format(distanceInMeters / 1000f).toString() + " km"
-        else -> distanceInMeters.div(1000).toInt().toString() + " km"
+        in 0..999 -> distanceInMeters.toInt().toString() + " ${getString(R.string.m)}"
+        in 1001..9999 -> DistanceFormat.df.format(distanceInMeters / 1000f).toString() + " ${getString(R.string.km)}"
+        else -> distanceInMeters.div(1000).toInt().toString() + " ${getString(R.string.km)}"
     }
 }
 
