@@ -1,10 +1,11 @@
 package com.mobileprism.fishing.compose.ui.home.new_catch
 
-import android.content.Context
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -17,7 +18,6 @@ import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -30,13 +30,11 @@ import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
-import com.mobileprism.fishing.compose.ui.home.views.DefaultAppBar
-import com.mobileprism.fishing.compose.ui.home.views.DefaultButton
-import com.mobileprism.fishing.compose.ui.home.views.DefaultButtonFilled
-import com.mobileprism.fishing.compose.ui.home.views.DefaultButtonOutlined
+import com.mobileprism.fishing.compose.ui.home.views.*
+import com.mobileprism.fishing.compose.ui.theme.customColors
 import com.mobileprism.fishing.domain.NewCatchMasterViewModel
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.utils.showToast
+import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.viewModel
@@ -64,7 +62,6 @@ fun NewCatchMasterScreen(
     }
 
     val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     val pagerState = rememberPagerState(0)
     val pages = remember {
@@ -81,7 +78,7 @@ fun NewCatchMasterScreen(
         mutableStateOf(false)
     }
 
-    SubscribeToProgress(
+    SubscribeToNewCatchProgress(
         vmUiState = viewModel.uiState,
         loadingDialogState = loadingDialogState,
         upPress = {
@@ -89,9 +86,27 @@ fun NewCatchMasterScreen(
         }
     )
 
+    ModalLoadingDialog(
+        dialogSate = loadingDialogState,
+        text = stringResource(id = R.string.saving_new_catch)
+    )
+
     Scaffold(
         topBar = {
+            val isEnabled = remember(pagerState.currentPage) {
+                mutableStateOf(pagerState.currentPage == (pagerState.pageCount - 1))
+            }
+
+            val color = animateColorAsState(
+                targetValue = if (isEnabled.value) {
+                    MaterialTheme.colors.onPrimary
+                } else {
+                    MaterialTheme.customColors.secondaryIconColor
+                }
+            )
+
             DefaultAppBar(title = stringResource(id = R.string.new_catch))
+
         }
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
@@ -200,7 +215,7 @@ fun NewCatchButtons(
             .fillMaxWidth()
             .wrapContentHeight(),
     ) {
-        val (next, previous, close, ad) = createRefs()
+        val (next, previous, close) = createRefs()
 
         DefaultButtonFilled(
             modifier = Modifier.constrainAs(next) {
@@ -242,16 +257,6 @@ fun NewCatchButtons(
             text = stringResource(R.string.close),
             onClick = onCloseClick
         )
-
-//        BannerAdvertView(
-//            modifier = Modifier.constrainAs(ad) {
-//                bottom.linkTo(parent.bottom)
-//                absoluteLeft.linkTo(parent.absoluteLeft)
-//                absoluteRight.linkTo(parent.absoluteRight)
-//            },
-//            adId = stringResource(R.string.new_catch_admob_banner_id),
-//            padding = 4.dp
-//        )
     }
 }
 
@@ -284,6 +289,11 @@ private fun handlePagerNextClick(
                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
                 } else {
                     SnackbarManager.showMessage(R.string.weather_error)
+                }
+            }
+            4 -> {
+                if (viewModel.photos.value.size > MAX_PHOTOS) {
+                    SnackbarManager.showMessage(R.string.max_photos_allowed)
                 }
             }
             else -> {

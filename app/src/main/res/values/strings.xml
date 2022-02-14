@@ -274,7 +274,7 @@
     <string name="location_and_time">Location and time</string>
     <string name="billing_unavaliable">Couldn\'t connect to billing service</string>
     <string name="thanks_developers">Thank developers</string>
-    <string name="max_photos_allowed">3 photos maximum allowed</string>
+    <string name="max_photos_allowed">4 photos maximum allowed</string>
     <string name="place_select_error">Please select place</string>
     <string name="fish_error">Please enter fish species</string>
     <string name="weather_error">Entered invalid values</string>

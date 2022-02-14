@@ -6,7 +6,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.compose.ui.home.map.DEFAULT_ZOOM
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.utils.time.TimeConstants.MOON_PHASE_INCREMENT_IN_DAY
+import com.mobileprism.fishing.utils.time.TimeConstants.MOON_ZERO_DATE_SECONDS
 import com.mobileprism.fishing.utils.time.TimeConstants.SECONDS_IN_DAY
+import com.mobileprism.fishing.utils.time.formatToMilliseconds
 import java.util.*
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -41,15 +43,23 @@ fun Float.roundTo(numFractionDigits: Int): Float {
     return (this * factor).roundToInt() / factor.toFloat()
 }
 
-fun calcMoonPhase(currentPhase: Float, currentDate: Long, requiredDate: Long): Float {
-    var result = currentPhase
-    val dif = currentDate - requiredDate
+//fun calcMoonPhase(currentPhase: Float, currentDate: Long, requiredDate: Long): Float {
+//    var result = currentPhase
+//    val dif = currentDate - requiredDate
+//    val numOfDays = dif / SECONDS_IN_DAY
+//    result -= (numOfDays * MOON_PHASE_INCREMENT_IN_DAY)
+//    if (result < 0.0f) {
+//        result += 1.0f
+//    }
+//    return result
+//}
+
+fun calcMoonPhase(requiredDate: Long): Float {
+    val dif = formatToMilliseconds(requiredDate) - formatToMilliseconds(MOON_ZERO_DATE_SECONDS)
     val numOfDays = dif / SECONDS_IN_DAY
-    result -= (numOfDays * MOON_PHASE_INCREMENT_IN_DAY)
-    if (result < 0.0f) {
-        result += 1.0f
-    }
-    return result
+    val phase = numOfDays * MOON_PHASE_INCREMENT_IN_DAY
+    val numOfFullCycles = phase.toInt()
+    return (phase - numOfFullCycles)
 }
 
 fun showToast(context: Context, text: String) {

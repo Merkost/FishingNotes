@@ -6,6 +6,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalContext
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
 import kotlinx.coroutines.flow.StateFlow
 
@@ -172,7 +173,7 @@ object Constants {
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun SubscribeToProgress(
+fun SubscribeToNewCatchProgress(
     vmUiState: StateFlow<BaseViewState>,
     loadingDialogState: MutableState<Boolean>,
     upPress: () -> Unit
@@ -186,11 +187,7 @@ fun SubscribeToProgress(
         when (uiState) {
             is BaseViewState.Success<*> -> {
                 if ((uiState as BaseViewState.Success<*>).data != null) {
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.catch_added_successfully),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    SnackbarManager.showMessage(R.string.catch_added_successfully)
                     upPress()
                 }
             }

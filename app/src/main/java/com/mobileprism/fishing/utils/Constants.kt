@@ -13,7 +13,7 @@ object Constants {
         topStart = 16.dp, topEnd = 16.dp, bottomStart = 0.dp, bottomEnd = 0.dp
     )
 
-    const val MAX_PHOTOS: Int = 3
+    const val MAX_PHOTOS: Int = 4
 
     const val ITEM_ADD_PHOTO = "ITEM_ADD_PHOTO"
     const val ITEM_PHOTO = "ITEM_PHOTO"

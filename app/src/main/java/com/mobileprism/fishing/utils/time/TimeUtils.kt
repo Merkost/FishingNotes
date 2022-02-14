@@ -15,7 +15,8 @@ object TimeConstants {
     const val MILLISECONDS_IN_HOUR = 3600000L
     const val SECONDS_IN_HOUR = 3600L
     const val SECONDS_IN_MINUTE = 60L
-    const val MOON_PHASE_INCREMENT_IN_DAY = 0.03f
+    const val MOON_PHASE_INCREMENT_IN_DAY = 0.0295305882f
+    const val MOON_ZERO_DATE_SECONDS = 1643705100L
 }
 
 fun Long.toTime(is12hFormat: Boolean = false): String {
@@ -66,7 +67,7 @@ fun calculateDaylightTime(context: Context, sunrise: Long, sunset: Long): String
     return "$hours ${context.getString(R.string.hours)} $minutes ${context.getString(R.string.minutes)}"
 }
 
-private fun formatToMilliseconds(time: Long): Long {
+fun formatToMilliseconds(time: Long): Long {
     return if (time > 1000000000000) time else time * MILLISECONDS_IN_SECOND
 }
 
