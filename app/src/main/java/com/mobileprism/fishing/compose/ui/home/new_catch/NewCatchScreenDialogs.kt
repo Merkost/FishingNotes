@@ -34,5 +34,3 @@ fun ErrorDialog(onClose: () -> Unit) {
         }
     )
 }
-
-

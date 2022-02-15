@@ -727,7 +727,7 @@ fun NewCatchPlaceSelectView(
 @Composable
 fun DateAndTimeItem(
     modifier: Modifier = Modifier,
-    date: State<Long>,
+    dateTime: State<Long>,
     onDateChange: (Long) -> Unit,
 ) {
     val viewModel: NewCatchViewModel = getViewModel()
@@ -738,6 +738,7 @@ fun DateAndTimeItem(
     if (dateSetState) {
         DatePickerDialog(
             context = context,
+            initialDate = dateTime.value,
             minDate = Date().time - (TimeConstants.MILLISECONDS_IN_DAY * 5),
             onDateChange = onDateChange
         ) {
@@ -746,7 +747,7 @@ fun DateAndTimeItem(
     }
 
     if (timeSetState) {
-        TimePickerDialog(context = context, onTimeChange = onDateChange) {
+        TimePickerDialog(context = context, initialTime = dateTime.value, onTimeChange = onDateChange) {
             timeSetState = false
         }
     }
@@ -759,7 +760,7 @@ fun DateAndTimeItem(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         OutlinedTextField(
-            value = date.value.toDate(),
+            value = dateTime.value.toDate(),
             onValueChange = {},
             label = { Text(text = stringResource(R.string.date)) },
             readOnly = true,
@@ -781,7 +782,7 @@ fun DateAndTimeItem(
 
             })
         OutlinedTextField(
-            value = date.value.toTime(),
+            value = dateTime.value.toTime(),
             onValueChange = {},
             label = { Text(text = stringResource(R.string.time)) },
             readOnly = true,
