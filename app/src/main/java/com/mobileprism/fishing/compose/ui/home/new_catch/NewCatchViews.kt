@@ -39,9 +39,11 @@ import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.mappers.getAllWeatherIcons
 import com.mobileprism.fishing.utils.roundTo
 import com.mobileprism.fishing.utils.showToast
+import com.mobileprism.fishing.utils.time.TimeConstants
 import com.mobileprism.fishing.utils.time.toDate
 import com.mobileprism.fishing.utils.time.toTime
 import org.koin.androidx.compose.getViewModel
+import java.util.*
 
 @ExperimentalComposeUiApi
 @Composable
@@ -684,7 +686,10 @@ fun NewCatchPlaceSelectView(
                         }
                     }
                 },
-                isError = !isThatPlaceInList(textFieldValue, suggestions).apply { onInputError(this) }
+                isError = !isThatPlaceInList(
+                    textFieldValue,
+                    suggestions
+                ).apply { onInputError(this) }
             )
         }
 
@@ -726,16 +731,24 @@ fun DateAndTimeItem(
     onDateChange: (Long) -> Unit,
 ) {
     val viewModel: NewCatchViewModel = getViewModel()
-    val dateSetState = remember { mutableStateOf(false) }
-    val timeSetState = remember { mutableStateOf(false) }
+    var dateSetState by remember { mutableStateOf(false) }
+    var timeSetState by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    if (dateSetState.value) {
-        DatePicker(dateSetState = dateSetState, context = context, onDateChange = onDateChange)
+    if (dateSetState) {
+        DatePickerDialog(
+            context = context,
+            minDate = Date().time - (TimeConstants.MILLISECONDS_IN_DAY * 5),
+            onDateChange = onDateChange
+        ) {
+            dateSetState = false
+        }
     }
 
-    if (timeSetState.value) {
-        TimePicker(timeSetState = timeSetState, context = context, onTimeChange = onDateChange)
+    if (timeSetState) {
+        TimePickerDialog(context = context, onTimeChange = onDateChange) {
+            timeSetState = false
+        }
     }
 
     Column(
@@ -754,7 +767,7 @@ fun DateAndTimeItem(
                 .fillMaxWidth(),
             trailingIcon = {
                 IconButton(onClick = {
-                    if (viewModel.noErrors.value) dateSetState.value = true
+                    if (viewModel.noErrors.value) dateSetState = true
                     else {
                         SnackbarManager.showMessage(R.string.choose_place_first)
                     }
@@ -776,7 +789,7 @@ fun DateAndTimeItem(
                 .fillMaxWidth(),
             trailingIcon = {
                 IconButton(onClick = {
-                    if (viewModel.noErrors.value) timeSetState.value = true
+                    if (viewModel.noErrors.value) timeSetState = true
                     else {
                         SnackbarManager.showMessage(R.string.choose_place_first)
                     }

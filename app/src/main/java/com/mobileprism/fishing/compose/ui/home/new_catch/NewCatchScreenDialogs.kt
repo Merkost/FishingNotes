@@ -13,6 +13,7 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.NewCatchViewModel
 import com.mobileprism.fishing.utils.time.TimeConstants.MILLISECONDS_IN_DAY
 import org.koin.androidx.compose.getViewModel
+import java.time.LocalDate
 import java.util.*
 
 @Composable
@@ -34,52 +35,4 @@ fun ErrorDialog(onClose: () -> Unit) {
     )
 }
 
-@Composable
-fun TimePicker(
-    timeSetState: MutableState<Boolean>,
-    context: Context,
-    onTimeChange: (Long) -> Unit
-) {
-    val calendar = Calendar.getInstance()
 
-    TimePickerDialog(
-        context,
-        android.R.style.Theme_Material_Dialog_Alert,
-        TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
-            calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
-            calendar.set(Calendar.MINUTE, minute)
-            onTimeChange(calendar.timeInMillis)
-        },
-        calendar.get(Calendar.HOUR_OF_DAY),
-        calendar.get(Calendar.MINUTE), true
-    ).show()
-    timeSetState.value = false
-}
-
-@Composable
-fun DatePicker(
-    dateSetState: MutableState<Boolean>,
-    context: Context,
-    onDateChange: (Long) -> Unit
-) {
-    val calendar = Calendar.getInstance()
-
-    DatePickerDialog(
-        context,
-        android.R.style.Theme_Material_Dialog_Alert,
-        { _, year, monthOfYear, dayOfMonth ->
-            calendar.set(Calendar.YEAR, year)
-            calendar.set(Calendar.MONTH, monthOfYear)
-            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-            onDateChange(calendar.timeInMillis)
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
-    ).apply {
-        datePicker.maxDate = Date().time
-        datePicker.minDate = Date().time - (MILLISECONDS_IN_DAY * 5)
-        show()
-    }
-    dateSetState.value = false
-}
