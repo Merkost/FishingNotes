@@ -1,7 +1,10 @@
 package com.mobileprism.fishing.compose.ui.home.settings
 
+import android.content.ActivityNotFoundException
 import android.content.Context
-import android.widget.Toast
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -9,14 +12,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.RateReview
+import androidx.compose.material.icons.filled.Savings
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -25,16 +27,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.override
+import com.airbnb.lottie.compose.*
 import com.android.billingclient.api.*
-import com.google.firebase.installations.remote.InstallationResponse
-import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.MainActivity
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.compose.ui.home.views.DefaultAppBar
 import com.mobileprism.fishing.compose.ui.home.views.MyClickableCard
 import com.mobileprism.fishing.compose.ui.home.views.PrimaryText
+import com.mobileprism.fishing.compose.ui.theme.customColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -87,7 +88,7 @@ fun AboutApp(upPress: () -> Unit) {
         ) {
             Column(
                 modifier = Modifier
-                    .weight(1f)
+                    .weight(6f)
                     .padding(20.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -97,7 +98,7 @@ fun AboutApp(upPress: () -> Unit) {
                     contentDescription = "appIcon",
                     modifier = Modifier.size(150.dp)
                 )
-                PrimaryText(text = "Fishing Notes")
+                PrimaryText(text = stringResource(id = R.string.app_name))
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
@@ -106,25 +107,32 @@ fun AboutApp(upPress: () -> Unit) {
                 ) {
                     Text(
                         modifier = Modifier.padding(4.dp),
-                        //style = MaterialTheme.typography.h4,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal,
                         textAlign = TextAlign.Center,
-                        color = Color.Gray,
-                        text = stringResource(R.string.current_app_version) + currentVersion,
+                        color = MaterialTheme.customColors.secondaryTextColor,
+                        text = stringResource(R.string.current_app_version) +
+                                (currentVersion ?: stringResource(id = R.string.unknown_version)),
                         softWrap = true
                     )
                 }
+
             }
             Column(
                 modifier = Modifier
-                    .weight(1f)
+                    .weight(4f)
                     .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
 
-                Button(onClick = {
+                OutlinedButton(onClick = { goToPlayStore(context) }) {
+                    Text(text = stringResource(id = R.string.leave_review))
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Icon(Icons.Default.RateReview, Icons.Default.RateReview.name)
+                }
+
+                OutlinedButton(onClick = {
                     billingClient.startConnection(
                         onBillingStart(
                             coroutineScope,
@@ -133,16 +141,9 @@ fun AboutApp(upPress: () -> Unit) {
                         )
                     )
                 }) {
-                    Text(text = stringResource(id = R.string.thanks_developers))
-                }
-
-                //test crash
-                if (BuildConfig.DEBUG) {
-                    Button(onClick = {
-                        throw RuntimeException("Test Crash") // Force a crash
-                    }) {
-                        Text(text = "Test Crash")
-                    }
+                    Text(text = stringResource(id = R.string.app_donation))
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Icon(Icons.Default.Savings, Icons.Default.Savings.name)
                 }
 
                 MyClickableCard(
@@ -159,11 +160,13 @@ fun AboutApp(upPress: () -> Unit) {
                             painterResource(R.drawable.russia), "",
                             modifier = Modifier
                                 .size(50.dp)
-                                .padding(6.dp)
+                                .padding(8.dp)
                         )
-                        Text(" Made in Russia with love  ❤️ ")
+                        Text(stringResource(id = R.string.made_in_russia))
                     }
                 }
+
+
             }
         }
     }
@@ -183,7 +186,7 @@ fun onBillingStart(
                         val products = it.skuDetailsList
                         products?.let {
                             if (products.isEmpty()) {
-                                Toast.makeText(context, "Products list is empty!", Toast.LENGTH_LONG).show()
+                                SnackbarManager.showMessage(R.string.payment_no_content)
                             } else {
                                 val flowParams = BillingFlowParams.newBuilder()
                                     .setSkuDetails(products.first())
@@ -193,10 +196,8 @@ fun onBillingStart(
                                     .responseCode
                                 checkResponseCode(responseCode, context)
                             }
-
                         }
                     }
-
                 }
             }
         }
@@ -211,7 +212,7 @@ fun onBillingStart(
 
 suspend fun querySkuDetails(billingClient: BillingClient, onReady: (SkuDetailsResult) -> Unit) {
     val skuList = ArrayList<String>()
-    skuList.add("coffee")
+    skuList.add("donation")
     val params = SkuDetailsParams.newBuilder()
     params.setSkusList(skuList).setType(BillingClient.SkuType.INAPP)
 
@@ -220,17 +221,31 @@ suspend fun querySkuDetails(billingClient: BillingClient, onReady: (SkuDetailsRe
         billingClient.querySkuDetails(params.build())
     }
     onReady(skuDetailsResult)
-
     // Process the result.
 }
 
 private fun checkResponseCode(responseCode: Int, context: Context) {
-    when(responseCode) {
+    when (responseCode) {
         BillingClient.BillingResponseCode.OK -> {}
         else -> {
-            Toast.makeText(context, responseCode, Toast.LENGTH_LONG).show()
+            /*Toast.makeText(context, responseCode, Toast.LENGTH_LONG).show()*/
+            Log.d("BILLING", responseCode.toString())
         }
     }
+}
+
+@Composable
+fun LottieStars(modifier: Modifier = Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.five_stars))
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever
+    )
+    LottieAnimation(
+        composition,
+        progress,
+        modifier = modifier
+    )
 }
 
 @Composable
@@ -239,4 +254,23 @@ fun AboutAppAppBar(backPress: () -> Unit) {
         title = stringResource(id = R.string.settings_about),
         onNavClick = { backPress() }
     )
+}
+
+fun goToPlayStore(context: Context) {
+    val packageName = context.packageName
+    try {
+        context.startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("market://details?id=$packageName")
+            )
+        )
+    } catch (e: ActivityNotFoundException) {
+        context.startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
+            )
+        )
+    }
 }

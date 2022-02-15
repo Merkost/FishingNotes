@@ -274,11 +274,25 @@
     <string name="location_and_time">Location and time</string>
     <string name="billing_unavaliable">Couldn\'t connect to billing service</string>
     <string name="thanks_developers">Thank developers</string>
-    <string name="max_photos_allowed">3 photos maximum allowed</string>
+    <string name="max_photos_allowed">4 photos maximum allowed</string>
     <string name="place_select_error">Please select place</string>
     <string name="fish_error">Please enter fish species</string>
     <string name="weather_error">Entered invalid values</string>
     <string name="date_and_time">Дата и время</string>
+    <string name="update_ready">Update is ready</string>
+    <string name="reload_app">Restart</string>
+    <string name="update_canceled">Update canceled by user</string>
+    <string name="update_downloading">The update is loading</string>
+    <string name="update_failed">Update failed</string>
+    <string name="update_installed">Update installed</string>
+    <string name="payment_no_content"> There are no items to buy</string>
+    <string name="made_in_russia">Made in Russia with love  ❤ </string>
+    <string name="app_donation">App support</string>
+    <string name="unknown_version">Неизвестная версия</string>
+    <string name="leave_review">Leave a review</string>
+    <string name="retry">Повторить</string>
+    <string name="km">km</string>
+    <string name="m">m</string>
 
 
 </resources>

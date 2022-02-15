@@ -1,7 +1,6 @@
 package com.mobileprism.fishing.compose.ui.home.map
 
-import android.content.Context
-import android.location.LocationManager
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
@@ -36,6 +35,7 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
@@ -57,10 +57,10 @@ import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
 import com.mobileprism.fishing.utils.getCameraPosition
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
+
 
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
@@ -80,7 +80,7 @@ fun MapScreen(
     val context = LocalContext.current
 
     var addingPlace by remember { mutableStateOf(addPlaceOnStart) }
-    var chosenPlace: UserMapMarker? by remember { mutableStateOf(place) }
+    var chosenPlace: UserMapMarker? by remember { mutableStateOf(place/* ?: viewModel.lastChosenPlace*/) }
 
     val map = rememberMapViewWithLifecycle()
 
@@ -101,10 +101,7 @@ fun MapScreen(
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val dialogAddPlaceIsShowing = remember { mutableStateOf(false) }
 
-    val mapLayersSelection = rememberSaveable { mutableStateOf(false) }
-    val mapType = rememberSaveable { mutableStateOf(MapTypes.roadmap) }
-    val mapBearing = remember { mutableStateOf(0f) }
-
+    var mapLayersSelection by rememberSaveable { mutableStateOf(false) }
 
     var mapUiState: MapUiState by remember {
         when {
@@ -236,22 +233,19 @@ fun MapScreen(
                 )
             },
             bottomSheet = {
-
                 MarkerInfoDialog(
                     receivedMarker = viewModel.currentMarker.value,
                     lastKnownLocation = viewModel.lastKnownLocation,
                     navController = navController,
-                    mapBearing = mapBearing,
                     onMarkerIconClicked = {
                         viewModel.currentMarker.value?.let {
                             moveCameraToLocation(
                                 coroutineScope, map,
-                                LatLng(it.latitude, it.longitude), DEFAULT_ZOOM, mapBearing.value
+                                LatLng(it.latitude, it.longitude), DEFAULT_ZOOM, viewModel.mapBearing.value
                             )
                         }
                     }
                 )
-
             }
         ) {
             ConstraintLayout(modifier = Modifier.fillMaxSize()) {
@@ -273,7 +267,6 @@ fun MapScreen(
                         mapUiState = MapUiState.BottomSheetInfoMode
                     },
                     currentCameraPosition = currentCameraPosition,
-                    mapType = mapType, mapBearing = mapBearing,
                     onMapClick = {
                         mapUiState = MapUiState.NormalMode
                     }
@@ -283,18 +276,17 @@ fun MapScreen(
                     modifier = Modifier.constrainAs(mapLayersButton) {
                         top.linkTo(parent.top, 16.dp)
                         absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                    },
-                    layersSelectionMode = mapLayersSelection,
-                )
+                    }
+                ) { mapLayersSelection = true }
 
-                if (mapLayersSelection.value)
+                if (mapLayersSelection)
                     Surface(modifier = Modifier
                         .fillMaxSize()
                         .alpha(0f)
                         .zIndex(4f)
-                        .clickable { mapLayersSelection.value = false }) {}
+                        .clickable { mapLayersSelection = false }) {}
                 AnimatedVisibility(
-                    mapLayersSelection.value,
+                    mapLayersSelection,
                     enter = expandIn(
                         expandFrom = Alignment.TopStart,
                         animationSpec = tween(380)
@@ -310,7 +302,9 @@ fun MapScreen(
                         }
                         .zIndex(5f)
                 ) {
-                    LayersView(mapLayersSelection, mapType)
+                    LayersView(viewModel.mapType) {
+                        mapLayersSelection = false
+                    }
                 }
 
                 MapSettingsButton(
@@ -335,14 +329,14 @@ fun MapScreen(
                     userPreferences = userPreferences,
                 ) {
                     viewModel.lastKnownLocation.value?.let {
-                        viewModel.lastMapCameraPosition.value = getCameraPosition(it)
-                    }
+                        moveCameraToLocation(coroutineScope, map, it, bearing = viewModel.mapBearing.value)
+                    } ?: SnackbarManager.showMessage(R.string.cant_get_current_location)
                 }
 
                 CompassButton(modifier = modifier.constrainAs(mapCompassButton) {
                     top.linkTo(mapMyLocationButton.bottom, 16.dp)
                     absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-                }, mapBearing = mapBearing) {
+                }, mapBearing = viewModel.mapBearing) {
                     setCameraBearing(
                         coroutineScope, map,
                         currentCameraPosition.value.first,
@@ -363,7 +357,7 @@ fun MapScreen(
                                 map,
                                 it.first,
                                 it.second + 1f,
-                                mapBearing.value
+                                viewModel.mapBearing.value
                             )
                         }
 
@@ -381,7 +375,7 @@ fun MapScreen(
                                 map,
                                 it.first,
                                 it.second - 1f,
-                                mapBearing.value
+                                viewModel.mapBearing.value
                             )
                         }
                     }
@@ -398,7 +392,7 @@ fun MapScreen(
                     PointerIcon(pointerState)
                 }
 
-                AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection.value,
+                AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection,
                     enter = fadeIn(animationSpec = tween(300)),
                     exit = fadeOut(animationSpec = tween(300)),
                     modifier = Modifier.constrainAs(addMarkerFragment) {
@@ -428,6 +422,7 @@ fun MapScreen(
 }
 
 
+@SuppressLint("PotentialBehaviorOverride")
 @ExperimentalAnimationApi
 @ExperimentalCoroutinesApi
 @ExperimentalPermissionsApi
@@ -437,8 +432,6 @@ fun MapLayout(
     map: MapView,
     onMarkerClick: (marker: UserMapMarker) -> Unit,
     currentCameraPosition: MutableState<Pair<LatLng, Float>>,
-    mapType: MutableState<Int>,
-    mapBearing: MutableState<Float>,
     onMapClick: () -> Unit,
 ) {
     val viewModel: MapViewModel = getViewModel()
@@ -473,18 +466,10 @@ fun MapLayout(
                 val googleMap = mapView.awaitMap()
 
                 //Map styles: https://mapstyle.withgoogle.com
-                when (darkTheme) {
-                    true -> {
-                        googleMap.setMapStyle(
-                            MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_fishing_night)
-                        )
-                    }
-                    false -> {
-                        googleMap.setMapStyle(
-                            MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_fishing)
-                        )
-                    }
+                if (darkTheme) {
+                    googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_fishing_night))
                 }
+                else { googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_fishing)) }
 
                 googleMap.clear()
                 markersToShow.forEach {
@@ -507,10 +492,9 @@ fun MapLayout(
                 }
                 googleMap.setOnCameraMoveStartedListener {
                     viewModel.setCameraMoveState(CameraMoveState.MoveStart)
-
                 }
                 googleMap.setOnCameraMoveListener {
-                    mapBearing.value = googleMap.cameraPosition.bearing
+                    viewModel.mapBearing.value = googleMap.cameraPosition.bearing
                     currentCameraPosition.value =
                         Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom)
                 }
@@ -522,6 +506,7 @@ fun MapLayout(
                 }
                 googleMap.setOnMarkerClickListener { marker ->
                     onMarkerClick(markers.first { it.id == marker.tag })
+                    //viewModel.setCurrentCameraPosition(Pair(marker.position, DEFAULT_ZOOM))
                     viewModel.lastMapCameraPosition.value = Pair(marker.position, DEFAULT_ZOOM)
                     true
                 }
@@ -530,9 +515,7 @@ fun MapLayout(
                     return@setOnMapClickListener
                 }
 
-
-
-                googleMap.uiSettings.isZoomGesturesEnabled = true
+                googleMap.uiSettings.isCompassEnabled = false
                 googleMap.uiSettings.isMyLocationButtonEnabled = false
             }
         }
@@ -547,16 +530,23 @@ fun MapLayout(
 
     LaunchedEffect(viewModel.lastMapCameraPosition.value) {
         viewModel.lastMapCameraPosition.value?.let {
-            moveCameraToLocation(this, map, it.first, it.second, mapBearing.value)
+            moveCameraToLocation(this, map, it.first, it.second, viewModel.mapBearing.value)
         }
     }
 
-    LaunchedEffect(mapType.value) {
+    LaunchedEffect(viewModel.mapType.value) {
         val googleMap = map.awaitMap()
-        googleMap.mapType = mapType.value
+        googleMap.mapType = viewModel.mapType.value
     }
 
     DisposableEffect(map) {
+        viewModel.lastMapCameraPosition.value?.let {
+            coroutineScope.launch {
+                val googleMap = map.awaitMap()
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(it.first, it.second))
+                currentCameraPosition.value = it
+            }
+        }
         onDispose {
             viewModel.lastMapCameraPosition.value = currentCameraPosition.value
         }
@@ -572,9 +562,7 @@ fun LocationPermissionDialog(
     onCloseCallback: () -> Unit = { },
 ) {
     val context = LocalContext.current
-    var isDialogOpen by remember {
-        mutableStateOf(true)
-    }
+    var isDialogOpen by remember { mutableStateOf(true) }
     val coroutineScope = rememberCoroutineScope()
 
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)

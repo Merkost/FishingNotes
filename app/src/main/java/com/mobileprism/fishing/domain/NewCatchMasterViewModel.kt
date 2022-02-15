@@ -15,6 +15,7 @@ import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
+import com.mobileprism.fishing.utils.calcMoonPhase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -262,7 +263,7 @@ class NewCatchMasterViewModel(
                 setWeatherPrimary(hourly.first().weather.first().description)
                 setWeatherIconId(hourly.first().weather.first().icon)
                 setWeatherWindDeg(hourly.first().windDeg)
-                setWeatherMoonPhase(daily.first().moonPhase)
+                setWeatherMoonPhase(calcMoonPhase(catchDate.value))
             }
 
         }

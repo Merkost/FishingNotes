@@ -14,8 +14,9 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -219,7 +220,8 @@ fun PhotosView(
 
 @OptIn(
     ExperimentalAnimationApi::class, androidx.compose.ui.ExperimentalComposeUiApi::class,
-    com.google.accompanist.permissions.ExperimentalPermissionsApi::class
+    com.google.accompanist.permissions.ExperimentalPermissionsApi::class,
+    androidx.compose.foundation.ExperimentalFoundationApi::class
 )
 @Composable
 fun NewCatchPhotoView(
@@ -253,23 +255,30 @@ fun NewCatchPhotoView(
     }
 
     Column(
-        modifier = modifier
-            .padding(vertical = 16.dp, horizontal = 8.dp),
+        modifier = modifier,
         verticalArrangement = Arrangement.Center,
     ) {
         if (tempPhotosState.isNotEmpty()) {
             if (connectionState is ConnectionState.Available) {
-                LazyColumn(
+                LazyVerticalGrid(
+                    cells = GridCells.Adaptive(minSize = 128.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+//                    horizontalAlignment = Alignment.CenterHorizontally
+//                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     items(items = tempPhotosState) {
                         FullSizePhotoView(
-                            modifier = Modifier.padding(horizontal = 8.dp),
+                            modifier = Modifier,
                             photo = it,
                             clickedPhoto = {},
                             deletedPhoto = { photo -> onDelete(photo) }
                         )
+//                        ItemPhoto(
+//                            photo = it,
+//                            clickedPhoto = {},
+//                            deletedPhoto = { photo -> onDelete(photo) }
+//                        )
                     }
                 }
 
@@ -312,7 +321,7 @@ fun FullSizePhotoView(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .wrapContentHeight()
+            .heightIn(max = 200.dp)
     ) {
 
         AsyncImage(

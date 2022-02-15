@@ -237,7 +237,7 @@
     <string name="show_hidden_places">Показывать скрытые места на карте</string>
     <string name="wind_ftps">футов/с</string>
     <string name="wind_mph">миль/ч</string>
-    <string name="wind_knots">узел(ов)</string>
+    <string name="wind_knots">узлов</string>
     <string name="wind_kmph">км/ч</string>
     <string name="wind_mps">м/с</string>
     <string name="wind_speed_unit">Единица измерения скорости ветра</string>
@@ -274,10 +274,24 @@
     <string name="location_and_time">Location and time</string>
     <string name="billing_unavaliable">Не удалось подключиться к billing service</string>
     <string name="thanks_developers">Поблагодарить разработчиков</string>
-    <string name="max_photos_allowed">Можно сохранить не более 3 фотографий</string>
+    <string name="max_photos_allowed">Можно сохранить не более 4 фотографий</string>
     <string name="place_select_error">Пожалуйста, выберите место</string>
     <string name="fish_error">Пожалуйста, введите вид рыбы</string>
     <string name="weather_error">Введены некорректные значения</string>
     <string name="date_and_time">Дата и время</string>
+    <string name="update_canceled">Обновление отменено пользователем</string>
+    <string name="update_downloading">Обновление загружается</string>
+    <string name="update_failed">Ошибка при обновлении</string>
+    <string name="update_installed">Обновление установлено</string>
+    <string name="payment_no_content">Отсутствуют товары для покупки</string>
+    <string name="made_in_russia">"Сделано в России с ❤ "</string>
+    <string name="app_donation">Поддержка проекта</string>
+    <string name="update_ready">Обновление загружено</string>
+    <string name="reload_app">Перезапустить</string>
+    <string name="unknown_version">Неизвестная версия</string>
+    <string name="leave_review">"Оставить отзыв"</string>
+    <string name="retry">Повторить</string>
+    <string name="km">км</string>
+    <string name="m">м</string>
 
 </resources>

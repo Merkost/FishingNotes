@@ -96,6 +96,7 @@ fun NewCatchPhotos(viewModel: NewCatchMasterViewModel, navController: NavControl
                 absoluteLeft.linkTo(parent.absoluteLeft)
                 absoluteRight.linkTo(parent.absoluteRight)
                 height = Dimension.fillToConstraints
+                width = Dimension.fillToConstraints
             },
             photos = photos.value,
             onDelete = { viewModel.deletePhoto(it) }

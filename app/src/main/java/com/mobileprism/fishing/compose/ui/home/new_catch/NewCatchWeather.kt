@@ -26,8 +26,6 @@ import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.mappers.getMoonIconByPhase
 import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.model.mappers.getWeatherNameByIcon
-import com.mobileprism.fishing.utils.calcMoonPhase
-import com.mobileprism.fishing.utils.time.TimeConstants.MILLISECONDS_IN_SECOND
 import com.mobileprism.fishing.utils.time.toHours
 import org.koin.androidx.compose.get
 import java.util.*
@@ -53,11 +51,11 @@ fun WeatherLayout(
             weather.daily.first().moonPhase
         }
 
-        viewModel.moonPhase.value = calcMoonPhase(
-            currentMoonPhase,
-            Date().time / MILLISECONDS_IN_SECOND,
-            weather.hourly.first().date
-        )
+//        viewModel.moonPhase.value = calcMoonPhase(
+//            currentMoonPhase,
+//            Date().time / MILLISECONDS_IN_SECOND,
+//            weather.hourly.first().date
+//        )
 
         val hour by remember(calendar.timeInMillis) {
             mutableStateOf(calendar.timeInMillis.toHours().toInt())

@@ -218,7 +218,7 @@ fun CompassButton(
                     ),
                     stringResource(R.string.compass),
                     modifier = Modifier
-                        .rotate(mapBearing.value)
+                        .rotate(1f-mapBearing.value)
                         .fillMaxSize()
                 )
             }
@@ -274,7 +274,7 @@ fun MapZoomOutButton(
 }
 
 @Composable
-fun MapLayersButton(layersSelectionMode: MutableState<Boolean>, modifier: Modifier) {
+fun MapLayersButton(modifier: Modifier, onLayersSelectionOpen: () -> Unit) {
     Card(
         shape = CircleShape,
         modifier = modifier.size(40.dp)
@@ -282,7 +282,7 @@ fun MapLayersButton(layersSelectionMode: MutableState<Boolean>, modifier: Modifi
         IconButton(modifier = Modifier
             .padding(8.dp)
             .fillMaxSize(),
-            onClick = { layersSelectionMode.value = true }) {
+            onClick = onLayersSelectionOpen) {
             Icon(painterResource(R.drawable.ic_baseline_layers_24), stringResource(R.string.layers))
         }
     }
@@ -290,8 +290,8 @@ fun MapLayersButton(layersSelectionMode: MutableState<Boolean>, modifier: Modifi
 
 @Composable
 fun LayersView(
-    mapLayersSelection: MutableState<Boolean>,
-    mapType: MutableState<Int>
+    mapType: MutableState<Int>,
+    onCloseMapSelection: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -321,7 +321,7 @@ fun LayersView(
             ) {
                 Text(stringResource(R.string.map_type))
                 Card(shape = CircleShape, modifier = Modifier.size(20.dp)) {
-                    IconButton(onClick = { mapLayersSelection.value = false }) {
+                    IconButton(onClick = onCloseMapSelection)  {
                         Icon(Icons.Default.Close, stringResource(R.string.close))
                     }
                 }
