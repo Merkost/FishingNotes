@@ -37,6 +37,7 @@ import com.mobileprism.fishing.domain.viewstates.ErrorType
 import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.mappers.getAllWeatherIcons
+import com.mobileprism.fishing.utils.Constants.WIND_ROTATION
 import com.mobileprism.fishing.utils.roundTo
 import com.mobileprism.fishing.utils.showToast
 import com.mobileprism.fishing.utils.time.toDate
@@ -458,6 +459,28 @@ fun PickWeatherIconDialog(onIconSelected: (Int) -> Unit, onDismiss: () -> Unit) 
             ) {
                 getAllWeatherIcons().distinct().forEach { iconResource ->
                     WeatherIconItem(iconResource) { onIconSelected(iconResource) }
+                }
+            }
+        }, onDismiss = onDismiss
+    )
+}
+
+@ExperimentalComposeUiApi
+@Composable
+fun PickWindDirDialog(onDirectionSelected: (Float) -> Unit, onDismiss: () -> Unit) {
+    DefaultDialog(
+        primaryText = stringResource(R.string.choose_wind_direction),
+        content = {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                mainAxisAlignment = FlowMainAxisAlignment.Center,
+                crossAxisAlignment = FlowCrossAxisAlignment.Center,
+            ) {
+                (0..7).forEach {
+                    WindIconItem(
+                        rotation = it * WIND_ROTATION,
+                        onIconSelected = { onDirectionSelected(it * WIND_ROTATION) }
+                    )
                 }
             }
         }, onDismiss = onDismiss

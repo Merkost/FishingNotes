@@ -293,6 +293,9 @@
     <string name="retry">Повторить</string>
     <string name="km">km</string>
     <string name="m">m</string>
+    <string name="weather_is_loading">Weather is loading</string>
+    <string name="choose_wind_direction">Choose wind direction</string>
+    <string name="download_weather">Download weather</string>
 
 
 </resources>

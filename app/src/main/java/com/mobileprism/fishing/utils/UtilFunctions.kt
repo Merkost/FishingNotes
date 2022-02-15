@@ -5,9 +5,9 @@ import android.widget.Toast
 import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.compose.ui.home.map.DEFAULT_ZOOM
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
+import com.mobileprism.fishing.utils.time.TimeConstants.MILLISECONDS_IN_DAY
 import com.mobileprism.fishing.utils.time.TimeConstants.MOON_PHASE_INCREMENT_IN_DAY
 import com.mobileprism.fishing.utils.time.TimeConstants.MOON_ZERO_DATE_SECONDS
-import com.mobileprism.fishing.utils.time.TimeConstants.SECONDS_IN_DAY
 import com.mobileprism.fishing.utils.time.formatToMilliseconds
 import java.util.*
 import kotlin.math.pow
@@ -56,7 +56,7 @@ fun Float.roundTo(numFractionDigits: Int): Float {
 
 fun calcMoonPhase(requiredDate: Long): Float {
     val dif = formatToMilliseconds(requiredDate) - formatToMilliseconds(MOON_ZERO_DATE_SECONDS)
-    val numOfDays = dif / SECONDS_IN_DAY
+    val numOfDays = dif / MILLISECONDS_IN_DAY
     val phase = numOfDays * MOON_PHASE_INCREMENT_IN_DAY
     val numOfFullCycles = phase.toInt()
     return (phase - numOfFullCycles)

@@ -23,10 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.PagerState
-import com.google.accompanist.pager.rememberPagerState
+import com.google.accompanist.pager.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
@@ -215,11 +212,21 @@ fun NewCatchButtons(
             .fillMaxWidth()
             .wrapContentHeight(),
     ) {
-        val (next, previous, close) = createRefs()
+        val (next, previous, close, indicator) = createRefs()
+
+        HorizontalPagerIndicator(
+            modifier = Modifier.constrainAs(indicator) {
+                top.linkTo(parent.top)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            activeColor = MaterialTheme.colors.primaryVariant,
+            pagerState = pagerState
+        )
 
         DefaultButtonFilled(
             modifier = Modifier.constrainAs(next) {
-                top.linkTo(parent.top)
+                top.linkTo(indicator.bottom, 8.dp)
                 bottom.linkTo(parent.bottom)
                 absoluteRight.linkTo(parent.absoluteRight)
             },
@@ -271,7 +278,6 @@ private fun handlePagerNextClick(
             0 -> {
                 if (viewModel.currentPlace.value != null && viewModel.isPlaceInputCorrect.value) {
                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                    viewModel.loadWeather()
                 } else {
                     SnackbarManager.showMessage(R.string.place_select_error)
                 }

@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
@@ -132,6 +133,29 @@ fun WeatherIconItem(
             .clickable(onClick = onIconSelected)
     ) {
         Icon(painterResource(iconResource), "", tint = iconTint)
+    }
+}
+
+@Composable
+fun WindIconItem(
+    iconTint: Color = MaterialTheme.colors.primaryVariant,
+    rotation: Float,
+    onIconSelected: () -> Unit
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .padding(4.dp)
+            .clip(MaterialTheme.shapes.medium)
+            .requiredSize(50.dp)
+            .clickable(onClick = onIconSelected)
+    ) {
+        Icon(
+            modifier = Modifier.rotate(rotation),
+            painter = painterResource(R.drawable.ic_baseline_navigation_24),
+            contentDescription = null,
+            tint = iconTint
+        )
     }
 }
 

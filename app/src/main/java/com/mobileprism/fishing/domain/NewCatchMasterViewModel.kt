@@ -16,6 +16,8 @@ import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
 import com.mobileprism.fishing.utils.calcMoonPhase
+import com.mobileprism.fishing.utils.roundTo
+import com.mobileprism.fishing.utils.time.toDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -51,7 +53,7 @@ class NewCatchMasterViewModel(
     val uiState = _uiState.asStateFlow()
 
     private val _weatherState =
-        MutableStateFlow<RetrofitWrapper<WeatherForecast>>(RetrofitWrapper.Loading())
+        MutableStateFlow<RetrofitWrapper<WeatherForecast>>(RetrofitWrapper.Success(WeatherForecast()))
     val weatherState = _weatherState.asStateFlow()
 
     private val _markersListState =
@@ -100,7 +102,7 @@ class NewCatchMasterViewModel(
     private val _weatherWindDeg = MutableStateFlow(0)
     val weatherWindDeg = _weatherWindDeg.asStateFlow()
 
-    private val _weatherMoonPhase = MutableStateFlow(0.0f)
+    private val _weatherMoonPhase = MutableStateFlow(calcMoonPhase(catchDate.value))
     val weatherMoonPhase = _weatherMoonPhase.asStateFlow()
 
     private val _photos = MutableStateFlow<List<Uri>>(listOf())
@@ -187,10 +189,12 @@ class NewCatchMasterViewModel(
     }
 
     fun loadWeather() {
-        if (loadedWeather.value.hourly.first().date != catchDate.value) {
-            getHistoricalWeather()
-        } else {
-            getWeatherForecast()
+        if (!ifWeatherLoaded()) {
+            if (Date().time.toDate() != catchDate.value.toDate()) {
+                getHistoricalWeather()
+            } else {
+                getWeatherForecast()
+            }
         }
     }
 
@@ -248,7 +252,6 @@ class NewCatchMasterViewModel(
 
     fun refreshWeatherState() {
         loadedWeather.value.run {
-
             viewModelScope.launch {
                 weatherSettings.getPressureUnit.take(1).collectLatest {
                     setWeatherPressure(it.getPressureInt(hourly.first().pressure).toString())
@@ -265,7 +268,6 @@ class NewCatchMasterViewModel(
                 setWeatherWindDeg(hourly.first().windDeg)
                 setWeatherMoonPhase(calcMoonPhase(catchDate.value))
             }
-
         }
     }
 
@@ -322,5 +324,13 @@ class NewCatchMasterViewModel(
         weatherPressure = weatherPressure.value.toInt(),
         weatherMoonPhase = weatherMoonPhase.value
     )
+
+    private fun ifWeatherLoaded(): Boolean {
+        return (loadedWeather.value.hourly.first().date.toDate() == catchDate.value.toDate())
+                && (loadedWeather.value.latitude.toDouble()
+            .roundTo(2) == currentPlace.value?.latitude?.roundTo(2))
+                && (loadedWeather.value.longitude.toDouble()
+            .roundTo(2) == currentPlace.value?.longitude?.roundTo(2))
+    }
 
 }
