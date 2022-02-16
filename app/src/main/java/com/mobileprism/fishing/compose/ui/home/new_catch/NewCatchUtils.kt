@@ -14,6 +14,11 @@ sealed class NewCatchPlacesState() {
     class Received(val locations: List<UserMapMarker>) : NewCatchPlacesState()
 }
 
+sealed class DropdownMenuState {
+    object Closed : DropdownMenuState()
+    object Opened : DropdownMenuState()
+}
+
 fun isThatPlaceInList(
     textFieldValue: String,
     suggestions: List<UserMapMarker>

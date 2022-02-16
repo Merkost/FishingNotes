@@ -1,6 +1,9 @@
 package com.mobileprism.fishing.domain
 
 import android.net.Uri
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchPlacesState
@@ -39,6 +42,7 @@ class NewCatchMasterViewModel(
     init {
         getAllUserMarkersList()
     }
+
 
     val isLocationLocked = MutableStateFlow(placeState is ReceivedPlaceState.Received)
     val isPlaceInputCorrect = MutableStateFlow(true)
@@ -112,6 +116,9 @@ class NewCatchMasterViewModel(
 
     private val _photos = MutableStateFlow<List<Uri>>(listOf())
     val photos = _photos.asStateFlow()
+
+    val skipAvaliable: MutableStateFlow<Boolean>
+        get() = MutableStateFlow(currentPlace.value != null && fishType.value.isNotBlank())
 
     fun setSelectedPlace(place: UserMapMarker) {
         _currentPlace.value = place

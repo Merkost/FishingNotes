@@ -296,5 +296,7 @@
     <string name="weather_is_loading">Weather is loading</string>
     <string name="choose_wind_direction">Choose wind direction</string>
     <string name="download_weather">Download weather</string>
+    <string name="skip">Пропустить</string>
+    <string name="new_catch_skip_tutor">Заполните местоположение и вид рыбы для пропуска остальных полей</string>
 
 </resources>
