@@ -274,7 +274,7 @@
     <string name="location_and_time">Location and time</string>
     <string name="billing_unavaliable">Не удалось подключиться к billing service</string>
     <string name="thanks_developers">Поблагодарить разработчиков</string>
-    <string name="max_photos_allowed">Можно сохранить не более 4 фотографий</string>
+    <string name="max_photos_allowed">Можно сохранить не более 3 фотографий</string>
     <string name="place_select_error">Пожалуйста, выберите место</string>
     <string name="fish_error">Пожалуйста, введите вид рыбы</string>
     <string name="weather_error">Введены некорректные значения</string>

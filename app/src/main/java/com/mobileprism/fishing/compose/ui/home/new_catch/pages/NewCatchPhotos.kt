@@ -5,7 +5,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -23,6 +22,7 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.compose.ui.home.catch_screen.addPhoto
 import com.mobileprism.fishing.compose.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.compose.ui.home.views.MaxCounterView
@@ -30,7 +30,8 @@ import com.mobileprism.fishing.compose.ui.home.views.NewCatchPhotoView
 import com.mobileprism.fishing.compose.ui.home.views.SubtitleWithIcon
 import com.mobileprism.fishing.domain.NewCatchMasterViewModel
 import com.mobileprism.fishing.utils.Constants
-import com.mobileprism.fishing.utils.showToast
+import com.mobileprism.fishing.utils.network.ConnectionState
+import com.mobileprism.fishing.utils.network.observeConnectivityAsFlow
 
 @OptIn(ExperimentalPermissionsApi::class)
 @ExperimentalComposeUiApi
@@ -41,11 +42,13 @@ fun NewCatchPhotos(viewModel: NewCatchMasterViewModel, navController: NavControl
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp)
     ) {
         val (subtitle, counter, button, photosView) = createRefs()
 
         val context = LocalContext.current
+        val internetConnectionState = context.observeConnectivityAsFlow()
+            .collectAsState(initial = ConnectionState.Available)
+
         val photos = viewModel.photos.collectAsState()
         val permissionState = rememberPermissionState(Manifest.permission.READ_EXTERNAL_STORAGE)
         val addPhotoState = rememberSaveable { mutableStateOf(false) }
@@ -53,7 +56,7 @@ fun NewCatchPhotos(viewModel: NewCatchMasterViewModel, navController: NavControl
         val choosePhotoLauncher =
             rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { value ->
                 if ((value.size + photos.value.size) > Constants.MAX_PHOTOS) {
-                    showToast(context, context.getString(R.string.max_photos_allowed))
+                    SnackbarManager.showMessage(R.string.max_photos_allowed)
                 }
                 viewModel.addPhotos(value)
                 addPhotoState.value = false
@@ -62,7 +65,7 @@ fun NewCatchPhotos(viewModel: NewCatchMasterViewModel, navController: NavControl
         SubtitleWithIcon(
             modifier = Modifier.constrainAs(subtitle) {
                 top.linkTo(parent.top, 16.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
             },
             icon = R.drawable.ic_baseline_photo_24,
             text = stringResource(R.string.photos)
@@ -72,7 +75,7 @@ fun NewCatchPhotos(viewModel: NewCatchMasterViewModel, navController: NavControl
             modifier = Modifier.constrainAs(counter) {
                 top.linkTo(subtitle.top)
                 bottom.linkTo(subtitle.bottom)
-                absoluteRight.linkTo(parent.absoluteRight)
+                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
             },
             count = photos.value.size,
             maxCount = Constants.MAX_PHOTOS
@@ -86,6 +89,7 @@ fun NewCatchPhotos(viewModel: NewCatchMasterViewModel, navController: NavControl
             },
             text = stringResource(id = R.string.add),
             icon = painterResource(id = R.drawable.ic_baseline_add_photo_alternate_24),
+            enabled = internetConnectionState.value is ConnectionState.Available,
             onClick = { addPhotoState.value = true }
         )
 
@@ -96,7 +100,6 @@ fun NewCatchPhotos(viewModel: NewCatchMasterViewModel, navController: NavControl
                 absoluteLeft.linkTo(parent.absoluteLeft)
                 absoluteRight.linkTo(parent.absoluteRight)
                 height = Dimension.fillToConstraints
-                width = Dimension.fillToConstraints
             },
             photos = photos.value,
             onDelete = { viewModel.deletePhoto(it) }

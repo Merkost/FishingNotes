@@ -33,7 +33,8 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
 
     val context = LocalContext.current
     val internetConnectionState = context.observeConnectivityAsFlow()
-        .collectAsState(initial = ConnectionState.Unavailable)
+        .collectAsState(initial = ConnectionState.Available)
+
     var primaryWeatherError by remember { mutableStateOf(false) }
     var temperatureError by remember { mutableStateOf(false) }
     var pressureError by remember { mutableStateOf(false) }

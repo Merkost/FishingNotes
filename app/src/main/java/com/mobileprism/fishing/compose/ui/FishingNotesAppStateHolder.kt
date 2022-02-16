@@ -92,7 +92,7 @@ class AppStateHolder(
                     snackbarAction?.let {
                         val actionText = resources.getText(snackbarAction.textId)
                         val result = scaffoldState.snackbarHostState.showSnackbar(
-                            text.toString(),
+                            message = text.toString(),
                             actionLabel = actionText.toString().uppercase(),
                             duration = message.duration
                         )

@@ -48,12 +48,12 @@ import coil.compose.AsyncImagePainter
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.compose.ui.home.catch_screen.addPhoto
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
 import com.mobileprism.fishing.utils.network.ConnectionState
 import com.mobileprism.fishing.utils.network.currentConnectivityState
 import com.mobileprism.fishing.utils.network.observeConnectivityAsFlow
-import com.mobileprism.fishing.utils.showToast
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -242,7 +242,7 @@ fun NewCatchPhotoView(
     val choosePhotoLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { value ->
             if ((value.size + tempPhotosState.size) > MAX_PHOTOS) {
-                showToast(context, context.getString(R.string.max_photos_allowed))
+                SnackbarManager.showMessage(R.string.max_photos_allowed)
             }
             tempPhotosState.addAll(value)
         }
@@ -255,45 +255,40 @@ fun NewCatchPhotoView(
     }
 
     Column(
-        modifier = modifier,
+        modifier = modifier
+            .wrapContentWidth(align = Alignment.CenterHorizontally)
+            .fillMaxHeight(),
         verticalArrangement = Arrangement.Center,
     ) {
-        if (tempPhotosState.isNotEmpty()) {
-            if (connectionState is ConnectionState.Available) {
+        if (connectionState is ConnectionState.Available) {
+            if (tempPhotosState.isNotEmpty()) {
                 LazyVerticalGrid(
-                    cells = GridCells.Adaptive(minSize = 128.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-//                    horizontalAlignment = Alignment.CenterHorizontally
-//                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    modifier = Modifier,
+                    cells = GridCells.Fixed(MAX_PHOTOS),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalArrangement = Arrangement.Center
                 ) {
                     items(items = tempPhotosState) {
                         FullSizePhotoView(
-                            modifier = Modifier,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
                             photo = it,
                             clickedPhoto = {},
                             deletedPhoto = { photo -> onDelete(photo) }
                         )
-//                        ItemPhoto(
-//                            photo = it,
-//                            clickedPhoto = {},
-//                            deletedPhoto = { photo -> onDelete(photo) }
-//                        )
                     }
                 }
-
             } else {
                 NoContentView(
-                    modifier = Modifier.padding(8.dp),
-                    text = stringResource(R.string.photos_not_available),
-                    icon = painterResource(id = R.drawable.ic_no_internet)
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(id = R.string.no_photos_added),
+                    icon = painterResource(id = R.drawable.ic_no_photos)
                 )
             }
         } else {
             NoContentView(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = R.string.no_photos_added),
-                icon = painterResource(id = R.drawable.ic_no_photos)
+                modifier = Modifier.padding(8.dp),
+                text = stringResource(R.string.photos_not_available),
+                icon = painterResource(id = R.drawable.ic_no_internet)
             )
         }
     }
@@ -321,13 +316,15 @@ fun FullSizePhotoView(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(max = 200.dp)
+            .aspectRatio(1f)
+            .heightIn(max = 256.dp)
     ) {
 
         AsyncImage(
             model = photo,
             contentDescription = null,
             modifier = Modifier
+                .fillMaxSize()
                 .align(alignment = Alignment.Center)
                 .clip(RoundedCornerShape(5.dp))
                 .clickable {

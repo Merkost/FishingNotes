@@ -1,16 +1,12 @@
 package com.mobileprism.fishing.compose.ui.home.new_catch
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -18,6 +14,7 @@ import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -27,8 +24,8 @@ import com.google.accompanist.pager.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
+import com.mobileprism.fishing.compose.ui.home.advertising.showInterstitialAd
 import com.mobileprism.fishing.compose.ui.home.views.*
-import com.mobileprism.fishing.compose.ui.theme.customColors
 import com.mobileprism.fishing.domain.NewCatchMasterViewModel
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
@@ -71,16 +68,14 @@ fun NewCatchMasterScreen(
         )
     }
 
-    val loadingDialogState = remember {
-        mutableStateOf(false)
-    }
+    val loadingDialogState = remember { mutableStateOf(false) }
+    val isAdLoaded = remember { mutableStateOf(false) }
 
     SubscribeToNewCatchProgress(
-        vmUiState = viewModel.uiState,
+        uiState = viewModel.uiState.collectAsState().value,
+        adIsLoadedState = isAdLoaded.value,
         loadingDialogState = loadingDialogState,
-        upPress = {
-            upPress()
-        }
+        upPress = { upPress() }
     )
 
     ModalLoadingDialog(
@@ -89,25 +84,12 @@ fun NewCatchMasterScreen(
     )
 
     Scaffold(
-        topBar = {
-            val isEnabled = remember(pagerState.currentPage) {
-                mutableStateOf(pagerState.currentPage == (pagerState.pageCount - 1))
-            }
-
-            val color = animateColorAsState(
-                targetValue = if (isEnabled.value) {
-                    MaterialTheme.colors.onPrimary
-                } else {
-                    MaterialTheme.customColors.secondaryIconColor
-                }
-            )
-
-            DefaultAppBar(title = stringResource(id = R.string.new_catch))
-
-        }
+        topBar = { DefaultAppBar(title = stringResource(id = R.string.new_catch)) }
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (pager, buttons) = createRefs()
+
+            val context = LocalContext.current
 
             NewCatchPager(
                 modifier = Modifier.constrainAs(pager) {
@@ -131,7 +113,17 @@ fun NewCatchMasterScreen(
                     absoluteRight.linkTo(parent.absoluteRight)
                 },
                 pagerState = pagerState,
-                onFinishClick = { viewModel.saveNewCatch() },
+                onFinishClick = {
+                    if (viewModel.photos.value.size <= MAX_PHOTOS) {
+                        viewModel.saveNewCatch()
+                        showInterstitialAd(
+                            context = context,
+                            onAdLoaded = { isAdLoaded.value = true }
+                        )
+                    } else {
+                        SnackbarManager.showMessage(R.string.max_photos_allowed)
+                    }
+                },
                 onNextClick = {
                     handlePagerNextClick(
                         coroutineScope = coroutineScope,
@@ -295,11 +287,6 @@ private fun handlePagerNextClick(
                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
                 } else {
                     SnackbarManager.showMessage(R.string.weather_error)
-                }
-            }
-            4 -> {
-                if (viewModel.photos.value.size > MAX_PHOTOS) {
-                    SnackbarManager.showMessage(R.string.max_photos_allowed)
                 }
             }
             else -> {
