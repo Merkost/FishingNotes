@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.model.datasource.firebase
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.google.android.gms.tasks.OnSuccessListener
@@ -15,6 +16,8 @@ import com.mobileprism.fishing.model.entity.raw.RawUserCatch
 import com.mobileprism.fishing.model.mappers.UserCatchMapper
 import com.mobileprism.fishing.model.repository.PhotoStorage
 import com.mobileprism.fishing.model.repository.app.CatchesRepository
+import com.mobileprism.fishing.utils.network.ConnectionState
+import com.mobileprism.fishing.utils.network.observeConnectivityAsFlow
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
@@ -24,7 +27,8 @@ import kotlinx.coroutines.launch
 class FirebaseCatchesRepositoryImpl(
     private val dbCollections: RepositoryCollections,
     private val firebaseAnalytics: FirebaseAnalytics,
-    private val cloudPhotoStorage: PhotoStorage
+    private val cloudPhotoStorage: PhotoStorage,
+    private val context: Context
 ) : CatchesRepository {
 
 
@@ -141,25 +145,36 @@ class FirebaseCatchesRepositoryImpl(
         markerId: String,
         newCatch: RawUserCatch
     ) = callbackFlow {
-
         trySend(Progress.Loading(0))
 
-        val photoDownloadLinks = savePhotos(newCatch.photos)
-        val userCatch = UserCatchMapper().mapRawCatch(newCatch, photoDownloadLinks)
+        context.observeConnectivityAsFlow().collectLatest {
+            if (it is ConnectionState.Available) {
+                val photoDownloadLinks = savePhotos(newCatch.photos)
+                val userCatch = UserCatchMapper().mapRawCatch(newCatch, photoDownloadLinks)
 
-        dbCollections.getUserCatchesCollection(markerId).document(userCatch.id).set(userCatch)
-            .addOnCompleteListener {
-                if (it.exception != null) {
-                    trySend(Progress.Error(it.exception!!))
-                }
+                dbCollections.getUserCatchesCollection(markerId).document(userCatch.id)
+                    .set(userCatch)
+                    .addOnCompleteListener {
+                        if (it.exception != null) {
+                            trySend(Progress.Error(it.exception!!))
+                        }
 
-                if (it.isSuccessful) {
-                    firebaseAnalytics.logEvent("new_catch", null)
-                    trySend(Progress.Complete)
-                    incrementNumOfCatches(markerId)
-                }
+                        if (it.isSuccessful) {
+                            firebaseAnalytics.logEvent("new_catch", null)
+                            trySend(Progress.Complete)
+                            incrementNumOfCatches(markerId)
+                        }
+                    }
+            } else {
+                val userCatch = UserCatchMapper().mapRawCatch(newCatch)
+                dbCollections.getUserCatchesCollection(markerId).document(userCatch.id)
+                    .set(userCatch)
+                trySend(Progress.Complete)
             }
+        }
+
         awaitClose { }
+
     }
 
 

@@ -26,7 +26,8 @@ val repositoryModule = module {
         FirebaseCatchesRepositoryImpl(
             dbCollections = get(),
             firebaseAnalytics = get(),
-            cloudPhotoStorage = get()
+            cloudPhotoStorage = get(),
+            context = androidContext()
         )
     }
     single<MarkersRepository> {
