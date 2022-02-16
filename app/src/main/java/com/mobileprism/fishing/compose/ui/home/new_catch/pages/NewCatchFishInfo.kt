@@ -39,7 +39,7 @@ fun NewCatchFishInfo(viewModel: NewCatchMasterViewModel, navController: NavContr
                 width = Dimension.fillToConstraints
             },
             name = viewModel.fishType.collectAsState(),
-            onNameChange = { viewModel.setFishType(it) }
+            onNameChange = viewModel::setFishType
         )
 
         FishAmountAndWeightViewItem(
@@ -51,8 +51,8 @@ fun NewCatchFishInfo(viewModel: NewCatchMasterViewModel, navController: NavContr
             },
             amountState = viewModel.fishAmount.collectAsState(),
             weightState = viewModel.fishWeight.collectAsState(),
-            onAmountChange = { viewModel.setFishAmount(it) },
-            onWeightChange = { viewModel.setFishWeight(it) }
+            onAmountChange = viewModel::setFishAmount,
+            onWeightChange = viewModel::setFishWeight
         )
 
 //        SubtitleWithIcon(

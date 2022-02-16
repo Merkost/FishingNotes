@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.compose.ui.home.new_catch
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -11,9 +12,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -43,6 +46,9 @@ import com.mobileprism.fishing.utils.showToast
 import com.mobileprism.fishing.utils.time.TimeConstants
 import com.mobileprism.fishing.utils.time.toDate
 import com.mobileprism.fishing.utils.time.toTime
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 import java.util.*
 
@@ -191,7 +197,7 @@ fun FishSpecies(
     ) {
         OutlinedTextField(
             value = name.value,
-            onValueChange = { onNameChange(it) },
+            onValueChange = onNameChange,
             label = { Text(stringResource(R.string.fish_species)) },
             modifier = Modifier.fillMaxWidth(),
             isError = name.value.isBlank(),
@@ -602,8 +608,14 @@ fun NewCatchPlaceSelectView(
     onInputError: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
-
+    val keyboard = LocalSoftwareKeyboardController.current
+    val coroutineScope = rememberCoroutineScope()
     var isDropMenuOpen by rememberSaveable { mutableStateOf(false) }
+    val arrowRotation by animateFloatAsState(
+        when (isDropMenuOpen) {
+            true -> 180f
+            else -> 0f
+    })
 
     var textFieldValue by rememberSaveable {
         mutableStateOf(marker.value?.title ?: "")
@@ -671,14 +683,14 @@ fun NewCatchPlaceSelectView(
                     textFieldValue = it
                     if (suggestions.isNotEmpty()) {
                         searchFor(textFieldValue, suggestions, filteredList)
-                        isDropMenuOpen = true
+                        if (!isDropMenuOpen) isDropMenuOpen = true
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .onFocusChanged {
+                    /*.onFocusChanged {
                         isDropMenuOpen = it.isFocused
-                    },
+                    }*/,
                 label = { Text(text = stringResource(R.string.place)) },
                 trailingIcon = {
                     if (textFieldValue.isNotEmpty()) {
@@ -702,6 +714,7 @@ fun NewCatchPlaceSelectView(
                             }
                         ) {
                             Icon(
+                                modifier = Modifier.rotate(arrowRotation),
                                 imageVector = Icons.Default.KeyboardArrowDown,
                                 contentDescription = Icons.Default.KeyboardArrowDown.name,
                                 tint = MaterialTheme.colors.primary
@@ -721,7 +734,10 @@ fun NewCatchPlaceSelectView(
                 .wrapContentWidth(),
             expanded = isDropMenuOpen && suggestions.isNotEmpty(),
             onDismissRequest = {
-                if (isDropMenuOpen) isDropMenuOpen = false
+                coroutineScope.launch {
+                    delay(100)
+                    if (isDropMenuOpen) isDropMenuOpen = false
+                }
             },
             properties = PopupProperties(focusable = false)
         ) {
@@ -730,6 +746,7 @@ fun NewCatchPlaceSelectView(
                     onClick = {
                         textFieldValue = suggestion.title
                         onNewPlaceSelected(suggestion)
+                        keyboard?.hide()
                         isDropMenuOpen = false
                     }) {
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -740,7 +757,6 @@ fun NewCatchPlaceSelectView(
                         )
                         Text(text = suggestion.title)
                     }
-
                 }
             }
         }

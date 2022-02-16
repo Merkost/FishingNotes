@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.compose.ui.home.new_catch
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.ExperimentalMaterialApi
@@ -26,10 +27,12 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.compose.ui.home.advertising.showInterstitialAd
 import com.mobileprism.fishing.compose.ui.home.views.*
+import com.mobileprism.fishing.compose.ui.theme.customColors
 import com.mobileprism.fishing.domain.NewCatchMasterViewModel
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.viewModel
 import org.koin.core.parameter.parametersOf
@@ -84,7 +87,12 @@ fun NewCatchMasterScreen(
     )
 
     Scaffold(
-        topBar = { DefaultAppBar(title = stringResource(id = R.string.new_catch)) }
+        topBar = {
+            DefaultAppBar(
+                title = stringResource(id = R.string.new_catch),
+                onNavClick = upPress
+            )
+        }
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (pager, buttons) = createRefs()
@@ -113,6 +121,7 @@ fun NewCatchMasterScreen(
                     absoluteRight.linkTo(parent.absoluteRight)
                 },
                 pagerState = pagerState,
+                viewModel = viewModel,
                 onFinishClick = {
                     if (viewModel.photos.value.size <= MAX_PHOTOS) {
                         viewModel.saveNewCatch()
@@ -136,9 +145,8 @@ fun NewCatchMasterScreen(
                         pagerState.animateScrollToPage(pagerState.currentPage - 1)
                     }
                 },
-                onCloseClick = {
-                    upPress()
-                }
+                onCloseClick = upPress
+
             )
         }
     }
@@ -186,11 +194,13 @@ fun NewCatchPager(
 fun NewCatchButtons(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
+    viewModel: NewCatchMasterViewModel,
     onFinishClick: () -> Unit,
     onNextClick: () -> Unit,
     onPreviousClick: () -> Unit,
     onCloseClick: () -> Unit
 ) {
+    val canSkip by viewModel.skipAvaliable.collectAsState()
     val isLastPage = remember(pagerState.currentPage) {
         pagerState.currentPage == (pagerState.pageCount - 1)
     }
@@ -204,7 +214,7 @@ fun NewCatchButtons(
             .fillMaxWidth()
             .wrapContentHeight(),
     ) {
-        val (next, previous, close, indicator) = createRefs()
+        val (next, previous, skip, indicator) = createRefs()
 
         HorizontalPagerIndicator(
             modifier = Modifier.constrainAs(indicator) {
@@ -244,17 +254,29 @@ fun NewCatchButtons(
             },
             enabled = !isFirstPage,
             text = stringResource(R.string.previous),
-            onClick = { onPreviousClick() }
+            onClick = onPreviousClick
         )
 
+        val skipButtonTextColor = animateColorAsState(
+            when (canSkip) {
+                true -> MaterialTheme.colors.primaryVariant
+                else -> MaterialTheme.customColors.secondaryTextColor
+            }
+        )
         DefaultButton(
-            modifier = Modifier.constrainAs(close) {
+            modifier = Modifier.constrainAs(skip) {
                 top.linkTo(next.top)
                 bottom.linkTo(next.bottom)
                 absoluteLeft.linkTo(parent.absoluteLeft)
             },
-            text = stringResource(R.string.close),
-            onClick = onCloseClick
+            text = stringResource(R.string.skip),
+            textColor = skipButtonTextColor.value,
+            onClick = {
+                when (canSkip) {
+                    true -> onFinishClick()
+                    else -> SnackbarManager.showMessage(R.string.new_catch_skip_tutor)
+                }
+            }
         )
     }
 }
