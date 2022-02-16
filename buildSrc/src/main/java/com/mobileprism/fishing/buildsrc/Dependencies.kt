@@ -62,9 +62,7 @@ object Libs {
         const val splashScreen = "androidx.core:core-splashscreen:1.0.0-alpha02"
 
         object Compose {
-            const val newVersion = "1.1.0-rc02"
-            const val version = "1.1.0-rc01"
-            const val oldVersion = "1.0.5"
+            const val version = "1.1.0-rc03"
 
             const val foundation = "androidx.compose.foundation:foundation:${version}"
             const val layout = "androidx.compose.foundation:foundation-layout:${version}"
