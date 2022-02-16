@@ -16,8 +16,10 @@ import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
 import com.mobileprism.fishing.utils.calcMoonPhase
+import com.mobileprism.fishing.utils.getClosestHourIndex
+import com.mobileprism.fishing.utils.isDateInList
 import com.mobileprism.fishing.utils.roundTo
-import com.mobileprism.fishing.utils.time.toDate
+import com.mobileprism.fishing.utils.time.hoursCount
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,6 +57,9 @@ class NewCatchMasterViewModel(
     private val _weatherState =
         MutableStateFlow<RetrofitWrapper<WeatherForecast>>(RetrofitWrapper.Success(WeatherForecast()))
     val weatherState = _weatherState.asStateFlow()
+
+    private val _weatherDownloadIsAvailable = MutableStateFlow(true)
+    val weatherDownloadIsAvailable = _weatherDownloadIsAvailable.asStateFlow()
 
     private val _markersListState =
         MutableStateFlow<NewCatchPlacesState>(NewCatchPlacesState.NotReceived)
@@ -110,6 +115,7 @@ class NewCatchMasterViewModel(
 
     fun setSelectedPlace(place: UserMapMarker) {
         _currentPlace.value = place
+        _weatherDownloadIsAvailable.value = true
     }
 
     fun setPlaceInputError(isError: Boolean) {
@@ -118,6 +124,7 @@ class NewCatchMasterViewModel(
 
     fun setDate(date: Long) {
         _catchDate.value = date
+        checkWeatherDownload()
     }
 
     fun setFishType(fish: String) {
@@ -190,7 +197,7 @@ class NewCatchMasterViewModel(
 
     fun loadWeather() {
         if (!ifWeatherLoaded()) {
-            if (Date().time.toDate() != catchDate.value.toDate()) {
+            if (Date().time.hoursCount() > catchDate.value.hoursCount()) {
                 getHistoricalWeather()
             } else {
                 getWeatherForecast()
@@ -253,20 +260,23 @@ class NewCatchMasterViewModel(
     fun refreshWeatherState() {
         loadedWeather.value.run {
             viewModelScope.launch {
+                val index = getClosestHourIndex(list = hourly, date = catchDate.value)
+
                 weatherSettings.getPressureUnit.take(1).collectLatest {
-                    setWeatherPressure(it.getPressureInt(hourly.first().pressure).toString())
+                    setWeatherPressure(it.getPressureInt(hourly[index].pressure).toString())
                 }
                 weatherSettings.getWindSpeedUnit.take(1).collectLatest {
-                    setWeatherWindSpeed(it.getWindSpeedInt(hourly.first().windSpeed.toDouble()))
+                    setWeatherWindSpeed(it.getWindSpeedInt(hourly[index].windSpeed.toDouble()))
                 }
                 weatherSettings.getTemperatureUnit.take(1).collectLatest {
-                    setWeatherTemperature(it.getTemperature(hourly.first().temperature))
+                    setWeatherTemperature(it.getTemperature(hourly[index].temperature))
                 }
 
-                setWeatherPrimary(hourly.first().weather.first().description)
-                setWeatherIconId(hourly.first().weather.first().icon)
-                setWeatherWindDeg(hourly.first().windDeg)
+                setWeatherPrimary(hourly[index].weather.first().description)
+                setWeatherIconId(hourly[index].weather.first().icon)
+                setWeatherWindDeg(hourly[index].windDeg)
                 setWeatherMoonPhase(calcMoonPhase(catchDate.value))
+                checkWeatherDownload()
             }
         }
     }
@@ -326,11 +336,16 @@ class NewCatchMasterViewModel(
     )
 
     private fun ifWeatherLoaded(): Boolean {
-        return (loadedWeather.value.hourly.first().date.toDate() == catchDate.value.toDate())
+        return (weatherDownloadIsAvailable.value
                 && (loadedWeather.value.latitude.toDouble()
-            .roundTo(2) == currentPlace.value?.latitude?.roundTo(2))
+            .roundTo(3) == currentPlace.value?.latitude?.roundTo(3))
                 && (loadedWeather.value.longitude.toDouble()
-            .roundTo(2) == currentPlace.value?.longitude?.roundTo(2))
+            .roundTo(3) == currentPlace.value?.longitude?.roundTo(3)))
+    }
+
+    private fun checkWeatherDownload() {
+        _weatherDownloadIsAvailable.value =
+            !isDateInList(loadedWeather.value.hourly, catchDate.value)
     }
 
 }

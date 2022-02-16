@@ -2,6 +2,8 @@ package com.mobileprism.fishing.utils.time
 
 import android.content.Context
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.utils.time.TimeConstants.MILLISECONDS_IN_DAY
+import com.mobileprism.fishing.utils.time.TimeConstants.MILLISECONDS_IN_HOUR
 import com.mobileprism.fishing.utils.time.TimeConstants.MILLISECONDS_IN_SECOND
 import com.mobileprism.fishing.utils.time.TimeConstants.SECONDS_IN_HOUR
 import com.mobileprism.fishing.utils.time.TimeConstants.SECONDS_IN_MINUTE
@@ -35,6 +37,10 @@ fun Long.toDate(): String {
     return sdf.format(date)
 }
 
+fun Long.daysCount(): Int {
+    return (formatToMilliseconds(this) / MILLISECONDS_IN_DAY).toInt()
+}
+
 fun Long.toDateTextMonth(): String {
     val date = Date(formatToMilliseconds(this))
     val sdf = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
@@ -57,6 +63,10 @@ fun Long.toHours(): String {
     val date = Date(formatToMilliseconds(this))
     val sdf = SimpleDateFormat("HH", Locale.getDefault())
     return sdf.format(date)
+}
+
+fun Long.hoursCount(): Int {
+    return (formatToMilliseconds(this) / MILLISECONDS_IN_HOUR).toInt()
 }
 
 fun calculateDaylightTime(context: Context, sunrise: Long, sunset: Long): String {

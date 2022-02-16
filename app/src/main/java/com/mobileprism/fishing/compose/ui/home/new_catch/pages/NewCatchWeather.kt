@@ -1,7 +1,9 @@
 package com.mobileprism.fishing.compose.ui.home.new_catch.pages
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -15,8 +17,6 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.new_catch.*
-import com.mobileprism.fishing.compose.ui.home.views.DefaultIconButton
-import com.mobileprism.fishing.compose.ui.home.views.LoadingIconButtonOutlined
 import com.mobileprism.fishing.compose.ui.home.views.SubtitleWithIcon
 import com.mobileprism.fishing.compose.ui.theme.customColors
 import com.mobileprism.fishing.domain.NewCatchMasterViewModel
@@ -28,7 +28,8 @@ import com.mobileprism.fishing.utils.network.observeConnectivityAsFlow
 @Composable
 fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavController) {
 
-    val uiState = viewModel.weatherState.collectAsState()
+    val uiState by viewModel.weatherState.collectAsState()
+    val canDownloadWeatherState by viewModel.weatherDownloadIsAvailable.collectAsState()
 
     val context = LocalContext.current
     val internetConnectionState = context.observeConnectivityAsFlow()
@@ -57,17 +58,6 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
 
         val guideline = createGuidelineFromAbsoluteLeft(0.5f)
 
-//        if (uiState.value is RetrofitWrapper.Loading) {
-//            LinearProgressIndicator(
-//                modifier = Modifier.fillMaxWidth().constrainAs(progress){
-//                    top.linkTo(parent.top)
-//                    absoluteLeft.linkTo(parent.absoluteLeft)
-//                    absoluteRight.linkTo(parent.absoluteRight)
-//                },
-//                color = MaterialTheme.colors.primaryVariant
-//            )
-//        }
-
         SubtitleWithIcon(
             modifier = Modifier.constrainAs(subtitle) {
                 top.linkTo(parent.top, 16.dp)
@@ -91,16 +81,42 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
             )
         }
 
-        DefaultIconButton(
+        IconButton(
             modifier = Modifier.constrainAs(refreshButton) {
                 absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                 top.linkTo(subtitle.top)
                 bottom.linkTo(subtitle.bottom)
             },
-            icon = painterResource(id = R.drawable.ic_baseline_refresh_24),
-            tint = MaterialTheme.colors.primaryVariant,
-            onClick = { viewModel.refreshWeatherState() }
-        )
+            onClick = {
+                when {
+                    internetConnectionState.value is ConnectionState.Unavailable -> {
+                        viewModel.refreshWeatherState()
+                    }
+                    canDownloadWeatherState -> {
+                        viewModel.loadWeather()
+                    }
+                    uiState is RetrofitWrapper.Loading -> {}
+                    uiState is RetrofitWrapper.Success -> {
+                        viewModel.refreshWeatherState()
+                    }
+                }
+            }) {
+            if (uiState is RetrofitWrapper.Loading) {
+                CircularProgressIndicator()
+            } else {
+                Icon(
+                    painter = when {
+                        canDownloadWeatherState
+                                && internetConnectionState.value is ConnectionState.Available -> painterResource(
+                            id = R.drawable.ic_baseline_download_24
+                        )
+                        else -> painterResource(id = R.drawable.ic_baseline_refresh_24)
+                    },
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.primaryVariant
+                )
+            }
+        }
 
         NewCatchWeatherPrimary(
             modifier = Modifier.constrainAs(description) {
@@ -164,18 +180,18 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
             moonPhase = viewModel.weatherMoonPhase.collectAsState()
         )
 
-        LoadingIconButtonOutlined(
-            modifier = Modifier.constrainAs(downloadButton) {
-                top.linkTo(moon.bottom, 16.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
-            },
-            enabled = (internetConnectionState.value is ConnectionState.Available),
-            icon = painterResource(id = R.drawable.ic_baseline_download_24),
-            text = stringResource(R.string.download_weather),
-            isLoading = (uiState.value is RetrofitWrapper.Loading),
-            onClick = { viewModel.loadWeather() }
-        )
+//        LoadingIconButtonOutlined(
+//            modifier = Modifier.constrainAs(downloadButton) {
+//                top.linkTo(moon.bottom, 16.dp)
+//                absoluteLeft.linkTo(parent.absoluteLeft)
+//                absoluteRight.linkTo(parent.absoluteRight)
+//            },
+//            enabled = (internetConnectionState.value is ConnectionState.Available),
+//            icon = painterResource(id = R.drawable.ic_baseline_download_24),
+//            text = stringResource(R.string.download_weather),
+//            isLoading = (uiState.value is RetrofitWrapper.Loading),
+//            onClick = { viewModel.loadWeather() }
+//        )
 
     }
 }
