@@ -500,14 +500,10 @@ fun MapLayout(
                 }
                 googleMap.setOnCameraIdleListener {
                     viewModel.setCameraMoveState(CameraMoveState.MoveFinish)
-                    /*currentCameraPosition.value =
-                        Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom)*/
-                    //mapBearing.value = googleMap.cameraPosition.bearing
                 }
                 googleMap.setOnMarkerClickListener { marker ->
                     onMarkerClick(markers.first { it.id == marker.tag })
-                    //viewModel.setCurrentCameraPosition(Pair(marker.position, DEFAULT_ZOOM))
-                    viewModel.lastMapCameraPosition.value = Pair(marker.position, DEFAULT_ZOOM)
+                    moveCameraToLocation(coroutineScope, map, marker.position, bearing = viewModel.mapBearing.value)
                     true
                 }
                 googleMap.setOnMapClickListener {
