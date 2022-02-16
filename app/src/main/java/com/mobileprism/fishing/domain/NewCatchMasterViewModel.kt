@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.text.capitalize
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchPlacesState
@@ -42,7 +43,6 @@ class NewCatchMasterViewModel(
     init {
         getAllUserMarkersList()
     }
-
 
     val isLocationLocked = MutableStateFlow(placeState is ReceivedPlaceState.Received)
     val isPlaceInputCorrect = MutableStateFlow(true)
@@ -279,7 +279,8 @@ class NewCatchMasterViewModel(
                     setWeatherTemperature(it.getTemperature(hourly[index].temperature))
                 }
 
-                setWeatherPrimary(hourly[index].weather.first().description)
+                setWeatherPrimary(hourly[index].weather.first().description
+                    .replaceFirstChar { it.uppercase() })
                 setWeatherIconId(hourly[index].weather.first().icon)
                 setWeatherWindDeg(hourly[index].windDeg)
                 setWeatherMoonPhase(calcMoonPhase(catchDate.value))
