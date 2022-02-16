@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -607,6 +608,7 @@ fun NewCatchPlaceSelectView(
     onInputError: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
+    val keyboard = LocalSoftwareKeyboardController.current
     val coroutineScope = rememberCoroutineScope()
     var isDropMenuOpen by rememberSaveable { mutableStateOf(false) }
     val arrowRotation by animateFloatAsState(
@@ -744,6 +746,7 @@ fun NewCatchPlaceSelectView(
                     onClick = {
                         textFieldValue = suggestion.title
                         onNewPlaceSelected(suggestion)
+                        keyboard?.hide()
                         isDropMenuOpen = false
                     }) {
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -754,7 +757,6 @@ fun NewCatchPlaceSelectView(
                         )
                         Text(text = suggestion.title)
                     }
-
                 }
             }
         }
