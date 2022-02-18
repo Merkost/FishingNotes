@@ -1,10 +1,6 @@
 package com.mobileprism.fishing.domain
 
 import android.net.Uri
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.text.capitalize
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchPlacesState
@@ -22,7 +18,7 @@ import com.mobileprism.fishing.model.repository.app.WeatherRepository
 import com.mobileprism.fishing.utils.calcMoonPhase
 import com.mobileprism.fishing.utils.getClosestHourIndex
 import com.mobileprism.fishing.utils.isDateInList
-import com.mobileprism.fishing.utils.roundTo
+import com.mobileprism.fishing.utils.isLocationsTooFar
 import com.mobileprism.fishing.utils.time.hoursCount
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -122,7 +118,7 @@ class NewCatchMasterViewModel(
 
     fun setSelectedPlace(place: UserMapMarker) {
         _currentPlace.value = place
-        _weatherDownloadIsAvailable.value = true
+        checkWeatherDownloadNeed()
     }
 
     fun setPlaceInputError(isError: Boolean) {
@@ -131,7 +127,7 @@ class NewCatchMasterViewModel(
 
     fun setDate(date: Long) {
         _catchDate.value = date
-        checkWeatherDownload()
+        checkWeatherDownloadNeed()
     }
 
     fun setFishType(fish: String) {
@@ -203,7 +199,7 @@ class NewCatchMasterViewModel(
     }
 
     fun loadWeather() {
-        if (!ifWeatherLoaded()) {
+        if (weatherDownloadIsAvailable.value) {
             if (Date().time.hoursCount() > catchDate.value.hoursCount()) {
                 getHistoricalWeather()
             } else {
@@ -284,7 +280,7 @@ class NewCatchMasterViewModel(
                 setWeatherIconId(hourly[index].weather.first().icon)
                 setWeatherWindDeg(hourly[index].windDeg)
                 setWeatherMoonPhase(calcMoonPhase(catchDate.value))
-                checkWeatherDownload()
+                checkWeatherDownloadNeed()
             }
         }
     }
@@ -343,17 +339,16 @@ class NewCatchMasterViewModel(
         weatherMoonPhase = weatherMoonPhase.value
     )
 
-    private fun ifWeatherLoaded(): Boolean {
-        return (weatherDownloadIsAvailable.value
-                && (loadedWeather.value.latitude.toDouble()
-            .roundTo(3) == currentPlace.value?.latitude?.roundTo(3))
-                && (loadedWeather.value.longitude.toDouble()
-            .roundTo(3) == currentPlace.value?.longitude?.roundTo(3)))
+    private fun checkWeatherDownloadNeed() {
+        val loadedWeatherPlace = UserMapMarker(
+            latitude = loadedWeather.value.latitude.toDouble(),
+            longitude = loadedWeather.value.longitude.toDouble()
+        )
+        _weatherDownloadIsAvailable.value = currentPlace.value?.let { currentPlace ->
+            isLocationsTooFar(currentPlace, loadedWeatherPlace)
+                    || !isDateInList(loadedWeather.value.hourly, catchDate.value)
+        } ?: false
     }
 
-    private fun checkWeatherDownload() {
-        _weatherDownloadIsAvailable.value =
-            !isDateInList(loadedWeather.value.hourly, catchDate.value)
-    }
 
 }

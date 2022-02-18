@@ -34,7 +34,7 @@ val repositoryModule = module {
         FirebaseMarkersRepositoryImpl(
             dbCollections = get(),
             firebaseAnalytics = get(),
-            cloudPhotoStorage = get()
+            context = androidContext()
         )
     }
     single<SolunarRepository> { SolunarRetrofitRepositoryImpl(firebaseAnalytics = get()) }

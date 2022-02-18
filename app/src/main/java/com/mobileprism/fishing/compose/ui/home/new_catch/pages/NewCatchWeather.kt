@@ -55,7 +55,7 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
         modifier = Modifier
             .fillMaxSize()
     ) {
-        val (subtitle, noInternet, description, temp, press, wind, moon, refreshButton, downloadButton, progress) = createRefs()
+        val (subtitle, noInternet, description, temp, press, wind, moon, refreshButton) = createRefs()
 
         val guideline = createGuidelineFromAbsoluteLeft(0.5f)
 

@@ -85,7 +85,7 @@ fun isLocationsTooFar(first: UserMapMarker, second: UserMapMarker): Boolean {
     return (sqrt(
         ((first.latitude - second.latitude).pow(2))
                 + ((first.longitude - second.longitude).pow(2))
-    ) > 0.3)
+    ) > 0.15)
 }
 
 fun isCoordinatesFar(first: LatLng, second: LatLng): Boolean {
