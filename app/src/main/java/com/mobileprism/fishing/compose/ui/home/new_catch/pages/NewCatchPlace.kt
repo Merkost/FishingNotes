@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Info
@@ -77,7 +78,11 @@ fun NewCatchPlace(viewModel: NewCatchMasterViewModel, navController: NavControll
             linkTo(button.top, button.bottom)
             absoluteLeft.linkTo(button.absoluteRight, 8.dp)
         }, onClick = { mapSelectInfoDialog = true }) {
-            Icon(Icons.Default.Info, contentDescription = Icons.Default.Info.name)
+            Icon(
+                Icons.Default.Info,
+                contentDescription = Icons.Default.Info.name,
+                tint = MaterialTheme.colors.primaryVariant
+            )
         }
 
         SubtitleWithIcon(
