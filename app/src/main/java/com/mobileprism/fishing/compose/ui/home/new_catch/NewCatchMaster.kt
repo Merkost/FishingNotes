@@ -27,6 +27,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.compose.ui.home.advertising.showInterstitialAd
+import com.mobileprism.fishing.compose.ui.home.place.DeletePlaceDialog
+import com.mobileprism.fishing.compose.ui.home.place.LottieWarning
 import com.mobileprism.fishing.compose.ui.home.views.*
 import com.mobileprism.fishing.compose.ui.theme.customColors
 import com.mobileprism.fishing.domain.NewCatchMasterViewModel
@@ -45,9 +47,9 @@ import org.koin.core.parameter.parametersOf
 @ExperimentalPagerApi
 @Composable
 fun NewCatchMasterScreen(
-    upPress: () -> Unit,
     receivedPlace: UserMapMarker?,
-    navController: NavController
+    navController: NavController,
+    upPress: () -> Unit,
 ) {
     val context = LocalContext.current
     val viewModel: NewCatchMasterViewModel by viewModel {
@@ -73,13 +75,21 @@ fun NewCatchMasterScreen(
         )
     }
 
+    var exitDialogIsShowing by remember { mutableStateOf(false) }
+
+    if (exitDialogIsShowing) {
+        CancelNewCatchDialog(onDismiss = { exitDialogIsShowing = false }) {
+            exitDialogIsShowing = false; upPress()
+        }
+    }
+
     BackHandler {
         val currentPage = pagerState.currentPage
         if (currentPage != 0) {
             coroutineScope.launch {
                 pagerState.animateScrollToPage(currentPage - 1)
             }
-        } else { upPress() }
+        } else { exitDialogIsShowing = true }
     }
 
     val loadingDialogState = remember { mutableStateOf(false) }
@@ -101,7 +111,7 @@ fun NewCatchMasterScreen(
         uiState = viewModel.uiState.collectAsState().value,
         adIsLoadedState = isAdLoaded.value,
         loadingDialogState = loadingDialogState,
-        upPress = { upPress() }
+        upPress = upPress
     )
 
     ModalLoadingDialog(
@@ -115,7 +125,7 @@ fun NewCatchMasterScreen(
         topBar = {
             DefaultAppBar(
                 title = stringResource(id = R.string.new_catch),
-                onNavClick = upPress,
+                onNavClick = { exitDialogIsShowing = true },
                 actions = {
                     IconButton(onClick = {
                         when (skipAvaliable) {
@@ -337,4 +347,28 @@ private fun handlePagerNextClick(
         }
     }
 
+}
+
+@ExperimentalComposeUiApi
+@Composable
+fun CancelNewCatchDialog(
+    onDismiss: () -> Unit,
+    onPositiveClick: () -> Unit
+) {
+    DefaultDialog(
+        primaryText = stringResource(R.string.cancel_new_catch_dialog),
+        secondaryText = stringResource(R.string.sure_cancel_new_catch_dialog),
+        negativeButtonText = stringResource(id = R.string.No),
+        onNegativeClick = onDismiss,
+        positiveButtonText = stringResource(id = R.string.Yes),
+        onPositiveClick = onPositiveClick,
+        onDismiss = onDismiss,
+        content = {
+            LottieWarning(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+            )
+        }
+    )
 }
