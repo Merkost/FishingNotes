@@ -8,10 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.compose.ui.home.UiState
-import com.mobileprism.fishing.compose.ui.home.map.CameraMoveState
-import com.mobileprism.fishing.compose.ui.home.map.MapTypes
-import com.mobileprism.fishing.compose.ui.home.map.MapUiState
-import com.mobileprism.fishing.compose.ui.home.map.PointerState
+import com.mobileprism.fishing.compose.ui.home.map.*
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
 import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.datastore.UserPreferences
@@ -25,6 +22,8 @@ import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.SolunarRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -35,6 +34,7 @@ class MapViewModel(
     private val userPreferences: UserPreferences,
 ) : ViewModel() {
 
+    private val firstLaunchLocation = mutableStateOf(true)
 
     val showMarker: MutableState<Boolean> = mutableStateOf(false)
     private val viewStateFlow: MutableStateFlow<BaseViewState> =
@@ -45,27 +45,25 @@ class MapViewModel(
     val mapMarkers: StateFlow<MutableList<UserMapMarker>>
         get() = _mapMarkers
 
-    var mapUiState: MutableState<MapUiState> = mutableStateOf(MapUiState.NormalMode)
+    private val _mapUiState: MutableStateFlow<MapUiState> = MutableStateFlow(MapUiState.NormalMode)
+    val mapUiState = _mapUiState.asStateFlow()
 
     private val _cameraMoveState = MutableStateFlow<CameraMoveState>(CameraMoveState.MoveFinish)
-    val cameraMoveState: StateFlow<CameraMoveState>
-    get() = _cameraMoveState
+    val cameraMoveState = _cameraMoveState.asStateFlow()
 
     private val _uiState = MutableStateFlow<UiState?>(null)
-    val uiState: StateFlow<UiState?>
-        get() = _uiState
+    val uiState = _uiState.asStateFlow()
 
     val mapType = mutableStateOf(MapTypes.roadmap)
     val mapBearing = mutableStateOf(0f)
-
-    val firstLaunchLocation = mutableStateOf(true)
 
     val lastKnownLocation = mutableStateOf<LatLng?>(null)
     val lastMapCameraPosition = mutableStateOf<Pair<LatLng, Float>?>(null)
 
     val currentCameraPosition = mutableStateOf(Pair(LatLng(0.0, 0.0), 0f))
 
-    var currentMarker: MutableState<UserMapMarker?> = mutableStateOf(null)
+    private val _currentMarker: MutableStateFlow<UserMapMarker?> = MutableStateFlow(null)
+    val currentMarker = _currentMarker.asStateFlow()
 
     val chosenPlace = mutableStateOf<String?>(null)
 
@@ -163,7 +161,7 @@ class MapViewModel(
             repository.getMapMarker(markerToUpdate.id).collect { updatedMarker ->
                 updatedMarker?.let {
                     currentMarker.value?.let {
-                        currentMarker.value = updatedMarker
+                        _currentMarker.value = updatedMarker
                     }
                     _mapMarkers.value.apply {
                         remove(markerToUpdate)
@@ -185,17 +183,65 @@ class MapViewModel(
     }
 
     fun quickAddPlace(name: String) {
-        viewModelScope.launch {
-            lastKnownLocation.value?.let {
-                addNewMarker(
-                    RawMapMarker(
-                        name,
-                        latitude = it.latitude,
-                        longitude = it.longitude,
+        if (mapUiState.value is MapUiState.NormalMode) {
+            viewModelScope.launch {
+                lastKnownLocation.value?.let {
+                    addNewMarker(
+                        RawMapMarker(
+                            name,
+                            latitude = it.latitude,
+                            longitude = it.longitude,
+                        )
                     )
-                )
+                }
+            }
+        }
+    }
+
+    fun setPlace(place: UserMapMarker?) {
+        place?.let {
+            if (it.id.isNotEmpty()) {
+                _currentMarker.value = place
+            }
+            lastMapCameraPosition.value =
+                Pair(LatLng(it.latitude, it.longitude), DEFAULT_ZOOM)
+        }
+    }
+
+    fun setAddingPlace(addPlaceOnStart: Boolean) {
+        when {
+            addPlaceOnStart -> _mapUiState.value = MapUiState.PlaceSelectMode
+            _currentMarker.value != null -> _mapUiState.value = MapUiState.BottomSheetInfoMode
+        }
+    }
+
+    fun resetMapUiState() {
+        _mapUiState.value = MapUiState.NormalMode
+        _currentMarker.value = null
+    }
+
+    fun onMarkerClicked(marker: UserMapMarker?) {
+        marker?.let {
+            _currentMarker.value = it
+            _mapUiState.value = MapUiState.BottomSheetInfoMode
+        }
+    }
+
+    fun setPlaceSelectionMode() {
+        _mapUiState.value = MapUiState.PlaceSelectMode
+    }
+
+    fun locationGranted(location: LatLng) {
+        lastKnownLocation.value = location
+        if (firstLaunchLocation.value) {
+            viewModelScope.launch {
+                if (currentMarker.value == null) {
+                    lastMapCameraPosition.value = userPreferences.getLastMapCameraLocation.first()
+                }
+                firstLaunchLocation.value = false
             }
         }
     }
 
 }
+

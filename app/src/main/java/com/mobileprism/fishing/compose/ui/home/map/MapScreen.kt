@@ -74,65 +74,31 @@ fun MapScreen(
     place: UserMapMarker?
 ) {
     val viewModel: MapViewModel = getViewModel()
+    viewModel.setPlace(place)
+    viewModel.setAddingPlace(addPlaceOnStart)
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     val context = LocalContext.current
 
     var addingPlace by remember { mutableStateOf(addPlaceOnStart) }
-    var chosenPlace: UserMapMarker? by remember { mutableStateOf(place/* ?: viewModel.lastChosenPlace*/) }
 
     val map = rememberMapViewWithLifecycle()
+    val mapUiState by viewModel.mapUiState.collectAsState()
 
-    chosenPlace?.let {
-        if (it.id.isNotEmpty()) {
-            viewModel.currentMarker.value = chosenPlace
-        }
-        viewModel.lastMapCameraPosition.value =
-            Pair(LatLng(it.latitude, it.longitude), DEFAULT_ZOOM)
-        chosenPlace = null
-    }
     val coroutineScope = rememberCoroutineScope()
     val userPreferences: UserPreferences = get()
     val useZoomButtons by userPreferences.useMapZoomButons.collectAsState(false)
     val lastMapCameraLocation by userPreferences.getLastMapCameraLocation.collectAsState(null)
-
 
     val scaffoldState = rememberBottomSheetScaffoldState()
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val dialogAddPlaceIsShowing = remember { mutableStateOf(false) }
     var mapLayersSelection by rememberSaveable { mutableStateOf(false) }
 
-    var mapUiState: MapUiState by remember {
-        when {
-            addingPlace -> mutableStateOf(MapUiState.PlaceSelectMode)
-            viewModel.currentMarker.value != null -> {
-                mutableStateOf(MapUiState.BottomSheetInfoMode)
-            }
-            else -> mutableStateOf(viewModel.mapUiState.value)
-        }
-    }
-
     val pointerState: MutableState<PointerState> = remember {
         mutableStateOf(PointerState.HideMarker)
     }
 
     val currentCameraPosition = remember { mutableStateOf(Pair(LatLng(0.0, 0.0), 0f)) }
-
-    LaunchedEffect(mapUiState) {
-        if (mapUiState != viewModel.mapUiState) {
-            viewModel.mapUiState.value = mapUiState
-            when (mapUiState) {
-                is MapUiState.NormalMode -> {
-                    viewModel.currentMarker.value = null
-                    addingPlace = false
-                }
-                is MapUiState.BottomSheetInfoMode -> {
-                    addingPlace = false
-                }
-                is MapUiState.PlaceSelectMode -> {
-                }
-            }
-        }
-    }
 
     val currentLocationFlow = remember(permissionsState.allPermissionsGranted) {
         getCurrentLocationFlow(context, permissionsState)
@@ -143,7 +109,7 @@ fun MapScreen(
             when (currentLocationState) {
                 is LocationState.LocationGranted -> {
                     viewModel.lastKnownLocation.value = currentLocationState.location
-                    if (viewModel.firstLaunchLocation.value) {
+                    /*if (viewModel.firstLaunchLocation.value) {
                         viewModel.currentMarker.value?.let {} ?: kotlin.run {
                             lastMapCameraLocation?.let {
                                 viewModel.lastMapCameraPosition.value = it
@@ -154,7 +120,8 @@ fun MapScreen(
 
                         }
                         viewModel.firstLaunchLocation.value = false
-                    }
+                    }*/
+                    viewModel.locationGranted(currentLocationState.location)
                 }
                 is LocationState.GpsNotEnabled -> {
                     checkGPSEnabled(context) //{ currentLocationFlow.collectAsState() }
@@ -163,24 +130,11 @@ fun MapScreen(
         }
     }
 
-    /*LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
-        viewModel.sheetState = scaffoldState.bottomSheetState.currentValue
-        if (!addingPlace) {
-            when (scaffoldState.bottomSheetState.currentValue) {
-                BottomSheetValue.Collapsed -> if (viewModel.currentMarker.value != null &&
-                    mapUiState == MapUiState.BottomSheetFullyExpanded
-                )
-                    mapUiState = MapUiState.BottomSheetInfoMode
-                BottomSheetValue.Expanded -> if (mapUiState == MapUiState.BottomSheetInfoMode)
-                    mapUiState = MapUiState.BottomSheetFullyExpanded
-            }
-        }
-    }*/
-
     BackPressHandler(
         mapUiState = mapUiState,
         navController = navController,
-    ) { mapUiState = MapUiState.NormalMode }
+        onBackPressedCallback = viewModel::resetMapUiState
+    )
 
     ModalBottomSheetLayout(
         sheetState = modalBottomSheetState,
@@ -199,12 +153,10 @@ fun MapScreen(
                     state = mapUiState,
                     onClick = {
                         when (mapUiState) {
-                            MapUiState.NormalMode -> {
-                                mapUiState = MapUiState.PlaceSelectMode
-                            }
+                            MapUiState.NormalMode -> viewModel.setPlaceSelectionMode()
                             MapUiState.PlaceSelectMode -> {
                                 dialogAddPlaceIsShowing.value = true
-                                mapUiState = MapUiState.NormalMode
+                                viewModel.resetMapUiState()
                             }
                             MapUiState.BottomSheetInfoMode -> {
                                 onAddNewCatchClick(navController, viewModel)
@@ -212,18 +164,13 @@ fun MapScreen(
                         }
                     },
                     onLongPress = {
-                        when (mapUiState) {
-                            MapUiState.NormalMode -> {
-                                viewModel.quickAddPlace(name = context.getString(R.string.no_name_place))
-                            }
-                        }
+                        viewModel.quickAddPlace(name = context.getString(R.string.no_name_place))
                     },
                     userSettings = userPreferences,
                 )
             },
             bottomSheet = {
                 MarkerInfoDialog(
-                    receivedMarker = viewModel.currentMarker.value,
                     lastKnownLocation = viewModel.lastKnownLocation,
                     navController = navController,
                     onMarkerIconClicked = {
@@ -250,14 +197,7 @@ fun MapScreen(
                         absoluteLeft.linkTo(parent.absoluteLeft)
                         absoluteRight.linkTo(parent.absoluteRight)
                     }, map = map,
-                    onMarkerClick = {
-                        viewModel.currentMarker.value = it
-                        mapUiState = MapUiState.BottomSheetInfoMode
-                    },
                     currentCameraPosition = currentCameraPosition,
-                    onMapClick = {
-                        mapUiState = MapUiState.NormalMode
-                    }
                 )
 
                 MapLayersButton(
@@ -406,7 +346,6 @@ fun onMapSettingsClicked(
     }
 }
 
-
 @SuppressLint("PotentialBehaviorOverride")
 @ExperimentalAnimationApi
 @ExperimentalCoroutinesApi
@@ -415,9 +354,7 @@ fun onMapSettingsClicked(
 fun MapLayout(
     modifier: Modifier = Modifier,
     map: MapView,
-    onMarkerClick: (marker: UserMapMarker) -> Unit,
     currentCameraPosition: MutableState<Pair<LatLng, Float>>,
-    onMapClick: () -> Unit,
 ) {
     val viewModel: MapViewModel = getViewModel()
     val userPreferences: UserPreferences = get()
@@ -489,12 +426,12 @@ fun MapLayout(
                     viewModel.saveLastCameraPosition(currentCameraPosition.value)
                 }
                 googleMap.setOnMarkerClickListener { marker ->
-                    onMarkerClick(markers.first { it.id == marker.tag })
+                    viewModel.onMarkerClicked(markers.firstOrNull { it.id == marker.tag })
                     moveCameraToLocation(coroutineScope, map, marker.position, bearing = viewModel.mapBearing.value)
                     true
                 }
                 googleMap.setOnMapClickListener {
-                    onMapClick()
+                    viewModel.resetMapUiState()
                     return@setOnMapClickListener
                 }
 
@@ -530,7 +467,6 @@ fun MapLayout(
 
         onDispose {
             viewModel.setLastMapCameraPosition(currentCameraPosition.value)
-            //viewModel.lastMapCameraPosition.value = currentCameraPosition.value
         }
     }
 }

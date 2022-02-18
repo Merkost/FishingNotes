@@ -49,7 +49,6 @@ import org.koin.androidx.compose.getViewModel
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MarkerInfoDialog(
-    receivedMarker: UserMapMarker?,
     lastKnownLocation: MutableState<LatLng?>,
     modifier: Modifier = Modifier,
     navController: NavController,
@@ -58,30 +57,25 @@ fun MarkerInfoDialog(
     val context = LocalContext.current
 
     val viewModel: MapViewModel = getViewModel()
+    val receivedMarker by viewModel.currentMarker.collectAsState()
     val weatherPreferences: WeatherPreferences = get()
     val coroutineScope = rememberCoroutineScope()
     val geocoder = Geocoder(context, resources().configuration.locale)
 
     val windUnit by weatherPreferences.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
 
-    /*val weatherPrefs: WeatherPreferences = get()
-    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
-
-    val connectionState by context.observeConnectivityAsFlow()
-        .collectAsState(initial = context.currentConnectivityState)*/
-
     var address: String? by remember { mutableStateOf(null) }
     var distance: String? by remember { mutableStateOf(null) }
     val fishActivity: Int? by remember { viewModel.fishActivity }
     val currentWeather: CurrentWeatherFree? by remember { viewModel.currentWeather }
 
-    receivedMarker?.let {
+    receivedMarker?.let { notNullMarker ->
         LaunchedEffect(receivedMarker) {
             coroutineScope.launch(Dispatchers.Default) {
                 address = null
                 delay(800)
                 try {
-                    val position = geocoder.getFromLocation(receivedMarker.latitude, receivedMarker.longitude, 1)
+                    val position = geocoder.getFromLocation(notNullMarker.latitude, notNullMarker.longitude, 1)
                     position?.first()?.apply {
                         address = if (!subAdminArea.isNullOrBlank()) {
                             subAdminArea.replaceFirstChar { it.uppercase() }
@@ -100,12 +94,12 @@ fun MarkerInfoDialog(
 
         LaunchedEffect(receivedMarker) {
             viewModel.fishActivity.value = null
-            viewModel.getFishActivity(receivedMarker.latitude, receivedMarker.longitude)
+            viewModel.getFishActivity(notNullMarker.latitude, notNullMarker.longitude)
         }
 
         LaunchedEffect(receivedMarker) {
             viewModel.currentWeather.value = null
-            viewModel.getCurrentWeather(receivedMarker.latitude, receivedMarker.longitude)
+            viewModel.getCurrentWeather(notNullMarker.latitude, notNullMarker.longitude)
         }
 
         LaunchedEffect(receivedMarker, viewModel.lastKnownLocation.value) {
@@ -114,10 +108,7 @@ fun MarkerInfoDialog(
                 lastKnownLocation.value?.let {
                     distance = context.convertDistance(
                         SphericalUtil.computeDistanceBetween(
-                            LatLng(
-                                receivedMarker.latitude,
-                                receivedMarker.longitude
-                            ),
+                            LatLng(notNullMarker.latitude, notNullMarker.longitude),
                             LatLng(it.latitude, it.longitude)
                         )
                     )
@@ -130,7 +121,7 @@ fun MarkerInfoDialog(
     val cornersDp = 16.dp
     val elevationDp = 6.dp
 
-    viewModel.currentMarker.value?.let { marker ->
+    receivedMarker?.let { marker ->
     Card(
         shape = RoundedCornerShape(cornersDp),
         elevation = elevationDp,
