@@ -176,15 +176,11 @@ class MapViewModel(
 
     fun setLastMapCameraPosition(value: Pair<LatLng, Float>) {
         lastMapCameraPosition.value = value
-        viewModelScope.launch {
-            userPreferences.saveLastMapCameraLocation(value.first)
-        }
     }
 
-    fun setCurrentCameraPosition(pair: Pair<LatLng, Float>) {
-        currentCameraPosition.value = pair
+    fun saveLastCameraPosition(pair: Pair<LatLng, Float>) {
         viewModelScope.launch {
-            userPreferences.saveLastMapCameraLocation(pair.first)
+            userPreferences.saveLastMapCameraLocation(pair)
         }
     }
 

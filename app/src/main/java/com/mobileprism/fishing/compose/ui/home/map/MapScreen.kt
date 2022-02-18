@@ -35,7 +35,6 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
@@ -55,7 +54,6 @@ import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.raw.RawMapMarker
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
-import com.mobileprism.fishing.utils.getCameraPosition
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -95,7 +93,7 @@ fun MapScreen(
     val coroutineScope = rememberCoroutineScope()
     val userPreferences: UserPreferences = get()
     val useZoomButtons by userPreferences.useMapZoomButons.collectAsState(false)
-    val lastMapLatLng by userPreferences.getLastMapCameraLocation.collectAsState(null)
+    val lastMapCameraLocation by userPreferences.getLastMapCameraLocation.collectAsState(null)
 
 
     val scaffoldState = rememberBottomSheetScaffoldState()
@@ -151,8 +149,8 @@ fun MapScreen(
                     viewModel.lastKnownLocation.value = currentLocationState.location
                     if (viewModel.firstLaunchLocation.value) {
                         viewModel.currentMarker.value?.let {} ?: kotlin.run {
-                            lastMapLatLng?.let {
-                                viewModel.lastMapCameraPosition.value = Pair(it, DEFAULT_ZOOM)
+                            lastMapCameraLocation?.let {
+                                viewModel.lastMapCameraPosition.value = it
                             } ?: kotlin.run {
                                 viewModel.lastMapCameraPosition.value =
                                     Pair(currentLocationState.location, DEFAULT_ZOOM)
@@ -501,12 +499,12 @@ fun MapLayout(
                 }
                 googleMap.setOnCameraMoveListener {
                     viewModel.mapBearing.value = googleMap.cameraPosition.bearing
-                    viewModel.setCurrentCameraPosition(Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom))
                     currentCameraPosition.value =
                         Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom)
                 }
                 googleMap.setOnCameraIdleListener {
                     viewModel.setCameraMoveState(CameraMoveState.MoveFinish)
+                    viewModel.saveLastCameraPosition(currentCameraPosition.value)
                 }
                 googleMap.setOnMarkerClickListener { marker ->
                     onMarkerClick(markers.first { it.id == marker.tag })

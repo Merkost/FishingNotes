@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.android.gms.maps.model.LatLng
+import com.mobileprism.fishing.compose.ui.home.map.DEFAULT_ZOOM
 import com.mobileprism.fishing.compose.ui.theme.AppThemeValues
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -18,6 +19,7 @@ class UserPreferences(private val context: Context) {
 
         val LAST_MAP_LATITUDE = doublePreferencesKey("last_map_camera_latitude")
         val LAST_MAP_LONGITUDE = doublePreferencesKey("last_map_camera_longitude")
+        val LAST_MAP_ZOOM = floatPreferencesKey("last_map_camera_zoom")
 
         val USER_LOCATION_PERMISSION_KEY = booleanPreferencesKey("should_show_location_permission")
         val MAP_HIDDEN_PLACES_KEY = booleanPreferencesKey("should_show_hidden_places_on_map")
@@ -47,7 +49,9 @@ class UserPreferences(private val context: Context) {
         .map { preferences ->
             AppThemeValues.valueOf(preferences[APP_THEME_KEY] ?: AppThemeValues.Blue.name)
         }.catch { e ->
-            if (e is IllegalArgumentException) { emit(AppThemeValues.Blue) }
+            if (e is IllegalArgumentException) {
+                emit(AppThemeValues.Blue)
+            }
         }
 
     val useFabFastAdd: Flow<Boolean> = context.dataStore.data
@@ -60,11 +64,14 @@ class UserPreferences(private val context: Context) {
             preferences[MAP_ZOOM_BUTTONS_KEY] ?: false
         }
 
-    val getLastMapCameraLocation: Flow<LatLng> = context.dataStore.data
+    val getLastMapCameraLocation: Flow<Pair<LatLng, Float>> = context.dataStore.data
         .map { preferences ->
-            LatLng(
-                preferences[LAST_MAP_LATITUDE] ?: 0.0,
-                preferences[LAST_MAP_LONGITUDE] ?: 0.0
+            Pair(
+                LatLng(
+                    preferences[LAST_MAP_LATITUDE] ?: 0.0,
+                    preferences[LAST_MAP_LONGITUDE] ?: 0.0
+                ),
+                preferences[LAST_MAP_ZOOM] ?: DEFAULT_ZOOM
             )
         }
 
@@ -98,15 +105,18 @@ class UserPreferences(private val context: Context) {
             preferences[FAB_FAST_ADD] = fastAdd
         }
     }
+
     suspend fun saveMapZoomButtons(useZoomButtons: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[MAP_ZOOM_BUTTONS_KEY] = useZoomButtons
         }
     }
-    suspend fun saveLastMapCameraLocation(latLng: LatLng) {
+
+    suspend fun saveLastMapCameraLocation(pair: Pair<LatLng, Float>) {
         context.dataStore.edit { preferences ->
-            preferences[LAST_MAP_LATITUDE] = latLng.latitude
-            preferences[LAST_MAP_LONGITUDE] = latLng.longitude
+            preferences[LAST_MAP_LATITUDE] = pair.first.latitude
+            preferences[LAST_MAP_LONGITUDE] = pair.first.longitude
+            preferences[LAST_MAP_ZOOM] = pair.second
         }
     }
 
