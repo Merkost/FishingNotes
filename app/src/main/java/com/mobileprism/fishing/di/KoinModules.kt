@@ -54,5 +54,14 @@ val mainModule = module {
     viewModel { UserPlaceViewModel(get(), get()) }
     viewModel { UserCatchesViewModel(get()) }
     viewModel { UserPlacesViewModel(get()) }
+    viewModel { parameters ->
+        NewCatchMasterViewModel(
+            placeState = parameters.get(),
+            get(),
+            get(),
+            get(),
+            get()
+        )
+    }
 
 }

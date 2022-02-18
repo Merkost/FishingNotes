@@ -177,7 +177,7 @@ class NewCatchViewModel(
         weatherWindSpeed = weatherToSave.value.windInMs.toFloat(),
         weatherWindDeg = weatherToSave.value.windDirInDeg.toInt(),
         weatherPressure = weatherToSave.value.pressureInMmhg,
-        weatherMoonPhase = weatherToSave.value.moonPhase
+        weatherMoonPhase = moonPhase.value
     )
 
     fun getTemperatureForHour(hour: Int, temperatureValue: TemperatureValues): String {

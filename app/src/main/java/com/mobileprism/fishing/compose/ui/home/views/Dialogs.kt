@@ -26,7 +26,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 @ExperimentalComposeUiApi
 @Composable
 fun DefaultDialog(
-    primaryText: String,
+    primaryText: String? = null,
     secondaryText: String? = null,
     neutralButtonText: String = "",
     onNeutralClick: (() -> Unit) = { },
@@ -37,9 +37,7 @@ fun DefaultDialog(
     onDismiss: () -> Unit = { },
     content: @Composable() (() -> Unit)? = null
 ) {
-    Dialog(
-        onDismissRequest = onDismiss
-    ) {
+    Dialog(onDismissRequest = onDismiss) {
         DefaultCard(
             modifier = Modifier
                 .fillMaxWidth()
@@ -54,13 +52,15 @@ fun DefaultDialog(
             ) {
                 val (title, subtitle, mainContent, neutralButton, negativeButton, positiveButton) = createRefs()
 
-                PrimaryText(
-                    modifier = Modifier.constrainAs(title) {
-                        top.linkTo(parent.top)
-                        absoluteLeft.linkTo(parent.absoluteLeft)
-                    },
-                    text = primaryText,
-                )
+                primaryText?.let {
+                    PrimaryText(
+                        modifier = Modifier.constrainAs(title) {
+                            top.linkTo(parent.top)
+                            absoluteLeft.linkTo(parent.absoluteLeft)
+                        },
+                        text = primaryText,
+                    )
+                }
 
                 if (secondaryText != null) {
                     PrimaryTextSmall(

@@ -21,7 +21,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.compose.ui.home.*
 import com.mobileprism.fishing.compose.ui.home.catch_screen.UserCatchScreen
-import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchScreen
+import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchMasterScreen
 import com.mobileprism.fishing.compose.ui.home.place.UserPlaceScreen
 import com.mobileprism.fishing.compose.ui.home.settings.AboutApp
 import com.mobileprism.fishing.compose.ui.home.weather.WeatherDaily
@@ -63,18 +63,18 @@ fun FishingNotesApp() {
         ) { innerPaddingModifier ->
             Column() {
 
-                    //Spacer(modifier = Modifier.statusBarsHeight())
-                    NavHost(
+                //Spacer(modifier = Modifier.statusBarsHeight())
+                NavHost(
+                    navController = appStateHolder.navController,
+                    startDestination = MainDestinations.HOME_ROUTE,
+                    modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
+                    Modifier.padding(innerPaddingModifier) /*else Modifier*/
+                ) {
+                    NavGraph(
                         navController = appStateHolder.navController,
-                        startDestination = MainDestinations.HOME_ROUTE,
-                        modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
-                        Modifier.padding(innerPaddingModifier) /*else Modifier*/
-                    ) {
-                        NavGraph(
-                            navController = appStateHolder.navController,
-                            upPress = appStateHolder::upPress,
-                        )
-                    }
+                        upPress = appStateHolder::upPress,
+                    )
+                }
 
             }
         }
@@ -117,16 +117,12 @@ private fun NavGraphBuilder.NavGraph(
         val place: UserMapMarker? = it.arguments?.getParcelable(Arguments.PLACE)
         it.arguments?.clear()
 
-        NewCatchScreen(
-            {
-                navController.popBackStack(
-                    route = MainDestinations.NEW_CATCH_ROUTE,
-                    inclusive = true
-                )
-            },
-            place,
-            navController
-        )
+        NewCatchMasterScreen(place, navController) {
+            navController.popBackStack(
+                route = MainDestinations.NEW_CATCH_ROUTE,
+                inclusive = true
+            )
+        }
     }
 
     composable(

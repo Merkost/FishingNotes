@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.compose.ui.home.views
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -93,10 +94,18 @@ fun DefaultButtonOutlined(
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
+    val color = animateColorAsState(
+        targetValue = if (enabled) {
+            MaterialTheme.colors.primaryVariant
+        } else {
+            MaterialTheme.customColors.secondaryIconColor
+        }
+    )
+
     TextButton(
         modifier = modifier,
         enabled = enabled,
-        border = BorderStroke(width = 1.dp, color = MaterialTheme.colors.primaryVariant),
+        border = BorderStroke(width = 1.dp, color = color.value),
         shape = RoundedCornerShape(24.dp),
         onClick = onClick
     ) {
@@ -107,13 +116,66 @@ fun DefaultButtonOutlined(
                     .padding(start = 4.dp),
                 painter = it,
                 contentDescription = null,
-                tint = MaterialTheme.colors.primaryVariant
+                tint = color.value
             )
         }
         Text(
             modifier = Modifier.padding(start = 4.dp, end = 4.dp),
             text = text.uppercase(),
-            color = MaterialTheme.colors.primaryVariant,
+            color = color.value,
+            maxLines = 1
+        )
+    }
+}
+
+@Composable
+fun LoadingIconButtonOutlined(
+    modifier: Modifier = Modifier,
+    icon: Painter? = null,
+    text: String,
+    enabled: Boolean = true,
+    isLoading: Boolean,
+    onClick: () -> Unit
+) {
+    val color = animateColorAsState(
+        targetValue = if (enabled) {
+            MaterialTheme.colors.primaryVariant
+        } else {
+            MaterialTheme.customColors.secondaryIconColor
+        }
+    )
+
+    TextButton(
+        modifier = modifier,
+        enabled = enabled,
+        border = BorderStroke(width = 1.dp, color = color.value),
+        shape = RoundedCornerShape(24.dp),
+        onClick = onClick
+    ) {
+        icon?.let {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .padding(start = 4.dp),
+                    color = color.value
+                )
+            } else {
+                Icon(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .padding(start = 4.dp),
+                    painter = it,
+                    contentDescription = null,
+                    tint = color.value
+                )
+            }
+
+        }
+        Text(
+            modifier = Modifier.padding(start = 4.dp, end = 4.dp),
+            text = text.uppercase(),
+            color = color.value,
             maxLines = 1
         )
     }

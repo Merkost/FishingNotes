@@ -14,6 +14,7 @@ object Constants {
     )
 
     const val MAX_PHOTOS: Int = 3
+    const val WIND_ROTATION = 45f
 
     const val ITEM_ADD_PHOTO = "ITEM_ADD_PHOTO"
     const val ITEM_PHOTO = "ITEM_PHOTO"

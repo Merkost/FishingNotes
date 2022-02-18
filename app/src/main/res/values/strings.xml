@@ -267,7 +267,18 @@
 
     <string name="saving_photos">Saving photos</string>
     <string name="place_note_not_deleted">Couldn\'t delete the note!</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+    <string name="finish">Finish</string>
+    <string name="select_on_map">Select on map</string>
+    <string name="location_and_time">Location and time</string>
     <string name="billing_unavaliable">Couldn\'t connect to billing service</string>
+    <string name="thanks_developers">Thank developers</string>
+    <string name="max_photos_allowed">3 photos maximum allowed</string>
+    <string name="place_select_error">Please select place</string>
+    <string name="fish_error">Please enter fish species</string>
+    <string name="weather_error">Entered invalid values</string>
+    <string name="date_and_time">Дата и время</string>
     <string name="update_ready">Update is ready</string>
     <string name="reload_app">Restart</string>
     <string name="update_canceled">Update canceled by user</string>
@@ -282,6 +293,13 @@
     <string name="retry">Повторить</string>
     <string name="km">km</string>
     <string name="m">m</string>
+    <string name="weather_is_loading">Weather is loading</string>
+    <string name="choose_wind_direction">Choose wind direction</string>
+    <string name="download_weather">Download weather</string>
+    <string name="skip">Пропустить</string>
+    <string name="new_catch_skip_tutor">Заполните местоположение и вид рыбы для пропуска остальных полей</string>
+    <string name="cancel_new_catch_dialog">Отменить добавление нового улова?</string>
+    <string name="sure_cancel_new_catch_dialog">Все введенные данные будут потеряны</string>
 
 
 </resources>

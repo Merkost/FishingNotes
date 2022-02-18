@@ -62,7 +62,7 @@ class FirebaseCloudPhotoStorage(
                 realFile = File(realPath)
 
                 val compressedImageFile = Compressor.compress(context, realFile) {
-                    quality(40)
+                    quality(10)
                     format(Bitmap.CompressFormat.JPEG)
                 }
                 val uploadTask = riversRef.putFile(compressedImageFile.toUri())

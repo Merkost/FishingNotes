@@ -7,7 +7,7 @@ import com.mobileprism.fishing.utils.getNewCatchId
 
 class UserCatchMapper {
 
-    fun mapRawCatch(newCatch: RawUserCatch, photoLinks: List<String>) = UserCatch(
+    fun mapRawCatch(newCatch: RawUserCatch, photoLinks: List<String>? = null) = UserCatch(
         id = getNewCatchId(),
         userId = getCurrentUser()!!.uid,
         description = newCatch.description ?: "",
@@ -20,7 +20,7 @@ class UserCatchMapper {
         fishingLure = newCatch.fishingLure ?: "",
         userMarkerId = newCatch.markerId,
         isPublic = newCatch.isPublic,
-        downloadPhotoLinks = photoLinks,
+        downloadPhotoLinks = photoLinks ?: listOf(),
         placeTitle = newCatch.placeTitle,
         weatherPrimary = newCatch.weatherPrimary,
         weatherIcon = newCatch.weatherIcon,

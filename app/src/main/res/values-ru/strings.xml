@@ -267,7 +267,18 @@
     <string name="saving_photos">Сохранение фото</string>
     <string name="place_note_not_deleted">Не удалось удалить заметку!</string>
     <string name="add_new_place">Добавить новое место</string>
+    <string name="next">Далее</string>
+    <string name="previous">Назад</string>
+    <string name="finish">Готово</string>
+    <string name="select_on_map">Выбрать на карте</string>
+    <string name="location_and_time">Location and time</string>
     <string name="billing_unavaliable">Не удалось подключиться к billing service</string>
+    <string name="thanks_developers">Поблагодарить разработчиков</string>
+    <string name="max_photos_allowed">Можно сохранить не более 3 фотографий</string>
+    <string name="place_select_error">Пожалуйста, выберите место</string>
+    <string name="fish_error">Пожалуйста, введите вид рыбы</string>
+    <string name="weather_error">Введены некорректные значения</string>
+    <string name="date_and_time">Дата и время</string>
     <string name="update_canceled">Обновление отменено пользователем</string>
     <string name="update_downloading">Обновление загружается</string>
     <string name="update_failed">Ошибка при обновлении</string>
@@ -282,5 +293,12 @@
     <string name="retry">Повторить</string>
     <string name="km">км</string>
     <string name="m">м</string>
+    <string name="weather_is_loading">Weather is loading</string>
+    <string name="choose_wind_direction">Choose wind direction</string>
+    <string name="download_weather">Download weather</string>
+    <string name="skip">Пропустить</string>
+    <string name="new_catch_skip_tutor">Заполните местоположение и вид рыбы для пропуска остальных полей</string>
+    <string name="cancel_new_catch_dialog">Отменить добавление нового улова?</string>
+    <string name="sure_cancel_new_catch_dialog">Все введенные данные будут потеряны</string>
 
 </resources>

@@ -5,8 +5,12 @@ import android.widget.Toast
 import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.compose.ui.home.map.DEFAULT_ZOOM
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
+import com.mobileprism.fishing.model.entity.weather.Hourly
+import com.mobileprism.fishing.utils.time.TimeConstants.MILLISECONDS_IN_DAY
 import com.mobileprism.fishing.utils.time.TimeConstants.MOON_PHASE_INCREMENT_IN_DAY
-import com.mobileprism.fishing.utils.time.TimeConstants.SECONDS_IN_DAY
+import com.mobileprism.fishing.utils.time.TimeConstants.MOON_ZERO_DATE_SECONDS
+import com.mobileprism.fishing.utils.time.formatToMilliseconds
+import com.mobileprism.fishing.utils.time.hoursCount
 import java.util.*
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -41,15 +45,30 @@ fun Float.roundTo(numFractionDigits: Int): Float {
     return (this * factor).roundToInt() / factor.toFloat()
 }
 
-fun calcMoonPhase(currentPhase: Float, currentDate: Long, requiredDate: Long): Float {
-    var result = currentPhase
-    val dif = currentDate - requiredDate
-    val numOfDays = dif / SECONDS_IN_DAY
-    result -= (numOfDays * MOON_PHASE_INCREMENT_IN_DAY)
-    if (result < 0.0f) {
-        result += 1.0f
+fun calcMoonPhase(requiredDate: Long): Float {
+    val dif = formatToMilliseconds(requiredDate) - formatToMilliseconds(MOON_ZERO_DATE_SECONDS)
+    val numOfDays = dif / MILLISECONDS_IN_DAY
+    val phase = numOfDays * MOON_PHASE_INCREMENT_IN_DAY
+    val numOfFullCycles = phase.toInt()
+    return (phase - numOfFullCycles)
+}
+
+fun isDateInList(list: List<Hourly>, date: Long): Boolean {
+    list.forEach {
+        if (it.date.hoursCount() == date.hoursCount()) {
+            return true
+        }
     }
-    return result
+    return false
+}
+
+fun getClosestHourIndex(list: List<Hourly>, date: Long): Int {
+    list.onEachIndexed { index, hourly ->
+        if (hourly.date.hoursCount() == date.hoursCount()) {
+            return index
+        }
+    }
+    return 0
 }
 
 fun showToast(context: Context, text: String) {
@@ -66,7 +85,7 @@ fun isLocationsTooFar(first: UserMapMarker, second: UserMapMarker): Boolean {
     return (sqrt(
         ((first.latitude - second.latitude).pow(2))
                 + ((first.longitude - second.longitude).pow(2))
-    ) > 0.3)
+    ) > 0.15)
 }
 
 fun isCoordinatesFar(first: LatLng, second: LatLng): Boolean {
@@ -75,4 +94,5 @@ fun isCoordinatesFar(first: LatLng, second: LatLng): Boolean {
                 + ((first.longitude - second.longitude).pow(2))
     ) > 0.1)
 }
+
 

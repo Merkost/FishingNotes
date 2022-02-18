@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.model.datasource.firebase
 
+import android.content.Context
 import android.util.Log
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.firestore.*
@@ -14,7 +15,6 @@ import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.raw.RawMapMarker
 import com.mobileprism.fishing.model.mappers.MapMarkerMapper
 import com.mobileprism.fishing.model.mappers.MarkerNoteMapper
-import com.mobileprism.fishing.model.repository.PhotoStorage
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.utils.getCurrentUserId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.*
 class FirebaseMarkersRepositoryImpl(
     private val dbCollections: RepositoryCollections,
     private val firebaseAnalytics: FirebaseAnalytics,
-    private val cloudPhotoStorage: PhotoStorage
+    private val context: Context
 ) : MarkersRepository {
 
     override fun getAllUserMarkers() = channelFlow<MapMarker> {

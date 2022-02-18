@@ -19,14 +19,13 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.views.SecondaryText
 import com.mobileprism.fishing.compose.ui.home.weather.PressureValues
 import com.mobileprism.fishing.compose.ui.home.weather.TemperatureValues
+import com.mobileprism.fishing.compose.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.domain.NewCatchViewModel
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.mappers.getMoonIconByPhase
 import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.model.mappers.getWeatherNameByIcon
-import com.mobileprism.fishing.utils.calcMoonPhase
-import com.mobileprism.fishing.utils.time.TimeConstants.MILLISECONDS_IN_SECOND
 import com.mobileprism.fishing.utils.time.toHours
 import org.koin.androidx.compose.get
 import java.util.*
@@ -52,11 +51,11 @@ fun WeatherLayout(
             weather.daily.first().moonPhase
         }
 
-        viewModel.moonPhase.value = calcMoonPhase(
-            currentMoonPhase,
-            Date().time / MILLISECONDS_IN_SECOND,
-            weather.hourly.first().date
-        )
+//        viewModel.moonPhase.value = calcMoonPhase(
+//            currentMoonPhase,
+//            Date().time / MILLISECONDS_IN_SECOND,
+//            weather.hourly.first().date
+//        )
 
         val hour by remember(calendar.timeInMillis) {
             mutableStateOf(calendar.timeInMillis.toHours().toInt())
@@ -81,7 +80,7 @@ fun WeatherLayout(
         }
 
         var pressure by remember(hour, weather, pressureUnit) {
-            mutableStateOf(pressureUnit.getPressure(weather.hourly[hour].pressure,))
+            mutableStateOf(pressureUnit.getPressure(weather.hourly[hour].pressure))
         }.also {
             it.value.toFloatOrNull()?.let { floatValue ->
                 viewModel.weatherToSave.value.pressureInMmhg =
@@ -283,4 +282,209 @@ fun WeatherLayoutLoading() {
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) { CircularProgressIndicator() }
+}
+
+@ExperimentalComposeUiApi
+@Composable
+fun NewCatchWeatherPrimary(
+    modifier: Modifier = Modifier,
+    weatherDescription: State<String>,
+    weatherIconId: State<String>,
+    onDescriptionChange: (String) -> Unit,
+    onIconChange: (String) -> Unit,
+    onError: (Boolean) -> Unit
+) {
+    var weatherIconDialogState by remember { mutableStateOf(false) }
+
+    if (weatherIconDialogState) {
+        PickWeatherIconDialog(
+            onDismiss = { weatherIconDialogState = false },
+            onIconSelected = {
+                onIconChange(getWeatherNameByIcon(it))
+                weatherIconDialogState = false
+            })
+    }
+
+    OutlinedTextField(
+        modifier = modifier.fillMaxWidth(),
+        readOnly = false,
+        value = weatherDescription.value,
+        leadingIcon = {
+            IconButton(
+                modifier = Modifier.size(32.dp),
+                content = {
+                    Icon(
+                        painter = painterResource(id = getWeatherIconByName(weatherIconId.value)),
+                        contentDescription = "",
+                        tint = Color.Unspecified
+                    )
+                },
+                onClick = { weatherIconDialogState = true }
+            )
+        },
+        onValueChange = { onDescriptionChange(it) },
+        isError = (weatherDescription.value.isEmpty()).apply { onError(this) },
+        label = { Text(text = stringResource(id = R.string.weather)) },
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Next
+        ),
+        singleLine = true
+    )
+}
+
+@Composable
+fun NewCatchTemperatureView(
+    modifier: Modifier = Modifier,
+    temperature: State<String>,
+    onTemperatureChange: (String) -> Unit,
+    onError: (Boolean) -> Unit
+) {
+
+    val weatherSettings: WeatherPreferences = get()
+    val temperatureUnit by weatherSettings.getTemperatureUnit.collectAsState(TemperatureValues.C)
+
+    OutlinedTextField(
+        modifier = modifier.fillMaxWidth(),
+        readOnly = false,
+        value = temperature.value,
+        leadingIcon = {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_thermometer),
+                contentDescription = "",
+                tint = MaterialTheme.colors.primary
+            )
+        },
+        trailingIcon = { Text(text = stringResource(temperatureUnit.stringRes)) },
+        onValueChange = { onTemperatureChange(it) },
+        isError = (temperature.value
+            .toIntOrNull() == null || temperature.value.length > 3)
+            .apply { onError(this) },
+        label = { Text(text = stringResource(R.string.temperature)) },
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Next,
+            keyboardType = KeyboardType.Number
+        ),
+        singleLine = true
+    )
+}
+
+@Composable
+fun NewCatchPressureView(
+    modifier: Modifier = Modifier,
+    pressure: State<String>,
+    onPressureChange: (String) -> Unit,
+    onError: (Boolean) -> Unit
+) {
+    val weatherSettings: WeatherPreferences = get()
+    val pressureUnit by weatherSettings.getPressureUnit.collectAsState(PressureValues.mmHg)
+
+    OutlinedTextField(
+        modifier = modifier.fillMaxWidth(),
+        readOnly = false,
+        value = pressure.value,
+        leadingIcon = {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_gauge),
+                contentDescription = "",
+                tint = MaterialTheme.colors.primary
+            )
+        },
+        trailingIcon = { Text(text = stringResource(pressureUnit.stringRes)) },
+        isError = (pressure.value.toDoubleOrNull() == null || pressure.value.endsWith(".") || pressure.value
+            .isEmpty())
+            .apply { onError(this) },
+        onValueChange = { onPressureChange(it) },
+        label = { Text(text = stringResource(R.string.pressure)) },
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Next,
+            keyboardType = KeyboardType.Number
+        ),
+        singleLine = true
+    )
+
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun NewCatchWindView(
+    modifier: Modifier = Modifier,
+    wind: State<String>,
+    windDeg: State<Int>,
+    onWindChange: (String) -> Unit,
+    onWindDirChange: (Float) -> Unit,
+    onError: (Boolean) -> Unit
+) {
+    val weatherSettings: WeatherPreferences = get()
+    val windSpeedUnit by weatherSettings.getWindSpeedUnit.collectAsState(WindSpeedValues.kmph)
+
+    var windDirDialogState by remember { mutableStateOf(false) }
+
+    if (windDirDialogState) {
+        PickWindDirDialog(
+            onDirectionSelected = {
+                onWindDirChange(it)
+                windDirDialogState = false
+            },
+            onDismiss = { windDirDialogState = false }
+        )
+    }
+
+    OutlinedTextField(
+        modifier = modifier.fillMaxWidth(),
+        readOnly = false,
+        value = wind.value,
+        leadingIcon = {
+            IconButton(onClick = { windDirDialogState = true }) {
+                Icon(
+                    modifier = Modifier.rotate(windDeg.value.toFloat()),
+                    painter = painterResource(id = R.drawable.ic_baseline_navigation_24),
+                    contentDescription = "",
+                    tint = MaterialTheme.colors.primary,
+                )
+            }
+
+        },
+        trailingIcon = { Text(text = stringResource(windSpeedUnit.stringRes)) },
+        onValueChange = { onWindChange(it) },
+        isError = (wind.value
+            .toIntOrNull() == null || wind.value.length >= 3)
+            .apply { onError(this) },
+        label = { Text(text = stringResource(R.string.wind)) },
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Next,
+            keyboardType = KeyboardType.Number
+        ),
+        singleLine = true
+    )
+}
+
+@Composable
+fun NewCatchMoonView(
+    modifier: Modifier = Modifier,
+    moonPhase: State<Float>,
+) {
+    OutlinedTextField(
+        modifier = modifier.fillMaxWidth(),
+        readOnly = true,
+        value = (moonPhase.value * 100).toInt().toString(),
+        leadingIcon = {
+            Icon(
+                painter = painterResource(
+                    id = getMoonIconByPhase(moonPhase.value)
+                ),
+                contentDescription = "",
+                tint = MaterialTheme.colors.primary
+            )
+        },
+        onValueChange = { },
+        trailingIcon = {
+            Text(text = stringResource(R.string.percent))
+        },
+        label = { Text(text = stringResource(R.string.moon_phase)) },
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Next,
+            keyboardType = KeyboardType.Number
+        ),
+        singleLine = true
+    )
 }
