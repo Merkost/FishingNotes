@@ -184,4 +184,18 @@ class MapViewModel(
         }
     }
 
+    fun quickAddPlace(name: String) {
+        viewModelScope.launch {
+            lastKnownLocation.value?.let {
+                addNewMarker(
+                    RawMapMarker(
+                        name,
+                        latitude = it.latitude,
+                        longitude = it.longitude,
+                    )
+                )
+            }
+        }
+    }
+
 }

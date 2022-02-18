@@ -42,6 +42,7 @@ import com.mobileprism.fishing.compose.viewmodels.MapViewModel
 import com.mobileprism.fishing.model.entity.raw.RawMapMarker
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
+import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
 @ExperimentalComposeUiApi
@@ -51,7 +52,7 @@ fun NewPlaceDialog(
     dialogState: MutableState<Boolean>,
     chosenPlace: MutableState<String?>,
 ) {
-    val viewModel = get<MapViewModel>()
+    val viewModel: MapViewModel = getViewModel()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsState()

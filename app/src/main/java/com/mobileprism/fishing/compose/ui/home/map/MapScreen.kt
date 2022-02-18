@@ -51,9 +51,9 @@ import com.mobileprism.fishing.compose.ui.navigate
 import com.mobileprism.fishing.compose.viewmodels.MapViewModel
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.model.entity.raw.RawMapMarker
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -99,7 +99,6 @@ fun MapScreen(
     val scaffoldState = rememberBottomSheetScaffoldState()
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val dialogAddPlaceIsShowing = remember { mutableStateOf(false) }
-
     var mapLayersSelection by rememberSaveable { mutableStateOf(false) }
 
     var mapUiState: MapUiState by remember {
@@ -131,9 +130,6 @@ fun MapScreen(
                 }
                 is MapUiState.PlaceSelectMode -> {
                 }
-                /*is MapUiState.BottomSheetFullyExpanded -> {
-                    scaffoldState.bottomSheetState.expand()
-                }*/
             }
         }
     }
@@ -186,8 +182,6 @@ fun MapScreen(
         navController = navController,
     ) { mapUiState = MapUiState.NormalMode }
 
-    val noNamePlace = stringResource(R.string.no_name_place)
-
     ModalBottomSheetLayout(
         sheetState = modalBottomSheetState,
         sheetShape = Constants.modalBottomSheetCorners,
@@ -220,15 +214,7 @@ fun MapScreen(
                     onLongPress = {
                         when (mapUiState) {
                             MapUiState.NormalMode -> {
-                                viewModel.lastKnownLocation.value?.let {
-                                    viewModel.addNewMarker(
-                                        RawMapMarker(
-                                            noNamePlace,
-                                            latitude = it.latitude,
-                                            longitude = it.longitude,
-                                        )
-                                    )
-                                }
+                                viewModel.quickAddPlace(name = context.getString(R.string.no_name_place))
                             }
                         }
                     },
@@ -242,8 +228,7 @@ fun MapScreen(
                     navController = navController,
                     onMarkerIconClicked = {
                         viewModel.currentMarker.value?.let {
-                            moveCameraToLocation(
-                                coroutineScope, map,
+                            moveCameraToLocation(coroutineScope, map,
                                 LatLng(it.latitude, it.longitude), DEFAULT_ZOOM, viewModel.mapBearing.value
                             )
                         }
@@ -314,14 +299,7 @@ fun MapScreen(
                     modifier = Modifier.constrainAs(mapSettingsButton) {
                         top.linkTo(mapLayersButton.bottom, 16.dp)
                         absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                    },
-                ) {
-                    coroutineScope.launch {
-                        Firebase.analytics.logEvent("map_settings", null)
-                        modalBottomSheetState.show()
-                    }
-                }
-
+                    }) { onMapSettingsClicked(coroutineScope, modalBottomSheetState) }
 
                 MyLocationButton(
                     modifier = modifier.constrainAs(mapMyLocationButton) {
@@ -340,10 +318,8 @@ fun MapScreen(
                     top.linkTo(mapMyLocationButton.bottom, 16.dp)
                     absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                 }, mapBearing = viewModel.mapBearing) {
-                    setCameraBearing(
-                        coroutineScope, map,
-                        currentCameraPosition.value.first,
-                        currentCameraPosition.value.second
+                    setCameraBearing(coroutineScope, map,
+                        currentCameraPosition.value.first, currentCameraPosition.value.second
                     )
                 }
 
@@ -355,15 +331,10 @@ fun MapScreen(
                         },
                     ) {
                         currentCameraPosition.value.let {
-                            moveCameraToLocation(
-                                coroutineScope,
-                                map,
-                                it.first,
-                                it.second + 1f,
+                            moveCameraToLocation(coroutineScope, map, it.first, it.second + 1f,
                                 viewModel.mapBearing.value
                             )
                         }
-
                     }
 
                     MapZoomOutButton(
@@ -383,7 +354,6 @@ fun MapScreen(
                         }
                     }
                 }
-
 
                 AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode,
                     enter = fadeIn(), exit = fadeOut(),
@@ -422,6 +392,17 @@ fun MapScreen(
                     }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+fun onMapSettingsClicked(
+    coroutineScope: CoroutineScope,
+    modalBottomSheetState: ModalBottomSheetState
+) {
+    coroutineScope.launch {
+        Firebase.analytics.logEvent("map_settings", null)
+        modalBottomSheetState.show()
     }
 }
 
@@ -707,7 +688,6 @@ fun FishingFab(
         shape = shape,
         color = backgroundColor,
         contentColor = contentColor.copy(alpha = 1f),
-
         elevation = elevation.elevation(interactionSource).value,
     ) {
         CompositionLocalProvider(LocalContentAlpha provides contentColor.alpha) {
