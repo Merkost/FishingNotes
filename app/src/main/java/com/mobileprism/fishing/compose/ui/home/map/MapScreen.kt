@@ -386,6 +386,7 @@ fun MapScreen(
 
 
                 AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode,
+                    enter = fadeIn(), exit = fadeOut(),
                     modifier = Modifier.constrainAs(pointer) {
                         top.linkTo(parent.top)
                         bottom.linkTo(parent.bottom, 65.dp)
