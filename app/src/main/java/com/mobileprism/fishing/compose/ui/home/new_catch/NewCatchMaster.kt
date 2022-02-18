@@ -277,34 +277,12 @@ fun NewCatchButtons(
                 top.linkTo(next.top)
                 bottom.linkTo(next.bottom)
                 absoluteLeft.linkTo(parent.absoluteLeft)
-                //absoluteRight.linkTo(next.absoluteLeft, 16.dp)
             },
             enabled = !isFirstPage,
             text = stringResource(R.string.previous),
             onClick = onPreviousClick
         )
 
-        /*val skipButtonTextColor = animateColorAsState(
-            when (canSkip) {
-                true -> MaterialTheme.colors.primaryVariant
-                else -> MaterialTheme.customColors.secondaryTextColor
-            }
-        )
-        DefaultButton(
-            modifier = Modifier.constrainAs(skip) {
-                top.linkTo(next.top)
-                bottom.linkTo(next.bottom)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-            },
-            text = stringResource(R.string.skip),
-            textColor = skipButtonTextColor.value,
-            onClick = {
-                when (canSkip) {
-                    true -> onFinishClick()
-                    else -> SnackbarManager.showMessage(R.string.new_catch_skip_tutor)
-                }
-            }
-        )*/
     }
 }
 

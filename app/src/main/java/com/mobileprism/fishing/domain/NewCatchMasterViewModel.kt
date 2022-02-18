@@ -49,6 +49,23 @@ class NewCatchMasterViewModel(
     )
     val currentPlace = _currentPlace.asStateFlow()
 
+    private val _placeAndTimeState = MutableStateFlow(
+        CatchPlaceAndTime(
+            place = if (placeState is ReceivedPlaceState.Received) placeState.place else null,
+            isLocationCocked = placeState is ReceivedPlaceState.Received
+        )
+    )
+    val placeAndTimeState = _placeAndTimeState.asStateFlow()
+
+    private val _fishAndWeightState = MutableStateFlow(FishAndWeight())
+    val fishAndWeightSate = _fishAndWeightState.asStateFlow()
+
+    private val _catchInfoState = MutableStateFlow(CatchInfo())
+    val catchInfoState = _catchInfoState.asStateFlow()
+
+    private val _catchWeatherState = MutableStateFlow(CatchWeather())
+    val catchWeatherState = _catchWeatherState.asStateFlow()
+
     private val loadedWeather = MutableStateFlow(WeatherForecast())
 
     private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
@@ -119,6 +136,7 @@ class NewCatchMasterViewModel(
 
     fun setSelectedPlace(place: UserMapMarker) {
         _currentPlace.value = place
+        _placeAndTimeState.value = _placeAndTimeState.value.copy(place = place)
         checkWeatherDownloadNeed()
     }
 
@@ -128,66 +146,82 @@ class NewCatchMasterViewModel(
 
     fun setDate(date: Long) {
         _catchDate.value = date
+        _placeAndTimeState.value = _placeAndTimeState.value.copy(date = date)
         checkWeatherDownloadNeed()
     }
 
     fun setFishType(fish: String) {
+        _fishAndWeightState.value = _fishAndWeightState.value.copy(fish = fish)
         _fishType.value = fish
     }
 
     fun setFishAmount(amount: Int) {
+        _fishAndWeightState.value = _fishAndWeightState.value.copy(fishAmount = amount)
         _fishAmount.value = amount
     }
 
     fun setFishWeight(weight: Double) {
+        _fishAndWeightState.value = _fishAndWeightState.value.copy(fishWeight = weight)
         _fishWeight.value = weight
     }
 
     fun setNote(note: String) {
+        _catchInfoState.value = _catchInfoState.value.copy(note = note)
         _description.value = note
     }
 
     fun setRod(rodValue: String) {
+        _catchInfoState.value = _catchInfoState.value.copy(rod = rodValue)
         _rod.value = rodValue
     }
 
     fun setBait(baitValue: String) {
+        _catchInfoState.value = _catchInfoState.value.copy(bait = baitValue)
         _bait.value = baitValue
     }
 
     fun setLure(lureValue: String) {
+        _catchInfoState.value = _catchInfoState.value.copy(lure = lureValue)
         _lure.value = lureValue
     }
 
     fun setWeatherPrimary(weather: String) {
+        _catchWeatherState.value = _catchWeatherState.value.copy(primary = weather)
         _weatherPrimary.value = weather
     }
 
     fun setWeatherTemperature(temperature: String) {
+        _catchWeatherState.value =
+            _catchWeatherState.value.copy(temperature = temperature.toFloat())
         _weatherTemperature.value = temperature
     }
 
     fun setWeatherIconId(icon: String) {
+        _catchWeatherState.value = _catchWeatherState.value.copy(icon = icon)
         _weatherIconId.value = icon
     }
 
     fun setWeatherPressure(pressure: String) {
+        _catchWeatherState.value = _catchWeatherState.value.copy(pressure = pressure.toInt())
         _weatherPressure.value = pressure
     }
 
     fun setWeatherWindSpeed(windSpeed: String) {
+        _catchWeatherState.value = _catchWeatherState.value.copy(windSpeed = windSpeed.toFloat())
         _weatherWindSpeed.value = windSpeed
     }
 
     fun setWeatherWindDeg(windDeg: Int) {
+        _catchWeatherState.value = _catchWeatherState.value.copy(windDeg = windDeg)
         _weatherWindDeg.value = windDeg
     }
 
-    fun setWeatherMoonPhase(moonPhase: Float) {
+    private fun setWeatherMoonPhase(moonPhase: Float) {
         _weatherMoonPhase.value = moonPhase
     }
 
     fun setWeatherIsError(isError: Boolean) {
+        _catchWeatherState.value = _catchWeatherState.value.copy(isError = isError)
         isWeatherInputCorrect.value = !isError
     }
 
@@ -314,6 +348,10 @@ class NewCatchMasterViewModel(
             markersRepository.getAllUserMarkersList().collect { markers ->
                 _markersListState.value =
                     NewCatchPlacesState.Received(markers as List<UserMapMarker>)
+                _placeAndTimeState.value = _placeAndTimeState.value.copy(
+                    placesListState = NewCatchPlacesState.Received(markers)
+                )
+                return@collect
             }
         }
     }
@@ -351,3 +389,38 @@ class NewCatchMasterViewModel(
         } ?: false
     }
 }
+
+data class CatchPlaceAndTime(
+    val place: UserMapMarker? = null,
+    val date: Long = Date().time,
+    val placesListState: NewCatchPlacesState = NewCatchPlacesState.NotReceived,
+    val isLocationCocked: Boolean,
+    val isError: Boolean = (place == null),
+)
+
+data class FishAndWeight(
+    val fish: String = "",
+    val fishAmount: Int = 0,
+    val fishWeight: Double = 0.0,
+    val isError: Boolean = (fish == "")
+)
+
+data class CatchInfo(
+    val rod: String = "",
+    val bait: String = "",
+    val lure: String = "",
+    val note: String = ""
+)
+
+data class CatchWeather(
+    val primary: String = "",
+    val icon: String = "01",
+    val temperature: Float = 0.0f,
+    val windSpeed: Float = 0.0f,
+    val windDeg: Int = 0,
+    val pressure: Int = 0,
+    val moonPhase: Float = calcMoonPhase(Date().time),
+    val isLoading: Boolean = false,
+    val isDownloadAvailable: Boolean = true,
+    val isError: Boolean = true
+)

@@ -46,7 +46,6 @@ import com.mobileprism.fishing.utils.showToast
 import com.mobileprism.fishing.utils.time.TimeConstants
 import com.mobileprism.fishing.utils.time.toDate
 import com.mobileprism.fishing.utils.time.toTime
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
@@ -189,18 +188,18 @@ fun Places(viewModel: NewCatchViewModel, isNull: Boolean, navController: NavCont
 @Composable
 fun FishSpecies(
     modifier: Modifier = Modifier,
-    name: State<String>,
+    name: String,
     onNameChange: (String) -> Unit
 ) {
     Column(
         modifier = modifier
     ) {
         OutlinedTextField(
-            value = name.value,
+            value = name,
             onValueChange = onNameChange,
             label = { Text(stringResource(R.string.fish_species)) },
             modifier = Modifier.fillMaxWidth(),
-            isError = name.value.isBlank(),
+            isError = name.isBlank(),
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Next
@@ -601,8 +600,8 @@ private fun onAddNewPlaceClick(navController: NavController) {
 @Composable
 fun NewCatchPlaceSelectView(
     modifier: Modifier = Modifier,
-    marker: State<UserMapMarker?>,
-    markersList: State<NewCatchPlacesState>,
+    marker: UserMapMarker?,
+    markersList: NewCatchPlacesState,
     isLocationLocked: Boolean,
     onNewPlaceSelected: (UserMapMarker) -> Unit,
     onInputError: (Boolean) -> Unit
@@ -615,16 +614,17 @@ fun NewCatchPlaceSelectView(
         when (isDropMenuOpen) {
             true -> 180f
             else -> 0f
-    })
+        }
+    )
 
     var textFieldValue by rememberSaveable {
-        mutableStateOf(marker.value?.title ?: "")
+        mutableStateOf(marker?.title ?: "")
     }
 
     val suggestions = remember { mutableStateListOf<UserMapMarker>() }
 
-    LaunchedEffect(key1 = markersList.value) {
-        markersList.value.let { state ->
+    LaunchedEffect(key1 = markersList) {
+        markersList.let { state ->
             when (state) {
                 is NewCatchPlacesState.NotReceived -> {
                 }
@@ -660,7 +660,7 @@ fun NewCatchPlaceSelectView(
                 readOnly = true,
                 singleLine = true,
                 label = { Text(text = stringResource(R.string.place)) },
-                value = marker.value?.title ?: "",
+                value = marker?.title ?: "",
                 onValueChange = { },
                 trailingIcon = {
                     IconButton(
@@ -766,7 +766,7 @@ fun NewCatchPlaceSelectView(
 @Composable
 fun DateAndTimeItem(
     modifier: Modifier = Modifier,
-    dateTime: State<Long>,
+    dateTime: Long,
     onDateChange: (Long) -> Unit,
 ) {
     val viewModel: NewCatchViewModel = getViewModel()
@@ -777,7 +777,7 @@ fun DateAndTimeItem(
     if (dateSetState) {
         DatePickerDialog(
             context = context,
-            initialDate = dateTime.value,
+            initialDate = dateTime,
             minDate = Date().time - (TimeConstants.MILLISECONDS_IN_DAY * 5),
             onDateChange = onDateChange
         ) {
@@ -786,7 +786,7 @@ fun DateAndTimeItem(
     }
 
     if (timeSetState) {
-        TimePickerDialog(context = context, initialTime = dateTime.value, onTimeChange = onDateChange) {
+        TimePickerDialog(context = context, initialTime = dateTime, onTimeChange = onDateChange) {
             timeSetState = false
         }
     }
@@ -799,7 +799,7 @@ fun DateAndTimeItem(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         OutlinedTextField(
-            value = dateTime.value.toDate(),
+            value = dateTime.toDate(),
             onValueChange = {},
             label = { Text(text = stringResource(R.string.date)) },
             readOnly = true,
@@ -821,7 +821,7 @@ fun DateAndTimeItem(
 
             })
         OutlinedTextField(
-            value = dateTime.value.toTime(),
+            value = dateTime.toTime(),
             onValueChange = {},
             label = { Text(text = stringResource(R.string.time)) },
             readOnly = true,
@@ -848,25 +848,25 @@ fun DateAndTimeItem(
 @Composable
 fun FishAmountAndWeightViewItem(
     modifier: Modifier = Modifier,
-    amountState: State<Int>,
-    weightState: State<Double>,
+    amountState: Int,
+    weightState: Double,
     onAmountChange: (Int) -> Unit,
     onWeightChange: (Double) -> Unit
 ) {
     Row(modifier = modifier) {
         Column(Modifier.weight(1F)) {
             OutlinedTextField(
-                value = amountState.value.toString(),
+                value = amountState.toString(),
                 onValueChange = {
                     if (it.isEmpty()) onAmountChange(it.toInt())
                     else {
                         when (it.toIntOrNull()) {
-                            null -> onAmountChange(amountState.value) //old value
+                            null -> onAmountChange(amountState) //old value
                             else -> onAmountChange(it.toInt())   //new value
                         }
                     }
                 },
-                isError = amountState.value.toString().isEmpty(),
+                isError = amountState.toString().isEmpty(),
                 label = { Text(text = stringResource(R.string.amount)) },
                 trailingIcon = { Text(stringResource(R.string.pc)) },
                 modifier = Modifier.fillMaxWidth(),
@@ -880,8 +880,8 @@ fun FishAmountAndWeightViewItem(
             Row(Modifier.fillMaxWidth()) {
                 OutlinedButton(
                     onClick = {
-                        if (amountState.value >= 1 && amountState.value.toString().isNotBlank()) {
-                            onAmountChange(amountState.value - 1)
+                        if (amountState >= 1 && amountState.toString().isNotBlank()) {
+                            onAmountChange(amountState - 1)
                         }
 
                     },
@@ -898,8 +898,8 @@ fun FishAmountAndWeightViewItem(
                 Spacer(modifier = Modifier.size(6.dp))
                 OutlinedButton(
                     onClick = {
-                        if (amountState.value.toString().isEmpty()) onAmountChange(1)
-                        else onAmountChange((amountState.value + 1))
+                        if (amountState.toString().isEmpty()) onAmountChange(1)
+                        else onAmountChange((amountState + 1))
                     },
                     Modifier
                         .weight(1F)
@@ -916,12 +916,12 @@ fun FishAmountAndWeightViewItem(
         Spacer(modifier = Modifier.size(6.dp))
         Column(Modifier.weight(1F)) {
             OutlinedTextField(
-                value = weightState.value.toString(),
+                value = weightState.toString(),
                 onValueChange = {
                     if (it.isEmpty()) onWeightChange(it.toDouble())
                     else {
                         when (it.toDoubleOrNull()) {
-                            null -> onWeightChange(weightState.value) //old value
+                            null -> onWeightChange(weightState) //old value
                             else -> onWeightChange(it.toDouble())   //new value
                         }
                     }
@@ -941,8 +941,8 @@ fun FishAmountAndWeightViewItem(
             Row(Modifier.fillMaxWidth()) {
                 OutlinedButton(
                     onClick = {
-                        if (weightState.value >= 0.1 && weightState.value.toString().isNotBlank()) {
-                            onWeightChange((weightState.value - 0.1).roundTo(1))
+                        if (weightState >= 0.1 && weightState.toString().isNotBlank()) {
+                            onWeightChange((weightState - 0.1).roundTo(1))
                         }
                     },
                     Modifier
@@ -958,11 +958,11 @@ fun FishAmountAndWeightViewItem(
                 Spacer(modifier = Modifier.size(6.dp))
                 OutlinedButton(
                     onClick = {
-                        if (weightState.value.toString().isEmpty()) onWeightChange(
+                        if (weightState.toString().isEmpty()) onWeightChange(
                             0.1.roundTo(1)
                         )
                         else onWeightChange(
-                            (weightState.value + 0.1).roundTo(1)
+                            (weightState + 0.1).roundTo(1)
                         )
                     },
                     Modifier
@@ -983,9 +983,9 @@ fun FishAmountAndWeightViewItem(
 @Composable
 fun WayOfFishingView(
     modifier: Modifier = Modifier,
-    rodState: State<String>,
-    biteState: State<String>,
-    lureState: State<String>,
+    rodState: String,
+    biteState: String,
+    lureState: String,
     onRodChange: (String) -> Unit,
     onBiteChange: (String) -> Unit,
     onLureChange: (String) -> Unit
@@ -998,21 +998,21 @@ fun WayOfFishingView(
     ) {
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = rodState.value,
+            value = rodState,
             onValueChange = { onRodChange(it) },
             label = { Text(text = stringResource(R.string.fish_rod)) }
         )
 
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = biteState.value,
+            value = biteState,
             onValueChange = { onBiteChange(it) },
             label = { Text(text = stringResource(R.string.bait)) }
         )
 
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = lureState.value,
+            value = lureState,
             onValueChange = { onLureChange(it) },
             label = { Text(text = stringResource(R.string.lure)) }
         )

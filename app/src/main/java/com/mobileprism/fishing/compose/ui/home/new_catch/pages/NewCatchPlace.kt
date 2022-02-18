@@ -30,16 +30,18 @@ import com.mobileprism.fishing.domain.NewCatchMasterViewModel
 @ExperimentalComposeUiApi
 @Composable
 fun NewCatchPlace(viewModel: NewCatchMasterViewModel, navController: NavController) {
-    var mapSelectInfoDialog by remember { mutableStateOf(false) }
 
+    var mapSelectInfoDialog by remember { mutableStateOf(false) }
     if (mapSelectInfoDialog) CatchOnMapSelectInfoDialog() { mapSelectInfoDialog = false }
+
+    val state by viewModel.placeAndTimeState.collectAsState()
+
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
         val (titleLocation, titleDate, field, date, button, buttonInfo) = createRefs()
-
 
         SubtitleWithIcon(
             modifier = Modifier.constrainAs(titleLocation) {
@@ -56,9 +58,9 @@ fun NewCatchPlace(viewModel: NewCatchMasterViewModel, navController: NavControll
                 absoluteLeft.linkTo(parent.absoluteLeft)
                 absoluteRight.linkTo(parent.absoluteRight)
             },
-            marker = viewModel.currentPlace.collectAsState(),
-            markersList = viewModel.markersListState.collectAsState(),
-            isLocationLocked = viewModel.isLocationLocked.collectAsState().value,
+            marker = state.place,
+            markersList = state.placesListState,
+            isLocationLocked = state.isLocationCocked,
             onNewPlaceSelected = { viewModel.setSelectedPlace(it) },
             onInputError = { viewModel.setPlaceInputError(it) }
         )
@@ -100,7 +102,7 @@ fun NewCatchPlace(viewModel: NewCatchMasterViewModel, navController: NavControll
                 absoluteLeft.linkTo(parent.absoluteLeft)
                 absoluteRight.linkTo(parent.absoluteRight)
             },
-            dateTime = viewModel.catchDate.collectAsState(),
+            dateTime = state.date,
             onDateChange = { viewModel.setDate(it) }
         )
     }

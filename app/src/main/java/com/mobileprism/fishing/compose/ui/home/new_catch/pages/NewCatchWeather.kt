@@ -31,6 +31,8 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
     val uiState by viewModel.weatherState.collectAsState()
     val canDownloadWeatherState by viewModel.weatherDownloadIsAvailable.collectAsState()
 
+    val state by viewModel.catchWeatherState.collectAsState()
+
     val context = LocalContext.current
     val internetConnectionState = context.observeConnectivityAsFlow()
         .collectAsState(initial = ConnectionState.Available)
@@ -90,24 +92,23 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
             },
             onClick = {
                 when {
-                    internetConnectionState.value is ConnectionState.Unavailable -> {
-                        viewModel.refreshWeatherState()
-                    }
-                    canDownloadWeatherState -> {
+                    state.isDownloadAvailable
+                            && internetConnectionState.value is ConnectionState.Available -> {
                         viewModel.loadWeather()
                     }
-                    uiState is RetrofitWrapper.Loading -> {}
-                    uiState is RetrofitWrapper.Success -> {
+                    state.isLoading -> {}
+                    else -> {
                         viewModel.refreshWeatherState()
                     }
                 }
-            }) {
+            }
+        ) {
             if (uiState is RetrofitWrapper.Loading) {
                 CircularProgressIndicator()
             } else {
                 Icon(
                     painter = when {
-                        canDownloadWeatherState
+                        state.isDownloadAvailable
                                 && internetConnectionState.value is ConnectionState.Available -> painterResource(
                             id = R.drawable.ic_baseline_download_24
                         )
@@ -126,8 +127,8 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
                 absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                 width = Dimension.fillToConstraints
             },
-            weatherDescription = viewModel.weatherPrimary.collectAsState(),
-            weatherIconId = viewModel.weatherIconId.collectAsState(),
+            weatherDescription = state.primary,
+            weatherIconId = state.icon,
             onDescriptionChange = { viewModel.setWeatherPrimary(it) },
             onIconChange = { viewModel.setWeatherIconId(it) },
             onError = { primaryWeatherError = it }
@@ -140,7 +141,7 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
                 absoluteRight.linkTo(guideline, 4.dp)
                 width = Dimension.fillToConstraints
             },
-            temperature = viewModel.weatherTemperature.collectAsState(),
+            temperature = state.temperature.toString(),
             onTemperatureChange = { viewModel.setWeatherTemperature(it) },
             onError = { temperatureError = it }
         )
@@ -152,7 +153,7 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
                 absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                 width = Dimension.fillToConstraints
             },
-            pressure = viewModel.weatherPressure.collectAsState(),
+            pressure = state.pressure.toString(),
             onPressureChange = { viewModel.setWeatherPressure(it) },
             onError = { pressureError = it }
         )
@@ -164,8 +165,8 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
                 absoluteRight.linkTo(guideline, 4.dp)
                 width = Dimension.fillToConstraints
             },
-            wind = viewModel.weatherWindSpeed.collectAsState(),
-            windDeg = viewModel.weatherWindDeg.collectAsState(),
+            wind = state.windSpeed.toString(),
+            windDeg = state.windDeg,
             onWindChange = { viewModel.setWeatherWindSpeed(it) },
             onWindDirChange = { viewModel.setWeatherWindDeg(it.toInt()) },
             onError = { windError = it }
@@ -178,22 +179,8 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
                 absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                 width = Dimension.fillToConstraints
             },
-            moonPhase = viewModel.weatherMoonPhase.collectAsState()
+            moonPhase = state.moonPhase
         )
-
-//        LoadingIconButtonOutlined(
-//            modifier = Modifier.constrainAs(downloadButton) {
-//                top.linkTo(moon.bottom, 16.dp)
-//                absoluteLeft.linkTo(parent.absoluteLeft)
-//                absoluteRight.linkTo(parent.absoluteRight)
-//            },
-//            enabled = (internetConnectionState.value is ConnectionState.Available),
-//            icon = painterResource(id = R.drawable.ic_baseline_download_24),
-//            text = stringResource(R.string.download_weather),
-//            isLoading = (uiState.value is RetrofitWrapper.Loading),
-//            onClick = { viewModel.loadWeather() }
-//        )
-
     }
 }
 
