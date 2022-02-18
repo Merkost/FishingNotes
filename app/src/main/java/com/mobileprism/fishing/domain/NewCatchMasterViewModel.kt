@@ -350,6 +350,4 @@ class NewCatchMasterViewModel(
                     || !isDateInList(loadedWeather.value.hourly, catchDate.value)
         } ?: false
     }
-
-
 }

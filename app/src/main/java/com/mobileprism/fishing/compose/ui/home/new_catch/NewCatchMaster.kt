@@ -2,7 +2,6 @@ package com.mobileprism.fishing.compose.ui.home.new_catch
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -27,15 +26,12 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.compose.ui.home.advertising.showInterstitialAd
-import com.mobileprism.fishing.compose.ui.home.place.DeletePlaceDialog
 import com.mobileprism.fishing.compose.ui.home.place.LottieWarning
 import com.mobileprism.fishing.compose.ui.home.views.*
-import com.mobileprism.fishing.compose.ui.theme.customColors
 import com.mobileprism.fishing.domain.NewCatchMasterViewModel
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.viewModel
 import org.koin.core.parameter.parametersOf
@@ -247,7 +243,8 @@ fun NewCatchButtons(
 
         HorizontalPagerIndicator(
             modifier = Modifier.constrainAs(indicator) {
-                top.linkTo(parent.top)
+                top.linkTo(next.top)
+                bottom.linkTo(next.bottom)
                 absoluteLeft.linkTo(parent.absoluteLeft)
                 absoluteRight.linkTo(parent.absoluteRight)
             },
@@ -257,7 +254,7 @@ fun NewCatchButtons(
 
         DefaultButtonFilled(
             modifier = Modifier.constrainAs(next) {
-                top.linkTo(indicator.bottom, 8.dp)
+                top.linkTo(parent.top, 8.dp)
                 bottom.linkTo(parent.bottom)
                 absoluteRight.linkTo(parent.absoluteRight)
             },
@@ -275,7 +272,7 @@ fun NewCatchButtons(
             }
         )
 
-        DefaultButtonOutlined(
+        DefaultButton(
             modifier = Modifier.constrainAs(previous) {
                 top.linkTo(next.top)
                 bottom.linkTo(next.bottom)
