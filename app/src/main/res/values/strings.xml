@@ -298,6 +298,8 @@
     <string name="download_weather">Download weather</string>
     <string name="skip">Пропустить</string>
     <string name="new_catch_skip_tutor">Заполните местоположение и вид рыбы для пропуска остальных полей</string>
+    <string name="cancel_new_catch_dialog">Отменить добавление нового улова?</string>
+    <string name="sure_cancel_new_catch_dialog">Все введенные данные будут потеряны</string>
 
 
 </resources>

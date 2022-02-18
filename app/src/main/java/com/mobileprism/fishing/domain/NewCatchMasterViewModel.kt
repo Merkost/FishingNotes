@@ -113,8 +113,9 @@ class NewCatchMasterViewModel(
     private val _photos = MutableStateFlow<List<Uri>>(listOf())
     val photos = _photos.asStateFlow()
 
-    val skipAvaliable: MutableStateFlow<Boolean>
-        get() = MutableStateFlow(currentPlace.value != null && fishType.value.isNotBlank())
+    private val _skipAvaliable: MutableStateFlow<Boolean> =
+        MutableStateFlow(currentPlace.value != null && fishType.value.isNotBlank())
+    val skipAvaliable = _skipAvaliable.asStateFlow()
 
     fun setSelectedPlace(place: UserMapMarker) {
         _currentPlace.value = place

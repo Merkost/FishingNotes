@@ -1,12 +1,13 @@
 package com.mobileprism.fishing.compose.ui.home.new_catch
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -26,6 +27,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
 import com.mobileprism.fishing.compose.ui.home.advertising.showInterstitialAd
+import com.mobileprism.fishing.compose.ui.home.place.DeletePlaceDialog
+import com.mobileprism.fishing.compose.ui.home.place.LottieWarning
 import com.mobileprism.fishing.compose.ui.home.views.*
 import com.mobileprism.fishing.compose.ui.theme.customColors
 import com.mobileprism.fishing.domain.NewCatchMasterViewModel
@@ -44,10 +47,11 @@ import org.koin.core.parameter.parametersOf
 @ExperimentalPagerApi
 @Composable
 fun NewCatchMasterScreen(
-    upPress: () -> Unit,
     receivedPlace: UserMapMarker?,
-    navController: NavController
+    navController: NavController,
+    upPress: () -> Unit,
 ) {
+    val context = LocalContext.current
     val viewModel: NewCatchMasterViewModel by viewModel {
         parametersOf(
             if (receivedPlace != null) {
@@ -71,14 +75,43 @@ fun NewCatchMasterScreen(
         )
     }
 
+    var exitDialogIsShowing by remember { mutableStateOf(false) }
+
+    if (exitDialogIsShowing) {
+        CancelNewCatchDialog(onDismiss = { exitDialogIsShowing = false }) {
+            exitDialogIsShowing = false; upPress()
+        }
+    }
+
+    BackHandler {
+        val currentPage = pagerState.currentPage
+        if (currentPage != 0) {
+            coroutineScope.launch {
+                pagerState.animateScrollToPage(currentPage - 1)
+            }
+        } else { exitDialogIsShowing = true }
+    }
+
     val loadingDialogState = remember { mutableStateOf(false) }
     val isAdLoaded = remember { mutableStateOf(false) }
+
+    val onFinish = {
+        if (viewModel.photos.value.size <= MAX_PHOTOS) {
+            viewModel.saveNewCatch()
+            showInterstitialAd(
+                context = context,
+                onAdLoaded = { isAdLoaded.value = true }
+            )
+        } else {
+            SnackbarManager.showMessage(R.string.max_photos_allowed)
+        }
+    }
 
     SubscribeToNewCatchProgress(
         uiState = viewModel.uiState.collectAsState().value,
         adIsLoadedState = isAdLoaded.value,
         loadingDialogState = loadingDialogState,
-        upPress = { upPress() }
+        upPress = upPress
     )
 
     ModalLoadingDialog(
@@ -86,18 +119,28 @@ fun NewCatchMasterScreen(
         text = stringResource(id = R.string.saving_new_catch)
     )
 
+    val skipAvaliable by viewModel.skipAvaliable.collectAsState()
+
     Scaffold(
         topBar = {
             DefaultAppBar(
                 title = stringResource(id = R.string.new_catch),
-                onNavClick = upPress
+                onNavClick = { exitDialogIsShowing = true },
+                actions = {
+                    IconButton(onClick = {
+                        when (skipAvaliable) {
+                        true -> onFinish()
+                        else -> SnackbarManager.showMessage(R.string.new_catch_skip_tutor)
+                    } },
+                    enabled = true) {
+                        Icon(Icons.Default.Check, Icons.Default.Check.name)
+                    }
+                }
             )
         }
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (pager, buttons) = createRefs()
-
-            val context = LocalContext.current
 
             NewCatchPager(
                 modifier = Modifier.constrainAs(pager) {
@@ -121,17 +164,8 @@ fun NewCatchMasterScreen(
                     absoluteRight.linkTo(parent.absoluteRight)
                 },
                 pagerState = pagerState,
-                viewModel = viewModel,
                 onFinishClick = {
-                    if (viewModel.photos.value.size <= MAX_PHOTOS) {
-                        viewModel.saveNewCatch()
-                        showInterstitialAd(
-                            context = context,
-                            onAdLoaded = { isAdLoaded.value = true }
-                        )
-                    } else {
-                        SnackbarManager.showMessage(R.string.max_photos_allowed)
-                    }
+                    onFinish()
                 },
                 onNextClick = {
                     handlePagerNextClick(
@@ -145,8 +179,6 @@ fun NewCatchMasterScreen(
                         pagerState.animateScrollToPage(pagerState.currentPage - 1)
                     }
                 },
-                onCloseClick = upPress
-
             )
         }
     }
@@ -194,13 +226,10 @@ fun NewCatchPager(
 fun NewCatchButtons(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
-    viewModel: NewCatchMasterViewModel,
     onFinishClick: () -> Unit,
     onNextClick: () -> Unit,
     onPreviousClick: () -> Unit,
-    onCloseClick: () -> Unit
 ) {
-    val canSkip by viewModel.skipAvaliable.collectAsState()
     val isLastPage = remember(pagerState.currentPage) {
         pagerState.currentPage == (pagerState.pageCount - 1)
     }
@@ -250,14 +279,15 @@ fun NewCatchButtons(
             modifier = Modifier.constrainAs(previous) {
                 top.linkTo(next.top)
                 bottom.linkTo(next.bottom)
-                absoluteRight.linkTo(next.absoluteLeft, 16.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                //absoluteRight.linkTo(next.absoluteLeft, 16.dp)
             },
             enabled = !isFirstPage,
             text = stringResource(R.string.previous),
             onClick = onPreviousClick
         )
 
-        val skipButtonTextColor = animateColorAsState(
+        /*val skipButtonTextColor = animateColorAsState(
             when (canSkip) {
                 true -> MaterialTheme.colors.primaryVariant
                 else -> MaterialTheme.customColors.secondaryTextColor
@@ -277,7 +307,7 @@ fun NewCatchButtons(
                     else -> SnackbarManager.showMessage(R.string.new_catch_skip_tutor)
                 }
             }
-        )
+        )*/
     }
 }
 
@@ -317,4 +347,28 @@ private fun handlePagerNextClick(
         }
     }
 
+}
+
+@ExperimentalComposeUiApi
+@Composable
+fun CancelNewCatchDialog(
+    onDismiss: () -> Unit,
+    onPositiveClick: () -> Unit
+) {
+    DefaultDialog(
+        primaryText = stringResource(R.string.cancel_new_catch_dialog),
+        secondaryText = stringResource(R.string.sure_cancel_new_catch_dialog),
+        negativeButtonText = stringResource(id = R.string.No),
+        onNegativeClick = onDismiss,
+        positiveButtonText = stringResource(id = R.string.Yes),
+        onPositiveClick = onPositiveClick,
+        onDismiss = onDismiss,
+        content = {
+            LottieWarning(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+            )
+        }
+    )
 }
