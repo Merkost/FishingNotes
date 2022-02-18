@@ -2,11 +2,9 @@ package com.mobileprism.fishing.model.datastore
 
 import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
+import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.compose.ui.theme.AppThemeValues
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -17,6 +15,9 @@ class UserPreferences(private val context: Context) {
     // to make sure there's only one instance
     companion object {
         private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("userSettings")
+
+        val LAST_MAP_LATITUDE = doublePreferencesKey("last_map_camera_latitude")
+        val LAST_MAP_LONGITUDE = doublePreferencesKey("last_map_camera_longitude")
 
         val USER_LOCATION_PERMISSION_KEY = booleanPreferencesKey("should_show_location_permission")
         val MAP_HIDDEN_PLACES_KEY = booleanPreferencesKey("should_show_hidden_places_on_map")
@@ -59,6 +60,14 @@ class UserPreferences(private val context: Context) {
             preferences[MAP_ZOOM_BUTTONS_KEY] ?: false
         }
 
+    val getLastMapCameraLocation: Flow<LatLng> = context.dataStore.data
+        .map { preferences ->
+            LatLng(
+                preferences[LAST_MAP_LATITUDE] ?: 0.0,
+                preferences[LAST_MAP_LONGITUDE] ?: 0.0
+            )
+        }
+
     //save values
     suspend fun saveLocationPermissionStatus(shouldShow: Boolean) {
         context.dataStore.edit { preferences ->
@@ -92,6 +101,12 @@ class UserPreferences(private val context: Context) {
     suspend fun saveMapZoomButtons(useZoomButtons: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[MAP_ZOOM_BUTTONS_KEY] = useZoomButtons
+        }
+    }
+    suspend fun saveLastMapCameraLocation(latLng: LatLng) {
+        context.dataStore.edit { preferences ->
+            preferences[LAST_MAP_LATITUDE] = latLng.latitude
+            preferences[LAST_MAP_LONGITUDE] = latLng.longitude
         }
     }
 

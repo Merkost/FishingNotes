@@ -181,6 +181,7 @@ fun setCameraPosition(
 ) {
     coroutineScope.launch {
         val googleMap = map.awaitMap()
+        googleMap.stopAnimation()
         googleMap.moveCamera(
             CameraUpdateFactory.newLatLngZoom(
                 location,
@@ -189,6 +190,7 @@ fun setCameraPosition(
         )
     }
 }
+
 
 fun checkPermission(context: Context): Boolean {
     return ActivityCompat.checkSelfPermission(

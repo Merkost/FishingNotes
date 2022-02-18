@@ -94,8 +94,9 @@ fun MapScreen(
     }
     val coroutineScope = rememberCoroutineScope()
     val userPreferences: UserPreferences = get()
-    val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
     val useZoomButtons by userPreferences.useMapZoomButons.collectAsState(false)
+    val lastMapLatLng by userPreferences.getLastMapCameraLocation.collectAsState(null)
+
 
     val scaffoldState = rememberBottomSheetScaffoldState()
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -149,10 +150,14 @@ fun MapScreen(
                 is LocationState.LocationGranted -> {
                     viewModel.lastKnownLocation.value = currentLocationState.location
                     if (viewModel.firstLaunchLocation.value) {
-                        viewModel.currentMarker.value?.let {
-                        } ?: kotlin.run {
-                            viewModel.lastMapCameraPosition.value =
-                                Pair(currentLocationState.location, DEFAULT_ZOOM)
+                        viewModel.currentMarker.value?.let {} ?: kotlin.run {
+                            lastMapLatLng?.let {
+                                viewModel.lastMapCameraPosition.value = Pair(it, DEFAULT_ZOOM)
+                            } ?: kotlin.run {
+                                viewModel.lastMapCameraPosition.value =
+                                    Pair(currentLocationState.location, DEFAULT_ZOOM)
+                            }
+
                         }
                         viewModel.firstLaunchLocation.value = false
                     }
@@ -435,9 +440,10 @@ fun MapLayout(
     onMapClick: () -> Unit,
 ) {
     val viewModel: MapViewModel = getViewModel()
+    val userPreferences: UserPreferences = get()
     val coroutineScope = rememberCoroutineScope()
     val darkTheme = isSystemInDarkTheme()
-    val userPreferences: UserPreferences = get()
+
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
     val context = LocalContext.current
     val markers by viewModel.mapMarkers.collectAsState()
@@ -495,6 +501,7 @@ fun MapLayout(
                 }
                 googleMap.setOnCameraMoveListener {
                     viewModel.mapBearing.value = googleMap.cameraPosition.bearing
+                    viewModel.setCurrentCameraPosition(Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom))
                     currentCameraPosition.value =
                         Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom)
                 }
@@ -537,14 +544,13 @@ fun MapLayout(
 
     DisposableEffect(map) {
         viewModel.lastMapCameraPosition.value?.let {
-            coroutineScope.launch {
-                val googleMap = map.awaitMap()
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(it.first, it.second))
-                currentCameraPosition.value = it
-            }
+            setCameraPosition(coroutineScope, map, it.first, it.second)
+            currentCameraPosition.value = it
         }
+
         onDispose {
-            viewModel.lastMapCameraPosition.value = currentCameraPosition.value
+            viewModel.setLastMapCameraPosition(currentCameraPosition.value)
+            //viewModel.lastMapCameraPosition.value = currentCameraPosition.value
         }
     }
 }

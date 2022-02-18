@@ -44,8 +44,8 @@ val mainModule = module {
 
     viewModel { MainViewModel(get()) }
     viewModel { LoginViewModel(get()) }
+    viewModel { MapViewModel(get(), get(), get(), get()) }
 
-    viewModel { MapViewModel(get(), get(), get()) }
     viewModel { NewCatchViewModel(get(), get(), get()) }
     viewModel { UserViewModel(get(), get()) }
     viewModel { NewPlaceViewModel(get()) }

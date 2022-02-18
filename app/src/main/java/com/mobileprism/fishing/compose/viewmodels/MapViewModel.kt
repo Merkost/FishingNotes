@@ -14,6 +14,7 @@ import com.mobileprism.fishing.compose.ui.home.map.MapUiState
 import com.mobileprism.fishing.compose.ui.home.map.PointerState
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
 import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
+import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.raw.RawMapMarker
@@ -31,6 +32,7 @@ class MapViewModel(
     private val repository: MarkersRepository,
     private val freeWeatherRepository: FreeWeatherRepository,
     private val solunarRepository: SolunarRepository,
+    private val userPreferences: UserPreferences,
 ) : ViewModel() {
 
 
@@ -60,6 +62,7 @@ class MapViewModel(
 
     val lastKnownLocation = mutableStateOf<LatLng?>(null)
     val lastMapCameraPosition = mutableStateOf<Pair<LatLng, Float>?>(null)
+
     val currentCameraPosition = mutableStateOf(Pair(LatLng(0.0, 0.0), 0f))
 
     var currentMarker: MutableState<UserMapMarker?> = mutableStateOf(null)
@@ -124,6 +127,7 @@ class MapViewModel(
                             Log.d("CURRENT WEATHER ERROR", result.errorType.error.toString())
                             //_weatherState.value = RetrofitWrapper.Error(result.errorType)
                         }
+                        else -> {}
                     }
                 }
         }
@@ -167,6 +171,20 @@ class MapViewModel(
                     }
                 }
             }
+        }
+    }
+
+    fun setLastMapCameraPosition(value: Pair<LatLng, Float>) {
+        lastMapCameraPosition.value = value
+        viewModelScope.launch {
+            userPreferences.saveLastMapCameraLocation(value.first)
+        }
+    }
+
+    fun setCurrentCameraPosition(pair: Pair<LatLng, Float>) {
+        currentCameraPosition.value = pair
+        viewModelScope.launch {
+            userPreferences.saveLastMapCameraLocation(pair.first)
         }
     }
 
