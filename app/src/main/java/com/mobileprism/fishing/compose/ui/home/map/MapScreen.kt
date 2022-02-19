@@ -68,10 +68,10 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun MapScreen(
     modifier: Modifier = Modifier,
-    upPress: () -> Unit,
     navController: NavController,
     addPlaceOnStart: Boolean = false,
-    place: UserMapMarker?
+    place: UserMapMarker?,
+    upPress: () -> Unit,
 ) {
     val viewModel: MapViewModel = getViewModel()
     viewModel.setPlace(place)
@@ -79,15 +79,12 @@ fun MapScreen(
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     val context = LocalContext.current
 
-    var addingPlace by remember { mutableStateOf(addPlaceOnStart) }
-
     val map = rememberMapViewWithLifecycle()
     val mapUiState by viewModel.mapUiState.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
     val userPreferences: UserPreferences = get()
     val useZoomButtons by userPreferences.useMapZoomButons.collectAsState(false)
-    val lastMapCameraLocation by userPreferences.getLastMapCameraLocation.collectAsState(null)
 
     val scaffoldState = rememberBottomSheetScaffoldState()
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -108,24 +105,13 @@ fun MapScreen(
         currentLocationFlow.collect { currentLocationState ->
             when (currentLocationState) {
                 is LocationState.LocationGranted -> {
-                    viewModel.lastKnownLocation.value = currentLocationState.location
-                    /*if (viewModel.firstLaunchLocation.value) {
-                        viewModel.currentMarker.value?.let {} ?: kotlin.run {
-                            lastMapCameraLocation?.let {
-                                viewModel.lastMapCameraPosition.value = it
-                            } ?: kotlin.run {
-                                viewModel.lastMapCameraPosition.value =
-                                    Pair(currentLocationState.location, DEFAULT_ZOOM)
-                            }
-
-                        }
-                        viewModel.firstLaunchLocation.value = false
-                    }*/
                     viewModel.locationGranted(currentLocationState.location)
                 }
                 is LocationState.GpsNotEnabled -> {
                     checkGPSEnabled(context) //{ currentLocationFlow.collectAsState() }
                 }
+                LocationState.LocationNotGranted -> {}
+                LocationState.NoPermission -> {}
             }
         }
     }

@@ -607,6 +607,7 @@ fun NewCatchPlaceSelectView(
     onNewPlaceSelected: (UserMapMarker) -> Unit,
     onInputError: (Boolean) -> Unit
 ) {
+
     val context = LocalContext.current
     val keyboard = LocalSoftwareKeyboardController.current
     val coroutineScope = rememberCoroutineScope()

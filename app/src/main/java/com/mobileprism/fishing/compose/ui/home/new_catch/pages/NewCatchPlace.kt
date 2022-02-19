@@ -20,7 +20,9 @@ import androidx.navigation.NavController
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.HomeSections
 import com.mobileprism.fishing.compose.ui.home.new_catch.DateAndTimeItem
+import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchNoPlaceDialog
 import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchPlaceSelectView
+import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchPlacesState
 import com.mobileprism.fishing.compose.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.compose.ui.home.views.DefaultDialog
 import com.mobileprism.fishing.compose.ui.home.views.SubtitleWithIcon
@@ -31,6 +33,9 @@ import com.mobileprism.fishing.domain.NewCatchMasterViewModel
 @Composable
 fun NewCatchPlace(viewModel: NewCatchMasterViewModel, navController: NavController) {
     var mapSelectInfoDialog by remember { mutableStateOf(false) }
+    val markersList = viewModel.markersListState.collectAsState()
+
+    setMarkerListListener(markersList.value, navController)
 
     if (mapSelectInfoDialog) CatchOnMapSelectInfoDialog() { mapSelectInfoDialog = false }
     ConstraintLayout(
@@ -57,7 +62,7 @@ fun NewCatchPlace(viewModel: NewCatchMasterViewModel, navController: NavControll
                 absoluteRight.linkTo(parent.absoluteRight)
             },
             marker = viewModel.currentPlace.collectAsState(),
-            markersList = viewModel.markersListState.collectAsState(),
+            markersList = markersList,
             isLocationLocked = viewModel.isLocationLocked.collectAsState().value,
             onNewPlaceSelected = { viewModel.setSelectedPlace(it) },
             onInputError = { viewModel.setPlaceInputError(it) }
@@ -103,6 +108,19 @@ fun NewCatchPlace(viewModel: NewCatchMasterViewModel, navController: NavControll
             dateTime = viewModel.catchDate.collectAsState(),
             onDateChange = { viewModel.setDate(it) }
         )
+    }
+}
+
+@ExperimentalComposeUiApi
+@Composable
+fun setMarkerListListener(markersList: NewCatchPlacesState, navController: NavController) {
+    when (markersList) {
+        is NewCatchPlacesState.NotReceived -> {}
+        is NewCatchPlacesState.Received -> {
+            if (markersList.locations.isEmpty()) {
+                NewCatchNoPlaceDialog(navController)
+            }
+        }
     }
 }
 
