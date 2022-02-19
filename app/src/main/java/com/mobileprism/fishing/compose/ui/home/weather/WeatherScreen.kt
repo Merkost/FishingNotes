@@ -54,6 +54,7 @@ import com.mobileprism.fishing.model.entity.weather.Daily
 import com.mobileprism.fishing.model.entity.weather.Hourly
 import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.mappers.getWeatherIconByName
+import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import com.mobileprism.fishing.utils.isLocationsTooFar
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toDayOfWeek
@@ -133,7 +134,7 @@ fun WeatherScreen(
                     selectedPlace?.let {
 
                         WeatherLocationIconButton(color = Color.White) {
-                            selectedPlace?.let {
+                            if (it.id != CURRENT_PLACE_ITEM_ID) {
                                 navController.navigate(
                                     "${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
                                     Arguments.PLACE to it
@@ -158,9 +159,11 @@ fun WeatherScreen(
         }
     ) {
 
-        Column(modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             if (!permissionsState.allPermissionsGranted && viewModel.markersList.isEmpty()) {
                 NoContentView(
                     text = stringResource(id = R.string.no_places_added),
