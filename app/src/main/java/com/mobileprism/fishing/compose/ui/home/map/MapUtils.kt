@@ -367,8 +367,7 @@ fun BackPressHandler(
     navController: NavController,
     onBackPressedCallback: () -> Unit,
 ) {
-    val context = LocalContext.current
-    val exitString = stringResource(R.string.app_exit_message)
+    val context = LocalContext.current.applicationContext
     var lastPressed: Long = 0
 
     BackHandler(onBack = {
@@ -381,7 +380,7 @@ fun BackPressHandler(
                     if (currentMillis - lastPressed < 2000) {
                         (context as MainActivity).finish()
                     } else {
-                        showToast(context, exitString)
+                        showToast(context, context.getString(R.string.app_exit_message))
                     }
                     lastPressed = currentMillis
                 }
