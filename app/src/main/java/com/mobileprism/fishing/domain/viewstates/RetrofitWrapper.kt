@@ -7,9 +7,9 @@ sealed class RetrofitWrapper<out T> {
     class Loading(val progress: Int? = null) : RetrofitWrapper<Nothing>()
 }
 
-sealed class ErrorType(val error: Throwable) {
+sealed class ErrorType(val error: Throwable?) {
     class NetworkError(error: Throwable) : ErrorType(error)
-    class OtherError(error: Throwable) : ErrorType(error)
+    class OtherError(error: Throwable?) : ErrorType(error)
 }
 
 /*

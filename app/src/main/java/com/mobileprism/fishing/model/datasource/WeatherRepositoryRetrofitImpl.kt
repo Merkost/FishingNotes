@@ -43,7 +43,7 @@ class WeatherRepositoryRetrofitImpl(
         }
     }
 
-    override fun getWeather(lat: Double, lon: Double)
+    override suspend fun getWeather(lat: Double, lon: Double)
     : Flow<RetrofitWrapper<WeatherForecast>> = flow {
         try {
             val weather = getService().getWeather(latitude = lat, longitude = lon,

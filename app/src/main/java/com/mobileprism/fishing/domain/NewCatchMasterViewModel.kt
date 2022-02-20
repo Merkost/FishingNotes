@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlacesState
 import com.mobileprism.fishing.ui.home.new_catch.ReceivedPlaceState
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
+import com.mobileprism.fishing.domain.viewstates.ErrorType
+import com.mobileprism.fishing.domain.viewstates.Resource
 import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.entity.common.Progress
@@ -15,6 +17,7 @@ import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
+import com.mobileprism.fishing.model.use_cases.GetNewCatchWeatherUseCase
 import com.mobileprism.fishing.utils.calcMoonPhase
 import com.mobileprism.fishing.utils.getClosestHourIndex
 import com.mobileprism.fishing.utils.isDateInList
@@ -26,14 +29,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
+import java.lang.IllegalArgumentException
 import java.util.*
 
 class NewCatchMasterViewModel(
     placeState: ReceivedPlaceState,
     private val markersRepository: MarkersRepository,
     private val catchesRepository: CatchesRepository,
-    private val weatherRepository: WeatherRepository,
-    private val weatherSettings: WeatherPreferences
+    private val weatherSettings: WeatherPreferences,
+    private val getNewCatchWeatherUseCase: GetNewCatchWeatherUseCase,
 ) : ViewModel() {
 
     init {
@@ -119,7 +123,7 @@ class NewCatchMasterViewModel(
 
     fun setSelectedPlace(place: UserMapMarker) {
         _currentPlace.value = place
-        checkWeatherDownloadNeed()
+        //checkWeatherDownloadNeed()
     }
 
     fun setPlaceInputError(isError: Boolean) {
@@ -128,7 +132,7 @@ class NewCatchMasterViewModel(
 
     fun setDate(date: Long) {
         _catchDate.value = date
-        checkWeatherDownloadNeed()
+        //checkWeatherDownloadNeed()
     }
 
     fun setFishType(fish: String) {
@@ -200,63 +204,22 @@ class NewCatchMasterViewModel(
     }
 
     fun loadWeather() {
-        if (weatherDownloadIsAvailable.value) {
-            if (Date().time.hoursCount() > catchDate.value.hoursCount()) {
-                getHistoricalWeather()
-            } else {
-                getWeatherForecast()
-            }
-        }
-    }
-
-    private fun getWeatherForecast() {
-        viewModelScope.launch(Dispatchers.IO) {
-            currentPlace.value?.run {
-
-                _weatherState.value = RetrofitWrapper.Loading()
-
-                weatherRepository.getWeather(latitude, longitude).collect { result ->
+        currentPlace.value?.let {
+            _weatherState.value = RetrofitWrapper.Loading()
+            viewModelScope.launch(Dispatchers.IO) {
+                getNewCatchWeatherUseCase.invoke(currentPlace.value, catchDate.value)
+                    .collectLatest { result->
                     when (result) {
-                        is RetrofitWrapper.Success<WeatherForecast> -> {
-                            loadedWeather.value = result.data
+                        is Resource.Success -> {
+                            loadedWeather.value = result.data!!
                             _weatherState.value = RetrofitWrapper.Success(result.data)
                             refreshWeatherState()
                         }
-                        is RetrofitWrapper.Loading -> {
-                            _weatherState.value = RetrofitWrapper.Loading()
-                        }
-                        is RetrofitWrapper.Error -> {
-                            _weatherState.value = RetrofitWrapper.Error(result.errorType)
+                        is Resource.Error -> {
+                            _weatherState.value = RetrofitWrapper.Error(ErrorType.OtherError(null))
                         }
                     }
                 }
-            }
-        }
-    }
-
-    private fun getHistoricalWeather() {
-        viewModelScope.launch(Dispatchers.IO) {
-            currentPlace.value?.run {
-
-                _weatherState.value = RetrofitWrapper.Loading()
-
-                weatherRepository
-                    .getHistoricalWeather(latitude, longitude, (catchDate.value / 1000))
-                    .collect { result ->
-                        when (result) {
-                            is RetrofitWrapper.Success<WeatherForecast> -> {
-                                loadedWeather.value = result.data
-                                _weatherState.value = RetrofitWrapper.Success(result.data)
-                                refreshWeatherState()
-                            }
-                            is RetrofitWrapper.Loading -> {
-                                _weatherState.value = RetrofitWrapper.Loading()
-                            }
-                            is RetrofitWrapper.Error -> {
-                                _weatherState.value = RetrofitWrapper.Error(result.errorType)
-                            }
-                        }
-                    }
             }
         }
     }
@@ -340,13 +303,13 @@ class NewCatchMasterViewModel(
         weatherMoonPhase = weatherMoonPhase.value
     )
 
-    private fun checkWeatherDownloadNeed() {
-        val loadedWeatherPlace = UserMapMarker(
+    private fun checkWeatherDownloadNeed(): Boolean {
+        val lastLoadedWeatherPlace = UserMapMarker(
             latitude = loadedWeather.value.latitude.toDouble(),
             longitude = loadedWeather.value.longitude.toDouble()
         )
-        _weatherDownloadIsAvailable.value = currentPlace.value?.let { currentPlace ->
-            isLocationsTooFar(currentPlace, loadedWeatherPlace)
+        return currentPlace.value?.let { currentPlace ->
+            isLocationsTooFar(currentPlace, lastLoadedWeatherPlace)
                     || !isDateInList(loadedWeather.value.hourly, catchDate.value)
         } ?: false
     }
