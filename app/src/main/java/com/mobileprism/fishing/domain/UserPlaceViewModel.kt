@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.compose.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
 import com.mobileprism.fishing.model.entity.common.LiteProgress
 import com.mobileprism.fishing.model.entity.common.Note

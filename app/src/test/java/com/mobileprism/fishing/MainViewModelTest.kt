@@ -3,7 +3,7 @@ package com.mobileprism.fishing
 import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.mobileprism.fishing.compose.viewmodels.MainViewModel
+import com.mobileprism.fishing.viewmodels.MainViewModel
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
 import com.mobileprism.fishing.model.entity.common.User
 import com.mobileprism.fishing.model.repository.UserRepository

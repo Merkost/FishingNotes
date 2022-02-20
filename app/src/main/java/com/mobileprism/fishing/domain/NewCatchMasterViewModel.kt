@@ -3,8 +3,8 @@ package com.mobileprism.fishing.domain
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchPlacesState
-import com.mobileprism.fishing.compose.ui.home.new_catch.ReceivedPlaceState
+import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlacesState
+import com.mobileprism.fishing.ui.home.new_catch.ReceivedPlaceState
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
 import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.datastore.WeatherPreferences

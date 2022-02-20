@@ -5,8 +5,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.android.gms.maps.model.LatLng
-import com.mobileprism.fishing.compose.ui.home.map.DEFAULT_ZOOM
-import com.mobileprism.fishing.compose.ui.utils.enums.AppThemeValues
+import com.mobileprism.fishing.ui.home.map.DEFAULT_ZOOM
+import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
