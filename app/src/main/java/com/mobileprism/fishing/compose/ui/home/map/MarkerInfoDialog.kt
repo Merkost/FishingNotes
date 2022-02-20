@@ -60,7 +60,7 @@ fun MarkerInfoDialog(
     val receivedMarker by viewModel.currentMarker.collectAsState()
     val weatherPreferences: WeatherPreferences = get()
     val coroutineScope = rememberCoroutineScope()
-    val geocoder = Geocoder(context, resources().configuration.locale)
+    val geocoder = Geocoder(context, resources().configuration.locales[0])
 
     val windUnit by weatherPreferences.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
 

@@ -20,6 +20,7 @@ import com.mobileprism.fishing.model.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.model.repository.app.FreeWeatherRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.SolunarRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -14,6 +14,7 @@ import com.mobileprism.fishing.model.datastore.AppPreferences
 import com.mobileprism.fishing.model.datastore.NotesPreferences
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
+import com.mobileprism.fishing.model.use_cases.GetUserCatchesUseCase
 import com.mobileprism.fishing.utils.Logger
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -64,4 +65,8 @@ val mainModule = module {
         )
     }
 
+}
+
+val useCasesModule = module {
+    single { GetUserCatchesUseCase(get()) }
 }

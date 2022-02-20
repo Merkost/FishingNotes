@@ -34,7 +34,6 @@ import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.fade
 import com.google.accompanist.placeholder.placeholder
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.compose.bar_chart.BarChartUtils.toLegacyInt
 import com.mobileprism.fishing.compose.ui.Arguments
 import com.mobileprism.fishing.compose.ui.MainDestinations
 import com.mobileprism.fishing.compose.ui.home.map.LocationState
@@ -618,7 +617,7 @@ fun PressureChart(
         paint.textAlign = Paint.Align.CENTER
         paint.textSize = 36.sp.value
         paint.typeface = Typeface.DEFAULT_BOLD
-        paint.color = textColor.toLegacyInt()
+        paint.color = textColor.hashCode()
 
         val linesList = mutableListOf<Point>()
 

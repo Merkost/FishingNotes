@@ -11,6 +11,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.mobileprism.fishing.compose.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import org.koin.androidx.compose.get
 
@@ -110,7 +111,6 @@ fun FishingNotesTheme(
         )
     }
 }
-
 
 fun chooseTheme(appTheme: AppThemeValues?, darkTheme: Boolean): Colors {
     return when(appTheme) {

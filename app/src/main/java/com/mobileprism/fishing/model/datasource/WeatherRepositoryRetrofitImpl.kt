@@ -75,10 +75,4 @@ class WeatherRepositoryRetrofitImpl(
     override suspend fun getWeatherForecast(lat: Double, lon: Double) =
         getService().getWeather(latitude = lat, longitude = lon)
 
-
-
-
-
-
-
 }

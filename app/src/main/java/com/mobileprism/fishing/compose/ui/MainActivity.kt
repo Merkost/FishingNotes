@@ -45,7 +45,7 @@ import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.home.SnackbarAction
 import com.mobileprism.fishing.compose.ui.home.SnackbarManager
-import com.mobileprism.fishing.compose.ui.theme.AppThemeValues
+import com.mobileprism.fishing.compose.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.compose.ui.theme.FishingNotesTheme
 import com.mobileprism.fishing.compose.viewmodels.MainViewModel
 import com.mobileprism.fishing.domain.viewstates.BaseViewState

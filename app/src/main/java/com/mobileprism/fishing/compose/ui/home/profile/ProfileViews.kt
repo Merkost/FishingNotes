@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -29,6 +30,7 @@ import coil.annotation.ExperimentalCoilApi
 import com.airbnb.lottie.compose.*
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.firestore.local.SQLitePersistence.clearPersistence
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.compose.ui.MainDestinations
@@ -123,6 +125,7 @@ fun ProfileAppBar(navController: NavController) {
 fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavController) {
     val scope = rememberCoroutineScope()
     val viewModel = getViewModel<UserViewModel>()
+    val context = LocalContext.current
 
     DefaultDialog(
         primaryText = stringResource(R.string.logout_dialog_title),
@@ -135,6 +138,7 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
                 viewModel.logoutCurrentUser().collect { isLogout ->
                     if (isLogout) {
                         dialogOnLogout.value = false
+                        
                         navController.navigate(MainDestinations.LOGIN_ROUTE) {
                             popUpTo(0) {
                                 inclusive = true

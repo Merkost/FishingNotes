@@ -4,16 +4,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.compose.ui.home.UiState
 import com.mobileprism.fishing.model.entity.content.UserCatch
-import com.mobileprism.fishing.model.repository.app.CatchesRepository
+import com.mobileprism.fishing.model.use_cases.GetUserCatchesUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class UserCatchesViewModel(private val repository: CatchesRepository) : ViewModel() {
+class UserCatchesViewModel(
+    private val userCatchesUseCase: GetUserCatchesUseCase
+    ) : ViewModel() {
 
-    private val _currentContent = MutableStateFlow<MutableList<UserCatch>>(mutableListOf())
-    val currentContent: StateFlow<List<UserCatch>>
-        get() = _currentContent
+    private val _currentContent = MutableStateFlow<List<UserCatch>>(mutableListOf())
+    val currentContent = _currentContent.asStateFlow()
 
     private val _uiState = MutableStateFlow<UiState>(UiState.InProgress)
     val uiState: StateFlow<UiState>
@@ -26,19 +29,8 @@ class UserCatchesViewModel(private val repository: CatchesRepository) : ViewMode
     private fun loadAllUserCatches() {
         _uiState.value = UiState.InProgress
         viewModelScope.launch {
-            repository.getAllUserCatchesState().collect { contentState ->
-
-                contentState.modified.forEach { newCatch ->
-                    _currentContent.value.removeAll { oldCatch ->
-                        newCatch.id == oldCatch.id
-                    }
-                }
-                _currentContent.value.apply {
-                    addAll(contentState.added)
-                    removeAll(contentState.deleted)
-                    addAll(contentState.modified)
-                }
-
+            userCatchesUseCase.invoke().collectLatest {
+                _currentContent.emit(it)
                 _uiState.value = UiState.Success
             }
         }

@@ -43,7 +43,7 @@ import com.mobileprism.fishing.compose.ui.home.views.PrimaryText
 import com.mobileprism.fishing.compose.ui.home.weather.PressureValues
 import com.mobileprism.fishing.compose.ui.home.weather.TemperatureValues
 import com.mobileprism.fishing.compose.ui.home.weather.WindSpeedValues
-import com.mobileprism.fishing.compose.ui.theme.AppThemeValues
+import com.mobileprism.fishing.compose.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.compose.ui.utils.ColorPicker
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
