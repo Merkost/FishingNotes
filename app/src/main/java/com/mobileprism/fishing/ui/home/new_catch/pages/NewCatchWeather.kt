@@ -16,20 +16,16 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.NewCatchMasterViewModel
 import com.mobileprism.fishing.ui.home.new_catch.*
 import com.mobileprism.fishing.ui.home.views.SubtitleWithIcon
 import com.mobileprism.fishing.ui.theme.customColors
-import com.mobileprism.fishing.domain.NewCatchMasterViewModel
-import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.utils.network.ConnectionState
 import com.mobileprism.fishing.utils.network.observeConnectivityAsFlow
 
 @ExperimentalComposeUiApi
 @Composable
 fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavController) {
-
-    val uiState by viewModel.weatherState.collectAsState()
-    val canDownloadWeatherState by viewModel.weatherDownloadIsAvailable.collectAsState()
 
     val state by viewModel.catchWeatherState.collectAsState()
 
@@ -103,7 +99,7 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
                 }
             }
         ) {
-            if (uiState is RetrofitWrapper.Loading) {
+            if (state.isLoading) {
                 CircularProgressIndicator()
             } else {
                 Icon(
@@ -141,7 +137,7 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
                 absoluteRight.linkTo(guideline, 4.dp)
                 width = Dimension.fillToConstraints
             },
-            temperature = state.temperature.toString(),
+            temperature = state.temperature,
             onTemperatureChange = { viewModel.setWeatherTemperature(it) },
             onError = { temperatureError = it }
         )
@@ -153,7 +149,7 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
                 absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                 width = Dimension.fillToConstraints
             },
-            pressure = state.pressure.toString(),
+            pressure = state.pressure,
             onPressureChange = { viewModel.setWeatherPressure(it) },
             onError = { pressureError = it }
         )
@@ -165,7 +161,7 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
                 absoluteRight.linkTo(guideline, 4.dp)
                 width = Dimension.fillToConstraints
             },
-            wind = state.windSpeed.toString(),
+            wind = state.windSpeed,
             windDeg = state.windDeg,
             onWindChange = { viewModel.setWeatherWindSpeed(it) },
             onWindDirChange = { viewModel.setWeatherWindDeg(it.toInt()) },

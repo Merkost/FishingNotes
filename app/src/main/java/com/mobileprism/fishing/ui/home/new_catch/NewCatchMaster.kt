@@ -24,12 +24,12 @@ import androidx.navigation.NavController
 import com.google.accompanist.pager.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.NewCatchMasterViewModel
+import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.advertising.showInterstitialAd
 import com.mobileprism.fishing.ui.home.place.LottieWarning
 import com.mobileprism.fishing.ui.home.views.*
-import com.mobileprism.fishing.domain.NewCatchMasterViewModel
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -115,7 +115,7 @@ fun NewCatchMasterScreen(
         text = stringResource(id = R.string.saving_new_catch)
     )
 
-    val skipAvaliable by viewModel.skipAvaliable.collectAsState()
+    val skipAvaliable by viewModel.skipAvailable.collectAsState()
 
     Scaffold(
         topBar = {
@@ -295,14 +295,14 @@ private fun handlePagerNextClick(
     coroutineScope.launch {
         when (pagerState.currentPage) {
             0 -> {
-                if (viewModel.currentPlace.value != null && viewModel.isPlaceInputCorrect.value) {
+                if (viewModel.placeAndTimeState.value.isInputCorrect) {
                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
                 } else {
                     SnackbarManager.showMessage(R.string.place_select_error)
                 }
             }
             1 -> {
-                if (viewModel.fishType.value.isNotBlank()) {
+                if (viewModel.fishAndWeightSate.value.isInputCorrect) {
                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
                 } else {
                     SnackbarManager.showMessage(R.string.fish_error)
@@ -310,7 +310,7 @@ private fun handlePagerNextClick(
 
             }
             3 -> {
-                if (viewModel.isWeatherInputCorrect.value) {
+                if (viewModel.catchWeatherState.value.isInputCorrect) {
                     pagerState.animateScrollToPage(pagerState.currentPage + 1)
                 } else {
                     SnackbarManager.showMessage(R.string.weather_error)

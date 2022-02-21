@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.NewCatchMasterViewModel
 import com.mobileprism.fishing.ui.home.HomeSections
 import com.mobileprism.fishing.ui.home.new_catch.DateAndTimeItem
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchNoPlaceDialog
@@ -26,21 +27,19 @@ import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlacesState
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.DefaultDialog
 import com.mobileprism.fishing.ui.home.views.SubtitleWithIcon
-import com.mobileprism.fishing.domain.NewCatchMasterViewModel
 
 
 @ExperimentalComposeUiApi
 @Composable
 fun NewCatchPlace(viewModel: NewCatchMasterViewModel, navController: NavController) {
 
-    var mapSelectInfoDialog by remember { mutableStateOf(false) }
-    val markersList = viewModel.markersListState.collectAsState()
+    val state by viewModel.placeAndTimeState.collectAsState()
 
-    setMarkerListListener(markersList.value, navController)
+    var mapSelectInfoDialog by remember { mutableStateOf(false) }
+
+    setMarkerListListener(state.placesListState, navController)
 
     if (mapSelectInfoDialog) CatchOnMapSelectInfoDialog() { mapSelectInfoDialog = false }
-
-    val state by viewModel.placeAndTimeState.collectAsState()
 
     ConstraintLayout(
         modifier = Modifier
