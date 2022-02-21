@@ -177,7 +177,7 @@ fun NoInternetView(modifier: Modifier = Modifier) {
             progress,
             modifier = modifier
         )
-        SupportText(text = "Can't connect to the server!")
+        SupportText(text = stringResource(id = R.string.network_error_message))
     }
 }
 

@@ -143,6 +143,7 @@ class MapViewModel(
                         Log.d("SOLUNAR ERROR", result.errorType.error.toString())
                         //_weatherState.value = RetrofitWrapper.Error(result.errorType)
                     }
+                    else -> {}
                 }
             }
         }
