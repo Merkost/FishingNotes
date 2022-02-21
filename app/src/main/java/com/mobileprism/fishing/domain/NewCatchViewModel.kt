@@ -6,8 +6,8 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mobileprism.fishing.compose.ui.home.new_catch.NewCatchPlacesState
-import com.mobileprism.fishing.compose.ui.home.weather.TemperatureValues
+import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlacesState
+import com.mobileprism.fishing.ui.home.weather.TemperatureValues
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
 import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.entity.common.Progress

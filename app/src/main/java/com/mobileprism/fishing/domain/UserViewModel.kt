@@ -2,8 +2,8 @@ package com.mobileprism.fishing.domain
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mobileprism.fishing.compose.ui.home.profile.findBestCatch
-import com.mobileprism.fishing.compose.ui.home.profile.findFavoritePlace
+import com.mobileprism.fishing.ui.home.profile.findBestCatch
+import com.mobileprism.fishing.ui.home.profile.findFavoritePlace
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
 import com.mobileprism.fishing.model.entity.common.User
 import com.mobileprism.fishing.model.entity.content.UserCatch

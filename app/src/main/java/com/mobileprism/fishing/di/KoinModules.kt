@@ -6,15 +6,17 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
-import com.mobileprism.fishing.compose.ui.home.SnackbarManager
-import com.mobileprism.fishing.compose.viewmodels.MainViewModel
-import com.mobileprism.fishing.compose.viewmodels.MapViewModel
+import com.mobileprism.fishing.viewmodels.MainViewModel
 import com.mobileprism.fishing.domain.*
 import com.mobileprism.fishing.model.datastore.AppPreferences
 import com.mobileprism.fishing.model.datastore.NotesPreferences
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
+import com.mobileprism.fishing.model.use_cases.GetNewCatchWeatherUseCase
+import com.mobileprism.fishing.model.use_cases.GetUserCatchesUseCase
+import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.utils.Logger
+import com.mobileprism.fishing.viewmodels.MapViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -44,8 +46,8 @@ val mainModule = module {
 
     viewModel { MainViewModel(get()) }
     viewModel { LoginViewModel(get()) }
+    viewModel { MapViewModel(get(), get(), get(), get()) }
 
-    viewModel { MapViewModel(get(), get(), get()) }
     viewModel { NewCatchViewModel(get(), get(), get()) }
     viewModel { UserViewModel(get(), get()) }
     viewModel { NewPlaceViewModel(get()) }
@@ -64,4 +66,9 @@ val mainModule = module {
         )
     }
 
+}
+
+val useCasesModule = module {
+    single { GetUserCatchesUseCase(get()) }
+    single { GetNewCatchWeatherUseCase(get()) }
 }

@@ -54,8 +54,6 @@ class UserCatchViewModel(
         }
     }
 
-    fun getCurrentUser() = userRepository.currentUser
-
     fun getMapMarker(markerId: String) {
         viewModelScope.launch {
             markersRepository.getMapMarker(markerId).collect {

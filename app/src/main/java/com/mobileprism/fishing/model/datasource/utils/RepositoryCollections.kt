@@ -14,7 +14,6 @@ class RepositoryCollections(val db: FirebaseFirestore = Firebase.firestore) {
 
     init {
         val settings = FirebaseFirestoreSettings.Builder()
-            .setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
             .setPersistenceEnabled(true)
             .build()
         db.firestoreSettings = settings

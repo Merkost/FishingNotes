@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.datastore.AppPreferences
@@ -51,6 +52,7 @@ class FirebaseUserRepositoryImpl(
         }
 
     override suspend fun logoutCurrentUser() = callbackFlow {
+        clearPersistance()
         AuthUI.getInstance().signOut(context).addOnCompleteListener {
             if (it.isSuccessful) {
                 Firebase.analytics.logEvent("logout", null)
@@ -58,6 +60,10 @@ class FirebaseUserRepositoryImpl(
             } else trySend(false)
         }
         awaitClose {}
+    }
+
+    private fun clearPersistance() {
+        Firebase.firestore.clearPersistence()
     }
 
     private fun mapFirebaseUserToUser(firebaseUser: FirebaseUser): User {

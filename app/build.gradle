@@ -20,8 +20,8 @@ android {
         applicationId "com.mobileprism.fishing"
         minSdkVersion 23
         targetSdkVersion 31
-        versionCode 10
-        versionName "1.0.3.006"
+        versionCode 12
+        versionName "1.1.0-b.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
@@ -43,7 +43,7 @@ android {
         //coreLibraryDesugaringEnabled true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion Libs.AndroidX.Compose.newVersion
+        kotlinCompilerExtensionVersion Libs.AndroidX.Compose.version
     }
     kotlinOptions {
         jvmTarget = '11'
