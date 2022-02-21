@@ -44,19 +44,19 @@ fun LoginScreen(navController: NavController) {
 
     val loginViewModel: LoginViewModel = get()
     val activity = LocalContext.current as MainActivity
-    val uiState = loginViewModel.subscribe().collectAsState()
+    val uiState by loginViewModel.uiState.collectAsState()
     val errorString = stringResource(R.string.signin_error)
     val resources = resources()
 
-    LaunchedEffect(uiState.value) {
-        when (uiState.value) {
+    LaunchedEffect(uiState) {
+        when (val state = uiState) {
             is BaseViewState.Success<*> -> {
                 delay(300)
                 isSuccess = true
                 isLoading = false
                 delay((MainActivity.splashFadeDurationMillis * 2).toLong())
 
-                if ((uiState.value as BaseViewState.Success<*>).data as User? != null) {
+                state.data?.let {
                     visible = false
                     delay((MainActivity.splashFadeDurationMillis * 2).toLong())
 

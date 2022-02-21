@@ -11,10 +11,9 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel(private val repository: UserRepository) : ViewModel() {
 
-    private val mutableStateFlow: MutableStateFlow<BaseViewState> =
-        MutableStateFlow(BaseViewState.Success(null))
-
-    fun subscribe() = mutableStateFlow
+    private val _uiState: MutableStateFlow<BaseViewState<User?>> =
+        MutableStateFlow(BaseViewState.Success<User?>(null))
+    val uiState = _uiState.asStateFlow()
 
     init {
         loadCurrentUser()
@@ -33,23 +32,21 @@ class LoginViewModel(private val repository: UserRepository) : ViewModel() {
             repository.addNewUser(user).collect { progress ->
                 when (progress) {
                     is Progress.Complete -> {
-                        mutableStateFlow.value = BaseViewState.Success(user)
+                        _uiState.value = BaseViewState.Success(user)
                     }
                     is Progress.Loading -> {
-                        mutableStateFlow.value = BaseViewState.Loading(null)
+                        _uiState.value = BaseViewState.Loading(null)
                     }
                     is Progress.Error -> {
-                        mutableStateFlow.value =
-                            BaseViewState.Error(progress.error)
+                        _uiState.value = BaseViewState.Error(progress.error)
                     }
                 }
             }
-            //mutableStateFlow.value = BaseViewState.Success(user)
         }
     }
 
     private fun handleError(error: Throwable) {
-        mutableStateFlow.value = BaseViewState.Error(error)
+        _uiState.value = BaseViewState.Error(error)
     }
 
 }

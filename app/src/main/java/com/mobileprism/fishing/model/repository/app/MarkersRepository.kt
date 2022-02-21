@@ -16,9 +16,9 @@ interface MarkersRepository {
     fun getAllUserMarkersList(): Flow<List<MapMarker>>
 
     suspend fun updateUserMarkerNote(markerId: String, currentNotes: List<Note>, note: Note)
-            : StateFlow<BaseViewState>
+            : StateFlow<BaseViewState<List<Note>>>
     suspend fun deleteMarkerNote(markerId: String, currentNotes: List<Note>, noteToDelete: Note)
-            : StateFlow<BaseViewState>
+            : StateFlow<BaseViewState<List<Note>>>
 
     suspend fun changeMarkerVisibility(marker: UserMapMarker, changeTo: Boolean): StateFlow<LiteProgress>
 

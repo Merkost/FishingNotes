@@ -18,6 +18,7 @@ import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
 import com.mobileprism.fishing.model.use_cases.GetNewCatchWeatherUseCase
+import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.utils.calcMoonPhase
 import com.mobileprism.fishing.utils.getClosestHourIndex
 import com.mobileprism.fishing.utils.isDateInList
@@ -55,7 +56,7 @@ class NewCatchMasterViewModel(
 
     private val loadedWeather = MutableStateFlow(WeatherForecast())
 
-    private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
+    private val _uiState = MutableStateFlow<UiState?>(null)
     val uiState = _uiState.asStateFlow()
 
     private val _weatherState =
@@ -250,7 +251,7 @@ class NewCatchMasterViewModel(
     }
 
     fun saveNewCatch() {
-        _uiState.value = BaseViewState.Loading(0)
+        _uiState.value = UiState.InProgress
 
         viewModelScope.launch(Dispatchers.IO) {
             currentPlace.value?.let { userMapMarker ->
@@ -258,13 +259,13 @@ class NewCatchMasterViewModel(
                 catchesRepository.addNewCatch(userMapMarker.id, newCatch).collect { progress ->
                     when (progress) {
                         is Progress.Complete -> {
-                            _uiState.value = BaseViewState.Success(progress)
+                            _uiState.value = UiState.Success
                         }
                         is Progress.Loading -> {
-                            _uiState.value = BaseViewState.Loading(progress.percents)
+                            _uiState.value = UiState.InProgress
                         }
                         is Progress.Error -> {
-                            _uiState.value = BaseViewState.Error(progress.error)
+                            _uiState.value = UiState.Error
                         }
                     }
                 }

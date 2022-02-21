@@ -20,7 +20,7 @@ class MainViewModel(private val repository: UserRepository) : ViewModel() {
     val userState: MutableStateFlow<User?> = MutableStateFlow(null)
     var user: User? = null
 
-    val mutableStateFlow: MutableStateFlow<BaseViewState> =
+    val mutableStateFlow: MutableStateFlow<BaseViewState<User>> =
         MutableStateFlow(BaseViewState.Loading(null))
 
     private fun loadCurrentUser() {

@@ -3,13 +3,16 @@ package com.mobileprism.fishing.domain
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mobileprism.fishing.domain.viewstates.BaseViewState
 import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class WeatherViewModel(
@@ -17,13 +20,11 @@ class WeatherViewModel(
     private val repository: MarkersRepository
 ) : ViewModel() {
 
-    private val _weatherState = MutableStateFlow<RetrofitWrapper<WeatherForecast>>(RetrofitWrapper.Loading())
-    val weatherState: StateFlow<RetrofitWrapper<WeatherForecast>>
-        get() = _weatherState
+    private val _weatherState = MutableStateFlow<BaseViewState<WeatherForecast>>(BaseViewState.Loading())
+    val weatherState = _weatherState.asStateFlow()
 
     private val _weather = MutableStateFlow<WeatherForecast>(WeatherForecast())
-    val weather: StateFlow<WeatherForecast>
-        get() = _weather
+    val weather = _weather.asStateFlow()
 
     val markersList = mutableStateListOf<UserMapMarker>()
 
@@ -32,8 +33,7 @@ class WeatherViewModel(
     }
 
     private fun getAllMarkers() {
-        _weatherState.value = RetrofitWrapper.Loading()
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.getAllUserMarkersList().collect {
                 markersList.clear()
                 markersList.addAll(it as List<UserMapMarker>)
@@ -43,26 +43,21 @@ class WeatherViewModel(
     }
 
     fun getWeather(latitude: Double, longitude: Double) {
-        _weatherState.value = RetrofitWrapper.Loading()
-        viewModelScope.launch {
+        _weatherState.value = BaseViewState.Loading()
+        viewModelScope.launch(Dispatchers.IO) {
             weatherRepository.getWeather(latitude, longitude).collect { result ->
                 when (result) {
                     is RetrofitWrapper.Success<WeatherForecast> -> {
                         //weather.value = result.data
-                        _weatherState.value = RetrofitWrapper.Success(result.data)
+                        _weatherState.value = BaseViewState.Success(result.data)
                         _weather.value = result.data
                     }
-                    is RetrofitWrapper.Loading -> {
-                        _weatherState.value = RetrofitWrapper.Loading()
-                    }
                     is RetrofitWrapper.Error -> {
-                        _weatherState.value = RetrofitWrapper.Error(result.errorType)
+                        _weatherState.value = BaseViewState.Error(result.errorType.error)
                     }
                 }
-
             }
         }
     }
-
 
 }

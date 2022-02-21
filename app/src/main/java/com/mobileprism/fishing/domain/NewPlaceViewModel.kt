@@ -6,16 +6,17 @@ import com.mobileprism.fishing.domain.viewstates.BaseViewState
 import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.raw.RawMapMarker
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
+import com.mobileprism.fishing.ui.home.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class NewPlaceViewModel(private val repository: MarkersRepository) : ViewModel() {
 
-    private val viewStateFlow: MutableStateFlow<BaseViewState> =
-        MutableStateFlow(BaseViewState.Loading(null))
+    private val viewStateFlow: MutableStateFlow<UiState> =
+        MutableStateFlow(UiState.InProgress)
 
-    fun subscribe(): StateFlow<BaseViewState> = viewStateFlow
+    fun subscribe(): StateFlow<UiState> = viewStateFlow
 
     fun addNewMarker(newMarker: RawMapMarker) {
         viewModelScope.launch {
@@ -34,14 +35,14 @@ class NewPlaceViewModel(private val repository: MarkersRepository) : ViewModel()
     }
 
     private fun onSuccess() {
-        viewStateFlow.value = BaseViewState.Success(null)
+        viewStateFlow.value = UiState.Success
     }
 
     private fun onLoading() {
-        viewStateFlow.value = BaseViewState.Loading(null)
+        viewStateFlow.value = UiState.InProgress
     }
 
     private fun onError(error: Throwable) {
-        viewStateFlow.value = BaseViewState.Error(error)
+        viewStateFlow.value = UiState.Error
     }
 }

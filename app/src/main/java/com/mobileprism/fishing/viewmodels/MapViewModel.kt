@@ -1,8 +1,6 @@
 package com.mobileprism.fishing.viewmodels
 
 import android.util.Log
-import androidx.compose.material.BottomSheetValue
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,7 +19,6 @@ import com.mobileprism.fishing.model.repository.app.FreeWeatherRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.SolunarRepository
 import com.mobileprism.fishing.ui.home.map.MapUiState
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,8 +36,9 @@ class MapViewModel(
     private val firstLaunchLocation = mutableStateOf(true)
 
     val showMarker: MutableState<Boolean> = mutableStateOf(false)
-    private val viewStateFlow: MutableStateFlow<BaseViewState> =
+    private val _addNewMarkerState: MutableStateFlow<BaseViewState<Nothing>> =
         MutableStateFlow(BaseViewState.Loading(null))
+    val addNewMarkerState = _addNewMarkerState.asStateFlow()
 
     private var _mapMarkers: MutableStateFlow<MutableList<UserMapMarker>> =
         MutableStateFlow(mutableListOf())
@@ -81,10 +79,7 @@ class MapViewModel(
 
     fun getAllMarkers(): StateFlow<List<UserMapMarker>> = _mapMarkers
 
-    override fun onCleared() {
-        super.onCleared()
-        viewStateFlow.value = BaseViewState.Loading(null)
-    }
+
 
     fun setCameraMoveState(newState: CameraMoveState) {
         _cameraMoveState.value = newState
@@ -154,9 +149,7 @@ class MapViewModel(
     }
 
 
-    private fun onError(error: Throwable) {
-        viewStateFlow.value = BaseViewState.Error(error)
-    }
+
 
     fun updateCurrentPlace(markerToUpdate: UserMapMarker) {
         viewModelScope.launch {
@@ -243,6 +236,14 @@ class MapViewModel(
                 firstLaunchLocation.value = false
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        _addNewMarkerState.value = BaseViewState.Loading(null)
+    }
+    private fun onError(error: Throwable) {
+        _addNewMarkerState.value = BaseViewState.Error(error)
     }
 
 }

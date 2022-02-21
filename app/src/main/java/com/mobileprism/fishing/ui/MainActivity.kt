@@ -87,7 +87,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val viewModel: MainViewModel = getViewModel()
 
-        val userStateFlow: StateFlow<BaseViewState> = viewModel.mutableStateFlow
+        val userStateFlow = viewModel.mutableStateFlow
 
         val userPreferences: UserPreferences = get()
         val appTheme = mutableStateOf<AppThemeValues?>(null)

@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.home.UiState
 
 object Constants {
     const val TAG = "NEW_CATCH_LOG"
@@ -173,7 +174,7 @@ object Constants {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SubscribeToNewCatchProgress(
-    uiState: BaseViewState,
+    uiState: UiState?,
     adIsLoadedState: Boolean,
     loadingDialogState: MutableState<Boolean>,
     upPress: () -> Unit
@@ -184,22 +185,22 @@ fun SubscribeToNewCatchProgress(
 
     LaunchedEffect(key1 = uiState, adIsLoadedState) {
         when (uiState) {
-            is BaseViewState.Success<*> -> {
-                if ((uiState.data != null) && adIsLoadedState) {
+            is UiState.Success -> {
+                if (adIsLoadedState) {
                     SnackbarManager.showMessage(R.string.catch_added_successfully)
                     upPress()
                 }
             }
-            is BaseViewState.Loading -> {
+            is UiState.InProgress -> {
                 loadingDialogState.value = true
             }
-            is BaseViewState.Error -> {
+            is UiState.Error -> {
                 errorDialog = true
-                Toast.makeText(
+                /*Toast.makeText(
                     context,
                     "Error: ${(uiState as BaseViewState.Error).error.message}",
                     Toast.LENGTH_SHORT
-                ).show()
+                ).show()*/
             }
         }
     }

@@ -41,9 +41,9 @@ class UserViewModel(
         getUserPlaces()
     }
 
-    private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
+    /*private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
     val uiState: StateFlow<BaseViewState>
-        get() = _uiState
+        get() = _uiState*/
 
     private fun getCurrentUser() = viewModelScope.launch {
         userRepository.datastoreUser.collect {

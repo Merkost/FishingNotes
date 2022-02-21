@@ -44,6 +44,7 @@ import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.domain.WeatherViewModel
+import com.mobileprism.fishing.domain.viewstates.BaseViewState
 import com.mobileprism.fishing.domain.viewstates.ErrorType
 import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.datastore.UserPreferences
@@ -115,7 +116,7 @@ fun WeatherScreen(
     }
 
     val scrollState = rememberScrollState()
-    val weatherState by viewModel.weatherState.collectAsState()
+    val weatherUiState by viewModel.weatherState.collectAsState()
     val forecast by viewModel.weather.collectAsState()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -182,8 +183,8 @@ fun WeatherScreen(
                 }
 
             } else
-                when (weatherState) {
-                    is RetrofitWrapper.Loading -> {
+                when (val weatherState = weatherUiState) {
+                    is BaseViewState.Loading -> {
                         MainWeatherScreen(childModifier = Modifier.placeholder(
                             true,
                             color = Color.Gray,
@@ -191,7 +192,7 @@ fun WeatherScreen(
                             highlight = PlaceholderHighlight.fade()
                         ), forecast, scrollState, navigateToDaily = {})
                     }
-                    is RetrofitWrapper.Success -> {
+                    is BaseViewState.Success -> {
                         MainWeatherScreen(childModifier = Modifier, forecast, scrollState)
                         { index ->
                             navigateToDailyWeatherScreen(
@@ -201,69 +202,20 @@ fun WeatherScreen(
                             )
                         }
                     }
-                    is RetrofitWrapper.Error -> {
+                    is BaseViewState.Error -> {
                         val errorType = (weatherState as RetrofitWrapper.Error).errorType
                         when (errorType) {
                             is ErrorType.NetworkError -> {
                                 NoInternetView(Modifier.fillMaxWidth())
                             }
-                            is ErrorType.OtherError -> {
+                            else -> {
                                 ErrorView(Modifier.fillMaxWidth())
                             }
                         }
                     }
                 }
-            /*AnimatedVisibility(weatherState is RetrofitWrapper.Success, RetrofitWrapper.Loading*//*viewModel.currentWeather.value != null*//*) {
-
-            }
-
-            AnimatedVisibility(weatherState is RetrofitWrapper.Loading) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-
-                    if (checkPermission(context) && viewModel.markersList.isEmpty()) {
-
-                        NoContentView(
-                            text = stringResource(id = R.string.no_places_added),
-                            icon = painterResource(id = R.drawable.ic_no_place_on_map)
-                        )
-
-                        Spacer(modifier = Modifier.size(16.dp))
-
-                        DefaultButtonOutlined(
-                            text = stringResource(id = R.string.new_place_text),
-                            onClick = { navigateToAddNewPlace(navController) }
-                        )
-                    } else {
-                        WeatherLoading(
-                            modifier = Modifier
-                                .size(300.dp)
-                        )
-                    }
-                }
-            }
-
-            AnimatedVisibility(weatherState is RetrofitWrapper.Error) {
-                if (weatherState is RetrofitWrapper.Error) {
-                    val errorType = (weatherState as RetrofitWrapper.Error).errorType
-                    when (errorType) {
-                        is ErrorType.NetworkError -> {
-                            NoInternetView(Modifier.fillMaxWidth())
-                        }
-                        is ErrorType.OtherError -> {
-                            ErrorView(Modifier.fillMaxWidth())
-                        }
-                    }
-                }
-            }*/
         }
-
     }
-
-
 }
 
 @Composable

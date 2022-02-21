@@ -74,8 +74,8 @@ class FirebaseMarkersRepositoryImpl(
         markerId: String,
         currentNotes: List<Note>,
         note: Note
-    ): StateFlow<BaseViewState> {
-        val flow = MutableStateFlow<BaseViewState>(BaseViewState.Loading())
+    ): StateFlow<BaseViewState<List<Note>>> {
+        val flow = MutableStateFlow<BaseViewState<List<Note>>>(BaseViewState.Loading())
 
         if (note.id.isEmpty()) {
             val newNote = MarkerNoteMapper().mapRawMarkerNote(note)
@@ -113,8 +113,8 @@ class FirebaseMarkersRepositoryImpl(
         markerId: String,
         currentNotes: List<Note>,
         noteToDelete: Note
-    ): StateFlow<BaseViewState> {
-        val flow = MutableStateFlow<BaseViewState>(BaseViewState.Loading())
+    ): StateFlow<BaseViewState<List<Note>>> {
+        val flow = MutableStateFlow<BaseViewState<List<Note>>>(BaseViewState.Loading())
 
         val newNotes = currentNotes.toMutableList().apply {
             remove(noteToDelete)
