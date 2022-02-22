@@ -25,6 +25,14 @@ import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.UserCatchViewModel
+import com.mobileprism.fishing.model.datastore.UserPreferences
+import com.mobileprism.fishing.model.datastore.WeatherPreferencesImpl
+import com.mobileprism.fishing.model.entity.common.Progress
+import com.mobileprism.fishing.model.entity.content.UserCatch
+import com.mobileprism.fishing.model.entity.content.UserMapMarker
+import com.mobileprism.fishing.model.mappers.getMoonIconByPhase
+import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.notes.ItemUserPlace
@@ -33,14 +41,6 @@ import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.home.weather.PressureValues
 import com.mobileprism.fishing.ui.home.weather.TemperatureValues
 import com.mobileprism.fishing.ui.navigate
-import com.mobileprism.fishing.domain.UserCatchViewModel
-import com.mobileprism.fishing.model.datastore.UserPreferences
-import com.mobileprism.fishing.model.datastore.WeatherPreferences
-import com.mobileprism.fishing.model.entity.common.Progress
-import com.mobileprism.fishing.model.entity.content.UserCatch
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.model.mappers.getMoonIconByPhase
-import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toTime
@@ -407,9 +407,9 @@ fun CatchWeatherView(
     catch: UserCatch
 ) {
 
-    val weatherPrefs: WeatherPreferences = get()
-    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
-    val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
+    val weatherPrefsImpl: WeatherPreferencesImpl = get()
+    val pressureUnit by weatherPrefsImpl.getPressureUnit.collectAsState(PressureValues.mmHg)
+    val temperatureUnit by weatherPrefsImpl.getTemperatureUnit.collectAsState(TemperatureValues.C)
 
     DefaultCard(
         modifier = modifier

@@ -12,12 +12,8 @@ import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.entity.common.CatchesContentState
 import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserCatch
-import com.mobileprism.fishing.model.entity.raw.RawUserCatch
-import com.mobileprism.fishing.model.mappers.UserCatchMapper
 import com.mobileprism.fishing.model.repository.PhotoStorage
 import com.mobileprism.fishing.model.repository.app.CatchesRepository
-import com.mobileprism.fishing.utils.network.ConnectionState
-import com.mobileprism.fishing.utils.network.observeConnectivityAsFlow
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
@@ -141,46 +137,31 @@ class FirebaseCatchesRepositoryImpl(
         }
 
 
-    override suspend fun addNewCatch(
+    override fun addNewCatch(
         markerId: String,
-        newCatch: RawUserCatch
+        newCatch: UserCatch
     ) = callbackFlow {
-        trySend(Progress.Loading(0))
-
-        context.observeConnectivityAsFlow().collectLatest {
-            if (it is ConnectionState.Available) {
-                val photoDownloadLinks = savePhotos(newCatch.photos)
-                val userCatch = UserCatchMapper().mapRawCatch(newCatch, photoDownloadLinks)
-
-                dbCollections.getUserCatchesCollection(markerId).document(userCatch.id)
-                    .set(userCatch)
-                    .addOnCompleteListener {
-                        if (it.exception != null) {
-                            trySend(Progress.Error(it.exception!!))
-                        }
-
-                        if (it.isSuccessful) {
-                            firebaseAnalytics.logEvent("new_catch", null)
-                            trySend(Progress.Complete)
-                            incrementNumOfCatches(markerId)
-                        }
-                    }
-            } else {
-                val userCatch = UserCatchMapper().mapRawCatch(newCatch)
-                dbCollections.getUserCatchesCollection(markerId).document(userCatch.id)
-                    .set(userCatch)
-                trySend(Progress.Complete)
+        dbCollections.getUserCatchesCollection(markerId).document(newCatch.id)
+            .set(newCatch)
+            .addOnCompleteListener {
+                if (it.exception != null) {
+                    trySend(Progress.Error(it.exception!!))
+                }
+                if (it.isSuccessful) {
+                    firebaseAnalytics.logEvent("new_catch", null)
+                    trySend(Progress.Complete)
+                    incrementNumOfCatches(markerId)
+                }
             }
-        }
-
         awaitClose { }
-
     }
 
-
-    private fun incrementNumOfCatches(markerId: String) {
-        dbCollections.getUserMapMarkersCollection().document(markerId)
-            .update("catchesCount", FieldValue.increment(1))
+    override fun addNewCatchOffline(markerId: String, newCatch: UserCatch) = callbackFlow {
+        dbCollections.getUserCatchesCollection(markerId).document(newCatch.id).set(newCatch)
+        firebaseAnalytics.logEvent("new_catch", null)
+        trySend(Progress.Complete)
+        incrementNumOfCatches(markerId)
+        awaitClose { }
     }
 
     override suspend fun deleteCatch(userCatch: UserCatch) {
@@ -191,11 +172,6 @@ class FirebaseCatchesRepositoryImpl(
         userCatch.downloadPhotoLinks.forEach {
             cloudPhotoStorage.deletePhoto(it)
         }
-    }
-
-    private fun decrementNumOfCatches(markerId: String) {
-        dbCollections.getUserMapMarkersCollection().document(markerId)
-            .update("catchesCount", FieldValue.increment(-1))
     }
 
     override suspend fun updateUserCatch(
@@ -225,7 +201,6 @@ class FirebaseCatchesRepositoryImpl(
                             }
                         }
                     }
-
             awaitClose {
                 listener.remove()
             }
@@ -249,7 +224,16 @@ class FirebaseCatchesRepositoryImpl(
             .addOnCompleteListener { flow.tryEmit(Progress.Complete) }
 
         return flow
+    }
 
+    private fun incrementNumOfCatches(markerId: String) {
+        dbCollections.getUserMapMarkersCollection().document(markerId)
+            .update("catchesCount", FieldValue.increment(1))
+    }
+
+    private fun decrementNumOfCatches(markerId: String) {
+        dbCollections.getUserMapMarkersCollection().document(markerId)
+            .update("catchesCount", FieldValue.increment(-1))
     }
 
     private suspend fun savePhotos(photos: List<Uri>) = cloudPhotoStorage.uploadPhotos(photos)

@@ -25,7 +25,6 @@ private fun getCurrentConnectivityState(
     return if (connected) ConnectionState.Available else ConnectionState.Unavailable
 }
 
-
 fun Context.observeConnectivityAsFlow() = callbackFlow {
     val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 

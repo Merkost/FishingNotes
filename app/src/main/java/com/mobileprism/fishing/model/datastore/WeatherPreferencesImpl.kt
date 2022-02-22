@@ -12,8 +12,21 @@ import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.single
 
-class WeatherPreferences(private val context: Context) {
+interface WeatherPreferences {
+    fun getPressureUnitFlow(): Flow<PressureValues>
+    fun getTemperatureUnitFlow(): Flow<TemperatureValues>
+    fun getWindSpeedUnitFlow(): Flow<WindSpeedValues>
+    suspend fun getPressureUnit(): PressureValues
+    suspend fun getTemperatureUnit(): TemperatureValues
+    suspend fun getWindSpeedUnit(): WindSpeedValues
+    suspend fun savePressureUnit(pressureValues: PressureValues)
+    suspend fun saveTemperatureUnit(temperatureValues: TemperatureValues)
+    suspend fun saveWindSpeedUnit(windSpeedValues: WindSpeedValues)
+}
+
+class WeatherPreferencesImpl(private val context: Context) : WeatherPreferences {
 
     // to make sure there's only one instance
     companion object {
@@ -36,30 +49,46 @@ class WeatherPreferences(private val context: Context) {
         .map { preferences ->
             TemperatureValues.valueOf(preferences[TEMPERATURE_UNIT] ?: TemperatureValues.C.name)
         }.catch { e ->
-            if (e is IllegalArgumentException) { emit(TemperatureValues.C) }
+            if (e is IllegalArgumentException) {
+                emit(TemperatureValues.C)
+            }
         }
 
     val getWindSpeedUnit: Flow<WindSpeedValues> = context.dataStore.data
         .map { preferences ->
             WindSpeedValues.valueOf(preferences[WIND_UNIT] ?: WindSpeedValues.metersps.name)
         }.catch { e ->
-            if (e is IllegalArgumentException) { emit(WindSpeedValues.metersps) }
+            if (e is IllegalArgumentException) {
+                emit(WindSpeedValues.metersps)
+            }
         }
 
+    override fun getPressureUnitFlow() = getPressureUnit
+
+    override fun getTemperatureUnitFlow() = getTemperatureUnit
+
+    override fun getWindSpeedUnitFlow() = getWindSpeedUnit
+
+    override suspend fun getPressureUnit() = getPressureUnit.single()
+
+    override suspend fun getTemperatureUnit() = getTemperatureUnit.single()
+
+    override suspend fun getWindSpeedUnit() = getWindSpeedUnit.single()
+
     //save into datastore
-    suspend fun savePressureUnit(pressureValues: PressureValues) {
+    override suspend fun savePressureUnit(pressureValues: PressureValues) {
         context.dataStore.edit { preferences ->
             preferences[PRESSURE_UNIT] = pressureValues.name
         }
     }
 
-    suspend fun saveTemperatureUnit(temperatureValues: TemperatureValues) {
+    override suspend fun saveTemperatureUnit(temperatureValues: TemperatureValues) {
         context.dataStore.edit { preferences ->
             preferences[TEMPERATURE_UNIT] = temperatureValues.name
         }
     }
 
-    suspend fun saveWindSpeedUnit(windSpeedValues: WindSpeedValues) {
+    override suspend fun saveWindSpeedUnit(windSpeedValues: WindSpeedValues) {
         context.dataStore.edit { preferences ->
             preferences[WIND_UNIT] = windSpeedValues.name
         }

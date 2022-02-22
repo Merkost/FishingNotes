@@ -34,6 +34,16 @@ import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.fade
 import com.google.accompanist.placeholder.placeholder
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.WeatherViewModel
+import com.mobileprism.fishing.domain.viewstates.ErrorType
+import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
+import com.mobileprism.fishing.model.datastore.UserPreferences
+import com.mobileprism.fishing.model.datastore.WeatherPreferencesImpl
+import com.mobileprism.fishing.model.entity.content.UserMapMarker
+import com.mobileprism.fishing.model.entity.weather.Daily
+import com.mobileprism.fishing.model.entity.weather.Hourly
+import com.mobileprism.fishing.model.entity.weather.WeatherForecast
+import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.map.LocationState
@@ -43,16 +53,6 @@ import com.mobileprism.fishing.ui.home.map.locationPermissionsList
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.theme.customColors
-import com.mobileprism.fishing.domain.WeatherViewModel
-import com.mobileprism.fishing.domain.viewstates.ErrorType
-import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
-import com.mobileprism.fishing.model.datastore.UserPreferences
-import com.mobileprism.fishing.model.datastore.WeatherPreferences
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.model.entity.weather.Daily
-import com.mobileprism.fishing.model.entity.weather.Hourly
-import com.mobileprism.fishing.model.entity.weather.WeatherForecast
-import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import com.mobileprism.fishing.utils.isLocationsTooFar
 import com.mobileprism.fishing.utils.time.toDateTextMonth
@@ -274,10 +274,10 @@ fun MainWeatherScreen(
     navigateToDaily: (Int) -> Unit,
 
     ) {
-    val weatherPrefs: WeatherPreferences = get()
-    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
-    val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
-    val windSpeedUnit by weatherPrefs.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
+    val weatherPrefsImpl: WeatherPreferencesImpl = get()
+    val pressureUnit by weatherPrefsImpl.getPressureUnit.collectAsState(PressureValues.mmHg)
+    val temperatureUnit by weatherPrefsImpl.getTemperatureUnit.collectAsState(TemperatureValues.C)
+    val windSpeedUnit by weatherPrefsImpl.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
 
 
     Column(

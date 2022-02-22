@@ -20,7 +20,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -28,7 +27,9 @@ import androidx.navigation.NavController
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.SphericalUtil
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.model.datastore.WeatherPreferences
+import com.mobileprism.fishing.model.datastore.WeatherPreferencesImpl
+import com.mobileprism.fishing.model.entity.content.UserMapMarker
+import com.mobileprism.fishing.model.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.views.PrimaryText
@@ -37,8 +38,6 @@ import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.resources
 import com.mobileprism.fishing.viewmodels.MapViewModel
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.model.entity.weather.CurrentWeatherFree
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -58,11 +57,11 @@ fun MarkerInfoDialog(
 
     val viewModel: MapViewModel = getViewModel()
     val receivedMarker by viewModel.currentMarker.collectAsState()
-    val weatherPreferences: WeatherPreferences = get()
+    val weatherPreferencesImpl: WeatherPreferencesImpl = get()
     val coroutineScope = rememberCoroutineScope()
     val geocoder = Geocoder(context, resources().configuration.locales[0])
 
-    val windUnit by weatherPreferences.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
+    val windUnit by weatherPreferencesImpl.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
 
     var address: String? by remember { mutableStateOf(null) }
     var distance: String? by remember { mutableStateOf(null) }

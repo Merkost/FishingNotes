@@ -5,34 +5,29 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
 import com.mobileprism.fishing.domain.viewstates.Resource
-import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.model.entity.raw.RawUserCatch
 import com.mobileprism.fishing.model.entity.weather.WeatherForecast
-import com.mobileprism.fishing.model.repository.app.CatchesRepository
-import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.use_cases.GetNewCatchWeatherUseCase
+import com.mobileprism.fishing.model.use_cases.GetUserCatchesUseCase
+import com.mobileprism.fishing.model.use_cases.SaveNewCatchUseCase
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlacesState
 import com.mobileprism.fishing.ui.home.new_catch.ReceivedPlaceState
 import com.mobileprism.fishing.utils.calcMoonPhase
-import com.mobileprism.fishing.utils.getClosestHourIndex
 import com.mobileprism.fishing.utils.isDateInList
 import com.mobileprism.fishing.utils.isLocationsTooFar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import java.util.*
 
 class NewCatchMasterViewModel(
     placeState: ReceivedPlaceState,
-    private val markersRepository: MarkersRepository,
-    private val catchesRepository: CatchesRepository,
-    private val weatherSettings: WeatherPreferences,
     private val getNewCatchWeatherUseCase: GetNewCatchWeatherUseCase,
+    private val getUserCatchesUseCase: GetUserCatchesUseCase,
+    private val saveNewCatchUseCase: SaveNewCatchUseCase
 ) : ViewModel() {
 
     init {
@@ -182,27 +177,28 @@ class NewCatchMasterViewModel(
     }
 
     fun refreshWeatherState() {
+
         loadedWeather.value.run {
-            viewModelScope.launch {
-                val index = getClosestHourIndex(list = hourly, date = placeAndTimeState.value.date)
-
-                weatherSettings.getPressureUnit.take(1).collectLatest {
-                    setWeatherPressure(it.getPressureInt(hourly[index].pressure).toString())
-                }
-                weatherSettings.getWindSpeedUnit.take(1).collectLatest {
-                    setWeatherWindSpeed(it.getWindSpeedInt(hourly[index].windSpeed.toDouble()))
-                }
-                weatherSettings.getTemperatureUnit.take(1).collectLatest {
-                    setWeatherTemperature(it.getTemperature(hourly[index].temperature))
-                }
-
-                setWeatherPrimary(hourly[index].weather.first().description
-                    .replaceFirstChar { it.uppercase() })
-                setWeatherIconId(hourly[index].weather.first().icon)
-                setWeatherWindDeg(hourly[index].windDeg)
-                setWeatherMoonPhase(calcMoonPhase(placeAndTimeState.value.date))
-                checkWeatherDownloadNeed()
-            }
+//            viewModelScope.launch {
+//                val index = getClosestHourIndex(list = hourly, date = placeAndTimeState.value.date)
+//
+//                weatherSettingsImpl.getPressureUnit.take(1).collectLatest {
+//                    setWeatherPressure(it.getPressureInt(hourly[index].pressure).toString())
+//                }
+//                weatherSettingsImpl.getWindSpeedUnit.take(1).collectLatest {
+//                    setWeatherWindSpeed(it.getWindSpeedInt(hourly[index].windSpeed.toDouble()))
+//                }
+//                weatherSettingsImpl.getTemperatureUnit.take(1).collectLatest {
+//                    setWeatherTemperature(it.getTemperature(hourly[index].temperature))
+//                }
+//
+//                setWeatherPrimary(hourly[index].weather.first().description
+//                    .replaceFirstChar { it.uppercase() })
+//                setWeatherIconId(hourly[index].weather.first().icon)
+//                setWeatherWindDeg(hourly[index].windDeg)
+//                setWeatherMoonPhase(calcMoonPhase(placeAndTimeState.value.date))
+//                checkWeatherDownloadNeed()
+//            }
         }
     }
 
@@ -210,9 +206,9 @@ class NewCatchMasterViewModel(
         _uiState.value = BaseViewState.Loading(0)
 
         viewModelScope.launch(Dispatchers.IO) {
-            placeAndTimeState.value.place?.let { userMapMarker ->
-                val newCatch = createRawUserCatch(userMapMarker)
-                catchesRepository.addNewCatch(userMapMarker.id, newCatch).collect { progress ->
+            placeAndTimeState.value.place?.let {
+                val newCatch = createNewCatchData()
+                saveNewCatchUseCase(newCatch).collect { progress ->
                     when (progress) {
                         is Progress.Complete -> {
                             _uiState.value = BaseViewState.Success(progress)
@@ -231,7 +227,7 @@ class NewCatchMasterViewModel(
 
     private fun getAllUserMarkersList() {
         viewModelScope.launch(Dispatchers.IO) {
-            markersRepository.getAllUserMarkersList().collect { markers ->
+            getUserCatchesUseCase().collect { markers ->
                 _placeAndTimeState.value = _placeAndTimeState.value.copy(
                     placesListState = NewCatchPlacesState.Received(markers as List<UserMapMarker>)
                 )
@@ -240,26 +236,12 @@ class NewCatchMasterViewModel(
         }
     }
 
-    private fun createRawUserCatch(marker: UserMapMarker) = RawUserCatch(
-//        fishType = fishType.value,
-//        description = description.value,
-//        date = catchDate.value,
-//        fishAmount = fishAmount.value,
-//        fishWeight = fishWeight.value,
-//        fishingRodType = rod.value,
-//        fishingBait = bait.value,
-//        fishingLure = lure.value,
-//        markerId = marker.id,
-//        placeTitle = marker.title,
-//        isPublic = false,
-//        photos = photos.value,
-//        weatherPrimary = weatherPrimary.value,
-//        weatherIcon = weatherIconId.value,
-//        weatherTemperature = weatherTemperature.value.toFloat(),
-//        weatherWindSpeed = weatherWindSpeed.value.toFloat(),
-//        weatherWindDeg = weatherWindDeg.value,
-//        weatherPressure = weatherPressure.value.toInt(),
-//        weatherMoonPhase = weatherMoonPhase.value
+    private fun createNewCatchData() = NewUserCatchData(
+        placeAndTime = placeAndTimeState.value,
+        fishAndWeight = fishAndWeightSate.value,
+        catchInfo = catchInfoState.value,
+        catchWeather = catchWeatherState.value,
+        photos = photos.value
     )
 
     private fun checkWeatherDownloadNeed() {
@@ -309,4 +291,12 @@ data class CatchWeather(
     val isDownloadAvailable: Boolean = true,
     val isInputCorrect: Boolean = (primary != ""),
     val isError: Boolean = true
+)
+
+data class NewUserCatchData(
+    val placeAndTime: CatchPlaceAndTime,
+    val fishAndWeight: FishAndWeight,
+    val catchInfo: CatchInfo,
+    val catchWeather: CatchWeather,
+    val photos: List<Uri>
 )
