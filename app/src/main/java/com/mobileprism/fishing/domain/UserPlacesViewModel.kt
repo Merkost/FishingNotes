@@ -23,8 +23,6 @@ class UserPlacesViewModel(private val repository: MarkersRepository) : ViewModel
         loadAllUserPlaces()
     }
 
-
-
     private fun loadAllUserPlaces() {
         _uiState.value = UiState.InProgress
         viewModelScope.launch {
