@@ -1,4 +1,3 @@
-/*
 package com.mobileprism.fishing.ui.home.new_catch
 
 import androidx.compose.animation.AnimatedVisibility
@@ -690,10 +689,9 @@ fun NewCatchPlaceSelectView(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    */
-/*.onFocusChanged {
+.onFocusChanged {
                         isDropMenuOpen = it.isFocused
-                    }*//*
+                    }
 ,
                 label = { Text(text = stringResource(R.string.place)) },
                 trailingIcon = {
@@ -1085,4 +1083,3 @@ fun NewCatchWeatherView(viewModel: NewCatchViewModel) {
         }
     }
 }
-*/

@@ -1,4 +1,3 @@
-/*
 package com.mobileprism.fishing.domain
 
 import android.net.Uri
@@ -187,4 +186,3 @@ class NewCatchViewModel(
     }
 
 }
-*/

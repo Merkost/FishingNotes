@@ -48,6 +48,8 @@ val mainModule = module {
     viewModel { LoginViewModel(get()) }
     viewModel { MapViewModel(get(), get(), get(), get()) }
 
+    viewModel { NewCatchViewModel(get(), get(), get()) }
+
     viewModel { UserViewModel(get(), get()) }
     viewModel { UserCatchViewModel(get(), get(), get()) }
     viewModel { WeatherViewModel(get(), get()) }
