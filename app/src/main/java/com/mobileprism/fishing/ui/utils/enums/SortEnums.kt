@@ -1,10 +1,11 @@
 package com.mobileprism.fishing.ui.utils.enums
 
+import androidx.annotation.StringRes
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 
-enum class PlacesSortValues(override val stringRes: Int) : StringOperation {
+enum class PlacesSortValues(@StringRes override val stringRes: Int) : StringOperation {
     Default (R.string.default_word),
     TimeAsc (R.string.time_asc),
     TimeDesc (R.string.time_desc),

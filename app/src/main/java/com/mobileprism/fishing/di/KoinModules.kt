@@ -3,6 +3,7 @@ package com.mobileprism.fishing.di
 import com.android.billingclient.api.BillingClient
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
@@ -26,8 +27,8 @@ val appModule = module {
     single<AppUpdateManager> { AppUpdateManagerFactory.create(androidContext()) }
     single<FirebaseAuth> { FirebaseAuth.getInstance() }
     single { SnackbarManager }
-    single { Firebase.analytics }
-    single { params ->
+    single<FirebaseAnalytics> { Firebase.analytics }
+    single<BillingClient> { params ->
         BillingClient.newBuilder(androidContext())
             .setListener(params.get())
             .enablePendingPurchases()

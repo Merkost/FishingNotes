@@ -8,6 +8,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.map.*
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
+import com.mobileprism.fishing.domain.viewstates.Result
 import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.entity.common.Progress
@@ -36,8 +37,8 @@ class MapViewModel(
     private val firstLaunchLocation = mutableStateOf(true)
 
     val showMarker: MutableState<Boolean> = mutableStateOf(false)
-    private val _addNewMarkerState: MutableStateFlow<BaseViewState<Nothing>> =
-        MutableStateFlow(BaseViewState.Loading(null))
+    private val _addNewMarkerState: MutableStateFlow<UiState> =
+        MutableStateFlow(UiState.Success)
     val addNewMarkerState = _addNewMarkerState.asStateFlow()
 
     private var _mapMarkers: MutableStateFlow<MutableList<UserMapMarker>> =
@@ -79,8 +80,6 @@ class MapViewModel(
 
     fun getAllMarkers(): StateFlow<List<UserMapMarker>> = _mapMarkers
 
-
-
     fun setCameraMoveState(newState: CameraMoveState) {
         _cameraMoveState.value = newState
     }
@@ -94,16 +93,16 @@ class MapViewModel(
     }
 
     fun addNewMarker(newMarker: RawMapMarker) {
+        _addNewMarkerState.value = UiState.InProgress
         viewModelScope.launch {
             repository.addNewMarker(newMarker).collect { progress ->
                 when (progress) {
-                    is Progress.Complete -> {
-                        _uiState.value = UiState.Success
+                    is Result.Success -> {
+                        _addNewMarkerState.value = UiState.Success
                     }
-                    is Progress.Loading -> {
-                        _uiState.value = UiState.InProgress
+                    is Result.Error -> {
+                        _uiState.value = UiState.Error
                     }
-                    is Progress.Error -> onError(progress.error)
                 }
             }
         }
@@ -148,9 +147,6 @@ class MapViewModel(
             }
         }
     }
-
-
-
 
     fun updateCurrentPlace(markerToUpdate: UserMapMarker) {
         viewModelScope.launch {
@@ -241,10 +237,7 @@ class MapViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        _addNewMarkerState.value = BaseViewState.Loading(null)
-    }
-    private fun onError(error: Throwable) {
-        _addNewMarkerState.value = BaseViewState.Error(error)
+        _addNewMarkerState.value = UiState.InProgress
     }
 
 }
