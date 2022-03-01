@@ -6,6 +6,8 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
+import com.mobileprism.fishing.domain.viewstates.Resource
+import com.mobileprism.fishing.domain.viewstates.Result
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.entity.common.LiteProgress
 import com.mobileprism.fishing.model.entity.common.Note
@@ -74,8 +76,8 @@ class FirebaseMarkersRepositoryImpl(
         markerId: String,
         currentNotes: List<Note>,
         note: Note
-    ): StateFlow<BaseViewState> {
-        val flow = MutableStateFlow<BaseViewState>(BaseViewState.Loading())
+    ): StateFlow<BaseViewState<List<Note>>> {
+        val flow = MutableStateFlow<BaseViewState<List<Note>>>(BaseViewState.Loading())
 
         if (note.id.isEmpty()) {
             val newNote = MarkerNoteMapper().mapRawMarkerNote(note)
@@ -113,8 +115,8 @@ class FirebaseMarkersRepositoryImpl(
         markerId: String,
         currentNotes: List<Note>,
         noteToDelete: Note
-    ): StateFlow<BaseViewState> {
-        val flow = MutableStateFlow<BaseViewState>(BaseViewState.Loading())
+    ): StateFlow<BaseViewState<List<Note>>> {
+        val flow = MutableStateFlow<BaseViewState<List<Note>>>(BaseViewState.Loading())
 
         val newNotes = currentNotes.toMutableList().apply {
             remove(noteToDelete)
@@ -196,16 +198,16 @@ class FirebaseMarkersRepositoryImpl(
         }
 
 
-    override suspend fun addNewMarker(newMarker: RawMapMarker): StateFlow<Progress> {
-        val flow = MutableStateFlow<Progress>(Progress.Loading())
+    override fun addNewMarker(newMarker: RawMapMarker): Flow<Result>
+    = flow<Result> {
         val mapMarker = MapMarkerMapper().mapRawMapMarker(newMarker)
         try {
+            //TODO:
             saveMarker(mapMarker)
         } catch (error: Throwable) {
-            flow.emit(Progress.Error(error))
+            emit(Result.Error(error))
         }
-        flow.emit(Progress.Complete)
-        return flow
+        emit(Result.Success)
     }
 
 

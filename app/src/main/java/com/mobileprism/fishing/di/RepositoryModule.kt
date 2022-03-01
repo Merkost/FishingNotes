@@ -12,6 +12,7 @@ import com.mobileprism.fishing.model.repository.app.*
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import java.util.concurrent.TimeUnit
 
@@ -39,6 +40,14 @@ val repositoryModule = module {
             context = androidContext()
         )
     }
+    /*single<CatchesRepository> {
+        FirebaseCatchesRepositoryImpl(
+            dbCollections = get(),
+            firebaseAnalytics = get(),
+            cloudPhotoStorage = get(),
+            context = androidContext()
+        )
+    }*/
     single<MarkersRepository> {
         FirebaseMarkersRepositoryImpl(
             dbCollections = get(),

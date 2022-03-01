@@ -79,8 +79,8 @@ class UserPlaceViewModel(
                     note = note
                 ).collect { baseViewState ->
                     when (baseViewState) {
-                        is BaseViewState.Success<*> -> {
-                            val newNotesList = baseViewState.data as List<Note>
+                        is BaseViewState.Success -> {
+                            val newNotesList = baseViewState.data
                             _markerNotes.value = newNotesList
                         }
                         is BaseViewState.Error -> {
@@ -102,8 +102,8 @@ class UserPlaceViewModel(
                     noteToDelete = note
                 ).collect { baseViewState ->
                     when (baseViewState) {
-                        is BaseViewState.Success<*> -> {
-                            val newNotesList = baseViewState.data as List<Note>
+                        is BaseViewState.Success -> {
+                            val newNotesList = baseViewState.data
                             _markerNotes.value = newNotesList
                         }
                         is BaseViewState.Error -> {

@@ -18,8 +18,10 @@ import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
+import com.mobileprism.fishing.ui.home.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class NewCatchViewModel(
@@ -32,9 +34,8 @@ class NewCatchViewModel(
         getAllUserMarkersList()
     }
 
-    private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
-    val uiState: StateFlow<BaseViewState>
-        get() = _uiState
+    private val _uiState = MutableStateFlow<UiState?>(null)
+    val uiState = _uiState.asStateFlow()
 
     private val _weatherState =
         MutableStateFlow<RetrofitWrapper<WeatherForecast>>(RetrofitWrapper.Loading())
@@ -124,19 +125,19 @@ class NewCatchViewModel(
     }
 
     private fun saveNewCatch(newCatch: RawUserCatch) {
-        _uiState.value = BaseViewState.Loading(0)
+        _uiState.value = UiState.InProgress
         viewModelScope.launch {
             marker.value?.let { userMapMarker ->
                 catchesRepo.addNewCatch(userMapMarker.id, newCatch).collect { progress ->
                     when (progress) {
                         is Progress.Complete -> {
-                            _uiState.value = BaseViewState.Success(progress)
+                            _uiState.value = UiState.Success
                         }
                         is Progress.Loading -> {
-                            _uiState.value = BaseViewState.Loading(progress.percents)
+                            _uiState.value = UiState.InProgress
                         }
                         is Progress.Error -> {
-                            _uiState.value = BaseViewState.Error(progress.error)
+                            _uiState.value = UiState.Error
                         }
                     }
                 }

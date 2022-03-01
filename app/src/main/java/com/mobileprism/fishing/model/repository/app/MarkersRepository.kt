@@ -1,6 +1,8 @@
 package com.mobileprism.fishing.model.repository.app
 
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
+import com.mobileprism.fishing.domain.viewstates.Resource
+import com.mobileprism.fishing.domain.viewstates.Result
 import com.mobileprism.fishing.model.entity.common.LiteProgress
 import com.mobileprism.fishing.model.entity.common.Note
 import com.mobileprism.fishing.model.entity.common.Progress
@@ -16,14 +18,14 @@ interface MarkersRepository {
     fun getAllUserMarkersList(): Flow<List<MapMarker>>
 
     suspend fun updateUserMarkerNote(markerId: String, currentNotes: List<Note>, note: Note)
-            : StateFlow<BaseViewState>
+            : StateFlow<BaseViewState<List<Note>>>
     suspend fun deleteMarkerNote(markerId: String, currentNotes: List<Note>, noteToDelete: Note)
-            : StateFlow<BaseViewState>
+            : StateFlow<BaseViewState<List<Note>>>
 
     suspend fun changeMarkerVisibility(marker: UserMapMarker, changeTo: Boolean): StateFlow<LiteProgress>
 
     suspend fun deleteMarker(userMapMarker: UserMapMarker)
-    suspend fun addNewMarker(newMarker: RawMapMarker): StateFlow<Progress>
+    fun addNewMarker(newMarker: RawMapMarker): Flow<Result>
 
 
 }

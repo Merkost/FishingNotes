@@ -2,6 +2,7 @@ package com.mobileprism.fishing.ui.home.weather
 
 import android.graphics.Paint
 import android.graphics.Typeface
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
@@ -35,6 +36,7 @@ import com.google.accompanist.placeholder.material.fade
 import com.google.accompanist.placeholder.placeholder
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.WeatherViewModel
+import com.mobileprism.fishing.domain.viewstates.BaseViewState
 import com.mobileprism.fishing.domain.viewstates.ErrorType
 import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.datastore.UserPreferences
@@ -77,10 +79,11 @@ fun WeatherScreen(
     viewModel: WeatherViewModel = getViewModel(),
     upPress: () -> Unit,
 ) {
+    viewModel.setSelectedPlace(place)
     val context = LocalContext.current
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
 
-    var selectedPlace by remember { mutableStateOf(place) }
+    val selectedPlace by viewModel.selectedPlace.collectAsState()
 
     LaunchedEffect(permissionsState.allPermissionsGranted) {
         checkPermission(context)
@@ -100,8 +103,8 @@ fun WeatherScreen(
                         viewModel.markersList.add(index = 0, element = newLocation)
                     }
 
-                    if (selectedPlace == null) {
-                        selectedPlace = viewModel.markersList.first()
+                    selectedPlace?.let {
+                        viewModel.setSelectedPlace(viewModel.markersList.first())
                     }
                 }
             }
@@ -115,7 +118,7 @@ fun WeatherScreen(
     }
 
     val scrollState = rememberScrollState()
-    val weatherState by viewModel.weatherState.collectAsState()
+    val weatherUiState by viewModel.weatherState.collectAsState()
     val forecast by viewModel.weather.collectAsState()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -123,7 +126,7 @@ fun WeatherScreen(
             val elevation =
                 animateDpAsState(targetValue = if (scrollState.value > 0) 4.dp else 0.dp)
             if (checkPermission(context) && viewModel.markersList.isNotEmpty()) {
-                selectedPlace = viewModel.markersList.first()
+                viewModel.setSelectedPlace(viewModel.markersList.first())
             }
 
             TopAppBar(
@@ -144,9 +147,7 @@ fun WeatherScreen(
                         WeatherPlaceSelectItem(
                             selectedPlace = it,
                             userPlaces = viewModel.markersList,
-                            onItemClick = { clickedItem ->
-                                selectedPlace = clickedItem
-                            }
+                            onItemClick = viewModel::setSelectedPlace
                         )
                     }
 
@@ -181,89 +182,45 @@ fun WeatherScreen(
                     )
                 }
 
-            } else
-                when (weatherState) {
-                    is RetrofitWrapper.Loading -> {
-                        MainWeatherScreen(childModifier = Modifier.placeholder(
-                            true,
-                            color = Color.Gray,
-                            shape = CircleShape,
-                            highlight = PlaceholderHighlight.fade()
-                        ), forecast, scrollState, navigateToDaily = {})
-                    }
-                    is RetrofitWrapper.Success -> {
-                        MainWeatherScreen(childModifier = Modifier, forecast, scrollState)
-                        { index ->
-                            navigateToDailyWeatherScreen(
-                                navController = navController,
-                                index = index,
-                                forecastDaily = forecast.daily
-                            )
+            } else {
+                Crossfade(targetState = weatherUiState) {
+                    when (it) {
+                        is BaseViewState.Loading -> {
+                            MainWeatherScreen(childModifier = Modifier.placeholder(
+                                true,
+                                color = Color.Gray,
+                                shape = CircleShape,
+                                highlight = PlaceholderHighlight.fade()
+                            ), forecast, scrollState, navigateToDaily = {})
                         }
-                    }
-                    is RetrofitWrapper.Error -> {
-                        val errorType = (weatherState as RetrofitWrapper.Error).errorType
-                        when (errorType) {
-                            is ErrorType.NetworkError -> {
-                                NoInternetView(Modifier.fillMaxWidth())
-                            }
-                            is ErrorType.OtherError -> {
-                                ErrorView(Modifier.fillMaxWidth())
+                        is BaseViewState.Success -> {
+                            MainWeatherScreen(childModifier = Modifier, forecast, scrollState)
+                            { index ->
+                                navigateToDailyWeatherScreen(
+                                    navController = navController,
+                                    index = index,
+                                    forecastDaily = forecast.daily
+                                )
                             }
                         }
-                    }
-                }
-            /*AnimatedVisibility(weatherState is RetrofitWrapper.Success, RetrofitWrapper.Loading*//*viewModel.currentWeather.value != null*//*) {
-
-            }
-
-            AnimatedVisibility(weatherState is RetrofitWrapper.Loading) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-
-                    if (checkPermission(context) && viewModel.markersList.isEmpty()) {
-
-                        NoContentView(
-                            text = stringResource(id = R.string.no_places_added),
-                            icon = painterResource(id = R.drawable.ic_no_place_on_map)
-                        )
-
-                        Spacer(modifier = Modifier.size(16.dp))
-
-                        DefaultButtonOutlined(
-                            text = stringResource(id = R.string.new_place_text),
-                            onClick = { navigateToAddNewPlace(navController) }
-                        )
-                    } else {
-                        WeatherLoading(
-                            modifier = Modifier
-                                .size(300.dp)
-                        )
-                    }
-                }
-            }
-
-            AnimatedVisibility(weatherState is RetrofitWrapper.Error) {
-                if (weatherState is RetrofitWrapper.Error) {
-                    val errorType = (weatherState as RetrofitWrapper.Error).errorType
-                    when (errorType) {
-                        is ErrorType.NetworkError -> {
+                        is BaseViewState.Error -> {
                             NoInternetView(Modifier.fillMaxWidth())
-                        }
-                        is ErrorType.OtherError -> {
-                            ErrorView(Modifier.fillMaxWidth())
+                            /*val errorType = (it as RetrofitWrapper.Error).errorType
+                            when (errorType) {
+                                is ErrorType.NetworkError -> {
+                                    NoInternetView(Modifier.fillMaxWidth())
+                                }
+                                else -> {
+                                    ErrorView(Modifier.fillMaxWidth())
+                                }
+                            }*/
                         }
                     }
                 }
-            }*/
+            }
+
         }
-
     }
-
-
 }
 
 @Composable

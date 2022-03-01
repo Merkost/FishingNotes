@@ -689,9 +689,10 @@ fun NewCatchPlaceSelectView(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    /*.onFocusChanged {
+.onFocusChanged {
                         isDropMenuOpen = it.isFocused
-                    }*/,
+                    }
+,
                 label = { Text(text = stringResource(R.string.place)) },
                 trailingIcon = {
                     if (textFieldValue.isNotEmpty()) {

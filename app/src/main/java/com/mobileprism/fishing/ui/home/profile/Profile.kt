@@ -7,6 +7,7 @@ import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
@@ -59,7 +60,7 @@ fun Profile(
         ConstraintLayout(
             modifier = Modifier
                 .fillMaxSize()
-                .scrollable(rememberScrollState(0), Orientation.Vertical, true)
+                .verticalScroll(rememberScrollState())
         ) {
             val (background, card, image, name, places, catches, registerDate) = createRefs()
 

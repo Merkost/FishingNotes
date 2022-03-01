@@ -300,5 +300,7 @@
     <string name="new_catch_skip_tutor">Заполните местоположение и вид рыбы для пропуска остальных полей</string>
     <string name="cancel_new_catch_dialog">Отменить добавление нового улова?</string>
     <string name="sure_cancel_new_catch_dialog">Все введенные данные будут потеряны</string>
+    <string name="network_error_message">Can\'t connect to the server!</string>
+    <string name="new_catch_place_on_map_tutorial">Выберите место на карте и нажмите кнопку добавления нового улова</string>
 
 </resources>

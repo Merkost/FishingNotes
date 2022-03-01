@@ -1,8 +1,6 @@
 package com.mobileprism.fishing.viewmodels
 
 import android.util.Log
-import androidx.compose.material.BottomSheetValue
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,6 +8,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.map.*
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
+import com.mobileprism.fishing.domain.viewstates.Result
 import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.entity.common.Progress
@@ -21,7 +20,6 @@ import com.mobileprism.fishing.model.repository.app.FreeWeatherRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.SolunarRepository
 import com.mobileprism.fishing.ui.home.map.MapUiState
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,8 +37,9 @@ class MapViewModel(
     private val firstLaunchLocation = mutableStateOf(true)
 
     val showMarker: MutableState<Boolean> = mutableStateOf(false)
-    private val viewStateFlow: MutableStateFlow<BaseViewState> =
-        MutableStateFlow(BaseViewState.Loading(null))
+    private val _addNewMarkerState: MutableStateFlow<UiState> =
+        MutableStateFlow(UiState.Success)
+    val addNewMarkerState = _addNewMarkerState.asStateFlow()
 
     private var _mapMarkers: MutableStateFlow<MutableList<UserMapMarker>> =
         MutableStateFlow(mutableListOf())
@@ -81,11 +80,6 @@ class MapViewModel(
 
     fun getAllMarkers(): StateFlow<List<UserMapMarker>> = _mapMarkers
 
-    override fun onCleared() {
-        super.onCleared()
-        viewStateFlow.value = BaseViewState.Loading(null)
-    }
-
     fun setCameraMoveState(newState: CameraMoveState) {
         _cameraMoveState.value = newState
     }
@@ -99,16 +93,16 @@ class MapViewModel(
     }
 
     fun addNewMarker(newMarker: RawMapMarker) {
+        _addNewMarkerState.value = UiState.InProgress
         viewModelScope.launch {
             repository.addNewMarker(newMarker).collect { progress ->
                 when (progress) {
-                    is Progress.Complete -> {
-                        _uiState.value = UiState.Success
+                    is Result.Success -> {
+                        _addNewMarkerState.value = UiState.Success
                     }
-                    is Progress.Loading -> {
-                        _uiState.value = UiState.InProgress
+                    is Result.Error -> {
+                        _uiState.value = UiState.Error
                     }
-                    is Progress.Error -> onError(progress.error)
                 }
             }
         }
@@ -148,14 +142,10 @@ class MapViewModel(
                         Log.d("SOLUNAR ERROR", result.errorType.error.toString())
                         //_weatherState.value = RetrofitWrapper.Error(result.errorType)
                     }
+                    else -> {}
                 }
             }
         }
-    }
-
-
-    private fun onError(error: Throwable) {
-        viewStateFlow.value = BaseViewState.Error(error)
     }
 
     fun updateCurrentPlace(markerToUpdate: UserMapMarker) {
@@ -243,6 +233,11 @@ class MapViewModel(
                 firstLaunchLocation.value = false
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        _addNewMarkerState.value = UiState.InProgress
     }
 
 }
