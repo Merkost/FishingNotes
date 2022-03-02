@@ -1,5 +1,7 @@
 package com.mobileprism.fishing.ui.home.new_catch.weather
 
-enum class Clear {
-    ClearSky,
+import com.mobileprism.fishing.R
+
+enum class Clear(val iconRes: Int) {
+    ClearSky(R.drawable.weather_sunny),
 }
