@@ -344,7 +344,7 @@ fun NewCatchTemperatureView(
 ) {
 
     val weatherSettings: WeatherPreferences = get()
-    val temperatureUnit by weatherSettings.getTemperatureUnit().collectAsState(TemperatureValues.C)
+    val temperatureUnit by weatherSettings.getTemperatureUnit.collectAsState(TemperatureValues.C)
 
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
@@ -379,7 +379,7 @@ fun NewCatchPressureView(
     onError: (Boolean) -> Unit
 ) {
     val weatherSettings: WeatherPreferences = get()
-    val pressureUnit by weatherSettings.getPressureUnit().collectAsState(PressureValues.mmHg)
+    val pressureUnit by weatherSettings.getPressureUnit.collectAsState(PressureValues.mmHg)
 
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
@@ -418,7 +418,7 @@ fun NewCatchWindView(
     onError: (Boolean) -> Unit
 ) {
     val weatherSettings: WeatherPreferences = get()
-    val windSpeedUnit by weatherSettings.getWindSpeedUnit().collectAsState(WindSpeedValues.kmph)
+    val windSpeedUnit by weatherSettings.getWindSpeedUnit.collectAsState(WindSpeedValues.kmph)
 
     var windDirDialogState by remember { mutableStateOf(false) }
 

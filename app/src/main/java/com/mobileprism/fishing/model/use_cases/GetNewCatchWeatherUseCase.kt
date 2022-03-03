@@ -10,6 +10,7 @@ import com.mobileprism.fishing.utils.getClosestHourIndex
 import com.mobileprism.fishing.utils.isDateInList
 import com.mobileprism.fishing.utils.isLocationsTooFar
 import com.mobileprism.fishing.utils.time.hoursCount
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.last
 import java.util.*
@@ -60,9 +61,9 @@ class GetNewCatchWeatherUseCase(
         date: Long
     ): NewCatchWeatherData {
         val hour = getClosestHourIndex(weatherForecast.hourly, date)
-        val tempUnits = weatherPreferences.getTemperatureUnit().last()
-        val pressureUnits = weatherPreferences.getPressureUnit().last()
-        val windUnits = weatherPreferences.getWindSpeedUnit().last()
+        val tempUnits = weatherPreferences.getTemperatureUnit.first()
+        val pressureUnits = weatherPreferences.getPressureUnit.first()
+        val windUnits = weatherPreferences.getWindSpeedUnit.first()
 
         return NewCatchWeatherData(
             lat = location.latitude,

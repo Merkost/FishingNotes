@@ -5,7 +5,6 @@ import com.mobileprism.fishing.model.datasource.FreeWeatherRepositoryImpl
 import com.mobileprism.fishing.model.datasource.SolunarRetrofitRepositoryImpl
 import com.mobileprism.fishing.model.datasource.WeatherRepositoryRetrofitImpl
 import com.mobileprism.fishing.model.datasource.firebase.*
-import com.mobileprism.fishing.model.datasource.firebase.offline.FirebaseCatchesRepositoryOfflineImpl
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.repository.PhotoStorage
 import com.mobileprism.fishing.model.repository.UserRepository
@@ -43,12 +42,12 @@ val repositoryModule = module {
             cloudPhotoStorage = get()
         )
     }
-    single<CatchesRepository>(named(CATCHES_REPOSITORY_OFFLINE)) {
+    /*single<CatchesRepository>(named(CATCHES_REPOSITORY_OFFLINE)) {
         FirebaseCatchesRepositoryOfflineImpl(
             dbCollections = get(),
             firebaseAnalytics = get(),
         )
-    }
+    }*/
     /*single<CatchesRepository> {
         FirebaseCatchesRepositoryImpl(
             dbCollections = get(),

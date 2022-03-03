@@ -91,8 +91,8 @@ val useCasesModule = module {
         )
     }
 
-    factory {
+    /*factory {
         GetUserPlacesUseCase(get())
-    }
+    }*/
 
 }

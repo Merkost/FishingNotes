@@ -59,9 +59,7 @@ fun WeatherDaily(
                     WeatherTabsContent(forecast = data.dailyForecast, pagerState = pagerState)
 
                 }
-
             }
-
         }
     }
 }
