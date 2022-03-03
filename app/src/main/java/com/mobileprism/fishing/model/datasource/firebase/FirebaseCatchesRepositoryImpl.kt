@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.model.datasource.firebase
 
-import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.google.android.gms.tasks.OnSuccessListener
@@ -24,7 +23,6 @@ class FirebaseCatchesRepositoryImpl(
     private val dbCollections: RepositoryCollections,
     private val firebaseAnalytics: FirebaseAnalytics,
     private val cloudPhotoStorage: PhotoStorage,
-    private val context: Context
 ) : CatchesRepository {
 
 
@@ -145,22 +143,14 @@ class FirebaseCatchesRepositoryImpl(
             .set(newCatch)
             .addOnCompleteListener {
                 if (it.exception != null) {
-                    trySend(Progress.Error(it.exception!!))
+                    trySend(Result.failure(it.exception!!))
                 }
                 if (it.isSuccessful) {
                     firebaseAnalytics.logEvent("new_catch", null)
-                    trySend(Progress.Complete)
+                    trySend(Result.success(null))
                     incrementNumOfCatches(markerId)
                 }
             }
-        awaitClose { }
-    }
-
-    override fun addNewCatchOffline(markerId: String, newCatch: UserCatch) = callbackFlow {
-        dbCollections.getUserCatchesCollection(markerId).document(newCatch.id).set(newCatch)
-        firebaseAnalytics.logEvent("new_catch", null)
-        trySend(Progress.Complete)
-        incrementNumOfCatches(markerId)
         awaitClose { }
     }
 

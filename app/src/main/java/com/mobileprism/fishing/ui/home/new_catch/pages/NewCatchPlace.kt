@@ -1,13 +1,14 @@
 package com.mobileprism.fishing.ui.home.new_catch.pages
 
-import android.graphics.ImageDecoder
-import android.os.Build.VERSION.SDK_INT
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Info
@@ -24,15 +25,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
-import coil.ComponentRegistry
-import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.compose.AsyncImageContent
 import coil.compose.AsyncImagePainter
-import coil.compose.LocalImageLoader
-import coil.decode.Decoder
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.NewCatchMasterViewModel
 import com.mobileprism.fishing.ui.home.HomeSections
@@ -43,10 +38,6 @@ import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlacesState
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.DefaultDialog
 import com.mobileprism.fishing.ui.home.views.SubtitleWithIcon
-import com.mobileprism.fishing.domain.NewCatchMasterViewModel
-import com.mobileprism.fishing.ui.MainActivity
-import com.skydoves.landscapist.coil.CoilImage
-
 
 @ExperimentalComposeUiApi
 @Composable

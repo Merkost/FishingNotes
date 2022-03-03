@@ -1,11 +1,9 @@
 package com.mobileprism.fishing.model.repository.app
 
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
-import com.mobileprism.fishing.domain.viewstates.Resource
 import com.mobileprism.fishing.domain.viewstates.Result
 import com.mobileprism.fishing.model.entity.common.LiteProgress
 import com.mobileprism.fishing.model.entity.common.Note
-import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.MapMarker
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.raw.RawMapMarker

@@ -27,7 +27,7 @@ import androidx.navigation.NavController
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.SphericalUtil
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.model.datastore.WeatherPreferencesImpl
+import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.ui.Arguments
@@ -57,11 +57,11 @@ fun MarkerInfoDialog(
 
     val viewModel: MapViewModel = getViewModel()
     val receivedMarker by viewModel.currentMarker.collectAsState()
-    val weatherPreferencesImpl: WeatherPreferencesImpl = get()
+    val weatherPreferences: WeatherPreferences = get()
     val coroutineScope = rememberCoroutineScope()
     val geocoder = Geocoder(context, resources().configuration.locales[0])
 
-    val windUnit by weatherPreferencesImpl.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
+    val windUnit by weatherPreferences.getWindSpeedUnit().collectAsState(WindSpeedValues.metersps)
 
     var address: String? by remember { mutableStateOf(null) }
     var distance: String? by remember { mutableStateOf(null) }

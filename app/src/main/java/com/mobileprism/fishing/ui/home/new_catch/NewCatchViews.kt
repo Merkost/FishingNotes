@@ -31,15 +31,15 @@ import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.ui.Arguments
-import com.mobileprism.fishing.ui.MainDestinations
-import com.mobileprism.fishing.ui.home.SnackbarManager
-import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.domain.NewCatchViewModel
 import com.mobileprism.fishing.domain.viewstates.ErrorType
 import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.mappers.getAllWeatherIcons
+import com.mobileprism.fishing.ui.Arguments
+import com.mobileprism.fishing.ui.MainDestinations
+import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.utils.Constants.WIND_ROTATION
 import com.mobileprism.fishing.utils.roundTo
 import com.mobileprism.fishing.utils.showToast
@@ -689,7 +689,7 @@ fun NewCatchPlaceSelectView(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-.onFocusChanged {
+                    .onFocusChanged {
                         isDropMenuOpen = it.isFocused
                     }
 ,
@@ -771,7 +771,6 @@ fun DateAndTimeItem(
     dateTime: Long,
     onDateChange: (Long) -> Unit,
 ) {
-    val viewModel: NewCatchViewModel = getViewModel()
     var dateSetState by remember { mutableStateOf(false) }
     var timeSetState by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -809,10 +808,7 @@ fun DateAndTimeItem(
                 .fillMaxWidth(),
             trailingIcon = {
                 IconButton(onClick = {
-                    if (viewModel.noErrors.value) dateSetState = true
-                    else {
-                        SnackbarManager.showMessage(R.string.choose_place_first)
-                    }
+                    dateSetState = true
                 }) {
                     Icon(
                         painter = painterResource(R.drawable.ic_baseline_event_24),
@@ -831,10 +827,7 @@ fun DateAndTimeItem(
                 .fillMaxWidth(),
             trailingIcon = {
                 IconButton(onClick = {
-                    if (viewModel.noErrors.value) timeSetState = true
-                    else {
-                        SnackbarManager.showMessage(R.string.choose_place_first)
-                    }
+                    timeSetState = true
                 }) {
                     Icon(
                         painter = painterResource(R.drawable.ic_baseline_access_time_24),

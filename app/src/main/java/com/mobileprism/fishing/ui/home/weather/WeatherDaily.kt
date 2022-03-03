@@ -16,7 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.*
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.model.datastore.WeatherPreferencesImpl
+import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.entity.weather.Daily
 import com.mobileprism.fishing.ui.home.advertising.AdaptiveBannerAdvertView
 import com.mobileprism.fishing.ui.home.views.DefaultAppBar
@@ -121,10 +121,10 @@ fun DailyWeatherScreen(
     modifier: Modifier = Modifier,
     forecast: Daily
 ) {
-    val weatherPrefsImpl: WeatherPreferencesImpl = get()
-    val pressureUnit by weatherPrefsImpl.getPressureUnit.collectAsState(PressureValues.mmHg)
-    val temperatureUnit by weatherPrefsImpl.getTemperatureUnit.collectAsState(TemperatureValues.C)
-    val windSpeedUnit by weatherPrefsImpl.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
+    val weatherPrefs: WeatherPreferences = get()
+    val pressureUnit by weatherPrefs.getPressureUnit().collectAsState(PressureValues.mmHg)
+    val temperatureUnit by weatherPrefs.getTemperatureUnit().collectAsState(TemperatureValues.C)
+    val windSpeedUnit by weatherPrefs.getWindSpeedUnit().collectAsState(WindSpeedValues.metersps)
 
     Column(
         modifier = modifier

@@ -3,7 +3,6 @@ package com.mobileprism.fishing.model.use_cases
 import android.net.Uri
 import com.mobileprism.fishing.domain.*
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
-import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.raw.NewCatchWeather
 import com.mobileprism.fishing.model.repository.PhotoStorage
@@ -13,35 +12,32 @@ import com.mobileprism.fishing.utils.getNewCatchId
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionState
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.last
 
 class SaveNewCatchUseCase(
     private val catchesRepository: CatchesRepository,
+    private val catchesRepositoryOffline: CatchesRepository,
     private val photosRepository: PhotoStorage,
     private val connectionManager: ConnectionManager,
     private val weatherPreferences: WeatherPreferences
 ) {
 
-    operator fun invoke(data: NewUserCatchData) = channelFlow<Progress> {
-        trySend(Progress.Loading())
+    operator fun invoke(data: NewUserCatchData) = channelFlow {
 
         val userCatch = createUserCatch(
-            placeAndTime = data.placeAndTime,
-            fishAndWeight = data.fishAndWeight,
-            catchInfo = data.catchInfo,
-            weather = mapWeatherValues(data.catchWeather),
+            placeAndTimeState = data.placeAndTimeState,
+            fishAndWeightState = data.fishAndWeightState,
+            catchInfoState = data.catchInfoState,
+            weather = mapWeatherValues(data.catchWeatherState),
             photos = savePhotos(data.photos)
         )
 
-        data.placeAndTime.place?.let { it ->
-            if (connectionManager.getConnectionState() is ConnectionState.Available) {
-                catchesRepository.addNewCatch(it.id, userCatch).collect { progerss ->
-                    trySend(progerss)
-                }
-            } else {
-                catchesRepository.addNewCatchOffline(it.id, userCatch).collect { progerss ->
-                    trySend(progerss)
-                }
-            }
+        val repository = if (connectionManager.getConnectionState() is ConnectionState.Available) {
+            catchesRepository
+        } else catchesRepositoryOffline
+
+        data.placeAndTimeState.place?.let { it ->
+            repository.addNewCatch(markerId = it.id, newCatch = userCatch).collect { trySend(it) }
         }
     }
 
@@ -49,43 +45,43 @@ class SaveNewCatchUseCase(
         return photosRepository.uploadPhotos(photos)
     }
 
-    private suspend fun mapWeatherValues(weather: CatchWeather): NewCatchWeather {
-        val tempUnits = weatherPreferences.getTemperatureUnit()
-        val pressureUnits = weatherPreferences.getPressureUnit()
-        val windUnits = weatherPreferences.getWindSpeedUnit()
+    private suspend fun mapWeatherValues(weatherState: CatchWeatherState): NewCatchWeather {
+        val tempUnits = weatherPreferences.getTemperatureUnit().last()
+        val pressureUnits = weatherPreferences.getPressureUnit().last()
+        val windUnits = weatherPreferences.getWindSpeedUnit().last()
 
         return NewCatchWeather(
-            weatherDescription = weather.primary.replaceFirstChar { it.uppercase() },
-            icon = weather.icon,
-            temperatureInC = tempUnits.getCelciusTemperature(weather.temperature.toFloat()),
-            pressureInMmhg = pressureUnits.getDefaultPressure(weather.pressure.toFloat()),
-            windInMs = windUnits.getWindSpeedInt(weather.windSpeed.toDouble()).toInt(),
-            windDirInDeg = weather.windDeg.toFloat(),
-            moonPhase = weather.moonPhase
+            weatherDescription = weatherState.primary.replaceFirstChar { it.uppercase() },
+            icon = weatherState.icon,
+            temperatureInC = tempUnits.getCelciusTemperature(weatherState.temperature.toFloat()),
+            pressureInMmhg = pressureUnits.getDefaultPressure(weatherState.pressure.toFloat()),
+            windInMs = windUnits.getWindSpeedInt(weatherState.windSpeed.toDouble()).toInt(),
+            windDirInDeg = weatherState.windDeg.toFloat(),
+            moonPhase = weatherState.moonPhase
         )
     }
 
     private fun createUserCatch(
-        placeAndTime: CatchPlaceAndTime,
-        fishAndWeight: FishAndWeight,
-        catchInfo: CatchInfo,
+        placeAndTimeState: CatchPlaceAndTimeState,
+        fishAndWeightState: FishAndWeightState,
+        catchInfoState: CatchInfoState,
         weather: NewCatchWeather,
         photos: List<String>
     ) = UserCatch(
         id = getNewCatchId(),
         userId = getCurrentUser()!!.uid,
-        description = catchInfo.note,
-        date = placeAndTime.date,
-        fishType = fishAndWeight.fish,
-        fishAmount = fishAndWeight.fishAmount,
-        fishWeight = fishAndWeight.fishWeight,
-        fishingRodType = catchInfo.rod,
-        fishingBait = catchInfo.bait,
-        fishingLure = catchInfo.lure,
-        userMarkerId = placeAndTime.place?.id ?: "",
+        description = catchInfoState.note,
+        date = placeAndTimeState.date,
+        fishType = fishAndWeightState.fish,
+        fishAmount = fishAndWeightState.fishAmount,
+        fishWeight = fishAndWeightState.fishWeight,
+        fishingRodType = catchInfoState.rod,
+        fishingBait = catchInfoState.bait,
+        fishingLure = catchInfoState.lure,
+        userMarkerId = placeAndTimeState.place?.id ?: "",
         isPublic = false,
         downloadPhotoLinks = photos,
-        placeTitle = placeAndTime.place?.title ?: "",
+        placeTitle = placeAndTimeState.place?.title ?: "",
         weatherPrimary = weather.weatherDescription,
         weatherIcon = weather.icon,
         weatherTemperature = weather.temperatureInC.toFloat(),

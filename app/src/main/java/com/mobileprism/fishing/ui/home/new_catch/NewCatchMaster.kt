@@ -103,12 +103,12 @@ fun NewCatchMasterScreen(
         }
     }
 
-    SubscribeToNewCatchProgress(
-        uiState = viewModel.uiState.collectAsState().value,
-        adIsLoadedState = isAdLoaded.value,
-        loadingDialogState = loadingDialogState,
-        upPress = upPress
-    )
+//    SubscribeToNewCatchProgress(
+//        uiState = viewModel.uiState.collectAsState().value,
+//        adIsLoadedState = isAdLoaded.value,
+//        loadingDialogState = loadingDialogState,
+//        upPress = upPress
+//    )
 
     ModalLoadingDialog(
         dialogSate = loadingDialogState,

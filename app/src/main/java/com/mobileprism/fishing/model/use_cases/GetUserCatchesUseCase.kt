@@ -16,6 +16,7 @@ class GetUserCatchesUseCase(val repository: CatchesRepository) {
                     newCatch.id == oldCatch.id
                 }
             }
+
             currentCatches.apply {
                 addAll(contentState.added)
                 removeAll(contentState.deleted)

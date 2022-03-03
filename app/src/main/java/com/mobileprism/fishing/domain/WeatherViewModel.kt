@@ -4,14 +4,12 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
-import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -51,16 +49,15 @@ class WeatherViewModel(
         _weatherState.value = BaseViewState.Loading()
         viewModelScope.launch(Dispatchers.IO) {
             weatherRepository.getWeather(latitude, longitude).collect { result ->
-                when (result) {
-                    is RetrofitWrapper.Success<WeatherForecast> -> {
-                        //weather.value = result.data
-                        _weatherState.value = BaseViewState.Success(result.data)
-                        _weather.value = result.data
+                result.fold(
+                    onSuccess = {
+                        _weatherState.value = BaseViewState.Success(it)
+                        _weather.value = it
+                    },
+                    onFailure = {
+                        _weatherState.value = BaseViewState.Error(it)
                     }
-                    is RetrofitWrapper.Error -> {
-                        _weatherState.value = BaseViewState.Error(result.errorType.error)
-                    }
-                }
+                )
             }
         }
     }

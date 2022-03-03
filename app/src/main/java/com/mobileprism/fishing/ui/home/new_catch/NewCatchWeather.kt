@@ -17,6 +17,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.NewCatchViewModel
+import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferencesImpl
 import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.mappers.getMoonIconByPhase
@@ -342,8 +343,8 @@ fun NewCatchTemperatureView(
     onError: (Boolean) -> Unit
 ) {
 
-    val weatherSettingsImpl: WeatherPreferencesImpl = get()
-    val temperatureUnit by weatherSettingsImpl.getTemperatureUnit.collectAsState(TemperatureValues.C)
+    val weatherSettings: WeatherPreferences = get()
+    val temperatureUnit by weatherSettings.getTemperatureUnit().collectAsState(TemperatureValues.C)
 
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
@@ -377,8 +378,8 @@ fun NewCatchPressureView(
     onPressureChange: (String) -> Unit,
     onError: (Boolean) -> Unit
 ) {
-    val weatherSettingsImpl: WeatherPreferencesImpl = get()
-    val pressureUnit by weatherSettingsImpl.getPressureUnit.collectAsState(PressureValues.mmHg)
+    val weatherSettings: WeatherPreferences = get()
+    val pressureUnit by weatherSettings.getPressureUnit().collectAsState(PressureValues.mmHg)
 
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
@@ -416,8 +417,8 @@ fun NewCatchWindView(
     onWindDirChange: (Float) -> Unit,
     onError: (Boolean) -> Unit
 ) {
-    val weatherSettingsImpl: WeatherPreferencesImpl = get()
-    val windSpeedUnit by weatherSettingsImpl.getWindSpeedUnit.collectAsState(WindSpeedValues.kmph)
+    val weatherSettings: WeatherPreferences = get()
+    val windSpeedUnit by weatherSettings.getWindSpeedUnit().collectAsState(WindSpeedValues.kmph)
 
     var windDirDialogState by remember { mutableStateOf(false) }
 

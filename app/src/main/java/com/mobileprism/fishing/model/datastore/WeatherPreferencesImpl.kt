@@ -12,15 +12,11 @@ import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.single
 
 interface WeatherPreferences {
-    fun getPressureUnitFlow(): Flow<PressureValues>
-    fun getTemperatureUnitFlow(): Flow<TemperatureValues>
-    fun getWindSpeedUnitFlow(): Flow<WindSpeedValues>
-    suspend fun getPressureUnit(): PressureValues
-    suspend fun getTemperatureUnit(): TemperatureValues
-    suspend fun getWindSpeedUnit(): WindSpeedValues
+    fun getPressureUnit(): Flow<PressureValues>
+    fun getTemperatureUnit(): Flow<TemperatureValues>
+    fun getWindSpeedUnit(): Flow<WindSpeedValues>
     suspend fun savePressureUnit(pressureValues: PressureValues)
     suspend fun saveTemperatureUnit(temperatureValues: TemperatureValues)
     suspend fun saveWindSpeedUnit(windSpeedValues: WindSpeedValues)
@@ -63,17 +59,11 @@ class WeatherPreferencesImpl(private val context: Context) : WeatherPreferences 
             }
         }
 
-    override fun getPressureUnitFlow() = getPressureUnit
+    override fun getPressureUnit() = getPressureUnit
 
-    override fun getTemperatureUnitFlow() = getTemperatureUnit
+    override fun getTemperatureUnit() = getTemperatureUnit
 
-    override fun getWindSpeedUnitFlow() = getWindSpeedUnit
-
-    override suspend fun getPressureUnit() = getPressureUnit.single()
-
-    override suspend fun getTemperatureUnit() = getTemperatureUnit.single()
-
-    override suspend fun getWindSpeedUnit() = getWindSpeedUnit.single()
+    override fun getWindSpeedUnit() = getWindSpeedUnit
 
     //save into datastore
     override suspend fun savePressureUnit(pressureValues: PressureValues) {

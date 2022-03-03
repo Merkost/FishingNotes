@@ -5,6 +5,7 @@ import com.mobileprism.fishing.model.datasource.FreeWeatherRepositoryImpl
 import com.mobileprism.fishing.model.datasource.SolunarRetrofitRepositoryImpl
 import com.mobileprism.fishing.model.datasource.WeatherRepositoryRetrofitImpl
 import com.mobileprism.fishing.model.datasource.firebase.*
+import com.mobileprism.fishing.model.datasource.firebase.offline.FirebaseCatchesRepositoryOfflineImpl
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.repository.PhotoStorage
 import com.mobileprism.fishing.model.repository.UserRepository
@@ -15,6 +16,9 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import java.util.concurrent.TimeUnit
+
+const val CATCHES_REPOSITORY = "Catches repository"
+const val CATCHES_REPOSITORY_OFFLINE = "Catches repository offline"
 
 val repositoryModule = module {
     single { RepositoryCollections() }
@@ -32,12 +36,17 @@ val repositoryModule = module {
             context = androidContext()
         )
     }
-    single<CatchesRepository> {
+    single<CatchesRepository>(named(CATCHES_REPOSITORY)) {
         FirebaseCatchesRepositoryImpl(
             dbCollections = get(),
             firebaseAnalytics = get(),
-            cloudPhotoStorage = get(),
-            context = androidContext()
+            cloudPhotoStorage = get()
+        )
+    }
+    single<CatchesRepository>(named(CATCHES_REPOSITORY_OFFLINE)) {
+        FirebaseCatchesRepositoryOfflineImpl(
+            dbCollections = get(),
+            firebaseAnalytics = get(),
         )
     }
     /*single<CatchesRepository> {
