@@ -5,6 +5,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import java.text.DecimalFormatSymbols
 
 fun Modifier.noRippleClickable(
     enabled: Boolean = true,
@@ -16,4 +17,13 @@ fun Modifier.noRippleClickable(
         interactionSource = remember { MutableInteractionSource() },
         onClick = onClick
     )
+}
+
+fun String.toDoubleExOrNull() : Double? {
+    val decimalSymbol = DecimalFormatSymbols.getInstance().decimalSeparator
+    return if (decimalSymbol == ',') {
+        replace(decimalSymbol, '.').toDoubleOrNull()
+    } else {
+        toDoubleOrNull()
+    }
 }

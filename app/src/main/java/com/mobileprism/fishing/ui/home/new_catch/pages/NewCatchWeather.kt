@@ -94,7 +94,7 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
                     }
                     state.isLoading -> {}
                     else -> {
-                        viewModel.refreshWeatherState()
+                        viewModel.loadWeather()
                     }
                 }
             }

@@ -27,9 +27,13 @@ import com.mobileprism.fishing.ui.home.views.SecondaryText
 import com.mobileprism.fishing.ui.home.weather.PressureValues
 import com.mobileprism.fishing.ui.home.weather.TemperatureValues
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
+import com.mobileprism.fishing.ui.utils.toDoubleExOrNull
 import com.mobileprism.fishing.utils.time.toHours
 import org.koin.androidx.compose.get
+import java.text.DecimalFormatSymbols
+import java.text.NumberFormat
 import java.util.*
+
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -449,9 +453,7 @@ fun NewCatchWindView(
         },
         trailingIcon = { Text(text = stringResource(windSpeedUnit.stringRes)) },
         onValueChange = { onWindChange(it) },
-        isError = (wind
-            .toIntOrNull() == null || wind.length >= 3)
-            .apply { onError(this) },
+        isError = (wind.toDoubleExOrNull() == null || wind.length > 4).apply { onError(this) },
         label = { Text(text = stringResource(R.string.wind)) },
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Next,

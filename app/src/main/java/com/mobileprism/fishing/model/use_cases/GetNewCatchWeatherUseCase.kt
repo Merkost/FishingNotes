@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.model.use_cases
 
+import androidx.compose.ui.text.capitalize
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.weather.NewCatchWeatherData
@@ -13,6 +14,7 @@ import com.mobileprism.fishing.utils.time.hoursCount
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.flow.single
 import java.util.*
 
 class GetNewCatchWeatherUseCase(
@@ -33,7 +35,7 @@ class GetNewCatchWeatherUseCase(
                             emit(Result.success(createCatchWeatherData(place, it, newCatchDate)))
                         },
                         onFailure = {
-                            emit(Result.failure(Throwable()))
+                            emit(Result.failure(it))
                         }
                     )
                 } else {
@@ -49,9 +51,9 @@ class GetNewCatchWeatherUseCase(
         newCatchDate: Long
     ): Result<WeatherForecast> {
         return if (Date().time.hoursCount() > newCatchDate.hoursCount()) {
-            getHistoricalWeather(place, newCatchDate).first()
+            getHistoricalWeather(place, newCatchDate).single()
         } else {
-            getWeatherForecast(place).first()
+            getWeatherForecast(place).single()
         }
     }
 
@@ -68,7 +70,7 @@ class GetNewCatchWeatherUseCase(
         return NewCatchWeatherData(
             lat = location.latitude,
             lng = location.longitude,
-            primary = weatherForecast.hourly[hour].weather.first().description,
+            primary = weatherForecast.hourly[hour].weather.first().description.replaceFirstChar { it.uppercase() },
             icon = weatherForecast.hourly[hour].weather.first().icon,
             temperature = tempUnits.getTemperature(weatherForecast.hourly[hour].temperature),
             windSpeed = windUnits.getWindSpeed(weatherForecast.hourly[hour].windSpeed.toDouble()),

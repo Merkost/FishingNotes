@@ -1,8 +1,11 @@
 package com.mobileprism.fishing.domain
 
 import android.net.Uri
+import android.os.Build
+import android.os.Debug
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.weather.NewCatchWeatherData
@@ -38,7 +41,7 @@ class NewCatchMasterViewModel(
     )
     val placeAndTimeState = _placeAndTimeState.asStateFlow()
 
-    private val _fishAndWeightState = MutableStateFlow(FishAndWeightState())
+    private val _fishAndWeightState = MutableStateFlow(FishAndWeightState(fish = if (BuildConfig.DEBUG) "Fish" else ""))
     val fishAndWeightSate = _fishAndWeightState.asStateFlow()
 
     private val _catchInfoState = MutableStateFlow(CatchInfoState())
@@ -46,8 +49,6 @@ class NewCatchMasterViewModel(
 
     private val _catchWeatherState = MutableStateFlow(CatchWeatherState())
     val catchWeatherState = _catchWeatherState.asStateFlow()
-
-    private val loadedWeather = MutableStateFlow(NewCatchWeatherData())
 
     private val _uiState = MutableStateFlow<BaseViewState<Nothing?>>(BaseViewState.Success(null))
     val uiState = _uiState.asStateFlow()
@@ -154,35 +155,32 @@ class NewCatchMasterViewModel(
                 ).collectLatest { result ->
                     result.fold(
                         onSuccess = { forecast ->
-                            loadedWeather.value = forecast
                             _catchWeatherState.value =
-                                _catchWeatherState.value.copy(isDownloadAvailable = false)
-                            refreshWeatherState()
+                                _catchWeatherState.value.copy(isLoading = false)
+                            refreshWeatherState(forecast)
                         },
                         onFailure = {
                             _catchWeatherState.value =
-                                _catchWeatherState.value.copy(isError = true)
-                        }
+                                _catchWeatherState.value.copy(isLoading = false, isError = true)
+                        },
                     )
                 }
             }
         }
     }
 
-    fun refreshWeatherState() {
-        loadedWeather.value.let { weather ->
-            _catchWeatherState.value = _catchWeatherState.value.copy(
-                primary = weather.primary,
-                icon = weather.icon,
-                temperature = weather.temperature,
-                windSpeed = weather.windSpeed,
-                windDeg = weather.windDeg,
-                pressure = weather.pressure,
-                moonPhase = weather.moonPhase,
-                isLoading = false,
-                isError = false
-            )
-        }
+    private fun refreshWeatherState(weather: NewCatchWeatherData) {
+        _catchWeatherState.value = _catchWeatherState.value.copy(
+            primary = weather.primary,
+            icon = weather.icon,
+            temperature = weather.temperature,
+            windSpeed = weather.windSpeed,
+            windDeg = weather.windDeg,
+            pressure = weather.pressure,
+            moonPhase = weather.moonPhase,
+            isLoading = false,
+            isError = false
+        )
     }
 
     fun saveNewCatch() {
