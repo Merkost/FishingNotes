@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.model.datastore
+package com.mobileprism.fishing.model.datastore.impl
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.ui.home.weather.PressureValues
 import com.mobileprism.fishing.ui.home.weather.TemperatureValues
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
@@ -13,14 +14,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
-//interface WeatherPreferences {
-//    fun getPressureUnit(): Flow<PressureValues>
-//    fun getTemperatureUnit(): Flow<TemperatureValues>
-//    fun getWindSpeedUnit(): Flow<WindSpeedValues>
-//    suspend fun savePressureUnit(pressureValues: PressureValues)
-//    suspend fun saveTemperatureUnit(temperatureValues: TemperatureValues)
-//    suspend fun saveWindSpeedUnit(windSpeedValues: WindSpeedValues)
-//}
 
 class WeatherPreferencesImpl(private val context: Context) : WeatherPreferences {
 
@@ -34,14 +27,14 @@ class WeatherPreferencesImpl(private val context: Context) : WeatherPreferences 
     }
 
     //get the saved value
-    val getPressureUnit: Flow<PressureValues> = context.dataStore.data
+    override val getPressureUnit: Flow<PressureValues> = context.dataStore.data
         .map { preferences ->
             PressureValues.valueOf(preferences[PRESSURE_UNIT] ?: PressureValues.mmHg.name)
         }.catch { e ->
             if (e is IllegalArgumentException) { emit(PressureValues.mmHg) }
         }
 
-    val getTemperatureUnit: Flow<TemperatureValues> = context.dataStore.data
+    override val getTemperatureUnit: Flow<TemperatureValues> = context.dataStore.data
         .map { preferences ->
             TemperatureValues.valueOf(preferences[TEMPERATURE_UNIT] ?: TemperatureValues.C.name)
         }.catch { e ->
@@ -50,7 +43,7 @@ class WeatherPreferencesImpl(private val context: Context) : WeatherPreferences 
             }
         }
 
-    val getWindSpeedUnit: Flow<WindSpeedValues> = context.dataStore.data
+    override val getWindSpeedUnit: Flow<WindSpeedValues> = context.dataStore.data
         .map { preferences ->
             WindSpeedValues.valueOf(preferences[WIND_UNIT] ?: WindSpeedValues.metersps.name)
         }.catch { e ->
@@ -58,12 +51,6 @@ class WeatherPreferencesImpl(private val context: Context) : WeatherPreferences 
                 emit(WindSpeedValues.metersps)
             }
         }
-
-    override fun getPressureUnit() = getPressureUnit
-
-    override fun getTemperatureUnit() = getTemperatureUnit
-
-    override fun getWindSpeedUnit() = getWindSpeedUnit
 
     //save into datastore
     override suspend fun savePressureUnit(pressureValues: PressureValues) {
