@@ -19,7 +19,6 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.NewCatchViewModel
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferencesImpl
-import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.mappers.getMoonIconByPhase
 import com.mobileprism.fishing.model.mappers.getWeatherIconByName

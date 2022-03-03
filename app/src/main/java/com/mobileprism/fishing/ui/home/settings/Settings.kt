@@ -30,7 +30,7 @@ import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.datastore.UserPreferences
-import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
+import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.map.GrantLocationPermissionsDialog
 import com.mobileprism.fishing.ui.home.map.LocationPermissionDialog
@@ -55,7 +55,7 @@ import org.koin.androidx.compose.get
 fun SettingsScreen(backPress: () -> Unit, navController: NavController) {
 
     val userPreferences: UserPreferences = get()
-    val weatherPreferencesImpl: WeatherPreferencesImpl = get()
+    val weatherPreferencesImpl: WeatherPreferences = get()
 
     Scaffold(
         topBar = { SettingsTopAppBar(backPress) },
@@ -103,7 +103,7 @@ fun AboutSettings(navController: NavController) {
 }
 
 @Composable
-fun WeatherSettings(weatherPreferencesImpl: WeatherPreferencesImpl) {
+fun WeatherSettings(weatherPreferencesImpl: WeatherPreferences) {
     val coroutineScope = rememberCoroutineScope()
 
     val isPressureDialogOpen = remember { mutableStateOf(false) }
@@ -329,10 +329,10 @@ fun DarkModeLottieSwitch(modifier: Modifier = Modifier) {
 @Composable
 fun GetTemperatureUnit(
     isTemperatureDialogOpen: MutableState<Boolean>,
-    weatherPreferencesImpl: WeatherPreferencesImpl,
+    weatherPreferencesImpl: WeatherPreferences,
 ) {
     val temperatureUnit =
-        weatherPreferencesImpl.getTemperatureUnit.collectAsState(TemperatureValues.C)
+        weatherPreferencesImpl.getTemperatureUnit().collectAsState(TemperatureValues.C)
     val radioOptions = TemperatureValues.values().asList()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -375,9 +375,9 @@ fun GetTemperatureUnit(
 @Composable
 fun GetPressureUnit(
     pressureDialogOpen: MutableState<Boolean>,
-    weatherPreferencesImpl: WeatherPreferencesImpl,
+    weatherPreferencesImpl: WeatherPreferences,
 ) {
-    val pressureUnit = weatherPreferencesImpl.getPressureUnit.collectAsState(PressureValues.mmHg)
+    val pressureUnit = weatherPreferencesImpl.getPressureUnit().collectAsState(PressureValues.mmHg)
     val radioOptions = PressureValues.values().asList()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -421,10 +421,10 @@ fun GetPressureUnit(
 @Composable
 fun GetWindSpeedUnit(
     isWindSpeedDialogOpen: MutableState<Boolean>,
-    weatherPreferencesImpl: WeatherPreferencesImpl,
+    weatherPreferencesImpl: WeatherPreferences,
 ) {
     val windSpeedUnit =
-        weatherPreferencesImpl.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
+        weatherPreferencesImpl.getWindSpeedUnit().collectAsState(WindSpeedValues.metersps)
     val radioOptions = WindSpeedValues.values().asList()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()

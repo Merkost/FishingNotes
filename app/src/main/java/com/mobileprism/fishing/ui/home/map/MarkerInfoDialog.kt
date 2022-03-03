@@ -28,7 +28,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.SphericalUtil
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
-import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.ui.Arguments

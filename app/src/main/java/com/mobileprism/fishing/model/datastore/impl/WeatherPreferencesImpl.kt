@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.ui.home.weather.PressureValues
 import com.mobileprism.fishing.ui.home.weather.TemperatureValues
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
@@ -14,14 +13,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
-interface WeatherPreferences {
-    fun getPressureUnit(): Flow<PressureValues>
-    fun getTemperatureUnit(): Flow<TemperatureValues>
-    fun getWindSpeedUnit(): Flow<WindSpeedValues>
-    suspend fun savePressureUnit(pressureValues: PressureValues)
-    suspend fun saveTemperatureUnit(temperatureValues: TemperatureValues)
-    suspend fun saveWindSpeedUnit(windSpeedValues: WindSpeedValues)
-}
+//interface WeatherPreferences {
+//    fun getPressureUnit(): Flow<PressureValues>
+//    fun getTemperatureUnit(): Flow<TemperatureValues>
+//    fun getWindSpeedUnit(): Flow<WindSpeedValues>
+//    suspend fun savePressureUnit(pressureValues: PressureValues)
+//    suspend fun saveTemperatureUnit(temperatureValues: TemperatureValues)
+//    suspend fun saveWindSpeedUnit(windSpeedValues: WindSpeedValues)
+//}
 
 class WeatherPreferencesImpl(private val context: Context) : WeatherPreferences {
 

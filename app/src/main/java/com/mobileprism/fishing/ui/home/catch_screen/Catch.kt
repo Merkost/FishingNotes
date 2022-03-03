@@ -27,7 +27,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.UserCatchViewModel
 import com.mobileprism.fishing.model.datastore.UserPreferences
-import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
+import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
@@ -407,9 +407,9 @@ fun CatchWeatherView(
     catch: UserCatch
 ) {
 
-    val weatherPrefsImpl: WeatherPreferencesImpl = get()
-    val pressureUnit by weatherPrefsImpl.getPressureUnit.collectAsState(PressureValues.mmHg)
-    val temperatureUnit by weatherPrefsImpl.getTemperatureUnit.collectAsState(TemperatureValues.C)
+    val weatherPrefs: WeatherPreferences = get()
+    val pressureUnit by weatherPrefs.getPressureUnit().collectAsState(PressureValues.mmHg)
+    val temperatureUnit by weatherPrefs.getTemperatureUnit().collectAsState(TemperatureValues.C)
 
     DefaultCard(
         modifier = modifier

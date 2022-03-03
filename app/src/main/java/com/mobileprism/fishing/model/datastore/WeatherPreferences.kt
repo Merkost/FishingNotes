@@ -6,12 +6,9 @@ import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import kotlinx.coroutines.flow.Flow
 
 interface WeatherPreferences {
-    fun getPressureUnitFlow(): Flow<PressureValues>
-    fun getTemperatureUnitFlow(): Flow<TemperatureValues>
-    fun getWindSpeedUnitFlow(): Flow<WindSpeedValues>
-    suspend fun getPressureUnit(): PressureValues
-    suspend fun getTemperatureUnit(): TemperatureValues
-    suspend fun getWindSpeedUnit(): WindSpeedValues
+    fun getPressureUnit(): Flow<PressureValues>
+    fun getTemperatureUnit(): Flow<TemperatureValues>
+    fun getWindSpeedUnit(): Flow<WindSpeedValues>
     suspend fun savePressureUnit(pressureValues: PressureValues)
     suspend fun saveTemperatureUnit(temperatureValues: TemperatureValues)
     suspend fun saveWindSpeedUnit(windSpeedValues: WindSpeedValues)
