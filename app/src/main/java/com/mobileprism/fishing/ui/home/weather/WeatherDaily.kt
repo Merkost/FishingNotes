@@ -120,9 +120,9 @@ fun DailyWeatherScreen(
     forecast: Daily
 ) {
     val weatherPrefs: WeatherPreferences = get()
-    val pressureUnit by weatherPrefs.getPressureUnit().collectAsState(PressureValues.mmHg)
-    val temperatureUnit by weatherPrefs.getTemperatureUnit().collectAsState(TemperatureValues.C)
-    val windSpeedUnit by weatherPrefs.getWindSpeedUnit().collectAsState(WindSpeedValues.metersps)
+    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
+    val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
+    val windSpeedUnit by weatherPrefs.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
 
     Column(
         modifier = modifier

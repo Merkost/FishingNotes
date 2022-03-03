@@ -329,17 +329,17 @@ fun DarkModeLottieSwitch(modifier: Modifier = Modifier) {
 @Composable
 fun GetTemperatureUnit(
     isTemperatureDialogOpen: MutableState<Boolean>,
-    weatherPreferencesImpl: WeatherPreferences,
+    weatherPreferences: WeatherPreferences,
 ) {
     val temperatureUnit =
-        weatherPreferencesImpl.getTemperatureUnit().collectAsState(TemperatureValues.C)
+        weatherPreferences.getTemperatureUnit.collectAsState(TemperatureValues.C)
     val radioOptions = TemperatureValues.values().asList()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
     val onSelectedValue: (temperatureValue: TemperatureValues) -> Unit = { newValue ->
         coroutineScope.launch {
-            weatherPreferencesImpl.saveTemperatureUnit(newValue)
+            weatherPreferences.saveTemperatureUnit(newValue)
             delay(200)
             isTemperatureDialogOpen.value = false
         }
@@ -375,16 +375,16 @@ fun GetTemperatureUnit(
 @Composable
 fun GetPressureUnit(
     pressureDialogOpen: MutableState<Boolean>,
-    weatherPreferencesImpl: WeatherPreferences,
+    weatherPreferences: WeatherPreferences,
 ) {
-    val pressureUnit = weatherPreferencesImpl.getPressureUnit().collectAsState(PressureValues.mmHg)
+    val pressureUnit = weatherPreferences.getPressureUnit.collectAsState(PressureValues.mmHg)
     val radioOptions = PressureValues.values().asList()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
     val onSelectedValue: (pressureUnit: PressureValues) -> Unit = { newValue ->
         coroutineScope.launch {
-            weatherPreferencesImpl.savePressureUnit(newValue)
+            weatherPreferences.savePressureUnit(newValue)
             delay(200)
             pressureDialogOpen.value = false
         }
@@ -421,17 +421,17 @@ fun GetPressureUnit(
 @Composable
 fun GetWindSpeedUnit(
     isWindSpeedDialogOpen: MutableState<Boolean>,
-    weatherPreferencesImpl: WeatherPreferences,
+    weatherPreferences: WeatherPreferences,
 ) {
     val windSpeedUnit =
-        weatherPreferencesImpl.getWindSpeedUnit().collectAsState(WindSpeedValues.metersps)
+        weatherPreferences.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
     val radioOptions = WindSpeedValues.values().asList()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
     val onSelectedValue: (windSpeedValues: WindSpeedValues) -> Unit = { newValue ->
         coroutineScope.launch {
-            weatherPreferencesImpl.saveWindSpeedUnit(newValue)
+            weatherPreferences.saveWindSpeedUnit(newValue)
             delay(200)
             isWindSpeedDialogOpen.value = false
         }

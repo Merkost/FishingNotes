@@ -408,8 +408,8 @@ fun CatchWeatherView(
 ) {
 
     val weatherPrefs: WeatherPreferences = get()
-    val pressureUnit by weatherPrefs.getPressureUnit().collectAsState(PressureValues.mmHg)
-    val temperatureUnit by weatherPrefs.getTemperatureUnit().collectAsState(TemperatureValues.C)
+    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
+    val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
 
     DefaultCard(
         modifier = modifier

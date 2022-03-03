@@ -46,9 +46,9 @@ class SaveNewCatchUseCase(
     }
 
     private suspend fun mapWeatherValues(weatherState: CatchWeatherState): NewCatchWeather {
-        val tempUnits = weatherPreferences.getTemperatureUnit().first()
-        val pressureUnits = weatherPreferences.getPressureUnit().first()
-        val windUnits = weatherPreferences.getWindSpeedUnit().first()
+        val tempUnits = weatherPreferences.getTemperatureUnit.first()
+        val pressureUnits = weatherPreferences.getPressureUnit.first()
+        val windUnits = weatherPreferences.getWindSpeedUnit.first()
 
         return NewCatchWeather(
             weatherDescription = weatherState.primary.replaceFirstChar { it.uppercase() },

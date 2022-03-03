@@ -61,7 +61,7 @@ fun MarkerInfoDialog(
     val coroutineScope = rememberCoroutineScope()
     val geocoder = Geocoder(context, resources().configuration.locales[0])
 
-    val windUnit by weatherPreferences.getWindSpeedUnit().collectAsState(WindSpeedValues.metersps)
+    val windUnit by weatherPreferences.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
 
     var address: String? by remember { mutableStateOf(null) }
     var distance: String? by remember { mutableStateOf(null) }

@@ -49,9 +49,9 @@ class GetNewCatchWeatherUseCase(
         newCatchDate: Long
     ): Result<WeatherForecast> {
         return if (Date().time.hoursCount() > newCatchDate.hoursCount()) {
-            getHistoricalWeather(place, newCatchDate).last()
+            getHistoricalWeather(place, newCatchDate).first()
         } else {
-            getWeatherForecast(place).last()
+            getWeatherForecast(place).first()
         }
     }
 
