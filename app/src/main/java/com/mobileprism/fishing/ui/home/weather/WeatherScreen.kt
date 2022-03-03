@@ -38,7 +38,7 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.WeatherViewModel
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
 import com.mobileprism.fishing.model.datastore.UserPreferences
-import com.mobileprism.fishing.model.datastore.WeatherPreferences
+import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.weather.Daily
 import com.mobileprism.fishing.model.entity.weather.Hourly

@@ -9,6 +9,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.domain.*
 import com.mobileprism.fishing.model.datastore.*
+import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.model.use_cases.GetNewCatchWeatherUseCase
 import com.mobileprism.fishing.model.use_cases.GetUserCatchesUseCase
 import com.mobileprism.fishing.model.use_cases.GetUserPlacesUseCase
@@ -42,7 +43,7 @@ val settingsModule = module {
     single { AppPreferences(androidContext()) }
     single { UserPreferences(androidContext()) }
     single<WeatherPreferences> { WeatherPreferencesImpl(androidContext()) }
-    single { NotesPreferences(androidContext()) }
+    single { NotesPreferencesImpl(androidContext()) }
     single<ConnectionManager> { ConnectionManagerImpl(androidContext()) }
 }
 
