@@ -16,7 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.pager.*
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.model.datastore.WeatherPreferencesImpl
+import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.model.entity.weather.Daily
 import com.mobileprism.fishing.ui.home.advertising.AdaptiveBannerAdvertView
 import com.mobileprism.fishing.ui.home.views.DefaultAppBar

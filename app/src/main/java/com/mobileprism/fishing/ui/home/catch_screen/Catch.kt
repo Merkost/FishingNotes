@@ -27,7 +27,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.UserCatchViewModel
 import com.mobileprism.fishing.model.datastore.UserPreferences
-import com.mobileprism.fishing.model.datastore.WeatherPreferencesImpl
+import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.content.UserMapMarker

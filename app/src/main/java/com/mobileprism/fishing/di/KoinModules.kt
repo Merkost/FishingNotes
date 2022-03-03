@@ -7,10 +7,8 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.domain.*
-import com.mobileprism.fishing.model.datastore.AppPreferences
-import com.mobileprism.fishing.model.datastore.NotesPreferences
-import com.mobileprism.fishing.model.datastore.UserPreferences
-import com.mobileprism.fishing.model.datastore.WeatherPreferencesImpl
+import com.mobileprism.fishing.model.datastore.*
+import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.model.use_cases.GetNewCatchWeatherUseCase
 import com.mobileprism.fishing.model.use_cases.GetUserCatchesUseCase
 import com.mobileprism.fishing.ui.home.SnackbarManager
@@ -38,8 +36,8 @@ val appModule = module {
 val settingsModule = module {
     single { AppPreferences(androidContext()) }
     single { UserPreferences(androidContext()) }
-    single { WeatherPreferencesImpl(androidContext()) }
-    single { NotesPreferences(androidContext()) }
+    single<WeatherPreferences> { WeatherPreferencesImpl(androidContext()) }
+    single<NotesPreferences> { NotesPreferencesImpl(androidContext()) }
 }
 
 val mainModule = module {

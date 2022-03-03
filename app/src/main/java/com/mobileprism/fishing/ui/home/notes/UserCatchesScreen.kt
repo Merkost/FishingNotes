@@ -28,6 +28,7 @@ import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.utils.enums.CatchesSortValues
 import com.mobileprism.fishing.domain.UserCatchesViewModel
 import com.mobileprism.fishing.model.datastore.NotesPreferences
+import com.mobileprism.fishing.model.datastore.NotesPreferencesImpl
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import org.koin.androidx.compose.get
@@ -42,7 +43,7 @@ fun UserCatchesScreen(
     notesPreferences: NotesPreferences = get()
 ) {
     val uiState = viewModel.uiState.collectAsState()
-    val catchesSortValue by notesPreferences.catchesSortValue.collectAsState(CatchesSortValues.Default)
+    val catchesSortValue by notesPreferences.getCatchesSortValue.collectAsState(CatchesSortValues.Default)
 
     Scaffold(backgroundColor = Color.Transparent) {
         val catches by viewModel.currentContent.collectAsState()
