@@ -19,6 +19,7 @@ import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
 import com.mobileprism.fishing.model.use_cases.GetNewCatchWeatherUseCase
 import com.mobileprism.fishing.ui.home.UiState
+import com.mobileprism.fishing.ui.home.new_catch.NewCatchWeatherData
 import com.mobileprism.fishing.utils.calcMoonPhase
 import com.mobileprism.fishing.utils.getClosestHourIndex
 import com.mobileprism.fishing.utils.isDateInList
@@ -34,7 +35,7 @@ class NewCatchMasterViewModel(
     placeState: ReceivedPlaceState,
     private val markersRepository: MarkersRepository,
     private val catchesRepository: CatchesRepository,
-    private val weatherSettings: WeatherPreferences,
+
     private val getNewCatchWeatherUseCase: GetNewCatchWeatherUseCase,
 ) : ViewModel() {
 
@@ -51,13 +52,15 @@ class NewCatchMasterViewModel(
     )
     val currentPlace = _currentPlace.asStateFlow()
 
-    private val loadedWeather = MutableStateFlow(WeatherForecast())
-
     private val _uiState = MutableStateFlow<UiState?>(null)
     val uiState = _uiState.asStateFlow()
 
     private val _weatherState =
-        MutableStateFlow<RetrofitWrapper<WeatherForecast>>(RetrofitWrapper.Success(WeatherForecast()))
+        MutableStateFlow<RetrofitWrapper<NewCatchWeatherData>>(
+            RetrofitWrapper.Success(
+                NewCatchWeatherData()
+            )
+        )
     val weatherState = _weatherState.asStateFlow()
 
     private val _weatherDownloadIsAvailable = MutableStateFlow(true)
@@ -206,44 +209,31 @@ class NewCatchMasterViewModel(
             _weatherState.value = RetrofitWrapper.Loading()
             viewModelScope.launch(Dispatchers.IO) {
                 getNewCatchWeatherUseCase.invoke(currentPlace.value, catchDate.value)
-                    .collectLatest { result->
-                    when (result) {
-                        is Resource.Success -> {
-                            loadedWeather.value = result.data!!
-                            _weatherState.value = RetrofitWrapper.Success(result.data)
-                            refreshWeatherState()
-                        }
-                        is Resource.Error -> {
-                            _weatherState.value = RetrofitWrapper.Error(ErrorType.OtherError(null))
+                    .collect { result ->
+                        when (result) {
+                            is Resource.Success -> {
+                                _weatherState.value = RetrofitWrapper.Success(result.data!!)
+                                setWeather(result.data)
+                            }
+                            is Resource.Error -> {
+                                _weatherState.value =
+                                    RetrofitWrapper.Error(ErrorType.OtherError(null))
+                            }
                         }
                     }
-                }
             }
         }
     }
 
-    fun refreshWeatherState() {
-        loadedWeather.value.run {
-            viewModelScope.launch {
-                val index = getClosestHourIndex(list = hourly, date = catchDate.value)
-
-                weatherSettings.getPressureUnit.take(1).collectLatest {
-                    setWeatherPressure(it.getPressureInt(hourly[index].pressure).toString())
-                }
-                weatherSettings.getWindSpeedUnit.take(1).collectLatest {
-                    setWeatherWindSpeed(it.getWindSpeedInt(hourly[index].windSpeed.toDouble()))
-                }
-                weatherSettings.getTemperatureUnit.take(1).collectLatest {
-                    setWeatherTemperature(it.getTemperature(hourly[index].temperature))
-                }
-
-                setWeatherPrimary(hourly[index].weather.first().description
-                    .replaceFirstChar { it.uppercase() })
-                setWeatherIconId(hourly[index].weather.first().icon)
-                setWeatherWindDeg(hourly[index].windDeg)
-                setWeatherMoonPhase(calcMoonPhase(catchDate.value))
-                checkWeatherDownloadNeed()
-            }
+    fun setWeather(newWeather: NewCatchWeatherData) {
+        newWeather.let {
+            setWeatherPressure(it.pressure)
+            setWeatherWindSpeed(it.wind)
+            setWeatherTemperature(it.temperature)
+            setWeatherPrimary(it.weatherDescription)
+            setWeatherIconId(it.icon)
+            setWeatherWindDeg(it.windDir)
+            setWeatherMoonPhase(it.moonPhase)
         }
     }
 
@@ -301,14 +291,4 @@ class NewCatchMasterViewModel(
         weatherMoonPhase = weatherMoonPhase.value
     )
 
-    private fun checkWeatherDownloadNeed(): Boolean {
-        val lastLoadedWeatherPlace = UserMapMarker(
-            latitude = loadedWeather.value.latitude.toDouble(),
-            longitude = loadedWeather.value.longitude.toDouble()
-        )
-        return currentPlace.value?.let { currentPlace ->
-            isLocationsTooFar(currentPlace, lastLoadedWeatherPlace)
-                    || !isDateInList(loadedWeather.value.hourly, catchDate.value)
-        } ?: false
-    }
 }

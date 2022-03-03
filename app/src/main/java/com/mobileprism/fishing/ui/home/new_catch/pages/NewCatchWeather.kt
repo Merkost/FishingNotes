@@ -91,14 +91,14 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
             onClick = {
                 when {
                     internetConnectionState.value is ConnectionState.Unavailable -> {
-                        viewModel.refreshWeatherState()
+                        viewModel.loadWeather()
                     }
                     canDownloadWeatherState -> {
                         viewModel.loadWeather()
                     }
                     uiState is RetrofitWrapper.Loading -> {}
                     uiState is RetrofitWrapper.Success -> {
-                        viewModel.refreshWeatherState()
+                        viewModel.loadWeather()
                     }
                 }
             }) {

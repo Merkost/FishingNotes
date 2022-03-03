@@ -57,11 +57,8 @@ fun WeatherDaily(
                 ) {
                     WeatherDaysTabs(forecast = data!!.dailyForecast, pagerState = pagerState)
                     WeatherTabsContent(forecast = data.dailyForecast, pagerState = pagerState)
-
                 }
-
             }
-
         }
     }
 }

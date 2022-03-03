@@ -63,7 +63,6 @@ val mainModule = module {
             get(),
             get(),
             get(),
-            get()
         )
     }
 
@@ -71,5 +70,5 @@ val mainModule = module {
 
 val useCasesModule = module {
     single { GetUserCatchesUseCase(get()) }
-    single { GetNewCatchWeatherUseCase(get()) }
+    single { GetNewCatchWeatherUseCase(get(), get()) }
 }

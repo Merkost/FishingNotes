@@ -447,7 +447,7 @@ fun NewCatchWindView(
         trailingIcon = { Text(text = stringResource(windSpeedUnit.stringRes)) },
         onValueChange = { onWindChange(it) },
         isError = (wind.value
-            .toIntOrNull() == null || wind.value.length >= 3)
+            .toIntOrNull() == null || wind.value.length > 2)
             .apply { onError(this) },
         label = { Text(text = stringResource(R.string.wind)) },
         keyboardOptions = KeyboardOptions(
