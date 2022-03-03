@@ -12,7 +12,7 @@ import com.mobileprism.fishing.utils.getNewCatchId
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionState
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.flow.first
 
 class SaveNewCatchUseCase(
     private val catchesRepository: CatchesRepository,
@@ -46,9 +46,9 @@ class SaveNewCatchUseCase(
     }
 
     private suspend fun mapWeatherValues(weatherState: CatchWeatherState): NewCatchWeather {
-        val tempUnits = weatherPreferences.getTemperatureUnit().last()
-        val pressureUnits = weatherPreferences.getPressureUnit().last()
-        val windUnits = weatherPreferences.getWindSpeedUnit().last()
+        val tempUnits = weatherPreferences.getTemperatureUnit().first()
+        val pressureUnits = weatherPreferences.getPressureUnit().first()
+        val windUnits = weatherPreferences.getWindSpeedUnit().first()
 
         return NewCatchWeather(
             weatherDescription = weatherState.primary.replaceFirstChar { it.uppercase() },
