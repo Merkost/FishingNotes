@@ -9,9 +9,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.domain.*
 import com.mobileprism.fishing.model.datastore.*
+import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.model.use_cases.GetNewCatchWeatherUseCase
 import com.mobileprism.fishing.model.use_cases.GetUserCatchesUseCase
-import com.mobileprism.fishing.model.use_cases.GetUserPlacesUseCase
 import com.mobileprism.fishing.model.use_cases.SaveNewCatchUseCase
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.utils.Logger
