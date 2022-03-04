@@ -7,6 +7,9 @@ import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.api.SolunarApiService
 import com.mobileprism.fishing.model.entity.solunar.Solunar
 import com.mobileprism.fishing.model.repository.app.SolunarRepository
+import com.mobileprism.fishing.model.utils.safeApiCall
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.OkHttpClient
@@ -18,13 +21,13 @@ import java.util.*
 import okhttp3.logging.HttpLoggingInterceptor
 
 
-
-
 class SolunarRetrofitRepositoryImpl(
     private val firebaseAnalytics: FirebaseAnalytics,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : SolunarRepository {
 
     companion object {
+
         private const val BASE_SOLUNAR_URL = "https://api.solunar.org/"
 
         private fun getService(): SolunarApiService {
@@ -52,7 +55,8 @@ class SolunarRetrofitRepositoryImpl(
 
     override fun getSolunar(latitude: Double, longitude: Double): Flow<RetrofitWrapper<Solunar>> =
         flow {
-            try {
+
+            emit(safeApiCall(dispatcher) {
                 val currentDate = Date()
                 val format = SimpleDateFormat("yyyyMMdd", Locale.getDefault());
                 val date = format.format(currentDate)
@@ -60,20 +64,16 @@ class SolunarRetrofitRepositoryImpl(
                 val timeZone = SimpleDateFormat("ZZZZZ", Locale.getDefault())
                     .format(System.currentTimeMillis()).split(":")[0]
 
-                val solunar = getService().getSolunar(
+                firebaseAnalytics.logEvent("get_solunar", null)
+
+                getService().getSolunar(
                     latitude = latitude, longitude = longitude,
                     date = date,
                     tz = timeZone.toIntOrNull() ?: 0
                 )
 
-                firebaseAnalytics.logEvent("get_solunar", null)
+            })
 
-                emit(RetrofitWrapper.Success(solunar))
-            } catch (e: IOException) {
-                emit(RetrofitWrapper.Error(ErrorType.NetworkError(e)))
-            } catch (e: Exception) {
-                emit(RetrofitWrapper.Error(ErrorType.OtherError(e)))
-            }
         }
 
 }

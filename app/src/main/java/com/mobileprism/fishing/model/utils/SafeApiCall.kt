@@ -15,14 +15,16 @@ suspend fun <T> safeApiCall(dispatcher: CoroutineDispatcher, apiCall: suspend ()
             RetrofitWrapper.Success(apiCall.invoke())
         } catch (throwable: Throwable) {
             val error = when (throwable) {
-                is IOException -> RetrofitWrapper.Error(ErrorType.NetworkError)
+                is IOException -> RetrofitWrapper.Error(ErrorType.NetworkError(Throwable()))
                 is HttpException -> {
                     val code = throwable.code()
                     val errorResponse = convertErrorBody(throwable)
-                    RetrofitWrapper.Error(ErrorType.GenericError(code, errorResponse))
+                    /*RetrofitWrapper.Error(ErrorType.GenericError(code, errorResponse))*/
+                    RetrofitWrapper.Error(ErrorType.NetworkError(Throwable()))
                 }
                 else -> {
-                    RetrofitWrapper.Error(ErrorType.GenericError(null, null))
+                    /*RetrofitWrapper.Error(ErrorType.GenericError(null, null))*/
+                    RetrofitWrapper.Error(ErrorType.NetworkError(Throwable()))
                 }
             }
             error

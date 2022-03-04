@@ -8,6 +8,9 @@ import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.api.FreeWeatherApiService
 import com.mobileprism.fishing.model.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.model.repository.app.FreeWeatherRepository
+import com.mobileprism.fishing.model.utils.safeApiCall
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.OkHttpClient
@@ -18,9 +21,8 @@ import java.io.IOException
 
 class FreeWeatherRepositoryImpl(
     private val firebaseAnalytics: FirebaseAnalytics,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : FreeWeatherRepository {
-
-    val locale = LocaleListCompat.getAdjustedDefault().toLanguageTags().take(2)
 
     companion object {
         private const val FREE_WEATHER_URL = "https://weather-by-api-ninjas.p.rapidapi.com/"
@@ -46,10 +48,12 @@ class FreeWeatherRepositoryImpl(
             httpClient.addInterceptor { chain ->
                 val builder = chain.request().newBuilder()
                 builder.header("x-rapidapi-host", "weather-by-api-ninjas.p.rapidapi.com")
-                builder.header("x-rapidapi-key", "00952e723emshfbe5254b88d96a6p1c8539jsn92c8c9ef59a1")
+                builder.header(
+                    "x-rapidapi-key",
+                    "00952e723emshfbe5254b88d96a6p1c8539jsn92c8c9ef59a1"
+                )
                 return@addInterceptor chain.proceed(builder.build())
             }
-
             return httpClient.build()
         }
     }
@@ -58,15 +62,10 @@ class FreeWeatherRepositoryImpl(
         lat: Double,
         lon: Double
     ): Flow<RetrofitWrapper<CurrentWeatherFree>> = flow {
-        try {
-            val weather = getService().getFreeWeather(latitude = lat, longitude = lon)
+        emit(safeApiCall(dispatcher) {
             firebaseAnalytics.logEvent("get_free_weather", null)
-            emit(RetrofitWrapper.Success(weather))
-        } catch (e: IOException) {
-            emit(RetrofitWrapper.Error(ErrorType.NetworkError(e)))
-        } catch (e: Exception) {
-            emit(RetrofitWrapper.Error(ErrorType.OtherError(e)))
-        }
+            getService().getFreeWeather(latitude = lat, longitude = lon)
+        })
     }
 
 }

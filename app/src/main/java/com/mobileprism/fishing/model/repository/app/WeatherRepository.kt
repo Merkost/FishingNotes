@@ -7,6 +7,4 @@ import kotlinx.coroutines.flow.Flow
 interface WeatherRepository {
     suspend fun getWeather(lat: Double, lon: Double): Flow<RetrofitWrapper<WeatherForecast>>
     suspend fun getHistoricalWeather(lat: Double, lon: Double, date: Long): Flow<RetrofitWrapper<WeatherForecast>>
-    suspend fun getWeatherForecast(lat: Double, lon: Double): WeatherForecast
-
 }

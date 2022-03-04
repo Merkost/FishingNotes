@@ -8,6 +8,9 @@ import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.api.WeatherApiService
 import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
+import com.mobileprism.fishing.model.utils.safeApiCall
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.OkHttpClient
@@ -17,6 +20,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class WeatherRepositoryRetrofitImpl(
     private val firebaseAnalytics: FirebaseAnalytics,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : WeatherRepository {
 
     val locale = LocaleListCompat.getAdjustedDefault().toLanguageTags().take(2)
@@ -45,34 +49,24 @@ class WeatherRepositoryRetrofitImpl(
 
     override suspend fun getWeather(lat: Double, lon: Double)
     : Flow<RetrofitWrapper<WeatherForecast>> = flow {
-        try {
-            val weather = getService().getWeather(latitude = lat, longitude = lon,
-                lang = locale)
+        emit(safeApiCall(dispatcher) {
             firebaseAnalytics.logEvent("get_weather", null)
-            emit(RetrofitWrapper.Success(weather))
-        } catch (e: IOException) {
-            emit(RetrofitWrapper.Error(ErrorType.NetworkError(e)))
-        } catch (e: Exception) {
-            emit(RetrofitWrapper.Error(ErrorType.OtherError(e)))
-        }
+            getService().getWeather(
+                latitude = lat, longitude = lon,
+                lang = locale
+            )
+        })
 
     }
 
     override suspend fun getHistoricalWeather(lat: Double, lon: Double, date: Long)
     : Flow<RetrofitWrapper<WeatherForecast>> = flow {
-        try {
-            val weather = getService().getHistoricalWeather(latitude = lat, longitude = lon, dt = date,
-                lang = locale)
-            emit(RetrofitWrapper.Success(weather))
-        } catch (e: IOException) {
-            emit(RetrofitWrapper.Error(ErrorType.NetworkError(e)))
-        } catch (e: Exception) {
-            emit(RetrofitWrapper.Error(ErrorType.OtherError(e)))
-        }
+        emit(safeApiCall(dispatcher) {
+            getService().getHistoricalWeather(
+                latitude = lat, longitude = lon, dt = date,
+                lang = locale
+            )
+        })
     }
-
-
-    override suspend fun getWeatherForecast(lat: Double, lon: Double) =
-        getService().getWeather(latitude = lat, longitude = lon)
 
 }
