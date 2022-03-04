@@ -11,10 +11,7 @@ import com.mobileprism.fishing.utils.getClosestHourIndex
 import com.mobileprism.fishing.utils.isDateInList
 import com.mobileprism.fishing.utils.isLocationsTooFar
 import com.mobileprism.fishing.utils.time.hoursCount
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.last
-import kotlinx.coroutines.flow.single
+import kotlinx.coroutines.flow.*
 import java.util.*
 
 class GetNewCatchWeatherUseCase(
@@ -29,7 +26,7 @@ class GetNewCatchWeatherUseCase(
                 emit(Result.failure(Throwable()))
             } else {
                 if (checkWeatherDownloadNeed(place, newCatchDate)) {
-                    downloadWeather(place, newCatchDate).fold(
+                    downloadWeather(place, newCatchDate).single().fold(
                         onSuccess = {
                             lastLoadedWeather = it
                             emit(Result.success(createCatchWeatherData(place, it, newCatchDate)))
@@ -49,11 +46,11 @@ class GetNewCatchWeatherUseCase(
     private suspend fun downloadWeather(
         place: UserMapMarker,
         newCatchDate: Long
-    ): Result<WeatherForecast> {
+    ): Flow<Result<WeatherForecast>> {
         return if (Date().time.hoursCount() > newCatchDate.hoursCount()) {
-            getHistoricalWeather(place, newCatchDate).single()
+            getHistoricalWeather(place, newCatchDate)
         } else {
-            getWeatherForecast(place).single()
+            getWeatherForecast(place)
         }
     }
 

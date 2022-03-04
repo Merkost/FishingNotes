@@ -62,7 +62,7 @@ class NewCatchMasterViewModel(
 
     fun setSelectedPlace(place: UserMapMarker) {
         _placeAndTimeState.value = _placeAndTimeState.value.copy(place = place)
-        _catchWeatherState.value = _catchWeatherState.value.copy(isDownloadAvailable = true)
+        _catchWeatherState.value = CatchWeatherState(isDownloadAvailable = true)
     }
 
     fun setPlaceInputError(isError: Boolean) {
@@ -71,7 +71,7 @@ class NewCatchMasterViewModel(
 
     fun setDate(date: Long) {
         _placeAndTimeState.value = _placeAndTimeState.value.copy(date = date)
-        _catchWeatherState.value = _catchWeatherState.value.copy(isDownloadAvailable = true)
+        _catchWeatherState.value = CatchWeatherState(isDownloadAvailable = true)
     }
 
     fun setFishType(fish: String) {
@@ -156,7 +156,10 @@ class NewCatchMasterViewModel(
                     result.fold(
                         onSuccess = { forecast ->
                             _catchWeatherState.value =
-                                _catchWeatherState.value.copy(isLoading = false)
+                                _catchWeatherState.value.copy(
+                                    isLoading = false,
+                                    isDownloadAvailable = false
+                                )
                             refreshWeatherState(forecast)
                         },
                         onFailure = {

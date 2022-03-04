@@ -70,6 +70,7 @@ class SaveNewCatchUseCase(
     ) = UserCatch(
         id = getNewCatchId(),
         userId = getCurrentUser()!!.uid,
+        // FIXME:
         description = catchInfoState.note,
         date = placeAndTimeState.date,
         fishType = fishAndWeightState.fish,

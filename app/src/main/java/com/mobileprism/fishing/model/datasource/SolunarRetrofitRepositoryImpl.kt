@@ -18,8 +18,6 @@ import java.util.*
 import okhttp3.logging.HttpLoggingInterceptor
 
 
-
-
 class SolunarRetrofitRepositoryImpl(
     private val firebaseAnalytics: FirebaseAnalytics,
 ) : SolunarRepository {
