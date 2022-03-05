@@ -25,10 +25,7 @@ import com.mobileprism.fishing.model.datastore.NotesPreferences
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.SettingsHeader
-import com.mobileprism.fishing.ui.home.views.DefaultAppBar
-import com.mobileprism.fishing.ui.home.views.FabMenuItem
-import com.mobileprism.fishing.ui.home.views.FabWithMenu
-import com.mobileprism.fishing.ui.home.views.MultiFabState
+import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.theme.primaryTextColor
 import com.mobileprism.fishing.ui.utils.enums.CatchesSortValues
 import com.mobileprism.fishing.ui.utils.enums.PlacesSortValues
@@ -81,7 +78,9 @@ fun Notes(
             },
             floatingActionButton = {
                 FabWithMenu(
-                    modifier = Modifier.padding(bottom = 20.dp).zIndex(5f),
+                    modifier = Modifier
+                        .padding(bottom = 20.dp)
+                        .zIndex(5f),
                     fabState = fabState,
                     items = listOf(
                         FabMenuItem(
@@ -98,8 +97,11 @@ fun Notes(
                 )
             },
         ) {
-            AnimatedVisibility(fabState.value  == MultiFabState.EXPANDED,
-                modifier = Modifier.zIndex(4f).fillMaxSize(),
+            AnimatedVisibility(
+                fabState.value == MultiFabState.EXPANDED,
+                modifier = Modifier
+                    .zIndex(4f)
+                    .fillMaxSize(),
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
@@ -195,49 +197,15 @@ fun PlacesSort(
     currentSort: State<PlacesSortValues>,
     onSelectedValue: (placesSore: PlacesSortValues) -> Unit
 ) {
-
     val radioOptions = PlacesSortValues.values().asList()
-    val context = LocalContext.current
-
-    val (selectedOption, onOptionSelected) = remember {
-        mutableStateOf(
-            currentSort.value
-        )
-    }
 
     Column {
         SettingsHeader(stringResource(R.string.sort))
-        radioOptions.forEach { placesSortValue ->
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .height(45.dp)
-                    .selectable(
-                        selected = (placesSortValue == selectedOption),
-                        onClick = {
-                            onOptionSelected(placesSortValue)
-                            onSelectedValue(placesSortValue)
-                        }
-                    )
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                RadioButton(
-                    selected = (placesSortValue == selectedOption),
-                    modifier = Modifier.padding(all = Dp(value = 8F)),
-                    onClick = {
-                        onOptionSelected(placesSortValue)
-                        onSelectedValue(placesSortValue)
-                    }
-                )
-                Text(
-                    text = stringResource(placesSortValue.stringRes),
-                    modifier = Modifier.padding(start = 16.dp)
-                )
-            }
-        }
-        Spacer(modifier = Modifier.size(4.dp))
+        ItemsSelection(
+            radioOptions = radioOptions,
+            currentOption = currentSort,
+            onSelectedItem = onSelectedValue
+        )
     }
 }
 
@@ -247,49 +215,15 @@ fun CatchesSort(
     currentSort: State<CatchesSortValues>,
     onSelectedValue: (catchesSort: CatchesSortValues) -> Unit
 ) {
-
     val radioOptions = CatchesSortValues.values().asList()
-    val context = LocalContext.current
-
-    val (selectedOption, onOptionSelected) = remember {
-        mutableStateOf(
-            currentSort.value
-        )
-    }
 
     Column {
         SettingsHeader(stringResource(R.string.sort))
-        radioOptions.forEach { catchesSortValue ->
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .height(45.dp)
-                    .selectable(
-                        selected = (catchesSortValue == selectedOption),
-                        onClick = {
-                            onOptionSelected(catchesSortValue)
-                            onSelectedValue(catchesSortValue)
-                        }
-                    )
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                RadioButton(
-                    selected = (catchesSortValue == selectedOption),
-                    modifier = Modifier.padding(all = Dp(value = 8F)),
-                    onClick = {
-                        onOptionSelected(catchesSortValue)
-                        onSelectedValue(catchesSortValue)
-                    }
-                )
-                Text(
-                    text = stringResource(catchesSortValue.stringRes),
-                    modifier = Modifier.padding(start = 16.dp)
-                )
-            }
-        }
-        Spacer(modifier = Modifier.size(4.dp))
+        ItemsSelection(
+            radioOptions = radioOptions,
+            currentOption = currentSort,
+            onSelectedItem = onSelectedValue
+        )
     }
 }
 

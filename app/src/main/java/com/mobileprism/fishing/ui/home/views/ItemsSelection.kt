@@ -28,48 +28,41 @@ fun <T> ItemsSelection(
         mutableStateOf(currentOption.value)
     }
 
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(18.dp),
-        elevation = 0.dp
+    Column(
+        modifier = Modifier,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            modifier = Modifier.padding(vertical = 12.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
 
-            radioOptions.forEach { option ->
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .height(60.dp)
-                        .selectable(
-                            selected = (option == selectedOption),
-                            onClick = {
-                                onOptionSelected(option)
-                                onSelectedItem(option)
-                            }
-                        )
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    RadioButton(
+        radioOptions.forEach { option ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .selectable(
                         selected = (option == selectedOption),
-                        modifier = Modifier.padding(all = Dp(value = 8F)),
                         onClick = {
                             onOptionSelected(option)
                             onSelectedItem(option)
                         }
                     )
-                    Text(
-                        text = stringResource(option.stringRes),
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                }
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                RadioButton(
+                    selected = (option == selectedOption),
+                    modifier = Modifier.padding(all = Dp(value = 8F)),
+                    onClick = {
+                        onOptionSelected(option)
+                        onSelectedItem(option)
+                    }
+                )
+                Text(
+                    text = stringResource(option.stringRes),
+                    modifier = Modifier.padding(start = 16.dp)
+                )
             }
         }
-
     }
 }
