@@ -19,18 +19,16 @@ import com.mobileprism.fishing.model.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.model.repository.app.FreeWeatherRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.SolunarRepository
+import com.mobileprism.fishing.model.use_cases.GetFishActivityUseCase
 import com.mobileprism.fishing.ui.home.map.MapUiState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
 
 class MapViewModel(
     private val repository: MarkersRepository,
     private val freeWeatherRepository: FreeWeatherRepository,
-    private val solunarRepository: SolunarRepository,
+    private val getFishActivityUseCase: GetFishActivityUseCase,
     private val userPreferences: UserPreferences,
 ) : ViewModel() {
 
@@ -129,21 +127,8 @@ class MapViewModel(
 
     fun getFishActivity(latitude: Double, longitude: Double) {
         viewModelScope.launch {
-            solunarRepository.getSolunar(latitude, longitude).collect { result ->
-                when (result) {
-                    is RetrofitWrapper.Success<Solunar> -> {
-                        val solunar = result.data
-                        val calendar = Calendar.getInstance()
-                        val currentHour24 = calendar[Calendar.HOUR_OF_DAY]
-                        fishActivity.value = solunar.hourlyRating[currentHour24]
-                        //_weatherState.value = RetrofitWrapper.Success(result.data)
-                    }
-                    is RetrofitWrapper.Error -> {
-                        Log.d("SOLUNAR ERROR", result.errorType.error.toString())
-                        //_weatherState.value = RetrofitWrapper.Error(result.errorType)
-                    }
-                    else -> {}
-                }
+            getFishActivityUseCase.invoke(latitude, longitude).collect {
+                fishActivity.value = it
             }
         }
     }
