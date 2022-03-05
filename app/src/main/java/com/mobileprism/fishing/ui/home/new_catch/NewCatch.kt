@@ -1,33 +1,13 @@
 package com.mobileprism.fishing.ui.home.new_catch
 
 import android.widget.Toast
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavController
-import coil.annotation.ExperimentalCoilApi
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.NewCatchViewModel
-import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.ui.home.UiState
-import com.mobileprism.fishing.utils.Constants.modalBottomSheetCorners
-import com.mobileprism.fishing.utils.network.currentConnectivityState
-import com.mobileprism.fishing.utils.network.observeConnectivityAsFlow
-import kotlinx.coroutines.launch
-import org.koin.androidx.compose.viewModel
-import java.util.*
+import com.mobileprism.fishing.ui.home.SnackbarManager
 
 object Constants {
     const val TAG = "NEW_CATCH_LOG"
@@ -193,7 +173,7 @@ fun NewCatchScreen(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SubscribeToNewCatchProgress(
-    uiState: UiState?,
+    uiState: BaseViewState<Nothing?>,
     adIsLoadedState: Boolean,
     loadingDialogState: MutableState<Boolean>,
     upPress: () -> Unit
@@ -204,20 +184,20 @@ fun SubscribeToNewCatchProgress(
 
     LaunchedEffect(key1 = uiState, adIsLoadedState) {
         when (uiState) {
-            is UiState.Success -> {
+            is BaseViewState.Success -> {
                 if (adIsLoadedState) {
                     SnackbarManager.showMessage(R.string.catch_added_successfully)
                     upPress()
                 }
             }
-            is UiState.InProgress -> {
+            is BaseViewState.Loading -> {
                 loadingDialogState.value = true
             }
-            is UiState.Error -> {
+            is BaseViewState.Error -> {
                 errorDialog = true
                 Toast.makeText(
                     context,
-                    "Error: ${(uiState as BaseViewState.Error).error?.message}",
+                    "Error: ${(uiState).error?.message}",
                     Toast.LENGTH_SHORT
                 ).show()
 

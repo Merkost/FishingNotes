@@ -40,6 +40,7 @@ import com.mobileprism.fishing.ui.home.place.LottieWarning
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.home.weather.PressureValues
 import com.mobileprism.fishing.ui.home.weather.TemperatureValues
+import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.time.toDateTextMonth
@@ -410,6 +411,7 @@ fun CatchWeatherView(
     val weatherPrefs: WeatherPreferences = get()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
     val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
+    val windSpeedUnit by weatherPrefs.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
 
     DefaultCard(
         modifier = modifier
@@ -562,8 +564,8 @@ fun CatchWeatherView(
                     absoluteLeft.linkTo(windIcon.absoluteRight, 2.dp)
                     absoluteRight.linkTo(windDeg.absoluteLeft, 2.dp)
                 },
-                text = catch.weatherWindSpeed.toInt()
-                    .toString() + " " + stringResource(id = R.string.wind_speed_units)
+                text = windSpeedUnit.getWindSpeedInt(catch.weatherWindSpeed.toDouble())
+                        + " " + windSpeedUnit.name
             )
 
             Icon(

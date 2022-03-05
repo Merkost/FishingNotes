@@ -4,12 +4,12 @@ import android.content.Context
 import androidx.navigation.NavController
 import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.model.entity.content.UserMapMarker
+import com.mobileprism.fishing.model.entity.weather.Daily
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.utils.enums.StringOperation
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.model.entity.weather.Daily
 import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import java.text.DecimalFormat
 
@@ -47,6 +47,8 @@ data class Point(
     val x: Float,
     val y: Float
 )
+
+// FIXME: сделать понятные методы перевода единиц
 
 enum class PressureValues(override val stringRes: Int) : StringOperation {
     Pa(R.string.pressure_pa),
