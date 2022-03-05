@@ -1,10 +1,13 @@
 package com.mobileprism.fishing.viewmodels
 
+import android.location.Geocoder
 import android.util.Log
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.SphericalUtil
+import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.map.*
 import com.mobileprism.fishing.domain.viewstates.BaseViewState
@@ -22,6 +25,8 @@ import com.mobileprism.fishing.model.repository.app.SolunarRepository
 import com.mobileprism.fishing.model.use_cases.GetFishActivityUseCase
 import com.mobileprism.fishing.model.use_cases.GetFreeWeatherUseCase
 import com.mobileprism.fishing.ui.home.map.MapUiState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
@@ -30,8 +35,10 @@ class MapViewModel(
     private val repository: MarkersRepository,
     private val getFreeWeatherUseCase: GetFreeWeatherUseCase,
     private val getFishActivityUseCase: GetFishActivityUseCase,
+    private val geocoder: Geocoder,
     private val userPreferences: UserPreferences,
 ) : ViewModel() {
+
 
     private val firstLaunchLocation = mutableStateOf(true)
 
@@ -66,6 +73,13 @@ class MapViewModel(
     val currentMarker = _currentMarker.asStateFlow()
 
     val chosenPlace = mutableStateOf<String?>(null)
+
+    private val _currentMarkerAddress = MutableStateFlow<String?>(null)
+    val currentMarkerAddress = _currentMarkerAddress.asStateFlow()
+
+    private val _currentMarkerRawDistance = MutableStateFlow<Double?>(null)
+    val currentMarkerRawDistance = _currentMarkerRawDistance.asStateFlow()
+
 
     val fishActivity: MutableState<Int?> = mutableStateOf(null)
     val currentWeather: MutableState<CurrentWeatherFree?> = mutableStateOf(null)
@@ -218,8 +232,44 @@ class MapViewModel(
     fun setNewMarkerInfo(latitude: Double, longitude: Double) {
         fishActivity.value = null
         currentWeather.value = null
+        getPlaceName(latitude, longitude)
+        getPlaceRawDistance(latitude, longitude)
         getFishActivity(latitude, longitude)
         getCurrentWeather(latitude, longitude)
+    }
+
+    private fun getPlaceRawDistance(latitude: Double, longitude: Double) {
+        viewModelScope.launch(Dispatchers.Default) {
+            _currentMarkerRawDistance.value = null
+            lastKnownLocation.value?.let {
+                _currentMarkerRawDistance.value =
+                    SphericalUtil.computeDistanceBetween(
+                        LatLng(latitude, longitude),
+                        LatLng(it.latitude, it.longitude)
+                    )
+            }
+        }
+    }
+
+    private fun getPlaceName(latitude: Double, longitude: Double) {
+        viewModelScope.launch(Dispatchers.Default) {
+            _currentMarkerAddress.value = null
+            try {
+                val position = geocoder.getFromLocation(latitude, longitude, 1)
+                position?.first()?.apply {
+                    _currentMarkerAddress.value = if (!subAdminArea.isNullOrBlank()) {
+                        subAdminArea.replaceFirstChar { it.uppercase() }
+                    } else if (!adminArea.isNullOrBlank()) {
+                        adminArea.replaceFirstChar { it.uppercase() }
+                    } else if (!countryName.isNullOrBlank())
+                        countryName.replaceFirstChar { it.uppercase() }
+                    else "-"
+                }
+            } catch (e: Throwable) {
+                //TODO: Не удается определить место в океане
+                //address = context.getString(R.string.cant_recognize_place)
+            }
+        }
     }
 
 }

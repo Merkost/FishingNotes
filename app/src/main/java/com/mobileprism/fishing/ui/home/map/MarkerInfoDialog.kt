@@ -60,52 +60,20 @@ fun MarkerInfoDialog(
     val receivedMarker by viewModel.currentMarker.collectAsState()
     val weatherPreferences: WeatherPreferences = get()
     val coroutineScope = rememberCoroutineScope()
-    val geocoder = Geocoder(context, resources().configuration.locales[0])
+
 
     val windUnit by weatherPreferences.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
 
-    var address: String? by remember { mutableStateOf(null) }
-    var distance: String? by remember { mutableStateOf(null) }
+    val address by viewModel.currentMarkerAddress.collectAsState()
+    val rawDistance by viewModel.currentMarkerRawDistance.collectAsState()
+    val distance: String? by remember { mutableStateOf(rawDistance?.let { context.convertDistance(it) })}
     val fishActivity: Int? by remember { viewModel.fishActivity }
     val currentWeather: CurrentWeatherFree? by remember { viewModel.currentWeather }
 
     receivedMarker?.let { notNullMarker ->
-        LaunchedEffect(receivedMarker) {
-            coroutineScope.launch(Dispatchers.Default) {
-                address = null
-                delay(800)
-                try {
-                    val position = geocoder.getFromLocation(notNullMarker.latitude, notNullMarker.longitude, 1)
-                    position?.first()?.apply {
-                        address = if (!subAdminArea.isNullOrBlank()) {
-                            subAdminArea.replaceFirstChar { it.uppercase() }
-                        } else if (!adminArea.isNullOrBlank()) {
-                            adminArea.replaceFirstChar { it.uppercase() }
-                        } else if (!countryName.isNullOrBlank())
-                            countryName.replaceFirstChar { it.uppercase() }
-                        else "-"
-                    }
-                } catch (e: Throwable) {
-                    //TODO: Ошибка в океане!
-                    address = context.getString(R.string.cant_recognize_place)
-                }
-            }
-        }
 
         LaunchedEffect(receivedMarker, viewModel.lastKnownLocation.value) {
             viewModel.setNewMarkerInfo(notNullMarker.latitude, notNullMarker.longitude)
-
-            coroutineScope.launch(Dispatchers.Default) {
-                distance = null
-                lastKnownLocation.value?.let {
-                    distance = context.convertDistance(
-                        SphericalUtil.computeDistanceBetween(
-                            LatLng(notNullMarker.latitude, notNullMarker.longitude),
-                            LatLng(it.latitude, it.longitude)
-                        )
-                    )
-                }
-            }
         }
     }
 
