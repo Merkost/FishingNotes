@@ -92,17 +92,9 @@ fun MarkerInfoDialog(
             }
         }
 
-        LaunchedEffect(receivedMarker) {
-            viewModel.fishActivity.value = null
-            viewModel.getFishActivity(notNullMarker.latitude, notNullMarker.longitude)
-        }
-
-        LaunchedEffect(receivedMarker) {
-            viewModel.currentWeather.value = null
-            viewModel.getCurrentWeather(notNullMarker.latitude, notNullMarker.longitude)
-        }
-
         LaunchedEffect(receivedMarker, viewModel.lastKnownLocation.value) {
+            viewModel.setNewMarkerInfo(notNullMarker.latitude, notNullMarker.longitude)
+
             coroutineScope.launch(Dispatchers.Default) {
                 distance = null
                 lastKnownLocation.value?.let {

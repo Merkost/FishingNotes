@@ -20,6 +20,7 @@ import com.mobileprism.fishing.model.repository.app.FreeWeatherRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.SolunarRepository
 import com.mobileprism.fishing.model.use_cases.GetFishActivityUseCase
+import com.mobileprism.fishing.model.use_cases.GetFreeWeatherUseCase
 import com.mobileprism.fishing.ui.home.map.MapUiState
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -27,7 +28,7 @@ import java.util.*
 
 class MapViewModel(
     private val repository: MarkersRepository,
-    private val freeWeatherRepository: FreeWeatherRepository,
+    private val getFreeWeatherUseCase: GetFreeWeatherUseCase,
     private val getFishActivityUseCase: GetFishActivityUseCase,
     private val userPreferences: UserPreferences,
 ) : ViewModel() {
@@ -106,22 +107,11 @@ class MapViewModel(
         }
     }
 
-
     fun getCurrentWeather(latitude: Double, longitude: Double) {
         viewModelScope.launch {
-            freeWeatherRepository
-                .getCurrentWeatherFree(latitude, longitude).collect { result ->
-                    when (result) {
-                        is RetrofitWrapper.Success<CurrentWeatherFree> -> {
-                            currentWeather.value = result.data
-                        }
-                        is RetrofitWrapper.Error -> {
-                            Log.d("CURRENT WEATHER ERROR", result.errorType.error.toString())
-                            //_weatherState.value = RetrofitWrapper.Error(result.errorType)
-                        }
-                        else -> {}
-                    }
-                }
+            getFreeWeatherUseCase.invoke(latitude, longitude).collect {
+                currentWeather.value = it
+            }
         }
     }
 
@@ -223,6 +213,13 @@ class MapViewModel(
     override fun onCleared() {
         super.onCleared()
         _addNewMarkerState.value = UiState.InProgress
+    }
+
+    fun setNewMarkerInfo(latitude: Double, longitude: Double) {
+        fishActivity.value = null
+        currentWeather.value = null
+        getFishActivity(latitude, longitude)
+        getCurrentWeather(latitude, longitude)
     }
 
 }

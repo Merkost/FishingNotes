@@ -14,6 +14,7 @@ import com.mobileprism.fishing.model.datastore.NotesPreferences
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.use_cases.GetFishActivityUseCase
+import com.mobileprism.fishing.model.use_cases.GetFreeWeatherUseCase
 import com.mobileprism.fishing.model.use_cases.GetNewCatchWeatherUseCase
 import com.mobileprism.fishing.model.use_cases.GetUserCatchesUseCase
 import com.mobileprism.fishing.ui.home.SnackbarManager
@@ -73,4 +74,5 @@ val useCasesModule = module {
     single { GetUserCatchesUseCase(get()) }
     single { GetNewCatchWeatherUseCase(get(), get()) }
     single { GetFishActivityUseCase(get()) }
+    single { GetFreeWeatherUseCase(get()) }
 }
