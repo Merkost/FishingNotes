@@ -312,6 +312,10 @@
     <string name="thunderstorm_with_light_drizzle">гроза с моросью</string>
     <string name="thunderstorm_with_drizzle">Гроза с моросью</string>
     <string name="thunderstorm_with_heavy_drizzle">Гроза с сильной моросью</string>
+    <string name="snow">Снег</string>
+    <string name="clear_sky">Ясно</string>
+    <string name="few_clouds">Небольшая облачность</string>
+    <string name="overcast_clouds">Облачно</string>
 
 
 </resources>

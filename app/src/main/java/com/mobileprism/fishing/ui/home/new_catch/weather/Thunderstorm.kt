@@ -5,7 +5,8 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.utils.enums.StringOperation
 
 enum class Thunderstorm(
-    @StringRes override val stringRes: Int,
+    @StringRes
+    override val stringRes: Int,
     override val iconPrefix: String = "11"
 ) : StringOperation, WeatherIconPrefix {
     ThunderstormWithLightRain(R.string.thunderstorm_with_light_rain),
