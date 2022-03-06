@@ -121,6 +121,7 @@ sealed class MapUiState {
 }
 
 const val DEFAULT_ZOOM = 15f
+const val DEFAULT_BEARING = 0f
 
 val locationPermissionsList = listOf(
     Manifest.permission.ACCESS_FINE_LOCATION,
@@ -138,10 +139,6 @@ fun moveCameraToLocation(
         val googleMap = map.awaitMap()
         googleMap.stopAnimation()
         googleMap.animateCamera(
-            /*CameraUpdateFactory.newLatLngZoom(
-                location,
-                zoom
-            )*/
             CameraUpdateFactory.newCameraPosition(
                 CameraPosition.Builder()
                     .zoom(zoom)
@@ -177,16 +174,24 @@ fun setCameraPosition(
     coroutineScope: CoroutineScope,
     map: MapView,
     location: LatLng,
-    zoom: Float = DEFAULT_ZOOM
+    zoom: Float = DEFAULT_ZOOM,
+    bearing: Float = DEFAULT_BEARING
 ) {
     coroutineScope.launch {
         val googleMap = map.awaitMap()
         googleMap.stopAnimation()
         googleMap.moveCamera(
-            CameraUpdateFactory.newLatLngZoom(
+            CameraUpdateFactory.newCameraPosition(
+                CameraPosition.Builder()
+                    .zoom(zoom)
+                    .target(location)
+                    .bearing(bearing)
+                    .build()
+            )
+            /*CameraUpdateFactory.newLatLngZoom(
                 location,
                 zoom
-            )
+            )*/
         )
     }
 }

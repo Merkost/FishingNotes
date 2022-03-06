@@ -41,21 +41,20 @@ import com.mobileprism.fishing.ui.utils.ColorPicker
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import com.mobileprism.fishing.model.entity.raw.RawMapMarker
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
 @ExperimentalComposeUiApi
 @Composable
 fun NewPlaceDialog(
-    currentCameraPosition: MutableState<Pair<LatLng, Float>>,
+    currentCameraPosition: State<Triple<LatLng, Float, Float>>,
     dialogState: MutableState<Boolean>,
     chosenPlace: MutableState<String?>,
 ) {
     val viewModel: MapViewModel = getViewModel()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.addNewMarkerUiState.collectAsState()
 
     MyCard(
         shape = Shapes.large, modifier = Modifier
@@ -247,8 +246,8 @@ fun NewPlaceDialog(
                             false -> titleValue.value
                         },
                         description = descriptionValue.value,
-                        latitude = currentCameraPosition.component1().first.latitude,
-                        longitude = currentCameraPosition.component1().first.longitude,
+                        latitude = currentCameraPosition.value.first.latitude,
+                        longitude = currentCameraPosition.value.first.longitude,
                         markerColor = markerColor.value
                     )
                 )

@@ -2,6 +2,7 @@ package com.mobileprism.fishing.model.entity.content
 
 import android.os.Parcelable
 import androidx.compose.ui.graphics.Color
+import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.model.entity.common.Note
 import kotlinx.parcelize.Parcelize
 
@@ -19,4 +20,9 @@ class UserMapMarker(
     val visible: Boolean = true,
     val public: Boolean = false,
     var notes: List<Note> = listOf()
-) : Parcelable, MapMarker
+) : Parcelable, MapMarker {
+
+    val latLng: LatLng
+    get() = LatLng(latitude, longitude)
+
+}

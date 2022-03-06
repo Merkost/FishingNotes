@@ -46,10 +46,10 @@ import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MarkerInfoDialog(
-    lastKnownLocation: MutableState<LatLng?>,
     modifier: Modifier = Modifier,
     navController: NavController,
     onMarkerIconClicked: (UserMapMarker) -> Unit,
@@ -59,14 +59,12 @@ fun MarkerInfoDialog(
     val viewModel: MapViewModel = getViewModel()
     val receivedMarker by viewModel.currentMarker.collectAsState()
     val weatherPreferences: WeatherPreferences = get()
-    val coroutineScope = rememberCoroutineScope()
-
 
     val windUnit by weatherPreferences.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
 
     val address by viewModel.currentMarkerAddress.collectAsState()
     val rawDistance by viewModel.currentMarkerRawDistance.collectAsState()
-    val distance: String? by remember { mutableStateOf(rawDistance?.let { context.convertDistance(it) })}
+    val distance: String? by remember { mutableStateOf(rawDistance?.let { context.convertDistance(it) }) }
     val fishActivity: Int? by remember { viewModel.fishActivity }
     val currentWeather: CurrentWeatherFree? by remember { viewModel.currentWeather }
 
@@ -82,17 +80,17 @@ fun MarkerInfoDialog(
     val elevationDp = 6.dp
 
     receivedMarker?.let { marker ->
-    Card(
-        shape = RoundedCornerShape(cornersDp),
-        elevation = elevationDp,
-        backgroundColor = MaterialTheme.colors.surface,
-        modifier = Modifier
-            .zIndex(1.0f)
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(paddingDp),
-        onClick = { onMarkerClicked(marker, navController) }
-    ) {
+        Card(
+            shape = RoundedCornerShape(cornersDp),
+            elevation = elevationDp,
+            backgroundColor = MaterialTheme.colors.surface,
+            modifier = Modifier
+                .zIndex(1.0f)
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(paddingDp),
+            onClick = { onMarkerClicked(marker, navController) }
+        ) {
             AnimatedVisibility(
                 true,
                 enter = fadeIn(tween(500)),
@@ -102,10 +100,10 @@ fun MarkerInfoDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(150.dp)
-                        /*.noRippleClickable(
-                            onClick = onDescriptionClick,
-                            enabled = scaffoldState.bottomSheetState.isCollapsed
-                        )*/
+                    /*.noRippleClickable(
+                        onClick = onDescriptionClick,
+                        enabled = scaffoldState.bottomSheetState.isCollapsed
+                    )*/
                 ) {
                     val (locationIcon, title, area, distanceTo,
                         fish, divider, weather) = createRefs()
@@ -116,7 +114,6 @@ fun MarkerInfoDialog(
                     Box(modifier = Modifier
                         .size(64.dp)
                         .padding(16.dp)
-
                         .constrainAs(locationIcon) {
                             absoluteLeft.linkTo(parent.absoluteLeft)
                             top.linkTo(parent.top)
@@ -125,7 +122,7 @@ fun MarkerInfoDialog(
                             Icon(
                                 modifier = Modifier.fillMaxSize(),
                                 painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                                contentDescription = "Marker",
+                                contentDescription = stringResource(id = R.string.marker_icon),
                                 tint = Color(marker.markerColor)
                             )
                         }
@@ -207,14 +204,15 @@ fun MarkerInfoDialog(
                                     easing = LinearOutSlowInEasing
                                 )
                             ),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp,
+                        horizontalArrangement = Arrangement.spacedBy(
+                            6.dp,
                             Alignment.CenterHorizontally
                         ),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.fish),
-                            contentDescription = "Marker",
+                            contentDescription = stringResource(id = R.string.fish_desc),
                             modifier = Modifier
                                 .size(45.dp)
                                 .padding(6.dp),
@@ -250,13 +248,17 @@ fun MarkerInfoDialog(
                                 animationSpec =
                                 tween(durationMillis = 300, easing = LinearOutSlowInEasing)
                             ),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            6.dp,
+                            Alignment.CenterHorizontally
+                        ),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         IconButton(onClick = { onWeatherIconClicked(marker, navController) }) {
-                            Icon(painterResource(R.drawable.ic_baseline_navigation_24), "",
+                            Icon(
+                                painterResource(R.drawable.ic_baseline_navigation_24), "",
                                 modifier = Modifier.rotate(viewModel.windIconRotation),
-                                tint = if (fishActivity == null) Color.LightGray else MaterialTheme.colors.primaryVariant
+                                tint = if (currentWeather == null) Color.LightGray else MaterialTheme.colors.primaryVariant
                             )
                         }
 

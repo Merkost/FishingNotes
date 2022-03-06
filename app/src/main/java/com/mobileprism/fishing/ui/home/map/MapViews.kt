@@ -128,7 +128,6 @@ fun MapModalBottomSheet(
 @Composable
 fun MyLocationButton(
     modifier: Modifier = Modifier,
-    lastKnownLocation: MutableState<LatLng?>,
     userPreferences: UserPreferences,
     onClick: () -> Unit,
 ) {
@@ -190,10 +189,9 @@ fun MyLocationButton(
 @Composable
 fun CompassButton(
     modifier: Modifier = Modifier,
-    mapBearing: MutableState<Float>,
+    mapBearing: State<Float>,
     onClick: () -> Unit
 ) {
-    val rotation = mapBearing.value
 
     AnimatedVisibility(
         modifier = modifier,
@@ -290,7 +288,8 @@ fun MapLayersButton(modifier: Modifier, onLayersSelectionOpen: () -> Unit) {
 
 @Composable
 fun LayersView(
-    mapType: MutableState<Int>,
+    mapType: State<Int>,
+    onLayerSelected: (Int) -> Unit,
     onCloseMapSelection: () -> Unit
 ) {
     val context = LocalContext.current
@@ -305,7 +304,6 @@ fun LayersView(
         modifier = Modifier
             .width(250.dp)
             .wrapContentHeight()
-
     ) {
         Column(
             modifier = Modifier
@@ -334,19 +332,22 @@ fun LayersView(
                     mapType,
                     layer = MapTypes.roadmap,
                     painter = painterResource(R.drawable.ic_map_default),
-                    name = stringResource(R.string.roadmap)
+                    name = stringResource(R.string.roadmap),
+                    onLayerSelected = onLayerSelected
                 )
                 MapLayerItem(
                     mapType,
                     layer = MapTypes.hybrid,
                     painter = painterResource(R.drawable.ic_map_satellite),
-                    name = stringResource(R.string.satellite)
+                    name = stringResource(R.string.satellite),
+                    onLayerSelected = onLayerSelected
                 )
                 MapLayerItem(
                     mapType,
                     layer = MapTypes.terrain,
                     painter = painterResource(R.drawable.ic_map_terrain),
-                    name = stringResource(R.string.terrain)
+                    name = stringResource(R.string.terrain),
+                    onLayerSelected = onLayerSelected
                 )
             }
         }
@@ -354,14 +355,14 @@ fun LayersView(
 }
 
 @Composable
-fun MapLayerItem(mapType: MutableState<Int>, layer: Int, painter: Painter, name: String) {
+fun MapLayerItem(mapType: State<Int>, layer: Int, painter: Painter, name: String, onLayerSelected: (Int) -> Unit) {
     val animatedColor by animateColorAsState(
         if (mapType.value == layer) MaterialTheme.colors.primary else Color.White,
         animationSpec = tween(300)
     )
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(70.dp)) {
         IconToggleButton(
-            onCheckedChange = { if (it) mapType.value = layer },
+            onCheckedChange = { if (it) onLayerSelected(layer) },
             checked = mapType.value == layer,
             modifier = if (mapType.value == layer) Modifier
                 .size(70.dp)
@@ -480,7 +481,7 @@ fun FishLoading(modifier: Modifier) {
 @Composable
 fun PlaceTileView(
     modifier: Modifier,
-    currentCameraPosition: MutableState<Pair<LatLng, Float>>,
+    currentCameraPosition: State<Triple<LatLng, Float, Float>>,
     pointerState: MutableState<PointerState>
 ) {
     val context = LocalContext.current
@@ -503,8 +504,8 @@ fun PlaceTileView(
                 coroutineScope.launch(Dispatchers.Default) {
                     try {
                         val position = geocoder.getFromLocation(
-                            currentCameraPosition.component1().first.latitude,
-                            currentCameraPosition.component1().first.longitude,
+                            currentCameraPosition.value.first.latitude,
+                            currentCameraPosition.value.first.longitude,
                             1
                         )
                         position?.first()?.let { address ->

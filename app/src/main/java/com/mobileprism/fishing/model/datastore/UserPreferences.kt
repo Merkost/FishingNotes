@@ -20,6 +20,7 @@ class UserPreferences(private val context: Context) {
         val LAST_MAP_LATITUDE = doublePreferencesKey("last_map_camera_latitude")
         val LAST_MAP_LONGITUDE = doublePreferencesKey("last_map_camera_longitude")
         val LAST_MAP_ZOOM = floatPreferencesKey("last_map_camera_zoom")
+        val LAST_MAP_BEARING = floatPreferencesKey("last_map_camera_bearing")
 
         val USER_LOCATION_PERMISSION_KEY = booleanPreferencesKey("should_show_location_permission")
         val MAP_HIDDEN_PLACES_KEY = booleanPreferencesKey("should_show_hidden_places_on_map")
@@ -64,15 +65,16 @@ class UserPreferences(private val context: Context) {
             preferences[MAP_ZOOM_BUTTONS_KEY] ?: false
         }
 
-    val getLastMapCameraLocation: Flow<Pair<LatLng, Float>> = context.dataStore.data
+    val getLastMapCameraLocation: Flow<Triple<LatLng, Float, Float>> = context.dataStore.data
         .map { preferences ->
-            Pair(
+            Triple(
                 LatLng(
                     preferences[LAST_MAP_LATITUDE] ?: 0.0,
-                    preferences[LAST_MAP_LONGITUDE] ?: 0.0
+                    preferences[LAST_MAP_LONGITUDE] ?: 0.0,
                 ),
-                preferences[LAST_MAP_ZOOM] ?: DEFAULT_ZOOM
-            )
+                preferences[LAST_MAP_ZOOM] ?: DEFAULT_ZOOM,
+                preferences[LAST_MAP_BEARING] ?: 0f,
+                )
         }
 
     //save values
@@ -112,11 +114,12 @@ class UserPreferences(private val context: Context) {
         }
     }
 
-    suspend fun saveLastMapCameraLocation(pair: Pair<LatLng, Float>) {
+    suspend fun saveLastMapCameraLocation(triple: Triple<LatLng, Float, Float>) {
         context.dataStore.edit { preferences ->
-            preferences[LAST_MAP_LATITUDE] = pair.first.latitude
-            preferences[LAST_MAP_LONGITUDE] = pair.first.longitude
-            preferences[LAST_MAP_ZOOM] = pair.second
+            preferences[LAST_MAP_LATITUDE] = triple.first.latitude
+            preferences[LAST_MAP_LONGITUDE] = triple.first.longitude
+            preferences[LAST_MAP_ZOOM] = triple.second
+            preferences[LAST_MAP_BEARING] = triple.third
         }
     }
 

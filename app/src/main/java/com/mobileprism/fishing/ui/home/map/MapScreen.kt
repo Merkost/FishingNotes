@@ -55,6 +55,7 @@ import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
@@ -95,8 +96,6 @@ fun MapScreen(
         mutableStateOf(PointerState.HideMarker)
     }
 
-    val currentCameraPosition = remember { mutableStateOf(Pair(LatLng(0.0, 0.0), 0f)) }
-
     val currentLocationFlow = remember(permissionsState.allPermissionsGranted) {
         getCurrentLocationFlow(context, permissionsState)
     }
@@ -126,9 +125,7 @@ fun MapScreen(
         sheetState = modalBottomSheetState,
         sheetShape = Constants.modalBottomSheetCorners,
         sheetContent = {
-            MapModalBottomSheet(
-                mapPreferences = userPreferences,
-            )
+            MapModalBottomSheet(mapPreferences = userPreferences)
         }
     ) {
         MapScaffold(
@@ -149,22 +146,18 @@ fun MapScreen(
                             }
                         }
                     },
-                    onLongPress = {
-                        viewModel.quickAddPlace(name = context.getString(R.string.no_name_place))
-                    },
+                    onLongPress = { viewModel.quickAddPlace(name = context.getString(R.string.no_name_place)) },
                     userSettings = userPreferences,
                 )
             },
             bottomSheet = {
                 MarkerInfoDialog(
-                    lastKnownLocation = viewModel.lastKnownLocation,
                     navController = navController,
                     onMarkerIconClicked = {
-                        viewModel.currentMarker.value?.let {
-                            moveCameraToLocation(coroutineScope, map,
-                                LatLng(it.latitude, it.longitude), DEFAULT_ZOOM, viewModel.mapBearing.value
-                            )
-                        }
+                        viewModel.onMarkerClicked(
+                            it,
+                            LatLng(it.latitude, it.longitude)
+                        )
                     }
                 )
             }
@@ -182,8 +175,8 @@ fun MapScreen(
                         bottom.linkTo(parent.bottom)
                         absoluteLeft.linkTo(parent.absoluteLeft)
                         absoluteRight.linkTo(parent.absoluteRight)
-                    }, map = map,
-                    currentCameraPosition = currentCameraPosition,
+                    },
+                    map = map,
                 )
 
                 MapLayersButton(
@@ -216,7 +209,8 @@ fun MapScreen(
                         }
                         .zIndex(5f)
                 ) {
-                    LayersView(viewModel.mapType) {
+                    LayersView(viewModel.mapType.collectAsState(),
+                    onLayerSelected = viewModel::onLayerSelected) {
                         mapLayersSelection = false
                     }
                 }
@@ -232,53 +226,31 @@ fun MapScreen(
                         top.linkTo(parent.top, 16.dp)
                         absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                     },
-                    lastKnownLocation = viewModel.lastKnownLocation,
                     userPreferences = userPreferences,
-                ) {
-                    viewModel.lastKnownLocation.value?.let {
-                        moveCameraToLocation(coroutineScope, map, it, bearing = viewModel.mapBearing.value)
-                    } ?: SnackbarManager.showMessage(R.string.cant_get_current_location)
-                }
+                    onClick = viewModel::onMyLocationClick
+                )
 
-                CompassButton(modifier = modifier.constrainAs(mapCompassButton) {
+                CompassButton(
+                    modifier = modifier.constrainAs(mapCompassButton) {
                     top.linkTo(mapMyLocationButton.bottom, 16.dp)
                     absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-                }, mapBearing = viewModel.mapBearing) {
-                    setCameraBearing(coroutineScope, map,
-                        currentCameraPosition.value.first, currentCameraPosition.value.second
-                    )
-                }
+                }, mapBearing = viewModel.mapBearing.collectAsState(),
+                    onClick = viewModel::resetMapBearing)
 
                 if (useZoomButtons) {
                     MapZoomInButton(
                         modifier = Modifier.constrainAs(zoomInButton) {
                             linkTo(parent.top, centerHorizontal, 4.dp, 4.dp, 1f)
                             linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, 1f)
-                        },
-                    ) {
-                        currentCameraPosition.value.let {
-                            moveCameraToLocation(coroutineScope, map, it.first, it.second + 1f,
-                                viewModel.mapBearing.value
-                            )
-                        }
-                    }
+                        }, onClick = viewModel::onZoomInClick
+                    )
 
                     MapZoomOutButton(
                         modifier = Modifier.constrainAs(zoomOutButton) {
                             linkTo(centerHorizontal, parent.bottom, 4.dp, 4.dp, 0f)
                             linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, 1f)
-                        },
-                    ) {
-                        currentCameraPosition.value.let {
-                            moveCameraToLocation(
-                                coroutineScope,
-                                map,
-                                it.first,
-                                it.second - 1f,
-                                viewModel.mapBearing.value
-                            )
-                        }
-                    }
+                        }, onClick = viewModel::onZoomOutClick
+                    )
                 }
 
                 AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode,
@@ -303,7 +275,7 @@ fun MapScreen(
                 ) {
                     PlaceTileView(
                         modifier = Modifier.wrapContentSize(),
-                        currentCameraPosition = currentCameraPosition,
+                        currentCameraPosition = viewModel.currentCameraPosition.collectAsState(),
                         pointerState = pointerState
                     )
                 }
@@ -311,7 +283,7 @@ fun MapScreen(
                 if (dialogAddPlaceIsShowing.value)
                     Dialog(onDismissRequest = { dialogAddPlaceIsShowing.value = false }) {
                         NewPlaceDialog(
-                            currentCameraPosition = currentCameraPosition,
+                            currentCameraPosition = viewModel.currentCameraPosition.collectAsState(),
                             dialogState = dialogAddPlaceIsShowing,
                             chosenPlace = viewModel.chosenPlace
                         )
@@ -340,7 +312,6 @@ fun onMapSettingsClicked(
 fun MapLayout(
     modifier: Modifier = Modifier,
     map: MapView,
-    currentCameraPosition: MutableState<Pair<LatLng, Float>>,
 ) {
     val viewModel: MapViewModel = getViewModel()
     val userPreferences: UserPreferences = get()
@@ -348,18 +319,17 @@ fun MapLayout(
     val darkTheme = isSystemInDarkTheme()
 
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
+    val mapType by viewModel.mapType.collectAsState()
     val context = LocalContext.current
     val markers by viewModel.mapMarkers.collectAsState()
+
     val markersToShow by remember(markers, showHiddenPlaces) {
         mutableStateOf(if (showHiddenPlaces) markers
         else markers.filter { it.visible })
     }
 
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
-
-    var isMapVisible by remember {
-        mutableStateOf(false)
-    }
+    var isMapVisible by remember { mutableStateOf(false) }
 
     AnimatedVisibility(
         visible = isMapVisible,
@@ -376,9 +346,20 @@ fun MapLayout(
 
                 //Map styles: https://mapstyle.withgoogle.com
                 if (darkTheme) {
-                    googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_fishing_night))
+                    googleMap.setMapStyle(
+                        MapStyleOptions.loadRawResourceStyle(
+                            context,
+                            R.raw.map_style_fishing_night
+                        )
+                    )
+                } else {
+                    googleMap.setMapStyle(
+                        MapStyleOptions.loadRawResourceStyle(
+                            context,
+                            R.raw.map_style_fishing
+                        )
+                    )
                 }
-                else { googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_fishing)) }
 
                 googleMap.clear()
                 markersToShow.forEach {
@@ -403,17 +384,21 @@ fun MapLayout(
                     viewModel.setCameraMoveState(CameraMoveState.MoveStart)
                 }
                 googleMap.setOnCameraMoveListener {
-                    viewModel.mapBearing.value = googleMap.cameraPosition.bearing
-                    currentCameraPosition.value =
-                        Pair(googleMap.cameraPosition.target, googleMap.cameraPosition.zoom)
+                    viewModel.onCameraMove(
+                        googleMap.cameraPosition.target,
+                        googleMap.cameraPosition.zoom,
+                        googleMap.cameraPosition.bearing
+                    )
                 }
                 googleMap.setOnCameraIdleListener {
                     viewModel.setCameraMoveState(CameraMoveState.MoveFinish)
-                    viewModel.saveLastCameraPosition(currentCameraPosition.value)
+                    viewModel.saveLastCameraPosition()
                 }
                 googleMap.setOnMarkerClickListener { marker ->
-                    viewModel.onMarkerClicked(markers.firstOrNull { it.id == marker.tag })
-                    moveCameraToLocation(coroutineScope, map, marker.position, bearing = viewModel.mapBearing.value)
+                    viewModel.onMarkerClicked(
+                        markers.firstOrNull { it.id == marker.tag },
+                        marker.position
+                    )
                     true
                 }
                 googleMap.setOnMapClickListener {
@@ -434,25 +419,24 @@ fun MapLayout(
         isMapVisible = true
     }
 
-    LaunchedEffect(viewModel.lastMapCameraPosition.value) {
-        viewModel.lastMapCameraPosition.value?.let {
-            moveCameraToLocation(this, map, it.first, it.second, viewModel.mapBearing.value)
+    LaunchedEffect(Unit) {
+        viewModel.newMapCameraPosition.collectLatest {
+            moveCameraToLocation(this, map, it.first, it.second, it.third)
         }
     }
 
-    LaunchedEffect(viewModel.mapType.value) {
+    LaunchedEffect(mapType) {
         val googleMap = map.awaitMap()
-        googleMap.mapType = viewModel.mapType.value
+        googleMap.mapType = mapType
     }
 
     DisposableEffect(map) {
         viewModel.lastMapCameraPosition.value?.let {
             setCameraPosition(coroutineScope, map, it.first, it.second)
-            currentCameraPosition.value = it
-        }
+        } ?: viewModel.getFirstLaunchLocation()
 
         onDispose {
-            viewModel.setLastMapCameraPosition(currentCameraPosition.value)
+            viewModel.saveLastCameraPosition()
         }
     }
 }
