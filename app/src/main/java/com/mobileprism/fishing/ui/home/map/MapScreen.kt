@@ -430,7 +430,7 @@ fun MapLayout(
         googleMap.mapType = mapType
     }
 
-    DisposableEffect(map) {
+    DisposableEffect(map, ) {
         viewModel.lastMapCameraPosition.value?.let {
             setCameraPosition(coroutineScope, map, it.first, it.second)
         } ?: viewModel.getFirstLaunchLocation()

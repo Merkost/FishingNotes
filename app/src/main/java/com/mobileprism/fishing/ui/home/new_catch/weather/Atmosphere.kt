@@ -7,7 +7,7 @@ import com.mobileprism.fishing.ui.utils.enums.StringOperation
 enum class Atmosphere(
     @StringRes
     override val stringRes: Int,
-    override val iconPrefix: String = "50"
+    override val iconPrefix: String = "50",
 ) : StringOperation, WeatherIconPrefix {
     Mist(R.string.snow),
     Smoke(R.string.snow),
@@ -18,5 +18,8 @@ enum class Atmosphere(
     Dust(R.string.snow),
     VolcanicAsh(R.string.snow),
     Squalls(R.string.snow),
-    Tornado(R.string.snow),
+    Tornado(R.string.snow);
+
+    override val getNameRes: Int = R.string.atmosphere
+
 }

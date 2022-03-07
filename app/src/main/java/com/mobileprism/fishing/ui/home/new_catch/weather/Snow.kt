@@ -19,5 +19,7 @@ enum class Snow(
     RainAndSnow(R.string.snow),
     LightShowerSnow(R.string.snow),
     ShowerSnow(R.string.snow),
-    HeavyShowerSnow(R.string.snow),
+    HeavyShowerSnow(R.string.snow);
+
+    override val getNameRes: Int = R.string.snow
 }

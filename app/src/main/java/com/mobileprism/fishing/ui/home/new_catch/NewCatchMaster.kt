@@ -117,6 +117,10 @@ fun NewCatchMasterScreen(
 
     val skipAvaliable by viewModel.skipAvaliable.collectAsState()
 
+    /*ModalBottomSheetLayout(sheetState = modalBottomSheetState,
+        sheetContent = {
+            WeatherTypesSheet()
+        }) {*/
     Scaffold(
         topBar = {
             DefaultAppBar(

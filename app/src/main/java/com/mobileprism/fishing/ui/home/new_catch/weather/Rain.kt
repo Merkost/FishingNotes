@@ -9,14 +9,16 @@ enum class Rain(
     override val stringRes: Int,
     override val iconPrefix: String = "10"
 ) : StringOperation, WeatherIconPrefix {
-    LightRain(R.string.snow),
-    ModerateRain(R.string.snow),
-    HeavyIntensityRain(R.string.snow),
-    VeryHeavyRain(R.string.snow),
-    ExtremeRain(R.string.snow),
-    FreezingRain(R.string.snow, "13"),
+    LightRain(R.string.light_rain),
+    ModerateRain(R.string.rain),
+    HeavyIntensityRain(R.string.heavy_intensity_rain),
+    VeryHeavyRain(R.string.very_heavy_rain),
+    ExtremeRain(R.string.extreme_rain),
+    FreezingRain(R.string.freezing_rain, "13"),
     LightIntensityShowerRain(R.string.snow, "09"),
     ShowerRain(R.string.snow, "09"),
     HeavyIntensityShowerRain(R.string.snow, "09"),
-    RaggedShowerRain(R.string.snow, "09"),
+    RaggedShowerRain(R.string.snow, "09");
+
+    override val getNameRes: Int = R.string.rain
 }

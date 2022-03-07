@@ -10,12 +10,14 @@ enum class Drizzle(
     override val iconPrefix: String = "09"
 ) : StringOperation, WeatherIconPrefix {
     LightIntensityDrizzle(R.string.snow),
-    JustDrizzle(R.string.snow),
+    JustDrizzle(R.string.drizzle),
     HeavyIntensityDrizzle(R.string.snow),
     LightIntensityDrizzleRain(R.string.snow),
     DrizzleRain(R.string.snow),
     HeavyIntensityDrizzleRain(R.string.snow),
     ShowerRainAndDrizzle(R.string.snow),
     HeavyShowerRainAndDrizzle(R.string.snow),
-    ShowerDrizzle(R.string.snow),
+    ShowerDrizzle(R.string.snow);
+
+    override val getNameRes: Int = R.string.drizzle
 }

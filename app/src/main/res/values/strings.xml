@@ -316,6 +316,15 @@
     <string name="clear_sky">Ясно</string>
     <string name="few_clouds">Небольшая облачность</string>
     <string name="overcast_clouds">Облачно</string>
+    <string name="atmosphere">Atmosphere</string>
+    <string name="rain">Дождь</string>
+    <string name="light_rain">Слабый дождь</string>
+    <string name="heavy_intensity_rain">Сильный дождь</string>
+    <string name="very_heavy_rain">Очень сильный дождь</string>
+    <string name="extreme_rain">Наисильнейший дождь</string>
+    <string name="freezing_rain">Ледяной дождь</string>
+    <string name="drizzle">Морось</string>
+    <string name="choose_weather">Выберите погоду:</string>
 
 
 </resources>

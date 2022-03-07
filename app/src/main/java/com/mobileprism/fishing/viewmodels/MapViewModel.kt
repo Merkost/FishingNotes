@@ -159,6 +159,7 @@ class MapViewModel(
 
     fun saveLastCameraPosition() {
         viewModelScope.launch {
+            if (!firstLaunchLocation.value)
             lastMapCameraPosition.value = currentCameraPosition.value
             userPreferences.saveLastMapCameraLocation(currentCameraPosition.value)
         }

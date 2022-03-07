@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -122,15 +123,17 @@ fun NoContentView(
 fun WeatherIconItem(
     iconResource: Int,
     iconTint: Color = Color.Unspecified,
-    onIconSelected: () -> Unit
+    requiredSize: Dp = 50.dp,
+    onIconSelected: (() -> Unit)? = null
 ) {
+    val clickableModifier = onIconSelected?.let { Modifier.clickable { onIconSelected() } } ?: Modifier
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .padding(4.dp)
             .clip(MaterialTheme.shapes.medium)
-            .requiredSize(50.dp)
-            .clickable(onClick = onIconSelected)
+            .requiredSize(requiredSize)
+            .then(clickableModifier)
     ) {
         Icon(painterResource(iconResource), "", tint = iconTint)
     }

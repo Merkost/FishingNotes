@@ -456,11 +456,11 @@ fun NewCatchWeatherItem(viewModel: NewCatchViewModel) {
 
 @ExperimentalComposeUiApi
 @Composable
-fun PickWeatherIconDialog(onIconSelected: (Int) -> Unit, onDismiss: () -> Unit) {
+fun PickWeatherIconDialog(onWeatherSelected: (Int) -> Unit, onDismiss: () -> Unit) {
     DefaultDialog(
-        stringResource(R.string.choose_weather_icon),
+        stringResource(R.string.choose_weather),
         content = {
-            FlowRow(
+            /*FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 mainAxisAlignment = FlowMainAxisAlignment.Center,
                 crossAxisAlignment = FlowCrossAxisAlignment.Center,
@@ -468,6 +468,9 @@ fun PickWeatherIconDialog(onIconSelected: (Int) -> Unit, onDismiss: () -> Unit) 
                 getAllWeatherIcons().distinct().forEach { iconResource ->
                     WeatherIconItem(iconResource) { onIconSelected(iconResource) }
                 }
+            }*/
+            WeatherTypesSheet() {
+                onWeatherSelected(1)
             }
         }, onDismiss = onDismiss
     )
@@ -689,7 +692,7 @@ fun NewCatchPlaceSelectView(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-.onFocusChanged {
+                    .onFocusChanged {
                         isDropMenuOpen = it.isFocused
                     }
 ,

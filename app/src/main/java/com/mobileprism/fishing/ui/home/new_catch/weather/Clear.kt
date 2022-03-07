@@ -9,5 +9,7 @@ enum class Clear(
     override val stringRes: Int,
     override val iconPrefix: String = "01"
 ) : StringOperation, WeatherIconPrefix {
-    ClearSky(R.string.clear_sky),
+    ClearSky(R.string.clear_sky);
+
+    override val getNameRes: Int = R.string.clear_sky
 }

@@ -19,4 +19,6 @@ enum class Thunderstorm(
     ThunderstormWithLightDrizzle(R.string.thunderstorm_with_light_drizzle),
     ThunderstormWithDrizzle(R.string.thunderstorm_with_drizzle),
     ThunderstormWithHeavyDrizzle(R.string.thunderstorm_with_heavy_drizzle);
+
+    override val getNameRes: Int = R.string.thunderstorm
 }

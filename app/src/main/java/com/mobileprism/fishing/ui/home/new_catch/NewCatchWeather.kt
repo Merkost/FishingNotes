@@ -1,9 +1,16 @@
 package com.mobileprism.fishing.ui.home.new_catch
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -26,11 +33,15 @@ import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.mappers.getMoonIconByPhase
 import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.model.mappers.getWeatherNameByIcon
+import com.mobileprism.fishing.ui.home.new_catch.weather.*
+import com.mobileprism.fishing.ui.home.views.WeatherIconItem
+import com.mobileprism.fishing.ui.utils.enums.StringOperation
 import com.mobileprism.fishing.utils.time.toHours
 import org.koin.androidx.compose.get
 import java.util.*
 
-@OptIn(ExperimentalComposeUiApi::class)
+
+@OptIn(ExperimentalComposeUiApi::class, androidx.compose.material.ExperimentalMaterialApi::class)
 @Composable
 fun WeatherLayout(
     weatherForecast: WeatherForecast?,
@@ -98,10 +109,11 @@ fun WeatherLayout(
 
         if (weatherIconDialogState) PickWeatherIconDialog(
             onDismiss = { weatherIconDialogState = false },
-            onIconSelected = {
+            onWeatherSelected = {
                 weatherIcon = it
                 weatherIconDialogState = false
             })
+
 
         Crossfade(targetState = weather) { animatedWeather ->
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -119,7 +131,9 @@ fun WeatherLayout(
                                     tint = Color.Unspecified
                                 )
                             },
-                            onClick = { weatherIconDialogState = true }
+                            onClick = {
+                                weatherIconDialogState = true
+                            }
                         )
                     },
                     onValueChange = { weatherDescription = it },
@@ -267,10 +281,93 @@ fun WeatherLayout(
                 }
             }
         }
+
     } ?: SecondaryText(
         modifier = Modifier.padding(8.dp),
         text = stringResource(R.string.select_place_for_weather)
     )
+}
+
+@Composable
+fun WeatherTypesSheet(onWeatherSelected: () -> Unit) {
+    val weatherTypes = listOf(
+        Atmosphere.values(),
+        Clear.values(),
+        Clouds.values(),
+        Drizzle.values(),
+        Rain.values(),
+        Snow.values(),
+        Thunderstorm.values()
+    )
+
+    var openedList: Array<out Enum<*>>? by remember {
+        mutableStateOf(null)
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 35.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        weatherTypes.forEach {
+            WeatherType(it, isOpened = openedList?.javaClass == it.javaClass, onWeatherSelected = onWeatherSelected) {
+                openedList =
+                    if (openedList == null || openedList?.javaClass != it.javaClass) it else null
+            }
+        }
+    }
+}
+
+@Composable
+fun <T> WeatherType(it: Array<out T>, isOpened: Boolean, onWeatherSelected: () -> Unit, onWeatherTypeClicked: () -> Unit)
+        where T : StringOperation, T : WeatherIconPrefix {
+    WeatherTypeTitle(it, isOpened = isOpened, onWeatherTypeClicked)
+    AnimatedVisibility(visible = isOpened) {
+        Column {
+            it.forEach {
+                WeatherTypeItem(it, onWeatherSelected)
+            }
+        }
+    }
+}
+
+@Composable
+fun <T> WeatherTypeTitle(
+    param: Array<out T>,
+    isOpened: Boolean,
+    onWeatherTypeClicked: () -> Unit
+) where T : StringOperation, T : WeatherIconPrefix {
+    val angle by animateFloatAsState(
+        when (isOpened) {
+            true -> 180f
+            else -> 0f
+        }
+    )
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        WeatherIconItem(getWeatherIconByName(param.first().iconPrefix)) {}
+        Text(text = stringResource(id = param.first().getNameRes))
+        IconButton(onClick = onWeatherTypeClicked) {
+            Icon(Icons.Default.ArrowDropDown, "", modifier = Modifier.rotate(angle))
+        }
+    }
+}
+
+@Composable
+fun <T> WeatherTypeItem(it: T, onWeatherSelected: () -> Unit) where T : StringOperation, T : WeatherIconPrefix {
+    Box(modifier = Modifier.fillMaxWidth().clickable { onWeatherSelected() })
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        /*WeatherIconItem(
+            getWeatherIconByName(it.iconPrefix),
+            iconTint = MaterialTheme.colors.onSurface,
+            requiredSize = 35.dp
+        ) {}*/
+        Text(text = stringResource(id = it.stringRes))
+    }
 }
 
 @Composable
@@ -292,6 +389,7 @@ fun NewCatchWeatherPrimary(
     weatherIconId: State<String>,
     onDescriptionChange: (String) -> Unit,
     onIconChange: (String) -> Unit,
+    onWeatherPick: () -> Unit,
     onError: (Boolean) -> Unit
 ) {
     var weatherIconDialogState by remember { mutableStateOf(false) }
@@ -299,7 +397,7 @@ fun NewCatchWeatherPrimary(
     if (weatherIconDialogState) {
         PickWeatherIconDialog(
             onDismiss = { weatherIconDialogState = false },
-            onIconSelected = {
+            onWeatherSelected = {
                 onIconChange(getWeatherNameByIcon(it))
                 weatherIconDialogState = false
             })
