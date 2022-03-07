@@ -11,8 +11,10 @@ import com.mobileprism.fishing.utils.getCurrentUser
 import com.mobileprism.fishing.utils.getNewCatchId
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionState
+import com.mobileprism.fishing.utils.toStandardNumber
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
 
 class SaveNewCatchUseCase(
     private val catchesRepository: CatchesRepository,
@@ -34,7 +36,9 @@ class SaveNewCatchUseCase(
 
         val repository = if (connectionManager.getConnectionState() is ConnectionState.Available) {
             catchesRepository
-        } else catchesRepositoryOffline
+        } else {
+            catchesRepositoryOffline
+        }
 
         data.placeAndTimeState.place?.let { it ->
             repository.addNewCatch(markerId = it.id, newCatch = userCatch).collect { trySend(it) }
@@ -46,16 +50,22 @@ class SaveNewCatchUseCase(
     }
 
     private suspend fun mapWeatherValues(weatherState: CatchWeatherState): NewCatchWeather {
-        val tempUnits = weatherPreferences.getTemperatureUnit.first()
-        val pressureUnits = weatherPreferences.getPressureUnit.first()
-        val windUnits = weatherPreferences.getWindSpeedUnit.first()
+        val tempUnits = weatherPreferences.getTemperatureUnit.take(1).first()
+        val pressureUnits = weatherPreferences.getPressureUnit.take(1).first()
+        val windUnits = weatherPreferences.getWindSpeedUnit.take(1).first()
 
         return NewCatchWeather(
             weatherDescription = weatherState.primary.replaceFirstChar { it.uppercase() },
             icon = weatherState.icon,
-            temperatureInC = tempUnits.getCelciusTemperature(weatherState.temperature.toFloat()),
-            pressureInMmhg = pressureUnits.getDefaultPressure(weatherState.pressure.toFloat()),
-            windInMs = windUnits.getWindSpeedInt(weatherState.windSpeed.toDouble()).toInt(),
+            temperatureInC = tempUnits.getCelciusTemperature(
+                weatherState.temperature.toStandardNumber().toFloat()
+            ),
+            pressureInMmhg = pressureUnits.getDefaultPressure(
+                weatherState.pressure.toStandardNumber().toFloat()
+            ),
+            windInMs = windUnits.getWindSpeedInt(
+                weatherState.windSpeed.toStandardNumber().toDouble()
+            ).toInt(),
             windDirInDeg = weatherState.windDeg.toFloat(),
             moonPhase = weatherState.moonPhase
         )

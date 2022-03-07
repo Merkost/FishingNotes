@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.domain.use_cases
 
-import androidx.compose.ui.text.capitalize
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.weather.NewCatchWeatherData
@@ -11,7 +10,10 @@ import com.mobileprism.fishing.utils.getClosestHourIndex
 import com.mobileprism.fishing.utils.isDateInList
 import com.mobileprism.fishing.utils.isLocationsTooFar
 import com.mobileprism.fishing.utils.time.hoursCount
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.single
 import java.util.*
 
 class GetNewCatchWeatherUseCase(

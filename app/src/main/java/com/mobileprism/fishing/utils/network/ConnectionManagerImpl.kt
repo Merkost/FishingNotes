@@ -2,7 +2,8 @@ package com.mobileprism.fishing.utils.network
 
 import android.content.Context
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
 
 class ConnectionManagerImpl(private val context: Context) : ConnectionManager {
 
@@ -11,7 +12,7 @@ class ConnectionManagerImpl(private val context: Context) : ConnectionManager {
     }
 
     override suspend fun getConnectionState(): ConnectionState {
-        return context.observeConnectivityAsFlow().last()
+        return context.observeConnectivityAsFlow().take(1).first()
     }
 
 }
