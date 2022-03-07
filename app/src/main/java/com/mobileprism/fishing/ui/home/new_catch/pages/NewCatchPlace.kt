@@ -29,7 +29,7 @@ import coil.compose.AsyncImage
 import coil.compose.AsyncImageContent
 import coil.compose.AsyncImagePainter
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.NewCatchMasterViewModel
+import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
 import com.mobileprism.fishing.ui.home.HomeSections
 import com.mobileprism.fishing.ui.home.new_catch.DateAndTimeItem
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchNoPlaceDialog

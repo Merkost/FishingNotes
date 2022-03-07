@@ -16,7 +16,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.NewCatchViewModel
+import com.mobileprism.fishing.ui.viewmodels.NewCatchViewModel
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.model.entity.weather.WeatherForecast
@@ -30,8 +30,6 @@ import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.ui.utils.toDoubleExOrNull
 import com.mobileprism.fishing.utils.time.toHours
 import org.koin.androidx.compose.get
-import java.text.DecimalFormatSymbols
-import java.text.NumberFormat
 import java.util.*
 
 

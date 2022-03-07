@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.ui.home.profile
 
-import android.os.Bundle
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -28,10 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import com.airbnb.lottie.compose.*
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.firestore.local.SQLitePersistence.clearPersistence
-import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.notes.CatchItemView
@@ -39,7 +34,7 @@ import com.mobileprism.fishing.ui.home.notes.ItemUserPlace
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.ui.theme.primaryTextColor
-import com.mobileprism.fishing.domain.UserViewModel
+import com.mobileprism.fishing.ui.viewmodels.UserViewModel
 import com.mobileprism.fishing.model.entity.common.User
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
@@ -48,7 +43,6 @@ import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalCoilApi

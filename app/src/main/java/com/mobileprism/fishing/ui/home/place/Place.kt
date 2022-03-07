@@ -20,7 +20,7 @@ import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.advertising.AdaptiveBannerAdvertView
 import com.mobileprism.fishing.ui.home.notes.TabItem
 import com.mobileprism.fishing.ui.navigate
-import com.mobileprism.fishing.domain.UserPlaceViewModel
+import com.mobileprism.fishing.ui.viewmodels.UserPlaceViewModel
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.bottomBannerPadding

@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.domain.viewstates
+package com.mobileprism.fishing.ui.viewstates
 
 sealed class BaseViewState<out T> {
     data class Success<out T>(val data: T) : BaseViewState<T>()

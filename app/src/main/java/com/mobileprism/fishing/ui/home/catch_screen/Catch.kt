@@ -25,7 +25,7 @@ import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.UserCatchViewModel
+import com.mobileprism.fishing.ui.viewmodels.UserCatchViewModel
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.entity.common.Progress

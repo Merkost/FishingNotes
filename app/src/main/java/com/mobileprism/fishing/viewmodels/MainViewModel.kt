@@ -2,7 +2,7 @@ package com.mobileprism.fishing.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mobileprism.fishing.domain.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.model.entity.common.User
 import com.mobileprism.fishing.model.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow

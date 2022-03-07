@@ -1,12 +1,12 @@
-package com.mobileprism.fishing.model.use_cases
+package com.mobileprism.fishing.domain.use_cases
 
 import android.net.Uri
-import com.mobileprism.fishing.domain.*
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.raw.NewCatchWeather
 import com.mobileprism.fishing.model.repository.PhotoStorage
 import com.mobileprism.fishing.model.repository.app.CatchesRepository
+import com.mobileprism.fishing.ui.viewmodels.*
 import com.mobileprism.fishing.utils.getCurrentUser
 import com.mobileprism.fishing.utils.getNewCatchId
 import com.mobileprism.fishing.utils.network.ConnectionManager

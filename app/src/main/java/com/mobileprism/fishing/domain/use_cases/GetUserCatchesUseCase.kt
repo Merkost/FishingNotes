@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.model.use_cases
+package com.mobileprism.fishing.domain.use_cases
 
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.repository.app.CatchesRepository

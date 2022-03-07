@@ -31,9 +31,9 @@ import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.NewCatchViewModel
-import com.mobileprism.fishing.domain.viewstates.ErrorType
-import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
+import com.mobileprism.fishing.ui.viewmodels.NewCatchViewModel
+import com.mobileprism.fishing.ui.viewstates.ErrorType
+import com.mobileprism.fishing.ui.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.mappers.getAllWeatherIcons
 import com.mobileprism.fishing.ui.Arguments

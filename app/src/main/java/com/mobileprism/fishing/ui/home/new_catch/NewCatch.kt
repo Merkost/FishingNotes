@@ -1,33 +1,14 @@
 package com.mobileprism.fishing.ui.home.new_catch
 
 import android.widget.Toast
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavController
-import coil.annotation.ExperimentalCoilApi
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.NewCatchViewModel
 import com.mobileprism.fishing.ui.home.SnackbarManager
-import com.mobileprism.fishing.domain.viewstates.BaseViewState
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.ui.home.UiState
-import com.mobileprism.fishing.utils.Constants.modalBottomSheetCorners
-import com.mobileprism.fishing.utils.network.currentConnectivityState
-import com.mobileprism.fishing.utils.network.observeConnectivityAsFlow
-import kotlinx.coroutines.launch
-import org.koin.androidx.compose.viewModel
-import java.util.*
 
 object Constants {
     const val TAG = "NEW_CATCH_LOG"

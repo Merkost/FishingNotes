@@ -2,8 +2,6 @@ package com.mobileprism.fishing.ui.home.profile
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
@@ -32,7 +30,7 @@ import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.views.SecondaryText
 import com.mobileprism.fishing.ui.navigate
-import com.mobileprism.fishing.domain.UserViewModel
+import com.mobileprism.fishing.ui.viewmodels.UserViewModel
 import com.mobileprism.fishing.model.entity.common.User
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import kotlinx.coroutines.InternalCoroutinesApi

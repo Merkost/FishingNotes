@@ -35,8 +35,8 @@ import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.fade
 import com.google.accompanist.placeholder.placeholder
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.WeatherViewModel
-import com.mobileprism.fishing.domain.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewmodels.WeatherViewModel
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.entity.content.UserMapMarker

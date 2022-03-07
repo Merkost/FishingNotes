@@ -139,6 +139,8 @@ class FirebaseCatchesRepositoryImpl(
         markerId: String,
         newCatch: UserCatch
     ) = callbackFlow {
+        //is ->1
+        ->2
         dbCollections.getUserCatchesCollection(markerId).document(newCatch.id)
             .set(newCatch)
             .addOnCompleteListener {

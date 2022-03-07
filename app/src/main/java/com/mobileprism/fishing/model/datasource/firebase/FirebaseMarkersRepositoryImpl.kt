@@ -5,8 +5,8 @@ import android.util.Log
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
-import com.mobileprism.fishing.domain.viewstates.BaseViewState
-import com.mobileprism.fishing.domain.viewstates.Result
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.Result
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.entity.common.LiteProgress
 import com.mobileprism.fishing.model.entity.common.Note

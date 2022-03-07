@@ -4,7 +4,7 @@ import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.mobileprism.fishing.viewmodels.MainViewModel
-import com.mobileprism.fishing.domain.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.model.entity.common.User
 import com.mobileprism.fishing.model.repository.UserRepository
 import com.nhaarman.mockito_kotlin.times

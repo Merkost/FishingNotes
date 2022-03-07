@@ -6,7 +6,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.NewCatchViewModel
+import com.mobileprism.fishing.ui.viewmodels.NewCatchViewModel
 import org.koin.androidx.compose.getViewModel
 
 

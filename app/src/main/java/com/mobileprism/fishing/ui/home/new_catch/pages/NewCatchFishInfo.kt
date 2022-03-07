@@ -14,7 +14,7 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.new_catch.FishAmountAndWeightViewItem
 import com.mobileprism.fishing.ui.home.new_catch.FishSpecies
 import com.mobileprism.fishing.ui.home.views.SubtitleWithIcon
-import com.mobileprism.fishing.domain.NewCatchMasterViewModel
+import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
 
 @Composable
 fun NewCatchFishInfo(viewModel: NewCatchMasterViewModel, navController: NavController) {

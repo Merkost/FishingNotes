@@ -12,8 +12,8 @@ class MapMarkerMapper {
         return UserMapMarker(
             id = getNewMarkerId(),
             userId = getCurrentUserId(),
-            latitude = newMarker.latitude.toDouble(),
-            longitude = newMarker.longitude.toDouble(),
+            latitude = newMarker.latitude,
+            longitude = newMarker.longitude,
             title = newMarker.title,
             description = newMarker.description,
             markerColor = newMarker.markerColor,

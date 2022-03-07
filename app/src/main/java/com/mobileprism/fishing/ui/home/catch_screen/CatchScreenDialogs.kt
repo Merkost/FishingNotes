@@ -33,7 +33,7 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.advertising.showInterstitialAd
 import com.mobileprism.fishing.ui.home.new_catch.FishAmountAndWeightView
 import com.mobileprism.fishing.ui.home.views.*
-import com.mobileprism.fishing.domain.UserCatchViewModel
+import com.mobileprism.fishing.ui.viewmodels.UserCatchViewModel
 import com.mobileprism.fishing.model.entity.common.Note
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
 import com.mobileprism.fishing.utils.showToast

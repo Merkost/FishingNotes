@@ -1,9 +1,9 @@
-package com.mobileprism.fishing.domain
+package com.mobileprism.fishing.ui.viewmodels
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mobileprism.fishing.domain.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.repository.app.MarkersRepository

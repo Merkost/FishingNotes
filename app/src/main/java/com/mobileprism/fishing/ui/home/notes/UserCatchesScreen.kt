@@ -26,9 +26,8 @@ import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.NoContentView
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.utils.enums.CatchesSortValues
-import com.mobileprism.fishing.domain.UserCatchesViewModel
+import com.mobileprism.fishing.ui.viewmodels.UserCatchesViewModel
 import com.mobileprism.fishing.model.datastore.NotesPreferences
-import com.mobileprism.fishing.model.datastore.NotesPreferencesImpl
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import org.koin.androidx.compose.get

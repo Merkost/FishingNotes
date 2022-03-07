@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 interface CatchesRepository {
+
+    // TODO: Divide on two repos: 1st just reading, 2nd updating/adding
+
     fun getAllUserCatchesList(): Flow<List<UserCatch>>
     fun getAllUserCatchesState(): Flow<CatchesContentState>
     fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>>

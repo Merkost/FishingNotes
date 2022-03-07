@@ -7,14 +7,14 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
-import com.mobileprism.fishing.domain.*
 import com.mobileprism.fishing.model.datastore.*
 import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
-import com.mobileprism.fishing.model.use_cases.GetNewCatchWeatherUseCase
-import com.mobileprism.fishing.model.use_cases.GetUserCatchesUseCase
-import com.mobileprism.fishing.model.use_cases.GetUserPlacesUseCase
-import com.mobileprism.fishing.model.use_cases.SaveNewCatchUseCase
+import com.mobileprism.fishing.domain.use_cases.GetNewCatchWeatherUseCase
+import com.mobileprism.fishing.domain.use_cases.GetUserCatchesUseCase
+import com.mobileprism.fishing.domain.use_cases.GetUserPlacesUseCase
+import com.mobileprism.fishing.domain.use_cases.SaveNewCatchUseCase
 import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.viewmodels.*
 import com.mobileprism.fishing.utils.Logger
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionManagerImpl
@@ -30,6 +30,7 @@ val appModule = module {
     single<AppUpdateManager> { AppUpdateManagerFactory.create(androidContext()) }
     single<FirebaseAuth> { FirebaseAuth.getInstance() }
     single { SnackbarManager }
+    // TODO: move to logger
     single<FirebaseAnalytics> { Firebase.analytics }
     single<BillingClient> { params ->
         BillingClient.newBuilder(androidContext())

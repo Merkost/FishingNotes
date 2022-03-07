@@ -7,9 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.map.*
-import com.mobileprism.fishing.domain.viewstates.BaseViewState
-import com.mobileprism.fishing.domain.viewstates.Result
-import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.Result
+import com.mobileprism.fishing.ui.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserMapMarker

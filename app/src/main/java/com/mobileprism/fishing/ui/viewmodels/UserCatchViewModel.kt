@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.domain
+package com.mobileprism.fishing.ui.viewmodels
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel

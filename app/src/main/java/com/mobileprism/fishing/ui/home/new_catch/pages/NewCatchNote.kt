@@ -17,7 +17,7 @@ import androidx.navigation.NavController
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.new_catch.WayOfFishingView
 import com.mobileprism.fishing.ui.home.views.SubtitleWithIcon
-import com.mobileprism.fishing.domain.NewCatchMasterViewModel
+import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
 
 @Composable
 fun NewCatchNote(viewModel: NewCatchMasterViewModel, navController: NavController) {

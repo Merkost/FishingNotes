@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.model.use_cases
+package com.mobileprism.fishing.domain.use_cases
 
 import androidx.compose.ui.text.capitalize
 import com.mobileprism.fishing.model.datastore.WeatherPreferences

@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.navigation.NavController
 import com.mobileprism.fishing.ui.home.new_catch.pages.*
-import com.mobileprism.fishing.domain.NewCatchMasterViewModel
+import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
 
 typealias NewCatchScreenItem = @Composable (viewModel: NewCatchMasterViewModel, navController: NavController) -> Unit
 

@@ -16,7 +16,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.NewCatchMasterViewModel
+import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
 import com.mobileprism.fishing.ui.home.new_catch.*
 import com.mobileprism.fishing.ui.home.views.SubtitleWithIcon
 import com.mobileprism.fishing.ui.theme.customColors

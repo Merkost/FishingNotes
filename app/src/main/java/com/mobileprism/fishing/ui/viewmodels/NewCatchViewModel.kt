@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.domain
+package com.mobileprism.fishing.ui.viewmodels
 
 import android.net.Uri
 import androidx.compose.runtime.MutableState
@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
+import com.mobileprism.fishing.ui.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.raw.NewCatchWeather
 import com.mobileprism.fishing.model.entity.raw.RawUserCatch
