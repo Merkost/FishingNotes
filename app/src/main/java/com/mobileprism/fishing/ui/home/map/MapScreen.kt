@@ -80,7 +80,6 @@ fun MapScreen(
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     val context = LocalContext.current
 
-    val map = rememberMapViewWithLifecycle()
     val mapUiState by viewModel.mapUiState.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
@@ -176,7 +175,6 @@ fun MapScreen(
                         absoluteLeft.linkTo(parent.absoluteLeft)
                         absoluteRight.linkTo(parent.absoluteRight)
                     },
-                    map = map,
                 )
 
                 MapLayersButton(
@@ -311,9 +309,9 @@ fun onMapSettingsClicked(
 @Composable
 fun MapLayout(
     modifier: Modifier = Modifier,
-    map: MapView,
 ) {
     val viewModel: MapViewModel = getViewModel()
+    val map = rememberMapViewWithLifecycle()
     val userPreferences: UserPreferences = get()
     val coroutineScope = rememberCoroutineScope()
     val darkTheme = isSystemInDarkTheme()
@@ -516,15 +514,9 @@ fun MapFab(
 
     val paddingTop = animateDpAsState(
         when (state) {
-            MapUiState.NormalMode -> {
-                0.dp
-            }
-            MapUiState.BottomSheetInfoMode -> {
-                26.dp
-            }
-            MapUiState.PlaceSelectMode -> {
-                0.dp
-            }
+            MapUiState.NormalMode -> { 0.dp }
+            MapUiState.BottomSheetInfoMode -> { 26.dp }
+            MapUiState.PlaceSelectMode -> { 0.dp }
         }
     )
 
