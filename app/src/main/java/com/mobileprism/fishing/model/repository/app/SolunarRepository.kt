@@ -5,5 +5,5 @@ import com.mobileprism.fishing.model.entity.solunar.Solunar
 import kotlinx.coroutines.flow.Flow
 
 interface SolunarRepository {
-    fun getSolunar(latitude: Double, longitude: Double): Flow<RetrofitWrapper<Solunar>>
+    fun getSolunar(latitude: Double, longitude: Double, date: String, timeZone: Int): Flow<RetrofitWrapper<Solunar>>
 }

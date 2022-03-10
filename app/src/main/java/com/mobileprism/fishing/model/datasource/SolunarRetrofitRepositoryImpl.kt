@@ -53,24 +53,14 @@ class SolunarRetrofitRepositoryImpl(
         }
     }
 
-    override fun getSolunar(latitude: Double, longitude: Double): Flow<RetrofitWrapper<Solunar>> =
+    override fun getSolunar(latitude: Double, longitude: Double, date: String, timeZone: Int): Flow<RetrofitWrapper<Solunar>> =
         flow {
 
+            firebaseAnalytics.logEvent("get_solunar", null)
+
             emit(safeApiCall(dispatcher) {
-                val currentDate = Date()
-                val format = SimpleDateFormat("yyyyMMdd", Locale.getDefault());
-                val date = format.format(currentDate)
-                //val timeZone = TimeZone.getDefault().getOffset(currentDate.time)
-                val timeZone = SimpleDateFormat("ZZZZZ", Locale.getDefault())
-                    .format(System.currentTimeMillis()).split(":")[0]
 
-                firebaseAnalytics.logEvent("get_solunar", null)
-
-                getService().getSolunar(
-                    latitude = latitude, longitude = longitude,
-                    date = date,
-                    tz = timeZone.toIntOrNull() ?: 0
-                )
+                getService().getSolunar(latitude = latitude, longitude = longitude, date = date, tz = timeZone)
 
             })
 
