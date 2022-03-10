@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.domain
+package com.mobileprism.fishing.ui.viewmodels
 
 import android.net.Uri
 import androidx.compose.runtime.MutableState
@@ -6,11 +6,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlacesState
-import com.mobileprism.fishing.ui.home.weather.TemperatureValues
-import com.mobileprism.fishing.domain.viewstates.BaseViewState
-import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
-import com.mobileprism.fishing.model.entity.common.Progress
+import com.mobileprism.fishing.ui.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.raw.NewCatchWeather
 import com.mobileprism.fishing.model.entity.raw.RawUserCatch
@@ -19,6 +15,8 @@ import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
 import com.mobileprism.fishing.ui.home.UiState
+import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlacesState
+import com.mobileprism.fishing.ui.home.weather.TemperatureValues
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -62,53 +60,53 @@ class NewCatchViewModel(
     val images = mutableStateListOf<Uri>()
 
     fun getWeather() {
-        viewModelScope.launch {
-            //weather.value?.let {
-            //  weather.value = null
-            //weather.value = it} ?:
-            //TODO: Weather Loading State
-            marker.value?.run {
-                _weatherState.value = RetrofitWrapper.Loading()
-                weatherRepository.getWeather(latitude, longitude).collect { result ->
-                    when (result) {
-                        is RetrofitWrapper.Success<WeatherForecast> -> {
-                            weather.value = result.data
-                            _weatherState.value = RetrofitWrapper.Success(result.data)
-                        }
-                        is RetrofitWrapper.Loading -> {
-                            _weatherState.value = RetrofitWrapper.Loading()
-                        }
-                        is RetrofitWrapper.Error -> {
-                            _weatherState.value = RetrofitWrapper.Error(result.errorType)
-                        }
-                    }
-                }
-            }
-        }
+//        viewModelScope.launch {
+//            //weather.value?.let {
+//            //  weather.value = null
+//            //weather.value = it} ?:
+//            //TODO: Weather Loading State
+//            marker.value?.run {
+//                _weatherState.value = RetrofitWrapper.Loading()
+//                weatherRepository.getWeather(latitude, longitude).collect { result ->
+//                    when (result) {
+//                        is RetrofitWrapper.Success<WeatherForecast> -> {
+//                            weather.value = result.data
+//                            _weatherState.value = RetrofitWrapper.Success(result.data)
+//                        }
+//                        is RetrofitWrapper.Loading -> {
+//                            _weatherState.value = RetrofitWrapper.Loading()
+//                        }
+//                        is RetrofitWrapper.Error -> {
+//                            _weatherState.value = RetrofitWrapper.Error(result.errorType)
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 
     fun getHistoricalWeather() {
-        viewModelScope.launch {
-            marker.value?.run {
-                _weatherState.value = RetrofitWrapper.Loading()
-                weatherRepository
-                    .getHistoricalWeather(latitude, longitude, (date.value / 1000))
-                    .collect { result ->
-                        when (result) {
-                            is RetrofitWrapper.Success<WeatherForecast> -> {
-                                weather.value = result.data
-                                _weatherState.value = RetrofitWrapper.Success(result.data)
-                            }
-                            is RetrofitWrapper.Loading -> {
-                                _weatherState.value = RetrofitWrapper.Loading()
-                            }
-                            is RetrofitWrapper.Error -> {
-                                _weatherState.value = RetrofitWrapper.Error(result.errorType)
-                            }
-                        }
-                    }
-            }
-        }
+//        viewModelScope.launch {
+//            marker.value?.run {
+//                _weatherState.value = RetrofitWrapper.Loading()
+//                weatherRepository
+//                    .getHistoricalWeather(latitude, longitude, (date.value / 1000))
+//                    .collect { result ->
+//                        when (result) {
+//                            is RetrofitWrapper.Success<WeatherForecast> -> {
+//                                weather.value = result.data
+//                                _weatherState.value = RetrofitWrapper.Success(result.data)
+//                            }
+//                            is RetrofitWrapper.Loading -> {
+//                                _weatherState.value = RetrofitWrapper.Loading()
+//                            }
+//                            is RetrofitWrapper.Error -> {
+//                                _weatherState.value = RetrofitWrapper.Error(result.errorType)
+//                            }
+//                        }
+//                    }
+//            }
+//        }
 
     }
 
@@ -125,24 +123,24 @@ class NewCatchViewModel(
     }
 
     private fun saveNewCatch(newCatch: RawUserCatch) {
-        _uiState.value = UiState.InProgress
-        viewModelScope.launch {
-            marker.value?.let { userMapMarker ->
-                catchesRepo.addNewCatch(userMapMarker.id, newCatch).collect { progress ->
-                    when (progress) {
-                        is Progress.Complete -> {
-                            _uiState.value = UiState.Success
-                        }
-                        is Progress.Loading -> {
-                            _uiState.value = UiState.InProgress
-                        }
-                        is Progress.Error -> {
-                            _uiState.value = UiState.Error
-                        }
-                    }
-                }
-            }
-        }
+//        _uiState.value = UiState.InProgress
+//        viewModelScope.launch {
+//            marker.value?.let { userMapMarker ->
+//                catchesRepo.addNewCatch(userMapMarker.id, newCatch).collect { progress ->
+//                    when (progress) {
+//                        is Progress.Complete -> {
+//                            _uiState.value = UiState.Success
+//                        }
+//                        is Progress.Loading -> {
+//                            _uiState.value = UiState.InProgress
+//                        }
+//                        is Progress.Error -> {
+//                            _uiState.value = UiState.Error
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 
     fun isInputCorrect(): Boolean {

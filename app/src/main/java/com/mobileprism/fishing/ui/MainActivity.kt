@@ -48,7 +48,7 @@ import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.theme.FishingNotesTheme
 import com.mobileprism.fishing.viewmodels.MainViewModel
-import com.mobileprism.fishing.domain.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.entity.common.User
 import com.mobileprism.fishing.utils.Logger

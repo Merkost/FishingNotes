@@ -28,7 +28,7 @@ import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.MaxCounterView
 import com.mobileprism.fishing.ui.home.views.NewCatchPhotoView
 import com.mobileprism.fishing.ui.home.views.SubtitleWithIcon
-import com.mobileprism.fishing.domain.NewCatchMasterViewModel
+import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.network.ConnectionState
 import com.mobileprism.fishing.utils.network.observeConnectivityAsFlow

@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.domain.viewstates
+package com.mobileprism.fishing.ui.viewstates
 
 sealed class RetrofitWrapper<out T> {
     //TODO: Убрать loading и перенести Error сюда

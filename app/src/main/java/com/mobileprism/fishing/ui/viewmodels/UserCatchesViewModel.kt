@@ -1,10 +1,10 @@
-package com.mobileprism.fishing.domain
+package com.mobileprism.fishing.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.model.entity.content.UserCatch
-import com.mobileprism.fishing.model.use_cases.GetUserCatchesUseCase
+import com.mobileprism.fishing.domain.use_cases.GetUserCatchesUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -7,6 +7,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -16,10 +17,13 @@ import androidx.navigation.NavController
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.new_catch.WayOfFishingView
 import com.mobileprism.fishing.ui.home.views.SubtitleWithIcon
-import com.mobileprism.fishing.domain.NewCatchMasterViewModel
+import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
 
 @Composable
 fun NewCatchNote(viewModel: NewCatchMasterViewModel, navController: NavController) {
+
+    val state by viewModel.catchInfoState.collectAsState()
+
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
@@ -43,9 +47,9 @@ fun NewCatchNote(viewModel: NewCatchMasterViewModel, navController: NavControlle
                 absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                 width = Dimension.fillToConstraints
             },
-            rodState = viewModel.rod.collectAsState(),
-            biteState = viewModel.bait.collectAsState(),
-            lureState = viewModel.lure.collectAsState(),
+            rodState = state.rod,
+            biteState = state.bait,
+            lureState = state.lure,
             onRodChange = { viewModel.setRod(it) },
             onBiteChange = { viewModel.setBait(it) },
             onLureChange = { viewModel.setLure(it) }
@@ -71,7 +75,7 @@ fun NewCatchNote(viewModel: NewCatchMasterViewModel, navController: NavControlle
             singleLine = false,
             maxLines = 5,
             label = { Text(text = stringResource(id = R.string.note)) },
-            value = viewModel.description.collectAsState().value,
+            value = state.note,
             onValueChange = { viewModel.setNote(it) }
         )
 

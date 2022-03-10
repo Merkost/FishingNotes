@@ -3,8 +3,8 @@ package com.mobileprism.fishing.model.datasource
 import androidx.core.os.LocaleListCompat
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
-import com.mobileprism.fishing.domain.viewstates.ErrorType
-import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
+import com.mobileprism.fishing.ui.viewstates.ErrorType
+import com.mobileprism.fishing.ui.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.api.FreeWeatherApiService
 import com.mobileprism.fishing.model.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.model.repository.app.FreeWeatherRepository

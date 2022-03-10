@@ -23,7 +23,7 @@ class WeatherRepositoryRetrofitImpl(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : WeatherRepository {
 
-    val locale = LocaleListCompat.getAdjustedDefault().toLanguageTags().take(2)
+    private val locale = LocaleListCompat.getAdjustedDefault().toLanguageTags().take(2)
 
     companion object {
         private const val BASE_WEATHER_URL = "https://api.openweathermap.org/data/2.5/"

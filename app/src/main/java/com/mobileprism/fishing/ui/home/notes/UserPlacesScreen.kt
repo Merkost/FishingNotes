@@ -28,7 +28,7 @@ import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.NoContentView
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.utils.enums.PlacesSortValues
-import com.mobileprism.fishing.domain.UserPlacesViewModel
+import com.mobileprism.fishing.ui.viewmodels.UserPlacesViewModel
 import com.mobileprism.fishing.model.datastore.NotesPreferences
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import org.koin.androidx.compose.get
@@ -42,7 +42,7 @@ fun UserPlacesScreen(
     notesPreferences: NotesPreferences = get()
 ) {
     val uiState = viewModel.uiState.collectAsState()
-    val placesSortValue by notesPreferences.placesSortValue.collectAsState(PlacesSortValues.Default)
+    val placesSortValue by notesPreferences.getPlacesSortValue.collectAsState(PlacesSortValues.Default)
 
     Scaffold(backgroundColor = Color.Transparent) {
         val places: List<UserMapMarker> by viewModel.currentContent.collectAsState()

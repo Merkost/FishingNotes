@@ -3,6 +3,7 @@ package com.mobileprism.fishing.ui.home.new_catch.pages
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -13,14 +14,17 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.new_catch.FishAmountAndWeightViewItem
 import com.mobileprism.fishing.ui.home.new_catch.FishSpecies
 import com.mobileprism.fishing.ui.home.views.SubtitleWithIcon
-import com.mobileprism.fishing.domain.NewCatchMasterViewModel
+import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
 
 @Composable
 fun NewCatchFishInfo(viewModel: NewCatchMasterViewModel, navController: NavController) {
+
+    val state by viewModel.fishAndWeightSate.collectAsState()
+
     ConstraintLayout(
         modifier = Modifier.fillMaxSize()
     ) {
-        val (subtitleFish, subtitleRod, fish, amountAndWeight, rod) = createRefs()
+        val (subtitleFish, fish, amountAndWeight) = createRefs()
 
         SubtitleWithIcon(
             modifier = Modifier.constrainAs(subtitleFish) {
@@ -38,7 +42,7 @@ fun NewCatchFishInfo(viewModel: NewCatchMasterViewModel, navController: NavContr
                 absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                 width = Dimension.fillToConstraints
             },
-            name = viewModel.fishType.collectAsState(),
+            name = state.fish,
             onNameChange = viewModel::setFishType
         )
 
@@ -49,34 +53,10 @@ fun NewCatchFishInfo(viewModel: NewCatchMasterViewModel, navController: NavContr
                 absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                 width = Dimension.fillToConstraints
             },
-            amountState = viewModel.fishAmount.collectAsState(),
-            weightState = viewModel.fishWeight.collectAsState(),
+            amountState = state.fishAmount,
+            weightState = state.fishWeight,
             onAmountChange = viewModel::setFishAmount,
             onWeightChange = viewModel::setFishWeight
         )
-
-//        SubtitleWithIcon(
-//            modifier = Modifier.constrainAs(subtitleRod) {
-//                top.linkTo(amountAndWeight.bottom, 16.dp)
-//                absoluteLeft.linkTo(parent.absoluteLeft)
-//            },
-//            icon = R.drawable.ic_fishing_rod,
-//            text = stringResource(R.string.way_of_fishing)
-//        )
-//
-//        WayOfFishingView(
-//            modifier = Modifier.constrainAs(rod) {
-//                top.linkTo(subtitleRod.bottom, 16.dp)
-//                absoluteLeft.linkTo(parent.absoluteLeft)
-//                absoluteRight.linkTo(parent.absoluteRight)
-//            },
-//            rodState = viewModel.rod.collectAsState(),
-//            biteState = viewModel.bait.collectAsState(),
-//            lureState = viewModel.lure.collectAsState(),
-//            onRodChange = { viewModel.setRod(it) },
-//            onBiteChange = { viewModel.setBait(it) },
-//            onLureChange = { viewModel.setLure(it) }
-//        )
-
     }
 }

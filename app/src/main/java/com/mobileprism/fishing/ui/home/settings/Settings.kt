@@ -43,8 +43,8 @@ import com.mobileprism.fishing.ui.home.views.PrimaryText
 import com.mobileprism.fishing.ui.home.weather.PressureValues
 import com.mobileprism.fishing.ui.home.weather.TemperatureValues
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
-import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.utils.ColorPicker
+import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -55,7 +55,7 @@ import org.koin.androidx.compose.get
 fun SettingsScreen(backPress: () -> Unit, navController: NavController) {
 
     val userPreferences: UserPreferences = get()
-    val weatherPreferences: WeatherPreferences = get()
+    val weatherPreferencesImpl: WeatherPreferences = get()
 
     Scaffold(
         topBar = { SettingsTopAppBar(backPress) },
@@ -63,7 +63,7 @@ fun SettingsScreen(backPress: () -> Unit, navController: NavController) {
     {
         Column(modifier = Modifier.verticalScroll(rememberScrollState(0))) {
             MainAppSettings(userPreferences)
-            WeatherSettings(weatherPreferences)
+            WeatherSettings(weatherPreferencesImpl)
             AboutSettings(navController)
         }
     }
@@ -103,16 +103,16 @@ fun AboutSettings(navController: NavController) {
 }
 
 @Composable
-fun WeatherSettings(weatherPreferences: WeatherPreferences) {
+fun WeatherSettings(weatherPreferencesImpl: WeatherPreferences) {
     val coroutineScope = rememberCoroutineScope()
 
     val isPressureDialogOpen = remember { mutableStateOf(false) }
     val isTemperatureDialogOpen = remember { mutableStateOf(false) }
     val isWindSpeedDialogOpen = remember { mutableStateOf(false) }
 
-    GetPressureUnit(isPressureDialogOpen, weatherPreferences)
-    GetTemperatureUnit(isTemperatureDialogOpen, weatherPreferences)
-    GetWindSpeedUnit(isWindSpeedDialogOpen, weatherPreferences)
+    GetPressureUnit(isPressureDialogOpen, weatherPreferencesImpl)
+    GetTemperatureUnit(isTemperatureDialogOpen, weatherPreferencesImpl)
+    GetWindSpeedUnit(isWindSpeedDialogOpen, weatherPreferencesImpl)
 
     SettingsHeader(text = stringResource(R.string.settings_weather))
 
@@ -331,7 +331,8 @@ fun GetTemperatureUnit(
     isTemperatureDialogOpen: MutableState<Boolean>,
     weatherPreferences: WeatherPreferences,
 ) {
-    val temperatureUnit = weatherPreferences.getTemperatureUnit.collectAsState(TemperatureValues.C)
+    val temperatureUnit =
+        weatherPreferences.getTemperatureUnit.collectAsState(TemperatureValues.C)
     val radioOptions = TemperatureValues.values().asList()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -422,7 +423,8 @@ fun GetWindSpeedUnit(
     isWindSpeedDialogOpen: MutableState<Boolean>,
     weatherPreferences: WeatherPreferences,
 ) {
-    val windSpeedUnit = weatherPreferences.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
+    val windSpeedUnit =
+        weatherPreferences.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
     val radioOptions = WindSpeedValues.values().asList()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()

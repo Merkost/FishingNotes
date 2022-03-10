@@ -23,9 +23,8 @@ import com.google.accompanist.insets.systemBarsPadding
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.AppSnackbar
 import com.mobileprism.fishing.ui.home.SnackbarManager
-import com.mobileprism.fishing.domain.LoginViewModel
-import com.mobileprism.fishing.domain.viewstates.BaseViewState
-import com.mobileprism.fishing.model.entity.common.User
+import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get

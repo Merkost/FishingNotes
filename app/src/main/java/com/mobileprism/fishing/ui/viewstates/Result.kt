@@ -1,6 +1,4 @@
-package com.mobileprism.fishing.domain.viewstates
-
-import androidx.annotation.StringRes
+package com.mobileprism.fishing.ui.viewstates
 
 sealed class Result(val error: Throwable? = null) {
     object Success : Result()

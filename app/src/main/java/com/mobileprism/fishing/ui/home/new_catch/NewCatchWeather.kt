@@ -1,9 +1,6 @@
 package com.mobileprism.fishing.ui.home.new_catch
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -29,19 +26,16 @@ import com.mobileprism.fishing.ui.home.weather.TemperatureValues
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.domain.NewCatchViewModel
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
+import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.mappers.getMoonIconByPhase
 import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.model.mappers.getWeatherNameByIcon
-import com.mobileprism.fishing.ui.home.new_catch.weather.*
-import com.mobileprism.fishing.ui.home.views.WeatherIconItem
-import com.mobileprism.fishing.ui.utils.enums.StringOperation
 import com.mobileprism.fishing.utils.time.toHours
 import org.koin.androidx.compose.get
 import java.util.*
 
-
-@OptIn(ExperimentalComposeUiApi::class, androidx.compose.material.ExperimentalMaterialApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun WeatherLayout(
     weatherForecast: WeatherForecast?,
@@ -114,7 +108,6 @@ fun WeatherLayout(
                 weatherIconDialogState = false
             })
 
-
         Crossfade(targetState = weather) { animatedWeather ->
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 //Main weather title
@@ -131,9 +124,7 @@ fun WeatherLayout(
                                     tint = Color.Unspecified
                                 )
                             },
-                            onClick = {
-                                weatherIconDialogState = true
-                            }
+                            onClick = { weatherIconDialogState = true }
                         )
                     },
                     onValueChange = { weatherDescription = it },
@@ -281,7 +272,6 @@ fun WeatherLayout(
                 }
             }
         }
-
     } ?: SecondaryText(
         modifier = Modifier.padding(8.dp),
         text = stringResource(R.string.select_place_for_weather)
@@ -385,11 +375,10 @@ fun WeatherLayoutLoading() {
 @Composable
 fun NewCatchWeatherPrimary(
     modifier: Modifier = Modifier,
-    weatherDescription: State<String>,
-    weatherIconId: State<String>,
+    weatherDescription: String,
+    weatherIconId: String,
     onDescriptionChange: (String) -> Unit,
     onIconChange: (String) -> Unit,
-    onWeatherPick: () -> Unit,
     onError: (Boolean) -> Unit
 ) {
     var weatherIconDialogState by remember { mutableStateOf(false) }
@@ -406,13 +395,13 @@ fun NewCatchWeatherPrimary(
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
         readOnly = false,
-        value = weatherDescription.value,
+        value = weatherDescription,
         leadingIcon = {
             IconButton(
                 modifier = Modifier.size(32.dp),
                 content = {
                     Icon(
-                        painter = painterResource(id = getWeatherIconByName(weatherIconId.value)),
+                        painter = painterResource(id = getWeatherIconByName(weatherIconId)),
                         contentDescription = "",
                         tint = Color.Unspecified
                     )
@@ -421,7 +410,7 @@ fun NewCatchWeatherPrimary(
             )
         },
         onValueChange = { onDescriptionChange(it) },
-        isError = (weatherDescription.value.isEmpty()).apply { onError(this) },
+        isError = (weatherDescription.isEmpty()).apply { onError(this) },
         label = { Text(text = stringResource(id = R.string.weather)) },
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Next
@@ -433,7 +422,7 @@ fun NewCatchWeatherPrimary(
 @Composable
 fun NewCatchTemperatureView(
     modifier: Modifier = Modifier,
-    temperature: State<String>,
+    temperature: String,
     onTemperatureChange: (String) -> Unit,
     onError: (Boolean) -> Unit
 ) {
@@ -444,7 +433,7 @@ fun NewCatchTemperatureView(
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
         readOnly = false,
-        value = temperature.value,
+        value = temperature,
         leadingIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_thermometer),
@@ -454,8 +443,8 @@ fun NewCatchTemperatureView(
         },
         trailingIcon = { Text(text = stringResource(temperatureUnit.stringRes)) },
         onValueChange = { onTemperatureChange(it) },
-        isError = (temperature.value
-            .toIntOrNull() == null || temperature.value.length > 3)
+        isError = (temperature
+            .toIntOrNull() == null || temperature.length > 3)
             .apply { onError(this) },
         label = { Text(text = stringResource(R.string.temperature)) },
         keyboardOptions = KeyboardOptions(
@@ -469,7 +458,7 @@ fun NewCatchTemperatureView(
 @Composable
 fun NewCatchPressureView(
     modifier: Modifier = Modifier,
-    pressure: State<String>,
+    pressure: String,
     onPressureChange: (String) -> Unit,
     onError: (Boolean) -> Unit
 ) {
@@ -479,7 +468,7 @@ fun NewCatchPressureView(
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
         readOnly = false,
-        value = pressure.value,
+        value = pressure,
         leadingIcon = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_gauge),
@@ -488,7 +477,7 @@ fun NewCatchPressureView(
             )
         },
         trailingIcon = { Text(text = stringResource(pressureUnit.stringRes)) },
-        isError = (pressure.value.toDoubleOrNull() == null || pressure.value.endsWith(".") || pressure.value
+        isError = (pressure.toDoubleOrNull() == null || pressure.endsWith(".") || pressure
             .isEmpty())
             .apply { onError(this) },
         onValueChange = { onPressureChange(it) },
@@ -506,8 +495,8 @@ fun NewCatchPressureView(
 @Composable
 fun NewCatchWindView(
     modifier: Modifier = Modifier,
-    wind: State<String>,
-    windDeg: State<Int>,
+    wind: String,
+    windDeg: Int,
     onWindChange: (String) -> Unit,
     onWindDirChange: (Float) -> Unit,
     onError: (Boolean) -> Unit
@@ -530,11 +519,11 @@ fun NewCatchWindView(
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
         readOnly = false,
-        value = wind.value,
+        value = wind,
         leadingIcon = {
             IconButton(onClick = { windDirDialogState = true }) {
                 Icon(
-                    modifier = Modifier.rotate(windDeg.value.toFloat()),
+                    modifier = Modifier.rotate(windDeg.toFloat()),
                     painter = painterResource(id = R.drawable.ic_baseline_navigation_24),
                     contentDescription = "",
                     tint = MaterialTheme.colors.primary,
@@ -544,9 +533,7 @@ fun NewCatchWindView(
         },
         trailingIcon = { Text(text = stringResource(windSpeedUnit.stringRes)) },
         onValueChange = { onWindChange(it) },
-        isError = (wind.value
-            .toIntOrNull() == null || wind.value.length > 2)
-            .apply { onError(this) },
+        isError = (wind.toDoubleExOrNull() == null || wind.length > 4).apply { onError(this) },
         label = { Text(text = stringResource(R.string.wind)) },
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Next,
@@ -559,16 +546,16 @@ fun NewCatchWindView(
 @Composable
 fun NewCatchMoonView(
     modifier: Modifier = Modifier,
-    moonPhase: State<Float>,
+    moonPhase: Float,
 ) {
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
         readOnly = true,
-        value = (moonPhase.value * 100).toInt().toString(),
+        value = (moonPhase * 100).toInt().toString(),
         leadingIcon = {
             Icon(
                 painter = painterResource(
-                    id = getMoonIconByPhase(moonPhase.value)
+                    id = getMoonIconByPhase(moonPhase)
                 ),
                 contentDescription = "",
                 tint = MaterialTheme.colors.primary

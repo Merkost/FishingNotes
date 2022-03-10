@@ -22,6 +22,7 @@ import androidx.navigation.NavController
 import com.google.accompanist.pager.*
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.datastore.NotesPreferences
+import com.mobileprism.fishing.model.datastore.NotesPreferencesImpl
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.SettingsHeader
@@ -153,9 +154,9 @@ fun NotesModalBottomSheet(
     bottomSheetScreen: BottomSheetScreen,
     notesPreferences: NotesPreferences
 ) {
-    val currentPlacesSort = notesPreferences.placesSortValue
+    val currentPlacesSort = notesPreferences.getPlacesSortValue
         .collectAsState(PlacesSortValues.Default)
-    val currentCatchesSort = notesPreferences.catchesSortValue
+    val currentCatchesSort = notesPreferences.getCatchesSortValue
         .collectAsState(CatchesSortValues.Default)
 
     val coroutineScope = rememberCoroutineScope()

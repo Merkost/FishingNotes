@@ -35,7 +35,7 @@ import com.mobileprism.fishing.ui.home.notes.*
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.theme.primaryTextColor
 import com.mobileprism.fishing.ui.theme.supportTextColor
-import com.mobileprism.fishing.domain.UserPlaceViewModel
+import com.mobileprism.fishing.ui.viewmodels.UserPlaceViewModel
 import com.mobileprism.fishing.model.entity.common.Note
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
