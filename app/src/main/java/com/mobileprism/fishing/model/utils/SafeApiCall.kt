@@ -1,38 +1,35 @@
 package com.mobileprism.fishing.model.utils
 
-import com.mobileprism.fishing.domain.viewstates.ErrorResponse
-import com.mobileprism.fishing.domain.viewstates.ErrorType
-import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
-import com.squareup.moshi.Moshi
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.IOException
 
-suspend fun <T> safeApiCall(dispatcher: CoroutineDispatcher, apiCall: suspend () -> T): RetrofitWrapper<T> {
+suspend fun <T> safeApiCall(dispatcher: CoroutineDispatcher, apiCall: suspend () -> T): Result<T> {
     return withContext(dispatcher) {
         try {
-            RetrofitWrapper.Success(apiCall.invoke())
+            Result.success(apiCall.invoke())
         } catch (throwable: Throwable) {
-            val error = when (throwable) {
+            Result.failure(throwable)
+            /*val error = when (throwable) {
                 is IOException -> RetrofitWrapper.Error(ErrorType.NetworkError(Throwable()))
                 is HttpException -> {
                     val code = throwable.code()
                     val errorResponse = convertErrorBody(throwable)
-                    /*RetrofitWrapper.Error(ErrorType.GenericError(code, errorResponse))*/
+                    *//*RetrofitWrapper.Error(ErrorType.GenericError(code, errorResponse))*//*
                     RetrofitWrapper.Error(ErrorType.NetworkError(Throwable()))
                 }
                 else -> {
-                    /*RetrofitWrapper.Error(ErrorType.GenericError(null, null))*/
+                    *//*RetrofitWrapper.Error(ErrorType.GenericError(null, null))*//*
                     RetrofitWrapper.Error(ErrorType.NetworkError(Throwable()))
                 }
             }
-            error
+            error*/
         }
     }
 }
 
-private fun convertErrorBody(throwable: HttpException): ErrorResponse? {
+/*private fun convertErrorBody(throwable: HttpException): ErrorResponse? {
     return try {
         throwable.response()?.errorBody()?.source()?.let {
             val moshiAdapter = Moshi.Builder().build().adapter(ErrorResponse::class.java)
@@ -41,4 +38,4 @@ private fun convertErrorBody(throwable: HttpException): ErrorResponse? {
     } catch (exception: Exception) {
         null
     }
-}
+}*/

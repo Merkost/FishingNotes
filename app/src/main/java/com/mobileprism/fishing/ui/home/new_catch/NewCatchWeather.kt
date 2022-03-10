@@ -1,6 +1,9 @@
 package com.mobileprism.fishing.ui.home.new_catch
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -14,6 +17,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -24,13 +28,16 @@ import com.mobileprism.fishing.ui.home.views.SecondaryText
 import com.mobileprism.fishing.ui.home.weather.PressureValues
 import com.mobileprism.fishing.ui.home.weather.TemperatureValues
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
-import com.mobileprism.fishing.domain.NewCatchViewModel
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
-import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.mappers.getMoonIconByPhase
 import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.model.mappers.getWeatherNameByIcon
+import com.mobileprism.fishing.ui.home.new_catch.weather.*
+import com.mobileprism.fishing.ui.home.views.WeatherIconItem
+import com.mobileprism.fishing.ui.utils.enums.StringOperation
+import com.mobileprism.fishing.ui.utils.toDoubleExOrNull
+import com.mobileprism.fishing.ui.viewmodels.NewCatchViewModel
 import com.mobileprism.fishing.utils.time.toHours
 import org.koin.androidx.compose.get
 import java.util.*
@@ -51,16 +58,6 @@ fun WeatherLayout(
         var weatherIconDialogState by remember {
             mutableStateOf(false)
         }
-
-        val currentMoonPhase = remember {
-            weather.daily.first().moonPhase
-        }
-
-//        viewModel.moonPhase.value = calcMoonPhase(
-//            currentMoonPhase,
-//            Date().time / MILLISECONDS_IN_SECOND,
-//            weather.hourly.first().date
-//        )
 
         val hour by remember(calendar.timeInMillis) {
             mutableStateOf(calendar.timeInMillis.toHours().toInt())
@@ -104,7 +101,7 @@ fun WeatherLayout(
         if (weatherIconDialogState) PickWeatherIconDialog(
             onDismiss = { weatherIconDialogState = false },
             onWeatherSelected = {
-                weatherIcon = it
+                //weatherIcon = it
                 weatherIconDialogState = false
             })
 
@@ -279,7 +276,7 @@ fun WeatherLayout(
 }
 
 @Composable
-fun WeatherTypesSheet(onWeatherSelected: () -> Unit) {
+fun WeatherTypesSheet(onWeatherSelected: (SelectedWeather) -> Unit) {
     val weatherTypes = listOf(
         Atmosphere.values(),
         Clear.values(),
@@ -301,7 +298,11 @@ fun WeatherTypesSheet(onWeatherSelected: () -> Unit) {
             .verticalScroll(rememberScrollState())
     ) {
         weatherTypes.forEach {
-            WeatherType(it, isOpened = openedList?.javaClass == it.javaClass, onWeatherSelected = onWeatherSelected) {
+            WeatherType(
+                it,
+                isOpened = openedList?.javaClass == it.javaClass,
+                onWeatherSelected = onWeatherSelected
+            ) {
                 openedList =
                     if (openedList == null || openedList?.javaClass != it.javaClass) it else null
             }
@@ -310,7 +311,12 @@ fun WeatherTypesSheet(onWeatherSelected: () -> Unit) {
 }
 
 @Composable
-fun <T> WeatherType(it: Array<out T>, isOpened: Boolean, onWeatherSelected: () -> Unit, onWeatherTypeClicked: () -> Unit)
+fun <T> WeatherType(
+    it: Array<out T>,
+    isOpened: Boolean,
+    onWeatherSelected: (SelectedWeather) -> Unit,
+    onWeatherTypeClicked: () -> Unit
+)
         where T : StringOperation, T : WeatherIconPrefix {
     WeatherTypeTitle(it, isOpened = isOpened, onWeatherTypeClicked)
     AnimatedVisibility(visible = isOpened) {
@@ -335,28 +341,35 @@ fun <T> WeatherTypeTitle(
         }
     )
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onWeatherTypeClicked() },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         WeatherIconItem(getWeatherIconByName(param.first().iconPrefix)) {}
         Text(text = stringResource(id = param.first().getNameRes))
-        IconButton(onClick = onWeatherTypeClicked) {
+        IconButton(onClick = { } ) {
             Icon(Icons.Default.ArrowDropDown, "", modifier = Modifier.rotate(angle))
         }
     }
 }
 
 @Composable
-fun <T> WeatherTypeItem(it: T, onWeatherSelected: () -> Unit) where T : StringOperation, T : WeatherIconPrefix {
-    Box(modifier = Modifier.fillMaxWidth().clickable { onWeatherSelected() })
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        /*WeatherIconItem(
-            getWeatherIconByName(it.iconPrefix),
-            iconTint = MaterialTheme.colors.onSurface,
-            requiredSize = 35.dp
-        ) {}*/
-        Text(text = stringResource(id = it.stringRes))
+fun <T> WeatherTypeItem(it: T, onWeatherSelected: (SelectedWeather) -> Unit) where T : StringOperation, T : WeatherIconPrefix {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .heightIn(min = 25.dp)
+        .clickable { onWeatherSelected(SelectedWeather(it.stringRes, it.iconPrefix)) }) {
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            /*WeatherIconItem(
+                getWeatherIconByName(it.iconPrefix),
+                iconTint = MaterialTheme.colors.onSurface,
+                requiredSize = 35.dp
+            ) {}*/
+            Text(text = stringResource(id = it.stringRes))
+        }
     }
 }
 
@@ -381,13 +394,15 @@ fun NewCatchWeatherPrimary(
     onIconChange: (String) -> Unit,
     onError: (Boolean) -> Unit
 ) {
+    val context = LocalContext.current
     var weatherIconDialogState by remember { mutableStateOf(false) }
 
     if (weatherIconDialogState) {
         PickWeatherIconDialog(
             onDismiss = { weatherIconDialogState = false },
             onWeatherSelected = {
-                onIconChange(getWeatherNameByIcon(it))
+                onIconChange(it.iconPrefix)
+                onDescriptionChange(context.getString(it.stringRes))
                 weatherIconDialogState = false
             })
     }

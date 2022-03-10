@@ -53,7 +53,7 @@ class SolunarRetrofitRepositoryImpl(
         }
     }
 
-    override fun getSolunar(latitude: Double, longitude: Double, date: String, timeZone: Int): Flow<RetrofitWrapper<Solunar>> =
+    override fun getSolunar(latitude: Double, longitude: Double, date: String, timeZone: Int): Flow<Result<Solunar>> =
         flow {
 
             firebaseAnalytics.logEvent("get_solunar", null)

@@ -3,12 +3,11 @@ package com.mobileprism.fishing.model.datasource
 import androidx.core.os.LocaleListCompat
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
-import com.mobileprism.fishing.domain.viewstates.ErrorType
-import com.mobileprism.fishing.domain.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.api.WeatherApiService
 import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
 import com.mobileprism.fishing.model.utils.safeApiCall
+import com.mobileprism.fishing.ui.viewstates.RetrofitWrapper
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -48,7 +47,7 @@ class WeatherRepositoryRetrofitImpl(
     }
 
     override suspend fun getWeather(lat: Double, lon: Double)
-    : Flow<RetrofitWrapper<WeatherForecast>> = flow {
+    : Flow<Result<WeatherForecast>> = flow {
         emit(safeApiCall(dispatcher) {
             firebaseAnalytics.logEvent("get_weather", null)
             getService().getWeather(
@@ -60,7 +59,7 @@ class WeatherRepositoryRetrofitImpl(
     }
 
     override suspend fun getHistoricalWeather(lat: Double, lon: Double, date: Long)
-    : Flow<RetrofitWrapper<WeatherForecast>> = flow {
+    : Flow<Result<WeatherForecast>> = flow {
         emit(safeApiCall(dispatcher) {
             getService().getHistoricalWeather(
                 latitude = lat, longitude = lon, dt = date,

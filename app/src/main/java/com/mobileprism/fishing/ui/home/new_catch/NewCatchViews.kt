@@ -39,6 +39,7 @@ import com.mobileprism.fishing.model.mappers.getAllWeatherIcons
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.home.new_catch.weather.SelectedWeather
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.utils.Constants.WIND_ROTATION
 import com.mobileprism.fishing.utils.roundTo
@@ -455,23 +456,13 @@ fun NewCatchWeatherItem(viewModel: NewCatchViewModel) {
 
 @ExperimentalComposeUiApi
 @Composable
-fun PickWeatherIconDialog(onWeatherSelected: (Int) -> Unit, onDismiss: () -> Unit) {
+fun PickWeatherIconDialog(onWeatherSelected: (SelectedWeather) -> Unit, onDismiss: () -> Unit) {
     DefaultDialog(
         stringResource(R.string.choose_weather),
         content = {
-            /*FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                mainAxisAlignment = FlowMainAxisAlignment.Center,
-                crossAxisAlignment = FlowCrossAxisAlignment.Center,
-            ) {
-                getAllWeatherIcons().distinct().forEach { iconResource ->
-                    WeatherIconItem(iconResource) { onIconSelected(iconResource) }
-                }
-            }*/
-            WeatherTypesSheet() {
-                onWeatherSelected(1)
-            }
-        }, onDismiss = onDismiss
+            WeatherTypesSheet() { onWeatherSelected(it) }
+        },
+        onDismiss = onDismiss
     )
 }
 

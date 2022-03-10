@@ -5,6 +5,6 @@ import com.mobileprism.fishing.model.entity.weather.CurrentWeatherFree
 import kotlinx.coroutines.flow.Flow
 
 interface FreeWeatherRepository {
-    suspend fun getCurrentWeatherFree(lat: Double, lon: Double): Flow<RetrofitWrapper<CurrentWeatherFree>>
+    suspend fun getCurrentWeatherFree(lat: Double, lon: Double): Flow<Result<CurrentWeatherFree>>
 
 }

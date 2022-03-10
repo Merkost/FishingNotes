@@ -13,11 +13,12 @@ import com.mobileprism.fishing.model.datastore.*
 import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.domain.use_cases.GetNewCatchWeatherUseCase
 import com.mobileprism.fishing.domain.use_cases.GetUserCatchesUseCase
-import com.mobileprism.fishing.model.use_cases.GetFishActivityUseCase
-import com.mobileprism.fishing.model.use_cases.GetFreeWeatherUseCase
+import com.mobileprism.fishing.domain.use_cases.GetFishActivityUseCase
+import com.mobileprism.fishing.domain.use_cases.GetFreeWeatherUseCase
 import com.mobileprism.fishing.domain.use_cases.GetUserPlacesUseCase
 import com.mobileprism.fishing.domain.use_cases.SaveNewCatchUseCase
 import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.viewmodels.*
 import com.mobileprism.fishing.utils.Logger
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionManagerImpl
@@ -58,7 +59,13 @@ val mainModule = module {
 
     viewModel { MainViewModel(get()) }
     viewModel { LoginViewModel(get()) }
-    viewModel { MapViewModel(get(), get(), get(), get()) }
+    viewModel { MapViewModel(
+        repository = get(),
+        getFreeWeatherUseCase = get(),
+        getFishActivityUseCase = get(),
+        geocoder = get(),
+        userPreferences = get()
+    ) }
 
 //    viewModel { NewCatchViewModel(get(), get(), get()) }
 
@@ -103,10 +110,9 @@ val useCasesModule = module {
         )
     }
 
-    factory {
-        GetUserPlacesUseCase(get(), get()) }
-    single { GetFishActivityUseCase(get()) }
-    single { GetFreeWeatherUseCase(get()) }
+    factory { GetUserPlacesUseCase(get()) }
+    factory { GetFishActivityUseCase(get()) }
+    factory { GetFreeWeatherUseCase(get()) }
 }
 
 fun createGeocoder(androidContext: Context): Geocoder {

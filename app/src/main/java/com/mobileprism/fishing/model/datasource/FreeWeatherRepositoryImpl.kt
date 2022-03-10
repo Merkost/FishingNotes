@@ -61,7 +61,7 @@ class FreeWeatherRepositoryImpl(
     override suspend fun getCurrentWeatherFree(
         lat: Double,
         lon: Double
-    ): Flow<RetrofitWrapper<CurrentWeatherFree>> = flow {
+    ): Flow<Result<CurrentWeatherFree>> = flow {
         emit(safeApiCall(dispatcher) {
             firebaseAnalytics.logEvent("get_free_weather", null)
             getService().getFreeWeather(latitude = lat, longitude = lon)

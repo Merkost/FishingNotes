@@ -9,18 +9,17 @@ import com.google.maps.android.SphericalUtil
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.map.*
-import com.mobileprism.fishing.domain.viewstates.Result
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.raw.RawMapMarker
 import com.mobileprism.fishing.model.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
-import com.mobileprism.fishing.model.use_cases.GetFishActivityUseCase
-import com.mobileprism.fishing.model.use_cases.GetFreeWeatherUseCase
+import com.mobileprism.fishing.domain.use_cases.GetFishActivityUseCase
+import com.mobileprism.fishing.domain.use_cases.GetFreeWeatherUseCase
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.map.MapUiState
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
+import com.mobileprism.fishing.ui.viewstates.Result
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
