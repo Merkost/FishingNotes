@@ -52,139 +52,6 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 import java.util.*
 
-@ExperimentalComposeUiApi
-@Composable
-fun Places(viewModel: NewCatchViewModel, isNull: Boolean, navController: NavController) {
-    val context = LocalContext.current
-
-    val changePlaceError = stringResource(R.string.another_place_in_new_catch)
-    val marker by rememberSaveable { viewModel.marker }
-
-    var isDropMenuOpen by rememberSaveable { mutableStateOf(false) }
-
-    var textFieldValue by rememberSaveable {
-        mutableStateOf(
-            marker?.title ?: ""
-        )
-    }
-
-    val suggestions = remember { mutableStateListOf<UserMapMarker>() }
-
-    viewModel.markersListState.value.let {
-        when (it) {
-            is NewCatchPlacesState.NotReceived -> {
-            }
-            is NewCatchPlacesState.Received -> {
-                if (it.locations.isEmpty()) {
-                    NewCatchNoPlaceDialog(navController)
-                } else {
-                    suggestions.apply {
-                        clear()
-                        addAll(it.locations)
-                    }
-                }
-            }
-        }
-    }
-
-    val filteredList by rememberSaveable { mutableStateOf(suggestions.toMutableList()) }
-    if (textFieldValue == "") searchFor("", suggestions, filteredList)
-
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Spacer(modifier = Modifier.padding(1.dp))
-
-        SubtitleWithIcon(
-            modifier = Modifier.align(Alignment.Start),
-            icon = R.drawable.ic_baseline_location_on_24,
-            text = stringResource(id = R.string.location)
-        )
-        Column(modifier = Modifier.fillMaxWidth()) {
-            OutlinedTextField(
-                readOnly = !isNull,
-                singleLine = true,
-                value = textFieldValue,
-                onValueChange = {
-                    textFieldValue = it
-                    if (suggestions.isNotEmpty()) {
-                        searchFor(textFieldValue, suggestions, filteredList)
-                        isDropMenuOpen = true
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onFocusChanged {
-                        isDropMenuOpen = it.isFocused
-                    },
-                label = { Text(text = stringResource(R.string.place)) },
-                trailingIcon = {
-
-                    if (isNull) {
-                        if (textFieldValue.isNotEmpty()) {
-                            IconButton(onClick = {
-                                textFieldValue = ""; isDropMenuOpen = true
-                            }) {
-                                Icon(
-                                    Icons.Default.Close,
-                                    "",
-                                    tint = MaterialTheme.colors.primary
-                                )
-                            }
-
-                        } else {
-                            IconButton(onClick = {
-                                if (!isDropMenuOpen) isDropMenuOpen = true
-                            }) {
-                                Icon(
-                                    Icons.Default.KeyboardArrowDown,
-                                    "",
-                                    tint = MaterialTheme.colors.primary
-                                )
-                            }
-                        }
-                    } else IconButton(onClick = {
-                        showToast(
-                            context,
-                            changePlaceError
-                        )
-
-                    }) {
-                        Icon(
-                            Icons.Default.Lock,
-                            stringResource(R.string.locked),
-                            tint = MaterialTheme.colors.primary,
-                        )
-                    }
-                },
-                isError = !isThatPlaceInList(
-                    textFieldValue,
-                    suggestions
-                ).apply { viewModel.noErrors.value = this },
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next
-                )
-            )
-
-            DropdownMenu(
-                expanded = isDropMenuOpen, //suggestions.isNotEmpty(),
-                onDismissRequest = {
-                    if (isDropMenuOpen) isDropMenuOpen = false
-                },
-                properties = PopupProperties(focusable = false)
-            ) {
-                filteredList.forEach { suggestion ->
-                    DropdownMenuItem(
-                        onClick = {
-                            textFieldValue = suggestion.title
-                            viewModel.marker.value = suggestion
-                            isDropMenuOpen = false
-                        }) {
-                        Text(text = suggestion.title)
-                    }
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun FishSpecies(
@@ -237,27 +104,16 @@ fun Fishing(
     }
 }
 
+@ExperimentalComposeUiApi
 @Composable
-fun FishAndWeight(fishState: MutableState<String>, weightState: MutableState<String>) {
-    val viewModel: NewCatchViewModel = getViewModel()
-    Column {
-
-        SubtitleWithIcon(
-            modifier = Modifier.align(Alignment.Start),
-            icon = R.drawable.ic_fish,
-            text = stringResource(id = R.string.fish_catch)
-        )
-
-//        FishSpecies(viewModel.fishType)
-
-        SimpleOutlinedTextField(
-            textState = viewModel.description,
-            label = stringResource(R.string.note)
-        )
-        Spacer(modifier = Modifier.size(2.dp))
-        FishAmountAndWeightView(amountState = fishState, weightState = weightState)
-
-    }
+fun PickWeatherIconDialog(onWeatherSelected: (SelectedWeather) -> Unit, onDismiss: () -> Unit) {
+    DefaultDialog(
+        stringResource(R.string.choose_weather),
+        content = {
+            WeatherTypesSheet() { onWeatherSelected(it) }
+        },
+        onDismiss = onDismiss
+    )
 }
 
 @Composable
@@ -391,81 +247,6 @@ fun FishAmountAndWeightView(
     }
 }
 
-@Composable
-fun NewCatchWeatherItem(viewModel: NewCatchViewModel) {
-
-    val weather by viewModel.weather.collectAsState()
-    val weatherState by viewModel.weatherState.collectAsState()
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween.also { Arrangement.Center },
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            SubtitleWithIcon(
-                icon = R.drawable.weather_sunny,
-                text = stringResource(id = R.string.weather)
-            )
-            if (weather != null) {
-                IconButton(onClick = { viewModel.getWeather() }) {
-                    Icon(Icons.Default.Refresh, "", tint = MaterialTheme.colors.primary)
-                }
-            } else Spacer(modifier = Modifier.size(LocalViewConfiguration.current.minimumTouchTargetSize))
-        }
-
-        AnimatedVisibility(weatherState is RetrofitWrapper.Success) {
-            WeatherLayout(weather, viewModel)
-        }
-
-        AnimatedVisibility(weatherState is RetrofitWrapper.Loading) {
-            if (viewModel.marker.value == null) {
-                NoContentView(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    text = stringResource(R.string.select_place_for_weather),
-                    icon = painterResource(id = R.drawable.ic_baseline_location_on_24)
-                )
-            } else {
-                WeatherLayoutLoading()
-            }
-
-        }
-
-        AnimatedVisibility(weatherState is RetrofitWrapper.Error) {
-            if (weatherState is RetrofitWrapper.Error) {
-                when ((weatherState as RetrofitWrapper.Error).errorType) {
-                    is ErrorType.NetworkError -> {
-                        SecondaryText(
-                            modifier = Modifier.padding(8.dp),
-                            text = stringResource(R.string.no_internet)
-                        )
-                    }
-                    is ErrorType.OtherError -> {
-                        SecondaryText(
-                            modifier = Modifier.padding(8.dp),
-                            text = "Произошла ошибка!"
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@ExperimentalComposeUiApi
-@Composable
-fun PickWeatherIconDialog(onWeatherSelected: (SelectedWeather) -> Unit, onDismiss: () -> Unit) {
-    DefaultDialog(
-        stringResource(R.string.choose_weather),
-        content = {
-            WeatherTypesSheet() { onWeatherSelected(it) }
-        },
-        onDismiss = onDismiss
-    )
-}
-
 @ExperimentalComposeUiApi
 @Composable
 fun PickWindDirDialog(onDirectionSelected: (Float) -> Unit, onDismiss: () -> Unit) {
@@ -486,66 +267,6 @@ fun PickWindDirDialog(onDirectionSelected: (Float) -> Unit, onDismiss: () -> Uni
             }
         }, onDismiss = onDismiss
     )
-}
-
-@Composable
-fun DateAndTime(
-    date: MutableState<Long>,
-) {
-    val viewModel: NewCatchViewModel = getViewModel()
-    val dateSetState = remember { mutableStateOf(false) }
-    val timeSetState = remember { mutableStateOf(false) }
-    val context = LocalContext.current
-
-//    if (dateSetState.value) DatePicker(date, dateSetState, context)
-//    if (timeSetState.value) TimePicker(date, timeSetState, context)
-
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedTextField(
-            value = date.value.toDate(),
-            onValueChange = {},
-            label = { Text(text = stringResource(R.string.date)) },
-            readOnly = true,
-            modifier = Modifier
-                .fillMaxWidth(),
-            trailingIcon = {
-                IconButton(onClick = {
-                    if (viewModel.noErrors.value) dateSetState.value = true
-                    else {
-                        SnackbarManager.showMessage(R.string.choose_place_first)
-                    }
-                }) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_baseline_event_24),
-                        tint = MaterialTheme.colors.primary,
-                        contentDescription = stringResource(R.string.date)
-                    )
-                }
-
-            })
-        OutlinedTextField(
-            value = date.value.toTime(),
-            onValueChange = {},
-            label = { Text(text = stringResource(R.string.time)) },
-            readOnly = true,
-            modifier = Modifier
-                .fillMaxWidth(),
-            trailingIcon = {
-                IconButton(onClick = {
-                    if (viewModel.noErrors.value) timeSetState.value = true
-                    else {
-                        SnackbarManager.showMessage(R.string.choose_place_first)
-                    }
-                }) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_baseline_access_time_24),
-                        tint = MaterialTheme.colors.primary,
-                        contentDescription = stringResource(R.string.time)
-                    )
-                }
-
-            })
-    }
 }
 
 @ExperimentalComposeUiApi
@@ -1008,65 +729,3 @@ fun WayOfFishingView(
     }
 }
 
-@Composable
-fun NewCatchWeatherView(viewModel: NewCatchViewModel) {
-
-    val weather by viewModel.weather.collectAsState()
-    val weatherState by viewModel.weatherState.collectAsState()
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween.also { Arrangement.Center },
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            SubtitleWithIcon(
-                icon = R.drawable.weather_sunny,
-                text = stringResource(id = R.string.weather)
-            )
-            if (weather != null) {
-                IconButton(onClick = { viewModel.getWeather() }) {
-                    Icon(Icons.Default.Refresh, "", tint = MaterialTheme.colors.primary)
-                }
-            } else Spacer(modifier = Modifier.size(LocalViewConfiguration.current.minimumTouchTargetSize))
-        }
-
-        AnimatedVisibility(weatherState is RetrofitWrapper.Success) {
-            WeatherLayout(weather, viewModel)
-        }
-
-        AnimatedVisibility(weatherState is RetrofitWrapper.Loading) {
-            if (viewModel.marker.value == null) {
-                NoContentView(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    text = stringResource(R.string.select_place_for_weather),
-                    icon = painterResource(id = R.drawable.ic_baseline_location_on_24)
-                )
-            } else {
-                WeatherLayoutLoading()
-            }
-
-        }
-
-        AnimatedVisibility(weatherState is RetrofitWrapper.Error) {
-            if (weatherState is RetrofitWrapper.Error) {
-                when ((weatherState as RetrofitWrapper.Error).errorType) {
-                    is ErrorType.NetworkError -> {
-                        SecondaryText(
-                            modifier = Modifier.padding(8.dp),
-                            text = stringResource(R.string.no_internet)
-                        )
-                    }
-                    is ErrorType.OtherError -> {
-                        SecondaryText(
-                            modifier = Modifier.padding(8.dp),
-                            text = "Произошла ошибка!"
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
