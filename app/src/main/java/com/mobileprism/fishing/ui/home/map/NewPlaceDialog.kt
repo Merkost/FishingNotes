@@ -47,14 +47,15 @@ import org.koin.androidx.compose.getViewModel
 @ExperimentalComposeUiApi
 @Composable
 fun NewPlaceDialog(
-    currentCameraPosition: State<Triple<LatLng, Float, Float>>,
     dialogState: MutableState<Boolean>,
+    //TODO: delete chosenPlace
     chosenPlace: MutableState<String?>,
 ) {
     val viewModel: MapViewModel = getViewModel()
+    val currentCameraPosition by viewModel.currentCameraPosition.collectAsState()
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val uiState by viewModel.addNewMarkerUiState.collectAsState()
+    val uiState by viewModel.addNewMarkerState.collectAsState()
 
     MyCard(
         shape = Shapes.large, modifier = Modifier
@@ -88,8 +89,7 @@ fun NewPlaceDialog(
                             SnackbarManager.showMessage(R.string.add_place_success)
                         }
                     }
-                    else -> {
-                    }
+                    else -> {}
                 }
             }
 
@@ -246,8 +246,8 @@ fun NewPlaceDialog(
                             false -> titleValue.value
                         },
                         description = descriptionValue.value,
-                        latitude = currentCameraPosition.value.first.latitude,
-                        longitude = currentCameraPosition.value.first.longitude,
+                        latitude = currentCameraPosition.first.latitude,
+                        longitude = currentCameraPosition.first.longitude,
                         markerColor = markerColor.value
                     )
                 )

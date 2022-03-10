@@ -35,8 +35,7 @@ class MapViewModel(
     private val firstLaunchLocation = mutableStateOf(true)
 
     val showMarker: MutableState<Boolean> = mutableStateOf(false)
-    private val _addNewMarkerState: MutableStateFlow<UiState> =
-        MutableStateFlow(UiState.Success)
+    private val _addNewMarkerState: MutableStateFlow<UiState?> = MutableStateFlow(null)
     val addNewMarkerState = _addNewMarkerState.asStateFlow()
 
     private var _mapMarkers: MutableStateFlow<MutableList<UserMapMarker>> =
@@ -49,9 +48,6 @@ class MapViewModel(
 
     private val _cameraMoveState = MutableStateFlow<CameraMoveState>(CameraMoveState.MoveFinish)
     val cameraMoveState = _cameraMoveState.asStateFlow()
-
-    private val _addNewMarkerUiState = MutableStateFlow<UiState?>(null)
-    val addNewMarkerUiState = _addNewMarkerUiState.asStateFlow()
 
     private val _mapType = MutableStateFlow(MapTypes.roadmap)
     val mapType = _mapType.asStateFlow()
@@ -117,7 +113,7 @@ class MapViewModel(
                         _addNewMarkerState.value = UiState.Success
                     }
                     is Result.Error -> {
-                        _addNewMarkerUiState.value = UiState.Error
+                        _addNewMarkerState.value = UiState.Error
                     }
                 }
             }
