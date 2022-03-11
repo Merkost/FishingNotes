@@ -16,6 +16,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.focus.FocusState
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -33,6 +35,7 @@ import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.mappers.getMoonIconByPhase
 import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.model.mappers.getWeatherNameByIcon
+import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.new_catch.weather.*
 import com.mobileprism.fishing.ui.home.views.WeatherIconItem
 import com.mobileprism.fishing.ui.utils.enums.StringOperation
@@ -164,8 +167,10 @@ fun NewCatchWeatherPrimary(
     }
 
     OutlinedTextField(
-        modifier = modifier.fillMaxWidth(),
-        readOnly = false,
+        modifier = modifier.fillMaxWidth().onFocusChanged {
+             if (it.hasFocus) { weatherIconDialogState = true }
+        },
+        readOnly = true,
         value = weatherDescription,
         leadingIcon = {
             IconButton(
