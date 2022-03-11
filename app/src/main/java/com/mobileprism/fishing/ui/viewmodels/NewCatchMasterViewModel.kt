@@ -4,14 +4,14 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.BuildConfig
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.model.entity.weather.NewCatchWeatherData
 import com.mobileprism.fishing.domain.use_cases.GetNewCatchWeatherUseCase
 import com.mobileprism.fishing.domain.use_cases.GetUserPlacesUseCase
 import com.mobileprism.fishing.domain.use_cases.SaveNewCatchUseCase
+import com.mobileprism.fishing.model.entity.content.UserMapMarker
+import com.mobileprism.fishing.model.entity.weather.NewCatchWeatherData
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlacesState
 import com.mobileprism.fishing.ui.home.new_catch.ReceivedPlaceState
+import com.mobileprism.fishing.ui.viewstates.NewCatchViewState
 import com.mobileprism.fishing.utils.calcMoonPhase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,7 +48,7 @@ class NewCatchMasterViewModel(
     private val _catchWeatherState = MutableStateFlow(CatchWeatherState())
     val catchWeatherState = _catchWeatherState.asStateFlow()
 
-    private val _uiState = MutableStateFlow<BaseViewState<Nothing?>>(BaseViewState.Success(null))
+    private val _uiState = MutableStateFlow<NewCatchViewState>(NewCatchViewState.Editing)
     val uiState = _uiState.asStateFlow()
 
     private val _photos = MutableStateFlow<List<Uri>>(listOf())
@@ -185,7 +185,7 @@ class NewCatchMasterViewModel(
     }
 
     fun saveNewCatch() {
-        _uiState.value = BaseViewState.Loading(0)
+        _uiState.value = NewCatchViewState.SavingNewCatch
 
         viewModelScope.launch(Dispatchers.IO) {
             placeAndTimeState.value.place?.let {
@@ -193,10 +193,10 @@ class NewCatchMasterViewModel(
                 saveNewCatchUseCase(newCatch).collect { progress ->
                     progress.fold(
                         onSuccess = {
-                            _uiState.value = BaseViewState.Success(null)
+                            _uiState.value = NewCatchViewState.Complete
                         },
                         onFailure = {
-                            _uiState.value = BaseViewState.Error(it)
+                            _uiState.value = NewCatchViewState.Error(it)
                         }
                     )
                 }

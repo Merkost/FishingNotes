@@ -24,12 +24,12 @@ import androidx.navigation.NavController
 import com.google.accompanist.pager.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.home.SnackbarManager
-import com.mobileprism.fishing.ui.home.advertising.showInterstitialAd
 import com.mobileprism.fishing.ui.home.place.LottieWarning
 import com.mobileprism.fishing.ui.home.views.*
+import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
+import com.mobileprism.fishing.ui.viewstates.NewCatchViewState
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -85,7 +85,9 @@ fun NewCatchMasterScreen(
             coroutineScope.launch {
                 pagerState.animateScrollToPage(currentPage - 1)
             }
-        } else { exitDialogIsShowing = true }
+        } else {
+            exitDialogIsShowing = true
+        }
     }
 
     val loadingDialogState = remember { mutableStateOf(false) }
@@ -94,21 +96,40 @@ fun NewCatchMasterScreen(
     val onFinish = {
         if (viewModel.photos.value.size <= MAX_PHOTOS) {
             viewModel.saveNewCatch()
-            showInterstitialAd(
-                context = context,
-                onAdLoaded = { isAdLoaded.value = true }
-            )
         } else {
             SnackbarManager.showMessage(R.string.max_photos_allowed)
         }
     }
 
-    SubscribeToNewCatchProgress(
-        uiState = viewModel.uiState.collectAsState().value,
-        adIsLoadedState = isAdLoaded.value,
-        loadingDialogState = loadingDialogState,
-        upPress = upPress
-    )
+
+    val uiState = viewModel.uiState.collectAsState()
+
+    LaunchedEffect(key1 = uiState.value) {
+        uiState.value.let {
+            when (it) {
+                NewCatchViewState.Editing -> {}
+                NewCatchViewState.Complete -> {
+                    loadingDialogState.value = false
+                    SnackbarManager.showMessage(R.string.catch_added_successfully)
+                    upPress()
+
+                }
+                NewCatchViewState.SavingNewCatch -> {
+                    loadingDialogState.value = true
+//                    showInterstitialAd(
+//                        context = context,
+//                        onAdLoaded = { isAdLoaded.value = true }
+//                    )
+                }
+                is NewCatchViewState.Error -> {
+                    loadingDialogState.value = false
+                    SnackbarManager.showMessage(R.string.error_occured)
+                    upPress()
+                }
+            }
+        }
+
+    }
 
     ModalLoadingDialog(
         dialogSate = loadingDialogState,
@@ -127,12 +148,15 @@ fun NewCatchMasterScreen(
                 title = stringResource(id = R.string.new_catch),
                 onNavClick = { exitDialogIsShowing = true },
                 actions = {
-                    IconButton(onClick = {
-                        when (skipAvaliable) {
-                        true -> onFinish()
-                        else -> SnackbarManager.showMessage(R.string.new_catch_skip_tutor)
-                    } },
-                    enabled = true) {
+                    IconButton(
+                        onClick = {
+                            when (skipAvaliable) {
+                                true -> onFinish()
+                                else -> SnackbarManager.showMessage(R.string.new_catch_skip_tutor)
+                            }
+                        },
+                        enabled = true
+                    ) {
                         Icon(Icons.Default.Check, Icons.Default.Check.name)
                     }
                 }
