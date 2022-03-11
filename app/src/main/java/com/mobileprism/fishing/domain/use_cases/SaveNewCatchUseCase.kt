@@ -9,8 +9,6 @@ import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.ui.viewmodels.*
 import com.mobileprism.fishing.utils.getCurrentUser
 import com.mobileprism.fishing.utils.getNewCatchId
-import com.mobileprism.fishing.utils.network.ConnectionManager
-import com.mobileprism.fishing.utils.network.ConnectionState
 import com.mobileprism.fishing.utils.toStandardNumber
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
@@ -18,9 +16,7 @@ import kotlinx.coroutines.flow.take
 
 class SaveNewCatchUseCase(
     private val catchesRepository: CatchesRepository,
-    private val catchesRepositoryOffline: CatchesRepository,
     private val photosRepository: PhotoStorage,
-    private val connectionManager: ConnectionManager,
     private val weatherPreferences: WeatherPreferences
 ) {
 
@@ -34,14 +30,9 @@ class SaveNewCatchUseCase(
             photos = savePhotos(data.photos)
         )
 
-        val repository = if (connectionManager.getConnectionState() is ConnectionState.Available) {
-            catchesRepository
-        } else {
-            catchesRepositoryOffline
-        }
-
         data.placeAndTimeState.place?.let { it ->
-            repository.addNewCatch(markerId = it.id, newCatch = userCatch).collect { trySend(it) }
+            catchesRepository.addNewCatch(markerId = it.id, newCatch = userCatch)
+                .collect { trySend(it) }
         }
     }
 

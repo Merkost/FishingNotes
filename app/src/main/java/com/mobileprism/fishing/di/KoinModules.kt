@@ -9,14 +9,9 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
+import com.mobileprism.fishing.domain.use_cases.*
 import com.mobileprism.fishing.model.datastore.*
 import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
-import com.mobileprism.fishing.domain.use_cases.GetNewCatchWeatherUseCase
-import com.mobileprism.fishing.domain.use_cases.GetUserCatchesUseCase
-import com.mobileprism.fishing.domain.use_cases.GetFishActivityUseCase
-import com.mobileprism.fishing.domain.use_cases.GetFreeWeatherUseCase
-import com.mobileprism.fishing.domain.use_cases.GetUserPlacesUseCase
-import com.mobileprism.fishing.domain.use_cases.SaveNewCatchUseCase
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.viewmodels.*
 import com.mobileprism.fishing.utils.Logger
@@ -26,7 +21,6 @@ import com.mobileprism.fishing.viewmodels.MainViewModel
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val appModule = module {
@@ -45,7 +39,6 @@ val appModule = module {
 }
 
 
-
 val settingsModule = module {
     single { AppPreferences(androidContext()) }
     single { UserPreferences(androidContext()) }
@@ -56,60 +49,30 @@ val settingsModule = module {
 }
 
 val mainModule = module {
-
     viewModel { MainViewModel(get()) }
     viewModel { LoginViewModel(get()) }
-    viewModel { MapViewModel(
-        repository = get(),
-        getFreeWeatherUseCase = get(),
-        getFishActivityUseCase = get(),
-        geocoder = get(),
-        userPreferences = get()
-    ) }
-
-//    viewModel { NewCatchViewModel(get(), get(), get()) }
-
-    viewModel { UserViewModel(get(), get()) }
-    viewModel { UserCatchViewModel(get(), get(named(CATCHES_REPOSITORY)), get()) }
-    viewModel { WeatherViewModel(get(), get()) }
-    viewModel { UserPlaceViewModel(get(), get(named(CATCHES_REPOSITORY))) }
-    viewModel { UserCatchesViewModel(get()) }
-    viewModel { UserPlacesViewModel(get()) }
-    viewModel { parameters ->
-        NewCatchMasterViewModel(
-            placeState = parameters.get(),
-            get(),
-            get(),
-            get(),
+    viewModel {
+        MapViewModel(
+            repository = get(),
+            getFreeWeatherUseCase = get(),
+            getFishActivityUseCase = get(),
+            geocoder = get(),
+            userPreferences = get()
         )
     }
-
+    viewModel { UserViewModel(get(), get()) }
+    viewModel { UserCatchViewModel(get(), get(), get()) }
+    viewModel { WeatherViewModel(get(), get()) }
+    viewModel { UserPlaceViewModel(get(), get()) }
+    viewModel { UserCatchesViewModel(get()) }
+    viewModel { UserPlacesViewModel(get()) }
+    viewModel { parameters -> NewCatchMasterViewModel(parameters.get(), get(), get(), get()) }
 }
 
 val useCasesModule = module {
-    factory {
-        GetUserCatchesUseCase(
-            repository = get(named(CATCHES_REPOSITORY))
-        )
-    }
-
-    factory {
-        GetNewCatchWeatherUseCase(
-            weatherRepository = get(),
-            weatherPreferences = get()
-        )
-    }
-
-    factory {
-        SaveNewCatchUseCase(
-            catchesRepository = get(named(CATCHES_REPOSITORY)),
-            catchesRepositoryOffline = get(named(CATCHES_REPOSITORY_OFFLINE)),
-            photosRepository = get(),
-            connectionManager = get(),
-            weatherPreferences = get()
-        )
-    }
-
+    factory { GetUserCatchesUseCase(get()) }
+    factory { GetNewCatchWeatherUseCase(get(), get()) }
+    factory { SaveNewCatchUseCase(get(), get(), get()) }
     factory { GetUserPlacesUseCase(get()) }
     factory { GetFishActivityUseCase(get()) }
     factory { GetFreeWeatherUseCase(get()) }

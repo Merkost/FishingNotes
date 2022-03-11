@@ -13,6 +13,8 @@ import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.repository.PhotoStorage
 import com.mobileprism.fishing.model.repository.app.CatchesRepository
+import com.mobileprism.fishing.utils.network.ConnectionManager
+import com.mobileprism.fishing.utils.network.ConnectionState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
@@ -23,6 +25,7 @@ class FirebaseCatchesRepositoryImpl(
     private val dbCollections: RepositoryCollections,
     private val firebaseAnalytics: FirebaseAnalytics,
     private val cloudPhotoStorage: PhotoStorage,
+    private val connectionManager: ConnectionManager
 ) : CatchesRepository {
 
 
@@ -138,23 +141,48 @@ class FirebaseCatchesRepositoryImpl(
     override fun addNewCatch(
         markerId: String,
         newCatch: UserCatch
-    ) = callbackFlow {
-        //is ->1
-        ->2
+    ) = channelFlow {
+        val isOnline = connectionManager.getConnectionState() is ConnectionState.Available
+
+        if (isOnline) {
+            addNewCatchOnline(markerId = markerId, newCatch = newCatch, scope = this)
+        } else {
+            addNewCatchOffline(markerId = markerId, newCatch = newCatch, scope = this)
+        }
+
+        awaitClose { }
+    }
+
+    private fun addNewCatchOnline(
+        markerId: String,
+        newCatch: UserCatch,
+        scope: ProducerScope<Result<Nothing?>>
+    ) {
         dbCollections.getUserCatchesCollection(markerId).document(newCatch.id)
             .set(newCatch)
             .addOnCompleteListener {
                 if (it.exception != null) {
-                    trySend(Result.failure(it.exception!!))
+                    scope.trySend(Result.failure(it.exception!!))
                 }
                 if (it.isSuccessful) {
                     firebaseAnalytics.logEvent("new_catch", null)
-                    trySend(Result.success(null))
+                    scope.trySend(Result.success(null))
                     incrementNumOfCatches(markerId)
                 }
             }
-        awaitClose { }
     }
+
+    private fun addNewCatchOffline(
+        markerId: String,
+        newCatch: UserCatch,
+        scope: ProducerScope<Result<Nothing?>>
+    ) {
+        dbCollections.getUserCatchesCollection(markerId).document(newCatch.id).set(newCatch)
+        firebaseAnalytics.logEvent("new_catch_offline", null)
+        scope.trySend(Result.success(null))
+        incrementNumOfCatches(markerId)
+    }
+
 
     override suspend fun deleteCatch(userCatch: UserCatch) {
         dbCollections.getUserCatchesCollection(userCatch.userMarkerId).document(userCatch.id)
