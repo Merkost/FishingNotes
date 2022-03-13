@@ -86,8 +86,7 @@ fun <T> WeatherType(
     isOpened: Boolean,
     onWeatherSelected: (SelectedWeather) -> Unit,
     onWeatherTypeClicked: () -> Unit
-)
-        where T : StringOperation, T : WeatherIconPrefix {
+) where T : StringOperation, T : WeatherIconPrefix {
     WeatherTypeTitle(it, isOpened = isOpened, onWeatherTypeClicked)
     AnimatedVisibility(visible = isOpened) {
         Column {
@@ -133,11 +132,6 @@ fun <T> WeatherTypeItem(it: T, onWeatherSelected: (SelectedWeather) -> Unit) whe
         .clickable { onWeatherSelected(SelectedWeather(it.stringRes, it.iconPrefix)) }) {
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            /*WeatherIconItem(
-                getWeatherIconByName(it.iconPrefix),
-                iconTint = MaterialTheme.colors.onSurface,
-                requiredSize = 35.dp
-            ) {}*/
             Text(text = stringResource(id = it.stringRes))
         }
     }
