@@ -2,7 +2,6 @@ package com.mobileprism.fishing.model.datasource
 
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
-import com.mobileprism.fishing.ui.viewstates.ErrorType
 import com.mobileprism.fishing.model.api.SolunarApiService
 import com.mobileprism.fishing.model.entity.solunar.Solunar
 import com.mobileprism.fishing.model.repository.app.SolunarRepository

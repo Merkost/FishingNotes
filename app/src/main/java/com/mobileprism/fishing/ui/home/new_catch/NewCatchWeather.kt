@@ -126,16 +126,15 @@ fun <T> WeatherTypeTitle(
 
 @Composable
 fun <T> WeatherTypeItem(it: T, onWeatherSelected: (SelectedWeather) -> Unit) where T : StringOperation, T : WeatherIconPrefix {
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .heightIn(min = 40.dp).padding(4.dp)
-        .clickable { onWeatherSelected(SelectedWeather(it.stringRes, it.iconPrefix)) }) {
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = stringResource(id = it.stringRes))
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 40.dp)
+            .clickable { onWeatherSelected(SelectedWeather(it.stringRes, it.iconPrefix)) },
+                verticalAlignment = Alignment.CenterVertically) {
+            Text(modifier = Modifier.padding(4.dp), text = stringResource(id = it.stringRes))
         }
     }
-}
+
 
 @ExperimentalComposeUiApi
 @Composable
