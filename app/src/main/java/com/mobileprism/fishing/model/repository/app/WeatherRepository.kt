@@ -1,7 +1,6 @@
 package com.mobileprism.fishing.model.repository.app
 
 import com.mobileprism.fishing.model.entity.weather.WeatherForecast
-import com.mobileprism.fishing.ui.viewstates.RetrofitWrapper
 import kotlinx.coroutines.flow.Flow
 
 interface WeatherRepository {

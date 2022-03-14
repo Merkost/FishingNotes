@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mobileprism.fishing.ui.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.raw.NewCatchWeather
 import com.mobileprism.fishing.model.entity.raw.RawUserCatch
@@ -17,6 +16,7 @@ import com.mobileprism.fishing.model.repository.app.WeatherRepository
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlacesState
 import com.mobileprism.fishing.ui.home.weather.TemperatureValues
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,8 +36,8 @@ class NewCatchViewModel(
     val uiState = _uiState.asStateFlow()
 
     private val _weatherState =
-        MutableStateFlow<RetrofitWrapper<WeatherForecast>>(RetrofitWrapper.Loading())
-    val weatherState: StateFlow<RetrofitWrapper<WeatherForecast>>
+        MutableStateFlow<BaseViewState<WeatherForecast>>(BaseViewState.Loading())
+    val weatherState: StateFlow<BaseViewState<WeatherForecast>>
         get() = _weatherState
 
     val noErrors = mutableStateOf(true)
