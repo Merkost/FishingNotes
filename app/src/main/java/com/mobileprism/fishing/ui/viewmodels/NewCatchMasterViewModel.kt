@@ -7,9 +7,9 @@ import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.weather.NewCatchWeatherData
-import com.mobileprism.fishing.domain.use_cases.GetNewCatchWeatherUseCase
-import com.mobileprism.fishing.domain.use_cases.GetUserPlacesUseCase
-import com.mobileprism.fishing.domain.use_cases.SaveNewCatchUseCase
+import com.mobileprism.fishing.ui.use_cases.GetNewCatchWeatherUseCase
+import com.mobileprism.fishing.ui.use_cases.GetUserPlacesUseCase
+import com.mobileprism.fishing.ui.use_cases.SaveNewCatchUseCase
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlacesState
 import com.mobileprism.fishing.ui.home.new_catch.ReceivedPlaceState
 import com.mobileprism.fishing.utils.calcMoonPhase

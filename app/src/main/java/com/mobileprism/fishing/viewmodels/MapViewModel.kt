@@ -14,8 +14,8 @@ import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.raw.RawMapMarker
 import com.mobileprism.fishing.model.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
-import com.mobileprism.fishing.domain.use_cases.GetFishActivityUseCase
-import com.mobileprism.fishing.domain.use_cases.GetFreeWeatherUseCase
+import com.mobileprism.fishing.ui.use_cases.GetFishActivityUseCase
+import com.mobileprism.fishing.ui.use_cases.GetFreeWeatherUseCase
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.map.MapUiState
 import kotlinx.coroutines.Dispatchers

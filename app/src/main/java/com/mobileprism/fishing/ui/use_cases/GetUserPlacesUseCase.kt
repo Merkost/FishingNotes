@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.domain.use_cases
+package com.mobileprism.fishing.ui.use_cases
 
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.repository.app.MarkersRepository

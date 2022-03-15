@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.domain.use_cases
+package com.mobileprism.fishing.ui.use_cases
 
 import com.mobileprism.fishing.model.repository.app.FreeWeatherRepository
 import com.mobileprism.fishing.model.repository.app.SolunarRepository
