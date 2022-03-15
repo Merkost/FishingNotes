@@ -35,6 +35,7 @@ class MapViewModel(
     private val firstLaunchLocation = mutableStateOf(true)
 
     val showMarker: MutableState<Boolean> = mutableStateOf(false)
+
     private val _addNewMarkerState: MutableStateFlow<UiState?> = MutableStateFlow(null)
     val addNewMarkerState = _addNewMarkerState.asStateFlow()
 
@@ -307,6 +308,10 @@ class MapViewModel(
                 firstLaunchLocation.value = false
             }
         }
+    }
+
+    fun resetAddNewMarkerState() {
+        _addNewMarkerState.value = null
     }
 
 

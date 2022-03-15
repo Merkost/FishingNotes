@@ -57,6 +57,34 @@ fun NewPlaceDialog(
     val coroutineScope = rememberCoroutineScope()
     val uiState by viewModel.addNewMarkerState.collectAsState()
 
+    LaunchedEffect(uiState) {
+        when (uiState) {
+            /*UiState.InProgress -> {
+                Surface(color = Color.Gray, modifier = Modifier
+                    .constrainAs(progress) {
+                        top.linkTo(parent.top)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                        bottom.linkTo(parent.bottom)
+                    }
+                    .size(100.dp)) {
+                    FishLoading(modifier = Modifier.size(150.dp))
+                }
+            }*/
+            UiState.Success -> {
+                coroutineScope.launch {
+                    dialogState.value = false
+                    viewModel.resetAddNewMarkerState()
+                    SnackbarManager.showMessage(R.string.add_place_success)
+                }
+            }
+            UiState.Error -> {
+                SnackbarManager.showMessage(R.string.add_new_place_error)
+            }
+            else -> {}
+        }
+    }
+
     MyCard(
         shape = Shapes.large, modifier = Modifier
             .wrapContentHeight()
@@ -68,30 +96,6 @@ fun NewPlaceDialog(
                 .padding(4.dp)
         ) {
             val (progress, name, locationIcon, title, description, saveButton, cancelButton) = createRefs()
-
-            uiState?.let {
-                when (it) {
-                    UiState.InProgress -> {
-                        Surface(color = Color.Gray, modifier = Modifier
-                            .constrainAs(progress) {
-                                top.linkTo(parent.top)
-                                absoluteLeft.linkTo(parent.absoluteLeft)
-                                absoluteRight.linkTo(parent.absoluteRight)
-                                bottom.linkTo(parent.bottom)
-                            }
-                            .size(100.dp)) {
-                            FishLoading(modifier = Modifier.size(150.dp))
-                        }
-                    }
-                    UiState.Success -> {
-                        coroutineScope.launch {
-                            dialogState.value = false
-                            SnackbarManager.showMessage(R.string.add_place_success)
-                        }
-                    }
-                    else -> {}
-                }
-            }
 
             val descriptionValue = remember { mutableStateOf("") }
             val titleValue = remember { mutableStateOf(/*chosenPlace.value ?:*/ "") }
@@ -193,7 +197,6 @@ fun NewPlaceDialog(
                         .clip(CircleShape)
                 )
                 {
-//                    Image(painterResource(R.drawable.transparent), stringResource(R.string.transparent),)
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
                         contentDescription = stringResource(R.string.marker_icon),
@@ -253,13 +256,17 @@ fun NewPlaceDialog(
                 )
             }) {
                 Row(
-                    horizontalArrangement = Arrangement.Center,
+                    horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         stringResource(id = R.string.save),
                         style = MaterialTheme.typography.button
                     )
+                    /*AnimatedVisibility(visible = uiState is UiState.InProgress,
+                        modifier = Modifier.size(8.dp)) {
+                        CircularProgressIndicator()
+                    }*/
                 }
             }
             DisposableEffect(Unit) {
@@ -267,7 +274,6 @@ fun NewPlaceDialog(
                 onDispose { }
             }
         }
-
     }
 }
 
