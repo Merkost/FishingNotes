@@ -1,7 +1,6 @@
 package com.mobileprism.fishing.model.repository.app
 
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
-import com.mobileprism.fishing.ui.viewstates.Result
 import com.mobileprism.fishing.model.entity.common.LiteProgress
 import com.mobileprism.fishing.model.entity.common.Note
 import com.mobileprism.fishing.model.entity.content.MapMarker
@@ -23,7 +22,7 @@ interface MarkersRepository {
     suspend fun changeMarkerVisibility(marker: UserMapMarker, changeTo: Boolean): StateFlow<LiteProgress>
 
     suspend fun deleteMarker(userMapMarker: UserMapMarker)
-    fun addNewMarker(newMarker: RawMapMarker): Flow<Result>
+    fun addNewMarker(newMarker: RawMapMarker): Flow<Result<Unit>>
 
 
 }

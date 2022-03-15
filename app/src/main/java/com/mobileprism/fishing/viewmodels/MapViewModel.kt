@@ -19,7 +19,6 @@ import com.mobileprism.fishing.ui.use_cases.GetFreeWeatherUseCase
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.map.MapUiState
 import kotlinx.coroutines.Dispatchers
-import com.mobileprism.fishing.ui.viewstates.Result
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -30,7 +29,6 @@ class MapViewModel(
     private val geocoder: Geocoder,
     private val userPreferences: UserPreferences,
 ) : ViewModel() {
-
 
     private val firstLaunchLocation = mutableStateOf(true)
 
@@ -108,16 +106,14 @@ class MapViewModel(
     fun addNewMarker(newMarker: RawMapMarker) {
         _addNewMarkerState.value = UiState.InProgress
         viewModelScope.launch {
-            repository.addNewMarker(newMarker).collect { progress ->
-                when (progress) {
-                    is Result.Success -> {
-                        _addNewMarkerState.value = UiState.Success
-                    }
-                    is Result.Error -> {
-                        _addNewMarkerState.value = UiState.Error
-                    }
+            repository.addNewMarker(newMarker).single().fold(
+                onSuccess = {
+                    _addNewMarkerState.value = UiState.Success
+                },
+                onFailure = {
+                    _addNewMarkerState.value = UiState.Error
                 }
-            }
+            )
         }
     }
 

@@ -6,7 +6,6 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
-import com.mobileprism.fishing.ui.viewstates.Result
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.entity.common.LiteProgress
 import com.mobileprism.fishing.model.entity.common.Note
@@ -196,16 +195,15 @@ class FirebaseMarkersRepositoryImpl(
         }
 
 
-    override fun addNewMarker(newMarker: RawMapMarker): Flow<Result>
-    = flow<Result> {
+    override fun addNewMarker(newMarker: RawMapMarker) = flow<Result<Unit>> {
         val mapMarker = MapMarkerMapper().mapRawMapMarker(newMarker)
         try {
-            //TODO:
+            //TODO: saveMarker method improvement
             saveMarker(mapMarker)
         } catch (error: Throwable) {
-            emit(Result.Error(error))
+            emit(Result.failure(error))
         }
-        emit(Result.Success)
+        emit(Result.success(Unit))
     }
 
 
