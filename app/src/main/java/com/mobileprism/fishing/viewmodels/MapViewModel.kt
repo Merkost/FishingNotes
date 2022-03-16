@@ -18,17 +18,23 @@ import com.mobileprism.fishing.ui.use_cases.GetFishActivityUseCase
 import com.mobileprism.fishing.ui.use_cases.GetFreeWeatherUseCase
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.map.MapUiState
+import com.mobileprism.fishing.ui.use_cases.AddNewPlaceUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class MapViewModel(
     private val repository: MarkersRepository,
+    private val addNewPlaceUseCase: AddNewPlaceUseCase,
     private val getFreeWeatherUseCase: GetFreeWeatherUseCase,
     private val getFishActivityUseCase: GetFishActivityUseCase,
     private val geocoder: Geocoder,
     private val userPreferences: UserPreferences,
 ) : ViewModel() {
+
+    init {
+        loadUserMarkers()
+    }
 
     private val firstLaunchLocation = mutableStateOf(true)
 
@@ -58,7 +64,7 @@ class MapViewModel(
     val lastMapCameraPosition = mutableStateOf<Triple<LatLng, Float, Float>?>(null)
 
     /**
-     * A Pair of LatLng, Zoom and Bearing
+     * A Triple of LatLng, Zoom and Bearing
      */
     private val _newMapCameraPosition = MutableSharedFlow<Triple<LatLng, Float, Float>>()
     val newMapCameraPosition = _newMapCameraPosition.asSharedFlow()
@@ -85,17 +91,13 @@ class MapViewModel(
         get() = currentWeather.value?.wind_degrees?.minus(_currentCameraPosition.value.third)
             ?: _currentCameraPosition.value.third
 
-    init {
-        loadMarkers()
-    }
 
-    fun getAllMarkers(): StateFlow<List<UserMapMarker>> = _mapMarkers
 
     fun setCameraMoveState(newState: CameraMoveState) {
         _cameraMoveState.value = newState
     }
 
-    private fun loadMarkers() {
+    private fun loadUserMarkers() {
         viewModelScope.launch {
             repository.getAllUserMarkersList().collect { markers ->
                 _mapMarkers.value = markers as MutableList<UserMapMarker>
@@ -106,7 +108,7 @@ class MapViewModel(
     fun addNewMarker(newMarker: RawMapMarker) {
         _addNewMarkerState.value = UiState.InProgress
         viewModelScope.launch {
-            repository.addNewMarker(newMarker).single().fold(
+            addNewPlaceUseCase.invoke(newMarker).single().fold(
                 onSuccess = {
                     _addNewMarkerState.value = UiState.Success
                 },

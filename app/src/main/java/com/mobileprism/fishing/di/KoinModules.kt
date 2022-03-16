@@ -11,13 +11,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.model.datastore.*
 import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
-import com.mobileprism.fishing.ui.use_cases.GetNewCatchWeatherUseCase
-import com.mobileprism.fishing.ui.use_cases.GetUserCatchesUseCase
-import com.mobileprism.fishing.ui.use_cases.GetFishActivityUseCase
-import com.mobileprism.fishing.ui.use_cases.GetFreeWeatherUseCase
-import com.mobileprism.fishing.ui.use_cases.GetUserPlacesUseCase
-import com.mobileprism.fishing.ui.use_cases.SaveNewCatchUseCase
 import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.use_cases.*
 import com.mobileprism.fishing.ui.viewmodels.*
 import com.mobileprism.fishing.utils.Logger
 import com.mobileprism.fishing.utils.network.ConnectionManager
@@ -87,6 +82,8 @@ val mainModule = module {
 }
 
 val useCasesModule = module {
+    factory { AddNewPlaceUseCase(get()) }
+
     factory {
         GetUserCatchesUseCase(
             repository = get(named(CATCHES_REPOSITORY))
@@ -110,7 +107,7 @@ val useCasesModule = module {
         )
     }
 
-    factory { GetUserPlacesUseCase(get()) }
+    factory { GetUserPlacesListUseCase(get()) }
     factory { GetFishActivityUseCase(get()) }
     factory { GetFreeWeatherUseCase(get()) }
 }
