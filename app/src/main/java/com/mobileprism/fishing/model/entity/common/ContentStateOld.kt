@@ -17,18 +17,18 @@ data class ContentStateOld<T>(
 
 
 
-sealed class ContentState<T> (items: MutableList<T>) {
-    class ADDED<T>(val items: MutableList<T>): ContentState<T>(items)
-    class DELETED<T>(val items: MutableList<T>): ContentState<T>(items)
-    class MODIFIED<T>(val items: MutableList<T>): ContentState<T>(items)
+sealed class ContentState<T> (item: T) {
+    class ADDED<T>(val item: T): ContentState<T>(item)
+    class DELETED<T>(val item: T): ContentState<T>(item)
+    class MODIFIED<T>(val item: T): ContentState<T>(item)
 }
 
 @OptIn(ExperimentalContracts::class)
 @SinceKotlin("1.3")
 public inline fun <R, T> ContentState<T>.fold(
-    onAdded: (value: MutableList<T>) -> R,
-    onDeleted: (value: MutableList<T>) -> R,
-    onModified: (value: MutableList<T>) -> R,
+    onAdded: (value: T) -> R,
+    onDeleted: (value: T) -> R,
+    onModified: (value: T) -> R,
 ): R {
     contract {
         callsInPlace(onAdded, InvocationKind.AT_MOST_ONCE)
@@ -36,8 +36,8 @@ public inline fun <R, T> ContentState<T>.fold(
         callsInPlace(onModified, InvocationKind.AT_MOST_ONCE)
     }
     return when (this) {
-        is ContentState.ADDED -> onAdded(items)
-        is ContentState.DELETED -> onAdded(items)
-        is ContentState.MODIFIED -> onAdded(items)
+        is ContentState.ADDED -> onAdded(item)
+        is ContentState.DELETED -> onAdded(item)
+        is ContentState.MODIFIED -> onAdded(item)
     }
 }

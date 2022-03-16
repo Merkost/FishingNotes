@@ -35,7 +35,6 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
@@ -73,8 +72,6 @@ fun MapScreen(
     place: UserMapMarker?,
     upPress: () -> Unit,
 ) {
-
-    // FIXME: Fix bug when deleting place from map bottomsheet remains open (should not)
 
     val viewModel: MapViewModel = getViewModel()
     viewModel.setPlace(place)
@@ -160,7 +157,11 @@ fun MapScreen(
                             LatLng(it.latitude, it.longitude)
                         )
                     }
-                )
+                ) {
+                    coroutineScope.launch {
+                        scaffoldState.bottomSheetState.collapse()
+                    }
+                }
             }
         ) {
             ConstraintLayout(modifier = Modifier.fillMaxSize()) {

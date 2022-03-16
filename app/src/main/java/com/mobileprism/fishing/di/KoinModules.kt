@@ -56,6 +56,8 @@ val mainModule = module {
     viewModel { LoginViewModel(get()) }
     viewModel { MapViewModel(
         repository = get(),
+        getUserPlacesUseCase = get(),
+        getUserPlacesListUseCase = get(),
         addNewPlaceUseCase = get(),
         getFreeWeatherUseCase = get(),
         getFishActivityUseCase = get(),
@@ -84,7 +86,6 @@ val mainModule = module {
 }
 
 val useCasesModule = module {
-    factory { AddNewPlaceUseCase(get()) }
 
     factory {
         GetUserCatchesUseCase(
@@ -108,6 +109,9 @@ val useCasesModule = module {
             weatherPreferences = get()
         )
     }
+
+    factory { AddNewPlaceUseCase(get()) }
+    factory { GetUserPlacesUseCase(get()) }
 
     factory { GetUserPlacesListUseCase(get()) }
     factory { GetFishActivityUseCase(get()) }

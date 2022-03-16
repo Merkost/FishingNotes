@@ -39,6 +39,7 @@ import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.resources
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -52,6 +53,7 @@ fun MarkerInfoDialog(
     modifier: Modifier = Modifier,
     navController: NavController,
     onMarkerIconClicked: (UserMapMarker) -> Unit,
+    onBottomSheetClose: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -271,7 +273,7 @@ fun MarkerInfoDialog(
                 }
             }
         }
-    }
+    } ?: onBottomSheetClose()
 }
 
 fun onMarkerClicked(marker: UserMapMarker, navController: NavController) {

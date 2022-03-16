@@ -15,9 +15,7 @@ class AddNewPlaceUseCase(private val markersRepository: MarkersRepository) {
     suspend operator fun invoke(
         newMarker: RawMapMarker
     ) = flow {
-        emit(
-            markersRepository.addNewMarker(newMarker)
-                .single()
-        )
+        emit(markersRepository.addNewMarker(newMarker)
+            .single())
     }
 }

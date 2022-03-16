@@ -10,21 +10,22 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.map.*
 import com.mobileprism.fishing.model.datastore.UserPreferences
+import com.mobileprism.fishing.model.entity.common.fold
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.raw.RawMapMarker
 import com.mobileprism.fishing.model.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
-import com.mobileprism.fishing.ui.use_cases.GetFishActivityUseCase
-import com.mobileprism.fishing.ui.use_cases.GetFreeWeatherUseCase
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.map.MapUiState
-import com.mobileprism.fishing.ui.use_cases.AddNewPlaceUseCase
+import com.mobileprism.fishing.ui.use_cases.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class MapViewModel(
     private val repository: MarkersRepository,
+    private val getUserPlacesUseCase: GetUserPlacesUseCase,
+    private val getUserPlacesListUseCase: GetUserPlacesListUseCase,
     private val addNewPlaceUseCase: AddNewPlaceUseCase,
     private val getFreeWeatherUseCase: GetFreeWeatherUseCase,
     private val getFishActivityUseCase: GetFishActivityUseCase,
@@ -33,7 +34,8 @@ class MapViewModel(
 ) : ViewModel() {
 
     init {
-        loadUserMarkers()
+        loadUserMarkersList()
+        //loadUserPlaces()
     }
 
     private val firstLaunchLocation = mutableStateOf(true)
@@ -97,13 +99,41 @@ class MapViewModel(
         _cameraMoveState.value = newState
     }
 
-    private fun loadUserMarkers() {
+    private fun loadUserMarkersList() {
         viewModelScope.launch {
-            repository.getAllUserMarkersList().collect { markers ->
+            getUserPlacesListUseCase.invoke().collect { markers ->
                 _mapMarkers.value = markers as MutableList<UserMapMarker>
+                if(!markers.contains(currentMarker.value)) {
+                    resetMapUiState()
+                }
             }
         }
     }
+
+    /*private fun loadUserPlaces() {
+        viewModelScope.launch {
+            getUserPlacesUseCase.invoke().collect {
+                it.fold(
+                    onAdded = { place ->
+                        var currentList = mutableListOf<UserMapMarker>()
+                        currentList = _mapMarkers.value
+                        currentList.add(place as UserMapMarker)
+                        _mapMarkers.emit(currentList)
+                    },
+                    onModified = { place ->
+                        val oldOne = _mapMarkers.value.find { it.id == (place as UserMapMarker).id}
+                        _mapMarkers.value.remove(oldOne)
+                        _mapMarkers.value.add(place as UserMapMarker)
+                    },
+                    onDeleted = { place ->
+                        val placeToDelete = place as UserMapMarker
+                        if (placeToDelete == currentMarker.value) _currentMarker.value = null
+                        _mapMarkers.value.remove(place as UserMapMarker)
+                    }
+                )
+            }
+        }
+    }*/
 
     fun addNewMarker(newMarker: RawMapMarker) {
         _addNewMarkerState.value = UiState.InProgress

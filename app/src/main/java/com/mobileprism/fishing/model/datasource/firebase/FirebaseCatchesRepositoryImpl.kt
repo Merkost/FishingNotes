@@ -36,7 +36,8 @@ class FirebaseCatchesRepositoryImpl(
     }
 
     @ExperimentalCoroutinesApi
-    private suspend fun getUserCatchesStateListener(scope: ProducerScope<ContentStateOld<UserCatch>>): OnSuccessListener<in QuerySnapshot> =
+    private suspend fun getUserCatchesStateListener(scope: ProducerScope<ContentStateOld<UserCatch>>)
+    : OnSuccessListener<in QuerySnapshot> =
         OnSuccessListener<QuerySnapshot> { task ->
             scope.launch {
                 getCatchesStateFromDoc(task.documents).collect {
