@@ -56,10 +56,12 @@ val mainModule = module {
     viewModel { LoginViewModel(get()) }
     viewModel { MapViewModel(
         repository = get(),
+        addNewPlaceUseCase = get(),
         getFreeWeatherUseCase = get(),
         getFishActivityUseCase = get(),
         geocoder = get(),
-        userPreferences = get()
+        userPreferences = get(),
+
     ) }
 
 //    viewModel { NewCatchViewModel(get(), get(), get()) }

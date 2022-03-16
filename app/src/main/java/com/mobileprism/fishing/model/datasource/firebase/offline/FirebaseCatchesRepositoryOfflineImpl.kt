@@ -8,7 +8,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.model.datasource.firebase.getCatchesFromDoc
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
-import com.mobileprism.fishing.model.entity.common.CatchesContentState
+import com.mobileprism.fishing.model.entity.common.ContentStateOld
 import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.repository.app.CatchesRepository
@@ -43,7 +43,7 @@ class FirebaseCatchesRepositoryOfflineImpl(
         awaitClose { }
     }
 
-    override fun getAllUserCatchesState(): Flow<CatchesContentState> {
+    override fun getAllUserCatchesState(): Flow<ContentStateOld<UserCatch>> {
         TODO("Not yet implemented")
     }
 
