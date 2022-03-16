@@ -412,6 +412,8 @@ fun MapLayout(
         }
     }
 
+    val firstCameraPosition by viewModel.firstCameraPosition.collectAsState()
+
     LaunchedEffect(map, permissionsState.allPermissionsGranted) {
         val googleMap = map.awaitMap()
         checkPermission(context)
@@ -422,6 +424,12 @@ fun MapLayout(
     LaunchedEffect(Unit) {
         viewModel.newMapCameraPosition.collectLatest {
             moveCameraToLocation(this, map, it.first, it.second, it.third)
+        }
+    }
+
+    LaunchedEffect(firstCameraPosition) {
+        firstCameraPosition?.let {
+            setCameraPosition(this, map, it.first, it.second, it.third)
         }
     }
 

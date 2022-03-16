@@ -38,6 +38,9 @@ class MapViewModel(
         //loadUserPlaces()
     }
 
+    private val _firstCameraPosition = MutableStateFlow<Triple<LatLng, Float, Float>?>(null)
+    val firstCameraPosition = _firstCameraPosition.asStateFlow()
+
     private val firstLaunchLocation = mutableStateOf(true)
 
     val showMarker: MutableState<Boolean> = mutableStateOf(false)
@@ -331,7 +334,8 @@ class MapViewModel(
             viewModelScope.launch {
                 if (currentMarker.value == null) {
                     val fromBd = userPreferences.getLastMapCameraLocation.first()
-                    _newMapCameraPosition.emit(fromBd)
+                    //_newMapCameraPosition.emit(fromBd)
+                    _firstCameraPosition.emit(fromBd)
                 }
                 firstLaunchLocation.value = false
             }
