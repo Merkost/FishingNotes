@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.model.datasource.firebase
 
-import android.net.Uri
 import android.util.Log
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
@@ -9,25 +8,24 @@ import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.entity.common.CatchesContentState
-import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserCatch
-import com.mobileprism.fishing.model.repository.PhotoStorage
 import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 
 class FirebaseCatchesRepositoryImpl(
     private val dbCollections: RepositoryCollections,
     private val firebaseAnalytics: FirebaseAnalytics,
-    private val cloudPhotoStorage: PhotoStorage,
     private val connectionManager: ConnectionManager
 ) : CatchesRepository {
-
 
     override fun getAllUserCatchesState() = channelFlow {
         val listeners = mutableListOf<Task<QuerySnapshot>>()
@@ -189,9 +187,6 @@ class FirebaseCatchesRepositoryImpl(
             .delete().addOnSuccessListener {
                 decrementNumOfCatches(userCatch.userMarkerId)
             }
-        userCatch.downloadPhotoLinks.forEach {
-            cloudPhotoStorage.deletePhoto(it)
-        }
     }
 
     override suspend fun updateUserCatch(
@@ -226,25 +221,25 @@ class FirebaseCatchesRepositoryImpl(
             }
         }
 
-    override suspend fun updateUserCatchPhotos(
-        markerId: String,
-        catchId: String,
-        newPhotos: List<Uri>
-    ): StateFlow<Progress> {
-        val flow = MutableStateFlow<Progress>(Progress.Loading(0))
-
-        val newPhotoDownloadLinks =
-            savePhotos(newPhotos.filter { !it.toString().startsWith("http") })
-
-        val oldPhotos = newPhotos.filter { it.toString().startsWith("http") }
-
-        val photosResult = newPhotoDownloadLinks + oldPhotos.map { it.toString() }
-        dbCollections.getUserCatchesCollection(markerId).document(catchId)
-            .update("downloadPhotoLinks", photosResult)
-            .addOnCompleteListener { flow.tryEmit(Progress.Complete) }
-
-        return flow
-    }
+//    override suspend fun updateUserCatchPhotos(
+//        markerId: String,
+//        catchId: String,
+//        newPhotos: List<Uri>
+//    ): StateFlow<Progress> {
+//        val flow = MutableStateFlow<Progress>(Progress.Loading(0))
+//
+//        val newPhotoDownloadLinks =
+//            savePhotos(newPhotos.filter { !it.toString().startsWith("http") })
+//
+//        val oldPhotos = newPhotos.filter { it.toString().startsWith("http") }
+//
+//        val photosResult = newPhotoDownloadLinks + oldPhotos.map { it.toString() }
+//        dbCollections.getUserCatchesCollection(markerId).document(catchId)
+//            .update("downloadPhotoLinks", photosResult)
+//            .addOnCompleteListener { flow.tryEmit(Progress.Complete) }
+//
+//        return flow
+//    }
 
     private fun incrementNumOfCatches(markerId: String) {
         dbCollections.getUserMapMarkersCollection().document(markerId)
@@ -255,8 +250,6 @@ class FirebaseCatchesRepositoryImpl(
         dbCollections.getUserMapMarkersCollection().document(markerId)
             .update("catchesCount", FieldValue.increment(-1))
     }
-
-    private suspend fun savePhotos(photos: List<Uri>) = cloudPhotoStorage.uploadPhotos(photos)
 
     companion object {
         private const val USERS_COLLECTION = "users"

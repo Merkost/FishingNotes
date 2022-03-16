@@ -15,7 +15,6 @@ import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -26,6 +25,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.home.new_catch.pages.NewCatchPage
 import com.mobileprism.fishing.ui.home.place.LottieWarning
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
@@ -47,7 +47,6 @@ fun NewCatchMasterScreen(
     navController: NavController,
     upPress: () -> Unit,
 ) {
-    val context = LocalContext.current
     val viewModel: NewCatchMasterViewModel by viewModel {
         parametersOf(
             if (receivedPlace != null) {
@@ -101,7 +100,6 @@ fun NewCatchMasterScreen(
         }
     }
 
-
     val uiState = viewModel.uiState.collectAsState()
 
     LaunchedEffect(key1 = uiState.value) {
@@ -112,10 +110,10 @@ fun NewCatchMasterScreen(
                     loadingDialogState.value = false
                     SnackbarManager.showMessage(R.string.catch_added_successfully)
                     upPress()
-
                 }
                 NewCatchViewState.SavingNewCatch -> {
                     loadingDialogState.value = true
+                    // TODO: Insert fullscreen AD after new catch
 //                    showInterstitialAd(
 //                        context = context,
 //                        onAdLoaded = { isAdLoaded.value = true }
@@ -136,7 +134,7 @@ fun NewCatchMasterScreen(
         text = stringResource(id = R.string.saving_new_catch)
     )
 
-    val skipAvaliable by viewModel.skipAvailable.collectAsState()
+    val skipAvailable by viewModel.skipAvailable.collectAsState()
 
     /*ModalBottomSheetLayout(sheetState = modalBottomSheetState,
         sheetContent = {
@@ -150,7 +148,7 @@ fun NewCatchMasterScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            when (skipAvaliable) {
+                            when (skipAvailable) {
                                 true -> onFinish()
                                 else -> SnackbarManager.showMessage(R.string.new_catch_skip_tutor)
                             }

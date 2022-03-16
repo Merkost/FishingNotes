@@ -25,7 +25,6 @@ import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.ui.viewmodels.UserCatchViewModel
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.entity.common.Progress
@@ -42,12 +41,14 @@ import com.mobileprism.fishing.ui.home.weather.PressureValues
 import com.mobileprism.fishing.ui.home.weather.TemperatureValues
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.ui.navigate
+import com.mobileprism.fishing.ui.viewmodels.UserCatchViewModel
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toTime
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.viewModel
+import org.koin.core.parameter.parametersOf
 
 @ExperimentalPermissionsApi
 @ExperimentalComposeUiApi
@@ -57,9 +58,7 @@ import org.koin.androidx.compose.getViewModel
 fun UserCatchScreen(navController: NavController, catch: UserCatch) {
     val coroutineScope = rememberCoroutineScope()
 
-    val viewModel = getViewModel<UserCatchViewModel>()
-
-    LaunchedEffect(key1 = catch) { viewModel.setCatch(catch) }
+    val viewModel: UserCatchViewModel by viewModel { parametersOf(catch) }
 
     val loadingState by viewModel.loadingState.collectAsState()
     val loadingDialogState = remember { mutableStateOf(false) }
@@ -188,70 +187,64 @@ fun CatchContent(
 
     val catchState by viewModel.catch.collectAsState()
 
-    catchState?.let { catch ->
+    val placeState by viewModel.mapMarker.collectAsState()
 
-        val placeState by viewModel.mapMarker.collectAsState()
-
-        LaunchedEffect(key1 = catch) {
-            viewModel.getMapMarker(catch.userMarkerId)
-        }
-
-        LaunchedEffect(key1 = photosState.value) {
-            if (photosState.value.isNotEmpty()) {
-                viewModel.updateCatchPhotos(photosState.value)
-            }
-        }
-
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .fillMaxSize()
-                .padding(vertical = 16.dp, horizontal = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-
-            CatchTitleView(
-                catch = catch,
-                onClick = { openSheet(BottomSheetCatchScreen.EditFishTypeAndWeightScreen) }
-            )
-
-            PhotosView(
-                photos = catch.downloadPhotoLinks.map { it.toUri() },
-                onEditClick = { openSheet(BottomSheetCatchScreen.EditPhotosScreen) }
-            )
-
-            placeState?.let { place ->
-                ItemUserPlace(
-                    place = place,
-                    userPlaceClicked = {
-                        onPlaceItemClick(place = it, navController = navController)
-                    },
-                    navigateToMap = {
-                        navController.navigate(
-                            "${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
-                            Arguments.PLACE to place
-                        )
-                    },
-                )
-            }
-
-            DefaultNoteView(
-                note = catch.note,
-                onClick = { openSheet(BottomSheetCatchScreen.EditNoteScreen) }
-            )
-
-            WayOfFishingView(
-                catch = catch,
-                onClick = {
-                    openSheet(BottomSheetCatchScreen.EditWayOfFishingScreen)
-                })
-
-            CatchWeatherView(
-                catch = catch
-            )
+    LaunchedEffect(key1 = photosState.value) {
+        if (photosState.value.isNotEmpty()) {
+            viewModel.updateCatchPhotos(photosState.value)
         }
     }
+
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .fillMaxSize()
+            .padding(vertical = 16.dp, horizontal = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+
+        CatchTitleView(
+            catch = catchState,
+            onClick = { openSheet(BottomSheetCatchScreen.EditFishTypeAndWeightScreen) }
+        )
+
+        PhotosView(
+            photos = catchState.downloadPhotoLinks.map { it.toUri() },
+            onEditClick = { openSheet(BottomSheetCatchScreen.EditPhotosScreen) }
+        )
+
+        placeState?.let { place ->
+            ItemUserPlace(
+                place = place,
+                userPlaceClicked = {
+                    onPlaceItemClick(place = it, navController = navController)
+                },
+                navigateToMap = {
+                    navController.navigate(
+                        "${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
+                        Arguments.PLACE to place
+                    )
+                },
+            )
+        }
+
+        DefaultNoteView(
+            note = catchState.note,
+            onClick = { openSheet(BottomSheetCatchScreen.EditNoteScreen) }
+        )
+
+        WayOfFishingView(
+            catch = catchState,
+            onClick = {
+                openSheet(BottomSheetCatchScreen.EditWayOfFishingScreen)
+            })
+
+        CatchWeatherView(
+            catch = catchState
+        )
+    }
+
 }
 
 @ExperimentalComposeUiApi

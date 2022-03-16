@@ -30,7 +30,6 @@ val repositoryModule = module {
         FirebaseCatchesRepositoryImpl(
             dbCollections = get(),
             firebaseAnalytics = get(),
-            cloudPhotoStorage = get(),
             connectionManager = get()
         )
     }

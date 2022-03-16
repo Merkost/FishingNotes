@@ -3,23 +3,27 @@ package com.mobileprism.fishing.ui.viewmodels
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mobileprism.fishing.domain.use_cases.DeleteUserCatchUseCase
+import com.mobileprism.fishing.domain.use_cases.GetMapMarkerByIdUseCase
+import com.mobileprism.fishing.domain.use_cases.UpdateUserCatchUseCase
+import com.mobileprism.fishing.model.entity.common.Note
 import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.model.repository.UserRepository
 import com.mobileprism.fishing.model.repository.app.CatchesRepository
-import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class UserCatchViewModel(
-    private val markersRepository: MarkersRepository,
+    userCatch: UserCatch,
+    private val updateUserCatch: UpdateUserCatchUseCase,
+    private val deleteUserCatch: DeleteUserCatchUseCase,
+    private val getMapMarkerById: GetMapMarkerByIdUseCase,
     private val catchesRepository: CatchesRepository,
-    private val userRepository: UserRepository,
 ) : ViewModel() {
 
-    private val _catch = MutableStateFlow<UserCatch?>(null)
+    private val _catch = MutableStateFlow(userCatch)
     val catch = _catch.asStateFlow()
 
     private val _mapMarker = MutableStateFlow<UserMapMarker?>(null)
@@ -28,61 +32,68 @@ class UserCatchViewModel(
     private val _loadingState = MutableStateFlow<Progress>(Progress.Complete)
     val loadingState = _loadingState.asStateFlow()
 
-    fun setCatch(userCatch: UserCatch) {
-        _catch.value = userCatch
+    init {
+        getMapMarker(userCatch.userMarkerId)
     }
 
-    fun updateCatch(data: Map<String, Any>) {
-        mapMarker.value?.let { marker ->
-            catch.value?.let { catch ->
-                viewModelScope.launch {
-                    catchesRepository.updateUserCatch(
-                        markerId = marker.id,
-                        catchId = catch.id,
-                        data = data
-                    )
-                }
-            }
-        }
+    fun updateCatchInfo(fishType: String, fishAmount: Int, fishWeight: Double) {
+        updateCatch(
+            catch.value.copy(
+                fishType = fishType,
+                fishAmount = fishAmount,
+                fishWeight = fishWeight
+            )
+        )
+    }
+
+    fun updateNote(note: Note) {
+        updateCatch(
+            catch.value.copy(
+                note = note
+            )
+        )
+    }
+
+    fun updateWayOfFishing(fishingRodType: String, fishingLure: String, fishingBait: String) {
+        updateCatch(
+            catch.value.copy(
+                fishingRodType = fishingRodType,
+                fishingLure = fishingLure,
+                fishingBait = fishingBait
+            )
+        )
+    }
+
+    fun updateCatchPhotos(photos: List<Uri>) {
+        updateCatch(
+            catch.value.copy(
+                downloadPhotoLinks = photos.map { it.toString() }
+            )
+        )
+    }
+
+    private fun updateCatch(newCatch: UserCatch) {
+        viewModelScope.launch { updateUserCatch(newCatch = newCatch) }
     }
 
     fun deleteCatch() {
         viewModelScope.launch {
-            catch.value?.let {
-                catchesRepository.deleteCatch(it)
-            }
+            deleteUserCatch(catch.value)
         }
     }
 
-    fun getMapMarker(markerId: String) {
+    private fun getMapMarker(markerId: String) {
         viewModelScope.launch {
-            markersRepository.getMapMarker(markerId).collect {
+            getMapMarkerById(markerId).collect {
                 _mapMarker.value = it
                 subscribeOnCatchChanges()
             }
         }
     }
 
-    fun updateCatchPhotos(photos: List<Uri>) {
-        mapMarker.value?.let { marker ->
-            catch.value?.let { catch ->
-                viewModelScope.launch {
-                    _loadingState.value = Progress.Loading()
-                    catchesRepository.updateUserCatchPhotos(
-                        markerId = marker.id,
-                        catchId = catch.id,
-                        newPhotos = photos
-                    ).collect {
-                        _loadingState.value = it
-                    }
-                }
-            }
-        }
-    }
-
     private suspend fun subscribeOnCatchChanges() {
         mapMarker.value?.let { marker ->
-            catch.value?.let { oldCatch ->
+            catch.value.let { oldCatch ->
                 catchesRepository.subscribeOnUserCatchState(
                     markerId = marker.id,
                     catchId = oldCatch.id

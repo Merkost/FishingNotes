@@ -1,10 +1,8 @@
 package com.mobileprism.fishing.domain.use_cases
 
-import android.net.Uri
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.raw.NewCatchWeather
-import com.mobileprism.fishing.model.repository.PhotoStorage
 import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.ui.viewmodels.*
 import com.mobileprism.fishing.utils.getCurrentUser
@@ -16,7 +14,7 @@ import kotlinx.coroutines.flow.take
 
 class SaveNewCatchUseCase(
     private val catchesRepository: CatchesRepository,
-    private val photosRepository: PhotoStorage,
+    private val savePhotos: SavePhotosUseCase,
     private val weatherPreferences: WeatherPreferences
 ) {
 
@@ -34,10 +32,6 @@ class SaveNewCatchUseCase(
             catchesRepository.addNewCatch(markerId = it.id, newCatch = userCatch)
                 .collect { trySend(it) }
         }
-    }
-
-    private suspend fun savePhotos(photos: List<Uri>): List<String> {
-        return photosRepository.uploadPhotos(photos)
     }
 
     private suspend fun mapWeatherValues(weatherState: CatchWeatherState): NewCatchWeather {

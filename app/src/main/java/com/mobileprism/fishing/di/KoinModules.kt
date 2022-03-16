@@ -61,7 +61,7 @@ val mainModule = module {
         )
     }
     viewModel { UserViewModel(get(), get()) }
-    viewModel { UserCatchViewModel(get(), get(), get()) }
+    viewModel { parameters -> UserCatchViewModel(parameters.get(), get(), get(), get(), get()) }
     viewModel { WeatherViewModel(get(), get()) }
     viewModel { UserPlaceViewModel(get(), get()) }
     viewModel { UserCatchesViewModel(get()) }
@@ -76,6 +76,10 @@ val useCasesModule = module {
     factory { GetUserPlacesUseCase(get()) }
     factory { GetFishActivityUseCase(get()) }
     factory { GetFreeWeatherUseCase(get()) }
+    factory { DeleteUserCatchUseCase(get(), get()) }
+    factory { GetMapMarkerByIdUseCase(get()) }
+    factory { SavePhotosUseCase(get()) }
+    factory { UpdateUserCatchUseCase(get(), get()) }
 }
 
 fun createGeocoder(androidContext: Context): Geocoder {

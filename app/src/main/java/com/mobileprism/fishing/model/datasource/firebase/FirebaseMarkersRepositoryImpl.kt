@@ -5,8 +5,6 @@ import android.util.Log
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
-import com.mobileprism.fishing.ui.viewstates.Result
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.entity.common.LiteProgress
 import com.mobileprism.fishing.model.entity.common.Note
@@ -16,6 +14,8 @@ import com.mobileprism.fishing.model.entity.raw.RawMapMarker
 import com.mobileprism.fishing.model.mappers.MapMarkerMapper
 import com.mobileprism.fishing.model.mappers.MarkerNoteMapper
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.Result
 import com.mobileprism.fishing.utils.getCurrentUserId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
@@ -150,8 +150,7 @@ class FirebaseMarkersRepositoryImpl(
         return flow
     }
 
-
-    override fun getMapMarker(markerId: String) = channelFlow {
+    override fun getMapMarker(markerId: String) = callbackFlow {
         val listener = dbCollections.getUserMapMarkersCollection().document(markerId)
             .addSnapshotListener { value, _ ->
                 trySend(value?.toObject<UserMapMarker>())
