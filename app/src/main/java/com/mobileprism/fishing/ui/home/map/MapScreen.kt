@@ -60,7 +60,6 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
-
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
 @ExperimentalCoroutinesApi
@@ -74,6 +73,9 @@ fun MapScreen(
     place: UserMapMarker?,
     upPress: () -> Unit,
 ) {
+
+    // FIXME: Fix bug when deleting place from map bottomsheet remains open (should not)
+
     val viewModel: MapViewModel = getViewModel()
     viewModel.setPlace(place)
     viewModel.setAddingPlace(addPlaceOnStart)
