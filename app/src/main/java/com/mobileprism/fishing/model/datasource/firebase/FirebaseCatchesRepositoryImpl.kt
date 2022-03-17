@@ -8,6 +8,8 @@ import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.entity.common.CatchesContentState
+import com.mobileprism.fishing.model.entity.common.ContentStateOld
+import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.utils.network.ConnectionManager
@@ -27,6 +29,8 @@ class FirebaseCatchesRepositoryImpl(
     private val connectionManager: ConnectionManager
 ) : CatchesRepository {
 
+
+    override fun getAllUserCatchesState() = channelFlow<ContentStateOld<UserCatch>> {
     override fun getAllUserCatchesState() = channelFlow {
         val listeners = mutableListOf<Task<QuerySnapshot>>()
         listeners.add(
@@ -37,7 +41,8 @@ class FirebaseCatchesRepositoryImpl(
     }
 
     @ExperimentalCoroutinesApi
-    private suspend fun getUserCatchesStateListener(scope: ProducerScope<CatchesContentState>): OnSuccessListener<in QuerySnapshot> =
+    private suspend fun getUserCatchesStateListener(scope: ProducerScope<ContentStateOld<UserCatch>>)
+    : OnSuccessListener<in QuerySnapshot> =
         OnSuccessListener<QuerySnapshot> { task ->
             scope.launch {
                 getCatchesStateFromDoc(task.documents).collect {
@@ -53,7 +58,7 @@ class FirebaseCatchesRepositoryImpl(
                 .addSnapshotListener { snapshots, error ->
                     if (snapshots != null) {
 
-                        val result = CatchesContentState()
+                        val result = ContentStateOld<UserCatch>()
 
                         for (dc in snapshots.documentChanges) {
                             val userCatch = dc.document.toObject<UserCatch>()

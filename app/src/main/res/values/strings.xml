@@ -325,6 +325,7 @@
     <string name="freezing_rain">Ледяной дождь</string>
     <string name="drizzle">Морось</string>
     <string name="choose_weather">Выберите погоду:</string>
+    <string name="add_new_place_error">Не удалось добавить место</string>
 
 
 </resources>

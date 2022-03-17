@@ -1,7 +1,7 @@
 package com.mobileprism.fishing.model.repository.app
 
+import com.mobileprism.fishing.model.entity.common.ContentState
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
-import com.mobileprism.fishing.ui.viewstates.Result
 import com.mobileprism.fishing.model.entity.common.LiteProgress
 import com.mobileprism.fishing.model.entity.common.Note
 import com.mobileprism.fishing.model.entity.content.MapMarker
@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface MarkersRepository {
     fun getMapMarker(markerId: String): Flow<UserMapMarker?>
-    fun getAllUserMarkers(): Flow<MapMarker>
+    fun getAllUserMarkers(): Flow<ContentState<MapMarker>>
     fun getAllUserMarkersList(): Flow<List<MapMarker>>
 
     suspend fun updateUserMarkerNote(markerId: String, currentNotes: List<Note>, note: Note)
@@ -23,7 +23,7 @@ interface MarkersRepository {
     suspend fun changeMarkerVisibility(marker: UserMapMarker, changeTo: Boolean): StateFlow<LiteProgress>
 
     suspend fun deleteMarker(userMapMarker: UserMapMarker)
-    fun addNewMarker(newMarker: RawMapMarker): Flow<Result>
+    fun addNewMarker(newMarker: RawMapMarker): Flow<Result<Unit>>
 
 
 }

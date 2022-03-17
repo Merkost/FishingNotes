@@ -7,7 +7,6 @@ import com.mobileprism.fishing.model.api.WeatherApiService
 import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
 import com.mobileprism.fishing.model.utils.safeApiCall
-import com.mobileprism.fishing.ui.viewstates.RetrofitWrapper
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

@@ -37,8 +37,10 @@ import com.mobileprism.fishing.ui.home.views.SubtitleText
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.resources
+import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -52,6 +54,7 @@ fun MarkerInfoDialog(
     modifier: Modifier = Modifier,
     navController: NavController,
     onMarkerIconClicked: (UserMapMarker) -> Unit,
+    onBottomSheetClose: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -68,7 +71,6 @@ fun MarkerInfoDialog(
     val currentWeather: CurrentWeatherFree? by remember { viewModel.currentWeather }
 
     receivedMarker?.let { notNullMarker ->
-
         LaunchedEffect(receivedMarker, viewModel.lastKnownLocation.value) {
             viewModel.setNewMarkerInfo(notNullMarker.latitude, notNullMarker.longitude)
         }
@@ -271,14 +273,19 @@ fun MarkerInfoDialog(
                 }
             }
         }
-    }
+    } ?: onBottomSheetClose()
 }
 
 fun onMarkerClicked(marker: UserMapMarker, navController: NavController) {
-    navController.navigate(
-        MainDestinations.PLACE_ROUTE,
-        Arguments.PLACE to marker
-    )
+    if (marker.id != Constants.CURRENT_PLACE_ITEM_ID) {
+        navController.navigate(
+            MainDestinations.PLACE_ROUTE,
+            Arguments.PLACE to marker
+        )
+    } else {
+        // TODO: Нельзя перейти на экран места
+    }
+
 }
 
 fun onWeatherIconClicked(marker: UserMapMarker, navController: NavController) {

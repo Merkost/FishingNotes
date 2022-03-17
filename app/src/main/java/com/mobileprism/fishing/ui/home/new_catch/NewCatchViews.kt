@@ -32,8 +32,6 @@ import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.viewmodels.NewCatchViewModel
-import com.mobileprism.fishing.ui.viewstates.ErrorType
-import com.mobileprism.fishing.ui.viewstates.RetrofitWrapper
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.mappers.getAllWeatherIcons
 import com.mobileprism.fishing.ui.Arguments
@@ -79,28 +77,6 @@ fun FishSpecies(
                 Alignment.End
             )
         )
-    }
-}
-
-
-@Composable
-fun Fishing(
-    rod: MutableState<String>,
-    bite: MutableState<String>,
-    lure: MutableState<String>
-) {
-    Column {
-        SubtitleWithIcon(
-            modifier = Modifier.align(Alignment.Start),
-            icon = R.drawable.ic_fishing_rod,
-            text = stringResource(id = R.string.way_of_fishing)
-        )
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            SimpleOutlinedTextField(textState = rod, label = stringResource(R.string.fish_rod))
-            SimpleOutlinedTextField(textState = bite, label = stringResource(R.string.bait))
-            SimpleOutlinedTextField(textState = lure, label = stringResource(R.string.lure))
-        }
-
     }
 }
 

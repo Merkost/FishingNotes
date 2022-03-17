@@ -2,13 +2,20 @@ package com.mobileprism.fishing.model.datasource.firebase
 
 import android.content.Context
 import android.util.Log
+import com.google.android.gms.tasks.OnSuccessListener
+import com.google.android.gms.tasks.Task
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
+import com.mobileprism.fishing.model.datasource.utils.RepositoryConstants.MARKERS_COLLECTION
+import com.mobileprism.fishing.model.entity.common.ContentState
+import com.mobileprism.fishing.model.entity.common.ContentStateOld
 import com.mobileprism.fishing.model.entity.common.LiteProgress
 import com.mobileprism.fishing.model.entity.common.Note
 import com.mobileprism.fishing.model.entity.content.MapMarker
+import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.raw.RawMapMarker
 import com.mobileprism.fishing.model.mappers.MapMarkerMapper
@@ -21,6 +28,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class FirebaseMarkersRepositoryImpl(
     private val dbCollections: RepositoryCollections,
@@ -28,7 +36,7 @@ class FirebaseMarkersRepositoryImpl(
     private val context: Context
 ) : MarkersRepository {
 
-    override fun getAllUserMarkers() = channelFlow<MapMarker> {
+    override fun getAllUserMarkers() = channelFlow {
         val listeners = mutableListOf<ListenerRegistration>()
 
         //UserMarkers
@@ -40,16 +48,78 @@ class FirebaseMarkersRepositoryImpl(
             )
         )
         //AllPublicMarkers
-        listeners.add(
+        /*listeners.add(
             dbCollections.getMapMarkersCollection()
                 .whereNotEqualTo("userId", getCurrentUserId())
                 .addSnapshotListener(getMarkersSnapshotListener(this))
-        )
+        )*/
 
         awaitClose {
             listeners.forEach { it.remove() }
         }
     }
+
+    /*override fun getAllUserMarkers() = channelFlow<ContentState<MapMarker>> {
+        val listeners = mutableListOf<Task<QuerySnapshot>>()
+
+        //UserMarkers
+        listeners.add(
+            dbCollections.getUserMapMarkersCollection().get().addOnSuccessListener(
+                getUserMarkersStateListener(this)
+            )
+        )
+        //AllPublicMarkers
+        *//*listeners.add(
+            dbCollections.getMapMarkersCollection()
+                .whereNotEqualTo("userId", getCurrentUserId())
+                .addSnapshotListener(getMarkersSnapshotListener(this))
+        )*//*
+
+        awaitClose {
+            listeners.forEach { listeners.remove(it) }
+        }
+    }
+
+    private fun getUserMarkersStateListener(scope: ProducerScope<ContentState<MapMarker>>)
+    : OnSuccessListener<in QuerySnapshot>  =
+        OnSuccessListener<QuerySnapshot> { task ->
+        scope.launch {
+            getMarkersStateFromDoc(task.documents).collect {
+                scope.trySend(it)
+            }
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    private fun getMarkersStateFromDoc(docs: List<DocumentSnapshot>) = callbackFlow {
+        docs.forEach { doc ->
+            doc.reference.collection(MARKERS_COLLECTION)
+                .addSnapshotListener { snapshots, error ->
+                    if (snapshots != null) {
+
+                        val result = ContentStateOld<UserCatch>()
+
+                        for (dc in snapshots.documentChanges) {
+                            val userCatch = dc.document.toObject<UserCatch>()
+                            when (dc.type) {
+                                DocumentChange.Type.ADDED -> {
+                                    result.added.add(userCatch)
+                                }
+                                DocumentChange.Type.MODIFIED -> {
+                                    result.modified.add(userCatch)
+                                }
+                                DocumentChange.Type.REMOVED -> {
+                                    result.deleted.add(userCatch)
+                                }
+                            }
+                        }
+
+                        trySend(result)
+                    }
+                }
+        }
+        awaitClose { }
+    }*/
 
     override fun getAllUserMarkersList() = channelFlow {
         val listeners = mutableListOf<ListenerRegistration>()
@@ -159,21 +229,28 @@ class FirebaseMarkersRepositoryImpl(
     }
 
     @ExperimentalCoroutinesApi
-    private fun getMarkersSnapshotListener(scope: ProducerScope<UserMapMarker>) =
+    private fun getMarkersSnapshotListener(scope: ProducerScope<ContentState<MapMarker>>) =
         EventListener<QuerySnapshot> { snapshots, error ->
             if (error != null) {
                 Log.d("Fishing", "Marker snapshot listener", error)
                 return@EventListener
             }
             snapshots?.let { snapshot ->
+                snapshot.documentChanges
                 for (dc in snapshot.documentChanges) {
                     when (dc.type) {
                         DocumentChange.Type.ADDED -> {
                             val mapMarker = dc.document.toObject<UserMapMarker>()
-                            scope.trySend(mapMarker)
+                            scope.trySend(ContentState.ADDED<MapMarker>(mapMarker))
                         }
-                        DocumentChange.Type.MODIFIED -> {}
-                        DocumentChange.Type.REMOVED -> {}
+                        DocumentChange.Type.MODIFIED -> {
+                            val mapMarker = dc.document.toObject<UserMapMarker>()
+                            scope.trySend(ContentState.MODIFIED<MapMarker>(mapMarker))
+                        }
+                        DocumentChange.Type.REMOVED -> {
+                            val mapMarker = dc.document.toObject<UserMapMarker>()
+                            scope.trySend(ContentState.DELETED<MapMarker>(mapMarker))
+                        }
                     }
                 }
             }
@@ -195,16 +272,15 @@ class FirebaseMarkersRepositoryImpl(
         }
 
 
-    override fun addNewMarker(newMarker: RawMapMarker): Flow<Result>
-    = flow<Result> {
+    override fun addNewMarker(newMarker: RawMapMarker) = flow<Result<Unit>> {
         val mapMarker = MapMarkerMapper().mapRawMapMarker(newMarker)
         try {
-            //TODO:
+            //TODO: saveMarker method improvement
             saveMarker(mapMarker)
         } catch (error: Throwable) {
-            emit(Result.Error(error))
+            emit(Result.failure(error))
         }
-        emit(Result.Success)
+        emit(Result.success(Unit))
     }
 
 

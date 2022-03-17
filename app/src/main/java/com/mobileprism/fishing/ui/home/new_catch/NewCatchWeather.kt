@@ -86,8 +86,7 @@ fun <T> WeatherType(
     isOpened: Boolean,
     onWeatherSelected: (SelectedWeather) -> Unit,
     onWeatherTypeClicked: () -> Unit
-)
-        where T : StringOperation, T : WeatherIconPrefix {
+) where T : StringOperation, T : WeatherIconPrefix {
     WeatherTypeTitle(it, isOpened = isOpened, onWeatherTypeClicked)
     AnimatedVisibility(visible = isOpened) {
         Column {
@@ -127,21 +126,15 @@ fun <T> WeatherTypeTitle(
 
 @Composable
 fun <T> WeatherTypeItem(it: T, onWeatherSelected: (SelectedWeather) -> Unit) where T : StringOperation, T : WeatherIconPrefix {
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .heightIn(min = 40.dp).padding(4.dp)
-        .clickable { onWeatherSelected(SelectedWeather(it.stringRes, it.iconPrefix)) }) {
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            /*WeatherIconItem(
-                getWeatherIconByName(it.iconPrefix),
-                iconTint = MaterialTheme.colors.onSurface,
-                requiredSize = 35.dp
-            ) {}*/
-            Text(text = stringResource(id = it.stringRes))
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 40.dp)
+            .clickable { onWeatherSelected(SelectedWeather(it.stringRes, it.iconPrefix)) },
+                verticalAlignment = Alignment.CenterVertically) {
+            Text(modifier = Modifier.padding(4.dp), text = stringResource(id = it.stringRes))
         }
     }
-}
+
 
 @ExperimentalComposeUiApi
 @Composable

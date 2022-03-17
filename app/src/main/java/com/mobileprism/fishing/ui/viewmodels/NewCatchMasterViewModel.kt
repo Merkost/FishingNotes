@@ -9,6 +9,12 @@ import com.mobileprism.fishing.domain.use_cases.GetUserPlacesUseCase
 import com.mobileprism.fishing.domain.use_cases.SaveNewCatchUseCase
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.weather.NewCatchWeatherData
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.model.entity.content.UserMapMarker
+import com.mobileprism.fishing.model.entity.weather.NewCatchWeatherData
+import com.mobileprism.fishing.ui.use_cases.GetNewCatchWeatherUseCase
+import com.mobileprism.fishing.ui.use_cases.GetUserPlacesListUseCase
+import com.mobileprism.fishing.ui.use_cases.SaveNewCatchUseCase
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlacesState
 import com.mobileprism.fishing.ui.home.new_catch.ReceivedPlaceState
 import com.mobileprism.fishing.ui.viewstates.NewCatchViewState
@@ -24,7 +30,7 @@ class NewCatchMasterViewModel(
     placeState: ReceivedPlaceState,
     private val getNewCatchWeatherUseCase: GetNewCatchWeatherUseCase,
     private val saveNewCatchUseCase: SaveNewCatchUseCase,
-    private val getUserPlacesUseCase: GetUserPlacesUseCase
+    private val getUserPlacesListUseCase: GetUserPlacesListUseCase
 ) : ViewModel() {
 
     init {
@@ -206,7 +212,7 @@ class NewCatchMasterViewModel(
 
     private fun getAllUserMarkersList() {
         viewModelScope.launch(Dispatchers.IO) {
-            getUserPlacesUseCase().collect { markers ->
+            getUserPlacesListUseCase().collect { markers ->
                 _placeAndTimeState.value = _placeAndTimeState.value.copy(
                     placesListState = NewCatchPlacesState.Received(markers)
                 )

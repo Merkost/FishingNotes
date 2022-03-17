@@ -13,6 +13,7 @@ import com.mobileprism.fishing.domain.use_cases.*
 import com.mobileprism.fishing.model.datastore.*
 import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.use_cases.*
 import com.mobileprism.fishing.ui.viewmodels.*
 import com.mobileprism.fishing.utils.Logger
 import com.mobileprism.fishing.utils.network.ConnectionManager
@@ -51,15 +52,20 @@ val settingsModule = module {
 val mainModule = module {
     viewModel { MainViewModel(get()) }
     viewModel { LoginViewModel(get()) }
-    viewModel {
-        MapViewModel(
-            repository = get(),
-            getFreeWeatherUseCase = get(),
-            getFishActivityUseCase = get(),
-            geocoder = get(),
-            userPreferences = get()
-        )
-    }
+    viewModel { MapViewModel(
+        repository = get(),
+        getUserPlacesUseCase = get(),
+        getUserPlacesListUseCase = get(),
+        addNewPlaceUseCase = get(),
+        getFreeWeatherUseCase = get(),
+        getFishActivityUseCase = get(),
+        geocoder = get(),
+        userPreferences = get(),
+
+    ) }
+
+//    viewModel { NewCatchViewModel(get(), get(), get()) }
+
     viewModel { UserViewModel(get(), get()) }
     viewModel { parameters -> UserCatchViewModel(parameters.get(), get(), get(), get(), get()) }
     viewModel { WeatherViewModel(get(), get()) }
@@ -74,6 +80,7 @@ val useCasesModule = module {
     factory { GetNewCatchWeatherUseCase(get(), get()) }
     factory { SaveNewCatchUseCase(get(), get(), get()) }
     factory { GetUserPlacesUseCase(get()) }
+    factory { GetUserPlacesListUseCase(get()) }
     factory { GetFishActivityUseCase(get()) }
     factory { GetFreeWeatherUseCase(get()) }
     factory { DeleteUserCatchUseCase(get(), get()) }

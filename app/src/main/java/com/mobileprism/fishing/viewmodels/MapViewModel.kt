@@ -10,31 +10,42 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.map.*
 import com.mobileprism.fishing.model.datastore.UserPreferences
+import com.mobileprism.fishing.model.entity.common.fold
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.raw.RawMapMarker
 import com.mobileprism.fishing.model.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
-import com.mobileprism.fishing.domain.use_cases.GetFishActivityUseCase
-import com.mobileprism.fishing.domain.use_cases.GetFreeWeatherUseCase
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.map.MapUiState
+import com.mobileprism.fishing.ui.use_cases.*
+import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import kotlinx.coroutines.Dispatchers
-import com.mobileprism.fishing.ui.viewstates.Result
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class MapViewModel(
     private val repository: MarkersRepository,
+    private val getUserPlacesUseCase: GetUserPlacesUseCase,
+    private val getUserPlacesListUseCase: GetUserPlacesListUseCase,
+    private val addNewPlaceUseCase: AddNewPlaceUseCase,
     private val getFreeWeatherUseCase: GetFreeWeatherUseCase,
     private val getFishActivityUseCase: GetFishActivityUseCase,
     private val geocoder: Geocoder,
     private val userPreferences: UserPreferences,
 ) : ViewModel() {
 
+    init {
+        loadUserMarkersList()
+        //loadUserPlaces()
+    }
+
+    private val _firstCameraPosition = MutableStateFlow<Triple<LatLng, Float, Float>?>(null)
+    val firstCameraPosition = _firstCameraPosition.asStateFlow()
 
     private val firstLaunchLocation = mutableStateOf(true)
 
     val showMarker: MutableState<Boolean> = mutableStateOf(false)
+
     private val _addNewMarkerState: MutableStateFlow<UiState?> = MutableStateFlow(null)
     val addNewMarkerState = _addNewMarkerState.asStateFlow()
 
@@ -51,7 +62,9 @@ class MapViewModel(
 
     private val _mapType = MutableStateFlow(MapTypes.roadmap)
     val mapType = _mapType.asStateFlow()
-    fun onLayerSelected(layer: Int) { _mapType.value = layer }
+    fun onLayerSelected(layer: Int) {
+        _mapType.value = layer
+    }
 
     val mapBearing = MutableStateFlow(0f)
 
@@ -59,7 +72,7 @@ class MapViewModel(
     val lastMapCameraPosition = mutableStateOf<Triple<LatLng, Float, Float>?>(null)
 
     /**
-     * A Pair of LatLng, Zoom and Bearing
+     * A Triple of LatLng, Zoom and Bearing
      */
     private val _newMapCameraPosition = MutableSharedFlow<Triple<LatLng, Float, Float>>()
     val newMapCameraPosition = _newMapCameraPosition.asSharedFlow()
@@ -86,37 +99,58 @@ class MapViewModel(
         get() = currentWeather.value?.wind_degrees?.minus(_currentCameraPosition.value.third)
             ?: _currentCameraPosition.value.third
 
-    init {
-        loadMarkers()
-    }
-
-    fun getAllMarkers(): StateFlow<List<UserMapMarker>> = _mapMarkers
 
     fun setCameraMoveState(newState: CameraMoveState) {
         _cameraMoveState.value = newState
     }
 
-    private fun loadMarkers() {
+    private fun loadUserMarkersList() {
         viewModelScope.launch {
-            repository.getAllUserMarkersList().collect { markers ->
+            getUserPlacesListUseCase.invoke().collect { markers ->
                 _mapMarkers.value = markers as MutableList<UserMapMarker>
+                if (!markers.contains(currentMarker.value)) {
+                    resetMapUiState()
+                }
             }
         }
     }
 
+    /*private fun loadUserPlaces() {
+        viewModelScope.launch {
+            getUserPlacesUseCase.invoke().collect {
+                it.fold(
+                    onAdded = { place ->
+                        var currentList = mutableListOf<UserMapMarker>()
+                        currentList = _mapMarkers.value
+                        currentList.add(place as UserMapMarker)
+                        _mapMarkers.emit(currentList)
+                    },
+                    onModified = { place ->
+                        val oldOne = _mapMarkers.value.find { it.id == (place as UserMapMarker).id}
+                        _mapMarkers.value.remove(oldOne)
+                        _mapMarkers.value.add(place as UserMapMarker)
+                    },
+                    onDeleted = { place ->
+                        val placeToDelete = place as UserMapMarker
+                        if (placeToDelete == currentMarker.value) _currentMarker.value = null
+                        _mapMarkers.value.remove(place as UserMapMarker)
+                    }
+                )
+            }
+        }
+    }*/
+
     fun addNewMarker(newMarker: RawMapMarker) {
         _addNewMarkerState.value = UiState.InProgress
         viewModelScope.launch {
-            repository.addNewMarker(newMarker).collect { progress ->
-                when (progress) {
-                    is Result.Success -> {
-                        _addNewMarkerState.value = UiState.Success
-                    }
-                    is Result.Error -> {
-                        _addNewMarkerState.value = UiState.Error
-                    }
+            addNewPlaceUseCase.invoke(newMarker).single().fold(
+                onSuccess = {
+                    _addNewMarkerState.value = UiState.Success
+                },
+                onFailure = {
+                    _addNewMarkerState.value = UiState.Error
                 }
-            }
+            )
         }
     }
 
@@ -154,9 +188,10 @@ class MapViewModel(
 
     fun saveLastCameraPosition() {
         viewModelScope.launch {
-            if (!firstLaunchLocation.value)
+            if (!settingPlace.value) {
+                userPreferences.saveLastMapCameraLocation(currentCameraPosition.value)
+            }
             lastMapCameraPosition.value = currentCameraPosition.value
-            userPreferences.saveLastMapCameraLocation(currentCameraPosition.value)
         }
     }
 
@@ -176,20 +211,29 @@ class MapViewModel(
         }
     }
 
+    private val settingPlace = MutableStateFlow(false)
+
     fun setPlace(place: UserMapMarker?) {
-        place?.let {
-            if (it.id.isNotEmpty()) {
-                _currentMarker.value = place
-            }
-            /*lastMapCameraPosition.value =
-                Pair(LatLng(it.latitude, it.longitude), DEFAULT_ZOOM)*/
+        viewModelScope.launch {
+            place?.let {
+                if (it.id.isNotEmpty()) {
+                    settingPlace.value = true
+                    _currentMarker.value = place
+                    _mapUiState.value = MapUiState.BottomSheetInfoMode
+                    _firstCameraPosition.value =
+                        currentCameraPosition.value.copy(it.latLng, second = DEFAULT_ZOOM)
+                    //setNewCameraLocation(it.latLng)
+
+                } else run { settingPlace.value = false }
+            } ?: run { settingPlace.value = false }
         }
+
     }
 
     fun setAddingPlace(addPlaceOnStart: Boolean) {
         when {
             addPlaceOnStart -> _mapUiState.value = MapUiState.PlaceSelectMode
-            _currentMarker.value != null -> _mapUiState.value = MapUiState.BottomSheetInfoMode
+            //_currentMarker.value != null -> _mapUiState.value = MapUiState.BottomSheetInfoMode
         }
     }
 
@@ -201,6 +245,7 @@ class MapViewModel(
     fun onMyLocationClick() {
         lastKnownLocation.value?.let {
             setNewCameraLocation(it)
+            _currentMarker.value = null
         } ?: SnackbarManager.showMessage(R.string.cant_get_current_location)
     }
 
@@ -210,9 +255,9 @@ class MapViewModel(
         }
     }
 
-    fun onMarkerClicked(marker: UserMapMarker?, position: LatLng) {
+    fun onMarkerClicked(marker: UserMapMarker?) {
         marker?.let {
-            setNewCameraLocation(position, DEFAULT_ZOOM)
+            setNewCameraLocation(it.latLng, DEFAULT_ZOOM)
             _currentMarker.value = it
             _mapUiState.value = MapUiState.BottomSheetInfoMode
         }
@@ -223,17 +268,19 @@ class MapViewModel(
     }
 
     fun onZoomInClick() {
-        val currentCamera = _currentCameraPosition.value
-        setNewCameraLocation(currentCamera.first, currentCamera.second + 2f)
+        _currentCameraPosition.value.let {
+            setNewCameraLocation(it.first, it.second + 2f)
+        }
     }
 
     fun onZoomOutClick() {
-        val currentCamera = _currentCameraPosition.value
-        setNewCameraLocation(currentCamera.first, currentCamera.second - 2f)
+        _currentCameraPosition.value.let {
+            setNewCameraLocation(it.first, it.second - 2f)
+        }
     }
 
     fun locationGranted(location: LatLng) {
-        if (!firstLaunchLocation.value) lastKnownLocation.value = location
+        lastKnownLocation.value = location
     }
 
     fun resetMapBearing() {
@@ -297,16 +344,25 @@ class MapViewModel(
         }
     }
 
+    fun getLastLocation() {
+        currentMarker.value?.let {
+            _firstCameraPosition.value = currentCameraPosition.value.copy(it.latLng, DEFAULT_ZOOM)
+        } ?: lastMapCameraPosition.value?.let {
+            _firstCameraPosition.value = it
+        } ?: getFirstLaunchLocation()
+    }
+
     fun getFirstLaunchLocation() {
-        if (firstLaunchLocation.value) {
-            viewModelScope.launch {
-                if (currentMarker.value == null) {
-                    val fromBd = userPreferences.getLastMapCameraLocation.first()
-                    _newMapCameraPosition.emit(fromBd)
-                }
-                firstLaunchLocation.value = false
+        viewModelScope.launch {
+            if (currentMarker.value == null) {
+                val fromBd = userPreferences.getLastMapCameraLocation.first()
+                _firstCameraPosition.emit(fromBd)
             }
         }
+    }
+
+    fun resetAddNewMarkerState() {
+        _addNewMarkerState.value = null
     }
 
 
