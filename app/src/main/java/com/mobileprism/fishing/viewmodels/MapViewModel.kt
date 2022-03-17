@@ -18,6 +18,7 @@ import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.map.MapUiState
 import com.mobileprism.fishing.ui.use_cases.*
+import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -254,9 +255,9 @@ class MapViewModel(
         }
     }
 
-    fun onMarkerClicked(marker: UserMapMarker?, position: LatLng) {
+    fun onMarkerClicked(marker: UserMapMarker?) {
         marker?.let {
-            setNewCameraLocation(position, DEFAULT_ZOOM)
+            setNewCameraLocation(it.latLng, DEFAULT_ZOOM)
             _currentMarker.value = it
             _mapUiState.value = MapUiState.BottomSheetInfoMode
         }

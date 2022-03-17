@@ -51,6 +51,7 @@ import com.mobileprism.fishing.viewmodels.MapViewModel
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.utils.Constants
+import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -152,10 +153,7 @@ fun MapScreen(
                 MarkerInfoDialog(
                     navController = navController,
                     onMarkerIconClicked = {
-                        viewModel.onMarkerClicked(
-                            it,
-                            LatLng(it.latitude, it.longitude)
-                        )
+                        viewModel.onMarkerClicked(it)
                     }
                 ) {
                     coroutineScope.launch {
@@ -210,8 +208,10 @@ fun MapScreen(
                         }
                         .zIndex(5f)
                 ) {
-                    LayersView(viewModel.mapType.collectAsState(),
-                    onLayerSelected = viewModel::onLayerSelected) {
+                    LayersView(
+                        viewModel.mapType.collectAsState(),
+                        onLayerSelected = viewModel::onLayerSelected
+                    ) {
                         mapLayersSelection = false
                     }
                 }
@@ -233,10 +233,11 @@ fun MapScreen(
 
                 CompassButton(
                     modifier = modifier.constrainAs(mapCompassButton) {
-                    top.linkTo(mapMyLocationButton.bottom, 16.dp)
-                    absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-                }, mapBearing = viewModel.mapBearing.collectAsState(),
-                    onClick = viewModel::resetMapBearing)
+                        top.linkTo(mapMyLocationButton.bottom, 16.dp)
+                        absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+                    }, mapBearing = viewModel.mapBearing.collectAsState(),
+                    onClick = viewModel::resetMapBearing
+                )
 
                 if (useZoomButtons) {
                     MapZoomInButton(
@@ -396,8 +397,7 @@ fun MapLayout(
                 }
                 googleMap.setOnMarkerClickListener { marker ->
                     viewModel.onMarkerClicked(
-                        markers.firstOrNull { it.id == marker.tag },
-                        marker.position
+                        markers.find { it.id == marker.tag },
                     )
                     true
                 }
@@ -438,7 +438,7 @@ fun MapLayout(
         googleMap.mapType = mapType
     }
 
-    DisposableEffect(map, ) {
+    DisposableEffect(map) {
         viewModel.getLastLocation()
 
         onDispose {
@@ -522,9 +522,15 @@ fun MapFab(
 
     val paddingTop = animateDpAsState(
         when (state) {
-            MapUiState.NormalMode -> { 0.dp }
-            MapUiState.BottomSheetInfoMode -> { 26.dp }
-            MapUiState.PlaceSelectMode -> { 0.dp }
+            MapUiState.NormalMode -> {
+                0.dp
+            }
+            MapUiState.BottomSheetInfoMode -> {
+                26.dp
+            }
+            MapUiState.PlaceSelectMode -> {
+                0.dp
+            }
         }
     )
 
@@ -621,10 +627,15 @@ private val FabSize = 56.dp
 
 private fun onAddNewCatchClick(navController: NavController, viewModel: MapViewModel) {
     viewModel.currentMarker.value?.let {
-        navController.navigate(
-            MainDestinations.NEW_CATCH_ROUTE,
-            Arguments.PLACE to it
-        )
+        if (it.id != CURRENT_PLACE_ITEM_ID) {
+            navController.navigate(
+                MainDestinations.NEW_CATCH_ROUTE,
+                Arguments.PLACE to it
+            )
+        } else {
+            // TODO: Нельзя добавить улов на текущее местоположение
+        }
+
     }
 }
 

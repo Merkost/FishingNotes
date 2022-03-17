@@ -37,6 +37,7 @@ import com.mobileprism.fishing.ui.home.views.SubtitleText
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.resources
+import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -276,10 +277,15 @@ fun MarkerInfoDialog(
 }
 
 fun onMarkerClicked(marker: UserMapMarker, navController: NavController) {
-    navController.navigate(
-        MainDestinations.PLACE_ROUTE,
-        Arguments.PLACE to marker
-    )
+    if (marker.id != Constants.CURRENT_PLACE_ITEM_ID) {
+        navController.navigate(
+            MainDestinations.PLACE_ROUTE,
+            Arguments.PLACE to marker
+        )
+    } else {
+        // TODO: Нельзя перейти на экран места
+    }
+
 }
 
 fun onWeatherIconClicked(marker: UserMapMarker, navController: NavController) {
