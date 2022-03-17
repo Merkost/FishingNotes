@@ -89,22 +89,8 @@ fun WeatherScreen(
         if (permissionsState.allPermissionsGranted) {
             getCurrentLocationFlow(context, permissionsState).collect { locationState ->
                 if (locationState is LocationState.LocationGranted) {
-
                     val newLocation = createCurrentPlaceItem(locationState.location, context)
-                    val oldLocation = viewModel.markersList.find { it.id == newLocation.id }
-
-                    if (oldLocation != null) {
-                        if (isLocationsTooFar(oldLocation, newLocation)) {
-                            viewModel.markersList.remove(oldLocation)
-                            viewModel.markersList.add(index = 0, element = newLocation)
-                        }
-                    } else {
-                        viewModel.markersList.add(index = 0, element = newLocation)
-                    }
-
-                    if (selectedPlace == null) {
-                        viewModel.setSelectedPlace(viewModel.markersList.first())
-                    }
+                    viewModel.locationGranted(newLocation)
                 }
             }
         }
@@ -193,16 +179,13 @@ fun WeatherScreen(
 fun WeatherNoPlaces(modifier: Modifier = Modifier, onAddNewPlace: () -> Unit) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         NoContentView(
             text = stringResource(id = R.string.no_places_added),
             icon = painterResource(id = R.drawable.ic_no_place_on_map)
         )
-
-        Spacer(modifier = Modifier.size(16.dp))
-
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally

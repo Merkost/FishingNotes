@@ -8,6 +8,7 @@ import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
+import com.mobileprism.fishing.utils.isLocationsTooFar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +22,6 @@ class WeatherViewModel(
 
     private val _weatherState = MutableStateFlow<BaseViewState<WeatherForecast>>(BaseViewState.Loading())
     val weatherState = _weatherState.asStateFlow()
-
 
     private val _selectedPlace = MutableStateFlow<UserMapMarker?>(null)
     val selectedPlace = _selectedPlace.asStateFlow()
@@ -64,6 +64,23 @@ class WeatherViewModel(
             _selectedPlace.value = it
         }
 
+    }
+
+    fun locationGranted(newLocation: UserMapMarker) {
+        val oldLocation = markersList.find { it.id == newLocation.id }
+
+        if (oldLocation != null) {
+            if (isLocationsTooFar(oldLocation, newLocation)) {
+                markersList.remove(oldLocation)
+                markersList.add(index = 0, element = newLocation)
+            }
+        } else {
+            markersList.add(index = 0, element = newLocation)
+        }
+
+        if (selectedPlace.value == null) {
+            setSelectedPlace(markersList.first())
+        }
     }
 
 }
