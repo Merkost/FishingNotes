@@ -61,7 +61,9 @@ class MapViewModel(
 
     private val _mapType = MutableStateFlow(MapTypes.roadmap)
     val mapType = _mapType.asStateFlow()
-    fun onLayerSelected(layer: Int) { _mapType.value = layer }
+    fun onLayerSelected(layer: Int) {
+        _mapType.value = layer
+    }
 
     val mapBearing = MutableStateFlow(0f)
 
@@ -97,7 +99,6 @@ class MapViewModel(
             ?: _currentCameraPosition.value.third
 
 
-
     fun setCameraMoveState(newState: CameraMoveState) {
         _cameraMoveState.value = newState
     }
@@ -106,7 +107,7 @@ class MapViewModel(
         viewModelScope.launch {
             getUserPlacesListUseCase.invoke().collect { markers ->
                 _mapMarkers.value = markers as MutableList<UserMapMarker>
-                if(!markers.contains(currentMarker.value)) {
+                if (!markers.contains(currentMarker.value)) {
                     resetMapUiState()
                 }
             }
@@ -186,9 +187,10 @@ class MapViewModel(
 
     fun saveLastCameraPosition() {
         viewModelScope.launch {
-            if (!firstLaunchLocation.value)
+            if (!settingPlace.value) {
+                userPreferences.saveLastMapCameraLocation(currentCameraPosition.value)
+            }
             lastMapCameraPosition.value = currentCameraPosition.value
-            userPreferences.saveLastMapCameraLocation(currentCameraPosition.value)
         }
     }
 
@@ -208,20 +210,29 @@ class MapViewModel(
         }
     }
 
+    private val settingPlace = MutableStateFlow(false)
+
     fun setPlace(place: UserMapMarker?) {
-        place?.let {
-            if (it.id.isNotEmpty()) {
-                _currentMarker.value = place
-            }
-            /*lastMapCameraPosition.value =
-                Pair(LatLng(it.latitude, it.longitude), DEFAULT_ZOOM)*/
+        viewModelScope.launch {
+            place?.let {
+                if (it.id.isNotEmpty()) {
+                    settingPlace.value = true
+                    _currentMarker.value = place
+                    _mapUiState.value = MapUiState.BottomSheetInfoMode
+                    _firstCameraPosition.value =
+                        currentCameraPosition.value.copy(it.latLng, second = DEFAULT_ZOOM)
+                    //setNewCameraLocation(it.latLng)
+
+                } else run { settingPlace.value = false }
+            } ?: run { settingPlace.value = false }
         }
+
     }
 
     fun setAddingPlace(addPlaceOnStart: Boolean) {
         when {
             addPlaceOnStart -> _mapUiState.value = MapUiState.PlaceSelectMode
-            _currentMarker.value != null -> _mapUiState.value = MapUiState.BottomSheetInfoMode
+            //_currentMarker.value != null -> _mapUiState.value = MapUiState.BottomSheetInfoMode
         }
     }
 
@@ -233,6 +244,7 @@ class MapViewModel(
     fun onMyLocationClick() {
         lastKnownLocation.value?.let {
             setNewCameraLocation(it)
+            _currentMarker.value = null
         } ?: SnackbarManager.showMessage(R.string.cant_get_current_location)
     }
 
@@ -255,17 +267,19 @@ class MapViewModel(
     }
 
     fun onZoomInClick() {
-        val currentCamera = _currentCameraPosition.value
-        setNewCameraLocation(currentCamera.first, currentCamera.second + 2f)
+        _currentCameraPosition.value.let {
+            setNewCameraLocation(it.first, it.second + 2f)
+        }
     }
 
     fun onZoomOutClick() {
-        val currentCamera = _currentCameraPosition.value
-        setNewCameraLocation(currentCamera.first, currentCamera.second - 2f)
+        _currentCameraPosition.value.let {
+            setNewCameraLocation(it.first, it.second - 2f)
+        }
     }
 
     fun locationGranted(location: LatLng) {
-        if (!firstLaunchLocation.value) lastKnownLocation.value = location
+        lastKnownLocation.value = location
     }
 
     fun resetMapBearing() {
@@ -329,15 +343,19 @@ class MapViewModel(
         }
     }
 
+    fun getLastLocation() {
+        currentMarker.value?.let {
+            _firstCameraPosition.value = currentCameraPosition.value.copy(it.latLng, DEFAULT_ZOOM)
+        } ?: lastMapCameraPosition.value?.let {
+            _firstCameraPosition.value = it
+        } ?: getFirstLaunchLocation()
+    }
+
     fun getFirstLaunchLocation() {
-        if (firstLaunchLocation.value) {
-            viewModelScope.launch {
-                if (currentMarker.value == null) {
-                    val fromBd = userPreferences.getLastMapCameraLocation.first()
-                    //_newMapCameraPosition.emit(fromBd)
-                    _firstCameraPosition.emit(fromBd)
-                }
-                firstLaunchLocation.value = false
+        viewModelScope.launch {
+            if (currentMarker.value == null) {
+                val fromBd = userPreferences.getLastMapCameraLocation.first()
+                _firstCameraPosition.emit(fromBd)
             }
         }
     }

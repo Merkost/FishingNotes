@@ -70,7 +70,6 @@ fun MarkerInfoDialog(
     val currentWeather: CurrentWeatherFree? by remember { viewModel.currentWeather }
 
     receivedMarker?.let { notNullMarker ->
-
         LaunchedEffect(receivedMarker, viewModel.lastKnownLocation.value) {
             viewModel.setNewMarkerInfo(notNullMarker.latitude, notNullMarker.longitude)
         }

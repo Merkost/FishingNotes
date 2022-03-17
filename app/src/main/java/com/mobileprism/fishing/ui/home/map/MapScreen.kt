@@ -439,9 +439,7 @@ fun MapLayout(
     }
 
     DisposableEffect(map, ) {
-        viewModel.lastMapCameraPosition.value?.let {
-            setCameraPosition(coroutineScope, map, it.first, it.second)
-        } ?: viewModel.getFirstLaunchLocation()
+        viewModel.getLastLocation()
 
         onDispose {
             viewModel.saveLastCameraPosition()
