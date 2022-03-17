@@ -112,7 +112,7 @@ fun FishTypeAmountAndWeightDialog(
     val fishWeight = remember { mutableStateOf("") }
 
     LaunchedEffect(key1 = viewModel.catch.collectAsState().value) {
-        viewModel.catch.value?.let {
+        viewModel.catch.value.let {
             fishType.value = it.fishType
             fishAmount.value = it.fishAmount.toString()
             fishWeight.value = it.fishWeight.toString()
@@ -197,7 +197,7 @@ fun EditWayOfFishingDialog(
     val lure = remember { mutableStateOf("") }
 
     LaunchedEffect(key1 = viewModel.catch.collectAsState().value) {
-        viewModel.catch.value?.let {
+        viewModel.catch.value.let {
             rod.value = it.fishingRodType
             bait.value = it.fishingBait
             lure.value = it.fishingLure
@@ -310,8 +310,6 @@ fun EditNoteDialog(
         noteDescriptionState.value = note.description
         noteDateCreated.value = note.dateCreated
     }
-
-    val description = noteDescriptionState.value
 
     ConstraintLayout(
         modifier = Modifier

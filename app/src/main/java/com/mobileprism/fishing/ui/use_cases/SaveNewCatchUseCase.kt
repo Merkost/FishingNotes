@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.use_cases
 
+import com.mobileprism.fishing.domain.use_cases.SavePhotosUseCase
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.raw.NewCatchWeather

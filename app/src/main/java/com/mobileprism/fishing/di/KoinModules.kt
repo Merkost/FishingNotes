@@ -39,7 +39,6 @@ val appModule = module {
     }
 }
 
-
 val settingsModule = module {
     single { AppPreferences(androidContext()) }
     single { UserPreferences(androidContext()) }
@@ -61,7 +60,6 @@ val mainModule = module {
         getFishActivityUseCase = get(),
         geocoder = get(),
         userPreferences = get(),
-
     ) }
 
 //    viewModel { NewCatchViewModel(get(), get(), get()) }
@@ -81,12 +79,14 @@ val useCasesModule = module {
     factory { SaveNewCatchUseCase(get(), get(), get()) }
     factory { GetUserPlacesUseCase(get()) }
     factory { GetUserPlacesListUseCase(get()) }
+    factory { AddNewPlaceUseCase(get()) }
     factory { GetFishActivityUseCase(get()) }
     factory { GetFreeWeatherUseCase(get()) }
     factory { DeleteUserCatchUseCase(get(), get()) }
     factory { GetMapMarkerByIdUseCase(get()) }
     factory { SavePhotosUseCase(get()) }
     factory { UpdateUserCatchUseCase(get(), get()) }
+    factory { SubscribeOnUserCatchStateUseCase(get()) }
 }
 
 fun createGeocoder(androidContext: Context): Geocoder {

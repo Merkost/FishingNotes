@@ -2,33 +2,24 @@ package com.mobileprism.fishing.model.datasource.firebase
 
 import android.content.Context
 import android.util.Log
-import com.google.android.gms.tasks.OnSuccessListener
-import com.google.android.gms.tasks.Task
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
-import com.mobileprism.fishing.model.datasource.utils.RepositoryConstants.MARKERS_COLLECTION
 import com.mobileprism.fishing.model.entity.common.ContentState
-import com.mobileprism.fishing.model.entity.common.ContentStateOld
 import com.mobileprism.fishing.model.entity.common.LiteProgress
 import com.mobileprism.fishing.model.entity.common.Note
 import com.mobileprism.fishing.model.entity.content.MapMarker
-import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.raw.RawMapMarker
 import com.mobileprism.fishing.model.mappers.MapMarkerMapper
 import com.mobileprism.fishing.model.mappers.MarkerNoteMapper
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
-import com.mobileprism.fishing.ui.viewstates.Result
-import com.mobileprism.fishing.utils.getCurrentUserId
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 class FirebaseMarkersRepositoryImpl(
     private val dbCollections: RepositoryCollections,

@@ -7,9 +7,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
-import com.mobileprism.fishing.model.entity.common.CatchesContentState
 import com.mobileprism.fishing.model.entity.common.ContentStateOld
-import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.utils.network.ConnectionManager
@@ -31,7 +29,6 @@ class FirebaseCatchesRepositoryImpl(
 
 
     override fun getAllUserCatchesState() = channelFlow<ContentStateOld<UserCatch>> {
-    override fun getAllUserCatchesState() = channelFlow {
         val listeners = mutableListOf<Task<QuerySnapshot>>()
         listeners.add(
             dbCollections.getUserMapMarkersCollection().get()
