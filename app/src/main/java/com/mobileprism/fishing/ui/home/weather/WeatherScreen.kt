@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.weather
 
+import android.annotation.SuppressLint
 import android.graphics.Paint
 import android.graphics.Typeface
 import androidx.compose.animation.Crossfade
@@ -32,7 +33,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.material.fade
+import com.google.accompanist.placeholder.material.shimmer
 import com.google.accompanist.placeholder.placeholder
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.viewmodels.WeatherViewModel
@@ -101,7 +102,7 @@ fun WeatherScreen(
                         viewModel.markersList.add(index = 0, element = newLocation)
                     }
 
-                    selectedPlace?.let {
+                    if (selectedPlace == null) {
                         viewModel.setSelectedPlace(viewModel.markersList.first())
                     }
                 }
@@ -117,7 +118,6 @@ fun WeatherScreen(
 
     val scrollState = rememberScrollState()
     val weatherUiState by viewModel.weatherState.collectAsState()
-    val forecast by viewModel.weather.collectAsState()
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -134,12 +134,12 @@ fun WeatherScreen(
                     selectedPlace?.let {
 
                         WeatherLocationIconButton(color = Color.White) {
-                            if (it.id != CURRENT_PLACE_ITEM_ID) {
+                            //if (it.id != CURRENT_PLACE_ITEM_ID) {
                                 navController.navigate(
                                     "${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
                                     Arguments.PLACE to it
                                 )
-                            }
+                            //}
                         }
 
                         WeatherPlaceSelectItem(
@@ -157,73 +157,67 @@ fun WeatherScreen(
         }
     ) {
 
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (!permissionsState.allPermissionsGranted && viewModel.markersList.isEmpty()) {
-                NoContentView(
-                    text = stringResource(id = R.string.no_places_added),
-                    icon = painterResource(id = R.drawable.ic_no_place_on_map)
-                )
-
-                Spacer(modifier = Modifier.size(16.dp))
-
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    DefaultButtonOutlined(
-                        text = stringResource(id = R.string.new_place_text),
-                        onClick = { navigateToAddNewPlace(navController) }
-                    )
-                }
-
-            } else {
-                Crossfade(targetState = weatherUiState) {
-                    when (it) {
-                        is BaseViewState.Loading -> {
-                            MainWeatherScreen(childModifier = Modifier.placeholder(
-                                true,
-                                color = Color.Gray,
-                                shape = CircleShape,
-                                highlight = PlaceholderHighlight.fade()
-                            ), forecast, scrollState, navigateToDaily = {})
+        if (!permissionsState.allPermissionsGranted && viewModel.markersList.isEmpty()) {
+            WeatherNoPlaces(Modifier.fillMaxSize()) { navigateToAddNewPlace(navController) }
+        } else {
+            Crossfade(targetState = weatherUiState) {
+                when (it) {
+                    is BaseViewState.Loading -> {
+                        MainWeatherScreen(childModifier = Modifier.placeholder(
+                            true,
+                            color = Color.LightGray,
+                            shape = CircleShape,
+                            highlight = PlaceholderHighlight.shimmer()
+                        ), WeatherForecast(), scrollState, navigateToDaily = {})
+                    }
+                    is BaseViewState.Success -> {
+                        MainWeatherScreen(childModifier = Modifier, it.data, scrollState)
+                        { index ->
+                            navigateToDailyWeatherScreen(
+                                navController = navController,
+                                index = index,
+                                forecastDaily = it.data.daily
+                            )
                         }
-                        is BaseViewState.Success -> {
-                            MainWeatherScreen(childModifier = Modifier, forecast, scrollState)
-                            { index ->
-                                navigateToDailyWeatherScreen(
-                                    navController = navController,
-                                    index = index,
-                                    forecastDaily = forecast.daily
-                                )
-                            }
-                        }
-                        is BaseViewState.Error -> {
-                            NoInternetView(Modifier.fillMaxWidth())
-                            /*val errorType = (it as RetrofitWrapper.Error).errorType
-                            when (errorType) {
-                                is ErrorType.NetworkError -> {
-                                    NoInternetView(Modifier.fillMaxWidth())
-                                }
-                                else -> {
-                                    ErrorView(Modifier.fillMaxWidth())
-                                }
-                            }*/
-                        }
+                    }
+                    is BaseViewState.Error -> {
+                        NoInternetView(Modifier.fillMaxWidth())
                     }
                 }
             }
+        }
+    }
+}
 
+@Composable
+fun WeatherNoPlaces(modifier: Modifier = Modifier, onAddNewPlace: () -> Unit) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        NoContentView(
+            text = stringResource(id = R.string.no_places_added),
+            icon = painterResource(id = R.drawable.ic_no_place_on_map)
+        )
+
+        Spacer(modifier = Modifier.size(16.dp))
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            DefaultButtonOutlined(
+                text = stringResource(id = R.string.new_place_text),
+                onClick = onAddNewPlace
+            )
         }
     }
 }
 
 @Composable
 fun MainWeatherScreen(
-    childModifier: Modifier = Modifier,
+    @SuppressLint("ModifierParameter") childModifier: Modifier = Modifier,
     forecast: WeatherForecast,
     scrollState: ScrollState,
     navigateToDaily: (Int) -> Unit,

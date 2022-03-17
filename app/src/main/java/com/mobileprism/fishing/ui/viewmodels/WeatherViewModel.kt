@@ -22,8 +22,6 @@ class WeatherViewModel(
     private val _weatherState = MutableStateFlow<BaseViewState<WeatherForecast>>(BaseViewState.Loading())
     val weatherState = _weatherState.asStateFlow()
 
-    private val _weather = MutableStateFlow<WeatherForecast>(WeatherForecast())
-    val weather = _weather.asStateFlow()
 
     private val _selectedPlace = MutableStateFlow<UserMapMarker?>(null)
     val selectedPlace = _selectedPlace.asStateFlow()
@@ -52,7 +50,6 @@ class WeatherViewModel(
                 result.fold(
                     onSuccess = {
                         _weatherState.value = BaseViewState.Success(it)
-                        _weather.value = it
                     },
                     onFailure = {
                         _weatherState.value = BaseViewState.Error(it)
