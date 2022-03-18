@@ -46,7 +46,7 @@ class WeatherViewModel(
         }
     }
 
-    fun getWeather(latitude: Double, longitude: Double) {
+    private fun getWeather(latitude: Double, longitude: Double) {
         _weatherState.value = BaseViewState.Loading()
         viewModelScope.launch(Dispatchers.IO) {
             weatherRepository.getWeather(latitude, longitude).collect { result ->
@@ -64,7 +64,10 @@ class WeatherViewModel(
 
     fun setSelectedPlace(place: UserMapMarker?) {
         place?.let {
-            _selectedPlace.value = it
+            if (selectedPlace.value != place) {
+                _selectedPlace.value = it
+                getWeather(it.latitude, it.longitude)
+            }
         }
 
     }

@@ -96,12 +96,6 @@ fun WeatherScreen(
         }
     }
 
-    LaunchedEffect(selectedPlace) {
-        selectedPlace?.let { place ->
-            viewModel.getWeather(place.latitude, place.longitude)
-        }
-    }
-
     val scrollState = rememberScrollState()
     val weatherUiState by viewModel.weatherState.collectAsState()
     Scaffold(
