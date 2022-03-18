@@ -9,46 +9,40 @@ import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.repository.app.OfflineRepository
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class FirebaseOfflineRepositoryImpl(
     private val db: FirebaseFirestore = Firebase.firestore,
     private val dbCollections: RepositoryCollections,
-) :
-    OfflineRepository {
+) : OfflineRepository {
 
-    override fun getAllUserMarkersList() = callbackFlow<List<UserMapMarker>> {
-        db.disableNetwork().addOnSuccessListener {
-            dbCollections.getUserMapMarkersCollection().get().addOnSuccessListener {
-                val markers = it.toObjects(UserMapMarker::class.java)
-                trySend(markers)
-                db.enableNetwork()
-            }
-        }
-        awaitClose { }
-    }
+    override fun getAllUserMarkersList() = flow<List<UserMapMarker>> {
+        db.disableNetwork().await()
+        val collection = dbCollections.getUserMapMarkersCollection().get().await()
+        val markers = collection.toObjects(UserMapMarker::class.java)
+        emit(markers)
+    }.onCompletion { db.enableNetwork() }
 
-    override fun getAllUserCatchesList() = callbackFlow<List<UserCatch>> {
-        db.disableNetwork().addOnSuccessListener {
-            dbCollections.getUserMapMarkersCollection().get().addOnSuccessListener {
-                val result = mutableListOf<UserCatch>()
+    override fun getAllUserCatchesList() = flow<List<UserCatch>> {
+        db.disableNetwork().await()
+        val collection = dbCollections.getUserMapMarkersCollection().get().await()
+        val collectionSize = collection.documents.size
+        val result = mutableListOf<UserCatch>()
 
-                launch {
-                    if (it.documents.size > 0) {
-                        getCatchesFromDoc(it.documents).take(it.documents.size).onCompletion {
-                            trySend(result)
-                            db.enableNetwork()
-                        }.collect {
-                            result.addAll(it)
-                        }
-                    }
+        if (collectionSize > 0) {
+            getCatchesFromDoc(collection.documents)
+                .take(collectionSize)
+                .onCompletion {
+                    emit(result)
+                    db.enableNetwork()
+                }.collect {
+                    result.addAll(it)
                 }
-
-            }
         }
-        awaitClose { }
     }
 
 }
