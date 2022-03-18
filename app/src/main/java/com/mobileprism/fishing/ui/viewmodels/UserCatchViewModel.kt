@@ -7,7 +7,7 @@ import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.repository.UserRepository
-import com.mobileprism.fishing.model.repository.app.CatchesRepository
+import com.mobileprism.fishing.model.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

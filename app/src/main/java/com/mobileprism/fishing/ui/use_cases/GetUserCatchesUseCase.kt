@@ -1,7 +1,7 @@
 package com.mobileprism.fishing.ui.use_cases
 
 import com.mobileprism.fishing.model.entity.content.UserCatch
-import com.mobileprism.fishing.model.repository.app.CatchesRepository
+import com.mobileprism.fishing.model.repository.app.catches.CatchesRepository
 import kotlinx.coroutines.flow.flow
 
 class GetUserCatchesUseCase(val repository: CatchesRepository) {
