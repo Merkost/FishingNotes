@@ -27,7 +27,8 @@ class UserPlaceViewModel(
 
 ) : ViewModel() {
 
-    var markerVisibility: MutableState<Boolean?> = mutableStateOf(null)
+    var markerVisibility: MutableState<Boolean?> = mutableStateOf(true)
+
     private val _marker: MutableStateFlow<UserMapMarker?> = MutableStateFlow(null)
     val marker: StateFlow<UserMapMarker?>
         get() = _marker
@@ -121,6 +122,7 @@ class UserPlaceViewModel(
     fun setMarker(m: UserMapMarker) {
         _marker.value = m
         _markerNotes.value = m.notes
+        markerVisibility.value = m.visible
     }
 
 }

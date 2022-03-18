@@ -12,6 +12,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.outlined.More
+import androidx.compose.material.icons.outlined.MoreHoriz
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -323,15 +327,7 @@ fun PlaceButtonsView(
 ) {
     val context = LocalContext.current
 
-    var deleteDialogIsShowing by remember { mutableStateOf(false) }
 
-    if (deleteDialogIsShowing) {
-        DeletePlaceDialog(place, onDismiss = { deleteDialogIsShowing = false }) {
-            viewModel.deletePlace()
-            deleteDialogIsShowing = false
-            navController.popBackStack()
-        }
-    }
 
     Row(
         modifier = modifier.horizontalScroll(rememberScrollState()),
@@ -364,11 +360,11 @@ fun PlaceButtonsView(
             onClick = { }
         )*/
 
-        DefaultButtonOutlined(
+        /*DefaultButtonOutlined(
             text = stringResource(id = R.string.delete),
             icon = painterResource(id = R.drawable.ic_baseline_delete_24),
             onClick = { deleteDialogIsShowing = true }
-        )
+        )*/
 
         Spacer(modifier = Modifier.padding(4.dp))
     }
@@ -418,13 +414,12 @@ fun PlaceTopBar(
     backPress: () -> Unit,
     viewModel: UserPlaceViewModel,
     modifier: Modifier = Modifier,
-
+    onDelete: () -> Unit,
     ) {
 
-    val isVisible by remember(viewModel.markerVisibility.value) {
-        if (viewModel.markerVisibility.value == null) mutableStateOf(true)
-        else viewModel.markerVisibility
-    }
+    val isVisible by remember { viewModel.markerVisibility }
+
+    var menuOpened by remember { mutableStateOf(false) }
 
     val color = animateColorAsState(
         targetValue = if (isVisible!!) {
@@ -450,6 +445,23 @@ fun PlaceTopBar(
                     tint = color.value
                 )
             }
+            IconButton(onClick = { menuOpened  = true }) {
+                Icon(Icons.Outlined.MoreVert, Icons.Outlined.MoreVert.name)
+            }
+            DropdownMenu(expanded = menuOpened, onDismissRequest = { menuOpened = false }) {
+                DropdownMenuItem(onClick = { menuOpened = false; onDelete() }) {
+                    Row(
+                        //modifier = Modifier.padding(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        //horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(text = stringResource(id = R.string.delete), maxLines = 1)
+                        //Icon(Icons.Default.Delete,  Icons.Default.Delete.name)
+                    }
+                }
+            }
+
         }
     )
+
 }

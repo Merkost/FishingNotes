@@ -49,6 +49,17 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
     val marker by viewModel.marker.collectAsState()
     val notes by viewModel.markerNotes.collectAsState()
 
+
+    var deleteDialogIsShowing by remember { mutableStateOf(false) }
+
+    if (deleteDialogIsShowing) {
+        DeletePlaceDialog(place, onDismiss = { deleteDialogIsShowing = false }) {
+            viewModel.deletePlace()
+            deleteDialogIsShowing = false
+            navController.popBackStack()
+        }
+    }
+
     ModalBottomSheetLayout(
         sheetState = modalBottomSheetState,
         sheetShape = Constants.modalBottomSheetCorners,
@@ -62,7 +73,7 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
         BottomSheetScaffold(
             scaffoldState = scaffoldState,
             topBar = {
-                PlaceTopBar(backPress, viewModel)
+                PlaceTopBar(backPress, viewModel) { deleteDialogIsShowing = true }
             },
             sheetContent = {
                 AdaptiveBannerAdvertView(adId = stringResource(R.string.place_admob_banner_id))
