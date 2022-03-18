@@ -57,13 +57,13 @@ class SaveNewCatchUseCase(
         return NewCatchWeather(
             weatherDescription = weatherState.primary.replaceFirstChar { it.uppercase() },
             icon = weatherState.icon,
-            temperatureInC = tempUnits.getCelciusTemperature(
+            temperatureInC = tempUnits.getDefaultTemperature(
                 weatherState.temperature.toStandardNumber().toFloat()
             ),
             pressureInMmhg = pressureUnits.getDefaultPressure(
                 weatherState.pressure.toStandardNumber().toFloat()
             ),
-            windInMs = windUnits.getWindSpeedInt(
+            windInMs = windUnits.getDefaultWindSpeed(
                 weatherState.windSpeed.toStandardNumber().toDouble()
             ).toInt(),
             windDirInDeg = weatherState.windDeg.toFloat(),

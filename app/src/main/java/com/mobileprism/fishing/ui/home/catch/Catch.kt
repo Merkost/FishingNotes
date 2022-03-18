@@ -8,14 +8,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -577,7 +575,7 @@ fun CatchWeatherView(
                     absoluteLeft.linkTo(windIcon.absoluteRight, 2.dp)
                     absoluteRight.linkTo(windDeg.absoluteLeft, 2.dp)
                 },
-                text = windSpeedUnit.getWindSpeedInt(catch.weatherWindSpeed.toDouble())
+                text = windSpeedUnit.getWindSpeed(catch.weatherWindSpeed.toDouble())
                         + " " + windSpeedUnit.name
             )
 
