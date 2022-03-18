@@ -35,13 +35,13 @@ object Libs {
         private const val oldVersion = "18.0.2"
 
         const val auth = "com.google.android.gms:play-services-auth:$version"
-        const val ads = "com.google.android.gms:play-services-ads:20.4.0"
+        const val ads = "com.google.android.gms:play-services-ads:20.6.0"
         const val billing = "com.android.billingclient:billing-ktx:4.0.0"
         const val core = "com.google.android.play:core-ktx:1.8.1"
 
         //Maps
         const val maps = "com.google.android.gms:play-services-maps:$oldVersion"
-        const val location = "com.google.android.gms:play-services-location:$version"
+        const val location = "com.google.android.gms:play-services-location:19.0.1"
     }
 
     object Kotlin {
@@ -60,10 +60,10 @@ object Libs {
 
     object AndroidX {
         const val coreKtx = "androidx.core:core-ktx:1.7.0"
-        const val splashScreen = "androidx.core:core-splashscreen:1.0.0-alpha02"
+        const val splashScreen = "androidx.core:core-splashscreen:1.0.0-beta01"
 
         object Compose {
-            const val version = "1.1.0-rc03"
+            const val version = "1.1.0"
 
             const val foundation = "androidx.compose.foundation:foundation:${version}"
             const val layout = "androidx.compose.foundation:foundation-layout:${version}"
@@ -74,8 +74,8 @@ object Libs {
             const val animation = "androidx.compose.animation:animation:${version}"
 
             //Theme
-            const val theme = "com.google.android.material:compose-theme-adapter:1.1.2"
-            const val lottie = "com.airbnb.android:lottie-compose:4.2.2"
+            const val theme = "com.google.android.material:compose-theme-adapter:1.1.5"
+            const val lottie = "com.airbnb.android:lottie-compose:5.0.3"
 
             // Tooling support (Previews, etc.)
             const val tooling = "androidx.compose.ui:ui-tooling:${version}"
@@ -91,14 +91,13 @@ object Libs {
         }
 
         object Lifecycle {
-            //1.0.0-alpha07
             // Integration with ViewModels
             const val viewModelCompose =
                 "androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0"
         }
 
         object Navigation {
-            const val version = "2.4.0-rc01"
+            const val version = "2.4.0"
             const val navigationCompose = "androidx.navigation:navigation-compose:$version"
         }
 
@@ -112,7 +111,7 @@ object Libs {
         }
 
         object DependencyInjection {
-            private const val koin_version = "3.1.4"
+            private const val koin_version = "3.2.0-beta-1"
 
             const val koinMain = "io.insert-koin:koin-android:${koin_version}"
             const val koinJava = "io.insert-koin:koin-android-compat:${koin_version}"
@@ -139,7 +138,7 @@ object Libs {
         private const val version = "20.0.2"
 
         // Import the Firebase BoM
-        const val platform = "com.google.firebase:firebase-bom:29.0.4"
+        const val platform = "com.google.firebase:firebase-bom:29.2.1"
 
         // When using the BoM, you don't specify versions in Firebase library dependencies
         const val auth = "com.google.firebase:firebase-auth-ktx"
@@ -149,7 +148,7 @@ object Libs {
         const val storage = "com.google.firebase:firebase-storage-ktx"
         const val core = "com.google.firebase:firebase-core"
 
-        const val firestore = "com.google.firebase:firebase-firestore-ktx:24.0.0"
+        const val firestore = "com.google.firebase:firebase-firestore-ktx:24.0.2"
         const val authUi = "com.firebaseui:firebase-ui-auth:8.0.0"
 
         //Firebase Coroutine dependency:
@@ -158,16 +157,12 @@ object Libs {
     }
 
     object JUnit {
-        private const val version = "4.13"
+        private const val version = "4.13.2"
         const val junit = "junit:junit:$version"
     }
 
     object Coil {
-        const val coilCompose = "io.coil-kt:coil-compose:2.0.0-alpha06"
-    }
-
-    object Shimmer {
-        const val shimmer = "me.vponomarenko:compose-shimmer:1.0.0"
+        const val coilCompose = "io.coil-kt:coil-compose:2.0.0-rc01"
     }
 
     object Retrofit {

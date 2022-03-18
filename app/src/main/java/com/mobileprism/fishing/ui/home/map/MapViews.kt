@@ -36,6 +36,9 @@ import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
 import com.alorma.compose.settings.ui.SettingsCheckbox
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.shimmer
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
@@ -51,7 +54,6 @@ import com.mobileprism.fishing.model.datastore.UserPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.vponomarenko.compose.shimmer.shimmer
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalMaterialApi
@@ -531,7 +533,15 @@ fun PlaceTileView(
     }
 
     val placeName = viewModel.chosenPlace.value ?: stringResource(R.string.searching)
-    val shimmerModifier = if (viewModel.chosenPlace.value != null) Modifier else Modifier.shimmer()
+    val shimmerModifier = if (viewModel.chosenPlace.value != null) Modifier else
+        Modifier.placeholder(
+        visible = true,
+        color = Color.LightGray,
+        // optional, defaults to RectangleShape
+        shape = CircleShape,
+        highlight = PlaceholderHighlight.shimmer(
+            highlightColor = Color.White,
+        ),)
     val pointerIconColor by animateColorAsState(
         if (selectedPlace != null) secondaryFigmaColor
         else Color.LightGray
@@ -573,7 +583,7 @@ fun PlaceTileView(
                 placeName,
                 overflow = TextOverflow.Ellipsis,
                 color = textColor,
-                modifier = shimmerModifier.padding(end = 2.dp)
+                modifier = Modifier.padding(end = 2.dp).then(shimmerModifier)
             )
             Spacer(Modifier.size(4.dp))
         }

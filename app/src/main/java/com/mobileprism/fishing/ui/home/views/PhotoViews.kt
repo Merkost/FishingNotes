@@ -43,8 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
-import coil.compose.AsyncImageContent
-import coil.compose.AsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import com.mobileprism.fishing.R
@@ -78,7 +77,7 @@ fun ItemPhoto(
             .padding(4.dp)
     ) {
 
-        AsyncImage(
+        SubcomposeAsyncImage(
             model = photo,
             contentDescription = null,
             modifier = Modifier
@@ -89,8 +88,11 @@ fun ItemPhoto(
                     fullScreenPhoto.value = photo
                 },
             contentScale = ContentScale.Crop,
-            filterQuality = FilterQuality.Low
-        ) { state ->
+            filterQuality = FilterQuality.Medium,
+            loading = {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        ) /*{ state ->
             if (state is AsyncImagePainter.State.Loading) {
                 CircularProgressIndicator(
                     modifier = Modifier
@@ -101,7 +103,7 @@ fun ItemPhoto(
             } else {
                 AsyncImageContent()
             }
-        }
+        }*/// FIXME:  
         if (deleteEnabled) {
             Surface(
                 color = Color.LightGray.copy(alpha = 0.5f),
@@ -320,7 +322,7 @@ fun FullSizePhotoView(
             .heightIn(max = 256.dp)
     ) {
 
-        AsyncImage(
+        SubcomposeAsyncImage(
             model = photo,
             contentDescription = null,
             modifier = Modifier
@@ -332,8 +334,11 @@ fun FullSizePhotoView(
                     fullScreenPhoto.value = photo
                 },
             contentScale = ContentScale.Crop,
-            filterQuality = FilterQuality.Low
-        ) { state ->
+            filterQuality = FilterQuality.Medium,
+            loading = {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        ) /*{ state ->
             if (state is AsyncImagePainter.State.Loading) {
                 CircularProgressIndicator(
                     modifier = Modifier
@@ -344,7 +349,7 @@ fun FullSizePhotoView(
             } else {
                 AsyncImageContent()
             }
-        }
+        }*/// FIXME:  
         if (deleteEnabled) {
             Surface(
                 color = Color.LightGray.copy(alpha = 0.5f),
@@ -381,7 +386,7 @@ fun ItemCatchPhotoView(
         mutableStateOf<Uri?>(null)
     }
 
-    AsyncImage(
+    SubcomposeAsyncImage(
         model = photo,
         contentDescription = null,
         modifier = modifier
@@ -389,14 +394,11 @@ fun ItemCatchPhotoView(
             .clip(RoundedCornerShape(5.dp))
             .clickable { fullScreenPhoto.value = photo },
         contentScale = ContentScale.Crop,
-        filterQuality = FilterQuality.Low
-    ) { state ->
-        if (state is AsyncImagePainter.State.Loading) {
+        filterQuality = FilterQuality.Medium,
+        loading = {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        } else {
-            AsyncImageContent()
         }
-    }
+    )
 
     AnimatedVisibility(fullScreenPhoto.value != null) {
         FullScreenPhoto(fullScreenPhoto)
@@ -409,6 +411,7 @@ fun ItemCatchPhotoView(
 @Composable
 fun FullScreenPhoto(photo: MutableState<Uri?>) {
 
+    // TODO: add rotation and zoom
     /*val scale = remember { mutableStateOf(1f) }
     val rotationState = remember { mutableStateOf(1f) }*/
 
@@ -429,8 +432,12 @@ fun FullScreenPhoto(photo: MutableState<Uri?>) {
             Modifier
                 .fillMaxSize(), color = backgroundColor.value
         ) {
-            AsyncImage(
+            SubcomposeAsyncImage(
                 model = photo.value,
+                filterQuality = FilterQuality.High,
+                loading = {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                },
                 modifier = Modifier
                     .fillMaxSize()
                     .offset {

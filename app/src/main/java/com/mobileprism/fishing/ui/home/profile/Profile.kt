@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -25,6 +26,9 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import com.airbnb.lottie.compose.*
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.shimmer
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
@@ -34,7 +38,6 @@ import com.mobileprism.fishing.ui.viewmodels.UserViewModel
 import com.mobileprism.fishing.model.entity.common.User
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import kotlinx.coroutines.InternalCoroutinesApi
-import me.vponomarenko.compose.shimmer.shimmer
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
@@ -236,18 +239,7 @@ fun UserText(user: User?, modifier: Modifier) {
 
 @Composable
 fun PlacesNumber(modifier: Modifier = Modifier, userPlacesNum: Int?) {
-    userPlacesNum?.let {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center, modifier = modifier
-        ) {
-            Icon(
-                Icons.Default.Place, stringResource(R.string.place),
-                modifier = Modifier.size(25.dp)
-            )
-            Text(it.toString())
-        }
-    } ?: Column(
+    Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center, modifier = modifier
     ) {
@@ -255,33 +247,35 @@ fun PlacesNumber(modifier: Modifier = Modifier, userPlacesNum: Int?) {
             Icons.Default.Place, stringResource(R.string.place),
             modifier = Modifier
                 .size(25.dp)
-                .shimmer(),
-            tint = Color.LightGray
+                .placeholder(
+                    visible = userPlacesNum == null,
+                    color = Color.LightGray,
+                    // optional, defaults to RectangleShape
+                    shape = CircleShape,
+                    highlight = PlaceholderHighlight.shimmer(
+                        highlightColor = Color.White,
+                    )
+                ),
         )
         Text(
-            "0",
-            color = Color.LightGray,
+            text = userPlacesNum?.toString() ?: "0",
             modifier = Modifier
-                .background(Color.LightGray)
-                .shimmer()
+                .placeholder(
+                    visible = userPlacesNum == null,
+                    color = Color.LightGray,
+                    // optional, defaults to RectangleShape
+                    shape = CircleShape,
+                    highlight = PlaceholderHighlight.shimmer(
+                        highlightColor = Color.White,
+                    )
+                )
         )
     }
 }
 
 @Composable
 fun CatchesNumber(modifier: Modifier = Modifier, userCatchesNum: Int?) {
-    userCatchesNum?.let {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center, modifier = modifier
-        ) {
-            Icon(
-                painterResource(R.drawable.ic_fishing), stringResource(R.string.place),
-                modifier = Modifier.size(25.dp)
-            )
-            Text(it.toString())
-        }
-    } ?: Column(
+    Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center, modifier = modifier
     ) {
@@ -289,15 +283,27 @@ fun CatchesNumber(modifier: Modifier = Modifier, userCatchesNum: Int?) {
             painterResource(R.drawable.ic_fishing), stringResource(R.string.place),
             modifier = Modifier
                 .size(25.dp)
-                .shimmer(),
-            tint = Color.LightGray
+                .placeholder(
+                    visible = userCatchesNum == null,
+                    color = Color.LightGray,
+                    // optional, defaults to RectangleShape
+                    shape = CircleShape,
+                    highlight = PlaceholderHighlight.shimmer(
+                        highlightColor = Color.White,
+                    )
+                )
         )
         Text(
-            "0",
-            color = Color.LightGray,
-            modifier = Modifier
-                .background(Color.LightGray)
-                .shimmer()
+            text = userCatchesNum?.toString() ?: "0",
+            modifier = Modifier.placeholder(
+                visible = userCatchesNum == null,
+                color = Color.LightGray,
+                // optional, defaults to RectangleShape
+                shape = CircleShape,
+                highlight = PlaceholderHighlight.shimmer(
+                    highlightColor = Color.White,
+                )
+            )
         )
     }
 }
