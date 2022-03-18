@@ -6,13 +6,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.SnackbarManager
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.model.entity.common.LiteProgress
 import com.mobileprism.fishing.model.entity.common.Note
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
+import com.mobileprism.fishing.ui.use_cases.notes.DeleteUserMarkerNoteUseCase
+import com.mobileprism.fishing.ui.use_cases.notes.SaveUserMarkerNoteUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +22,9 @@ import kotlinx.coroutines.launch
 class UserPlaceViewModel(
     private val markersRepo: MarkersRepository,
     private val catchesRepo: CatchesRepository,
+    private val saveNewUserMarkerNoteUseCase: SaveUserMarkerNoteUseCase,
+    private val deleteUserMarkerNoteUseCase: DeleteUserMarkerNoteUseCase
+
 ) : ViewModel() {
 
     var markerVisibility: MutableState<Boolean?> = mutableStateOf(null)
@@ -73,21 +77,20 @@ class UserPlaceViewModel(
     fun updateMarkerNotes(note: Note) {
         _marker.value?.let { marker ->
             viewModelScope.launch {
-                markersRepo.updateUserMarkerNote(
+                saveNewUserMarkerNoteUseCase.invoke(
                     markerId = marker.id,
                     _markerNotes.value,
                     note = note
-                ).collect { baseViewState ->
-                    when (baseViewState) {
-                        is BaseViewState.Success -> {
-                            val newNotesList = baseViewState.data
+                ).collect {
+                    it.fold(
+                        onSuccess = {
+                            val newNotesList = it
                             _markerNotes.value = newNotesList
-                        }
-                        is BaseViewState.Error -> {
+                        },
+                        onFailure = {
                             SnackbarManager.showMessage(R.string.place_note_not_saved)
                         }
-                        else -> {}
-                    }
+                    )
                 }
             }
         }
@@ -96,21 +99,20 @@ class UserPlaceViewModel(
     fun deleteMarkerNote(note: Note) {
         _marker.value?.let { marker ->
             viewModelScope.launch {
-                markersRepo.deleteMarkerNote(
+                deleteUserMarkerNoteUseCase.invoke(
                     markerId = marker.id,
                     currentNotes = _markerNotes.value,
                     noteToDelete = note
-                ).collect { baseViewState ->
-                    when (baseViewState) {
-                        is BaseViewState.Success -> {
-                            val newNotesList = baseViewState.data
+                ).collect {
+                    it.fold(
+                        onSuccess = {
+                            val newNotesList = it
                             _markerNotes.value = newNotesList
-                        }
-                        is BaseViewState.Error -> {
+                        },
+                        onFailure = {
                             SnackbarManager.showMessage(R.string.place_note_not_deleted)
                         }
-                        else -> {}
-                    }
+                    )
                 }
             }
         }

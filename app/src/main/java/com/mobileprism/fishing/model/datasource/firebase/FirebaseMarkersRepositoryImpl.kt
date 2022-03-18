@@ -138,7 +138,41 @@ class FirebaseMarkersRepositoryImpl(
         }
     }
 
-    override suspend fun updateUserMarkerNote(
+    override suspend fun saveNewNote(
+        markerId: String,
+        newNote: Note
+    ): Flow<Result<Unit>> = callbackFlow {
+        dbCollections.getUserMapMarkersCollection().document(markerId)
+            .update("notes", FieldValue.arrayUnion(newNote)).addOnCompleteListener {
+                it.exception?.let { exp ->
+                    trySend(Result.failure(exp))
+                }
+
+                if (it.isSuccessful) {
+                    firebaseAnalytics.logEvent("add_marker_note", null)
+                    trySend(Result.success(Unit))
+                }
+            }
+        awaitClose()
+    }
+
+    override suspend fun updateNotes(
+        markerId: String, notes: List<Note>
+    ): Flow<Result<Unit>> = callbackFlow {
+        dbCollections.getUserMapMarkersCollection().document(markerId)
+            .update("notes", notes).addOnCompleteListener {
+                it.exception?.let { exp ->
+                    trySend(Result.failure(exp))
+                }
+                if (it.isSuccessful) {
+                    firebaseAnalytics.logEvent("edit_marker_note", null)
+                    trySend(Result.success(Unit))
+                }
+            }
+        awaitClose()
+    }
+
+    /*override suspend fun updateUserMarkerNote(
         markerId: String,
         currentNotes: List<Note>,
         note: Note
@@ -175,9 +209,9 @@ class FirebaseMarkersRepositoryImpl(
                 }
         }
         return flow
-    }
+    }*/
 
-    override suspend fun deleteMarkerNote(
+    /*override suspend fun deleteMarkerNote(
         markerId: String,
         currentNotes: List<Note>,
         noteToDelete: Note
@@ -199,7 +233,7 @@ class FirebaseMarkersRepositoryImpl(
                 }
             }
         return flow
-    }
+    }*/
 
     override suspend fun changeMarkerVisibility(marker: UserMapMarker, changeTo: Boolean)
             : StateFlow<LiteProgress> {

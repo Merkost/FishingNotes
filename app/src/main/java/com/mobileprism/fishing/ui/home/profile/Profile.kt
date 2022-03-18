@@ -258,8 +258,8 @@ fun PlacesNumber(modifier: Modifier = Modifier, userPlacesNum: Int?) {
                 ),
         )
         Text(
-            text = userPlacesNum?.toString() ?: "0",
-            modifier = Modifier
+            text = userPlacesNum?.toString() ?: "",
+            /*modifier = Modifier
                 .placeholder(
                     visible = userPlacesNum == null,
                     color = Color.LightGray,
@@ -268,7 +268,7 @@ fun PlacesNumber(modifier: Modifier = Modifier, userPlacesNum: Int?) {
                     highlight = PlaceholderHighlight.shimmer(
                         highlightColor = Color.White,
                     )
-                )
+                )*/
         )
     }
 }
@@ -294,8 +294,8 @@ fun CatchesNumber(modifier: Modifier = Modifier, userCatchesNum: Int?) {
                 )
         )
         Text(
-            text = userCatchesNum?.toString() ?: "0",
-            modifier = Modifier.placeholder(
+            text = userCatchesNum?.toString() ?: "",
+            /*modifier = Modifier.placeholder(
                 visible = userCatchesNum == null,
                 color = Color.LightGray,
                 // optional, defaults to RectangleShape
@@ -303,7 +303,7 @@ fun CatchesNumber(modifier: Modifier = Modifier, userCatchesNum: Int?) {
                 highlight = PlaceholderHighlight.shimmer(
                     highlightColor = Color.White,
                 )
-            )
+            )*/
         )
     }
 }

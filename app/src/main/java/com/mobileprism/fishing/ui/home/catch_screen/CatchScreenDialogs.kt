@@ -332,7 +332,8 @@ fun EditNoteDialog(
                 top.linkTo(parent.top)
                 absoluteLeft.linkTo(parent.absoluteLeft)
             },
-            text = stringResource(id = R.string.edit_note)
+            text = if (noteId.value.isEmpty()) stringResource(id = R.string.new_note)
+            else stringResource(id = R.string.edit_note)
         )
 
         SimpleOutlinedTextField(

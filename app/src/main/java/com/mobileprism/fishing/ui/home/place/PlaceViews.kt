@@ -208,9 +208,9 @@ fun NoteModalBottomSheet(
 ) {
     EditNoteDialog(
         note = viewModel.currentNote.value ?: Note(),
-        onSaveNote = { note -> viewModel.updateMarkerNotes(note) },
+        onSaveNote = viewModel::updateMarkerNotes,
         deleteOption = (viewModel.currentNote.value ?: Note()).id.isNotEmpty(),
-        onDeleteNote = { note -> viewModel.deleteMarkerNote(note) },
+        onDeleteNote = viewModel::deleteMarkerNote,
         onCloseDialog = onCloseBottomSheet
     )
 }
