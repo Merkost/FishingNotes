@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.ui.home.new_catch
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,7 +16,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -31,9 +29,7 @@ import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.ui.viewmodels.NewCatchViewModel
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.model.mappers.getAllWeatherIcons
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.SnackbarManager
@@ -41,13 +37,11 @@ import com.mobileprism.fishing.ui.home.new_catch.weather.SelectedWeather
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.utils.Constants.WIND_ROTATION
 import com.mobileprism.fishing.utils.roundTo
-import com.mobileprism.fishing.utils.showToast
 import com.mobileprism.fishing.utils.time.TimeConstants
 import com.mobileprism.fishing.utils.time.toDate
 import com.mobileprism.fishing.utils.time.toTime
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.getViewModel
 import java.util.*
 
 

@@ -1,7 +1,6 @@
 package com.mobileprism.fishing.ui.home.new_catch
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -26,24 +24,17 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.ui.home.views.SecondaryText
 import com.mobileprism.fishing.ui.home.weather.PressureValues
 import com.mobileprism.fishing.ui.home.weather.TemperatureValues
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
-import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.mappers.getMoonIconByPhase
 import com.mobileprism.fishing.model.mappers.getWeatherIconByName
-import com.mobileprism.fishing.model.mappers.getWeatherNameByIcon
-import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.new_catch.weather.*
 import com.mobileprism.fishing.ui.home.views.WeatherIconItem
 import com.mobileprism.fishing.ui.utils.enums.StringOperation
 import com.mobileprism.fishing.ui.utils.toDoubleExOrNull
-import com.mobileprism.fishing.ui.viewmodels.NewCatchViewModel
-import com.mobileprism.fishing.utils.time.toHours
 import org.koin.androidx.compose.get
-import java.util.*
 
 @Composable
 fun WeatherTypesSheet(onWeatherSelected: (SelectedWeather) -> Unit) {

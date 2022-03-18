@@ -107,7 +107,8 @@ fun NewCatchMasterScreen(
         uiState = viewModel.uiState.collectAsState().value,
         adIsLoadedState = isAdLoaded.value,
         loadingDialogState = loadingDialogState,
-        upPress = upPress
+        upPress = upPress,
+        onRetry = viewModel::saveNewCatch,
     )
 
     ModalLoadingDialog(
