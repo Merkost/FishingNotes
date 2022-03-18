@@ -1,24 +1,25 @@
 package com.mobileprism.fishing.viewmodels
 
 import android.location.Geocoder
-import androidx.compose.runtime.*
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.SphericalUtil
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.ui.home.UiState
-import com.mobileprism.fishing.ui.home.map.*
 import com.mobileprism.fishing.model.datastore.UserPreferences
-import com.mobileprism.fishing.model.entity.common.fold
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.raw.RawMapMarker
 import com.mobileprism.fishing.model.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.home.UiState
+import com.mobileprism.fishing.ui.home.map.CameraMoveState
+import com.mobileprism.fishing.ui.home.map.DEFAULT_ZOOM
+import com.mobileprism.fishing.ui.home.map.MapTypes
 import com.mobileprism.fishing.ui.home.map.MapUiState
 import com.mobileprism.fishing.ui.use_cases.*
-import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -172,17 +173,21 @@ class MapViewModel(
 
     fun updateCurrentPlace(markerToUpdate: UserMapMarker) {
         viewModelScope.launch {
-            repository.getMapMarker(markerToUpdate.id).collect { updatedMarker ->
-                updatedMarker?.let {
-                    currentMarker.value?.let {
-                        _currentMarker.value = updatedMarker
+            repository.getMapMarker(markerToUpdate.id).fold(
+                onSuccess = { updatedMarker ->
+                    updatedMarker.let {
+                        currentMarker.value?.let {
+                            _currentMarker.value = updatedMarker
+                        }
+                        _mapMarkers.value.apply {
+                            remove(markerToUpdate)
+                            add(updatedMarker)
+                        }
                     }
-                    _mapMarkers.value.apply {
-                        remove(markerToUpdate)
-                        add(updatedMarker)
-                    }
-                }
-            }
+
+                },
+                onFailure = { }
+            )
         }
     }
 

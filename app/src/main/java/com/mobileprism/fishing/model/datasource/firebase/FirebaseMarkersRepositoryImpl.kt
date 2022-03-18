@@ -20,6 +20,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class FirebaseMarkersRepositoryImpl(
     private val dbCollections: RepositoryCollections,
@@ -211,13 +213,21 @@ class FirebaseMarkersRepositoryImpl(
         return flow
     }
 
-    override fun getMapMarker(markerId: String) = callbackFlow {
-        val listener = dbCollections.getUserMapMarkersCollection().document(markerId)
-            .addSnapshotListener { value, _ ->
-                trySend(value?.toObject<UserMapMarker>())
-            }
-        awaitClose { listener.remove() }
-    }
+    override suspend fun getMapMarker(markerId: String) =
+        suspendCoroutine<Result<UserMapMarker>> { continuation ->
+
+            dbCollections.getUserMapMarkersCollection().document(markerId).get()
+                .addOnSuccessListener {
+                    val result = it.toObject<UserMapMarker>()
+
+                    result?.let { continuation.resume(Result.success(result)) }
+                        ?: continuation.resume(Result.failure(Throwable()))
+
+                }
+//                .addSnapshotListener { value, _ ->
+//                    trySend(value?.toObject<UserMapMarker>())
+//                }
+        }
 
     @ExperimentalCoroutinesApi
     private fun getMarkersSnapshotListener(scope: ProducerScope<ContentState<MapMarker>>) =

@@ -84,10 +84,14 @@ class UserCatchViewModel(
 
     private fun getMapMarker(markerId: String) {
         viewModelScope.launch {
-            getMapMarkerById(markerId).collect {
-                _mapMarker.value = it
-                subscribeOnCatchChanges()
-            }
+            getMapMarkerById(markerId).fold(
+                onSuccess = {
+                    _mapMarker.value = it
+                    subscribeOnCatchChanges()
+                },
+                onFailure = { }
+            )
+
         }
     }
 
