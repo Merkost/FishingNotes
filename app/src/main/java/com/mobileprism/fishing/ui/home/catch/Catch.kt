@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.ui.home.catch_screen
+package com.mobileprism.fishing.ui.home.catch
 
 import android.net.Uri
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -9,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -136,6 +137,9 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch) {
 fun CatchTopBar(navController: NavController, catch: UserCatch, onDeleteCatch: () -> Unit) {
     val userPreferences: UserPreferences = get()
     val is12hTime by userPreferences.use12hTimeFormat.collectAsState(initial = false)
+
+    var menuOpened by remember { mutableStateOf(false) }
+
     DefaultAppBar(
         title = stringResource(id = R.string.user_catch),
         subtitle = catch.date.toDateTextMonth() + " " + catch.date.toTime(is12hTime),
@@ -145,7 +149,16 @@ fun CatchTopBar(navController: NavController, catch: UserCatch, onDeleteCatch: (
             modifier = Modifier.padding(horizontal = 4.dp),
             onClick = onDeleteCatch
         ) {
-            Icon(imageVector = Icons.Filled.Delete, contentDescription = "", tint = Color.White)
+            Icon(imageVector = Icons.Outlined.MoreVert, Icons.Outlined.MoreVert.name)
+        }
+        DropdownMenu(expanded = menuOpened, onDismissRequest = { menuOpened = false }) {
+            DropdownMenuItem(onClick = { menuOpened = false; onDeleteCatch() }) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(text = stringResource(id = R.string.delete), maxLines = 1)
+                }
+            }
         }
     }
 }

@@ -12,9 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.outlined.More
-import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,7 +31,7 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.ui.home.catch_screen.EditNoteDialog
+import com.mobileprism.fishing.ui.home.catch.EditNoteDialog
 import com.mobileprism.fishing.ui.home.notes.*
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.theme.primaryTextColor

@@ -23,7 +23,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.SnackbarManager
-import com.mobileprism.fishing.ui.home.catch_screen.addPhoto
+import com.mobileprism.fishing.ui.home.catch.addPhoto
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.MaxCounterView
 import com.mobileprism.fishing.ui.home.views.NewCatchPhotoView

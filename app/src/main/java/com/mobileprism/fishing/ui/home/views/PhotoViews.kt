@@ -42,13 +42,12 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.SnackbarManager
-import com.mobileprism.fishing.ui.home.catch_screen.addPhoto
+import com.mobileprism.fishing.ui.home.catch.addPhoto
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
 import com.mobileprism.fishing.utils.network.ConnectionState
 import com.mobileprism.fishing.utils.network.currentConnectivityState

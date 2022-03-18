@@ -20,7 +20,7 @@ import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.ui.home.*
-import com.mobileprism.fishing.ui.home.catch_screen.UserCatchScreen
+import com.mobileprism.fishing.ui.home.catch.UserCatchScreen
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchMasterScreen
 import com.mobileprism.fishing.ui.home.place.UserPlaceScreen
 import com.mobileprism.fishing.ui.home.settings.AboutApp

@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.ui.home.catch_screen
+package com.mobileprism.fishing.ui.home.catch
 
 import android.Manifest
 import android.net.Uri
