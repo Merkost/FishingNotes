@@ -15,9 +15,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import java.util.concurrent.TimeUnit
 
-val repositoryModule = module {
-    single { RepositoryCollections() }
-
+val userRepositoryModule = module {
     single<UserRepository> {
         FirebaseUserRepositoryImpl(
             appPreferences = get(),
@@ -26,6 +24,11 @@ val repositoryModule = module {
             context = androidContext()
         )
     }
+}
+
+val repositoryModule = module {
+    single { RepositoryCollections() }
+
     single<CatchesRepository> {
         FirebaseCatchesRepositoryImpl(
             dbCollections = get(),

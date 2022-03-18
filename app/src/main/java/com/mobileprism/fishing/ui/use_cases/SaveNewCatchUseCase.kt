@@ -6,7 +6,7 @@ import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.raw.NewCatchWeather
 import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.ui.viewmodels.*
-import com.mobileprism.fishing.utils.getCurrentUser
+import com.mobileprism.fishing.utils.getCurrentUserId
 import com.mobileprism.fishing.utils.getNewCatchId
 import com.mobileprism.fishing.utils.toStandardNumber
 import kotlinx.coroutines.flow.channelFlow
@@ -46,8 +46,8 @@ class SaveNewCatchUseCase(
             temperatureInC = tempUnits.getCelciusTemperature(
                 weatherState.temperature.toStandardNumber().toFloat()
             ),
-            pressureInMmhg = pressureUnits.getDefaultPressure(
-                weatherState.pressure.toStandardNumber().toFloat()
+            pressureInMmhg = pressureUnits.getPressureInt(
+                weatherState.pressure.toStandardNumber().toInt()
             ),
             windInMs = windUnits.getWindSpeedInt(
                 weatherState.windSpeed.toStandardNumber().toDouble()
@@ -65,8 +65,7 @@ class SaveNewCatchUseCase(
         photos: List<String>
     ) = UserCatch(
         id = getNewCatchId(),
-        userId = getCurrentUser()!!.uid,
-        // FIXME:
+        userId = getCurrentUserId(),
         description = catchInfoState.note,
         date = placeAndTimeState.date,
         fishType = fishAndWeightState.fish,

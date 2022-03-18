@@ -5,14 +5,15 @@ import android.os.Bundle
 import android.util.Log
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.FirebaseAnalyticsKtxRegistrar
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.firestore.*
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.mobileprism.fishing.di.repositoryModule
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.datastore.AppPreferences
 import com.mobileprism.fishing.model.entity.common.Progress
@@ -22,6 +23,8 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
+import org.koin.core.context.GlobalContext.loadKoinModules
+import org.koin.core.context.GlobalContext.unloadKoinModules
 import java.util.*
 
 class FirebaseUserRepositoryImpl(
@@ -52,17 +55,23 @@ class FirebaseUserRepositoryImpl(
         }
 
     override suspend fun logoutCurrentUser() = callbackFlow {
-        clearPersistance()
         AuthUI.getInstance().signOut(context).addOnCompleteListener {
             if (it.isSuccessful) {
                 Firebase.analytics.logEvent("logout", null)
+                reloadRepositories()
                 trySend(true)
             } else trySend(false)
         }
         awaitClose {}
     }
 
-    private fun clearPersistance() {
+    private fun reloadRepositories() {
+        clearPersistence()
+        unloadKoinModules(repositoryModule)
+        loadKoinModules(repositoryModule)
+    }
+
+    private fun clearPersistence() {
         Firebase.firestore.clearPersistence()
     }
 

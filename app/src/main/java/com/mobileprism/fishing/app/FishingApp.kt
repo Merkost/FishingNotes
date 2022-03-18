@@ -6,7 +6,6 @@ import com.mobileprism.fishing.di.*
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
 import org.koin.core.logger.Level
 
 
@@ -18,7 +17,14 @@ class FishingApp : Application() {
         startKoin {
             androidLogger(if (BuildConfig.DEBUG) Level.ERROR else Level.NONE)
             androidContext(this@FishingApp)
-            modules(appModule, mainModule, repositoryModule, settingsModule, useCasesModule)
+            modules(
+                appModule,
+                mainModule,
+                repositoryModule,
+                settingsModule,
+                useCasesModule,
+                userRepositoryModule
+            )
 
         }
         // FIXME: Reset koin
