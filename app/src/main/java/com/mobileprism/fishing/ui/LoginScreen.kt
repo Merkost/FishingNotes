@@ -17,6 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 import com.google.accompanist.insets.systemBarsPadding
@@ -25,6 +26,7 @@ import com.mobileprism.fishing.ui.home.AppSnackbar
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.utils.showErrorToast
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -36,13 +38,12 @@ fun LoginScreen(navController: NavController) {
 
     val coroutineScope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
-    var isLoading by remember { mutableStateOf(false) }
-    var isSuccess by remember { mutableStateOf(false) }
     var visible by remember { mutableStateOf(false) }
-    var clicked by remember { mutableStateOf(false) }
+    var googleLoading by remember { mutableStateOf(false) }
+    var showLottie by remember { mutableStateOf(false) }
 
     val loginViewModel: LoginViewModel = get()
-    val activity = LocalContext.current as MainActivity
+    val context = LocalContext.current
     val uiState by loginViewModel.uiState.collectAsState()
     val errorString = stringResource(R.string.signin_error)
     val resources = resources()
@@ -50,12 +51,10 @@ fun LoginScreen(navController: NavController) {
     LaunchedEffect(uiState) {
         when (val state = uiState) {
             is BaseViewState.Success<*> -> {
-                delay(300)
-                isSuccess = true
-                isLoading = false
-                delay((MainActivity.splashFadeDurationMillis * 2).toLong())
-
                 state.data?.let {
+                    googleLoading = false
+                    showLottie = true
+                    delay(2500)
                     visible = false
                     delay((MainActivity.splashFadeDurationMillis * 2).toLong())
 
@@ -66,10 +65,12 @@ fun LoginScreen(navController: NavController) {
                     }
                 }
             }
-            is BaseViewState.Loading -> isLoading = true
+            is BaseViewState.Loading -> {}
             is BaseViewState.Error -> {
+                showErrorToast(context, state.error?.message)
+                googleLoading = false
                 scaffoldState.snackbarHostState.showSnackbar(errorString)
-            }  //TODO: logger.log((uiState.value as BaseViewState.Error).error)
+            }
         }
     }
 
@@ -79,7 +80,7 @@ fun LoginScreen(navController: NavController) {
                 if (currentMessages.isNotEmpty()) {
                     val message = currentMessages[0]
                     val text = resources.getText(message.messageId)
-                    clicked = false
+                    googleLoading = false
                     // Display the snackbar on the screen. `showSnackbar` is a function
                     // that suspends until the snackbar disappears from the screen
                     scaffoldState.snackbarHostState.showSnackbar(text.toString())
@@ -171,21 +172,27 @@ fun LoginScreen(navController: NavController) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(30.dp)
-                        .wrapContentHeight(),
+                        .height(450.dp)
+                        .padding(30.dp),
                     elevation = 10.dp,
                     shape = RoundedCornerShape(30.dp)
                 ) {
 
                     //LottieSuccess
-                    /*AnimatedVisibility(visible = isSuccess, modifier = Modifier.constrainAs(lottieSuccess) {
-                    top.linkTo(card.top)
-                    bottom.linkTo(card.bottom)
-                    absoluteLeft.linkTo(card.absoluteLeft)
-                    absoluteRight.linkTo(card.absoluteRight)
-                }) { LottieSuccess(modifier = Modifier.fillMaxSize()) {
-                    navController.navigate(MainDestinations.HOME_ROUTE)
-                } }*/
+                    AnimatedVisibility(
+                        visible = showLottie,
+                        modifier = Modifier.constrainAs(lottieSuccess) {
+                            top.linkTo(parent.top)
+                            bottom.linkTo(parent.bottom)
+                            absoluteLeft.linkTo(parent.absoluteLeft)
+                            absoluteRight.linkTo(parent.absoluteRight)
+                            width = Dimension.fillToConstraints
+                            height = Dimension.wrapContent
+                        }) {
+                        LottieSuccess() {
+                            //navController.navigate(MainDestinations.HOME_ROUTE)
+                        }
+                    }
 
                     Column(
                         verticalArrangement = Arrangement.Center,
@@ -220,15 +227,11 @@ fun LoginScreen(navController: NavController) {
                             //color = Color.DarkGray
                         )
 
-                        //LottieLoading
-                        //AnimatedVisibility(isLoading,) { LottieLoading(modifier = Modifier.size(140.dp)) }
-                        //AnimatedVisibility(!isLoading) {
                         Spacer(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(30.dp)
                         )
-                        //}
 
                         //Google button
                         Card(
@@ -236,7 +239,7 @@ fun LoginScreen(navController: NavController) {
                             onClickLabel = stringResource(
                                 R.string.google_login
                             ),
-                            onClick = { clicked = true; activity.startGoogleLogin() },
+                            onClick = { googleLoading = true; (context as MainActivity).startGoogleLogin() },
                         ) {
                             Row(
                                 modifier = Modifier
@@ -257,10 +260,10 @@ fun LoginScreen(navController: NavController) {
                                     modifier = Modifier.size(25.dp)
                                 )
                                 Text(
-                                    text = if (clicked) stringResource(R.string.signing_in)
+                                    text = if (googleLoading) stringResource(R.string.signing_in)
                                     else stringResource(R.string.sign_with_google)
                                 )
-                                if (clicked) {
+                                if (googleLoading) {
                                     //Spacer(modifier = Modifier.width(16.dp))
                                     CircularProgressIndicator(
                                         modifier = Modifier
@@ -280,9 +283,7 @@ fun LoginScreen(navController: NavController) {
                     }
                 }
             }
-            LaunchedEffect(this) {
-                visible = true
-            }
+            LaunchedEffect(this) { visible = true }
         }
     }
 }
@@ -308,18 +309,4 @@ fun LottieSuccess(modifier: Modifier = Modifier, onFinished: () -> Unit) {
             onFinished()
         }
     }
-}
-
-@Composable
-fun LottieLoading(modifier: Modifier = Modifier) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.walking_fish))
-    val progress by animateLottieCompositionAsState(
-        composition,
-        iterations = LottieConstants.IterateForever
-    )
-    LottieAnimation(
-        composition,
-        progress,
-        modifier = modifier
-    )
 }
