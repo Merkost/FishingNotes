@@ -12,11 +12,6 @@ data class ContentStateOld<T>(
     val modified: MutableList<T> = mutableListOf(),
 )
 
-
-
-
-
-
 sealed class ContentState<T> (item: T) {
     class ADDED<T>(val item: T): ContentState<T>(item)
     class DELETED<T>(val item: T): ContentState<T>(item)
