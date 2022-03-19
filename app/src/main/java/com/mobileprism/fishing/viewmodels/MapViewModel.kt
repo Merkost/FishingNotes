@@ -245,7 +245,7 @@ class MapViewModel(
     fun onMyLocationClick() {
         lastKnownLocation.value?.let {
             setNewCameraLocation(it)
-            _currentMarker.value = null
+            resetMapUiState()
         } ?: SnackbarManager.showMessage(R.string.cant_get_current_location)
     }
 
