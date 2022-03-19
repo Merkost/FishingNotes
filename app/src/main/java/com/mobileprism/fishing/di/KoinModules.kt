@@ -15,6 +15,8 @@ import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.use_cases.*
 import com.mobileprism.fishing.ui.viewmodels.*
 import com.mobileprism.fishing.utils.Logger
+import com.mobileprism.fishing.utils.location.LocationManager
+import com.mobileprism.fishing.utils.location.LocationManagerImpl
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionManagerImpl
 import com.mobileprism.fishing.viewmodels.MainViewModel
@@ -37,6 +39,7 @@ val appModule = module {
             .enablePendingPurchases()
             .build()
     }
+    single<LocationManager> { LocationManagerImpl(get()) }
 }
 
 
@@ -63,8 +66,8 @@ val mainModule = module {
             getFishActivityUseCase = get(),
             geocoder = get(),
             userPreferences = get(),
-
-            )
+            locationManager = get()
+        )
     }
 
 //    viewModel { NewCatchViewModel(get(), get(), get()) }

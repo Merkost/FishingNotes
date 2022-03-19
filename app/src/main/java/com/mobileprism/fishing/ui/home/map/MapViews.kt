@@ -51,9 +51,12 @@ import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
 import com.mobileprism.fishing.ui.theme.supportTextColor
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import com.mobileprism.fishing.model.datastore.UserPreferences
+import com.mobileprism.fishing.ui.MainActivity
+import com.mobileprism.fishing.utils.location.LocationManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalMaterialApi
@@ -134,6 +137,7 @@ fun MyLocationButton(
     onClick: () -> Unit,
 ) {
     val context = LocalContext.current
+    val locationManager: LocationManager = get()
     var locationDialogIsShowing by remember { mutableStateOf(false) }
     val shouldShowPermissions by userPreferences.shouldShowLocationPermission.collectAsState(false)
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
@@ -142,7 +146,7 @@ fun MyLocationButton(
 
         if (shouldShowPermissions) {
             LocationPermissionDialog(userPreferences = userPreferences) {
-                checkPermission(context)
+                checkLocationPermissions(context)
                 locationDialogIsShowing = false
             }
         } else SnackbarManager.showMessage(R.string.location_permission_denied)
@@ -170,7 +174,7 @@ fun MyLocationButton(
             onClick = {
                 when (permissionsState.allPermissionsGranted) {
                     true -> {
-                        checkGPSEnabled(context, onClick)
+                        locationManager.checkGPSEnabled(context as MainActivity) { onClick() }
                     }
                     false -> {
                         locationDialogIsShowing = true

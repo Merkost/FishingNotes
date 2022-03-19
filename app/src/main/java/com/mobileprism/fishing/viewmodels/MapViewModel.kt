@@ -4,6 +4,8 @@ import android.location.Geocoder
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.SphericalUtil
 import com.mobileprism.fishing.R
@@ -19,9 +21,11 @@ import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.map.MapUiState
 import com.mobileprism.fishing.ui.use_cases.*
 import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
+import com.mobileprism.fishing.utils.location.LocationManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.get
 
 class MapViewModel(
     private val repository: MarkersRepository,
@@ -32,6 +36,7 @@ class MapViewModel(
     private val getFishActivityUseCase: GetFishActivityUseCase,
     private val geocoder: Geocoder,
     private val userPreferences: UserPreferences,
+    private val locationManager: LocationManager,
 ) : ViewModel() {
 
     init {
@@ -39,6 +44,7 @@ class MapViewModel(
         //loadUserPlaces()
     }
 
+    val locationUpdate = MutableSharedFlow<Boolean>()
     private val _firstCameraPosition = MutableStateFlow<Triple<LatLng, Float, Float>?>(null)
     val firstCameraPosition = _firstCameraPosition.asStateFlow()
 
@@ -69,7 +75,7 @@ class MapViewModel(
     val mapBearing = MutableStateFlow(0f)
 
     val lastKnownLocation = mutableStateOf<LatLng?>(null)
-    val lastMapCameraPosition = mutableStateOf<Triple<LatLng, Float, Float>?>(null)
+    private val lastMapCameraPosition = mutableStateOf<Triple<LatLng, Float, Float>?>(null)
 
     /**
      * A Triple of LatLng, Zoom and Bearing
@@ -242,11 +248,30 @@ class MapViewModel(
         _currentMarker.value = null
     }
 
+    @OptIn(ExperimentalPermissionsApi::class)
     fun onMyLocationClick() {
-        lastKnownLocation.value?.let {
+        viewModelScope.launch {
+            locationManager.getCurrentLocationFlow().collect { currentLocationState ->
+                when (currentLocationState) {
+                    is LocationState.LocationGranted -> {
+                        locationGranted(currentLocationState.location)
+                        setNewCameraLocation(currentLocationState.location)
+                    }
+                    else -> {
+                        SnackbarManager.showMessage(R.string.cant_get_current_location)
+                    }
+                }
+            }
+        }
+        /*lastKnownLocation.value?.let {
             setNewCameraLocation(it)
             resetMapUiState()
-        } ?: SnackbarManager.showMessage(R.string.cant_get_current_location)
+        } ?: run {
+            SnackbarManager.showMessage(R.string.cant_get_current_location)
+            viewModelScope.launch {
+                locationUpdate.emit(true)
+            }
+        }*/
     }
 
     private fun setNewCameraLocation(position: LatLng, zoom: Float = DEFAULT_ZOOM) {

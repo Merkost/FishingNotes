@@ -48,12 +48,12 @@ import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.map.LocationState
-import com.mobileprism.fishing.ui.home.map.checkPermission
-import com.mobileprism.fishing.ui.home.map.getCurrentLocationFlow
+import com.mobileprism.fishing.ui.home.map.checkLocationPermissions
 import com.mobileprism.fishing.ui.home.map.locationPermissionsList
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.theme.customColors
+import com.mobileprism.fishing.utils.location.LocationManager
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toDayOfWeek
 import com.mobileprism.fishing.utils.time.toDayOfWeekAndDate
@@ -81,11 +81,12 @@ fun WeatherScreen(
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
 
     val selectedPlace by viewModel.selectedPlace.collectAsState()
+    val locationManager: LocationManager = get()
 
     LaunchedEffect(permissionsState.allPermissionsGranted) {
-        checkPermission(context)
+        checkLocationPermissions(context)
         if (permissionsState.allPermissionsGranted) {
-            getCurrentLocationFlow(context, permissionsState).collect { locationState ->
+            locationManager.getCurrentLocationFlow().collect { locationState ->
                 if (locationState is LocationState.LocationGranted) {
                     val newLocation = createCurrentPlaceItem(locationState.location, context)
                     viewModel.locationGranted(newLocation)
@@ -101,7 +102,7 @@ fun WeatherScreen(
         topBar = {
             val elevation =
                 animateDpAsState(targetValue = if (scrollState.value > 0) 4.dp else 0.dp)
-            if (checkPermission(context) && viewModel.markersList.isNotEmpty()) {
+            if (checkLocationPermissions(context) && viewModel.markersList.isNotEmpty()) {
                 viewModel.setSelectedPlace(viewModel.markersList.first())
             }
 

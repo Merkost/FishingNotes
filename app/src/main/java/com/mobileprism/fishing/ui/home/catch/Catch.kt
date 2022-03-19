@@ -145,7 +145,7 @@ fun CatchTopBar(navController: NavController, catch: UserCatch, onDeleteCatch: (
     ) {
         IconButton(
             modifier = Modifier.padding(horizontal = 4.dp),
-            onClick = onDeleteCatch
+            onClick = { menuOpened = true }
         ) {
             Icon(imageVector = Icons.Outlined.MoreVert, Icons.Outlined.MoreVert.name)
         }

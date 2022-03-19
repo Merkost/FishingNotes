@@ -50,9 +50,11 @@ import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
+import com.mobileprism.fishing.ui.MainActivity
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
+import com.mobileprism.fishing.utils.location.LocationManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
@@ -93,25 +95,6 @@ fun MapScreen(
 
     val pointerState: MutableState<PointerState> = remember {
         mutableStateOf(PointerState.HideMarker)
-    }
-
-    val currentLocationFlow = remember(permissionsState.allPermissionsGranted) {
-        getCurrentLocationFlow(context, permissionsState)
-    }
-
-    LaunchedEffect(currentLocationFlow) {
-        currentLocationFlow.collect { currentLocationState ->
-            when (currentLocationState) {
-                is LocationState.LocationGranted -> {
-                    viewModel.locationGranted(currentLocationState.location)
-                }
-                is LocationState.GpsNotEnabled -> {
-                    checkGPSEnabled(context) //{ currentLocationFlow.collectAsState() }
-                }
-                LocationState.LocationNotGranted -> {}
-                LocationState.NoPermission -> {}
-            }
-        }
     }
 
     BackPressHandler(
@@ -305,7 +288,7 @@ fun onMapSettingsClicked(
     }
 }
 
-@SuppressLint("PotentialBehaviorOverride")
+@SuppressLint("PotentialBehaviorOverride", "MissingPermission")
 @ExperimentalAnimationApi
 @ExperimentalCoroutinesApi
 @ExperimentalPermissionsApi
@@ -416,7 +399,7 @@ fun MapLayout(
 
     LaunchedEffect(map, permissionsState.allPermissionsGranted) {
         val googleMap = map.awaitMap()
-        checkPermission(context)
+        checkLocationPermissions(context)
         googleMap.isMyLocationEnabled = permissionsState.allPermissionsGranted
         isMapVisible = true
     }
@@ -490,7 +473,7 @@ fun LocationPermissionDialog(
             }
         },
         permissionsNotAvailableContent = { onCloseCallback(); SnackbarManager.showMessage(R.string.location_permission_denied) })
-    { checkPermission(context); }
+    { checkLocationPermissions(context); }
 }
 
 @ExperimentalMaterialApi
@@ -549,7 +532,7 @@ fun MapFab(
             onClick = onClick,
             onLongPress = {
                 if (state == MapUiState.NormalMode && useFastFabAdd) {
-                    if (!checkPermission(context)) {
+                    if (!checkLocationPermissions(context)) {
                         Toast.makeText(context, adding_place, Toast.LENGTH_SHORT).show()
                         onLongPress()
                     } else Toast.makeText(context, permissions_required, Toast.LENGTH_SHORT)

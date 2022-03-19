@@ -150,26 +150,6 @@ fun moveCameraToLocation(
     }
 }
 
-fun setCameraBearing(
-    coroutineScope: CoroutineScope,
-    map: MapView,
-    location: LatLng,
-    zoom: Float = DEFAULT_ZOOM
-) {
-    coroutineScope.launch {
-        val googleMap = map.awaitMap()
-        googleMap.animateCamera(
-            CameraUpdateFactory.newCameraPosition(
-                CameraPosition.Builder()
-                    .zoom(zoom)
-                    .target(location)
-                    .bearing(0f)
-                    .build()
-            )
-        )
-    }
-}
-
 fun setCameraPosition(
     coroutineScope: CoroutineScope,
     map: MapView,
@@ -188,16 +168,11 @@ fun setCameraPosition(
                     .bearing(bearing)
                     .build()
             )
-            /*CameraUpdateFactory.newLatLngZoom(
-                location,
-                zoom
-            )*/
         )
     }
 }
 
-
-fun checkPermission(context: Context): Boolean {
+fun checkLocationPermissions(context: Context): Boolean {
     return ActivityCompat.checkSelfPermission(
         context,
         Manifest.permission.ACCESS_FINE_LOCATION
@@ -221,127 +196,6 @@ fun getMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
     }
 
 
-@ExperimentalCoroutinesApi
-@ExperimentalPermissionsApi
-fun getCurrentLocationFlow(
-    context: Context,
-    permissionsState: MultiplePermissionsState,
-) = callbackFlow {
-
-    var previousCoordinates = LatLng(0.0, 0.0)
-
-    val fusedLocationProviderClient =
-        LocationServices.getFusedLocationProviderClient(context)
-
-    checkPermission(context)
-    val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
-    when {
-        manager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-            .not() -> trySend(LocationState.GpsNotEnabled)
-        permissionsState.allPermissionsGranted -> {
-            val locationResult = fusedLocationProviderClient.lastLocation
-            locationResult.addOnSuccessListener { task ->
-                if (task != null) {
-                    val newCoordinates = LatLng(task.latitude, task.longitude)
-                    if (isCoordinatesFar(previousCoordinates, newCoordinates)) {
-                        try {
-                            trySend(
-                                LocationState.LocationGranted(
-                                    location = newCoordinates
-                                )
-                            )
-                            previousCoordinates = newCoordinates
-                        } catch (e: Exception) {
-                            Log.d("MAP", "GPS is off")
-                            Toast.makeText(
-                                context,
-                                R.string.cant_get_current_location,
-                                Toast.LENGTH_SHORT
-                            )
-                                .show()
-                        }
-                    }
-                }
-
-
-            }
-        }
-        else -> {
-            trySend(LocationState.NoPermission)
-        }
-    }
-
-    awaitClose { }
-}
-
-fun checkGPSEnabled(context: Context, onGpsEnabled: () -> Unit = {}) {
-    val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    if (manager.isProviderEnabled(LocationManager.GPS_PROVIDER).not()) {
-        SnackbarManager.showMessage(R.string.gps_is_off)
-        turnOnGPS(context, onGpsEnabled)
-    } else onGpsEnabled()
-}
-
-private fun turnOnGPS(context: Context, onGpsEnabled: () -> Unit = {}) {
-    val request = LocationRequest.create().apply {
-        interval = 8000
-        fastestInterval = 5000
-        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-    }
-    val builder = LocationSettingsRequest.Builder().addLocationRequest(request)
-    val client: SettingsClient = LocationServices.getSettingsClient(context as MainActivity)
-    val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
-    task.addOnFailureListener { exception ->
-        if (exception is ResolvableApiException) {
-            // Location settings are not satisfied, but this can be fixed
-            // by showing the user a dialog.
-            try {
-                // Show the dialog by calling startResolutionForResult(),
-                // and check the result in onActivityResult().
-                exception.startResolutionForResult(
-                    context as MainActivity,
-                    /*REQUEST_CHECK_SETTINGS*/12345
-                )
-            } catch (sendEx: IntentSender.SendIntentException) {
-                // Ignore the error.
-            }
-        }
-    }.addOnSuccessListener {
-
-        onGpsEnabled()
-    }
-}
-
-@ExperimentalPermissionsApi
-fun getCurrentLocation(
-    context: Context,
-    permissionsState: MultiplePermissionsState,
-) = runBlocking {
-    val fusedLocationProviderClient =
-        LocationServices.getFusedLocationProviderClient(context)
-
-    checkPermission(context)
-
-    val result = mutableStateOf(LatLng(0.0, 0.0))
-
-    if (permissionsState.allPermissionsGranted) {
-        val locationResult = fusedLocationProviderClient.lastLocation
-        locationResult.addOnSuccessListener { task ->
-
-            try {
-                result.value = LatLng(task.latitude, task.longitude)
-
-            } catch (e: Exception) {
-                Log.d("MAP", "Unable to get location")
-                Toast.makeText(context, R.string.cant_get_current_location, Toast.LENGTH_SHORT)
-                    .show()
-            }
-
-        }
-    }
-    result
-}
 
 fun startMapsActivityForNavigation(mapMarker: UserMapMarker, context: Context) {
     val uri = String.format(

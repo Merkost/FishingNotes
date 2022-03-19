@@ -34,7 +34,7 @@ import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.map.GrantLocationPermissionsDialog
 import com.mobileprism.fishing.ui.home.map.LocationPermissionDialog
-import com.mobileprism.fishing.ui.home.map.checkPermission
+import com.mobileprism.fishing.ui.home.map.checkLocationPermissions
 import com.mobileprism.fishing.ui.home.map.locationPermissionsList
 import com.mobileprism.fishing.ui.home.views.DefaultAppBar
 import com.mobileprism.fishing.ui.home.views.DefaultCard
@@ -482,7 +482,7 @@ fun GetLocationPermission(closeDialog: () -> Unit) {
             )
         },
         permissionsNotAvailableContent = { SnackbarManager.showMessage(R.string.location_permission_denied) })
-    { checkPermission(context) }
+    { checkLocationPermissions(context) }
 }
 
 @Composable
