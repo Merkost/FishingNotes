@@ -17,11 +17,9 @@ import com.mobileprism.fishing.model.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.UiState
-import com.mobileprism.fishing.ui.home.map.CameraMoveState
-import com.mobileprism.fishing.ui.home.map.DEFAULT_ZOOM
-import com.mobileprism.fishing.ui.home.map.MapTypes
-import com.mobileprism.fishing.ui.home.map.MapUiState
+import com.mobileprism.fishing.ui.home.map.*
 import com.mobileprism.fishing.ui.use_cases.*
+import com.mobileprism.fishing.utils.location.LocationManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

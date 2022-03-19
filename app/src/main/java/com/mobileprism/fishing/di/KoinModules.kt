@@ -2,6 +2,7 @@ package com.mobileprism.fishing.di
 
 import android.content.Context
 import android.location.Geocoder
+import android.os.Build
 import com.android.billingclient.api.BillingClient
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -15,6 +16,8 @@ import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.use_cases.*
 import com.mobileprism.fishing.ui.viewmodels.*
 import com.mobileprism.fishing.utils.Logger
+import com.mobileprism.fishing.utils.location.LocationManager
+import com.mobileprism.fishing.utils.location.LocationManagerImpl
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionManagerImpl
 import com.mobileprism.fishing.viewmodels.MainViewModel
@@ -50,8 +53,8 @@ val settingsModule = module {
 }
 
 val mainModule = module {
-    viewModel { MainViewModel(get()) }
-    viewModel { LoginViewModel(get()) }
+    viewModel { MainViewModel(repository = get()) }
+    viewModel { LoginViewModel(repository = get()) }
     viewModel {
         MapViewModel(
             repository = get(),
@@ -62,12 +65,17 @@ val mainModule = module {
             getFishActivityUseCase = get(),
             geocoder = get(),
             userPreferences = get(),
+            locationManager = get()
         )
     }
 
 //    viewModel { NewCatchViewModel(get(), get(), get()) }
 
-    viewModel { UserViewModel(get(), get()) }
+    viewModel { UserViewModel(
+        userRepository = get(),
+        repository = get(),
+        getUserCatchUseCase = get()
+    ) }
     viewModel { parameters ->
         UserCatchViewModel(
             userCatch = parameters.get(),
@@ -76,28 +84,24 @@ val mainModule = module {
             getMapMarkerById = get(),
         )
     }
-    viewModel { WeatherViewModel(get(), get()) }
-    viewModel { UserPlaceViewModel(get(), get()) }
-    viewModel { UserCatchesViewModel(get()) }
-    viewModel { UserPlacesViewModel(get()) }
-    viewModel { parameters -> NewCatchMasterViewModel(parameters.get(), get(), get(), get()) }
+    viewModel { WeatherViewModel(weatherRepository = get(), repository = get()) }
+    viewModel { UserPlaceViewModel(
+        markersRepo = get(),
+        catchesRepo = get(),
+        saveNewUserMarkerNoteUseCase = get(),
+        deleteUserMarkerNoteUseCase = get()
+    ) }
+    viewModel { UserCatchesViewModel(userCatchesUseCase = get()) }
+    viewModel { UserPlacesViewModel(repository = get()) }
+    viewModel { parameters -> NewCatchMasterViewModel(
+        placeState = parameters.get(),
+        getNewCatchWeatherUseCase = get(),
+        saveNewCatchUseCase = get(),
+        getUserPlacesListUseCase = get()
+    ) }
 }
 
-val useCasesModule = module {
-    factory { GetUserCatchesUseCase(get()) }
-    factory { GetNewCatchWeatherUseCase(get(), get()) }
-    factory { SaveNewCatchUseCase(get(), get(), get()) }
-    factory { GetUserPlacesUseCase(get()) }
-    factory { GetUserPlacesListUseCase(get()) }
-    factory { AddNewPlaceUseCase(get()) }
-    factory { GetFishActivityUseCase(get()) }
-    factory { GetFreeWeatherUseCase(get()) }
-    factory { DeleteUserCatchUseCase(get(), get()) }
-    factory { GetMapMarkerByIdUseCase(get()) }
-    factory { SavePhotosUseCase(get()) }
-    factory { UpdateUserCatchUseCase(get(), get()) }
-    //factory { SubscribeOnUserCatchStateUseCase(get()) }
-}
+
 
 fun createGeocoder(androidContext: Context): Geocoder {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

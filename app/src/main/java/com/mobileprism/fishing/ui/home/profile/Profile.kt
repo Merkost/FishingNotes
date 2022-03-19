@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -35,10 +36,8 @@ import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.views.SecondaryText
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.viewmodels.UserViewModel
-import com.mobileprism.fishing.model.entity.common.User
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import kotlinx.coroutines.InternalCoroutinesApi
-import me.vponomarenko.compose.shimmer.shimmer
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
@@ -233,6 +232,7 @@ fun PlacesNumber(modifier: Modifier = Modifier, userPlacesNum: Int?) {
             text = userPlacesNum?.toString() ?: "",
         )
     }
+
 }
 
 @Composable

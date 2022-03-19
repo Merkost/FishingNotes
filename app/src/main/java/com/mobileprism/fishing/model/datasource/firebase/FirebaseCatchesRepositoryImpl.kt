@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.model.datasource.firebase
 
+import android.net.Uri
 import android.util.Log
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
@@ -8,17 +9,15 @@ import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.entity.common.ContentStateOld
+import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserCatch
-import com.mobileprism.fishing.model.repository.app.CatchesRepository
+import com.mobileprism.fishing.model.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class FirebaseCatchesRepositoryImpl(
@@ -197,6 +196,14 @@ class FirebaseCatchesRepositoryImpl(
         data: Map<String, Any>
     ) {
         dbCollections.getUserCatchesCollection(markerId).document(catchId).update(data)
+    }
+
+    override suspend fun updateUserCatchPhotos(
+        markerId: String,
+        catchId: String,
+        newPhotos: List<Uri>
+    ): StateFlow<Progress> {
+        TODO("Not yet implemented")
     }
 
     override fun subscribeOnUserCatchState(markerId: String, catchId: String) =

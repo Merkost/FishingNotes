@@ -4,7 +4,7 @@ import com.mobileprism.fishing.domain.use_cases.SavePhotosUseCase
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.raw.NewCatchWeather
-import com.mobileprism.fishing.model.repository.app.CatchesRepository
+import com.mobileprism.fishing.model.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.ui.viewmodels.*
 import com.mobileprism.fishing.utils.getCurrentUserId
 import com.mobileprism.fishing.utils.getNewCatchId

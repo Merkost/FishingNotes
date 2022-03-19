@@ -335,20 +335,14 @@ fun FullSizePhotoView(
             contentScale = ContentScale.Crop,
             filterQuality = FilterQuality.Medium,
             loading = {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
-        ) /*{ state ->
-            if (state is AsyncImagePainter.State.Loading) {
                 CircularProgressIndicator(
                     modifier = Modifier
                         .size(64.dp)
                         .padding(64.dp)
                         .align(Alignment.Center)
                 )
-            } else {
-                AsyncImageContent()
             }
-        }*/// FIXME:  
+        )
         if (deleteEnabled) {
             Surface(
                 color = Color.LightGray.copy(alpha = 0.5f),
@@ -395,7 +389,8 @@ fun ItemCatchPhotoView(
         contentScale = ContentScale.Crop,
         filterQuality = FilterQuality.Medium,
         loading = {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center)
+                .padding(32.dp))
         }
     )
 

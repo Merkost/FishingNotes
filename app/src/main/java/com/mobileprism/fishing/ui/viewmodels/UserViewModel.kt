@@ -2,6 +2,7 @@ package com.mobileprism.fishing.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mobileprism.fishing.ui.use_cases.UpdateUserCatchUseCase
 import com.mobileprism.fishing.ui.home.profile.findBestCatch
 import com.mobileprism.fishing.ui.home.profile.findFavoritePlace
 import com.mobileprism.fishing.model.entity.common.User
@@ -9,13 +10,16 @@ import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.repository.UserRepository
 import com.mobileprism.fishing.model.repository.app.OfflineRepository
+import com.mobileprism.fishing.ui.use_cases.GetUserCatchesUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.launch
 
 class UserViewModel(
     private val userRepository: UserRepository,
-    private val repository: OfflineRepository
+    private val repository: OfflineRepository,
+    private val getUserCatchUseCase: GetUserCatchesUseCase
 ) : ViewModel() {
 
     private val _currentUser = MutableStateFlow<User?>(null)
@@ -60,10 +64,19 @@ class UserViewModel(
     }
 
     private fun getUserCatches() = viewModelScope.launch {
-        repository.getAllUserCatchesList().collect {
+        // TODO: fix
+        getUserCatchUseCase().collect {
             _currentCatches.value = it
             _bestCatch.value = findBestCatch(it)
         }
+
+        /*val list = repository.getAllUserCatchesList().single()
+        list.!ifEmpty {
+
+        } ?: run {
+            _currentCatches.value = list
+        }
+        */
     }
 
     suspend fun logoutCurrentUser() = viewModelScope.run {

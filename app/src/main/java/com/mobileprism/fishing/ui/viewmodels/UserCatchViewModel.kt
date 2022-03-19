@@ -3,9 +3,9 @@ package com.mobileprism.fishing.ui.viewmodels
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mobileprism.fishing.domain.use_cases.DeleteUserCatchUseCase
+import com.mobileprism.fishing.ui.use_cases.DeleteUserCatchUseCase
 import com.mobileprism.fishing.domain.use_cases.GetMapMarkerByIdUseCase
-import com.mobileprism.fishing.domain.use_cases.UpdateUserCatchUseCase
+import com.mobileprism.fishing.ui.use_cases.UpdateUserCatchUseCase
 import com.mobileprism.fishing.model.entity.common.Note
 import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserCatch

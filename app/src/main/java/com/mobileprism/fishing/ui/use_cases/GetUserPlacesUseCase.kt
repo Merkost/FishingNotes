@@ -10,8 +10,18 @@ import kotlinx.coroutines.flow.*
 class GetUserPlacesUseCase(private val repository: MarkersRepository) {
 
     suspend operator fun invoke() = channelFlow<ContentState<MapMarker>> {
-        repository.getAllUserMarkers().collectLatest {
-            send(it)
+        repository.getAllUserMarkers().collect {
+            it.fold(
+                onAdded = {
+
+                },
+                onDeleted = {
+
+                },
+                onModified = {
+
+                }
+            )
         }
     }
 }
