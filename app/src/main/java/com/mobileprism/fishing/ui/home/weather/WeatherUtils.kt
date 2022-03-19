@@ -55,6 +55,7 @@ enum class PressureValues(override val stringRes: Int) : StringOperation {
     Bar(R.string.pressure_bar),
     mmHg(R.string.pressure_mm),
     Psi(R.string.pressure_psi);
+    // TODO: add hpa
 
     fun getPressure(hPa: Int): String {
         return when (this) {

@@ -30,13 +30,13 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.ui.home.advertising.showInterstitialAd
+import com.mobileprism.fishing.model.entity.common.Note
 import com.mobileprism.fishing.ui.home.new_catch.FishAmountAndWeightView
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.viewmodels.UserCatchViewModel
-import com.mobileprism.fishing.model.entity.common.Note
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
 import com.mobileprism.fishing.utils.showToast
+import java.util.*
 
 
 sealed class BottomSheetCatchScreen() {
@@ -67,10 +67,8 @@ fun CatchModalBottomSheetContent(
 
         BottomSheetCatchScreen.EditNoteScreen -> {
             EditNoteDialog(
-                note = viewModel.catch.value?.note ?: Note(),
-                onSaveNote = { note ->
-                    viewModel.updateCatch(data = mapOf("note" to note))
-                },
+                note = viewModel.catch.collectAsState().value.note,
+                onSaveNote = { note -> viewModel.updateNote(note) },
                 onCloseDialog = onCloseBottomSheet
             )
 
@@ -78,15 +76,15 @@ fun CatchModalBottomSheetContent(
 
         BottomSheetCatchScreen.EditPhotosScreen -> {
             AddPhotoDialog(
-                photos = viewModel.catch.value?.downloadPhotoLinks?.map { it.toUri() } ?: listOf(),
+                photos = viewModel.catch.collectAsState().value.downloadPhotoLinks.map { it.toUri() },
                 onSavePhotosClick = { newPhotos ->
                     viewModel.updateCatchPhotos(newPhotos)
-                    if (newPhotos.find { !it.toString().startsWith("http") } != null) {
-                        showInterstitialAd(
-                            context = context,
-                            onAdLoaded = { }
-                        )
-                    }
+//                    if (newPhotos.find { !it.toString().startsWith("http") } != null) {
+//                        showInterstitialAd(
+//                            context = context,
+//                            onAdLoaded = { }
+//                        )
+//                    }
                 },
                 onCloseBottomSheet = onCloseBottomSheet
             )
@@ -114,7 +112,7 @@ fun FishTypeAmountAndWeightDialog(
     val fishWeight = remember { mutableStateOf("") }
 
     LaunchedEffect(key1 = viewModel.catch.collectAsState().value) {
-        viewModel.catch.value?.let {
+        viewModel.catch.value.let {
             fishType.value = it.fishType
             fishAmount.value = it.fishAmount.toString()
             fishWeight.value = it.fishWeight.toString()
@@ -167,12 +165,10 @@ fun FishTypeAmountAndWeightDialog(
             },
             text = stringResource(id = R.string.save),
             onClick = {
-                viewModel.updateCatch(
-                    data = mapOf(
-                        "fishType" to fishType.value,
-                        "fishAmount" to fishAmount.value.toInt(),
-                        "fishWeight" to fishWeight.value.toDouble()
-                    )
+                viewModel.updateCatchInfo(
+                    fishType = fishType.value,
+                    fishAmount = fishAmount.value.toInt(),
+                    fishWeight = fishWeight.value.toDouble()
                 )
                 onCloseBottomSheet()
             }
@@ -201,7 +197,7 @@ fun EditWayOfFishingDialog(
     val lure = remember { mutableStateOf("") }
 
     LaunchedEffect(key1 = viewModel.catch.collectAsState().value) {
-        viewModel.catch.value?.let {
+        viewModel.catch.value.let {
             rod.value = it.fishingRodType
             bait.value = it.fishingBait
             lure.value = it.fishingLure
@@ -267,12 +263,10 @@ fun EditWayOfFishingDialog(
             },
             text = stringResource(id = R.string.save),
             onClick = {
-                viewModel.updateCatch(
-                    data = mapOf(
-                        "fishingRodType" to rod.value,
-                        "fishingBait" to bait.value,
-                        "fishingLure" to lure.value
-                    )
+                viewModel.updateWayOfFishing(
+                    fishingRodType = rod.value,
+                    fishingLure = lure.value,
+                    fishingBait = bait.value
                 )
                 onCloseBottomSheet()
             }
@@ -317,8 +311,6 @@ fun EditNoteDialog(
         noteDateCreated.value = note.dateCreated
     }
 
-    val description = noteDescriptionState.value
-
     ConstraintLayout(
         modifier = Modifier
             .padding(16.dp)
@@ -357,10 +349,10 @@ fun EditNoteDialog(
             onClick = {
                 onSaveNote(
                     Note(
-                        noteId.value,
-                        noteTitle.value,
-                        noteDescriptionState.value,
-                        noteDateCreated.value
+                        id = noteId.value,
+                        title = noteTitle.value,
+                        description = noteDescriptionState.value,
+                        dateCreated = Date().time
                     )
                 )
                 onClose()

@@ -314,7 +314,7 @@
     <string name="thunderstorm_with_heavy_drizzle">Гроза с сильной моросью</string>
     <string name="snow">Снег</string>
     <string name="few_clouds">Небольшая облачность</string>
-    <string name="overcast_clouds">Облачно</string>
+    <string name="overcast_clouds">Сильная облачность</string>
     <string name="atmosphere">Atmosphere</string>
     <string name="rain">Дождь</string>
     <string name="light_rain">Слабый дождь</string>
@@ -325,5 +325,7 @@
     <string name="drizzle">Морось</string>
     <string name="add_new_place_error">Не удалось добавить место</string>
     <string name="new_note">Новая заметка</string>
+    <string name="broken_clouds">Облачность</string>
+    <string name="scattered_clouds">Рассеянная облачность</string>
 
 </resources>

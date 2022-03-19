@@ -1,16 +1,13 @@
 package com.mobileprism.fishing.ui.use_cases
 
-import android.net.Uri
+import com.mobileprism.fishing.domain.use_cases.SavePhotosUseCase
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.raw.NewCatchWeather
-import com.mobileprism.fishing.model.repository.PhotoStorage
-import com.mobileprism.fishing.model.repository.app.catches.CatchesRepository
+import com.mobileprism.fishing.model.repository.app.CatchesRepository
 import com.mobileprism.fishing.ui.viewmodels.*
-import com.mobileprism.fishing.utils.getCurrentUser
+import com.mobileprism.fishing.utils.getCurrentUserId
 import com.mobileprism.fishing.utils.getNewCatchId
-import com.mobileprism.fishing.utils.network.ConnectionManager
-import com.mobileprism.fishing.utils.network.ConnectionState
 import com.mobileprism.fishing.utils.toStandardNumber
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
@@ -18,9 +15,7 @@ import kotlinx.coroutines.flow.take
 
 class SaveNewCatchUseCase(
     private val catchesRepository: CatchesRepository,
-    private val catchesRepositoryOffline: CatchesRepository,
-    private val photosRepository: PhotoStorage,
-    private val connectionManager: ConnectionManager,
+    private val savePhotos: SavePhotosUseCase,
     private val weatherPreferences: WeatherPreferences
 ) {
 
@@ -34,19 +29,10 @@ class SaveNewCatchUseCase(
             photos = savePhotos(data.photos)
         )
 
-        val repository = if (connectionManager.getConnectionState() is ConnectionState.Available) {
-            catchesRepository
-        } else {
-            catchesRepositoryOffline
-        }
-
         data.placeAndTimeState.place?.let { it ->
-            repository.addNewCatch(markerId = it.id, newCatch = userCatch).collect { trySend(it) }
+            catchesRepository.addNewCatch(markerId = it.id, newCatch = userCatch)
+                .collect { trySend(it) }
         }
-    }
-
-    private suspend fun savePhotos(photos: List<Uri>): List<String> {
-        return photosRepository.uploadPhotos(photos)
     }
 
     private suspend fun mapWeatherValues(weatherState: CatchWeatherState): NewCatchWeather {
@@ -60,8 +46,8 @@ class SaveNewCatchUseCase(
             temperatureInC = tempUnits.getDefaultTemperature(
                 weatherState.temperature.toStandardNumber().toFloat()
             ),
-            pressureInMmhg = pressureUnits.getDefaultPressure(
-                weatherState.pressure.toStandardNumber().toFloat()
+            pressureInMmhg = pressureUnits.getPressureInt(
+                weatherState.pressure.toStandardNumber().toInt()
             ),
             windInMs = windUnits.getDefaultWindSpeed(
                 weatherState.windSpeed.toStandardNumber().toDouble()
@@ -79,8 +65,7 @@ class SaveNewCatchUseCase(
         photos: List<String>
     ) = UserCatch(
         id = getNewCatchId(),
-        userId = getCurrentUser()!!.uid,
-        // FIXME:
+        userId = getCurrentUserId(),
         description = catchInfoState.note,
         date = placeAndTimeState.date,
         fishType = fishAndWeightState.fish,

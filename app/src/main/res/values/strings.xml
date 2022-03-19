@@ -326,6 +326,8 @@
     <string name="drizzle">Морось</string>
     <string name="choose_weather">Выберите погоду:</string>
     <string name="add_new_place_error">Не удалось добавить место</string>
+    <string name="broken_clouds">Облачность</string>
+    <string name="scattered_clouds">Рассеянная облачность</string>
     <string name="new_note">Новая заметка</string>
 
 

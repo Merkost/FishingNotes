@@ -8,7 +8,8 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.MainActivity
-import com.mobileprism.fishing.ui.home.new_catch.Constants
+
+const val TAG = "FISHING"
 
 fun showInterstitialAd(context: Context, onAdLoaded: () -> Unit) {
     InterstitialAd.load(
@@ -26,7 +27,7 @@ fun createInterstitialAdLoadCallback(
     object : InterstitialAdLoadCallback() {
         var mInterstitialAd: InterstitialAd? = null
         override fun onAdLoaded(interstitialAd: InterstitialAd) {
-            Log.d(Constants.TAG, "Ad was loaded.")
+            Log.d(TAG, "Ad was loaded.")
             mInterstitialAd = interstitialAd
             mInterstitialAd?.show(context as MainActivity)
             onAdLoaded()
@@ -34,7 +35,7 @@ fun createInterstitialAdLoadCallback(
         }
 
         override fun onAdFailedToLoad(adError: LoadAdError) {
-            Log.d(Constants.TAG, adError.message)
+            Log.d(TAG, adError.message)
             mInterstitialAd = null
             onAdLoaded()
             super.onAdFailedToLoad(adError)
