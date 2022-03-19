@@ -1,7 +1,9 @@
 package com.mobileprism.fishing.di
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Geocoder
+import android.os.Build
 import com.android.billingclient.api.BillingClient
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -51,21 +53,30 @@ val settingsModule = module {
 val mainModule = module {
     viewModel { MainViewModel(get()) }
     viewModel { LoginViewModel(get()) }
-    viewModel { MapViewModel(
-        repository = get(),
-        getUserPlacesUseCase = get(),
-        getUserPlacesListUseCase = get(),
-        addNewPlaceUseCase = get(),
-        getFreeWeatherUseCase = get(),
-        getFishActivityUseCase = get(),
-        geocoder = get(),
-        userPreferences = get(),
-    ) }
+    viewModel {
+        MapViewModel(
+            repository = get(),
+            getUserPlacesUseCase = get(),
+            getUserPlacesListUseCase = get(),
+            addNewPlaceUseCase = get(),
+            getFreeWeatherUseCase = get(),
+            getFishActivityUseCase = get(),
+            geocoder = get(),
+            userPreferences = get(),
+        )
+    }
 
 //    viewModel { NewCatchViewModel(get(), get(), get()) }
 
     viewModel { UserViewModel(get(), get()) }
-    viewModel { parameters -> UserCatchViewModel(parameters.get(), get(), get(), get(), get()) }
+    viewModel { parameters ->
+        UserCatchViewModel(
+            userCatch = parameters.get(),
+            updateUserCatch = get(),
+            deleteUserCatch = get(),
+            getMapMarkerById = get(),
+        )
+    }
     viewModel { WeatherViewModel(get(), get()) }
     viewModel { UserPlaceViewModel(get(), get()) }
     viewModel { UserCatchesViewModel(get()) }
@@ -86,9 +97,13 @@ val useCasesModule = module {
     factory { GetMapMarkerByIdUseCase(get()) }
     factory { SavePhotosUseCase(get()) }
     factory { UpdateUserCatchUseCase(get(), get()) }
-    factory { SubscribeOnUserCatchStateUseCase(get()) }
+    //factory { SubscribeOnUserCatchStateUseCase(get()) }
 }
 
 fun createGeocoder(androidContext: Context): Geocoder {
-    return Geocoder(androidContext, androidContext.resources.configuration.locales[0])
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        Geocoder(androidContext, androidContext.resources.configuration.locales[0])
+    } else {
+        Geocoder(androidContext)
+    }
 }
