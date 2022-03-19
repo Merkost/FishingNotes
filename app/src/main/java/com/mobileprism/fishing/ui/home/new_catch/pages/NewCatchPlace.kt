@@ -27,6 +27,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
 import com.mobileprism.fishing.ui.home.HomeSections
@@ -140,27 +141,24 @@ fun setMarkerListListener(markersList: NewCatchPlacesState, navController: NavCo
 fun CatchOnMapSelectInfoDialog(onDismiss: () -> Unit) {
     val context = LocalContext.current
 
-    /*DefaultDialog(
+    DefaultDialog(
         secondaryText = stringResource(id = R.string.new_catch_place_on_map_tutorial),
         onDismiss = onDismiss,
         content = {
             //todo: gif tutorial
-                AsyncImage(
+                SubcomposeAsyncImage(
                     model = R.drawable.add_catch_from_map_tutorial,
                     contentDescription = null,
                     modifier = Modifier
                         .clip(RoundedCornerShape(5.dp))
                         .size(250.dp),
                     contentScale = ContentScale.None,
-                    filterQuality = FilterQuality.Low
-                ) { state ->
-                    if (state is AsyncImagePainter.State.Loading) {
+                    filterQuality = FilterQuality.Low,
+                    loading = {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    } else {
-                        AsyncIma
                     }
-                }
+                )
         },
-    )*/
+    )
 }
 

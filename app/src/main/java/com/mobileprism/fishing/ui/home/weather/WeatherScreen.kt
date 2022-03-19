@@ -54,8 +54,6 @@ import com.mobileprism.fishing.ui.home.map.locationPermissionsList
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.theme.customColors
-import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
-import com.mobileprism.fishing.utils.isLocationsTooFar
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toDayOfWeek
 import com.mobileprism.fishing.utils.time.toDayOfWeekAndDate
@@ -360,7 +358,7 @@ fun HourlyWeatherItem(
         ) {
             PrimaryText(
                 modifier = childModifier,
-                text = windSpeedUnit.getWindSpeedInt(forecast.windSpeed.toDouble())
+                text = windSpeedUnit.getDefaultWindSpeed(forecast.windSpeed.toDouble())
                         + " " + stringResource(windSpeedUnit.stringRes),
                 textColor = color
             )

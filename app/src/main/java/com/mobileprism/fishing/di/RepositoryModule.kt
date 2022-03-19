@@ -10,6 +10,7 @@ import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.repository.PhotoStorage
 import com.mobileprism.fishing.model.repository.UserRepository
 import com.mobileprism.fishing.model.repository.app.*
+import com.mobileprism.fishing.model.repository.app.catches.CatchesRepository
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext

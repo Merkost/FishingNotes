@@ -74,6 +74,9 @@ enum class PressureValues(override val stringRes: Int) : StringOperation {
         }
     }
 
+    /**
+     * Used in WeatherScreen.kt for pressure chart
+     */
     fun getPressureInt(hPa: Int): Int {
         return when (this) {
             Pa -> (hPa * 100)
@@ -97,14 +100,13 @@ enum class TemperatureValues(override val stringRes: Int) : StringOperation {
         }
     }
 
-    fun getCelciusTemperature(temperaturInC: Float): Int {
+    fun getDefaultTemperature(temperature: Float): Int {
         return when (this) {
-            C -> temperaturInC.toInt()
-            F -> ((temperaturInC - 32) * (5 / 9)).toInt()
-            K -> (temperaturInC - 273.15).toInt()
+            C -> temperature.toInt()
+            F -> ((temperature - 32) * (5 / 9)).toInt()
+            K -> (temperature - 273.15).toInt()
         }
     }
-
 }
 
 enum class WindSpeedValues(override val stringRes: Int) : StringOperation {
@@ -126,7 +128,7 @@ enum class WindSpeedValues(override val stringRes: Int) : StringOperation {
         )
     }
 
-    fun getWindSpeedInt(windSpeed: Double): String {
+    fun getDefaultWindSpeed(windSpeed: Double): String {
         return (when (this) {
             metersps -> windSpeed
             knots -> (windSpeed * 1.9438444924574)

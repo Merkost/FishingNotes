@@ -5,7 +5,7 @@ import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.raw.NewCatchWeather
 import com.mobileprism.fishing.model.repository.PhotoStorage
-import com.mobileprism.fishing.model.repository.app.CatchesRepository
+import com.mobileprism.fishing.model.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.ui.viewmodels.*
 import com.mobileprism.fishing.utils.getCurrentUser
 import com.mobileprism.fishing.utils.getNewCatchId
@@ -57,13 +57,13 @@ class SaveNewCatchUseCase(
         return NewCatchWeather(
             weatherDescription = weatherState.primary.replaceFirstChar { it.uppercase() },
             icon = weatherState.icon,
-            temperatureInC = tempUnits.getCelciusTemperature(
+            temperatureInC = tempUnits.getDefaultTemperature(
                 weatherState.temperature.toStandardNumber().toFloat()
             ),
             pressureInMmhg = pressureUnits.getDefaultPressure(
                 weatherState.pressure.toStandardNumber().toFloat()
             ),
-            windInMs = windUnits.getWindSpeedInt(
+            windInMs = windUnits.getDefaultWindSpeed(
                 weatherState.windSpeed.toStandardNumber().toDouble()
             ).toInt(),
             windDirInDeg = weatherState.windDeg.toFloat(),

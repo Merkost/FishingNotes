@@ -3,6 +3,7 @@ package com.mobileprism.fishing.utils
 import android.content.Context
 import android.widget.Toast
 import com.google.android.gms.maps.model.LatLng
+import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.entity.weather.Hourly
 import com.mobileprism.fishing.ui.home.map.DEFAULT_ZOOM
@@ -77,6 +78,10 @@ fun getClosestHourIndex(list: List<Hourly>, date: Long): Int {
 
 fun showToast(context: Context, text: String) {
     Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+}
+
+fun showErrorToast(context: Context, text: String? = null) {
+    Toast.makeText(context, text ?: context.getString(R.string.error_occured), Toast.LENGTH_SHORT).show()
 }
 
 fun getCameraPosition(latLng: LatLng): Pair<LatLng, Float> {

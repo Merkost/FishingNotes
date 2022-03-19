@@ -202,7 +202,7 @@ fun CatchItemView(
                 text = "${catch.fishWeight} ${stringResource(id = R.string.kg)}"
             )
 
-            //TODO: if place is hidden
+            //TODO: if place is hidden setting preference
             if (showPlace) {
                 Icon(
                     modifier = Modifier

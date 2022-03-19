@@ -12,7 +12,7 @@ import com.mobileprism.fishing.model.entity.common.ContentStateOld
 import com.mobileprism.fishing.model.entity.common.Progress
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.repository.PhotoStorage
-import com.mobileprism.fishing.model.repository.app.CatchesRepository
+import com.mobileprism.fishing.model.repository.app.catches.CatchesRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose

@@ -530,7 +530,7 @@ fun DailyWeatherValuesView(
                 absoluteLeft.linkTo(windIcon.absoluteRight, 2.dp)
                 absoluteRight.linkTo(windDeg.absoluteLeft, 2.dp)
             },
-            text = windSpeedUnit.getWindSpeedInt(forecast.windSpeed.toDouble())
+            text = windSpeedUnit.getDefaultWindSpeed(forecast.windSpeed.toDouble())
                     + " " + stringResource(windSpeedUnit.stringRes),
         )
         Icon(

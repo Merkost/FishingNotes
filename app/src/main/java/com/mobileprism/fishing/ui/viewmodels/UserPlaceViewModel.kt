@@ -10,7 +10,7 @@ import com.mobileprism.fishing.model.entity.common.LiteProgress
 import com.mobileprism.fishing.model.entity.common.Note
 import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.model.repository.app.CatchesRepository
+import com.mobileprism.fishing.model.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.ui.use_cases.notes.DeleteUserMarkerNoteUseCase
 import com.mobileprism.fishing.ui.use_cases.notes.SaveUserMarkerNoteUseCase
