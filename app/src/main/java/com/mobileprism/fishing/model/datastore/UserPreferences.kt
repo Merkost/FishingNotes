@@ -72,7 +72,7 @@ class UserPreferences(private val context: Context) {
                     preferences[LAST_MAP_LATITUDE] ?: 0.0,
                     preferences[LAST_MAP_LONGITUDE] ?: 0.0,
                 ),
-                preferences[LAST_MAP_ZOOM] ?: DEFAULT_ZOOM,
+                preferences[LAST_MAP_ZOOM] ?: 0f,
                 preferences[LAST_MAP_BEARING] ?: 0f,
                 )
         }
