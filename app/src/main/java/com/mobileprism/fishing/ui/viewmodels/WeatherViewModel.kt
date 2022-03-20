@@ -10,6 +10,7 @@ import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.repository.app.WeatherRepository
 import com.mobileprism.fishing.ui.home.map.LocationState
 import com.mobileprism.fishing.utils.isLocationsTooFar
+import com.mobileprism.fishing.utils.location.LocationManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,10 +18,9 @@ import kotlinx.coroutines.launch
 
 class WeatherViewModel(
     private val weatherRepository: WeatherRepository,
-    private val repository: MarkersRepository
+    private val repository: MarkersRepository,
+    private val locationManager: LocationManager,
 ) : ViewModel() {
-
-    private val locationState = MutableStateFlow<LocationState>(LocationState.LocationNotGranted)
 
     private val _weatherState =
         MutableStateFlow<BaseViewState<WeatherForecast>>(BaseViewState.Loading())
@@ -73,22 +73,19 @@ class WeatherViewModel(
     }
 
     fun locationGranted(newLocation: UserMapMarker) {
-        if (locationState.value !is LocationState.LocationGranted && markersList.isEmpty()) {
+        val oldLocation = markersList.find { it.id == newLocation.id }
 
-            val oldLocation = markersList.find { it.id == newLocation.id }
-
-            if (oldLocation != null) {
-                if (isLocationsTooFar(oldLocation, newLocation)) {
-                    markersList.remove(oldLocation)
-                    markersList.add(index = 0, element = newLocation)
-                }
-            } else {
+        if (oldLocation != null) {
+            if (isLocationsTooFar(oldLocation, newLocation)) {
+                markersList.remove(oldLocation)
                 markersList.add(index = 0, element = newLocation)
             }
+        } else {
+            markersList.add(index = 0, element = newLocation)
+        }
 
-            if (selectedPlace.value == null) {
-                setSelectedPlace(markersList.first())
-            }
+        if (selectedPlace.value == null) {
+            setSelectedPlace(markersList.first())
         }
     }
 

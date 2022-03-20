@@ -76,11 +76,10 @@ class LocationManagerImpl(private val context: Context) : LocationManager {
                 val locationResult = fusedLocationProviderClient.lastLocation.await()
                 try {
                     val newCoordinates = LatLng(locationResult.latitude, locationResult.longitude)
-                    if (isCoordinatesFar(lastCoordinates.value, newCoordinates)) {
-
+                        //if (isCoordinatesFar(lastCoordinates.value, newCoordinates)) {
                         emit(LocationState.LocationGranted(newCoordinates))
                         lastCoordinates.value = newCoordinates
-                    }
+                        //}
                 } catch (e: Exception) {
                     Log.d("MAP", "GPS is off")
                     Toast.makeText(
@@ -90,9 +89,7 @@ class LocationManagerImpl(private val context: Context) : LocationManager {
                     ).show()
                 }
             }
-            else -> {
-                emit(LocationState.NoPermission)
-            }
+            else -> { emit(LocationState.NoPermission) }
         }
     }
 
@@ -107,7 +104,7 @@ class LocationManagerImpl(private val context: Context) : LocationManager {
         val request = LocationRequest.create().apply {
             interval = 8000
             fastestInterval = 5000
-            priority = LocationRequest.PRIORITY_LOW_POWER
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         }
         val builder = LocationSettingsRequest.Builder().addLocationRequest(request)
         val client: SettingsClient = LocationServices.getSettingsClient(context)

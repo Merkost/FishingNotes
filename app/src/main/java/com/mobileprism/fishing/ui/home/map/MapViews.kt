@@ -174,7 +174,10 @@ fun MyLocationButton(
             onClick = {
                 when (permissionsState.allPermissionsGranted) {
                     true -> {
-                        locationManager.checkGPSEnabled(context as MainActivity) { onClick() }
+                        locationManager.checkGPSEnabled(context as MainActivity)
+                        {
+                            onClick()
+                        }
                     }
                     false -> {
                         locationDialogIsShowing = true

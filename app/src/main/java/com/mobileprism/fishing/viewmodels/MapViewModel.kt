@@ -42,6 +42,8 @@ class MapViewModel(
         //loadUserPlaces()
     }
 
+    private val settingPlace = MutableStateFlow(false)
+
     val locationUpdate = MutableSharedFlow<Boolean>()
     private val _firstCameraPosition = MutableStateFlow<Triple<LatLng, Float, Float>?>(null)
     val firstCameraPosition = _firstCameraPosition.asStateFlow()
@@ -219,8 +221,6 @@ class MapViewModel(
         }
     }
 
-    private val settingPlace = MutableStateFlow(false)
-
     fun setPlace(place: UserMapMarker?) {
         viewModelScope.launch {
             place?.let {
@@ -358,7 +358,7 @@ class MapViewModel(
                     else "-"
                 }
             } catch (e: Throwable) {
-                //TODO: Не удается определить место в океане
+                //TODO: сделать стейт
                 //address = context.getString(R.string.cant_recognize_place)
             }
         }

@@ -59,11 +59,6 @@ android {
 }
 
 dependencies {
-    //implementation "com.github.ben-manes:gradle-versions-plugin:0.39.0"
-
-    //Moshi
-    //implementation "com.squareup.moshi:moshi-kotlin:1.13.0"
-    //kapt "com.squareup.moshi:moshi-kotlin-codegen:1.13.0"
 
     //Settings
     implementation 'com.github.alorma:compose-settings-ui:0.7.2'

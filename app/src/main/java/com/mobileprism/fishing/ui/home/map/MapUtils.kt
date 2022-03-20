@@ -109,7 +109,6 @@ sealed class PointerState {
 sealed class LocationState() {
     object NoPermission : LocationState()
     class LocationGranted(val location: LatLng) : LocationState()
-    object LocationNotGranted : LocationState()
     object GpsNotEnabled : LocationState()
 }
 

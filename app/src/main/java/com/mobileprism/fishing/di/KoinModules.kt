@@ -71,11 +71,13 @@ val mainModule = module {
 
 //    viewModel { NewCatchViewModel(get(), get(), get()) }
 
-    viewModel { UserViewModel(
-        userRepository = get(),
-        repository = get(),
-        getUserCatchUseCase = get()
-    ) }
+    viewModel {
+        UserViewModel(
+            userRepository = get(),
+            repository = get(),
+            getUserCatchUseCase = get()
+        )
+    }
     viewModel { parameters ->
         UserCatchViewModel(
             userCatch = parameters.get(),
@@ -84,23 +86,32 @@ val mainModule = module {
             getMapMarkerById = get(),
         )
     }
-    viewModel { WeatherViewModel(weatherRepository = get(), repository = get()) }
-    viewModel { UserPlaceViewModel(
-        markersRepo = get(),
-        catchesRepo = get(),
-        saveNewUserMarkerNoteUseCase = get(),
-        deleteUserMarkerNoteUseCase = get()
-    ) }
+    viewModel {
+        WeatherViewModel(
+            weatherRepository = get(),
+            repository = get(),
+            locationManager = get()
+        )
+    }
+    viewModel {
+        UserPlaceViewModel(
+            markersRepo = get(),
+            catchesRepo = get(),
+            saveNewUserMarkerNoteUseCase = get(),
+            deleteUserMarkerNoteUseCase = get()
+        )
+    }
     viewModel { UserCatchesViewModel(userCatchesUseCase = get()) }
     viewModel { UserPlacesViewModel(repository = get()) }
-    viewModel { parameters -> NewCatchMasterViewModel(
-        placeState = parameters.get(),
-        getNewCatchWeatherUseCase = get(),
-        saveNewCatchUseCase = get(),
-        getUserPlacesListUseCase = get()
-    ) }
+    viewModel { parameters ->
+        NewCatchMasterViewModel(
+            placeState = parameters.get(),
+            getNewCatchWeatherUseCase = get(),
+            saveNewCatchUseCase = get(),
+            getUserPlacesListUseCase = get()
+        )
+    }
 }
-
 
 
 fun createGeocoder(androidContext: Context): Geocoder {
