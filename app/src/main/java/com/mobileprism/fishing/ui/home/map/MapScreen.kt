@@ -77,8 +77,10 @@ fun MapScreen(
 ) {
 
     val viewModel: MapViewModel = getViewModel()
-    viewModel.setPlace(place)
-    viewModel.setAddingPlace(addPlaceOnStart)
+    SideEffect {
+        viewModel.setPlace(place)
+        viewModel.setAddingPlace(addPlaceOnStart)
+    }
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     val context = LocalContext.current
 
@@ -395,13 +397,10 @@ fun MapLayout(
         }
     }
 
-    val firstCameraPosition by viewModel.firstCameraPosition.collectAsState()
-
     LaunchedEffect(map, permissionsState.allPermissionsGranted) {
         val googleMap = map.awaitMap()
         checkLocationPermissions(context)
         googleMap.isMyLocationEnabled = permissionsState.allPermissionsGranted
-        isMapVisible = true
     }
 
     LaunchedEffect(Unit) {
@@ -410,9 +409,11 @@ fun MapLayout(
         }
     }
 
-    LaunchedEffect(firstCameraPosition) {
-        firstCameraPosition?.let {
-            setCameraPosition(this, map, it.first, it.second, it.third)
+    LaunchedEffect(Unit) {
+        viewModel.firstCameraPosition.collectLatest {
+            it?.let {
+                setCameraPosition(this, map, it.first, it.second, it.third)
+            }
         }
     }
 
@@ -422,6 +423,7 @@ fun MapLayout(
     }
 
     DisposableEffect(map) {
+        isMapVisible = true
         viewModel.getLastLocation()
 
         onDispose {
