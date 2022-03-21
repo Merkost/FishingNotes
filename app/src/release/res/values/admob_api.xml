@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="is_release_boolean" templateMergeStrategy="preserve" translatable="false">true</string>
     <!--  Ads RELEASE -->
     <string name="new_catch_admob_banner_id" templateMergeStrategy="preserve" translatable="false">ca-app-pub-5946981839129788/7130507253</string>
     <string name="new_catch_loading_admob_fullscreen_id" templateMergeStrategy="preserve" translatable="false">ca-app-pub-5946981839129788/9033959322</string>

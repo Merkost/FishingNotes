@@ -35,6 +35,9 @@ android {
                 proguardFiles 'proguard-rules.pro', getDefaultProguardFile('proguard-android-optimize.txt')
             }
         }
+        debug {
+            ext.enableCrashlytics = false
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11

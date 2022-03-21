@@ -33,7 +33,10 @@
             android:value="@string/admob_app_id"/>
         <meta-data
             android:name="firebase_performance_logcat_enabled"
-            android:value="false" />
+            android:value="@string/is_release_boolean" />
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="@string/is_release_boolean" />
 
         <activity android:hardwareAccelerated="true"
             android:name="com.mobileprism.fishing.ui.MainActivity"
