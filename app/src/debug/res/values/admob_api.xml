@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="is_release_boolean" templateMergeStrategy="preserve" translatable="false">false</string>
     <!--  Ads DEBUG -->
     <string name="new_catch_admob_banner_id"
         templateMergeStrategy="preserve"
