@@ -20,12 +20,12 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.entity.content.UserCatch
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.theme.cardColor
 import com.mobileprism.fishing.ui.theme.customColors
-import com.mobileprism.fishing.model.datastore.UserPreferences
-import com.mobileprism.fishing.model.entity.content.UserCatch
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toTime
 import org.koin.androidx.compose.get
@@ -153,7 +153,7 @@ fun CatchItemView(
     showPlace: Boolean = true,
     onClick: (UserCatch) -> Unit,
 
-) {
+    ) {
     val preferences: UserPreferences = get()
     val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
 

@@ -1,15 +1,15 @@
 package com.mobileprism.fishing.di
 
 import com.mobileprism.fishing.BuildConfig
+import com.mobileprism.fishing.domain.repository.PhotoStorage
+import com.mobileprism.fishing.domain.repository.UserRepository
+import com.mobileprism.fishing.domain.repository.app.*
+import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.model.datasource.FreeWeatherRepositoryImpl
 import com.mobileprism.fishing.model.datasource.SolunarRetrofitRepositoryImpl
 import com.mobileprism.fishing.model.datasource.WeatherRepositoryRetrofitImpl
 import com.mobileprism.fishing.model.datasource.firebase.*
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
-import com.mobileprism.fishing.model.repository.PhotoStorage
-import com.mobileprism.fishing.model.repository.UserRepository
-import com.mobileprism.fishing.model.repository.app.*
-import com.mobileprism.fishing.model.repository.app.catches.CatchesRepository
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext

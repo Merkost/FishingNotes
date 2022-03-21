@@ -19,6 +19,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.entity.content.UserCatch
+import com.mobileprism.fishing.model.datastore.NotesPreferences
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.UiState
@@ -27,8 +29,6 @@ import com.mobileprism.fishing.ui.home.views.NoContentView
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.utils.enums.CatchesSortValues
 import com.mobileprism.fishing.ui.viewmodels.UserCatchesViewModel
-import com.mobileprism.fishing.model.datastore.NotesPreferences
-import com.mobileprism.fishing.model.entity.content.UserCatch
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel

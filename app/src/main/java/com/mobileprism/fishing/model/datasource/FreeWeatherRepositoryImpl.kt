@@ -1,11 +1,10 @@
 package com.mobileprism.fishing.model.datasource
 
-import androidx.core.os.LocaleListCompat
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import com.mobileprism.fishing.domain.entity.weather.CurrentWeatherFree
+import com.mobileprism.fishing.domain.repository.app.FreeWeatherRepository
 import com.mobileprism.fishing.model.api.FreeWeatherApiService
-import com.mobileprism.fishing.model.entity.weather.CurrentWeatherFree
-import com.mobileprism.fishing.model.repository.app.FreeWeatherRepository
 import com.mobileprism.fishing.model.utils.safeApiCall
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +14,6 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.io.IOException
 
 class FreeWeatherRepositoryImpl(
     private val firebaseAnalytics: FirebaseAnalytics,

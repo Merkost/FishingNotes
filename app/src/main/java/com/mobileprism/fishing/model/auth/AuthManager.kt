@@ -1,6 +1,6 @@
 package com.mobileprism.fishing.model.auth
 
-import com.mobileprism.fishing.model.entity.common.User
+import com.mobileprism.fishing.domain.entity.common.User
 import kotlinx.coroutines.flow.Flow
 
 interface AuthManager {

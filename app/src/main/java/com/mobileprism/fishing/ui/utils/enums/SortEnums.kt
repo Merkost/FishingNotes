@@ -2,8 +2,8 @@ package com.mobileprism.fishing.ui.utils.enums
 
 import androidx.annotation.StringRes
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.model.entity.content.UserCatch
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
+import com.mobileprism.fishing.domain.entity.content.UserCatch
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 
 enum class PlacesSortValues(@StringRes override val stringRes: Int) : StringOperation {
     Default (R.string.default_word),

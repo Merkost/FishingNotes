@@ -19,13 +19,13 @@ import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.home.*
 import com.mobileprism.fishing.ui.home.catch.UserCatchScreen
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchMasterScreen
 import com.mobileprism.fishing.ui.home.place.UserPlaceScreen
 import com.mobileprism.fishing.ui.home.settings.AboutApp
 import com.mobileprism.fishing.ui.home.weather.WeatherDaily
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.InternalCoroutinesApi
 
 @ExperimentalComposeUiApi

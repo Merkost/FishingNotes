@@ -36,14 +36,12 @@ import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.shimmer
 import com.google.accompanist.placeholder.placeholder
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.ui.viewmodels.WeatherViewModel
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.domain.entity.weather.Daily
+import com.mobileprism.fishing.domain.entity.weather.Hourly
+import com.mobileprism.fishing.domain.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.model.entity.weather.Daily
-import com.mobileprism.fishing.model.entity.weather.Hourly
-import com.mobileprism.fishing.model.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
@@ -53,6 +51,8 @@ import com.mobileprism.fishing.ui.home.map.locationPermissionsList
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.theme.customColors
+import com.mobileprism.fishing.ui.viewmodels.WeatherViewModel
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.location.LocationManager
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toDayOfWeek

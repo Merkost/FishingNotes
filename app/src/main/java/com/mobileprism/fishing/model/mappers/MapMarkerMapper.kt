@@ -1,7 +1,7 @@
 package com.mobileprism.fishing.model.mappers
 
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.model.entity.raw.RawMapMarker
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.domain.entity.raw.RawMapMarker
 import com.mobileprism.fishing.utils.getCurrentUserId
 import com.mobileprism.fishing.utils.getNewMarkerId
 import java.util.*

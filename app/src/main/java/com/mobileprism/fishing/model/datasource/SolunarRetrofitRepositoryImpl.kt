@@ -2,21 +2,18 @@ package com.mobileprism.fishing.model.datasource
 
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import com.mobileprism.fishing.domain.entity.solunar.Solunar
+import com.mobileprism.fishing.domain.repository.app.SolunarRepository
 import com.mobileprism.fishing.model.api.SolunarApiService
-import com.mobileprism.fishing.model.entity.solunar.Solunar
-import com.mobileprism.fishing.model.repository.app.SolunarRepository
 import com.mobileprism.fishing.model.utils.safeApiCall
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.io.IOException
-import java.text.SimpleDateFormat
-import java.util.*
-import okhttp3.logging.HttpLoggingInterceptor
 
 
 class SolunarRetrofitRepositoryImpl(

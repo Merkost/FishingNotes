@@ -3,13 +3,14 @@ package com.mobileprism.fishing.ui.viewmodels
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mobileprism.fishing.ui.use_cases.DeleteUserCatchUseCase
+import com.mobileprism.fishing.domain.entity.common.Note
+import com.mobileprism.fishing.domain.entity.common.Progress
+import com.mobileprism.fishing.domain.entity.content.UserCatch
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.domain.use_cases.DeleteUserCatchUseCase
 import com.mobileprism.fishing.domain.use_cases.GetMapMarkerByIdUseCase
-import com.mobileprism.fishing.ui.use_cases.UpdateUserCatchUseCase
-import com.mobileprism.fishing.model.entity.common.Note
-import com.mobileprism.fishing.model.entity.common.Progress
-import com.mobileprism.fishing.model.entity.content.UserCatch
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
+import com.mobileprism.fishing.domain.use_cases.SubscribeOnUserCatchStateUseCase
+import com.mobileprism.fishing.domain.use_cases.UpdateUserCatchUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -19,6 +20,7 @@ class UserCatchViewModel(
     private val updateUserCatch: UpdateUserCatchUseCase,
     private val deleteUserCatch: DeleteUserCatchUseCase,
     private val getMapMarkerById: GetMapMarkerByIdUseCase,
+    private val subscribeOnUserCatchState: SubscribeOnUserCatchStateUseCase
 ) : ViewModel() {
 
     private val _catch = MutableStateFlow(userCatch)
@@ -94,7 +96,7 @@ class UserCatchViewModel(
     }
 
     private suspend fun subscribeOnCatchChanges() {
-        /*mapMarker.value?.let { marker ->
+        mapMarker.value?.let { marker ->
             catch.value.let { oldCatch ->
                 subscribeOnUserCatchState(
                     markerId = marker.id,
@@ -103,7 +105,7 @@ class UserCatchViewModel(
                     _catch.value = it
                 }
             }
-        }*/
+        }
     }
 
 }

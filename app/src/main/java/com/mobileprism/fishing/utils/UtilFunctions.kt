@@ -4,8 +4,8 @@ import android.content.Context
 import android.widget.Toast
 import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.model.entity.weather.Hourly
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.domain.entity.weather.Hourly
 import com.mobileprism.fishing.ui.home.map.DEFAULT_ZOOM
 import com.mobileprism.fishing.utils.time.TimeConstants.MILLISECONDS_IN_DAY
 import com.mobileprism.fishing.utils.time.TimeConstants.MOON_PHASE_INCREMENT_IN_DAY

@@ -10,11 +10,11 @@ import androidx.navigation.NavController
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
+import com.mobileprism.fishing.domain.entity.content.UserCatch
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.navigate
-import com.mobileprism.fishing.model.entity.content.UserCatch
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import java.util.*
 
 fun newCatchClicked(navController: NavController, place: UserMapMarker) {

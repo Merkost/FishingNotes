@@ -24,11 +24,11 @@ import androidx.core.net.toUri
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.entity.common.Progress
+import com.mobileprism.fishing.domain.entity.content.UserCatch
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
-import com.mobileprism.fishing.model.entity.common.Progress
-import com.mobileprism.fishing.model.entity.content.UserCatch
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.mappers.getMoonIconByPhase
 import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.ui.Arguments

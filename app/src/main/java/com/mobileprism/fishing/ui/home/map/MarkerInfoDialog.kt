@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.ui.home.map
 
-import android.location.Geocoder
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -24,28 +23,20 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
-import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.SphericalUtil
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.domain.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.model.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.views.PrimaryText
 import com.mobileprism.fishing.ui.home.views.SubtitleText
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.ui.navigate
-import com.mobileprism.fishing.ui.resources
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.viewmodels.MapViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
-
 
 
 @OptIn(ExperimentalMaterialApi::class)

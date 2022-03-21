@@ -2,11 +2,14 @@ package com.mobileprism.fishing.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mobileprism.fishing.domain.entity.common.Progress
+import com.mobileprism.fishing.domain.entity.common.User
+import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
-import com.mobileprism.fishing.model.entity.common.Progress
-import com.mobileprism.fishing.model.entity.common.User
-import com.mobileprism.fishing.model.repository.UserRepository
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class LoginViewModel(private val repository: UserRepository) : ViewModel() {

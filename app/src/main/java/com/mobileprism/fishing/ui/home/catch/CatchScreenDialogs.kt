@@ -30,7 +30,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.model.entity.common.Note
+import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.ui.home.new_catch.FishAmountAndWeightView
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.viewmodels.UserCatchViewModel

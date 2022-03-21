@@ -2,9 +2,9 @@ package com.mobileprism.fishing.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mobileprism.fishing.domain.entity.common.User
+import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
-import com.mobileprism.fishing.model.entity.common.User
-import com.mobileprism.fishing.model.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest

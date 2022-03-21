@@ -1,6 +1,6 @@
 package com.mobileprism.fishing.model.api
 
-import com.mobileprism.fishing.model.entity.solunar.Solunar
+import com.mobileprism.fishing.domain.entity.solunar.Solunar
 import retrofit2.http.GET
 import retrofit2.http.Path
 

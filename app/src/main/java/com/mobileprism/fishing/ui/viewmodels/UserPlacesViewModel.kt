@@ -2,9 +2,9 @@ package com.mobileprism.fishing.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.domain.repository.app.MarkersRepository
 import com.mobileprism.fishing.ui.home.UiState
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.model.repository.app.MarkersRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

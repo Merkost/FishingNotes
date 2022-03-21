@@ -13,7 +13,6 @@ import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.model.datastore.*
 import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.ui.home.SnackbarManager
-import com.mobileprism.fishing.ui.use_cases.*
 import com.mobileprism.fishing.ui.viewmodels.*
 import com.mobileprism.fishing.utils.Logger
 import com.mobileprism.fishing.utils.location.LocationManager
@@ -24,7 +23,6 @@ import com.mobileprism.fishing.viewmodels.MainViewModel
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val appModule = module {
@@ -84,6 +82,7 @@ val mainModule = module {
             updateUserCatch = get(),
             deleteUserCatch = get(),
             getMapMarkerById = get(),
+            subscribeOnUserCatchState = get()
         )
     }
     viewModel {

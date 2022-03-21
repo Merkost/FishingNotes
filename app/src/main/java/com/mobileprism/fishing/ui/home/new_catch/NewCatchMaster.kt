@@ -15,7 +15,6 @@ import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -24,12 +23,12 @@ import androidx.navigation.NavController
 import com.google.accompanist.pager.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.new_catch.pages.NewCatchPage
 import com.mobileprism.fishing.ui.home.place.LottieWarning
 import com.mobileprism.fishing.ui.home.views.*
+import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
 import com.mobileprism.fishing.ui.viewstates.NewCatchViewState
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
 import kotlinx.coroutines.CoroutineScope

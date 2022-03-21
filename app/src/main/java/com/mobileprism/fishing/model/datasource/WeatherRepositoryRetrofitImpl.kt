@@ -3,16 +3,15 @@ package com.mobileprism.fishing.model.datasource
 import androidx.core.os.LocaleListCompat
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import com.mobileprism.fishing.domain.entity.weather.WeatherForecast
+import com.mobileprism.fishing.domain.repository.app.WeatherRepository
 import com.mobileprism.fishing.model.api.WeatherApiService
-import com.mobileprism.fishing.model.entity.weather.WeatherForecast
-import com.mobileprism.fishing.model.repository.app.WeatherRepository
 import com.mobileprism.fishing.model.utils.safeApiCall
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import okhttp3.OkHttpClient
-import okio.IOException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

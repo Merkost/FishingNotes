@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.navigation.NavController
 import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
-import com.mobileprism.fishing.model.entity.weather.Daily
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.domain.entity.weather.Daily
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.navigate

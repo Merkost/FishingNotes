@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.ui.home.new_catch
 
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+
 
 sealed class ReceivedPlaceState() {
     object NotReceived : ReceivedPlaceState()

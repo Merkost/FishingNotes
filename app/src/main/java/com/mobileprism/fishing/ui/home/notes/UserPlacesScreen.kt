@@ -21,6 +21,8 @@ import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.fade
 import com.google.accompanist.placeholder.placeholder
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.model.datastore.NotesPreferences
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.UiState
@@ -29,8 +31,6 @@ import com.mobileprism.fishing.ui.home.views.NoContentView
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.utils.enums.PlacesSortValues
 import com.mobileprism.fishing.ui.viewmodels.UserPlacesViewModel
-import com.mobileprism.fishing.model.datastore.NotesPreferences
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 

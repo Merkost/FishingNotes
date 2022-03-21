@@ -28,6 +28,9 @@ import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import com.airbnb.lottie.compose.*
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.entity.common.User
+import com.mobileprism.fishing.domain.entity.content.UserCatch
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.notes.CatchItemView
 import com.mobileprism.fishing.ui.home.notes.ItemUserPlace
@@ -35,9 +38,6 @@ import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.ui.theme.primaryTextColor
 import com.mobileprism.fishing.ui.viewmodels.UserViewModel
-import com.mobileprism.fishing.model.entity.common.User
-import com.mobileprism.fishing.model.entity.content.UserCatch
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage

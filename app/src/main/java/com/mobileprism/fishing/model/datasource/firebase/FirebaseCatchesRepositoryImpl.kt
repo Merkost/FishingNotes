@@ -7,11 +7,11 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
+import com.mobileprism.fishing.domain.entity.common.ContentStateOld
+import com.mobileprism.fishing.domain.entity.common.Progress
+import com.mobileprism.fishing.domain.entity.content.UserCatch
+import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
-import com.mobileprism.fishing.model.entity.common.ContentStateOld
-import com.mobileprism.fishing.model.entity.common.Progress
-import com.mobileprism.fishing.model.entity.content.UserCatch
-import com.mobileprism.fishing.model.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionState
 import kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -30,8 +30,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.entity.raw.RawMapMarker
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.views.MyCard
@@ -39,7 +39,6 @@ import com.mobileprism.fishing.ui.theme.Shapes
 import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
 import com.mobileprism.fishing.ui.utils.ColorPicker
 import com.mobileprism.fishing.viewmodels.MapViewModel
-import com.mobileprism.fishing.model.entity.raw.RawMapMarker
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 

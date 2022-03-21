@@ -43,8 +43,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.model.datastore.UserPreferences
-import com.mobileprism.fishing.model.entity.common.User
 import com.mobileprism.fishing.ui.home.SnackbarAction
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.theme.FishingNotesTheme

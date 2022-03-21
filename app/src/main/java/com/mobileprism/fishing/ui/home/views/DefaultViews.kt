@@ -24,8 +24,8 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.airbnb.lottie.compose.*
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.ui.theme.customColors
-import com.mobileprism.fishing.model.entity.common.Note
 import com.mobileprism.fishing.utils.time.toDate
 
 @ExperimentalComposeUiApi

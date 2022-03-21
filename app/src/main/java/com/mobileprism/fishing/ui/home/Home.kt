@@ -49,13 +49,13 @@ import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.home.map.MapScreen
 import com.mobileprism.fishing.ui.home.notes.Notes
 import com.mobileprism.fishing.ui.home.profile.Profile
 import com.mobileprism.fishing.ui.home.weather.WeatherScreen
 import com.mobileprism.fishing.ui.theme.FishingNotesTheme
-import com.mobileprism.fishing.model.entity.content.UserMapMarker
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 

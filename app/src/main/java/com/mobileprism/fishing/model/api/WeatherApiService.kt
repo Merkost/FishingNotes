@@ -1,6 +1,6 @@
 package com.mobileprism.fishing.model.api
 
-import com.mobileprism.fishing.model.entity.weather.WeatherForecast
+import com.mobileprism.fishing.domain.entity.weather.WeatherForecast
 import retrofit2.http.GET
 import retrofit2.http.Query
 

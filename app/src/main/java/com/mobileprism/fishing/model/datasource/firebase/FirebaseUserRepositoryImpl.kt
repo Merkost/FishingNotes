@@ -14,11 +14,11 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.di.repositoryModule
+import com.mobileprism.fishing.domain.entity.common.Progress
+import com.mobileprism.fishing.domain.entity.common.User
+import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.datastore.AppPreferences
-import com.mobileprism.fishing.model.entity.common.Progress
-import com.mobileprism.fishing.model.entity.common.User
-import com.mobileprism.fishing.model.repository.UserRepository
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking

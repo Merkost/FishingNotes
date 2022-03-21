@@ -9,7 +9,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
-import com.mobileprism.fishing.model.repository.PhotoStorage
+import com.mobileprism.fishing.domain.repository.PhotoStorage
 import com.mobileprism.fishing.utils.getNewPhotoId
 import getPathFromURI
 import id.zelory.compressor.Compressor

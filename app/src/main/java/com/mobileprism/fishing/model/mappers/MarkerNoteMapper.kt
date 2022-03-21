@@ -1,6 +1,6 @@
 package com.mobileprism.fishing.model.mappers
 
-import com.mobileprism.fishing.model.entity.common.Note
+import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.utils.getNewMarkerNoteId
 import java.util.*
 

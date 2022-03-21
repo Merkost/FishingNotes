@@ -1,7 +1,7 @@
 package com.mobileprism.fishing.model.datasource.firebase
 
 import com.google.firebase.firestore.DocumentSnapshot
-import com.mobileprism.fishing.model.entity.content.UserCatch
+import com.mobileprism.fishing.domain.entity.content.UserCatch
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
