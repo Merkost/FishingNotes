@@ -327,5 +327,13 @@
     <string name="new_note">Новая заметка</string>
     <string name="broken_clouds">Облачность</string>
     <string name="scattered_clouds">Рассеянная облачность</string>
+    <string name="light_intensity_drizzle">Слабая морось</string>
+    <string name="heavy_intensity_drizzle">Сильная морось</string>
+    <string name="light_intensity_drizzle_rain">Мелкий моросящий дождь</string>
+    <string name="drizzle_rain">Моросящий дождь</string>
+    <string name="heavy_intensity_drizzle_rain">Сильный моросящий дождь</string>
+    <string name="shower_rain_and_drizzle">Ливень с моросью</string>
+    <string name="heavy_shower_rain_and_drizzle">Сильный ливень с моросью</string>
+    <string name="shower_drizzle">Короткая морось</string>
 
 </resources>
