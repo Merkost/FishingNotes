@@ -308,7 +308,7 @@
     <string name="light_thunderstorm">Легкая гроза</string>
     <string name="thunderstorm">Гроза</string>
     <string name="heavy_thunderstorm">Сильная гроза</string>
-    <string name="ragged_thunderstorm">Рваная гроза</string>
+    <string name="ragged_thunderstorm">Переменная гроза</string>
     <string name="thunderstorm_with_light_drizzle">Гроза с небольшой моросью</string>
     <string name="thunderstorm_with_drizzle">Гроза с моросью</string>
     <string name="thunderstorm_with_heavy_drizzle">Гроза с сильной моросью</string>
@@ -345,5 +345,9 @@
     <string name="volcanic_ash">Вулканический пепел</string>
     <string name="squalls">Шквал (резкое усиление ветра)</string>
     <string name="tornado">Торнадо</string>
+    <string name="light_intensity_shower_rain">Легкий ливень</string>
+    <string name="shower_rain">Ливень</string>
+    <string name="heavy_intensity_shower_rain">Сильный ливень</string>
+    <string name="ragged_shower_rain">Переменный ливень</string>
 
 </resources>
