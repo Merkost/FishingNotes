@@ -349,5 +349,14 @@
     <string name="shower_rain">Ливень</string>
     <string name="heavy_intensity_shower_rain">Сильный ливень</string>
     <string name="ragged_shower_rain">Переменный ливень</string>
+    <string name="light_snow">Легкий снег</string>
+    <string name="heavy_snow">Сильный снег</string>
+    <string name="sleet">Мокый снег</string>
+    <string name="shower_snow">Снегопад</string>
+    <string name="heavy_shower_snow">Сильный снегопад</string>
+    <string name="rain_and_snow">Дождь со снегом</string>
+    <string name="light_rain_and_snow">Легкий дождь со снегом</string>
+    <string name="light_shower_sleet">Легкий ливень с мокрым снегом</string>
+    <string name="shower_sleet">Ливень с мокрым снегом</string>
 
 </resources>
