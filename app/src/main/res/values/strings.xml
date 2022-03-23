@@ -337,6 +337,16 @@
     <string name="shower_rain_and_drizzle">Ливень с моросью</string>
     <string name="heavy_shower_rain_and_drizzle">Сильный ливень с моросью</string>
     <string name="shower_drizzle">Короткая морось</string>
+    <string name="mist">Туман</string>
+    <string name="smoke">Дым</string>
+    <string name="haze">Дымка</string>
+    <string name="sand_or_dust_whirls">Песчаные или пыльные вихри</string>
+    <string name="fog">Туман</string>
+    <string name="sand">Песок</string>
+    <string name="dust">Пыль</string>
+    <string name="volcanic_ash">Вулканический пепел</string>
+    <string name="squalls">Шквал (резкое усиление ветра)</string>
+    <string name="tornado">Торнадо</string>
 
 
 </resources>

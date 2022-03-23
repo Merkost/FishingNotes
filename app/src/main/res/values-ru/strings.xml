@@ -315,7 +315,7 @@
     <string name="snow">Снег</string>
     <string name="few_clouds">Небольшая облачность</string>
     <string name="overcast_clouds">Сильная облачность</string>
-    <string name="atmosphere">Atmosphere</string>
+    <string name="atmosphere">Атмосферный воздух</string>
     <string name="rain">Дождь</string>
     <string name="light_rain">Слабый дождь</string>
     <string name="heavy_intensity_rain">Сильный дождь</string>
@@ -335,5 +335,15 @@
     <string name="shower_rain_and_drizzle">Ливень с моросью</string>
     <string name="heavy_shower_rain_and_drizzle">Сильный ливень с моросью</string>
     <string name="shower_drizzle">Короткая морось</string>
+    <string name="mist">Дымка</string>
+    <string name="smoke">Дым</string>
+    <string name="haze">Мгла</string>
+    <string name="sand_or_dust_whirls">Песчаные или пыльные вихри</string>
+    <string name="fog">Туман</string>
+    <string name="sand">Песок</string>
+    <string name="dust">Пыль</string>
+    <string name="volcanic_ash">Вулканический пепел</string>
+    <string name="squalls">Шквал (резкое усиление ветра)</string>
+    <string name="tornado">Торнадо</string>
 
 </resources>
