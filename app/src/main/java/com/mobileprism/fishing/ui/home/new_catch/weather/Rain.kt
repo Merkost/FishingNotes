@@ -15,10 +15,10 @@ enum class Rain(
     VeryHeavyRain(R.string.very_heavy_rain),
     ExtremeRain(R.string.extreme_rain),
     FreezingRain(R.string.freezing_rain, "13"),
-    LightIntensityShowerRain(R.string.snow, "09"),
-    ShowerRain(R.string.snow, "09"),
-    HeavyIntensityShowerRain(R.string.snow, "09"),
-    RaggedShowerRain(R.string.snow, "09");
+    LightIntensityShowerRain(R.string.light_intensity_shower_rain, "09"),
+    ShowerRain(R.string.shower_rain, "09"),
+    HeavyIntensityShowerRain(R.string.heavy_intensity_shower_rain, "09"),
+    RaggedShowerRain(R.string.ragged_shower_rain, "09");
 
     override val getNameRes: Int = R.string.rain
 }

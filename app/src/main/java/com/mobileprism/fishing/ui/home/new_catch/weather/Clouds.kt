@@ -14,5 +14,5 @@ enum class Clouds(
     BrokenClouds(R.string.broken_clouds, "04"), //51-84%
     OvercastClouds(R.string.overcast_clouds, "04"); //85-100%
 
-    override val getNameRes: Int = R.string.overcast_clouds
+    override val getNameRes: Int = R.string.broken_clouds
 }
