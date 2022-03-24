@@ -359,5 +359,6 @@
     <string name="shower_sleet">Ливень с мокрым снегом</string>
     <string name="clear_sky">Ясно</string>
     <string name="choose_weather">Выберите погоду:</string>
+    <string name="pressure_hpa">гПа</string>
 
 </resources>
