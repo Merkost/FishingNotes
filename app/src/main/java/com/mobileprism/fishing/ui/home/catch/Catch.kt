@@ -544,7 +544,7 @@ fun CatchWeatherView(
                     absoluteLeft.linkTo(pressIcon.absoluteRight, 2.dp)
                     absoluteRight.linkTo(pressText.absoluteRight)
                 },
-                text = pressureUnit.getPressure(
+                text = pressureUnit.getPressureFromMmhg(
                     catch.weatherPressure
                 ) + " " + pressureUnit.name,
             )

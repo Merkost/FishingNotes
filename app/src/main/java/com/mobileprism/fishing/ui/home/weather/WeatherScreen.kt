@@ -557,7 +557,7 @@ fun PressureChart(
             )
 
             drawContext.canvas.nativeCanvas.drawText(
-                pressureUnit.getPressure(
+                pressureUnit.getPressureFromHpa(
                     weather[index].pressure
                 ),
                 pointX, pointY - 48f, paint
@@ -653,7 +653,7 @@ fun CurrentWeatherValuesView(
                 absoluteLeft.linkTo(pressIcon.absoluteRight, 2.dp)
                 absoluteRight.linkTo(pressText.absoluteRight)
             },
-            text = pressureUnit.getPressure(
+            text = pressureUnit.getPressureFromHpa(
                 forecast.pressure
             ) + " " + stringResource(pressureUnit.stringRes),
             textColor = textColor

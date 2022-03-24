@@ -508,7 +508,7 @@ fun DailyWeatherValuesView(
                 absoluteLeft.linkTo(pressIcon.absoluteRight, 2.dp)
                 absoluteRight.linkTo(pressText.absoluteRight)
             },
-            text = pressureUnit.getPressure(
+            text = pressureUnit.getPressureFromHpa(
                 forecast.pressure) + " " + stringResource(pressureUnit.stringRes),
         )
 

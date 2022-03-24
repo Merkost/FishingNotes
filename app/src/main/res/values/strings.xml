@@ -337,6 +337,7 @@
     <string name="shower_rain_and_drizzle">Ливень с моросью</string>
     <string name="heavy_shower_rain_and_drizzle">Сильный ливень с моросью</string>
     <string name="shower_drizzle">Короткая морось</string>
+    <string name="pressure_hpa">hPa</string>
 
 
 </resources>

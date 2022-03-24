@@ -30,7 +30,7 @@ fun getPressureList(
     forecast: List<Daily>,
     pressureUnit: PressureValues
 ): List<Int> {
-    return forecast.map { pressureUnit.getPressureInt(it.pressure) }
+    return forecast.map { /*pressureUnit.getPressureInt(it.pressure)*/it.pressure.toInt() }
 }
 
 fun getBounds(list: List<Int>): Pair<Int, Int> {
@@ -48,42 +48,40 @@ data class Point(
     val y: Float
 )
 
-// FIXME: сделать понятные методы перевода единиц
-
 enum class PressureValues(override val stringRes: Int) : StringOperation {
     Pa(R.string.pressure_pa),
     Bar(R.string.pressure_bar),
     mmHg(R.string.pressure_mm),
-    Psi(R.string.pressure_psi);
-    // TODO: add hpa
+    Psi(R.string.pressure_psi),
+    Hpa(R.string.pressure_hpa);
 
-    fun getPressure(hPa: Int): String {
+    fun getPressureFromHpa(hPa: Int): String {
         return when (this) {
             Pa -> (hPa * 100).toString()
-            Bar -> (hPa / 1000f).toString()
+            Bar -> (hPa / 1000).toString()
             mmHg -> (hPa * 0.75006375541921).toInt().toString()
-            Psi -> String.format("%.5g", (hPa * 0.0145037738))
+            Psi -> String.format("%.5g", (hPa * 0.0145037738f))
+            Hpa -> hPa.toString()
         }
     }
 
-    fun getDefaultPressure(value: Float): Int {
+    fun getPressureFromMmhg(mmHg: Int): String {
+        return when (this) {
+            Pa -> (mmHg * 133.322).toString()
+            Bar -> (mmHg * 0.00133322f).toString()
+            PressureValues.mmHg -> mmHg.toString()
+            Psi -> String.format("%.5g", (mmHg * 0.0193368f))
+            Hpa -> (mmHg * 1.33).toString()
+        }
+    }
+
+    fun getPressureMmhg(value: Double): Int {
         return when (this) {
             Pa -> (value * 0.0075006156130264f).toInt()
             Bar -> (value * 750.06168f).toInt()
             mmHg -> value.toInt()
             Psi -> (value * 51.71484f).toInt()
-        }
-    }
-
-    /**
-     * Used in WeatherScreen.kt for pressure chart
-     */
-    fun getPressureInt(hPa: Int): Int {
-        return when (this) {
-            Pa -> (hPa * 100)
-            Bar -> hPa
-            mmHg -> (hPa * 0.75006375541921).toInt()
-            Psi -> (hPa * 0.0145037738 * 100).toInt()
+            Hpa -> (value * 1.33f).toInt()
         }
     }
 }
@@ -101,7 +99,7 @@ enum class TemperatureValues(override val stringRes: Int) : StringOperation {
         }
     }
 
-    fun getDefaultTemperature(temperature: Float): Int {
+    fun getDefaultTemperature(temperature: Double): Int {
         return when (this) {
             C -> temperature.toInt()
             F -> ((temperature - 32) * (5 / 9)).toInt()

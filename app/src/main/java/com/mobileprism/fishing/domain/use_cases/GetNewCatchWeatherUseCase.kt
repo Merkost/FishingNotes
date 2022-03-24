@@ -74,7 +74,7 @@ class GetNewCatchWeatherUseCase(
             temperature = tempUnits.getTemperature(weatherForecast.hourly[hour].temperature),
             windSpeed = windUnits.getWindSpeed(weatherForecast.hourly[hour].windSpeed.toDouble()),
             windDeg = weatherForecast.hourly[hour].windDeg,
-            pressure = pressureUnits.getPressure(weatherForecast.hourly[hour].pressure),
+            pressure = pressureUnits.getPressureFromHpa(weatherForecast.hourly[hour].pressure),
             moonPhase = calcMoonPhase(Date().time)
         )
     }
