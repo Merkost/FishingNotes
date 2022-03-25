@@ -43,6 +43,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.use_cases.GeocoderResult
 import com.mobileprism.fishing.ui.home.SettingsHeader
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.views.DefaultDialog
@@ -225,7 +226,7 @@ fun CompassButton(
                     ),
                     stringResource(R.string.compass),
                     modifier = Modifier
-                        .rotate(1f-mapBearing.value)
+                        .rotate(1f - mapBearing.value)
                         .fillMaxSize()
                 )
             }
@@ -491,18 +492,34 @@ fun FishLoading(modifier: Modifier) {
 fun PlaceTileView(
     modifier: Modifier,
     currentCameraPosition: State<Triple<LatLng, Float, Float>>,
-    pointerState: MutableState<PointerState>
 ) {
     val context = LocalContext.current
     val viewModel: MapViewModel = getViewModel()
     val cameraMoveState by viewModel.cameraMoveState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val geocoder = Geocoder(context)
-    var selectedPlace by remember { mutableStateOf<String?>(null) }
+    val placeTileViewNameState by viewModel.placeTileViewNameState.collectAsState()
+    val pointerState = viewModel.pointerState
+    var selectedPlace by remember { mutableStateOf<String>("") }
+
+    /*LaunchedEffect(placeTileViewNameState) {
+        selectedPlace = when (val state = placeTileViewNameState) {
+            is GeocoderResult.Success -> {
+                state.placeName
+            }
+            GeocoderResult.UnnamedPlace -> {
+                context.getString(R.string.unnamed_place)
+            }
+            GeocoderResult.Failed -> {
+                context.getString(R.string.cant_recognize_place)
+            }
+            else -> ""
+        }
+    }*/
 
     when (cameraMoveState) {
         CameraMoveState.MoveStart -> {
-            selectedPlace = null
+            selectedPlace = ""
             pointerState.value = PointerState.ShowMarker
             viewModel.resetChosenPlace()
         }
@@ -517,7 +534,6 @@ fun PlaceTileView(
                             1
                         )
                         position?.first()?.let { address ->
-                            viewModel.showMarker.value = true
                             if (!address.subAdminArea.isNullOrBlank()) {
                                 viewModel.chosenPlace.value =
                                     address.subAdminArea.replaceFirstChar { it.uppercase() }
@@ -549,11 +565,11 @@ fun PlaceTileView(
             highlightColor = Color.White,
         ),)
     val pointerIconColor by animateColorAsState(
-        if (selectedPlace != null) secondaryFigmaColor
+        if (selectedPlace.isNotBlank()) secondaryFigmaColor
         else Color.LightGray
     )
     val textColor by animateColorAsState(
-        if (selectedPlace != null) MaterialTheme.colors.onSurface
+        if (selectedPlace.isNotBlank()) MaterialTheme.colors.onSurface
         else Color.LightGray
     )
 
@@ -589,7 +605,9 @@ fun PlaceTileView(
                 placeName,
                 overflow = TextOverflow.Ellipsis,
                 color = textColor,
-                modifier = Modifier.padding(end = 2.dp).then(shimmerModifier)
+                modifier = Modifier
+                    .padding(end = 2.dp)
+                    .then(shimmerModifier)
             )
             Spacer(Modifier.size(4.dp))
         }

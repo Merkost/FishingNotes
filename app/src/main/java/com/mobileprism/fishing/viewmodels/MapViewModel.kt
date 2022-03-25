@@ -1,8 +1,10 @@
 package com.mobileprism.fishing.viewmodels
 
 import android.location.Geocoder
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -24,6 +26,8 @@ import com.mobileprism.fishing.ui.home.map.*
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.location.LocationManager
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -42,6 +46,7 @@ class MapViewModel(
 
     init {
         loadUserMarkersList()
+
         //loadUserPlaces()
     }
 
@@ -97,8 +102,14 @@ class MapViewModel(
     private val _currentMarkerAddressState = MutableStateFlow<GeocoderResult?>(null)
     val currentMarkerAddressState = _currentMarkerAddressState.asStateFlow()
 
+    private val _placeTileViewNameState = MutableStateFlow<GeocoderResult?>(null)
+    val placeTileViewNameState = _placeTileViewNameState.asStateFlow()
+
     private val _currentMarkerRawDistance = MutableStateFlow<Double?>(null)
     val currentMarkerRawDistance = _currentMarkerRawDistance.asStateFlow()
+
+    val pointerState: MutableState<PointerState> = mutableStateOf(PointerState.HideMarker)
+
 
 
     val fishActivity: MutableState<Int?> = mutableStateOf(null)
@@ -341,15 +352,24 @@ class MapViewModel(
         }
     }
 
-    private fun getPlaceName(latitude: Double, longitude: Double) {
+    private fun getPlaceTileViewName() {
         viewModelScope.launch(Dispatchers.Default) {
-            getPlaceNameUseCase.invoke(latitude, longitude).collect { result ->
-                when (result) {
-                    is GeocoderResult.Success -> {
-                        result.placeName
+            when (cameraMoveState.value) {
+                CameraMoveState.MoveStart -> {
+                    _placeTileViewNameState.value = null
+                    pointerState.value = PointerState.ShowMarker
+                    chosenPlace.value = ""
+                    showMarker.value = false
+                }
+                CameraMoveState.MoveFinish -> {
+                    delay(1200)
+                    getPlaceNameUseCase.invoke(
+                        currentCameraPosition.value.first.latitude,
+                        currentCameraPosition.value.first.longitude,
+                    ).collect { result ->
+                        _placeTileViewNameState.value = result
+                        pointerState.value = PointerState.HideMarker
                     }
-                    GeocoderResult.UnnamedPlace -> TODO()
-                    GeocoderResult.Failed -> TODO()
                 }
             }
         }
@@ -362,7 +382,6 @@ class MapViewModel(
             }
         }
     }
-
 
 
     fun onCameraMove(target: LatLng, zoom: Float, bearing: Float) {
@@ -399,7 +418,6 @@ class MapViewModel(
 
     fun resetChosenPlace() {
         chosenPlace.value = ""
-        showMarker.value = false
     }
 
 

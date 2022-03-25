@@ -93,10 +93,6 @@ fun MapScreen(
     val dialogAddPlaceIsShowing = remember { mutableStateOf(false) }
     var mapLayersSelection by rememberSaveable { mutableStateOf(false) }
 
-    val pointerState: MutableState<PointerState> = remember {
-        mutableStateOf(PointerState.HideMarker)
-    }
-
     BackPressHandler(
         mapUiState = mapUiState,
         navController = navController,
@@ -246,7 +242,7 @@ fun MapScreen(
                         absoluteLeft.linkTo(parent.absoluteLeft)
                         absoluteRight.linkTo(parent.absoluteRight)
                     }) {
-                    PointerIcon(pointerState)
+                    PointerIcon(viewModel.pointerState)
                 }
 
                 AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection,
@@ -261,7 +257,6 @@ fun MapScreen(
                     PlaceTileView(
                         modifier = Modifier.wrapContentSize(),
                         currentCameraPosition = viewModel.currentCameraPosition.collectAsState(),
-                        pointerState = pointerState
                     )
                 }
 
