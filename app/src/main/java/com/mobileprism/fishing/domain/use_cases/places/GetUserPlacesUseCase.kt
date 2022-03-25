@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.domain.use_cases
+package com.mobileprism.fishing.domain.use_cases.places
 
 import com.mobileprism.fishing.domain.entity.common.ContentState
 import com.mobileprism.fishing.domain.entity.common.fold

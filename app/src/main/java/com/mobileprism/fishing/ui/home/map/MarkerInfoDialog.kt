@@ -26,6 +26,7 @@ import androidx.navigation.NavController
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.CurrentWeatherFree
+import com.mobileprism.fishing.domain.use_cases.GeocoderResult
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
@@ -54,8 +55,24 @@ fun MarkerInfoDialog(
     val weatherPreferences: WeatherPreferences = get()
 
     val windUnit by weatherPreferences.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
+    var address by remember { mutableStateOf("") }
+    val addressState by viewModel.currentMarkerAddressState.collectAsState()
 
-    val address by viewModel.currentMarkerAddress.collectAsState()
+    LaunchedEffect(addressState) {
+        address = when (val state = addressState) {
+            is GeocoderResult.Success -> {
+                state.placeName
+            }
+            GeocoderResult.UnnamedPlace -> {
+                context.getString(R.string.unnamed_place)
+            }
+            GeocoderResult.Failed -> {
+                context.getString(R.string.cant_recognize_place)
+            }
+            else -> ""
+        }
+    }
+
     val rawDistance by viewModel.currentMarkerRawDistance.collectAsState()
     val distance: String? by remember { mutableStateOf(rawDistance?.let { context.convertDistance(it) }) }
     val fishActivity: Int? by remember { viewModel.fishActivity }
@@ -151,7 +168,7 @@ fun MarkerInfoDialog(
                                     easing = LinearOutSlowInEasing
                                 )
                             ),
-                        text = address ?: "",
+                        text = address,
                         maxLines = 1
                     )
 
@@ -161,7 +178,15 @@ fun MarkerInfoDialog(
                             .constrainAs(distanceTo) {
                                 top.linkTo(area.top)
                                 bottom.linkTo(area.bottom)
-                                linkTo(area.absoluteRight, parent.absoluteRight, 8.dp, 16.dp, 8.dp, 16.dp, 1f)
+                                linkTo(
+                                    area.absoluteRight,
+                                    parent.absoluteRight,
+                                    8.dp,
+                                    16.dp,
+                                    8.dp,
+                                    16.dp,
+                                    1f
+                                )
 
                             }
                             .animateContentSize(
@@ -187,7 +212,15 @@ fun MarkerInfoDialog(
                         modifier = Modifier
                             .constrainAs(fish) {
                                 top.linkTo(area.bottom, 4.dp)
-                                linkTo(parent.absoluteLeft, horizontalLine, 0.dp, 0.dp, 0.dp, 0.dp,0.5f)
+                                linkTo(
+                                    parent.absoluteLeft,
+                                    horizontalLine,
+                                    0.dp,
+                                    0.dp,
+                                    0.dp,
+                                    0.dp,
+                                    0.5f
+                                )
                                 bottom.linkTo(parent.bottom)
                             }
                             .animateContentSize(
@@ -233,7 +266,15 @@ fun MarkerInfoDialog(
                         modifier = Modifier
                             .constrainAs(weather) {
                                 top.linkTo(area.bottom, 4.dp)
-                                linkTo(horizontalLine, parent.absoluteRight, 0.dp, 0.dp, 0.dp, 0.dp, 0.5f)
+                                linkTo(
+                                    horizontalLine,
+                                    parent.absoluteRight,
+                                    0.dp,
+                                    0.dp,
+                                    0.dp,
+                                    0.dp,
+                                    0.5f
+                                )
                                 bottom.linkTo(parent.bottom)
                             }
                             .animateContentSize(

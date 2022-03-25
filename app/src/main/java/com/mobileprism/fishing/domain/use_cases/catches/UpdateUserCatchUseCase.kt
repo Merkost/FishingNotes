@@ -1,8 +1,9 @@
-package com.mobileprism.fishing.domain.use_cases
+package com.mobileprism.fishing.domain.use_cases.catches
 
 import androidx.core.net.toUri
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
+import com.mobileprism.fishing.domain.use_cases.SavePhotosUseCase
 
 
 class UpdateUserCatchUseCase(

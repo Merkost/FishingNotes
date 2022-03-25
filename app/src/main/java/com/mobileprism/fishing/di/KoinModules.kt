@@ -63,7 +63,8 @@ val mainModule = module {
             getFishActivityUseCase = get(),
             geocoder = get(),
             userPreferences = get(),
-            locationManager = get()
+            locationManager = get(),
+            getPlaceNameUseCase = get()
         )
     }
 

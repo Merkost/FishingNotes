@@ -6,9 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.NewCatchWeatherData
-import com.mobileprism.fishing.domain.use_cases.GetNewCatchWeatherUseCase
-import com.mobileprism.fishing.domain.use_cases.GetUserPlacesListUseCase
-import com.mobileprism.fishing.domain.use_cases.SaveNewCatchUseCase
+import com.mobileprism.fishing.domain.use_cases.catches.GetNewCatchWeatherUseCase
+import com.mobileprism.fishing.domain.use_cases.places.GetUserPlacesListUseCase
+import com.mobileprism.fishing.domain.use_cases.catches.SaveNewCatchUseCase
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlacesState
 import com.mobileprism.fishing.ui.home.new_catch.ReceivedPlaceState
 import com.mobileprism.fishing.ui.viewstates.NewCatchViewState

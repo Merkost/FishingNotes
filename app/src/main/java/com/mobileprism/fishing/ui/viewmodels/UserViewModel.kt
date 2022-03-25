@@ -7,7 +7,7 @@ import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.domain.repository.app.OfflineRepository
-import com.mobileprism.fishing.domain.use_cases.GetUserCatchesUseCase
+import com.mobileprism.fishing.domain.use_cases.catches.GetUserCatchesUseCase
 import com.mobileprism.fishing.ui.home.profile.findBestCatch
 import com.mobileprism.fishing.ui.home.profile.findFavoritePlace
 import kotlinx.coroutines.flow.MutableStateFlow

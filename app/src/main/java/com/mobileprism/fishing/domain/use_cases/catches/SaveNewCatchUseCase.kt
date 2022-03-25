@@ -1,8 +1,9 @@
-package com.mobileprism.fishing.domain.use_cases
+package com.mobileprism.fishing.domain.use_cases.catches
 
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.raw.NewCatchWeather
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
+import com.mobileprism.fishing.domain.use_cases.SavePhotosUseCase
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.ui.viewmodels.*
 import com.mobileprism.fishing.utils.getCurrentUserId

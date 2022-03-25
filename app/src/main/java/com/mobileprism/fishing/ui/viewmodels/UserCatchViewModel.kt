@@ -7,10 +7,10 @@ import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.domain.entity.common.Progress
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
-import com.mobileprism.fishing.domain.use_cases.DeleteUserCatchUseCase
-import com.mobileprism.fishing.domain.use_cases.GetMapMarkerByIdUseCase
+import com.mobileprism.fishing.domain.use_cases.catches.DeleteUserCatchUseCase
+import com.mobileprism.fishing.domain.use_cases.places.GetMapMarkerByIdUseCase
 import com.mobileprism.fishing.domain.use_cases.SubscribeOnUserCatchStateUseCase
-import com.mobileprism.fishing.domain.use_cases.UpdateUserCatchUseCase
+import com.mobileprism.fishing.domain.use_cases.catches.UpdateUserCatchUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch

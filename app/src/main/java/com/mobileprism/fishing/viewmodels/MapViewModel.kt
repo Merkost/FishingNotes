@@ -14,6 +14,9 @@ import com.mobileprism.fishing.domain.entity.raw.RawMapMarker
 import com.mobileprism.fishing.domain.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.domain.repository.app.MarkersRepository
 import com.mobileprism.fishing.domain.use_cases.*
+import com.mobileprism.fishing.domain.use_cases.places.AddNewPlaceUseCase
+import com.mobileprism.fishing.domain.use_cases.places.GetUserPlacesListUseCase
+import com.mobileprism.fishing.domain.use_cases.places.GetUserPlacesUseCase
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.UiState
@@ -31,6 +34,7 @@ class MapViewModel(
     private val addNewPlaceUseCase: AddNewPlaceUseCase,
     private val getFreeWeatherUseCase: GetFreeWeatherUseCase,
     private val getFishActivityUseCase: GetFishActivityUseCase,
+    private val getPlaceNameUseCase: GetPlaceNameUseCase,
     private val geocoder: Geocoder,
     private val userPreferences: UserPreferences,
     private val locationManager: LocationManager,
@@ -90,8 +94,8 @@ class MapViewModel(
     private val _chosenPlace = MutableStateFlow("")
     val chosenPlace = _chosenPlace
 
-    private val _currentMarkerAddress = MutableStateFlow<String?>(null)
-    val currentMarkerAddress = _currentMarkerAddress.asStateFlow()
+    private val _currentMarkerAddressState = MutableStateFlow<GeocoderResult?>(null)
+    val currentMarkerAddressState = _currentMarkerAddressState.asStateFlow()
 
     private val _currentMarkerRawDistance = MutableStateFlow<Double?>(null)
     val currentMarkerRawDistance = _currentMarkerRawDistance.asStateFlow()
@@ -317,7 +321,9 @@ class MapViewModel(
     fun setNewMarkerInfo(latitude: Double, longitude: Double) {
         fishActivity.value = null
         currentWeather.value = null
-        getPlaceName(latitude, longitude)
+        _currentMarkerAddressState.value = null
+        _currentMarkerRawDistance.value = null
+        getPlaceNameForMarkerDetails(latitude, longitude)
         getPlaceRawDistance(latitude, longitude)
         getFishActivity(latitude, longitude)
         getCurrentWeather(latitude, longitude)
@@ -325,7 +331,6 @@ class MapViewModel(
 
     private fun getPlaceRawDistance(latitude: Double, longitude: Double) {
         viewModelScope.launch(Dispatchers.Default) {
-            _currentMarkerRawDistance.value = null
             lastKnownLocation.value?.let {
                 _currentMarkerRawDistance.value =
                     SphericalUtil.computeDistanceBetween(
@@ -338,24 +343,27 @@ class MapViewModel(
 
     private fun getPlaceName(latitude: Double, longitude: Double) {
         viewModelScope.launch(Dispatchers.Default) {
-            _currentMarkerAddress.value = null
-            try {
-                val position = geocoder.getFromLocation(latitude, longitude, 1)
-                position?.first()?.apply {
-                    _currentMarkerAddress.value = if (!subAdminArea.isNullOrBlank()) {
-                        subAdminArea.replaceFirstChar { it.uppercase() }
-                    } else if (!adminArea.isNullOrBlank()) {
-                        adminArea.replaceFirstChar { it.uppercase() }
-                    } else if (!countryName.isNullOrBlank())
-                        countryName.replaceFirstChar { it.uppercase() }
-                    else "-"
+            getPlaceNameUseCase.invoke(latitude, longitude).collect { result ->
+                when (result) {
+                    is GeocoderResult.Success -> {
+                        result.placeName
+                    }
+                    GeocoderResult.UnnamedPlace -> TODO()
+                    GeocoderResult.Failed -> TODO()
                 }
-            } catch (e: Throwable) {
-                //TODO: сделать стейт
-                //address = context.getString(R.string.cant_recognize_place)
             }
         }
     }
+
+    private fun getPlaceNameForMarkerDetails(latitude: Double, longitude: Double) {
+        viewModelScope.launch(Dispatchers.Default) {
+            getPlaceNameUseCase.invoke(latitude, longitude).collect { result ->
+                _currentMarkerAddressState.value = result
+            }
+        }
+    }
+
+
 
     fun onCameraMove(target: LatLng, zoom: Float, bearing: Float) {
         viewModelScope.launch {
