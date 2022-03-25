@@ -225,15 +225,15 @@ fun MapScreen(
                 if (useZoomButtons) {
                     MapZoomInButton(
                         modifier = Modifier.constrainAs(zoomInButton) {
-                            linkTo(parent.top, centerHorizontal, 4.dp, 4.dp, 1f)
-                            linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, 1f)
+                            linkTo(parent.top, centerHorizontal, 4.dp, 4.dp, 4.dp, 4.dp, 1f)
+                            linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, 16.dp, 16.dp, 1f)
                         }, onClick = viewModel::onZoomInClick
                     )
 
                     MapZoomOutButton(
                         modifier = Modifier.constrainAs(zoomOutButton) {
-                            linkTo(centerHorizontal, parent.bottom, 4.dp, 4.dp, 0f)
-                            linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, 1f)
+                            linkTo(centerHorizontal, parent.bottom, 4.dp, 4.dp, 4.dp, 4.dp, 0f)
+                            linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, 16.dp, 16.dp, 1f)
                         }, onClick = viewModel::onZoomOutClick
                     )
                 }

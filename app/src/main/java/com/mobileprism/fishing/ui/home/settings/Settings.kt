@@ -36,10 +36,7 @@ import com.mobileprism.fishing.ui.home.map.GrantLocationPermissionsDialog
 import com.mobileprism.fishing.ui.home.map.LocationPermissionDialog
 import com.mobileprism.fishing.ui.home.map.checkLocationPermissions
 import com.mobileprism.fishing.ui.home.map.locationPermissionsList
-import com.mobileprism.fishing.ui.home.views.DefaultAppBar
-import com.mobileprism.fishing.ui.home.views.DefaultCard
-import com.mobileprism.fishing.ui.home.views.ItemsSelection
-import com.mobileprism.fishing.ui.home.views.PrimaryText
+import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.home.weather.PressureValues
 import com.mobileprism.fishing.ui.home.weather.TemperatureValues
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
@@ -59,7 +56,8 @@ fun SettingsScreen(backPress: () -> Unit, navController: NavController) {
 
     Scaffold(
         topBar = { SettingsTopAppBar(backPress) },
-        modifier = Modifier.fillMaxSize())
+        modifier = Modifier.fillMaxSize()
+    )
     {
         Column(modifier = Modifier.verticalScroll(rememberScrollState(0))) {
             MainAppSettings(userPreferences)
@@ -174,7 +172,7 @@ fun MainAppSettings(userPreferences: UserPreferences) {
         }
 
     Column {
-        AnimatedVisibility (!permissionsState.allPermissionsGranted) {
+        AnimatedVisibility(!permissionsState.allPermissionsGranted) {
             SettingsMenuLink(
                 icon = {
                     Icon(
@@ -239,7 +237,9 @@ fun MainAppSettings(userPreferences: UserPreferences) {
             onCheckedChange = { use12h ->
                 coroutineScope.launch { userPreferences.saveTimeFormatStatus(use12h) }
             },
-            state = if (use12hTimeFormat) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
+            state = if (use12hTimeFormat) rememberBooleanSettingState(true) else rememberBooleanSettingState(
+                false
+            )
         )
         SettingsCheckbox(
             icon = {
@@ -253,7 +253,9 @@ fun MainAppSettings(userPreferences: UserPreferences) {
             onCheckedChange = { useZoomButtons ->
                 coroutineScope.launch { userPreferences.saveMapZoomButtons(useZoomButtons) }
             },
-            state = if (useZoomButtons) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
+            state = if (useZoomButtons) rememberBooleanSettingState(true) else rememberBooleanSettingState(
+                false
+            )
         )
         SettingsCheckbox(
             icon = {
@@ -267,7 +269,9 @@ fun MainAppSettings(userPreferences: UserPreferences) {
             onCheckedChange = { useFastFabAdd ->
                 coroutineScope.launch { userPreferences.saveFabFastAdd(useFastFabAdd) }
             },
-            state = if (useFastFabAdd) rememberBooleanSettingState(true) else rememberBooleanSettingState(false)
+            state = if (useFastFabAdd) rememberBooleanSettingState(true) else rememberBooleanSettingState(
+                false
+            )
         )
 
     }
@@ -326,6 +330,7 @@ fun DarkModeLottieSwitch(modifier: Modifier = Modifier) {
 
 }*/
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun GetTemperatureUnit(
     isTemperatureDialogOpen: MutableState<Boolean>,
@@ -334,7 +339,6 @@ fun GetTemperatureUnit(
     val temperatureUnit =
         weatherPreferences.getTemperatureUnit.collectAsState(TemperatureValues.C)
     val radioOptions = TemperatureValues.values().asList()
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
     val onSelectedValue: (temperatureValue: TemperatureValues) -> Unit = { newValue ->
@@ -346,32 +350,20 @@ fun GetTemperatureUnit(
     }
 
     if (isTemperatureDialogOpen.value) {
-        Dialog(onDismissRequest = { isTemperatureDialogOpen.value = false }) {
-            DefaultCard {
-                Column(
-                    modifier = Modifier.padding(bottom = 12.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Row(
-                        modifier = Modifier.padding(14.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        PrimaryText(text = stringResource(R.string.choose_temperature_unit))
-                    }
-                    ItemsSelection(
-                        radioOptions = radioOptions,
-                        currentOption = temperatureUnit) {
-                        onSelectedValue(it)
-                    }
-                }
+        DefaultDialog(
+            primaryText = stringResource(R.string.choose_temperature_unit),
+            onDismiss = { isTemperatureDialogOpen.value = false }) {
+            ItemsSelection(
+                radioOptions = radioOptions,
+                currentOption = temperatureUnit
+            ) {
+                onSelectedValue(it)
             }
-
         }
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun GetPressureUnit(
     pressureDialogOpen: MutableState<Boolean>,
@@ -379,7 +371,6 @@ fun GetPressureUnit(
 ) {
     val pressureUnit = weatherPreferences.getPressureUnit.collectAsState(PressureValues.mmHg)
     val radioOptions = PressureValues.values().asList()
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
     val onSelectedValue: (pressureUnit: PressureValues) -> Unit = { newValue ->
@@ -391,42 +382,28 @@ fun GetPressureUnit(
     }
 
     if (pressureDialogOpen.value) {
-        Dialog(onDismissRequest = { pressureDialogOpen.value = false }) {
-            DefaultCard {
-                Column(
-                    modifier = Modifier.padding(bottom = 12.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Row(
-                        modifier = Modifier.padding(14.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        PrimaryText(text = stringResource(R.string.choose_pressure_unit))
-                    }
-                    ItemsSelection(
-                        radioOptions = radioOptions,
-                        currentOption = pressureUnit
-                    ) {
-                        onSelectedValue(it)
-                    }
-                }
-            }
+        DefaultDialog(
+            primaryText = stringResource(R.string.choose_pressure_unit),
+            onDismiss = { pressureDialogOpen.value = false }) {
 
+            ItemsSelection(
+                radioOptions = radioOptions,
+                currentOption = pressureUnit
+            ) {
+                onSelectedValue(it)
+            }
         }
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun GetWindSpeedUnit(
     isWindSpeedDialogOpen: MutableState<Boolean>,
     weatherPreferences: WeatherPreferences,
 ) {
-    val windSpeedUnit =
-        weatherPreferences.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
+    val windSpeedUnit = weatherPreferences.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
     val radioOptions = WindSpeedValues.values().asList()
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
     val onSelectedValue: (windSpeedValues: WindSpeedValues) -> Unit = { newValue ->
@@ -438,29 +415,15 @@ fun GetWindSpeedUnit(
     }
 
     if (isWindSpeedDialogOpen.value) {
-        Dialog(onDismissRequest = { isWindSpeedDialogOpen.value = false }) {
-            DefaultCard {
-                Column(
-                    modifier = Modifier.padding(bottom = 12.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Row(
-                        modifier = Modifier.padding(14.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        PrimaryText(text = stringResource(R.string.choose_temperature_unit))
-                    }
-
-                    ItemsSelection(
-                        radioOptions = radioOptions,
-                        currentOption = windSpeedUnit) {
-                        onSelectedValue(it)
-                    }
-                }
+        DefaultDialog(
+            primaryText = stringResource(R.string.choose_temperature_unit),
+            onDismiss = { isWindSpeedDialogOpen.value = false }) {
+            ItemsSelection(
+                radioOptions = radioOptions,
+                currentOption = windSpeedUnit
+            ) {
+                onSelectedValue(it)
             }
-
         }
     }
 }

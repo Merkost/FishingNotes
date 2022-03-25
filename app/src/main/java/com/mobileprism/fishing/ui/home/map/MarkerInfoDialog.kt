@@ -125,7 +125,7 @@ fun MarkerInfoDialog(
                         modifier = Modifier
                             .constrainAs(title) {
                                 top.linkTo(locationIcon.top)
-                                linkTo(locationIcon.end, verticalFabLine, 0.dp, 0.dp, 0f)
+                                linkTo(locationIcon.end, verticalFabLine, 0.dp, 0.dp, 0.dp, 0.dp, 0f)
                                 bottom.linkTo(locationIcon.bottom)
                                 width = Dimension.fillToConstraints
                             },
@@ -142,7 +142,7 @@ fun MarkerInfoDialog(
                         modifier = Modifier
                             .constrainAs(area) {
                                 top.linkTo(title.bottom, 4.dp)
-                                linkTo(title.start, title.end, 0.dp, 32.dp, 0f)
+                                linkTo(title.start, title.end, 0.dp, 32.dp, 0.dp, 32.dp, 0f)
 
                             }
                             .animateContentSize(
@@ -161,7 +161,7 @@ fun MarkerInfoDialog(
                             .constrainAs(distanceTo) {
                                 top.linkTo(area.top)
                                 bottom.linkTo(area.bottom)
-                                linkTo(area.absoluteRight, parent.absoluteRight, 8.dp, 16.dp, 1f)
+                                linkTo(area.absoluteRight, parent.absoluteRight, 8.dp, 16.dp, 8.dp, 16.dp, 1f)
 
                             }
                             .animateContentSize(
@@ -187,7 +187,7 @@ fun MarkerInfoDialog(
                         modifier = Modifier
                             .constrainAs(fish) {
                                 top.linkTo(area.bottom, 4.dp)
-                                linkTo(parent.absoluteLeft, horizontalLine, 0.dp, 0.dp, 0.5f)
+                                linkTo(parent.absoluteLeft, horizontalLine, 0.dp, 0.dp, 0.dp, 0.dp,0.5f)
                                 bottom.linkTo(parent.bottom)
                             }
                             .animateContentSize(
@@ -220,7 +220,7 @@ fun MarkerInfoDialog(
                         modifier = Modifier
                             .constrainAs(divider) {
                                 top.linkTo(area.bottom, 4.dp)
-                                linkTo(horizontalLine, horizontalLine, 0.dp, 0.dp, 0.5f)
+                                linkTo(horizontalLine, horizontalLine, 0.dp, 0.dp, 0.dp, 0.dp, 0.5f)
                                 bottom.linkTo(parent.bottom)
                             }
                             .height(20.dp)
@@ -233,7 +233,7 @@ fun MarkerInfoDialog(
                         modifier = Modifier
                             .constrainAs(weather) {
                                 top.linkTo(area.bottom, 4.dp)
-                                linkTo(horizontalLine, parent.absoluteRight, 0.dp, 0.dp, 0.5f)
+                                linkTo(horizontalLine, parent.absoluteRight, 0.dp, 0.dp, 0.dp, 0.dp, 0.5f)
                                 bottom.linkTo(parent.bottom)
                             }
                             .animateContentSize(

@@ -27,6 +27,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 @Composable
 fun DefaultDialog(
     primaryText: String? = null,
+    primaryTextAlign: Alignment = Alignment.Center,
     secondaryText: String? = null,
     neutralButtonText: String = "",
     onNeutralClick: (() -> Unit) = { },
@@ -37,6 +38,13 @@ fun DefaultDialog(
     onDismiss: () -> Unit = { },
     content: @Composable() (() -> Unit)? = null
 ) {
+
+    val mainTextBias = when(primaryTextAlign) {
+        Alignment.Start -> 0f
+        Alignment.End -> 1f
+        else -> 0.5f
+    }
+
     Dialog(onDismissRequest = onDismiss) {
         DefaultCard(
             modifier = Modifier
@@ -48,14 +56,14 @@ fun DefaultDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .padding(16.dp)
             ) {
                 val (title, subtitle, mainContent, neutralButton, negativeButton, positiveButton) = createRefs()
 
                 primaryText?.let {
                     PrimaryText(
                         modifier = Modifier.constrainAs(title) {
-                            top.linkTo(parent.top)
+                            top.linkTo(parent.top, 16.dp)
+                            linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, 16.dp, 16.dp, mainTextBias)
                             absoluteLeft.linkTo(parent.absoluteLeft)
                         },
                         text = primaryText,
@@ -72,7 +80,7 @@ fun DefaultDialog(
                     )
                 } else {
                     Spacer(modifier = Modifier
-                        .size(1.dp)
+                        .size(0.dp)
                         .constrainAs(subtitle) {
                             top.linkTo(title.bottom, 2.dp)
                             absoluteLeft.linkTo(title.absoluteLeft)
@@ -84,7 +92,7 @@ fun DefaultDialog(
                         .fillMaxWidth()
                         .wrapContentHeight()
                         .constrainAs(mainContent) {
-                            top.linkTo(subtitle.bottom, 16.dp)
+                            top.linkTo(subtitle.bottom, 14.dp)
                             absoluteLeft.linkTo(parent.absoluteLeft)
                             absoluteRight.linkTo(parent.absoluteRight)
                             width = Dimension.fillToConstraints
@@ -137,7 +145,6 @@ fun DefaultDialog(
                         onClick = onNegativeClick,
                     )
                 }
-
             }
         }
     }
