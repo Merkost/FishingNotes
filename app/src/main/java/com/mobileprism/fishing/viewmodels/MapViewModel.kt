@@ -87,7 +87,8 @@ class MapViewModel(
     private val _currentMarker: MutableStateFlow<UserMapMarker?> = MutableStateFlow(null)
     val currentMarker = _currentMarker.asStateFlow()
 
-    val chosenPlace = mutableStateOf<String?>(null)
+    private val _chosenPlace = MutableStateFlow("")
+    val chosenPlace = _chosenPlace
 
     private val _currentMarkerAddress = MutableStateFlow<String?>(null)
     val currentMarkerAddress = _currentMarkerAddress.asStateFlow()
@@ -386,6 +387,11 @@ class MapViewModel(
 
     fun resetAddNewMarkerState() {
         _addNewMarkerState.value = null
+    }
+
+    fun resetChosenPlace() {
+        chosenPlace.value = ""
+        showMarker.value = false
     }
 
 

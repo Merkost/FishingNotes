@@ -502,10 +502,9 @@ fun PlaceTileView(
 
     when (cameraMoveState) {
         CameraMoveState.MoveStart -> {
-            pointerState.value = PointerState.ShowMarker
             selectedPlace = null
-            viewModel.chosenPlace.value = null
-            viewModel.showMarker.value = false
+            pointerState.value = PointerState.ShowMarker
+            viewModel.resetChosenPlace()
         }
         CameraMoveState.MoveFinish -> {
             LaunchedEffect(cameraMoveState) {
@@ -539,8 +538,8 @@ fun PlaceTileView(
         }
     }
 
-    val placeName = viewModel.chosenPlace.value ?: stringResource(R.string.searching)
-    val shimmerModifier = if (viewModel.chosenPlace.value != null) Modifier else
+    val placeName = viewModel.chosenPlace.value.ifEmpty { stringResource(R.string.searching) }
+    val shimmerModifier = if (viewModel.chosenPlace.value.isNotBlank()) Modifier else
         Modifier.placeholder(
         visible = true,
         color = Color.LightGray,

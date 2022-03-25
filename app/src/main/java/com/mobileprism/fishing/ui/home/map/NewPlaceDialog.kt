@@ -47,8 +47,6 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun NewPlaceDialog(
     dialogState: MutableState<Boolean>,
-    //TODO: delete chosenPlace
-    chosenPlace: MutableState<String?>,
 ) {
     val viewModel: MapViewModel = getViewModel()
     val currentCameraPosition by viewModel.currentCameraPosition.collectAsState()
@@ -97,12 +95,10 @@ fun NewPlaceDialog(
             val (progress, name, locationIcon, title, description, saveButton, cancelButton) = createRefs()
 
             val descriptionValue = remember { mutableStateOf("") }
-            val titleValue = remember { mutableStateOf(/*chosenPlace.value ?:*/ "") }
+            val titleValue = remember { mutableStateOf(viewModel.chosenPlace.value) }
             val markerColor = remember { mutableStateOf(Color(0xFFEC407A).hashCode()) }
-            LaunchedEffect(chosenPlace.value) {
-                chosenPlace.value?.let {
-                    titleValue.value = it
-                }
+            LaunchedEffect(viewModel.chosenPlace.value) {
+                    titleValue.value = viewModel.chosenPlace.value
             }
 
             Text(

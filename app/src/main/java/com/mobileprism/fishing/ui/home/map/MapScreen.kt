@@ -269,7 +269,6 @@ fun MapScreen(
                     Dialog(onDismissRequest = { dialogAddPlaceIsShowing.value = false }) {
                         NewPlaceDialog(
                             dialogState = dialogAddPlaceIsShowing,
-                            chosenPlace = viewModel.chosenPlace
                         )
                     }
             }
