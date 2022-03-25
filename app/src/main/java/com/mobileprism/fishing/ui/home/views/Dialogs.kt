@@ -12,6 +12,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -27,7 +28,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 @Composable
 fun DefaultDialog(
     primaryText: String? = null,
-    primaryTextAlign: Alignment = Alignment.Center,
+    textAlign: TextAlign = TextAlign.Center,
     secondaryText: String? = null,
     neutralButtonText: String = "",
     onNeutralClick: (() -> Unit) = { },
@@ -39,9 +40,9 @@ fun DefaultDialog(
     content: @Composable() (() -> Unit)? = null
 ) {
 
-    val mainTextBias = when(primaryTextAlign) {
-        Alignment.Start -> 0f
-        Alignment.End -> 1f
+    val textBias = when(textAlign) {
+        TextAlign.Start -> 0f
+        TextAlign.End -> 1f
         else -> 0.5f
     }
 
@@ -55,7 +56,7 @@ fun DefaultDialog(
             ConstraintLayout(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight()
+                    .wrapContentHeight().padding(bottom = 2.dp)
             ) {
                 val (title, subtitle, mainContent, neutralButton, negativeButton, positiveButton) = createRefs()
 
@@ -63,9 +64,11 @@ fun DefaultDialog(
                     PrimaryText(
                         modifier = Modifier.constrainAs(title) {
                             top.linkTo(parent.top, 16.dp)
-                            linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, 16.dp, 16.dp, mainTextBias)
-                            absoluteLeft.linkTo(parent.absoluteLeft)
+                            linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, bias = textBias)
+                            width = Dimension.fillToConstraints
                         },
+                        textAlign = textAlign,
+                        fontWeight = FontWeight.SemiBold,
                         text = primaryText,
                     )
                 }
@@ -74,9 +77,11 @@ fun DefaultDialog(
                     PrimaryTextSmall(
                         modifier = Modifier.constrainAs(subtitle) {
                             top.linkTo(title.bottom, 2.dp)
-                            absoluteLeft.linkTo(title.absoluteLeft)
+                            linkTo(start = parent.absoluteLeft, end = parent.absoluteRight, 16.dp, 16.dp, bias = 0.5f)
+                            width = Dimension.fillToConstraints
                         },
-                        text = secondaryText, textAlign = TextAlign.Start
+                        textAlign = textAlign,
+                        text = secondaryText,
                     )
                 } else {
                     Spacer(modifier = Modifier
@@ -106,7 +111,7 @@ fun DefaultDialog(
                     DefaultButtonSecondaryLight(
                         modifier = Modifier.constrainAs(neutralButton) {
                             top.linkTo(mainContent.bottom, 16.dp)
-                            absoluteLeft.linkTo(parent.absoluteLeft)
+                            absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
                         },
                         text = neutralButtonText,
                         onClick = onNeutralClick,
@@ -118,7 +123,7 @@ fun DefaultDialog(
                         modifier = Modifier.constrainAs(positiveButton) {
                             top.linkTo(mainContent.bottom, 16.dp)
                             bottom.linkTo(parent.bottom)
-                            absoluteRight.linkTo(parent.absoluteRight)
+                            absoluteRight.linkTo(parent.absoluteRight, 8.dp)
                         },
                         text = positiveButtonText,
                         onClick = onPositiveClick,
@@ -130,7 +135,7 @@ fun DefaultDialog(
                             .constrainAs(positiveButton) {
                                 top.linkTo(mainContent.bottom, 16.dp)
                                 bottom.linkTo(parent.bottom)
-                                absoluteRight.linkTo(parent.absoluteRight)
+                                absoluteRight.linkTo(parent.absoluteRight, 8.dp)
                             },
                     )
                 }

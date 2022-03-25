@@ -73,7 +73,7 @@ fun DefaultButtonSecondaryLight(
     icon: Painter? = null,
     text: String,
     enabled: Boolean = true,
-    textColor: Color = secondaryTextColor,
+    textColor: Color = MaterialTheme.customColors.secondaryTextColor,
     onClick: () -> Unit
 ) {
     DefaultButton(

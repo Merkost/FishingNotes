@@ -19,7 +19,7 @@ sealed class ContentState<T> (item: T) {
 
 @OptIn(ExperimentalContracts::class)
 @SinceKotlin("1.3")
-public inline fun <R, T> ContentState<T>.fold(
+inline fun <R, T> ContentState<T>.fold(
     onAdded: (value: T) -> R,
     onDeleted: (value: T) -> R,
     onModified: (value: T) -> R,
