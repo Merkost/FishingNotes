@@ -87,6 +87,7 @@ fun MapScreen(
     val coroutineScope = rememberCoroutineScope()
     val userPreferences: UserPreferences = get()
     val useZoomButtons by userPreferences.useMapZoomButons.collectAsState(false)
+    val placeTileState by viewModel.placeTileViewNameState.collectAsState()
 
     val scaffoldState = rememberBottomSheetScaffoldState()
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -218,7 +219,7 @@ fun MapScreen(
                     onClick = viewModel::resetMapBearing
                 )
 
-                if (useZoomButtons) {
+                /*if (useZoomButtons) {
                     MapZoomInButton(
                         modifier = Modifier.constrainAs(zoomInButton) {
                             linkTo(parent.top, centerHorizontal, 4.dp, 4.dp, 4.dp, 4.dp, 1f)
@@ -232,7 +233,7 @@ fun MapScreen(
                             linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, 16.dp, 16.dp, 1f)
                         }, onClick = viewModel::onZoomOutClick
                     )
-                }
+                }*/
 
                 AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode,
                     enter = fadeIn(), exit = fadeOut(),
@@ -242,7 +243,7 @@ fun MapScreen(
                         absoluteLeft.linkTo(parent.absoluteLeft)
                         absoluteRight.linkTo(parent.absoluteRight)
                     }) {
-                    PointerIcon(viewModel.pointerState)
+                    PointerIcon(placeTileState.pointerState)
                 }
 
                 AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection,
@@ -403,9 +404,7 @@ fun MapLayout(
 
     LaunchedEffect(Unit) {
         viewModel.firstCameraPosition.collectLatest {
-            it?.let {
-                setCameraPosition(this, map, it.first, it.second, it.third)
-            }
+            it?.let { setCameraPosition(this, map, it.first, it.second, it.third) }
         }
     }
 

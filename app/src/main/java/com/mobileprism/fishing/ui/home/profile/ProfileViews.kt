@@ -63,8 +63,7 @@ fun UserImage(user: User?, imgSize: Dp, modifier: Modifier = Modifier) {
 
 
             CoilImage(
-                imageModel = if (user.photoUrl.isNullOrEmpty())
-                    painterResource(R.drawable.ic_fisher) else user.photoUrl,
+                imageModel = user.photoUrl.ifEmpty { painterResource(R.drawable.ic_fisher) },
                 contentScale = ContentScale.Crop,
                 shimmerParams = ShimmerParams(
                     baseColor = Color.LightGray,

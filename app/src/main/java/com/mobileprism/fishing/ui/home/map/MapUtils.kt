@@ -48,6 +48,18 @@ object MapTypes {
     const val terrain = GoogleMap.MAP_TYPE_TERRAIN
 }
 
+sealed class GeocoderResult {
+    class Success(val placeName: String): GeocoderResult()
+    object NoNamePlace: GeocoderResult()
+    object Failed: GeocoderResult()
+    object InProgress: GeocoderResult()
+}
+
+data class PlaceTileState(
+    val geocoderResult: GeocoderResult = GeocoderResult.InProgress,
+    val pointerState: PointerState = PointerState.ShowMarker,
+)
+
 fun getHue(red: Float, green: Float, blue: Float): Float {
     val min = min(min(red, green), blue)
     val max = max(max(red, green), blue)

@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.ui.home.map
 
-import android.location.Geocoder
 import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -43,7 +42,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.use_cases.GeocoderResult
 import com.mobileprism.fishing.ui.home.SettingsHeader
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.views.DefaultDialog
@@ -54,8 +52,6 @@ import com.mobileprism.fishing.viewmodels.MapViewModel
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.MainActivity
 import com.mobileprism.fishing.utils.location.LocationManager
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
@@ -287,10 +283,12 @@ fun MapLayersButton(modifier: Modifier, onLayersSelectionOpen: () -> Unit) {
         shape = CircleShape,
         modifier = modifier.size(40.dp)
     ) {
-        IconButton(modifier = Modifier
-            .padding(8.dp)
-            .fillMaxSize(),
-            onClick = onLayersSelectionOpen) {
+        IconButton(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxSize(),
+            onClick = onLayersSelectionOpen
+        ) {
             Icon(painterResource(R.drawable.ic_baseline_layers_24), stringResource(R.string.layers))
         }
     }
@@ -329,7 +327,7 @@ fun LayersView(
             ) {
                 Text(stringResource(R.string.map_type))
                 Card(shape = CircleShape, modifier = Modifier.size(20.dp)) {
-                    IconButton(onClick = onCloseMapSelection)  {
+                    IconButton(onClick = onCloseMapSelection) {
                         Icon(Icons.Default.Close, stringResource(R.string.close))
                     }
                 }
@@ -365,7 +363,13 @@ fun LayersView(
 }
 
 @Composable
-fun MapLayerItem(mapType: State<Int>, layer: Int, painter: Painter, name: String, onLayerSelected: (Int) -> Unit) {
+fun MapLayerItem(
+    mapType: State<Int>,
+    layer: Int,
+    painter: Painter,
+    name: String,
+    onLayerSelected: (Int) -> Unit
+) {
     val animatedColor by animateColorAsState(
         if (mapType.value == layer) MaterialTheme.colors.primary else Color.White,
         animationSpec = tween(300)
@@ -421,7 +425,7 @@ fun MapSettingsButton(
 
 @Composable
 fun PointerIcon(
-    pointerState: MutableState<PointerState>,
+    pointerState: PointerState,
     modifier: Modifier = Modifier,
 ) {
     var isFirstTimeCalled by remember { mutableStateOf(false) }
@@ -448,8 +452,8 @@ fun PointerIcon(
         )
     }
 
-    LaunchedEffect(pointerState.value) {
-        if (pointerState.value == PointerState.ShowMarker) {
+    LaunchedEffect(pointerState) {
+        if (pointerState == PointerState.ShowMarker) {
             lottieAnimatable.animate(
                 composition,
                 iteration = 1,
@@ -495,81 +499,34 @@ fun PlaceTileView(
 ) {
     val context = LocalContext.current
     val viewModel: MapViewModel = getViewModel()
-    val cameraMoveState by viewModel.cameraMoveState.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
-    val geocoder = Geocoder(context)
     val placeTileViewNameState by viewModel.placeTileViewNameState.collectAsState()
-    val pointerState = viewModel.pointerState
-    var selectedPlace by remember { mutableStateOf<String>("") }
 
-    /*LaunchedEffect(placeTileViewNameState) {
-        selectedPlace = when (val state = placeTileViewNameState) {
-            is GeocoderResult.Success -> {
-                state.placeName
-            }
-            GeocoderResult.UnnamedPlace -> {
-                context.getString(R.string.unnamed_place)
-            }
-            GeocoderResult.Failed -> {
-                context.getString(R.string.cant_recognize_place)
-            }
-            else -> ""
-        }
-    }*/
+    val selectedPlace = remember { mutableStateOf("") }
 
-    when (cameraMoveState) {
-        CameraMoveState.MoveStart -> {
-            selectedPlace = ""
-            pointerState.value = PointerState.ShowMarker
-            viewModel.resetChosenPlace()
-        }
-        CameraMoveState.MoveFinish -> {
-            LaunchedEffect(cameraMoveState) {
-                delay(1200)
-                coroutineScope.launch(Dispatchers.Default) {
-                    try {
-                        val position = geocoder.getFromLocation(
-                            currentCameraPosition.value.first.latitude,
-                            currentCameraPosition.value.first.longitude,
-                            1
-                        )
-                        position?.first()?.let { address ->
-                            if (!address.subAdminArea.isNullOrBlank()) {
-                                viewModel.chosenPlace.value =
-                                    address.subAdminArea.replaceFirstChar { it.uppercase() }
-                            } else if (!address.adminArea.isNullOrBlank()) {
-                                viewModel.chosenPlace.value = address.adminArea
-                                    .replaceFirstChar { it.uppercase() }
-                            } else viewModel.chosenPlace.value =
-                                context.getString(R.string.unnamed_place)
-                        }
-                    } catch (e: Throwable) {
-                        viewModel.chosenPlace.value =
-                            context.getString(R.string.cant_recognize_place)
-                    }
-                    pointerState.value = PointerState.HideMarker
-                    selectedPlace = viewModel.chosenPlace.value
-                }
-            }
-        }
+    DisposableEffect(Unit) {
+        viewModel.getPlaceTileViewName()
+        onDispose { viewModel.cancelPlaceTileNameJob() }
     }
 
-    val placeName = viewModel.chosenPlace.value.ifEmpty { stringResource(R.string.searching) }
-    val shimmerModifier = if (viewModel.chosenPlace.value.isNotBlank()) Modifier else
+    SetPlaceNameResultListener(placeTileViewNameState) { newPlaceName ->
+        selectedPlace.value = newPlaceName
+    }
+
+    val shimmerModifier = if (selectedPlace.value.isNotBlank()) Modifier else
         Modifier.placeholder(
-        visible = true,
-        color = Color.LightGray,
-        // optional, defaults to RectangleShape
-        shape = CircleShape,
-        highlight = PlaceholderHighlight.shimmer(
-            highlightColor = Color.White,
-        ),)
+            visible = true,
+            color = Color.LightGray,
+            shape = CircleShape,
+            highlight = PlaceholderHighlight.shimmer(
+                highlightColor = Color.White,
+            ),
+        )
     val pointerIconColor by animateColorAsState(
-        if (selectedPlace.isNotBlank()) secondaryFigmaColor
+        if (selectedPlace.value.isNotBlank()) secondaryFigmaColor
         else Color.LightGray
     )
     val textColor by animateColorAsState(
-        if (selectedPlace.isNotBlank()) MaterialTheme.colors.onSurface
+        if (selectedPlace.value.isNotBlank()) MaterialTheme.colors.onSurface
         else Color.LightGray
     )
 
@@ -602,7 +559,7 @@ fun PlaceTileView(
             )
             Spacer(Modifier.size(4.dp))
             Text(
-                placeName,
+                selectedPlace.value.ifEmpty { stringResource(R.string.searching) },
                 overflow = TextOverflow.Ellipsis,
                 color = textColor,
                 modifier = Modifier
@@ -610,6 +567,30 @@ fun PlaceTileView(
                     .then(shimmerModifier)
             )
             Spacer(Modifier.size(4.dp))
+        }
+    }
+}
+
+@Composable
+fun SetPlaceNameResultListener(placeTileViewNameState: PlaceTileState, setPlaceName: (String) -> Unit) {
+    val context = LocalContext.current
+
+    LaunchedEffect(placeTileViewNameState) {
+        placeTileViewNameState.let {
+            when (it.geocoderResult) {
+                is GeocoderResult.Success -> {
+                    setPlaceName(it.geocoderResult.placeName)
+                }
+                GeocoderResult.NoNamePlace -> {
+                    setPlaceName(context.getString(R.string.unnamed_place))
+                }
+                GeocoderResult.Failed -> {
+                    setPlaceName(context.getString(R.string.cant_recognize_place))
+                }
+                GeocoderResult.InProgress -> {
+                    setPlaceName("")
+                }
+            }
         }
     }
 }

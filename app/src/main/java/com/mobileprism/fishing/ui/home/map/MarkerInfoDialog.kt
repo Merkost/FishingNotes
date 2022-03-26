@@ -26,7 +26,6 @@ import androidx.navigation.NavController
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.CurrentWeatherFree
-import com.mobileprism.fishing.domain.use_cases.GeocoderResult
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
@@ -63,7 +62,7 @@ fun MarkerInfoDialog(
             is GeocoderResult.Success -> {
                 state.placeName
             }
-            GeocoderResult.UnnamedPlace -> {
+            GeocoderResult.NoNamePlace -> {
                 context.getString(R.string.unnamed_place)
             }
             GeocoderResult.Failed -> {
