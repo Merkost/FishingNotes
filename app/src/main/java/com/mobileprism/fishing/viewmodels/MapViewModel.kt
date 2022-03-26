@@ -27,14 +27,12 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 class MapViewModel(
-    private val repository: MarkersRepository,
     private val getUserPlacesUseCase: GetUserPlacesUseCase,
     private val getUserPlacesListUseCase: GetUserPlacesListUseCase,
     private val addNewPlaceUseCase: AddNewPlaceUseCase,
     private val getFreeWeatherUseCase: GetFreeWeatherUseCase,
     private val getFishActivityUseCase: GetFishActivityUseCase,
     private val getPlaceNameUseCase: GetPlaceNameUseCase,
-    private val geocoder: Geocoder,
     private val userPreferences: UserPreferences,
     private val locationManager: LocationManager,
 ) : ViewModel() {
@@ -50,31 +48,27 @@ class MapViewModel(
     private val _firstCameraPosition = MutableStateFlow<Triple<LatLng, Float, Float>?>(null)
     val firstCameraPosition = _firstCameraPosition.asStateFlow()
 
-    private val firstLaunchLocation = mutableStateOf(true)
-
     private val _addNewMarkerState: MutableStateFlow<UiState?> = MutableStateFlow(null)
     val addNewMarkerState = _addNewMarkerState.asStateFlow()
 
-    private var _mapMarkers: MutableStateFlow<MutableList<UserMapMarker>> =
-        MutableStateFlow(mutableListOf())
-    val mapMarkers: StateFlow<MutableList<UserMapMarker>>
+    private var _mapMarkers: MutableStateFlow<MutableList<UserMapMarker>> = MutableStateFlow(mutableListOf())
+    val mapMarkers: StateFlow<List<UserMapMarker>>
         get() = _mapMarkers
 
     private val _mapUiState: MutableStateFlow<MapUiState> = MutableStateFlow(MapUiState.NormalMode)
     val mapUiState = _mapUiState.asStateFlow()
 
     private val _cameraMoveState = MutableStateFlow<CameraMoveState>(CameraMoveState.MoveFinish)
-    val cameraMoveState = _cameraMoveState.asStateFlow()
 
     private val _mapType = MutableStateFlow(MapTypes.roadmap)
     val mapType = _mapType.asStateFlow()
-    fun onLayerSelected(layer: Int) {
-        _mapType.value = layer
-    }
+    fun onLayerSelected(layer: Int) { _mapType.value = layer }
 
     val mapBearing = MutableStateFlow(0f)
 
-    val lastKnownLocation = mutableStateOf<LatLng?>(null)
+    private val _lastKnownLocation = MutableStateFlow<LatLng?>(null)
+    val lastKnownLocation = _lastKnownLocation.asStateFlow()
+
     private val lastMapCameraPosition = mutableStateOf<Triple<LatLng, Float, Float>?>(null)
 
     /**
@@ -89,7 +83,7 @@ class MapViewModel(
     private val _currentMarker: MutableStateFlow<UserMapMarker?> = MutableStateFlow(null)
     val currentMarker = _currentMarker.asStateFlow()
 
-    private val _currentMarkerAddressState = MutableStateFlow<GeocoderResult?>(null)
+    private val _currentMarkerAddressState = MutableStateFlow<GeocoderResult>(GeocoderResult.InProgress)
     val currentMarkerAddressState = _currentMarkerAddressState.asStateFlow()
 
     private val _placeTileViewNameState = MutableStateFlow<PlaceTileState>(PlaceTileState())
@@ -97,7 +91,6 @@ class MapViewModel(
 
     private val _currentMarkerRawDistance = MutableStateFlow<Double?>(null)
     val currentMarkerRawDistance = _currentMarkerRawDistance.asStateFlow()
-
 
     val fishActivity: MutableState<Int?> = mutableStateOf(null)
     val currentWeather: MutableState<CurrentWeatherFree?> = mutableStateOf(null)
@@ -216,7 +209,7 @@ class MapViewModel(
     fun quickAddPlace(name: String) {
         if (mapUiState.value is MapUiState.NormalMode) {
             viewModelScope.launch {
-                lastKnownLocation.value?.let {
+                _lastKnownLocation.value?.let {
                     addNewMarker(
                         RawMapMarker(
                             name,
@@ -271,7 +264,7 @@ class MapViewModel(
             locationManager.getCurrentLocationFlow().collect { currentLocationState ->
                 when (currentLocationState) {
                     is LocationState.LocationGranted -> {
-                        lastKnownLocation.value = currentLocationState.location
+                        _lastKnownLocation.value = currentLocationState.location
                         setNewCameraLocation(currentLocationState.location)
                     }
                     else -> {
@@ -326,7 +319,7 @@ class MapViewModel(
     fun setNewMarkerInfo(latitude: Double, longitude: Double) {
         fishActivity.value = null
         currentWeather.value = null
-        _currentMarkerAddressState.value = null
+        _currentMarkerAddressState.value = GeocoderResult.InProgress
         _currentMarkerRawDistance.value = null
         getPlaceNameForMarkerDetails(latitude, longitude)
         getPlaceRawDistance(latitude, longitude)
@@ -335,8 +328,8 @@ class MapViewModel(
     }
 
     private fun getPlaceRawDistance(latitude: Double, longitude: Double) {
-        viewModelScope.launch(Dispatchers.Default) {
-            lastKnownLocation.value?.let {
+        viewModelScope.launch {
+            _lastKnownLocation.value?.let {
                 _currentMarkerRawDistance.value =
                     SphericalUtil.computeDistanceBetween(
                         LatLng(latitude, longitude),
@@ -353,7 +346,7 @@ class MapViewModel(
 
     fun getPlaceTileViewName() {
         placeTileNameJob = viewModelScope.launch(Dispatchers.Default) {
-            cameraMoveState.collectLatest {
+            _cameraMoveState.collectLatest {
                 when (it) {
                     CameraMoveState.MoveStart -> {
                         _placeTileViewNameState.value = _placeTileViewNameState.value.copy(

@@ -508,7 +508,7 @@ fun PlaceTileView(
         onDispose { viewModel.cancelPlaceTileNameJob() }
     }
 
-    SetPlaceNameResultListener(placeTileViewNameState) { newPlaceName ->
+    SetPlaceNameResultListener(placeTileViewNameState.geocoderResult) { newPlaceName ->
         selectedPlace.value = newPlaceName
     }
 
@@ -572,14 +572,14 @@ fun PlaceTileView(
 }
 
 @Composable
-fun SetPlaceNameResultListener(placeTileViewNameState: PlaceTileState, setPlaceName: (String) -> Unit) {
+fun SetPlaceNameResultListener(geocoderResult: GeocoderResult, setPlaceName: (String) -> Unit) {
     val context = LocalContext.current
 
-    LaunchedEffect(placeTileViewNameState) {
-        placeTileViewNameState.let {
-            when (it.geocoderResult) {
+    LaunchedEffect(geocoderResult) {
+        geocoderResult.let {
+            when (it) {
                 is GeocoderResult.Success -> {
-                    setPlaceName(it.geocoderResult.placeName)
+                    setPlaceName(it.placeName)
                 }
                 GeocoderResult.NoNamePlace -> {
                     setPlaceName(context.getString(R.string.unnamed_place))

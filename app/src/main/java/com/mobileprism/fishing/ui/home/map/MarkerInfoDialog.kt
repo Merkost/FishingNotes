@@ -57,28 +57,21 @@ fun MarkerInfoDialog(
     var address by remember { mutableStateOf("") }
     val addressState by viewModel.currentMarkerAddressState.collectAsState()
 
-    LaunchedEffect(addressState) {
-        address = when (val state = addressState) {
-            is GeocoderResult.Success -> {
-                state.placeName
-            }
-            GeocoderResult.NoNamePlace -> {
-                context.getString(R.string.unnamed_place)
-            }
-            GeocoderResult.Failed -> {
-                context.getString(R.string.cant_recognize_place)
-            }
-            else -> ""
-        }
+    SetPlaceNameResultListener(addressState) { newPlaceName ->
+        address = newPlaceName
     }
 
     val rawDistance by viewModel.currentMarkerRawDistance.collectAsState()
+    val lastKnownLocation by viewModel.lastKnownLocation.collectAsState()
+
     val distance: String? by remember { mutableStateOf(rawDistance?.let { context.convertDistance(it) }) }
+
     val fishActivity: Int? by remember { viewModel.fishActivity }
     val currentWeather: CurrentWeatherFree? by remember { viewModel.currentWeather }
 
+
     receivedMarker?.let { notNullMarker ->
-        LaunchedEffect(receivedMarker, viewModel.lastKnownLocation.value) {
+        LaunchedEffect(receivedMarker, lastKnownLocation) {
             viewModel.setNewMarkerInfo(notNullMarker.latitude, notNullMarker.longitude)
         }
     }

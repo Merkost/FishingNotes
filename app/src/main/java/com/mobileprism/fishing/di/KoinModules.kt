@@ -55,20 +55,16 @@ val mainModule = module {
     viewModel { LoginViewModel(repository = get()) }
     viewModel {
         MapViewModel(
-            repository = get(),
             getUserPlacesUseCase = get(),
             getUserPlacesListUseCase = get(),
             addNewPlaceUseCase = get(),
             getFreeWeatherUseCase = get(),
             getFishActivityUseCase = get(),
-            geocoder = get(),
             userPreferences = get(),
             locationManager = get(),
             getPlaceNameUseCase = get()
         )
     }
-
-//    viewModel { NewCatchViewModel(get(), get(), get()) }
 
     viewModel {
         UserViewModel(

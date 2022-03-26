@@ -28,7 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
@@ -91,7 +90,7 @@ fun MapScreen(
 
     val scaffoldState = rememberBottomSheetScaffoldState()
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    val dialogAddPlaceIsShowing = remember { mutableStateOf(false) }
+    var newPlaceDialog by remember { mutableStateOf(false) }
     var mapLayersSelection by rememberSaveable { mutableStateOf(false) }
 
     BackPressHandler(
@@ -117,7 +116,7 @@ fun MapScreen(
                         when (mapUiState) {
                             MapUiState.NormalMode -> viewModel.setPlaceSelectionMode()
                             MapUiState.PlaceSelectMode -> {
-                                dialogAddPlaceIsShowing.value = true
+                                newPlaceDialog = true
                                 viewModel.resetMapUiState()
                             }
                             MapUiState.BottomSheetInfoMode -> {
@@ -219,7 +218,7 @@ fun MapScreen(
                     onClick = viewModel::resetMapBearing
                 )
 
-                /*if (useZoomButtons) {
+                if (useZoomButtons) {
                     MapZoomInButton(
                         modifier = Modifier.constrainAs(zoomInButton) {
                             linkTo(parent.top, centerHorizontal, 4.dp, 4.dp, 4.dp, 4.dp, 1f)
@@ -233,7 +232,7 @@ fun MapScreen(
                             linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, 16.dp, 16.dp, 1f)
                         }, onClick = viewModel::onZoomOutClick
                     )
-                }*/
+                }
 
                 AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode,
                     enter = fadeIn(), exit = fadeOut(),
@@ -261,12 +260,7 @@ fun MapScreen(
                     )
                 }
 
-                if (dialogAddPlaceIsShowing.value)
-                    Dialog(onDismissRequest = { dialogAddPlaceIsShowing.value = false }) {
-                        NewPlaceDialog(
-                            dialogState = dialogAddPlaceIsShowing,
-                        )
-                    }
+                NewPlaceDialog(dialogState = newPlaceDialog) { newPlaceDialog = false }
             }
         }
     }
