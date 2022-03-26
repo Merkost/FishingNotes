@@ -1,9 +1,6 @@
 package com.mobileprism.fishing.ui.home.map
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -48,32 +45,17 @@ import org.koin.androidx.compose.getViewModel
 fun NewPlaceDialog(
     dialogState: MutableState<Boolean>,
 ) {
+    val context = LocalContext.current
     val viewModel: MapViewModel = getViewModel()
     val currentCameraPosition by viewModel.currentCameraPosition.collectAsState()
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
     val uiState by viewModel.addNewMarkerState.collectAsState()
 
     LaunchedEffect(uiState) {
         when (uiState) {
-            /*UiState.InProgress -> {
-                Surface(color = Color.Gray, modifier = Modifier
-                    .constrainAs(progress) {
-                        top.linkTo(parent.top)
-                        absoluteLeft.linkTo(parent.absoluteLeft)
-                        absoluteRight.linkTo(parent.absoluteRight)
-                        bottom.linkTo(parent.bottom)
-                    }
-                    .size(100.dp)) {
-                    FishLoading(modifier = Modifier.size(150.dp))
-                }
-            }*/
             UiState.Success -> {
-                coroutineScope.launch {
-                    dialogState.value = false
-                    viewModel.resetAddNewMarkerState()
-                    SnackbarManager.showMessage(R.string.add_place_success)
-                }
+                dialogState.value = false
+                viewModel.resetAddNewMarkerState()
+                SnackbarManager.showMessage(R.string.add_place_success)
             }
             UiState.Error -> {
                 SnackbarManager.showMessage(R.string.add_new_place_error)
@@ -94,11 +76,14 @@ fun NewPlaceDialog(
         ) {
             val (progress, name, locationIcon, title, description, saveButton, cancelButton) = createRefs()
 
+            val placeTileViewNameState by viewModel.placeTileViewNameState.collectAsState()
+
+            val titleValue = remember { mutableStateOf("") }
             val descriptionValue = remember { mutableStateOf("") }
-            val titleValue = remember { mutableStateOf(viewModel.chosenPlace.value) }
             val markerColor = remember { mutableStateOf(Color(0xFFEC407A).hashCode()) }
-            LaunchedEffect(viewModel.chosenPlace.value) {
-                    titleValue.value = viewModel.chosenPlace.value
+
+            SetPlaceNameResultListener(placeTileViewNameState) {
+                titleValue.value = it
             }
 
             Text(
@@ -217,9 +202,8 @@ fun NewPlaceDialog(
                 bottom.linkTo(saveButton.bottom)
             },
                 shape = RoundedCornerShape(24.dp), onClick = {
-                    coroutineScope.launch {
-                        dialogState.value = false
-                    }
+                    viewModel.cancelAddNewMarker()
+                    dialogState.value = false
                 }) {
                 Row(
                     horizontalArrangement = Arrangement.Center,
@@ -249,19 +233,23 @@ fun NewPlaceDialog(
                         markerColor = markerColor.value
                     )
                 )
-            }) {
+            }, enabled = uiState !is UiState.InProgress
+            ) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally),
-                    verticalAlignment = Alignment.CenterVertically
+                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.animateContentSize()
                 ) {
                     Text(
                         stringResource(id = R.string.save),
                         style = MaterialTheme.typography.button
                     )
-                    /*AnimatedVisibility(visible = uiState is UiState.InProgress,
-                        modifier = Modifier.size(8.dp)) {
-                        CircularProgressIndicator()
-                    }*/
+                    AnimatedVisibility(
+                        visible = uiState is UiState.InProgress,
+                        modifier = Modifier.size(18.dp)
+                    ) {
+                        CircularProgressIndicator(color = Color.White)
+                    }
                 }
             }
             DisposableEffect(Unit) {
