@@ -20,7 +20,7 @@ interface MarkersRepository {
     suspend fun changeMarkerVisibility(marker: UserMapMarker, changeTo: Boolean): StateFlow<LiteProgress>
 
     suspend fun deleteMarker(userMapMarker: UserMapMarker)
-    fun addNewMarker(newMarker: RawMapMarker): Flow<Result<Unit>>
+    suspend fun addNewMarker(newMarker: UserMapMarker): Result<Unit>
 
 
 }

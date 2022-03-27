@@ -10,14 +10,15 @@ import com.mobileprism.fishing.domain.entity.common.LiteProgress
 import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.domain.entity.content.MapMarker
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
-import com.mobileprism.fishing.domain.entity.raw.RawMapMarker
 import com.mobileprism.fishing.domain.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
-import com.mobileprism.fishing.model.mappers.MapMarkerMapper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.tasks.asDeferred
+import kotlinx.coroutines.tasks.await
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -305,15 +306,18 @@ class FirebaseMarkersRepositoryImpl(
         }
 
 
-    override fun addNewMarker(newMarker: RawMapMarker) = flow<Result<Unit>> {
-        val mapMarker = MapMarkerMapper().mapRawMapMarker(newMarker)
-        try {
-            //TODO: saveMarker method improvement
-            saveMarker(mapMarker)
-        } catch (error: Throwable) {
-            emit(Result.failure(error))
+    override suspend fun addNewMarker(newMarker: UserMapMarker)
+    = suspendCoroutine<Result<Unit>> { continuation ->
+        val task = dbCollections.getUserMapMarkersCollection().document(newMarker.id).set(newMarker)
+        task.addOnCompleteListener {
+            if (it.isSuccessful) {
+                firebaseAnalytics.logEvent("new_marker", null)
+                continuation.resume(Result.success(Unit))
+            }
+            if (it.isCanceled || it.exception != null) {
+                continuation.resume(Result.failure(it.exception ?: Throwable()))
+            }
         }
-        emit(Result.success(Unit))
     }
 
 

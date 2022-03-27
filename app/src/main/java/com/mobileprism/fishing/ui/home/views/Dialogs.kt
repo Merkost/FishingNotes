@@ -28,7 +28,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 @Composable
 fun DefaultDialog(
     primaryText: String? = null,
-    textAlign: TextAlign = TextAlign.Center,
+    textAlign: TextAlign = TextAlign.Start,
     secondaryText: String? = null,
     neutralButtonText: String = "",
     onNeutralClick: (() -> Unit) = { },

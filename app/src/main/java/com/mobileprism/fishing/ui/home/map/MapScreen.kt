@@ -131,14 +131,8 @@ fun MapScreen(
             bottomSheet = {
                 MarkerInfoDialog(
                     navController = navController,
-                    onMarkerIconClicked = {
-                        viewModel.onMarkerClicked(it)
-                    }
-                ) {
-                    coroutineScope.launch {
-                        scaffoldState.bottomSheetState.collapse()
-                    }
-                }
+                    onMarkerIconClicked = viewModel::onMarkerClicked
+                ) { coroutineScope.launch { scaffoldState.bottomSheetState.collapse() } }
             }
         ) {
             ConstraintLayout(modifier = Modifier.fillMaxSize()) {
@@ -148,14 +142,7 @@ fun MapScreen(
                 val verticalMyLocationButtonGl = createGuidelineFromAbsoluteRight(56.dp)
                 val centerHorizontal = createGuidelineFromBottom(0.5f)
 
-                MapLayout(
-                    modifier = Modifier.constrainAs(mapLayout) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                        absoluteLeft.linkTo(parent.absoluteLeft)
-                        absoluteRight.linkTo(parent.absoluteRight)
-                    },
-                )
+                MapLayout(modifier = Modifier.constrainAs(mapLayout) { centerTo(parent) })
 
                 MapLayersButton(
                     modifier = Modifier.constrainAs(mapLayersButton) {
@@ -190,9 +177,7 @@ fun MapScreen(
                     LayersView(
                         viewModel.mapType.collectAsState(),
                         onLayerSelected = viewModel::onLayerSelected
-                    ) {
-                        mapLayersSelection = false
-                    }
+                    ) { mapLayersSelection = false }
                 }
 
                 MapSettingsButton(
@@ -221,15 +206,15 @@ fun MapScreen(
                 if (useZoomButtons) {
                     MapZoomInButton(
                         modifier = Modifier.constrainAs(zoomInButton) {
-                            linkTo(parent.top, centerHorizontal, 4.dp, 4.dp, 4.dp, 4.dp, 1f)
-                            linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, 16.dp, 16.dp, 1f)
+                            linkTo(parent.top, centerHorizontal, 4.dp, 4.dp, bias = 1f)
+                            linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, bias = 1f)
                         }, onClick = viewModel::onZoomInClick
                     )
 
                     MapZoomOutButton(
                         modifier = Modifier.constrainAs(zoomOutButton) {
-                            linkTo(centerHorizontal, parent.bottom, 4.dp, 4.dp, 4.dp, 4.dp, 0f)
-                            linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, 16.dp, 16.dp, 1f)
+                            linkTo(centerHorizontal, parent.bottom, 4.dp, 4.dp, bias = 0f)
+                            linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, bias = 1f)
                         }, onClick = viewModel::onZoomOutClick
                     )
                 }
@@ -239,11 +224,8 @@ fun MapScreen(
                     modifier = Modifier.constrainAs(pointer) {
                         top.linkTo(parent.top)
                         bottom.linkTo(parent.bottom, 65.dp)
-                        absoluteLeft.linkTo(parent.absoluteLeft)
-                        absoluteRight.linkTo(parent.absoluteRight)
-                    }) {
-                    PointerIcon(placeTileState.pointerState)
-                }
+                        centerHorizontallyTo(parent)
+                    }) { PointerIcon(placeTileState.pointerState) }
 
                 AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection,
                     enter = fadeIn(animationSpec = tween(300)),
@@ -411,9 +393,7 @@ fun MapLayout(
         isMapVisible = true
         viewModel.getLastLocation()
 
-        onDispose {
-            viewModel.saveLastCameraPosition()
-        }
+        onDispose { viewModel.saveLastCameraPosition() }
     }
 }
 
@@ -478,29 +458,17 @@ fun MapFab(
 
     val paddingBottom = animateDpAsState(
         when (state) {
-            MapUiState.NormalMode -> {
-                defaultFabBottomPadding
-            }
-            MapUiState.BottomSheetInfoMode -> {
-                34.dp
-            }
-            MapUiState.PlaceSelectMode -> {
-                defaultFabBottomPadding
-            }
+            MapUiState.NormalMode -> { defaultFabBottomPadding }
+            MapUiState.BottomSheetInfoMode -> { 34.dp }
+            MapUiState.PlaceSelectMode -> { defaultFabBottomPadding }
         }
     )
 
     val paddingTop = animateDpAsState(
         when (state) {
-            MapUiState.NormalMode -> {
-                0.dp
-            }
-            MapUiState.BottomSheetInfoMode -> {
-                26.dp
-            }
-            MapUiState.PlaceSelectMode -> {
-                0.dp
-            }
+            MapUiState.NormalMode -> { 0.dp }
+            MapUiState.BottomSheetInfoMode -> { 26.dp }
+            MapUiState.PlaceSelectMode -> { 0.dp }
         }
     )
 

@@ -51,7 +51,8 @@ class MapViewModel(
     private val _addNewMarkerState: MutableStateFlow<UiState?> = MutableStateFlow(null)
     val addNewMarkerState = _addNewMarkerState.asStateFlow()
 
-    private var _mapMarkers: MutableStateFlow<MutableList<UserMapMarker>> = MutableStateFlow(mutableListOf())
+    private var _mapMarkers: MutableStateFlow<MutableList<UserMapMarker>> =
+        MutableStateFlow(mutableListOf())
     val mapMarkers: StateFlow<List<UserMapMarker>>
         get() = _mapMarkers
 
@@ -62,7 +63,9 @@ class MapViewModel(
 
     private val _mapType = MutableStateFlow(MapTypes.roadmap)
     val mapType = _mapType.asStateFlow()
-    fun onLayerSelected(layer: Int) { _mapType.value = layer }
+    fun onLayerSelected(layer: Int) {
+        _mapType.value = layer
+    }
 
     val mapBearing = MutableStateFlow(0f)
 
@@ -83,7 +86,8 @@ class MapViewModel(
     private val _currentMarker: MutableStateFlow<UserMapMarker?> = MutableStateFlow(null)
     val currentMarker = _currentMarker.asStateFlow()
 
-    private val _currentMarkerAddressState = MutableStateFlow<GeocoderResult>(GeocoderResult.InProgress)
+    private val _currentMarkerAddressState =
+        MutableStateFlow<GeocoderResult>(GeocoderResult.InProgress)
     val currentMarkerAddressState = _currentMarkerAddressState.asStateFlow()
 
     private val _placeTileViewNameState = MutableStateFlow<PlaceTileState>(PlaceTileState())
@@ -261,15 +265,14 @@ class MapViewModel(
     @OptIn(ExperimentalPermissionsApi::class)
     fun onMyLocationClick() {
         viewModelScope.launch {
-            locationManager.getCurrentLocationFlow().collect { currentLocationState ->
-                when (currentLocationState) {
-                    is LocationState.LocationGranted -> {
-                        _lastKnownLocation.value = currentLocationState.location
-                        setNewCameraLocation(currentLocationState.location)
-                    }
-                    else -> {
-                        SnackbarManager.showMessage(R.string.cant_get_current_location)
-                    }
+            val result = locationManager.getCurrentLocationFlow().singleOrNull()
+            when (result) {
+                is LocationState.LocationGranted -> {
+                    _lastKnownLocation.value = result.location
+                    setNewCameraLocation(result.location)
+                }
+                else -> {
+                    SnackbarManager.showMessage(R.string.cant_get_current_location)
                 }
             }
         }
