@@ -177,6 +177,8 @@ class MainActivity : ComponentActivity() {
             } else if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
                 popupSnackbarForCompleteUpdate()
             }
+        }.addOnFailureListener {
+            //SnackbarManager.showMessage(R.string.error_occured)
         }
     }
 
