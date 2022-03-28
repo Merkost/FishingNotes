@@ -63,6 +63,14 @@ android {
 
 dependencies {
 
+    /* lite version provides only map and some core services
+         * full version provides the rest of maps API
+         * routing, panoramas, search and etc.
+         * implementation 'com.yandex.android:maps.mobile:4.0.0-lite'
+         * implementation 'com.yandex.android:maps.mobile:4.0.0-full'
+         */
+    implementation 'com.yandex.android:maps.mobile:4.0.0-lite'
+
     //Settings
     implementation 'com.github.alorma:compose-settings-ui:0.7.2'
 

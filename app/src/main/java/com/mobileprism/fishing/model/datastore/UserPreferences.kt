@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.ui.home.map.DEFAULT_ZOOM
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
+import com.mobileprism.fishing.ui.utils.enums.MapTypeValues
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -28,6 +29,7 @@ class UserPreferences(private val context: Context) {
         val FAB_FAST_ADD = booleanPreferencesKey("fab_fast_add")
         val MAP_ZOOM_BUTTONS_KEY = booleanPreferencesKey("map_zoom_buttons")
         val APP_THEME_KEY = stringPreferencesKey("app_theme")
+        val MAP_TYPE_KEY = stringPreferencesKey("map_type")
     }
 
     //get the saved value
@@ -77,7 +79,21 @@ class UserPreferences(private val context: Context) {
                 )
         }
 
+    val mapType: Flow<MapTypeValues> = context.dataStore.data
+        .map { preferences ->
+            MapTypeValues.valueOf(preferences[MAP_TYPE_KEY] ?: MapTypeValues.GoogleMap.name)
+        }.catch { e ->
+            if (e is IllegalArgumentException) { emit(MapTypeValues.GoogleMap) }
+        }
+
+
     //save values
+    suspend fun saveMapType(mapType: MapTypeValues) {
+        context.dataStore.edit { preferences ->
+            preferences[MAP_TYPE_KEY] = mapType.name
+        }
+    }
+
     suspend fun saveLocationPermissionStatus(shouldShow: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[USER_LOCATION_PERMISSION_KEY] = shouldShow

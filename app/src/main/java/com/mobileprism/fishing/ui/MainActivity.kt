@@ -52,6 +52,7 @@ import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.Logger
 import com.mobileprism.fishing.viewmodels.MainViewModel
+import com.yandex.mapkit.MapKitFactory
 import kotlinx.coroutines.InternalCoroutinesApi
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
@@ -140,7 +141,8 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-
+        MapKitFactory.setApiKey(getString(R.string.yandex_mapkit_apikey))
+        MapKitFactory.initialize(this)
 
         MobileAds.initialize(this) {}
 

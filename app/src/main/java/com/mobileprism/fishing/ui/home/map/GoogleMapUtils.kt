@@ -20,11 +20,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleObserver
 import androidx.navigation.NavController
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.GoogleMapOptions
-import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.MapView as GoogleMapView
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.ktx.awaitMap
@@ -39,8 +40,9 @@ import java.text.DecimalFormat
 import java.util.*
 import kotlin.math.max
 import kotlin.math.min
+import com.yandex.mapkit.mapview.MapView as YandexMapView
 
-object MapTypes {
+object GoogleMapTypes {
     const val none = GoogleMap.MAP_TYPE_NONE
     const val roadmap = GoogleMap.MAP_TYPE_NORMAL
     const val satellite = GoogleMap.MAP_TYPE_SATELLITE
@@ -124,7 +126,7 @@ val locationPermissionsList = listOf(
 
 fun moveCameraToLocation(
     coroutineScope: CoroutineScope,
-    map: MapView,
+    map: GoogleMapView,
     location: LatLng,
     zoom: Float = DEFAULT_ZOOM,
     bearing: Float = 0f
@@ -146,7 +148,7 @@ fun moveCameraToLocation(
 
 fun setCameraPosition(
     coroutineScope: CoroutineScope,
-    map: MapView,
+    map: GoogleMapView,
     location: LatLng,
     zoom: Float = DEFAULT_ZOOM,
     bearing: Float = DEFAULT_BEARING
@@ -176,7 +178,16 @@ fun checkLocationPermissions(context: Context): Boolean {
     ) != PackageManager.PERMISSION_GRANTED
 }
 
-fun getMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
+fun getYandexMapLifecycleObserver(mapView: YandexMapView): LifecycleEventObserver =
+    LifecycleEventObserver { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_START -> mapView.onStart()
+            Lifecycle.Event.ON_STOP -> mapView.onStop()
+            else -> {}
+        }
+    }
+
+fun getGoogleMapLifecycleObserver(mapView: GoogleMapView): LifecycleEventObserver =
     LifecycleEventObserver { _, event ->
         when (event) {
             Lifecycle.Event.ON_CREATE -> mapView.onCreate(Bundle())
@@ -231,7 +242,7 @@ fun BackPressHandler(
                 } else {
                     val currentMillis = System.currentTimeMillis()
                     if (currentMillis - lastPressed < 2000) {
-                        (context as MainActivity).finish()
+                        onBackPressedCallback()
                     } else {
                         showToast(context, context.getString(R.string.app_exit_message))
                     }
@@ -244,15 +255,37 @@ fun BackPressHandler(
 }
 
 @Composable
-fun rememberMapViewWithLifecycle(): MapView {
+fun rememberYandexMapViewWithLifecycle(): YandexMapView {
+    val context = (LocalContext.current as MainActivity)
+    val mapView: YandexMapView = remember {
+        YandexMapView(context)
+    }/*.apply { id = R.id.map }*/
+
+
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(lifecycle, mapView) {
+        // Make MapView follow the current lifecycle
+        val lifecycleObserver = getYandexMapLifecycleObserver(mapView)
+        lifecycle.addObserver(lifecycleObserver)
+        onDispose {
+            lifecycle.removeObserver(lifecycleObserver)
+        }
+    }
+    return mapView
+}
+
+
+
+@Composable
+fun rememberGoogleMapViewWithLifecycle(): GoogleMapView {
     val context = (LocalContext.current as MainActivity)
     val isDarkMode = isSystemInDarkTheme()
     val mapOptions = when (isDarkMode) {
         true -> { GoogleMapOptions().mapId(context.resources.getString(R.string.dark_map_id)) }
         false -> { GoogleMapOptions().mapId(context.resources.getString(R.string.light_map_id)) }
     }
-    val mapView: MapView = remember(isDarkMode) {
-        MapView(
+    val mapView: GoogleMapView = remember(isDarkMode) {
+        GoogleMapView(
             context,
             mapOptions
         )
@@ -262,7 +295,7 @@ fun rememberMapViewWithLifecycle(): MapView {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle, mapView) {
         // Make MapView follow the current lifecycle
-        val lifecycleObserver = getMapLifecycleObserver(mapView)
+        val lifecycleObserver = getGoogleMapLifecycleObserver(mapView)
         lifecycle.addObserver(lifecycleObserver)
         onDispose {
             lifecycle.removeObserver(lifecycleObserver)

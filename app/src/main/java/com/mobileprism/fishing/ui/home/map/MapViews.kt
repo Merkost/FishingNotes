@@ -338,21 +338,21 @@ fun LayersView(
             ) {
                 MapLayerItem(
                     mapType,
-                    layer = MapTypes.roadmap,
+                    layer = GoogleMapTypes.roadmap,
                     painter = painterResource(R.drawable.ic_map_default),
                     name = stringResource(R.string.roadmap),
                     onLayerSelected = onLayerSelected
                 )
                 MapLayerItem(
                     mapType,
-                    layer = MapTypes.hybrid,
+                    layer = GoogleMapTypes.hybrid,
                     painter = painterResource(R.drawable.ic_map_satellite),
                     name = stringResource(R.string.satellite),
                     onLayerSelected = onLayerSelected
                 )
                 MapLayerItem(
                     mapType,
-                    layer = MapTypes.terrain,
+                    layer = GoogleMapTypes.terrain,
                     painter = painterResource(R.drawable.ic_map_terrain),
                     name = stringResource(R.string.terrain),
                     onLayerSelected = onLayerSelected

@@ -48,10 +48,17 @@ import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.navigate
+import com.mobileprism.fishing.ui.utils.enums.MapTypeValues
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
 import com.mobileprism.fishing.viewmodels.MapViewModel
+import com.yandex.mapkit.MapKitFactory
+import com.yandex.mapkit.geometry.Point
+import com.yandex.mapkit.logo.HorizontalAlignment
+import com.yandex.mapkit.logo.VerticalAlignment
+import com.yandex.mapkit.map.InputListener
+import com.yandex.mapkit.map.Map
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
@@ -78,13 +85,13 @@ fun MapScreen(
         viewModel.setPlace(place)
         viewModel.setAddingPlace(addPlaceOnStart)
     }
-    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     val context = LocalContext.current
 
     val mapUiState by viewModel.mapUiState.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
     val userPreferences: UserPreferences = get()
+    val mapType by userPreferences.mapType.collectAsState(MapTypeValues.GoogleMap)
     val useZoomButtons by userPreferences.useMapZoomButons.collectAsState(false)
     val placeTileState by viewModel.placeTileViewNameState.collectAsState()
 
@@ -142,7 +149,14 @@ fun MapScreen(
                 val verticalMyLocationButtonGl = createGuidelineFromAbsoluteRight(56.dp)
                 val centerHorizontal = createGuidelineFromBottom(0.5f)
 
-                MapLayout(modifier = Modifier.constrainAs(mapLayout) { centerTo(parent) })
+                when(mapType) {
+                    MapTypeValues.GoogleMap -> {
+                        GoogleMapLayout(modifier = Modifier.constrainAs(mapLayout) { centerTo(parent) })
+                    }
+                    MapTypeValues.YandexMap -> {
+                        YandexMapLayout(modifier = Modifier.constrainAs(mapLayout) { centerTo(parent) })
+                    }
+                }
 
                 MapLayersButton(
                     modifier = Modifier.constrainAs(mapLayersButton) {
@@ -175,7 +189,7 @@ fun MapScreen(
                         .zIndex(5f)
                 ) {
                     LayersView(
-                        viewModel.mapType.collectAsState(),
+                        viewModel.googleMapType.collectAsState(),
                         onLayerSelected = viewModel::onLayerSelected
                     ) { mapLayersSelection = false }
                 }
@@ -207,14 +221,26 @@ fun MapScreen(
                     MapZoomInButton(
                         modifier = Modifier.constrainAs(zoomInButton) {
                             linkTo(parent.top, centerHorizontal, 4.dp, 4.dp, bias = 1f)
-                            linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, bias = 1f)
+                            linkTo(
+                                parent.absoluteLeft,
+                                parent.absoluteRight,
+                                16.dp,
+                                16.dp,
+                                bias = 1f
+                            )
                         }, onClick = viewModel::onZoomInClick
                     )
 
                     MapZoomOutButton(
                         modifier = Modifier.constrainAs(zoomOutButton) {
                             linkTo(centerHorizontal, parent.bottom, 4.dp, 4.dp, bias = 0f)
-                            linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, bias = 1f)
+                            linkTo(
+                                parent.absoluteLeft,
+                                parent.absoluteRight,
+                                16.dp,
+                                16.dp,
+                                bias = 1f
+                            )
                         }, onClick = viewModel::onZoomOutClick
                     )
                 }
@@ -248,6 +274,7 @@ fun MapScreen(
     }
 }
 
+
 @OptIn(ExperimentalMaterialApi::class)
 fun onMapSettingsClicked(
     coroutineScope: CoroutineScope,
@@ -259,22 +286,142 @@ fun onMapSettingsClicked(
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun YandexMapLayout(modifier: Modifier = Modifier) {
+    val viewModel: MapViewModel = getViewModel()
+
+    val userPreferences: UserPreferences = get()
+    val coroutineScope = rememberCoroutineScope()
+    val isDarkTheme = isSystemInDarkTheme()
+    val context = LocalContext.current
+
+    val map = rememberYandexMapViewWithLifecycle()
+
+    val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
+    val googleMapType by viewModel.googleMapType.collectAsState()
+    val markers by viewModel.mapMarkers.collectAsState()
+
+    val markersToShow by remember(markers, showHiddenPlaces) {
+        mutableStateOf(if (showHiddenPlaces) markers
+        else markers.filter { it.visible })
+    }
+
+    val locationPermissionState = rememberMultiplePermissionsState(locationPermissionsList)
+    var isMapVisible by remember { mutableStateOf(false) }
+
+    AnimatedVisibility(
+        visible = isMapVisible,
+        enter = fadeIn(), exit = fadeOut()
+    ) {
+        AndroidView(
+            { map },
+            modifier = modifier
+                .fillMaxSize()
+                .zIndex(-1.0f)
+        ) { mapView ->
+            coroutineScope.launch {
+                val yandexMap = mapView.map
+                yandexMap.mapObjects.clear()
+                markersToShow.forEach {
+                    val position = LatLng(it.latitude, it.longitude)
+                    val markerColor = Color(it.markerColor)
+                    val marker = yandexMap.mapObjects.addPlacemark(
+                        Point(position.latitude, position.longitude),
+                    )
+                    marker.addTapListener { mapObject, point ->
+                        viewModel.onMarkerClicked(it)
+                        true
+                    }
+                }
+
+                yandexMap.addCameraListener { _, cameraPosition, _, isFinished ->
+                    when (isFinished) {
+                        true -> {
+                            viewModel.setCameraMoveState(CameraMoveState.MoveFinish)
+                            viewModel.saveLastCameraPosition()
+                        }
+                        else -> {
+                            viewModel.setCameraMoveState(CameraMoveState.MoveStart)
+                            viewModel.onCameraMove(
+                                LatLng(cameraPosition.target.latitude, cameraPosition.target.longitude),
+                                cameraPosition.zoom, cameraPosition.azimuth
+                            )
+                        }
+                    }
+                }
+
+                yandexMap.addInputListener(object : InputListener {
+                    override fun onMapTap(p0: Map, p1: Point) {
+                        viewModel.resetMapUiState()
+                    }
+
+                    override fun onMapLongTap(p0: Map, p1: Point) {}
+                })
+
+                yandexMap.logo.setAlignment(
+                    com.yandex.mapkit.logo.Alignment(
+                        HorizontalAlignment.LEFT,
+                        VerticalAlignment.BOTTOM
+                    )
+                )
+                yandexMap.isNightModeEnabled = isDarkTheme
+            }
+        }
+    }
+
+    LaunchedEffect(map, locationPermissionState.allPermissionsGranted) {
+        checkLocationPermissions(context)
+        if (locationPermissionState.allPermissionsGranted) {
+            val mapKit = MapKitFactory.getInstance()
+            val userLocationLayer = mapKit.createUserLocationLayer(map.mapWindow)
+            userLocationLayer.isVisible = true
+            userLocationLayer.isHeadingEnabled = true
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.newMapCameraPosition.collectLatest {
+            moveCameraToLocation(this, map, it.first, it.second, it.third)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.firstCameraPosition.collectLatest {
+            it?.let { setCameraPosition(this, map, it.first, it.second, it.third) }
+        }
+    }
+
+    LaunchedEffect(googleMapType) {
+        val yandexMap = map.map
+        //yandexMap.mapType = googleMapType.toYandexMapType
+        // TODO: Add Layers Selection
+    }
+
+    DisposableEffect(map) {
+        isMapVisible = true
+        viewModel.getLastLocation()
+
+        onDispose { viewModel.saveLastCameraPosition() }
+    }
+}
+
 @SuppressLint("PotentialBehaviorOverride", "MissingPermission")
 @ExperimentalAnimationApi
 @ExperimentalCoroutinesApi
 @ExperimentalPermissionsApi
 @Composable
-fun MapLayout(
+fun GoogleMapLayout(
     modifier: Modifier = Modifier,
 ) {
     val viewModel: MapViewModel = getViewModel()
-    val map = rememberMapViewWithLifecycle()
+    val map = rememberGoogleMapViewWithLifecycle()
     val userPreferences: UserPreferences = get()
     val coroutineScope = rememberCoroutineScope()
     val darkTheme = isSystemInDarkTheme()
 
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
-    val mapType by viewModel.mapType.collectAsState()
+    val mapType by viewModel.googleMapType.collectAsState()
     val context = LocalContext.current
     val markers by viewModel.mapMarkers.collectAsState()
 
@@ -458,17 +605,29 @@ fun MapFab(
 
     val paddingBottom = animateDpAsState(
         when (state) {
-            MapUiState.NormalMode -> { defaultFabBottomPadding }
-            MapUiState.BottomSheetInfoMode -> { 34.dp }
-            MapUiState.PlaceSelectMode -> { defaultFabBottomPadding }
+            MapUiState.NormalMode -> {
+                defaultFabBottomPadding
+            }
+            MapUiState.BottomSheetInfoMode -> {
+                34.dp
+            }
+            MapUiState.PlaceSelectMode -> {
+                defaultFabBottomPadding
+            }
         }
     )
 
     val paddingTop = animateDpAsState(
         when (state) {
-            MapUiState.NormalMode -> { 0.dp }
-            MapUiState.BottomSheetInfoMode -> { 26.dp }
-            MapUiState.PlaceSelectMode -> { 0.dp }
+            MapUiState.NormalMode -> {
+                0.dp
+            }
+            MapUiState.BottomSheetInfoMode -> {
+                26.dp
+            }
+            MapUiState.PlaceSelectMode -> {
+                0.dp
+            }
         }
     )
 

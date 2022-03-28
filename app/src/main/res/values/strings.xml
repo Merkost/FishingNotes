@@ -362,6 +362,11 @@
     <string name="light_shower_sleet">Light shower sleet</string>
     <string name="shower_sleet">Shower sleet</string>
     <string name="pressure_hpa">hPa</string>
+    <string name="map_value">Карта</string>
+    <string name="map_type_value">Тип карты</string>
+    <string name="choose_map_type">Выберите тип карты</string>
+    <string name="google_map">Google Map</string>
+    <string name="yandex_map">Yandex map</string>
 
 
 </resources>

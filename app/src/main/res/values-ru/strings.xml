@@ -360,5 +360,10 @@
     <string name="clear_sky">Ясно</string>
     <string name="choose_weather">Выберите погоду:</string>
     <string name="pressure_hpa">гПа</string>
+    <string name="map_value">Карта</string>
+    <string name="map_type_value">Тип карты</string>
+    <string name="choose_map_type">Выберите тип карты</string>
+    <string name="google_map">Google Map</string>
+    <string name="yandex_map">Yandex map</string>
 
 </resources>

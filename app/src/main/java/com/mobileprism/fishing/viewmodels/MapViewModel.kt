@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.viewmodels
 
-import android.location.Geocoder
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -12,7 +11,6 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.raw.RawMapMarker
 import com.mobileprism.fishing.domain.entity.weather.CurrentWeatherFree
-import com.mobileprism.fishing.domain.repository.app.MarkersRepository
 import com.mobileprism.fishing.domain.use_cases.*
 import com.mobileprism.fishing.domain.use_cases.places.AddNewPlaceUseCase
 import com.mobileprism.fishing.domain.use_cases.places.GetUserPlacesListUseCase
@@ -61,13 +59,14 @@ class MapViewModel(
 
     private val _cameraMoveState = MutableStateFlow<CameraMoveState>(CameraMoveState.MoveFinish)
 
-    private val _mapType = MutableStateFlow(MapTypes.roadmap)
-    val mapType = _mapType.asStateFlow()
+    private val _googleMapType = MutableStateFlow(GoogleMapTypes.roadmap)
+    val googleMapType = _googleMapType.asStateFlow()
     fun onLayerSelected(layer: Int) {
-        _mapType.value = layer
+        _googleMapType.value = layer
     }
 
-    val mapBearing = MutableStateFlow(0f)
+    private val _mapBearing = MutableStateFlow<Float>(0f)
+    val mapBearing = _mapBearing.asStateFlow()
 
     private val _lastKnownLocation = MutableStateFlow<LatLng?>(null)
     val lastKnownLocation = _lastKnownLocation.asStateFlow()
@@ -386,7 +385,7 @@ class MapViewModel(
 
     fun onCameraMove(target: LatLng, zoom: Float, bearing: Float) {
         viewModelScope.launch {
-            mapBearing.value = bearing
+            _mapBearing.emit(bearing)
             _currentCameraPosition.value = Triple(target, zoom, bearing)
         }
     }

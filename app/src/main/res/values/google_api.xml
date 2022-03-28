@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    //<string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">1</string>
+    <string name="yandex_mapkit_apikey" templateMergeStrategy="preserve" translatable="false">c2f3ead8-733a-498b-b5ba-cf060d311b64</string>
     <string name="admob_app_id" templateMergeStrategy="preserve" translatable="false">ca-app-pub-5946981839129788~1083532715</string>
     <string name="light_map_id" templateMergeStrategy="preserve" translatable="false">45ced64d98c0e1c8</string>
     <string name="dark_map_id" templateMergeStrategy="preserve" translatable="false">bb595ff311df8535</string>

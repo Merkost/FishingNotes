@@ -20,7 +20,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
 import com.alorma.compose.settings.ui.SettingsCheckbox
@@ -42,6 +41,7 @@ import com.mobileprism.fishing.ui.home.weather.TemperatureValues
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.ui.utils.ColorPicker
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
+import com.mobileprism.fishing.ui.utils.enums.MapTypeValues
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -160,16 +160,23 @@ fun MainAppSettings(userPreferences: UserPreferences) {
     val use12hTimeFormat by userPreferences.use12hTimeFormat.collectAsState(false)
     val useFastFabAdd by userPreferences.useFabFastAdd.collectAsState(false)
     val useZoomButtons by userPreferences.useMapZoomButons.collectAsState(false)
+    val mapType = userPreferences.mapType.collectAsState(MapTypeValues.GoogleMap)
 
     var isPermissionDialogOpen by remember { mutableStateOf(false) }
     var isAppThemeDialogOpen by remember { mutableStateOf(false) }
+    val isMapTypeDialogOpen = remember { mutableStateOf(false) }
+
+
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
 
 
-    if (isPermissionDialogOpen)
+    if (isPermissionDialogOpen) {
         LocationPermissionDialog(userPreferences = userPreferences) {
             isPermissionDialogOpen = false
         }
+    }
+    if (isMapTypeDialogOpen.value) { MapTypeDialog(mapType, isMapTypeDialogOpen, userPreferences) }
+
 
     Column {
         AnimatedVisibility(!permissionsState.allPermissionsGranted) {
@@ -225,6 +232,17 @@ fun MainAppSettings(userPreferences: UserPreferences) {
                     .requiredSize(48.dp))*/
             }
         }
+        SettingsMenuLink(
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Map,
+                    contentDescription = Icons.Default.Map.name
+                )
+            },
+            title = { Text(text = stringResource(R.string.map_value)) },
+            subtitle = { Text(text = stringResource(R.string.map_type_value)) },
+            onClick = { isMapTypeDialogOpen.value = isMapTypeDialogOpen.value.not() }
+        )
         SettingsCheckbox(
             icon = {
                 Icon(
@@ -275,6 +293,38 @@ fun MainAppSettings(userPreferences: UserPreferences) {
         )
 
     }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun MapTypeDialog(
+    mapType: State<MapTypeValues>,
+    mapTypeDialogOpen: MutableState<Boolean>,
+    userPreferences: UserPreferences
+) {
+    val radioOptions = MapTypeValues.values().asList()
+    val coroutineScope = rememberCoroutineScope()
+
+    val onSelectedValue: (mapType: MapTypeValues) -> Unit = { newValue ->
+        coroutineScope.launch {
+            userPreferences.saveMapType(newValue)
+            delay(200)
+            mapTypeDialogOpen.value = false
+        }
+    }
+
+    if (mapTypeDialogOpen.value) {
+        DefaultDialog(
+            primaryText = stringResource(R.string.choose_map_type),
+            onDismiss = { mapTypeDialogOpen.value = false }
+        ) {
+            ItemsSelection(
+                radioOptions = radioOptions,
+                currentOption = mapType
+            ) { onSelectedValue(it) }
+        }
+    }
+
 }
 
 @Composable
