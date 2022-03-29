@@ -257,9 +257,11 @@ fun BackPressHandler(
 @Composable
 fun rememberYandexMapViewWithLifecycle(): YandexMapView {
     val context = (LocalContext.current as MainActivity)
-    val mapView: YandexMapView = remember {
+    val isDarkTheme = isSystemInDarkTheme()
+
+    val mapView: YandexMapView = remember(isDarkTheme) {
         YandexMapView(context)
-    }/*.apply { id = R.id.map }*/
+    }.apply { this.map.isDebugInfoEnabled = isDarkTheme }
 
 
     val lifecycle = LocalLifecycleOwner.current.lifecycle

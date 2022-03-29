@@ -365,7 +365,7 @@ fun YandexMapLayout(modifier: Modifier = Modifier) {
                         VerticalAlignment.BOTTOM
                     )
                 )
-                yandexMap.isNightModeEnabled = isDarkTheme
+                //yandexMap.isNightModeEnabled = isDarkTheme
             }
         }
     }
