@@ -23,4 +23,5 @@ val useCasesModule = module {
     factory { SavePhotosUseCase(get()) }
     factory { UpdateUserCatchUseCase(get(), get()) }
     factory { SubscribeOnUserCatchStateUseCase(get()) }
+    factory { GetUserCatchesByMarkerId(get()) }
 }

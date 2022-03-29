@@ -52,7 +52,7 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.home.map.MapScreen
-import com.mobileprism.fishing.ui.home.notes.Notes
+import com.mobileprism.fishing.ui.home.notes.NotesScreen
 import com.mobileprism.fishing.ui.home.profile.Profile
 import com.mobileprism.fishing.ui.home.weather.WeatherScreen
 import com.mobileprism.fishing.ui.theme.FishingNotesTheme
@@ -83,7 +83,7 @@ fun NavGraphBuilder.addHomeGraph(
         MapScreen(modifier, navController, addPlace, place, upPress)
     }
     composable(HomeSections.NOTES.route) {
-        Notes(modifier, navController, upPress)
+        NotesScreen(navController = navController, upPress = upPress)
     }
     composable(HomeSections.WEATHER.route) { from ->
         val place: UserMapMarker? = from.arguments?.getParcelable(Arguments.PLACE)

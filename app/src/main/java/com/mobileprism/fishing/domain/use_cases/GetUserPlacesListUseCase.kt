@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.flow
 
 class GetUserPlacesListUseCase(private val repository: MarkersRepository) {
 
-    suspend operator fun invoke() = flow {
+    operator fun invoke() = flow {
         repository.getAllUserMarkersList().collect { markers ->
             emit(markers as List<UserMapMarker>)
         }

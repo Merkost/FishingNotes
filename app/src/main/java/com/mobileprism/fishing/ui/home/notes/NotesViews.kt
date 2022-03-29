@@ -26,6 +26,7 @@ import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.theme.cardColor
 import com.mobileprism.fishing.ui.theme.customColors
+import com.mobileprism.fishing.ui.viewmodels.PlaceNoteItemUiState
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toTime
 import org.koin.androidx.compose.get
@@ -88,7 +89,7 @@ fun ItemUserPlace(
                 childModifier = childModifier,
                 icon = painterResource(id = R.drawable.ic_place_on_map),
                 tint = if (!place.visible) MaterialTheme.customColors.secondaryTextColor
-                        else MaterialTheme.colors.onSurface,
+                else MaterialTheme.colors.onSurface,
                 onClick = { navigateToMap() }
             )
 
@@ -116,6 +117,14 @@ fun ItemUserPlace(
             )
         }
     }
+}
+
+@Composable
+fun ItemUserPlaceNote(
+    modifier: Modifier = Modifier,
+    placeNote: PlaceNoteItemUiState
+) {
+
 }
 
 @Composable

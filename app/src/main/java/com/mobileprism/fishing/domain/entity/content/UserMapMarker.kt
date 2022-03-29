@@ -24,5 +24,4 @@ class UserMapMarker(
 
     val latLng: LatLng
     get() = LatLng(latitude, longitude)
-
 }

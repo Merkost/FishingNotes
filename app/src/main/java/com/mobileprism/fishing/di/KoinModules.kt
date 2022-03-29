@@ -110,8 +110,8 @@ val mainModule = module {
             getUserPlacesListUseCase = get()
         )
     }
+    viewModel { NotesViewModel(getUserCatches = get(), getUserPlacesList = get()) }
 }
-
 
 fun createGeocoder(androidContext: Context): Geocoder {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {

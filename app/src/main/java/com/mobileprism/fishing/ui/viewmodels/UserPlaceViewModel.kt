@@ -14,9 +14,9 @@ import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.domain.use_cases.notes.DeleteUserMarkerNoteUseCase
 import com.mobileprism.fishing.domain.use_cases.notes.SaveUserMarkerNoteUseCase
 import com.mobileprism.fishing.ui.home.SnackbarManager
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class UserPlaceViewModel(
@@ -24,7 +24,6 @@ class UserPlaceViewModel(
     private val catchesRepo: CatchesRepository,
     private val saveNewUserMarkerNoteUseCase: SaveUserMarkerNoteUseCase,
     private val deleteUserMarkerNoteUseCase: DeleteUserMarkerNoteUseCase
-
 ) : ViewModel() {
 
     var markerVisibility: MutableState<Boolean?> = mutableStateOf(true)
@@ -37,12 +36,22 @@ class UserPlaceViewModel(
     val markerNotes: StateFlow<List<Note>>
         get() = _markerNotes
 
+    private val _catchesList = MutableStateFlow<List<UserCatch>>(listOf())
+    val catchesList = _catchesList.asStateFlow()
+
     val currentNote: MutableState<Note?> = mutableStateOf(null)
 
 
-    fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>> {
-        return viewModelScope.run {
-            catchesRepo.getCatchesByMarkerId(markerId)
+    private fun getCatchesByMarkerId(markerId: String) {
+        viewModelScope.launch {
+            catchesRepo.getCatchesByMarkerId(markerId).fold(
+                onSuccess = {
+                    _catchesList.value = it
+                },
+                onFailure = {
+
+                }
+            )
         }
     }
 
@@ -120,6 +129,7 @@ class UserPlaceViewModel(
     }
 
     fun setMarker(m: UserMapMarker) {
+        getCatchesByMarkerId(m.id)
         _marker.value = m
         _markerNotes.value = m.notes
         markerVisibility.value = m.visible
