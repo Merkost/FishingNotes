@@ -2,7 +2,6 @@ package com.mobileprism.fishing.ui.home.notes
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -10,7 +9,6 @@ import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.mobileprism.fishing.R
@@ -59,8 +57,9 @@ fun NotesScreen(
                     is BaseViewState.Success -> {
                         UserPlacesList(
                             placeNotes = state.data,
-                            onItemClick = { viewModel.onPlaceItemClick(it) },
-                            navigateToPlace = { }
+                            expandedItemsList = viewModel.expandedItems.collectAsState().value,
+                            onItemExpandClick = { viewModel.onPlaceExpandItemClick(it) },
+                            onItemClick = { }
                         )
                     }
                     is BaseViewState.Loading -> {
@@ -82,17 +81,18 @@ fun NotesScreen(
 fun UserPlacesList(
     modifier: Modifier = Modifier,
     placeNotes: List<PlaceNoteItemUiState>,
-    onItemClick: (UserMapMarker) -> Unit,
-    navigateToPlace: (UserMapMarker) -> Unit
+    expandedItemsList: List<UserMapMarker>,
+    onItemExpandClick: (UserMapMarker) -> Unit,
+    onItemClick: (UserMapMarker) -> Unit
 ) {
     LazyColumn(modifier = modifier) {
-        items(count = placeNotes.size) {
-//            ItemUserPlace(
-//                place = places[it].place,
-//                userPlaceClicked = {  },
-//                navigateToMap = {  },
-//
-            Text(modifier = Modifier.padding(50.dp), text = placeNotes[it].place.title)
+        items(count = placeNotes.size) { index ->
+            ItemUserPlaceNote(
+                placeNote = placeNotes[index],
+                onItemClick = { onItemClick(it) },
+                onExpandItemClick = { onItemExpandClick(it) },
+                isExpanded = expandedItemsList.contains(placeNotes[index].place)
+            )
         }
     }
 }

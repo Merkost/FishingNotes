@@ -1,14 +1,15 @@
 package com.mobileprism.fishing.ui.home.notes
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,6 +27,7 @@ import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.theme.cardColor
 import com.mobileprism.fishing.ui.theme.customColors
+import com.mobileprism.fishing.ui.viewmodels.NoteCatchesState
 import com.mobileprism.fishing.ui.viewmodels.PlaceNoteItemUiState
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toTime
@@ -122,9 +124,253 @@ fun ItemUserPlace(
 @Composable
 fun ItemUserPlaceNote(
     modifier: Modifier = Modifier,
-    placeNote: PlaceNoteItemUiState
+    placeNote: PlaceNoteItemUiState,
+    isExpanded: Boolean,
+    onExpandItemClick: (UserMapMarker) -> Unit,
+    onItemClick: (UserMapMarker) -> Unit
+) {
+    DefaultCardClickable(
+        modifier = modifier,
+        onClick = { onItemClick(placeNote.place) }
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            ItemNotesPlace(
+                place = placeNote.place,
+                onExpandItemClick = onExpandItemClick,
+                onItemClick = onItemClick
+            )
+            ItemNotesCatches(
+                isVisible = isExpanded,
+                addNewCatch = {},
+                navigateToCatch = {},
+                catchesState = placeNote.catchesState
+            )
+
+        }
+    }
+}
+
+@Composable
+fun ItemNotesPlace(
+    modifier: Modifier = Modifier,
+    place: UserMapMarker,
+    onExpandItemClick: (UserMapMarker) -> Unit,
+    onItemClick: (UserMapMarker) -> Unit
+) {
+    ConstraintLayout(
+        modifier = modifier
+            .clickable { onItemClick(place) }
+            .wrapContentHeight()
+            .fillMaxWidth()
+    ) {
+        val (icon, title, amount, date, navigateButton) = createRefs()
+
+        Icon(
+            modifier = Modifier
+                .size(32.dp)
+                .constrainAs(icon) {
+                    top.linkTo(title.top)
+                    bottom.linkTo(date.bottom)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
+                },
+            painter = painterResource(R.drawable.ic_baseline_location_on_24),
+            contentDescription = stringResource(R.string.place),
+            tint = Color(place.markerColor)
+        )
+
+        PrimaryText(
+            modifier = Modifier
+                .constrainAs(title) {
+                    absoluteLeft.linkTo(icon.absoluteRight, 8.dp)
+                    absoluteRight.linkTo(navigateButton.absoluteLeft, 8.dp)
+                    top.linkTo(parent.top, 16.dp)
+                    width = Dimension.fillToConstraints
+                },
+            text = place.title,
+        )
+
+        DefaultIconButton(
+            modifier = Modifier.constrainAs(navigateButton) {
+                top.linkTo(title.top)
+                bottom.linkTo(date.bottom)
+                absoluteRight.linkTo(parent.absoluteRight, 8.dp)
+            },
+            icon = painterResource(id = R.drawable.ic_baseline_chevron_right_24),
+            tint = MaterialTheme.colors.onSurface,
+            onClick = { onExpandItemClick(place) }
+        )
+
+        SupportText(
+            modifier = Modifier
+                .constrainAs(date) {
+                    top.linkTo(title.bottom, 4.dp)
+                    bottom.linkTo(parent.bottom, 16.dp)
+                    absoluteLeft.linkTo(title.absoluteLeft)
+                },
+            text = place.dateOfCreation.toDateTextMonth()
+        )
+
+        ItemCounter(
+            modifier = Modifier.constrainAs(amount) {
+                bottom.linkTo(date.bottom)
+                top.linkTo(date.top)
+                height = Dimension.fillToConstraints
+                absoluteLeft.linkTo(date.absoluteRight, 8.dp)
+            },
+            count = place.catchesCount,
+            icon = R.drawable.ic_fishing,
+            tint = MaterialTheme.colors.primaryVariant.copy(0.25f)
+        )
+
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun ItemNotesCatches(
+    modifier: Modifier = Modifier,
+    isVisible: Boolean = false,
+    addNewCatch: () -> Unit,
+    navigateToCatch: (UserCatch) -> Unit,
+    catchesState: NoteCatchesState,
 ) {
 
+    val transitionState = remember {
+        MutableTransitionState(isVisible).apply { targetState = !isVisible }
+    }
+
+    val enterFadeIn = remember {
+        fadeIn(
+            animationSpec = TweenSpec(
+                durationMillis = 100,
+                easing = FastOutLinearInEasing
+            )
+        )
+    }
+    val enterExpand = remember {
+        expandVertically(animationSpec = tween(100))
+    }
+    val exitFadeOut = remember {
+        fadeOut(
+            animationSpec = TweenSpec(
+                durationMillis = 100,
+                easing = LinearOutSlowInEasing
+            )
+        )
+    }
+    val exitCollapse = remember {
+        shrinkVertically(animationSpec = tween(100))
+    }
+
+    AnimatedVisibility(
+        visibleState = transitionState,
+        enter = enterExpand + enterFadeIn,
+        exit = exitCollapse + exitFadeOut
+    ) {
+        when (catchesState) {
+            is NoteCatchesState.Loaded -> {
+                Column(modifier = modifier) {
+                    (catchesState.catches).forEach {
+                        ItemNotesCatch(
+                            catch = it,
+                            onItemClick = navigateToCatch
+                        )
+                    }
+                }
+            }
+            NoteCatchesState.Loading -> {
+
+            }
+            NoteCatchesState.NotLoaded -> {
+
+            }
+        }
+
+    }
+
+
+}
+
+@Composable
+fun ItemNotesCatch(
+    modifier: Modifier = Modifier,
+    catch: UserCatch,
+    onItemClick: (UserCatch) -> Unit,
+    preferences: UserPreferences = get()
+) {
+
+    val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
+
+    ConstraintLayout(
+        modifier = modifier
+            .clickable { onItemClick(catch) }
+            .padding(8.dp)
+            .fillMaxWidth()
+    ) {
+        val (fishType, amount, weight, time, photosCount, divider) = createRefs()
+
+        Divider(modifier = modifier
+            .padding(horizontal = 8.dp)
+            .constrainAs(divider) {
+                top.linkTo(parent.top, 8.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+            })
+
+        PrimaryText(
+            modifier = Modifier
+                .constrainAs(fishType) {
+                    top.linkTo(divider.top)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
+                    absoluteRight.linkTo(weight.absoluteLeft, 16.dp)
+                    width = Dimension.fillToConstraints
+                },
+            text = catch.fishType,
+            maxLines = 1
+        )
+
+        SecondaryTextSmall(
+            modifier = Modifier
+                .constrainAs(amount) {
+                    top.linkTo(fishType.bottom, 4.dp)
+                    absoluteLeft.linkTo(fishType.absoluteLeft)
+                },
+            text = "${stringResource(id = R.string.amount)}: ${catch.fishAmount}" +
+                    " ${stringResource(id = R.string.pc)}"
+        )
+
+        PrimaryText(
+            modifier = Modifier
+                .constrainAs(weight) {
+                    top.linkTo(fishType.top)
+                    absoluteRight.linkTo(parent.absoluteRight, 8.dp)
+                },
+            text = "${catch.fishWeight} ${stringResource(id = R.string.kg)}"
+        )
+
+        SupportText(
+            modifier = Modifier
+                .constrainAs(time) {
+                    absoluteRight.linkTo(parent.absoluteRight, 8.dp)
+                    top.linkTo(amount.bottom, 16.dp)
+                },
+            text = catch.date.toTime(is12hTimeFormat)
+        )
+
+        ItemCounter(
+            modifier = Modifier
+                .constrainAs(photosCount) {
+                    top.linkTo(time.top)
+                    bottom.linkTo(time.bottom)
+                    height = Dimension.fillToConstraints
+                    absoluteRight.linkTo(time.absoluteLeft, 12.dp)
+                },
+            count = catch.downloadPhotoLinks.size,
+            icon = R.drawable.ic_baseline_photo_24,
+            tint = MaterialTheme.colors.primaryVariant.copy(0.25f)
+        )
+
+    }
 }
 
 @Composable

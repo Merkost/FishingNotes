@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.viewmodels
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,6 +24,9 @@ class NotesViewModel(
         MutableStateFlow<BaseViewState<List<PlaceNoteItemUiState>>>(BaseViewState.Loading())
     val uiState = _uiState.asStateFlow()
 
+    private val _expandedItems = MutableStateFlow<List<UserMapMarker>>(listOf())
+    val expandedItems = _expandedItems.asStateFlow()
+
     init {
         getAllUserPlaces()
     }
@@ -38,17 +42,23 @@ class NotesViewModel(
         }
     }
 
-    fun onPlaceItemClick(marker: UserMapMarker) {
+    fun onPlaceExpandItemClick(marker: UserMapMarker) {
+
+        _expandedItems.value = _expandedItems.value.toMutableList().also { list ->
+            if (list.contains(marker)) list.remove(marker) else list.add(marker)
+        }
+
         viewModelScope.launch {
             userPlacesList.find { it.place.id == marker.id }?.let { item ->
-                if (!item.isCatchesLoaded) {
+
+                if (item.catchesState is NoteCatchesState.NotLoaded) {
                     val index = userPlacesList.indexOf(item)
-                    userPlacesList[index] = item.copy(isLoading = true)
+                    userPlacesList[index] = item.copy(catchesState = NoteCatchesState.Loading)
 
                     getUserCatches(marker.id).fold(
                         onSuccess = {
                             userPlacesList[index] =
-                                item.copy(catches = it, isLoading = false, isCatchesLoaded = true)
+                                item.copy(catchesState = NoteCatchesState.Loaded(it))
                         },
                         onFailure = {
                             _uiState.value = BaseViewState.Error(it)
@@ -61,10 +71,14 @@ class NotesViewModel(
 
 }
 
+@Immutable
 data class PlaceNoteItemUiState(
     val place: UserMapMarker,
-    val catches: List<UserCatch> = listOf(),
-    val isCatchesLoaded: Boolean = false,
-    val isLoading: Boolean = false
+    val catchesState: NoteCatchesState = NoteCatchesState.NotLoaded,
 )
 
+sealed class NoteCatchesState() {
+    object Loading : NoteCatchesState()
+    object NotLoaded : NoteCatchesState()
+    class Loaded(val catches: List<UserCatch>) : NoteCatchesState()
+}
