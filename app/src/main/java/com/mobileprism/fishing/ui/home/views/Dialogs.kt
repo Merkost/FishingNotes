@@ -28,15 +28,15 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 @Composable
 fun DefaultDialog(
     primaryText: String? = null,
-    textAlign: TextAlign = TextAlign.Start,
     secondaryText: String? = null,
+    textAlign: TextAlign = TextAlign.Start,
     neutralButtonText: String = "",
-    onNeutralClick: (() -> Unit) = { },
-    negativeButtonText: String = "",
-    onNegativeClick: () -> Unit = { },
-    positiveButtonText: String = "",
-    onPositiveClick: () -> Unit = { },
-    onDismiss: () -> Unit = { },
+    onNeutralClick: (() -> Unit)? = null,
+    negativeButtonText: String = stringResource(id = R.string.No),
+    onNegativeClick: (() -> Unit)? = null,
+    positiveButtonText: String = stringResource(id = R.string.Yes),
+    onPositiveClick: (() -> Unit)? = null,
+    onDismiss: () -> Unit,
     content: @Composable() (() -> Unit)? = null
 ) {
 
@@ -56,9 +56,10 @@ fun DefaultDialog(
             ConstraintLayout(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight().padding(bottom = 2.dp)
+                    .wrapContentHeight()
+                    .padding(bottom = 2.dp)
             ) {
-                val (title, subtitle, mainContent, neutralButton, negativeButton, positiveButton) = createRefs()
+                val (title, subtitle, mainContent, neutralButton, negativeButton, positiveButton, buttonSpacer) = createRefs()
 
                 primaryText?.let {
                     PrimaryText(
@@ -107,7 +108,7 @@ fun DefaultDialog(
                     content?.invoke()
                 }
 
-                if (neutralButtonText.isNotEmpty()) {
+                onNeutralClick?.let{
                     DefaultButtonSecondaryLight(
                         modifier = Modifier.constrainAs(neutralButton) {
                             top.linkTo(mainContent.bottom, 16.dp)
@@ -118,7 +119,7 @@ fun DefaultDialog(
                     )
                 }
 
-                if (positiveButtonText.isNotEmpty()) {
+                onPositiveClick?.let{
                     DefaultButtonFilled(
                         modifier = Modifier.constrainAs(positiveButton) {
                             top.linkTo(mainContent.bottom, 16.dp)
@@ -128,7 +129,7 @@ fun DefaultDialog(
                         text = positiveButtonText,
                         onClick = onPositiveClick,
                     )
-                } else {
+                } ?: run {
                     Spacer(
                         modifier = Modifier
                             .size(0.dp)
@@ -140,7 +141,7 @@ fun DefaultDialog(
                     )
                 }
 
-                if (negativeButtonText.isNotEmpty()) {
+                onNegativeClick?.let {
                     DefaultButton(
                         modifier = Modifier.constrainAs(negativeButton) {
                             top.linkTo(mainContent.bottom, 16.dp)
