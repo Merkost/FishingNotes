@@ -57,7 +57,6 @@ fun NotesScreen(
                     is BaseViewState.Success -> {
                         UserPlacesList(
                             placeNotes = state.data,
-                            expandedItemsList = viewModel.expandedItems.collectAsState().value,
                             onItemExpandClick = { viewModel.onPlaceExpandItemClick(it) },
                             onItemClick = { }
                         )
@@ -81,7 +80,6 @@ fun NotesScreen(
 fun UserPlacesList(
     modifier: Modifier = Modifier,
     placeNotes: List<PlaceNoteItemUiState>,
-    expandedItemsList: List<UserMapMarker>,
     onItemExpandClick: (UserMapMarker) -> Unit,
     onItemClick: (UserMapMarker) -> Unit
 ) {
@@ -89,9 +87,9 @@ fun UserPlacesList(
         items(count = placeNotes.size) { index ->
             ItemUserPlaceNote(
                 placeNote = placeNotes[index],
+                isExpanded = placeNotes[index].isExpanded,
                 onItemClick = { onItemClick(it) },
-                onExpandItemClick = { onItemExpandClick(it) },
-                isExpanded = expandedItemsList.contains(placeNotes[index].place)
+                onExpandItemClick = { onItemExpandClick(it) }
             )
         }
     }
@@ -99,7 +97,7 @@ fun UserPlacesList(
 
 @Composable
 fun UserPlacesLoading() {
-
+    CircularProgressIndicator()
 }
 
 @Composable

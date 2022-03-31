@@ -229,15 +229,13 @@ fun ItemNotesPlace(
 @Composable
 fun ItemNotesCatches(
     modifier: Modifier = Modifier,
-    isVisible: Boolean = false,
+    isVisible: Boolean,
     addNewCatch: () -> Unit,
     navigateToCatch: (UserCatch) -> Unit,
     catchesState: NoteCatchesState,
 ) {
 
-    val transitionState = remember {
-        MutableTransitionState(isVisible).apply { targetState = !isVisible }
-    }
+    val transitionState = remember { MutableTransitionState(initialState = isVisible) }
 
     val enterFadeIn = remember {
         fadeIn(
@@ -270,6 +268,12 @@ fun ItemNotesCatches(
         when (catchesState) {
             is NoteCatchesState.Loaded -> {
                 Column(modifier = modifier) {
+                    Text(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .align(Alignment.CenterHorizontally),
+                        text = "Add new catch"
+                    )
                     (catchesState.catches).forEach {
                         ItemNotesCatch(
                             catch = it,
@@ -279,16 +283,11 @@ fun ItemNotesCatches(
                 }
             }
             NoteCatchesState.Loading -> {
-
-            }
-            NoteCatchesState.NotLoaded -> {
-
+                CircularProgressIndicator()
             }
         }
 
     }
-
-
 }
 
 @Composable

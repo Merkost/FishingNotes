@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.ui.viewmodels
 
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -24,9 +23,6 @@ class NotesViewModel(
         MutableStateFlow<BaseViewState<List<PlaceNoteItemUiState>>>(BaseViewState.Loading())
     val uiState = _uiState.asStateFlow()
 
-    private val _expandedItems = MutableStateFlow<List<UserMapMarker>>(listOf())
-    val expandedItems = _expandedItems.asStateFlow()
-
     init {
         getAllUserPlaces()
     }
@@ -43,17 +39,13 @@ class NotesViewModel(
     }
 
     fun onPlaceExpandItemClick(marker: UserMapMarker) {
-
-        _expandedItems.value = _expandedItems.value.toMutableList().also { list ->
-            if (list.contains(marker)) list.remove(marker) else list.add(marker)
-        }
-
         viewModelScope.launch {
             userPlacesList.find { it.place.id == marker.id }?.let { item ->
+                val index = userPlacesList.indexOf(item)
 
-                if (item.catchesState is NoteCatchesState.NotLoaded) {
-                    val index = userPlacesList.indexOf(item)
-                    userPlacesList[index] = item.copy(catchesState = NoteCatchesState.Loading)
+                userPlacesList[index] = item.copy(isExpanded = !userPlacesList[index].isExpanded)
+
+                if (item.catchesState is NoteCatchesState.Loading) {
 
                     getUserCatches(marker.id).fold(
                         onSuccess = {
@@ -71,14 +63,14 @@ class NotesViewModel(
 
 }
 
-@Immutable
+
 data class PlaceNoteItemUiState(
     val place: UserMapMarker,
-    val catchesState: NoteCatchesState = NoteCatchesState.NotLoaded,
+    val isExpanded: Boolean = false,
+    val catchesState: NoteCatchesState = NoteCatchesState.Loading,
 )
 
 sealed class NoteCatchesState() {
     object Loading : NoteCatchesState()
-    object NotLoaded : NoteCatchesState()
     class Loaded(val catches: List<UserCatch>) : NoteCatchesState()
 }
