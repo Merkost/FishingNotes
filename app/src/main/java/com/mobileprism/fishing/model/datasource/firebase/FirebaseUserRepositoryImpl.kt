@@ -92,8 +92,7 @@ class FirebaseUserRepositoryImpl(
         val flow = MutableStateFlow<Progress>(Progress.Loading())
 
         val userFromDatabase =
-            dbCollections.getUsersCollection().document(user.uid).get().await()
-                .toObject(User::class.java)
+            dbCollections.getUsersCollection().document(user.uid).get().await().toObject(User::class.java)
 
         if (userFromDatabase != null && userFromDatabase.registerDate != 0L) {
 
@@ -112,9 +111,7 @@ class FirebaseUserRepositoryImpl(
                     bundle.putString(FirebaseAnalytics.Param.METHOD, "Google")
                     firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)
 
-                    runBlocking {
-                        appPreferences.saveUserValue(user)
-                    }
+                    runBlocking { appPreferences.saveUserValue(user) }
                     flow.tryEmit(Progress.Complete)
                 }
 

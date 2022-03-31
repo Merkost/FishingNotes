@@ -61,7 +61,6 @@ fun UserImage(user: User?, imgSize: Dp, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
-
             CoilImage(
                 imageModel = user.photoUrl.ifEmpty { painterResource(R.drawable.ic_fisher) },
                 contentScale = ContentScale.Crop,

@@ -10,9 +10,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -32,6 +30,8 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.WeatherForecast
 import com.mobileprism.fishing.ui.MainActivity
+import com.mobileprism.fishing.utils.Constants
+import com.mobileprism.fishing.utils.Constants.TIME_TO_EXIT
 import com.mobileprism.fishing.utils.showToast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -49,10 +49,10 @@ object MapTypes {
 }
 
 sealed class GeocoderResult {
-    class Success(val placeName: String): GeocoderResult()
-    object NoNamePlace: GeocoderResult()
-    object Failed: GeocoderResult()
-    object InProgress: GeocoderResult()
+    class Success(val placeName: String) : GeocoderResult()
+    object NoNamePlace : GeocoderResult()
+    object Failed : GeocoderResult()
+    object InProgress : GeocoderResult()
 }
 
 data class PlaceTileState(
@@ -190,7 +190,6 @@ fun getMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
     }
 
 
-
 fun startMapsActivityForNavigation(mapMarker: UserMapMarker, context: Context) {
     val uri = String.format(
         Locale.ENGLISH,
@@ -219,28 +218,29 @@ fun BackPressHandler(
     mapUiState: MapUiState,
     navController: NavController,
     onBackPressedCallback: () -> Unit,
+    upPress: () -> Unit,
 ) {
-    val context = LocalContext.current.applicationContext
-    var lastPressed: Long = 0
+    val context = LocalContext.current
+    var lastPressed by remember { mutableStateOf(0L) }
 
-    BackHandler(onBack = {
+    BackHandler(true) {
         when (mapUiState) {
             MapUiState.NormalMode -> {
                 if (navController.navigateUp()) {
                     return@BackHandler
                 } else {
                     val currentMillis = System.currentTimeMillis()
-                    if (currentMillis - lastPressed < 2000) {
-                        (context as MainActivity).finish()
+                    if (currentMillis - lastPressed < TIME_TO_EXIT) {
+                        upPress()
                     } else {
-                        showToast(context, context.getString(R.string.app_exit_message))
+                        showToast(context.applicationContext, context.getString(R.string.app_exit_message))
                     }
                     lastPressed = currentMillis
                 }
             }
             else -> onBackPressedCallback()
         }
-    })
+    }
 }
 
 @Composable
@@ -248,8 +248,12 @@ fun rememberMapViewWithLifecycle(): MapView {
     val context = (LocalContext.current as MainActivity)
     val isDarkMode = isSystemInDarkTheme()
     val mapOptions = when (isDarkMode) {
-        true -> { GoogleMapOptions().mapId(context.resources.getString(R.string.dark_map_id)) }
-        false -> { GoogleMapOptions().mapId(context.resources.getString(R.string.light_map_id)) }
+        true -> {
+            GoogleMapOptions().mapId(context.resources.getString(R.string.dark_map_id))
+        }
+        false -> {
+            GoogleMapOptions().mapId(context.resources.getString(R.string.light_map_id))
+        }
     }
     val mapView: MapView = remember(isDarkMode) {
         MapView(
@@ -278,7 +282,8 @@ object DistanceFormat {
 fun Context.convertDistance(distanceInMeters: Double): String {
     return when (distanceInMeters.toInt()) {
         in 0..999 -> distanceInMeters.toInt().toString() + " ${getString(R.string.m)}"
-        in 1001..9999 -> DistanceFormat.df.format(distanceInMeters / 1000f).toString() + " ${getString(R.string.km)}"
+        in 1001..9999 -> DistanceFormat.df.format(distanceInMeters / 1000f)
+            .toString() + " ${getString(R.string.km)}"
         else -> distanceInMeters.div(1000).toInt().toString() + " ${getString(R.string.km)}"
     }
 }

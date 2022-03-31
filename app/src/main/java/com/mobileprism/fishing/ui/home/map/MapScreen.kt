@@ -45,6 +45,7 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.Arguments
+import com.mobileprism.fishing.ui.MainActivity
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.navigate
@@ -58,6 +59,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
+import org.koin.core.parameter.parametersOf
 
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
@@ -78,7 +80,6 @@ fun MapScreen(
         viewModel.setPlace(place)
         viewModel.setAddingPlace(addPlaceOnStart)
     }
-    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     val context = LocalContext.current
 
     val mapUiState by viewModel.mapUiState.collectAsState()
@@ -93,10 +94,12 @@ fun MapScreen(
     var newPlaceDialog by remember { mutableStateOf(false) }
     var mapLayersSelection by rememberSaveable { mutableStateOf(false) }
 
+
     BackPressHandler(
         mapUiState = mapUiState,
         navController = navController,
-        onBackPressedCallback = viewModel::resetMapUiState
+        onBackPressedCallback = viewModel::resetMapUiState,
+        upPress = { (context as MainActivity).finishAffinity() },
     )
 
     ModalBottomSheetLayout(
@@ -111,7 +114,7 @@ fun MapScreen(
             scaffoldState = scaffoldState,
             fab = {
                 MapFab(
-                    state = mapUiState,
+                    viewModel = viewModel,
                     onClick = {
                         when (mapUiState) {
                             MapUiState.NormalMode -> viewModel.setPlaceSelectionMode()
@@ -207,14 +210,26 @@ fun MapScreen(
                     MapZoomInButton(
                         modifier = Modifier.constrainAs(zoomInButton) {
                             linkTo(parent.top, centerHorizontal, 4.dp, 4.dp, bias = 1f)
-                            linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, bias = 1f)
+                            linkTo(
+                                parent.absoluteLeft,
+                                parent.absoluteRight,
+                                16.dp,
+                                16.dp,
+                                bias = 1f
+                            )
                         }, onClick = viewModel::onZoomInClick
                     )
 
                     MapZoomOutButton(
                         modifier = Modifier.constrainAs(zoomOutButton) {
                             linkTo(centerHorizontal, parent.bottom, 4.dp, 4.dp, bias = 0f)
-                            linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, bias = 1f)
+                            linkTo(
+                                parent.absoluteLeft,
+                                parent.absoluteRight,
+                                16.dp,
+                                16.dp,
+                                bias = 1f
+                            )
                         }, onClick = viewModel::onZoomOutClick
                     )
                 }
@@ -446,11 +461,12 @@ fun LocationPermissionDialog(
 @ExperimentalMaterialApi
 @Composable
 fun MapFab(
-    state: MapUiState,
-    onClick: () -> Unit,
-    onLongPress: () -> Unit,
+    viewModel: MapViewModel,
     userSettings: UserPreferences,
+    onLongPress: () -> Unit,
+    onClick: () -> Unit,
 ) {
+    val state by viewModel.mapUiState.collectAsState()
     val useFastFabAdd by userSettings.useFabFastAdd.collectAsState(false)
     val fabImg = remember { mutableStateOf(R.drawable.ic_baseline_add_location_24) }
 
@@ -458,17 +474,29 @@ fun MapFab(
 
     val paddingBottom = animateDpAsState(
         when (state) {
-            MapUiState.NormalMode -> { defaultFabBottomPadding }
-            MapUiState.BottomSheetInfoMode -> { 34.dp }
-            MapUiState.PlaceSelectMode -> { defaultFabBottomPadding }
+            MapUiState.NormalMode -> {
+                defaultFabBottomPadding
+            }
+            MapUiState.BottomSheetInfoMode -> {
+                34.dp
+            }
+            MapUiState.PlaceSelectMode -> {
+                defaultFabBottomPadding
+            }
         }
     )
 
     val paddingTop = animateDpAsState(
         when (state) {
-            MapUiState.NormalMode -> { 0.dp }
-            MapUiState.BottomSheetInfoMode -> { 26.dp }
-            MapUiState.PlaceSelectMode -> { 0.dp }
+            MapUiState.NormalMode -> {
+                0.dp
+            }
+            MapUiState.BottomSheetInfoMode -> {
+                26.dp
+            }
+            MapUiState.PlaceSelectMode -> {
+                0.dp
+            }
         }
     )
 

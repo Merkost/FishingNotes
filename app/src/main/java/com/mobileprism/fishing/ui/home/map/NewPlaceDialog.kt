@@ -67,11 +67,7 @@ fun NewPlaceDialog(
                 }
             }
 
-            MyCard(
-                shape = Shapes.large, modifier = Modifier
-                    .wrapContentHeight()
-                    .fillMaxWidth()
-            ) {
+            MyCard(shape = Shapes.large, modifier = Modifier.wrapContentHeight().fillMaxWidth()) {
                 ConstraintLayout(
                     modifier = Modifier
                         .wrapContentHeight()

@@ -22,6 +22,7 @@ import com.mobileprism.fishing.utils.network.ConnectionManagerImpl
 import com.mobileprism.fishing.viewmodels.MainViewModel
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import org.koin.android.ext.koin.androidContext
+import org.koin.androidx.compose.get
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 

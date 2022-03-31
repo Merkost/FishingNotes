@@ -37,9 +37,14 @@ class MapViewModel(
     private val locationManager: LocationManager,
 ) : ViewModel() {
 
-    init {
-        loadUserMarkersList()
+    private var _mapMarkers: MutableStateFlow<MutableList<UserMapMarker>> =
+        MutableStateFlow(mutableListOf())
+    val mapMarkers: StateFlow<List<UserMapMarker>>
+        get() = _mapMarkers
 
+    init {
+
+        loadUserMarkersList()
         //loadUserPlaces()
     }
 
@@ -51,10 +56,7 @@ class MapViewModel(
     private val _addNewMarkerState: MutableStateFlow<UiState?> = MutableStateFlow(null)
     val addNewMarkerState = _addNewMarkerState.asStateFlow()
 
-    private var _mapMarkers: MutableStateFlow<MutableList<UserMapMarker>> =
-        MutableStateFlow(mutableListOf())
-    val mapMarkers: StateFlow<List<UserMapMarker>>
-        get() = _mapMarkers
+
 
     private val _mapUiState: MutableStateFlow<MapUiState> = MutableStateFlow(MapUiState.NormalMode)
     val mapUiState = _mapUiState.asStateFlow()
@@ -325,22 +327,11 @@ class MapViewModel(
         _currentMarkerAddressState.value = GeocoderResult.InProgress
         _currentMarkerRawDistance.value = null
         getPlaceNameForMarkerDetails(latitude, longitude)
-        getPlaceRawDistance(latitude, longitude)
+        //getPlaceRawDistance(latitude, longitude)
         getFishActivity(latitude, longitude)
         getCurrentWeather(latitude, longitude)
     }
 
-    private fun getPlaceRawDistance(latitude: Double, longitude: Double) {
-        viewModelScope.launch {
-            _lastKnownLocation.value?.let {
-                _currentMarkerRawDistance.value =
-                    SphericalUtil.computeDistanceBetween(
-                        LatLng(latitude, longitude),
-                        LatLng(it.latitude, it.longitude)
-                    )
-            }
-        }
-    }
 
     private var placeTileNameJob: Job? = null
     fun cancelPlaceTileNameJob() {
