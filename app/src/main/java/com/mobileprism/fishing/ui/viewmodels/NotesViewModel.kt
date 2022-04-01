@@ -23,6 +23,9 @@ class NotesViewModel(
         MutableStateFlow<BaseViewState<List<PlaceNoteItemUiState>>>(BaseViewState.Loading())
     val uiState = _uiState.asStateFlow()
 
+    private val _expandedItems = MutableStateFlow<List<UserMapMarker>>(listOf())
+    val expandedItems = _expandedItems.asStateFlow()
+
     init {
         getAllUserPlaces()
     }
@@ -39,11 +42,15 @@ class NotesViewModel(
     }
 
     fun onPlaceExpandItemClick(marker: UserMapMarker) {
+
+        _expandedItems.value.toMutableList().let {
+            if (expandedItems.value.contains(marker)) it.remove(marker) else it.add(marker)
+            _expandedItems.value = it
+        }
+
         viewModelScope.launch {
             userPlacesList.find { it.place.id == marker.id }?.let { item ->
                 val index = userPlacesList.indexOf(item)
-
-                userPlacesList[index] = item.copy(isExpanded = !userPlacesList[index].isExpanded)
 
                 if (item.catchesState is NoteCatchesState.Loading) {
 
@@ -66,7 +73,6 @@ class NotesViewModel(
 
 data class PlaceNoteItemUiState(
     val place: UserMapMarker,
-    val isExpanded: Boolean = false,
     val catchesState: NoteCatchesState = NoteCatchesState.Loading,
 )
 

@@ -38,6 +38,8 @@ fun NotesScreen(
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     var bottomSheetScreen by remember { mutableStateOf(BottomSheetScreen.Sort) }
 
+    val expandedItems by viewModel.expandedItems.collectAsState()
+
 
     ModalBottomSheetLayout(
         modifier = modifier,
@@ -57,6 +59,7 @@ fun NotesScreen(
                     is BaseViewState.Success -> {
                         UserPlacesList(
                             placeNotes = state.data,
+                            expandedItems = expandedItems,
                             onItemExpandClick = { viewModel.onPlaceExpandItemClick(it) },
                             onItemClick = { }
                         )
@@ -80,6 +83,7 @@ fun NotesScreen(
 fun UserPlacesList(
     modifier: Modifier = Modifier,
     placeNotes: List<PlaceNoteItemUiState>,
+    expandedItems: List<UserMapMarker>,
     onItemExpandClick: (UserMapMarker) -> Unit,
     onItemClick: (UserMapMarker) -> Unit
 ) {
@@ -87,7 +91,7 @@ fun UserPlacesList(
         items(count = placeNotes.size) { index ->
             ItemUserPlaceNote(
                 placeNote = placeNotes[index],
-                isExpanded = placeNotes[index].isExpanded,
+                isExpanded = expandedItems.contains(placeNotes[index].place),
                 onItemClick = { onItemClick(it) },
                 onExpandItemClick = { onItemExpandClick(it) }
             )
