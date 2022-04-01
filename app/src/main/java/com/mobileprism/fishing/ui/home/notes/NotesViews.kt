@@ -154,69 +154,54 @@ fun ItemNotesPlace(
     onExpandItemClick: (UserMapMarker) -> Unit,
     onItemClick: (UserMapMarker) -> Unit
 ) {
-    ConstraintLayout(
+    Row(
         modifier = modifier
             .clickable { onItemClick(place) }
             .wrapContentHeight()
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        val (icon, title, amount, date, navigateButton) = createRefs()
 
         Icon(
             modifier = Modifier
-                .size(32.dp)
-                .constrainAs(icon) {
-                    top.linkTo(title.top)
-                    bottom.linkTo(date.bottom)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-                },
+                .padding(8.dp)
+                .size(32.dp),
             painter = painterResource(R.drawable.ic_baseline_location_on_24),
             contentDescription = stringResource(R.string.place),
             tint = Color(place.markerColor)
         )
 
-        PrimaryText(
+        Column(
             modifier = Modifier
-                .constrainAs(title) {
-                    absoluteLeft.linkTo(icon.absoluteRight, 8.dp)
-                    absoluteRight.linkTo(navigateButton.absoluteLeft, 8.dp)
-                    top.linkTo(parent.top, 16.dp)
-                    width = Dimension.fillToConstraints
-                },
-            text = place.title,
-        )
+                .padding(vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            PrimaryText(
+                modifier = Modifier,
+                text = place.title,
+            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                SupportText(
+                    modifier = Modifier,
+                    text = place.dateOfCreation.toDateTextMonth()
+                )
+                ItemCounter(
+                    modifier = Modifier,
+                    count = place.catchesCount,
+                    icon = R.drawable.ic_fishing,
+                    tint = MaterialTheme.colors.primaryVariant.copy(0.25f)
+                )
+            }
+        }
 
         DefaultIconButton(
-            modifier = Modifier.constrainAs(navigateButton) {
-                top.linkTo(title.top)
-                bottom.linkTo(date.bottom)
-                absoluteRight.linkTo(parent.absoluteRight, 8.dp)
-            },
+            modifier = Modifier.padding(8.dp),
             icon = painterResource(id = R.drawable.ic_baseline_chevron_right_24),
             tint = MaterialTheme.colors.onSurface,
             onClick = { onExpandItemClick(place) }
-        )
-
-        SupportText(
-            modifier = Modifier
-                .constrainAs(date) {
-                    top.linkTo(title.bottom, 4.dp)
-                    bottom.linkTo(parent.bottom, 16.dp)
-                    absoluteLeft.linkTo(title.absoluteLeft)
-                },
-            text = place.dateOfCreation.toDateTextMonth()
-        )
-
-        ItemCounter(
-            modifier = Modifier.constrainAs(amount) {
-                bottom.linkTo(date.bottom)
-                top.linkTo(date.top)
-                height = Dimension.fillToConstraints
-                absoluteLeft.linkTo(date.absoluteRight, 8.dp)
-            },
-            count = place.catchesCount,
-            icon = R.drawable.ic_fishing,
-            tint = MaterialTheme.colors.primaryVariant.copy(0.25f)
         )
 
     }
@@ -301,74 +286,55 @@ fun ItemNotesCatch(
 
     val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
 
-    ConstraintLayout(
+    Column(
         modifier = modifier
             .clickable { onItemClick(catch) }
             .padding(8.dp)
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.Center
     ) {
-        val (fishType, amount, weight, time, photosCount, divider) = createRefs()
 
-        Divider(modifier = modifier
-            .padding(horizontal = 8.dp)
-            .constrainAs(divider) {
-                top.linkTo(parent.top, 8.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
-            })
+        Divider(modifier = modifier.padding(horizontal = 8.dp))
 
-        PrimaryText(
-            modifier = Modifier
-                .constrainAs(fishType) {
-                    top.linkTo(divider.top)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-                    absoluteRight.linkTo(weight.absoluteLeft, 16.dp)
-                    width = Dimension.fillToConstraints
-                },
-            text = catch.fishType,
-            maxLines = 1
-        )
+        Row(modifier.fillMaxWidth()) {
+            Column() {
+                PrimaryText(
+                    modifier = Modifier,
+                    text = catch.fishType,
+                    maxLines = 1
+                )
+                SecondaryTextSmall(
+                    modifier = Modifier,
+                    text = "${stringResource(id = R.string.amount)}: ${catch.fishAmount}" +
+                            " ${stringResource(id = R.string.pc)}"
+                )
+            }
 
-        SecondaryTextSmall(
-            modifier = Modifier
-                .constrainAs(amount) {
-                    top.linkTo(fishType.bottom, 4.dp)
-                    absoluteLeft.linkTo(fishType.absoluteLeft)
-                },
-            text = "${stringResource(id = R.string.amount)}: ${catch.fishAmount}" +
-                    " ${stringResource(id = R.string.pc)}"
-        )
+            PrimaryText(
+                modifier = Modifier,
+                text = "${catch.fishWeight} ${stringResource(id = R.string.kg)}"
+            )
 
-        PrimaryText(
-            modifier = Modifier
-                .constrainAs(weight) {
-                    top.linkTo(fishType.top)
-                    absoluteRight.linkTo(parent.absoluteRight, 8.dp)
-                },
-            text = "${catch.fishWeight} ${stringResource(id = R.string.kg)}"
-        )
+
+        }
 
         SupportText(
-            modifier = Modifier
-                .constrainAs(time) {
-                    absoluteRight.linkTo(parent.absoluteRight, 8.dp)
-                    top.linkTo(amount.bottom, 16.dp)
-                },
+            modifier = Modifier,
             text = catch.date.toTime(is12hTimeFormat)
         )
 
-        ItemCounter(
-            modifier = Modifier
-                .constrainAs(photosCount) {
-                    top.linkTo(time.top)
-                    bottom.linkTo(time.bottom)
-                    height = Dimension.fillToConstraints
-                    absoluteRight.linkTo(time.absoluteLeft, 12.dp)
-                },
-            count = catch.downloadPhotoLinks.size,
-            icon = R.drawable.ic_baseline_photo_24,
-            tint = MaterialTheme.colors.primaryVariant.copy(0.25f)
-        )
+//        ItemCounter(
+//            modifier = Modifier
+//                .constrainAs(photosCount) {
+//                    top.linkTo(time.top)
+//                    bottom.linkTo(time.bottom)
+//                    height = Dimension.fillToConstraints
+//                    absoluteRight.linkTo(time.absoluteLeft, 12.dp)
+//                },
+//            count = catch.downloadPhotoLinks.size,
+//            icon = R.drawable.ic_baseline_photo_24,
+//            tint = MaterialTheme.colors.primaryVariant.copy(0.25f)
+//        )
 
     }
 }
