@@ -377,9 +377,9 @@ fun DeletePlaceDialog(
     DefaultDialog(
         primaryText = String.format(stringResource(R.string.delete_place_dialog), place.title),
         secondaryText = stringResource(R.string.sure_delete_place_dialog),
-        negativeButtonText = stringResource(id = R.string.No),
+        negativeButtonText = stringResource(id = R.string.no),
         onNegativeClick = onDismiss,
-        positiveButtonText = stringResource(id = R.string.Yes),
+        positiveButtonText = stringResource(id = R.string.yes),
         onPositiveClick = onPositiveClick,
         onDismiss = onDismiss,
         content = {

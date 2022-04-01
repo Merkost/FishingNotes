@@ -95,8 +95,8 @@
     <string name="add_new_catch">Новый улов</string>
     <string name="Choose_a_place">Выберите место</string>
     <string name="save">Сохранить</string>
-    <string name="Yes">Да</string>
-    <string name="No">Нет</string>
+    <string name="yes">Да</string>
+    <string name="no">Нет</string>
     <string name="another_place_in_new_catch">Начните добавлять улов с экрана заметок, чтобы выбрать другое место!</string>
     <string name="locked">Заблокировано</string>
     <string name="failed_to_determine">Не удалось определить</string>
@@ -360,5 +360,12 @@
     <string name="clear_sky">Ясно</string>
     <string name="choose_weather">Выберите погоду:</string>
     <string name="pressure_hpa">гПа</string>
+    <string name="reset_dialog">Сбросить изменения</string>
+    <string name="reset_dialog_secondary">Вы уверены, что хотите отменить все внесённые изменения?</string>
+    <string name="profile_edit">Редактирование профиля</string>
+    <string name="birthday_hint">Дата рождения</string>
+    <string name="birthday_set">Указать дату рождения</string>
+    <string name="name_hint">Имя</string>
+    <string name="email_hint">E-mail</string>
 
 </resources>

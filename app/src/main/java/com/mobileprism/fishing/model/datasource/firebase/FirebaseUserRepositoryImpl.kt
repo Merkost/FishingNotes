@@ -12,13 +12,15 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.di.repositoryModule
 import com.mobileprism.fishing.domain.entity.common.Progress
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
-import com.mobileprism.fishing.model.datastore.AppPreferences
+import com.mobileprism.fishing.model.datastore.UserDatastore
+import com.mobileprism.fishing.model.datastore.impl.UserDatasotoreImpl
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
@@ -26,9 +28,11 @@ import kotlinx.coroutines.tasks.await
 import org.koin.core.context.GlobalContext.loadKoinModules
 import org.koin.core.context.GlobalContext.unloadKoinModules
 import java.util.*
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class FirebaseUserRepositoryImpl(
-    private val appPreferences: AppPreferences,
+    private val userDatastore: UserDatastore,
     private val dbCollections: RepositoryCollections,
     private val firebaseAnalytics: FirebaseAnalytics,
     private val context: Context,
@@ -48,11 +52,8 @@ class FirebaseUserRepositoryImpl(
             awaitClose { fireBaseAuth.removeAuthStateListener(authListener) }
         }
 
-    override val datastoreUser: Flow<User?>
-        get() = callbackFlow {
-            appPreferences.userValue.collectLatest { send(it) }
-            awaitClose { }
-        }
+    override val datastoreUser: Flow<User>
+        get() = flow { userDatastore.getUser.first() }
 
     override suspend fun logoutCurrentUser() = callbackFlow {
         AuthUI.getInstance().signOut(context).addOnCompleteListener {
@@ -102,7 +103,7 @@ class FirebaseUserRepositoryImpl(
             firebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN, bundle)
 
 
-            appPreferences.saveUserValue(userFromDatabase)
+            userDatastore.saveUser(userFromDatabase)
             flow.tryEmit(Progress.Complete)
         } else {
             dbCollections.getUsersCollection().document(user.uid).set(user)
@@ -113,7 +114,7 @@ class FirebaseUserRepositoryImpl(
                     firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)
 
                     runBlocking {
-                        appPreferences.saveUserValue(user)
+                        userDatastore.saveUser(user)
                     }
                     flow.tryEmit(Progress.Complete)
                 }
@@ -131,6 +132,15 @@ class FirebaseUserRepositoryImpl(
         )
     }
 
+    override suspend fun setNewProfileData(user: User) =
+        suspendCoroutine<Result<Unit>> { continuation ->
+            dbCollections.getUsersCollection().document(user.uid).set(user)
+                .addOnCompleteListener {
+                    if (it.isSuccessful) continuation.resume(Result.success(Unit))
+                    else continuation.resume(Result.failure(it.exception ?: Throwable()))
+                }
+        }
+
     private fun getUserSnapshotListener(): EventListener<DocumentSnapshot> =
         EventListener { snapshot, error ->
             if (error != null) {
@@ -141,23 +151,27 @@ class FirebaseUserRepositoryImpl(
                 Log.d("Fishing", "Current data: ${snapshot.data}")
                 snapshot.toObject(User::class.java)?.let { userToUpdate ->
                     runBlocking {
-                        appPreferences.saveUserValue(userToUpdate)
+                        userDatastore.saveUser(userToUpdate)
                     }
                 }
-
             } else {
                 Log.d("Fishing", "Current data: null")
             }
 
         }
 
-    suspend fun getCurrentUserFromDatabase(userId: String) = callbackFlow {
-        dbCollections.getUsersCollection().document(userId).get().addOnCompleteListener {
-            if (it.result.exists()) {
-                trySend(true)
+    suspend fun getCurrentUserFromDatabase(userId: String) =
+        suspendCoroutine<Result<User>> { continuation ->
+            dbCollections.getUsersCollection().document(userId).get().addOnCompleteListener {
+                val user = it.result.toObject<User>()
+                user?.let { continuation.resume(Result.success(it)) } ?: kotlin.run {
+                    continuation.resume(
+                        Result.failure(
+                            it.exception ?: Throwable()
+                        )
+                    )
+                }
             }
         }
-        awaitClose { }
-    }
 
 }

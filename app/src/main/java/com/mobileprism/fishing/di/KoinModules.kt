@@ -11,6 +11,8 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.model.datastore.*
+import com.mobileprism.fishing.model.datastore.impl.NotesPreferencesImpl
+import com.mobileprism.fishing.model.datastore.impl.UserDatasotoreImpl
 import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.viewmodels.*
@@ -19,6 +21,7 @@ import com.mobileprism.fishing.utils.location.LocationManager
 import com.mobileprism.fishing.utils.location.LocationManagerImpl
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionManagerImpl
+import com.mobileprism.fishing.viewmodels.EditProfileViewModel
 import com.mobileprism.fishing.viewmodels.MainViewModel
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import org.koin.android.ext.koin.androidContext
@@ -42,7 +45,7 @@ val appModule = module {
 }
 
 val settingsModule = module {
-    single { AppPreferences(androidContext()) }
+    single<UserDatastore> { UserDatasotoreImpl(androidContext()) }
     single { UserPreferences(androidContext()) }
     single<WeatherPreferences> { WeatherPreferencesImpl(androidContext()) }
     single { NotesPreferencesImpl(androidContext()) }
@@ -70,8 +73,12 @@ val mainModule = module {
         UserViewModel(
             userRepository = get(),
             repository = get(),
-            getUserCatchUseCase = get()
+            getUserCatchUseCase = get(),
+            userDatastore = get()
         )
+    }
+    viewModel {
+        EditProfileViewModel(userDatastore = get(), userRepository = get())
     }
     viewModel { parameters ->
         UserCatchViewModel(

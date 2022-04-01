@@ -170,9 +170,9 @@ fun DeleteCatchDialog(
     DefaultDialog(
         primaryText = String.format(stringResource(R.string.delete_catch_dialog), catch.fishType),
         secondaryText = stringResource(R.string.catch_delete_confirmantion),
-        negativeButtonText = stringResource(id = R.string.No),
+        negativeButtonText = stringResource(id = R.string.no),
         onNegativeClick = onDismiss,
-        positiveButtonText = stringResource(id = R.string.Yes),
+        positiveButtonText = stringResource(id = R.string.yes),
         onPositiveClick = onPositiveClick,
         onDismiss = onDismiss,
         content = {

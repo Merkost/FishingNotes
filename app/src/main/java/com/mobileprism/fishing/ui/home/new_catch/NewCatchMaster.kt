@@ -363,9 +363,9 @@ fun CancelNewCatchDialog(
     DefaultDialog(
         primaryText = stringResource(R.string.cancel_new_catch_dialog),
         secondaryText = stringResource(R.string.sure_cancel_new_catch_dialog),
-        negativeButtonText = stringResource(id = R.string.No),
+        negativeButtonText = stringResource(id = R.string.no),
         onNegativeClick = onDismiss,
-        positiveButtonText = stringResource(id = R.string.Yes),
+        positiveButtonText = stringResource(id = R.string.yes),
         onPositiveClick = onPositiveClick,
         onDismiss = onDismiss,
         content = {

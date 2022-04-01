@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.model.datastore
+package com.mobileprism.fishing.model.datastore.impl
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.mobileprism.fishing.model.datastore.NotesPreferences
 import com.mobileprism.fishing.ui.utils.enums.CatchesSortValues
 import com.mobileprism.fishing.ui.utils.enums.PlacesSortValues
 import kotlinx.coroutines.flow.Flow

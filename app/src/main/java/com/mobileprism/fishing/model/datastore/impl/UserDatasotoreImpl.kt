@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.model.datastore
+package com.mobileprism.fishing.model.datastore.impl
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -8,10 +8,11 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.mobileprism.fishing.domain.entity.common.User
+import com.mobileprism.fishing.model.datastore.UserDatastore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class AppPreferences(private val context: Context) {
+class UserDatasotoreImpl(private val context: Context): UserDatastore {
 
     // to make sure there's only one instance
     companion object {
@@ -26,10 +27,8 @@ class AppPreferences(private val context: Context) {
     }
 
     //get the saved value
-    val userValue: Flow<User?> = context.dataStore.data
+    override val getUser: Flow<User> = context.dataStore.data
         .map { preferences ->
-            if (preferences[USER_UID_KEY] == null) return@map null
-            else {
                 User(
                     uid = preferences[USER_UID_KEY] ?: "",
                     email = preferences[USER_EMAIL_KEY] ?: "",
@@ -38,10 +37,9 @@ class AppPreferences(private val context: Context) {
                     login = preferences[USER_LOGIN_KEY] ?: "",
                     registerDate = preferences[USER_REGISTERDATE_KEY] ?: 0,
                 )
-            }
         }
 
-    suspend fun saveUserValue(user: User) {
+    override suspend fun saveUser(user: User) {
         context.dataStore.edit { preferences ->
             user.apply {
                 preferences[USER_UID_KEY] = uid

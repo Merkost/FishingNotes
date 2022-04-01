@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
@@ -24,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import com.airbnb.lottie.compose.*
@@ -47,20 +49,26 @@ import org.koin.androidx.compose.getViewModel
 
 @ExperimentalCoilApi
 @Composable
-fun UserImage(user: User?, imgSize: Dp, modifier: Modifier = Modifier) {
+fun UserImage(modifier: Modifier = Modifier, user: User, imgSize: Dp, onProfileEdit: () -> Unit) {
     val linearGradientBrush = Brush.linearGradient(
         colors = listOf(Color(0xFFED2939), Color(0xFFFFFF66))
     )
-    user?.let {
-        Column(
+    Row(modifier = modifier,
+        horizontalArrangement = Arrangement.Center) {
+        Box(
             modifier = modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
                 .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            contentAlignment = Alignment.BottomEnd
         ) {
-
+            Card(modifier = Modifier
+                .zIndex(3f)
+                .size(34.dp),
+                shape = CircleShape,
+                elevation = 12.dp) {
+                IconButton(modifier = Modifier ,onClick = onProfileEdit) {
+                    Icon(Icons.Default.Edit, Icons.Default.Edit.name)
+                }
+            }
 
             CoilImage(
                 imageModel = user.photoUrl.ifEmpty { painterResource(R.drawable.ic_fisher) },
@@ -79,9 +87,7 @@ fun UserImage(user: User?, imgSize: Dp, modifier: Modifier = Modifier) {
                     .size(imgSize)
                     .clip(CircleShape)
                     .border(2.dp, linearGradientBrush, CircleShape)
-
             )
-
         }
     }
 
@@ -123,9 +129,9 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
     DefaultDialog(
         primaryText = stringResource(R.string.logout_dialog_title),
         secondaryText = stringResource(R.string.logout_dialog_message),
-        negativeButtonText = stringResource(id = R.string.No),
+        negativeButtonText = stringResource(id = R.string.no),
         onNegativeClick = { dialogOnLogout.value = false },
-        positiveButtonText = stringResource(id = R.string.Yes),
+        positiveButtonText = stringResource(id = R.string.yes),
         onPositiveClick = {
             scope.launch {
                 viewModel.logoutCurrentUser().collect { isLogout ->

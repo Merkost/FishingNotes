@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit
 val userRepositoryModule = module {
     single<UserRepository> {
         FirebaseUserRepositoryImpl(
-            appPreferences = get(),
+            userDatastore = get(),
             dbCollections = get(),
             firebaseAnalytics = get(),
             context = androidContext()

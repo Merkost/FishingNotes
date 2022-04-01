@@ -8,19 +8,23 @@ import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.domain.repository.app.OfflineRepository
 import com.mobileprism.fishing.domain.use_cases.catches.GetUserCatchesUseCase
+import com.mobileprism.fishing.model.datastore.UserDatastore
 import com.mobileprism.fishing.ui.home.profile.findBestCatch
 import com.mobileprism.fishing.ui.home.profile.findFavoritePlace
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class UserViewModel(
     private val userRepository: UserRepository,
+    private val userDatastore: UserDatastore,
     private val repository: OfflineRepository,
     private val getUserCatchUseCase: GetUserCatchesUseCase
 ) : ViewModel() {
 
-    private val _currentUser = MutableStateFlow<User?>(null)
+    private val _currentUser = MutableStateFlow<User>(User())
     val currentUser = _currentUser.asStateFlow()
 
     private val _currentPlaces = MutableStateFlow<List<UserMapMarker>?>(null)
@@ -46,7 +50,7 @@ class UserViewModel(
         get() = _uiState*/
 
     private fun getCurrentUser() = viewModelScope.launch {
-        userRepository.datastoreUser.collect {
+        userDatastore.getUser.collect {
             _currentUser.value = it
         }
     }

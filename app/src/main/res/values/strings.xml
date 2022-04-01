@@ -97,8 +97,8 @@
     <string name="details">Details</string>
     <string name="add_new_catch">Add new catch</string>
     <string name="Choose_a_place">Choose a place</string>
-    <string name="Yes">Yes</string>
-    <string name="No">No</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
     <string name="another_place_in_new_catch">Start adding a catch from the notes screen to choose another location!</string>
     <string name="locked">Locked</string>
     <string name="failed_to_determine">Failed to determine</string>
@@ -362,6 +362,13 @@
     <string name="light_shower_sleet">Light shower sleet</string>
     <string name="shower_sleet">Shower sleet</string>
     <string name="pressure_hpa">hPa</string>
+    <string name="reset_dialog">Сбросить изменения</string>
+    <string name="reset_dialog_secondary">Вы уверены, что хотите отменить все внесённые изменения?</string>
+    <string name="profile_edit">Редактирование профиля</string>
+    <string name="birthday_hint">Дата рождения</string>
+    <string name="birthday_set">Указать дату рождения</string>
+    <string name="name_hint">Имя</string>
+    <string name="email_hint">E-mail</string>
 
 
 </resources>

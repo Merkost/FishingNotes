@@ -25,6 +25,7 @@ import com.mobileprism.fishing.ui.home.*
 import com.mobileprism.fishing.ui.home.catch.UserCatchScreen
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchMasterScreen
 import com.mobileprism.fishing.ui.home.place.UserPlaceScreen
+import com.mobileprism.fishing.ui.home.profile.EditProfile
 import com.mobileprism.fishing.ui.home.settings.AboutApp
 import com.mobileprism.fishing.ui.home.weather.WeatherDaily
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -133,6 +134,10 @@ private fun NavGraphBuilder.NavGraph(
     composable(
         route = MainDestinations.CATCH_ROUTE,
     ) { UserCatchScreen(navController, it.requiredArg(Arguments.CATCH)) }
+
+    composable(
+        route = MainDestinations.EDIT_PROFILE,
+    ) { EditProfile(upPress) }
 
     composable(
         route = MainDestinations.DAILY_WEATHER_ROUTE,

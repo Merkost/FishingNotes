@@ -6,10 +6,12 @@ import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,6 +22,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import com.airbnb.lottie.compose.*
@@ -47,10 +50,8 @@ fun Profile(
     modifier: Modifier = Modifier
 ) {
     val viewModel = getViewModel<UserViewModel>()
-
     val user by viewModel.currentUser.collectAsState()
-
-    val imgSize: Dp = 120.dp
+    val imgSize: Dp = remember { 120.dp }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -60,18 +61,20 @@ fun Profile(
         ConstraintLayout(
             modifier = modifier.fillMaxSize()
         ) {
-            val (image, card) = createRefs()
+            val (image, card, editButton) = createRefs()
 
             val placesState by viewModel.currentPlaces.collectAsState()
             val catchesState by viewModel.currentCatches.collectAsState()
 
-            UserImage(user, imgSize, modifier = Modifier
+            UserImage(modifier = Modifier
                 .constrainAs(image) {
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                    absoluteRight.linkTo(parent.absoluteRight)
+                    centerHorizontallyTo(parent)
                     centerAround(card.top)
+                    width = Dimension.fillToConstraints
                 }
-                .zIndex(2f))
+                .zIndex(2f), user, imgSize) {
+                navController.navigate(MainDestinations.EDIT_PROFILE)
+            }
 
             Card(
                 modifier = Modifier

@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
  */
 object MainDestinations {
 
+    const val EDIT_PROFILE = "edit_profile"
     const val LOGIN_ROUTE = "login"
     const val HOME_ROUTE = "home"
     const val SETTINGS = "settings"

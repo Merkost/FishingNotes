@@ -1,30 +1,17 @@
 package com.mobileprism.fishing.ui.home.views
 
-import android.R
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
-import android.icu.util.Calendar.MILLISECONDS_IN_DAY
-import android.icu.util.Calendar.YEAR
-import android.os.Build
-import android.view.LayoutInflater
-import android.widget.DatePicker
-import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import com.mobileprism.fishing.utils.time.TimeConstants
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.temporal.ChronoUnit
 import java.util.*
 
 @Composable
@@ -36,14 +23,14 @@ fun DatePickerDialog(
     onDateChange: (Long) -> Unit,
     onDismiss: () -> Unit,
 
-) {
+    ) {
     val calendar = Calendar.getInstance().apply {
         timeInMillis = initialDate
     }
 
     DatePickerDialog(
         context,
-        R.style.Theme_Material_Dialog_Alert,
+        android.R.style.Theme_Material_Dialog_Alert,
         { _, year, monthOfYear, dayOfMonth ->
             calendar.set(Calendar.YEAR, year)
             calendar.set(Calendar.MONTH, monthOfYear)
@@ -63,9 +50,11 @@ fun DatePickerDialog(
 
 @Composable
 fun WhiteCardWrapper(content: @Composable () -> Unit) {
-    Card(elevation = 4.dp, shape = RoundedCornerShape(12.dp),
+    Card(
+        elevation = 4.dp, shape = RoundedCornerShape(12.dp),
         modifier = Modifier.padding(8.dp), backgroundColor = Color.White,
-        content = content)
+        content = content
+    )
 }
 
 @Composable
@@ -81,7 +70,7 @@ fun TimePickerDialog(
 
     TimePickerDialog(
         context,
-        R.style.Theme_Material_Dialog_Alert,
+        android.R.style.Theme_Material_Dialog_Alert,
         TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
             calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
             calendar.set(Calendar.MINUTE, minute)

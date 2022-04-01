@@ -8,6 +8,7 @@ import com.mobileprism.fishing.utils.time.TimeConstants.MILLISECONDS_IN_SECOND
 import com.mobileprism.fishing.utils.time.TimeConstants.SECONDS_IN_HOUR
 import com.mobileprism.fishing.utils.time.TimeConstants.SECONDS_IN_MINUTE
 import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 object TimeConstants {

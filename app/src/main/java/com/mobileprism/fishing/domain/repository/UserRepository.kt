@@ -7,10 +7,11 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface UserRepository {
     val currentUser: Flow<User?>
-    val datastoreUser: Flow<User?>
+    val datastoreUser: Flow<User>
 
     suspend fun logoutCurrentUser(): Flow<Boolean>
     suspend fun addNewUser(user: User): StateFlow<Progress>
     suspend fun setUserListener(user: User)
+    suspend fun setNewProfileData(user: User): Result<Unit>
 
 }
