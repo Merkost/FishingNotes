@@ -279,8 +279,13 @@ fun MainAppSettings(userPreferences: UserPreferences) {
 
 @Composable
 fun SettingsHeader(text: String, modifier: Modifier = Modifier) {
+    GrayText(text, modifier.padding(14.dp))
+}
+
+@Composable
+fun GrayText(text: String, modifier: Modifier = Modifier) {
     Text(
-        modifier = modifier.padding(14.dp),
+        modifier = modifier,
         //style = MaterialTheme.typography.h4,
         fontSize = 14.sp,
         fontWeight = FontWeight.SemiBold,

@@ -1,5 +1,7 @@
 package com.mobileprism.fishing.ui.home.profile
 
+import android.annotation.SuppressLint
+import android.widget.Space
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.clickable
@@ -27,6 +29,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.entity.common.User
+import com.mobileprism.fishing.ui.home.GrayText
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.ui.utils.showError
@@ -37,6 +41,7 @@ import org.koin.androidx.compose.getViewModel
 import java.util.*
 
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun EditProfile(onBack: () -> Unit) {
     val context = LocalContext.current
@@ -90,9 +95,6 @@ fun EditProfile(onBack: () -> Unit) {
                 onBack = onBack
             )
         },
-        floatingActionButton = {
-
-        }
     ) {
         Column(
             modifier = Modifier
@@ -101,13 +103,34 @@ fun EditProfile(onBack: () -> Unit) {
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.SpaceBetween.also { Arrangement.spacedBy(12.dp) }
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(18.dp),
+            ) {
+
+                Spacer(modifier = Modifier.size(16.dp))
+                EditUserPhoto(
+                    currentUser = currentUser,
+                    hintText = stringResource(id = R.string.user_photo)
+                )
+
 
                 EditProfileTextFieldWithHeader(
                     modifier = Modifier.fillMaxWidth(),
                     value = currentUser.displayName,
                     onValueChange = viewModel::onNameChange,
                     hintText = stringResource(id = R.string.name_hint)
+                )
+
+                EditProfileTextFieldWithHeader(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = currentUser.login,
+                    onValueChange = viewModel::onLoginChange,
+                    hintText = stringResource(id = R.string.username),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(onDone = {}),
                 )
 
                 EditProfileTextFieldWithHeader(
@@ -123,10 +146,9 @@ fun EditProfile(onBack: () -> Unit) {
                     icon = Icons.Default.Email,
                     readOnly = true,
                 )
+
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    HeaderTextSecondary(
-                        text = stringResource(id = R.string.birthday_hint)
-                    )
+                    GrayText(text = stringResource(id = R.string.birthday_hint))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
@@ -155,7 +177,6 @@ fun EditProfile(onBack: () -> Unit) {
                         }
                     }
                 }
-
             }
 
 
@@ -169,8 +190,15 @@ fun EditProfile(onBack: () -> Unit) {
                     onClick = viewModel::updateProfile
                 )
             }
-
         }
+    }
+}
+
+@Composable
+fun EditUserPhoto(currentUser: User, hintText: String) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        GrayText(text = hintText)
+        UserImage(user = currentUser, imgSize = 150.dp, icon = Icons.Default.Edit, onIconClick = {})
     }
 }
 
@@ -201,12 +229,15 @@ fun EditProfileTextFieldWithHeader(
     icon: ImageVector? = null,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        HeaderTextSecondary(text = hintText)
+        GrayText(text = hintText)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             icon?.let { Icon(icon, icon.name) }
             BasicTextField(modifier = modifier, value = value,
                 onValueChange = onValueChange,
-                textStyle = TextStyle(color = MaterialTheme.colors.onSurface, fontSize = 16.sp),
+                textStyle = TextStyle(
+                    color = MaterialTheme.colors.onSurface,
+                    fontSize = 16.sp
+                ),
                 readOnly = readOnly,
                 keyboardOptions = keyboardOptions,
                 keyboardActions = keyboardActions,

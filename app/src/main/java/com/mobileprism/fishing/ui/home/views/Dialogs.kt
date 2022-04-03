@@ -32,9 +32,9 @@ fun DefaultDialog(
     textAlign: TextAlign = TextAlign.Start,
     neutralButtonText: String = "",
     onNeutralClick: (() -> Unit)? = null,
-    negativeButtonText: String = stringResource(id = R.string.No),
+    negativeButtonText: String = stringResource(id = R.string.no),
     onNegativeClick: (() -> Unit)? = null,
-    positiveButtonText: String = stringResource(id = R.string.Yes),
+    positiveButtonText: String = stringResource(id = R.string.yes),
     onPositiveClick: (() -> Unit)? = null,
     onDismiss: () -> Unit,
     content: @Composable() (() -> Unit)? = null

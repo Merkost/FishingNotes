@@ -72,7 +72,7 @@ fun Profile(
                     centerAround(card.top)
                     width = Dimension.fillToConstraints
                 }
-                .zIndex(2f), user, imgSize) {
+                .zIndex(2f), user = user, imgSize = imgSize, icon = Icons.Default.Edit) {
                 navController.navigate(MainDestinations.EDIT_PROFILE)
             }
 

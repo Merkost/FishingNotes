@@ -495,7 +495,6 @@ fun FishLoading(modifier: Modifier) {
 @Composable
 fun PlaceTileView(
     modifier: Modifier,
-    currentCameraPosition: State<Triple<LatLng, Float, Float>>,
 ) {
     val context = LocalContext.current
     val viewModel: MapViewModel = getViewModel()

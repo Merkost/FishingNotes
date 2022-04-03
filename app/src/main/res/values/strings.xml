@@ -369,6 +369,7 @@
     <string name="birthday_set">Указать дату рождения</string>
     <string name="name_hint">Имя</string>
     <string name="email_hint">E-mail</string>
+    <string name="username">Имя пользователя</string>
 
 
 </resources>

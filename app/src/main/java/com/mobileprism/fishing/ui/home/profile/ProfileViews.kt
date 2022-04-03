@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.ui.home.profile
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -19,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -49,24 +51,36 @@ import org.koin.androidx.compose.getViewModel
 
 @ExperimentalCoilApi
 @Composable
-fun UserImage(modifier: Modifier = Modifier, user: User, imgSize: Dp, onProfileEdit: () -> Unit) {
+fun UserImage(
+    modifier: Modifier = Modifier,
+    user: User,
+    imgSize: Dp,
+    icon: ImageVector? = null,
+    onIconClick: () -> Unit
+) {
     val linearGradientBrush = Brush.linearGradient(
         colors = listOf(Color(0xFFED2939), Color(0xFFFFFF66))
     )
-    Row(modifier = modifier,
-        horizontalArrangement = Arrangement.Center) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Center
+    ) {
         Box(
             modifier = modifier
                 .padding(20.dp),
             contentAlignment = Alignment.BottomEnd
         ) {
-            Card(modifier = Modifier
-                .zIndex(3f)
-                .size(34.dp),
-                shape = CircleShape,
-                elevation = 12.dp) {
-                IconButton(modifier = Modifier ,onClick = onProfileEdit) {
-                    Icon(Icons.Default.Edit, Icons.Default.Edit.name)
+            icon?.let {
+                Card(
+                    modifier = Modifier
+                        .zIndex(3f)
+                        .size(34.dp),
+                    shape = CircleShape,
+                    elevation = 12.dp
+                ) {
+                    IconButton(modifier = Modifier, onClick = onIconClick) {
+                        Icon(icon, icon.name)
+                    }
                 }
             }
 
@@ -81,7 +95,12 @@ fun UserImage(modifier: Modifier = Modifier, user: User, imgSize: Dp, onProfileE
                     tilt = 20f,
                 ),
                 failure = {
-                    Text("Image request failed")
+                    Image(
+                        painter = painterResource(R.drawable.ic_fisher),
+                        contentDescription = stringResource(
+                            id = R.string.fisher
+                        )
+                    )
                 },
                 modifier = Modifier
                     .size(imgSize)
@@ -90,7 +109,6 @@ fun UserImage(modifier: Modifier = Modifier, user: User, imgSize: Dp, onProfileE
             )
         }
     }
-
 }
 
 @OptIn(InternalCoroutinesApi::class)
@@ -137,7 +155,7 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
                 viewModel.logoutCurrentUser().collect { isLogout ->
                     if (isLogout) {
                         dialogOnLogout.value = false
-                        
+
                         navController.navigate(MainDestinations.LOGIN_ROUTE) {
                             popUpTo(0) {
                                 inclusive = true

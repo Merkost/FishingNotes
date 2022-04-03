@@ -30,16 +30,16 @@ class EditProfileViewModel(
     private val _uiState = MutableStateFlow<BaseViewState<Unit>?>(null)
     val uiState = _uiState.asStateFlow()
 
-
-
-
-
     fun resetChanges() {
         loadCurrentUser()
     }
 
     fun onNameChange(name: String) {
         _currentUser.value = _currentUser.value.copy(displayName = name)
+    }
+
+    fun onLoginChange(login: String) {
+        _currentUser.value = _currentUser.value.copy(login = login)
     }
 
     fun birthdaySelected(birthday: Long) {

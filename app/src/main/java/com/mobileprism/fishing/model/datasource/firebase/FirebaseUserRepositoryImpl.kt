@@ -20,7 +20,6 @@ import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.datastore.UserDatastore
-import com.mobileprism.fishing.model.datastore.impl.UserDatasotoreImpl
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking

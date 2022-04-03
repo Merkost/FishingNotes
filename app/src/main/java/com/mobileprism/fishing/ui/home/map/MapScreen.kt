@@ -87,7 +87,6 @@ fun MapScreen(
     val coroutineScope = rememberCoroutineScope()
     val userPreferences: UserPreferences = get()
     val useZoomButtons by userPreferences.useMapZoomButons.collectAsState(false)
-    val placeTileState by viewModel.placeTileViewNameState.collectAsState()
 
     val scaffoldState = rememberBottomSheetScaffoldState()
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -151,8 +150,7 @@ fun MapScreen(
                     modifier = Modifier.constrainAs(mapLayersButton) {
                         top.linkTo(parent.top, 16.dp)
                         absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                    }
-                ) { mapLayersSelection = true }
+                    }) { mapLayersSelection = true }
 
                 if (mapLayersSelection)
                     Surface(modifier = Modifier
@@ -240,7 +238,7 @@ fun MapScreen(
                         top.linkTo(parent.top)
                         bottom.linkTo(parent.bottom, 65.dp)
                         centerHorizontallyTo(parent)
-                    }) { PointerIcon(placeTileState.pointerState) }
+                    }) { PointerIcon(viewModel.placeTileViewNameState.collectAsState().value.pointerState) }
 
                 AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection,
                     enter = fadeIn(animationSpec = tween(300)),
@@ -253,7 +251,6 @@ fun MapScreen(
                 ) {
                     PlaceTileView(
                         modifier = Modifier.wrapContentSize(),
-                        currentCameraPosition = viewModel.currentCameraPosition.collectAsState(),
                     )
                 }
 
