@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.ui.home.profile
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
@@ -14,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -66,13 +68,24 @@ fun Profile(
             val placesState by viewModel.currentPlaces.collectAsState()
             val catchesState by viewModel.currentCatches.collectAsState()
 
+            val imageBorderStroke = remember {
+                BorderStroke(
+                    2.dp,
+                    Brush.linearGradient(colors = listOf(Color(0xFFED2939), Color(0xFFFFFF66)))
+                )
+            }
+
             UserImage(modifier = Modifier
                 .constrainAs(image) {
                     centerHorizontallyTo(parent)
                     centerAround(card.top)
                     width = Dimension.fillToConstraints
                 }
-                .zIndex(2f), user = user, imgSize = imgSize, icon = Icons.Default.Edit) {
+                .zIndex(2f),
+                user = user,
+                imgSize = imgSize,
+                icon = Icons.Default.Edit,
+                borderStroke = imageBorderStroke) {
                 navController.navigate(MainDestinations.EDIT_PROFILE)
             }
 

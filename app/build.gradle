@@ -68,9 +68,6 @@ dependencies {
 
     implementation 'androidx.work:work-runtime-ktx:2.7.1'
 
-    //CoilImage
-    implementation "com.github.skydoves:landscapist-coil:1.5.0"
-
     //Compressor
     implementation 'id.zelory:compressor:3.0.1'
 

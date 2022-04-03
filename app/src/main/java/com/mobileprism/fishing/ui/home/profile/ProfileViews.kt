@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.ui.home.profile
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
+import coil.compose.SubcomposeAsyncImage
 import com.airbnb.lottie.compose.*
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.common.User
@@ -43,8 +45,6 @@ import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.ui.theme.primaryTextColor
 import com.mobileprism.fishing.ui.viewmodels.UserViewModel
 import com.mobileprism.fishing.utils.time.toDateTextMonth
-import com.skydoves.landscapist.ShimmerParams
-import com.skydoves.landscapist.coil.CoilImage
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
@@ -56,11 +56,9 @@ fun UserImage(
     user: User,
     imgSize: Dp,
     icon: ImageVector? = null,
+    borderStroke: BorderStroke? = null,
     onIconClick: () -> Unit
 ) {
-    val linearGradientBrush = Brush.linearGradient(
-        colors = listOf(Color(0xFFED2939), Color(0xFFFFFF66))
-    )
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.Center
@@ -84,28 +82,20 @@ fun UserImage(
                 }
             }
 
-            CoilImage(
-                imageModel = user.photoUrl.ifEmpty { painterResource(R.drawable.ic_fisher) },
+            SubcomposeAsyncImage(
+                model = user.photoUrl.ifEmpty { painterResource(R.drawable.ic_fisher) },
+                contentDescription = stringResource(id = R.string.user_photo),
                 contentScale = ContentScale.Crop,
-                shimmerParams = ShimmerParams(
-                    baseColor = Color.LightGray,
-                    highlightColor = Color.White,
-                    durationMillis = 650,
-                    dropOff = 0.65f,
-                    tilt = 20f,
-                ),
-                failure = {
+                error = {
                     Image(
                         painter = painterResource(R.drawable.ic_fisher),
-                        contentDescription = stringResource(
-                            id = R.string.fisher
-                        )
+                        contentDescription = stringResource(id = R.string.fisher)
                     )
                 },
                 modifier = Modifier
                     .size(imgSize)
                     .clip(CircleShape)
-                    .border(2.dp, linearGradientBrush, CircleShape)
+                    .border(borderStroke ?: BorderStroke(0.dp, Color.White.copy(0f)))
             )
         }
     }
