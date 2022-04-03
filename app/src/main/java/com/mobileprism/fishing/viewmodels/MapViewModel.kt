@@ -57,7 +57,6 @@ class MapViewModel(
     val addNewMarkerState = _addNewMarkerState.asStateFlow()
 
 
-
     private val _mapUiState: MutableStateFlow<MapUiState> = MutableStateFlow(MapUiState.NormalMode)
     val mapUiState = _mapUiState.asStateFlow()
 
@@ -238,6 +237,7 @@ class MapViewModel(
             }
             else -> {
                 initialPlaceSelected.value = true
+                _currentMarker.value = place
                 _mapUiState.value = MapUiState.BottomSheetInfoMode
                 _firstCameraPosition.value =
                     currentCameraPosition.value.copy(place.latLng, second = DEFAULT_ZOOM)
