@@ -12,7 +12,7 @@ const val CATCHES_COLLECTION = "catches"
 fun getCatchesFromDoc(docs: List<DocumentSnapshot>) = callbackFlow {
     docs.forEach { doc ->
         doc.reference.collection(CATCHES_COLLECTION)
-            .addSnapshotListener { snapshots, error ->
+            .addSnapshotListener { snapshots, _ ->
                 if (snapshots != null) {
                     val catches = snapshots.toObjects(UserCatch::class.java)
                     trySend(catches)

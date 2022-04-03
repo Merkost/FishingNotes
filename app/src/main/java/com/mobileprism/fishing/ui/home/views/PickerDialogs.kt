@@ -32,10 +32,11 @@ fun DatePickerDialog(
         context,
         android.R.style.Theme_Material_Dialog_Alert,
         { _, year, monthOfYear, dayOfMonth ->
-            calendar.set(Calendar.YEAR, year)
-            calendar.set(Calendar.MONTH, monthOfYear)
-            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-            onDateChange(calendar.timeInMillis)
+            onDateChange(Calendar.getInstance().apply {
+                set(Calendar.YEAR, year)
+                set(Calendar.MONTH, monthOfYear)
+                set(Calendar.DAY_OF_MONTH, dayOfMonth)
+            }.timeInMillis)
         },
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),

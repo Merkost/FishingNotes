@@ -33,7 +33,7 @@ fun Long.toTime(is12hFormat: Boolean = false): String {
 }
 
 fun Long.toDate(): String {
-    val date = Date(formatToMilliseconds(this))
+    val date = Date(this)
     val sdf = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault())
     return sdf.format(date)
 }

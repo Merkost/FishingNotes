@@ -51,7 +51,7 @@ class FirebaseCatchesRepositoryImpl(
     private fun getCatchesStateFromDoc(docs: List<DocumentSnapshot>) = callbackFlow {
         docs.forEach { doc ->
             doc.reference.collection(CATCHES_COLLECTION)
-                .addSnapshotListener { snapshots, error ->
+                .addSnapshotListener { snapshots, _ ->
                     if (snapshots != null) {
 
                         val result = ContentStateOld<UserCatch>()
@@ -211,7 +211,7 @@ class FirebaseCatchesRepositoryImpl(
 
             val listener =
                 dbCollections.getUserCatchesCollection(markerId).whereEqualTo("id", catchId)
-                    .addSnapshotListener { snapshots, error ->
+                    .addSnapshotListener { snapshots, _ ->
 
                         for (dc in snapshots!!.documentChanges) {
                             when (dc.type) {

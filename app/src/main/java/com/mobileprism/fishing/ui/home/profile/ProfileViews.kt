@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -33,6 +34,7 @@ import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.SubcomposeAsyncImage
 import com.airbnb.lottie.compose.*
+import com.google.android.gms.maps.model.Circle
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.entity.content.UserCatch
@@ -55,6 +57,7 @@ fun UserImage(
     modifier: Modifier = Modifier,
     user: User,
     imgSize: Dp,
+    shape: Shape = CircleShape,
     icon: ImageVector? = null,
     borderStroke: BorderStroke? = null,
     onIconClick: () -> Unit
@@ -64,7 +67,7 @@ fun UserImage(
         horizontalArrangement = Arrangement.Center
     ) {
         Box(
-            modifier = modifier
+            modifier = Modifier
                 .padding(20.dp),
             contentAlignment = Alignment.BottomEnd
         ) {
@@ -73,7 +76,7 @@ fun UserImage(
                     modifier = Modifier
                         .zIndex(3f)
                         .size(34.dp),
-                    shape = CircleShape,
+                    shape = shape,
                     elevation = 12.dp
                 ) {
                     IconButton(modifier = Modifier, onClick = onIconClick) {
@@ -94,8 +97,8 @@ fun UserImage(
                 },
                 modifier = Modifier
                     .size(imgSize)
-                    .clip(CircleShape)
-                    .border(borderStroke ?: BorderStroke(0.dp, Color.White.copy(0f)))
+                    .clip(shape)
+                    .border(borderStroke ?: BorderStroke(0.dp, Color.White.copy(0f)), shape)
             )
         }
     }

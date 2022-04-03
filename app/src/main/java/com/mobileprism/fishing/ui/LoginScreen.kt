@@ -105,7 +105,7 @@ fun LoginScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            val (background, card, lottieSuccess, cardColumn) = createRefs()
+            val (card, lottieSuccess, cardColumn) = createRefs()
 
             AnimatedVisibility(
                 visible = visible,

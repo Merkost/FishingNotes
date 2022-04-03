@@ -64,9 +64,7 @@ fun EditProfile(onBack: () -> Unit) {
             initialDate = currentUser.birthDate.takeIf { it != 0L } ?: Calendar.getInstance()
                 .apply { this.add(Calendar.YEAR, -18) }.timeInMillis,
             maxDate = Calendar.getInstance().apply { this.add(Calendar.YEAR, -18) }.timeInMillis,
-            onDismiss = { datePickerShown = false }, onDateChange = {
-                viewModel.birthdaySelected(it)
-            })
+            onDismiss = { datePickerShown = false }, onDateChange = viewModel::birthdaySelected)
     }
 
     LaunchedEffect(uiState) {
@@ -109,6 +107,7 @@ fun EditProfile(onBack: () -> Unit) {
 
                 Spacer(modifier = Modifier.size(16.dp))
                 EditUserPhoto(
+                    modifier = Modifier.fillMaxWidth(),
                     currentUser = currentUser,
                     hintText = stringResource(id = R.string.user_photo)
                 )
@@ -195,10 +194,10 @@ fun EditProfile(onBack: () -> Unit) {
 }
 
 @Composable
-fun EditUserPhoto(currentUser: User, hintText: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+fun EditUserPhoto(modifier: Modifier = Modifier, currentUser: User, hintText: String) {
+    Column(modifier = Modifier, verticalArrangement = Arrangement.spacedBy(12.dp),) {
         GrayText(text = hintText)
-        UserImage(user = currentUser, imgSize = 150.dp, icon = Icons.Default.Edit, onIconClick = {})
+        UserImage(modifier = modifier, user = currentUser, imgSize = 150.dp, icon = Icons.Default.Edit, onIconClick = {})
     }
 }
 
