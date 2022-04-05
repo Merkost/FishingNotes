@@ -24,8 +24,10 @@ import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.theme.cardColor
 import com.mobileprism.fishing.ui.theme.customColors
+import com.mobileprism.fishing.ui.theme.primaryBlueLightColorTransparent
 import com.mobileprism.fishing.ui.viewmodels.NoteCatchesState
 import com.mobileprism.fishing.ui.viewmodels.PlaceNoteItemUiState
+import com.mobileprism.fishing.utils.time.toDate
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toTime
 import org.koin.androidx.compose.get
@@ -124,11 +126,12 @@ fun ItemUserPlaceNote(
     placeNote: PlaceNoteItemUiState,
     isExpanded: Boolean,
     onExpandItemClick: (UserMapMarker) -> Unit,
-    onItemClick: (UserMapMarker) -> Unit
+    onItemClick: (UserMapMarker) -> Unit,
+    onCatchClick: (UserCatch) -> Unit,
+    addNewCatch: (UserMapMarker) -> Unit
 ) {
-    DefaultCardClickable(
+    DefaultCard(
         modifier = modifier,
-        onClick = { onItemClick(placeNote.place) }
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             ItemNotesPlace(
@@ -138,8 +141,8 @@ fun ItemUserPlaceNote(
             )
             ItemNotesCatches(
                 isVisible = isExpanded,
-                addNewCatch = {},
-                navigateToCatch = {},
+                addNewCatch = { addNewCatch(placeNote.place) },
+                navigateToCatch = onCatchClick,
                 catchesState = placeNote.catchesState
             )
 
@@ -159,7 +162,8 @@ fun ItemNotesPlace(
             .clickable { onItemClick(place) }
             .wrapContentHeight()
             .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
 
         Icon(
@@ -173,19 +177,18 @@ fun ItemNotesPlace(
 
         Column(
             modifier = Modifier
-                .padding(vertical = 16.dp),
+                .padding(vertical = 16.dp)
+                .fillMaxWidth(0.8f),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.Start
         ) {
             PrimaryText(
-                modifier = Modifier,
                 text = place.title,
+                maxLines = 1
             )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SupportText(
-                    modifier = Modifier,
                     text = place.dateOfCreation.toDateTextMonth()
                 )
                 ItemCounter(
@@ -216,7 +219,6 @@ fun ItemNotesCatches(
     navigateToCatch: (UserCatch) -> Unit,
     catchesState: NoteCatchesState,
 ) {
-
     val transitionState = remember { MutableTransitionState(initialState = isVisible) }
 
     LaunchedEffect(key1 = isVisible) {
@@ -254,12 +256,9 @@ fun ItemNotesCatches(
         when (catchesState) {
             is NoteCatchesState.Loaded -> {
                 Column(modifier = modifier) {
-                    Text(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .align(Alignment.CenterHorizontally),
-                        text = "Add new catch"
-                    )
+
+                    ItemAddNewCatch(onClick = { addNewCatch() })
+
                     (catchesState.catches).forEach {
                         ItemNotesCatch(
                             catch = it,
@@ -269,7 +268,16 @@ fun ItemNotesCatches(
                 }
             }
             NoteCatchesState.Loading -> {
-                CircularProgressIndicator()
+                Box(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(32.dp))
+                }
+
             }
         }
 
@@ -288,40 +296,63 @@ fun ItemNotesCatch(
 
     Column(
         modifier = modifier
-            .clickable { onItemClick(catch) }
             .padding(8.dp)
             .fillMaxWidth(),
-        verticalArrangement = Arrangement.Center
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceEvenly
     ) {
-
-        Divider(modifier = modifier.padding(horizontal = 8.dp))
-
-        Row(modifier.fillMaxWidth()) {
-            Column() {
-                PrimaryText(
-                    modifier = Modifier,
-                    text = catch.fishType,
-                    maxLines = 1
+//        Divider(modifier = Modifier.padding(horizontal = 8.dp))
+        Surface(
+            modifier = modifier.padding(8.dp),
+            shape = RoundedCornerShape(24.dp),
+            color = primaryBlueLightColorTransparent
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .clickable { onItemClick(catch) },
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(32.dp),
+                    painter = painterResource(id = R.drawable.ic_fish),
+                    contentDescription = stringResource(id = R.string.fish_catch)
                 )
-                SecondaryTextSmall(
-                    modifier = Modifier,
-                    text = "${stringResource(id = R.string.amount)}: ${catch.fishAmount}" +
-                            " ${stringResource(id = R.string.pc)}"
-                )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.7f)
+                        .padding(horizontal = 8.dp)
+                ) {
+                    PrimaryText(
+                        modifier = Modifier,
+                        text = catch.fishType,
+                        maxLines = 1
+                    )
+                    SecondaryTextSmall(
+                        modifier = Modifier,
+                        text = "${catch.date.toDate()} ${catch.date.toTime(is12hTimeFormat)}"
+                    )
+                }
+
+                Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+                    PrimaryText(
+                        modifier = Modifier,
+                        text = "${catch.fishWeight} ${stringResource(id = R.string.kg)}"
+                    )
+//                SecondaryText(
+//                    modifier = Modifier,
+//                    text = "${catch.fishAmount}" + " ${stringResource(id = R.string.pc)}"
+//                )
+                }
+
             }
-
-            PrimaryText(
-                modifier = Modifier,
-                text = "${catch.fishWeight} ${stringResource(id = R.string.kg)}"
-            )
-
-
         }
 
-        SupportText(
-            modifier = Modifier,
-            text = catch.date.toTime(is12hTimeFormat)
-        )
 
 //        ItemCounter(
 //            modifier = Modifier
@@ -500,4 +531,58 @@ fun ItemCounter(
         SupportText(text = " x $count")
     }
 
+}
+
+@Composable
+fun ItemAddNewCatch(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceEvenly
+    ) {
+        Divider(modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp))
+
+        DefaultButtonOutlined(
+            icon = painterResource(id = R.drawable.ic_add_catch),
+            text = stringResource(id = R.string.add_catch_text),
+            onClick = onClick
+        )
+
+//        IconButton(
+//            modifier = Modifier
+//                .padding(8.dp)
+//                .wrapContentSize()
+//                .border(
+//                    width = 0.5.dp,
+//                    color = MaterialTheme.customColors.secondaryTextColor,
+//                    shape = RoundedCornerShape(24.dp)
+//                ),
+//            onClick = onClick
+//        ) {
+//            Row(
+//                modifier = modifier.wrapContentWidth(),
+//                horizontalArrangement = Arrangement.SpaceAround,
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Icon(
+//                    modifier = Modifier
+//                        .padding(8.dp)
+//                        .size(24.dp),
+//                    painter = painterResource(id = R.drawable.ic_add_catch),
+//                    contentDescription = stringResource(id = R.string.add_catch_text),
+//                    tint = MaterialTheme.colors.primaryVariant
+//                )
+//                SecondaryText(
+//                    modifier = Modifier,
+//                    text = stringResource(id = R.string.add_catch_text),
+//                    textColor = MaterialTheme.colors.primaryVariant
+//                )
+//            }
+//        }
+    }
 }

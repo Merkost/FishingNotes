@@ -12,7 +12,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.ui.home.place.newCatchClicked
 import com.mobileprism.fishing.ui.home.views.DefaultAppBar
 import com.mobileprism.fishing.ui.viewmodels.NotesViewModel
 import com.mobileprism.fishing.ui.viewmodels.PlaceNoteItemUiState
@@ -61,7 +63,9 @@ fun NotesScreen(
                             placeNotes = state.data,
                             expandedItems = expandedItems,
                             onItemExpandClick = { viewModel.onPlaceExpandItemClick(it) },
-                            onItemClick = { }
+                            onItemClick = { },
+                            onCatchClick = { },
+                            addNewCatch = { newCatchClicked(navController, it) }
                         )
                     }
                     is BaseViewState.Loading -> {
@@ -85,7 +89,9 @@ fun UserPlacesList(
     placeNotes: List<PlaceNoteItemUiState>,
     expandedItems: List<UserMapMarker>,
     onItemExpandClick: (UserMapMarker) -> Unit,
-    onItemClick: (UserMapMarker) -> Unit
+    onItemClick: (UserMapMarker) -> Unit,
+    onCatchClick: (UserCatch) -> Unit,
+    addNewCatch: (UserMapMarker) -> Unit
 ) {
     LazyColumn(modifier = modifier) {
         items(count = placeNotes.size) { index ->
@@ -93,7 +99,9 @@ fun UserPlacesList(
                 placeNote = placeNotes[index],
                 isExpanded = expandedItems.contains(placeNotes[index].place),
                 onItemClick = { onItemClick(it) },
-                onExpandItemClick = { onItemExpandClick(it) }
+                onExpandItemClick = { onItemExpandClick(it) },
+                onCatchClick = onCatchClick,
+                addNewCatch = addNewCatch
             )
         }
     }
