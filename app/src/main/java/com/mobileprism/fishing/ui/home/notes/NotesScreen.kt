@@ -14,8 +14,11 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.ui.Arguments
+import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.place.newCatchClicked
 import com.mobileprism.fishing.ui.home.views.DefaultAppBar
+import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.viewmodels.NotesViewModel
 import com.mobileprism.fishing.ui.viewmodels.PlaceNoteItemUiState
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
@@ -63,8 +66,8 @@ fun NotesScreen(
                             placeNotes = state.data,
                             expandedItems = expandedItems,
                             onItemExpandClick = { viewModel.onPlaceExpandItemClick(it) },
-                            onItemClick = { },
-                            onCatchClick = { },
+                            onItemClick = { onPlaceItemClick(navController, it) },
+                            onCatchClick = { onCatchItemClick(navController, it) },
                             addNewCatch = { newCatchClicked(navController, it) }
                         )
                     }
@@ -137,5 +140,16 @@ fun NotesAppBar(
                 )
             }
         }
+    )
+}
+
+private fun onCatchItemClick(navController: NavController, catch: UserCatch) {
+    navController.navigate(MainDestinations.CATCH_ROUTE, Arguments.CATCH to catch)
+}
+
+private fun onPlaceItemClick(navController: NavController, place: UserMapMarker) {
+    navController.navigate(
+        MainDestinations.PLACE_ROUTE,
+        Arguments.PLACE to place
     )
 }
