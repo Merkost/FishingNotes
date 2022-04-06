@@ -143,7 +143,7 @@
     <string name="google_login_failed">Вход через Google не удался. Попробуйте еще раз!</string>
     <string name="add_place_success">Место сохранено на карте</string>
     <string name="no_cathces_added">Уловы не добавлены</string>
-    <string name="add_catch_text">+ Добавить новый улов</string>
+    <string name="add_catch_text">Новый улов</string>
     <string name="no_places_added">Нет добавленных мест</string>
     <string name="new_place_text">+ Добавить новое место</string>
     <string name="for_today">Сегодня</string>
