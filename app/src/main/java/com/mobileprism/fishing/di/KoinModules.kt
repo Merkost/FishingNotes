@@ -19,8 +19,8 @@ import com.mobileprism.fishing.utils.location.LocationManager
 import com.mobileprism.fishing.utils.location.LocationManagerImpl
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionManagerImpl
-import com.mobileprism.fishing.viewmodels.MainViewModel
-import com.mobileprism.fishing.viewmodels.MapViewModel
+import com.mobileprism.fishing.ui.viewmodels.MainViewModel
+import com.mobileprism.fishing.ui.viewmodels.MapViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module

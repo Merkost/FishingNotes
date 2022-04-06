@@ -52,7 +52,7 @@ import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
-import com.mobileprism.fishing.viewmodels.MapViewModel
+import com.mobileprism.fishing.ui.viewmodels.MapViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest

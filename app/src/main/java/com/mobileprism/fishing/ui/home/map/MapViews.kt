@@ -49,7 +49,7 @@ import com.mobileprism.fishing.ui.home.views.DefaultDialog
 import com.mobileprism.fishing.ui.theme.RedGoogleChrome
 import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
 import com.mobileprism.fishing.ui.theme.supportTextColor
-import com.mobileprism.fishing.viewmodels.MapViewModel
+import com.mobileprism.fishing.ui.viewmodels.MapViewModel
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.MainActivity
 import com.mobileprism.fishing.utils.location.LocationManager

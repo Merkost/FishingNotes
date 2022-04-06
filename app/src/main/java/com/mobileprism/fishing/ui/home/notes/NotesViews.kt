@@ -142,7 +142,6 @@ fun ItemUserPlaceNote(
                 navigateToCatch = {},
                 catchesState = placeNote.catchesState
             )
-
         }
     }
 }
