@@ -2,11 +2,14 @@ package com.mobileprism.fishing.ui.home.notes
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
@@ -18,6 +21,7 @@ import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.place.newCatchClicked
 import com.mobileprism.fishing.ui.home.views.DefaultAppBar
+import com.mobileprism.fishing.ui.home.views.ErrorView
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.viewmodels.NotesViewModel
 import com.mobileprism.fishing.ui.viewmodels.PlaceNoteItemUiState
@@ -68,7 +72,8 @@ fun NotesScreen(
                             onItemExpandClick = { viewModel.onPlaceExpandItemClick(it) },
                             onItemClick = { onPlaceItemClick(navController, it) },
                             onCatchClick = { onCatchItemClick(navController, it) },
-                            addNewCatch = { newCatchClicked(navController, it) }
+                            addNewCatch = { newCatchClicked(navController, it) },
+                            addNewPlace = { onAddNewPlaceClick(navController) }
                         )
                     }
                     is BaseViewState.Loading -> {
@@ -80,10 +85,7 @@ fun NotesScreen(
                 }
             }
         }
-
-
     }
-
 }
 
 @Composable
@@ -94,30 +96,46 @@ fun UserPlacesList(
     onItemExpandClick: (UserMapMarker) -> Unit,
     onItemClick: (UserMapMarker) -> Unit,
     onCatchClick: (UserCatch) -> Unit,
-    addNewCatch: (UserMapMarker) -> Unit
+    addNewCatch: (UserMapMarker) -> Unit,
+    addNewPlace: () -> Unit
 ) {
-    LazyColumn(modifier = modifier) {
-        items(count = placeNotes.size) { index ->
-            ItemUserPlaceNote(
-                placeNote = placeNotes[index],
-                isExpanded = expandedItems.contains(placeNotes[index].place),
-                onItemClick = { onItemClick(it) },
-                onExpandItemClick = { onItemExpandClick(it) },
-                onCatchClick = onCatchClick,
-                addNewCatch = addNewCatch
-            )
+
+    if (placeNotes.isEmpty()) {
+        NoPlacesView(onAddNewPlaceClick = addNewPlace)
+    } else {
+        LazyColumn(modifier = modifier) {
+            items(count = placeNotes.size) { index ->
+                ItemUserPlaceNote(
+                    placeNote = placeNotes[index],
+                    isExpanded = expandedItems.contains(placeNotes[index].place),
+                    onItemClick = { onItemClick(it) },
+                    onExpandItemClick = { onItemExpandClick(it) },
+                    onCatchClick = onCatchClick,
+                    addNewCatch = addNewCatch
+                )
+            }
         }
     }
 }
 
 @Composable
 fun UserPlacesLoading() {
-    CircularProgressIndicator()
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
+    }
 }
 
 @Composable
 fun UserPlacesError() {
-
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        ErrorView()
+    }
 }
 
 @ExperimentalPagerApi
@@ -152,4 +170,9 @@ private fun onPlaceItemClick(navController: NavController, place: UserMapMarker)
         MainDestinations.PLACE_ROUTE,
         Arguments.PLACE to place
     )
+}
+
+private fun onAddNewPlaceClick(navController: NavController) {
+    val addNewPlace = true
+    navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${addNewPlace}")
 }

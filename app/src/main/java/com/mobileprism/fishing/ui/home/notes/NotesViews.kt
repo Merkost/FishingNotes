@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import com.airbnb.lottie.compose.*
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
@@ -576,4 +577,40 @@ fun ItemAddNewCatch(
         )
 
     }
+}
+
+@Composable
+fun NoPlacesView(
+    modifier: Modifier = Modifier,
+    onAddNewPlaceClick: () -> Unit
+) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        PrimaryText(text = stringResource(id = R.string.no_places_added))
+        Spacer(modifier = Modifier.padding(8.dp))
+        LottieNoPlaces(modifier = Modifier.size(128.dp))
+        Spacer(modifier = Modifier.padding(8.dp))
+        DefaultButtonOutlined(
+            text = stringResource(id = R.string.add_new_place),
+            icon = painterResource(id = R.drawable.ic_add_catch),
+            onClick = onAddNewPlaceClick
+        )
+    }
+}
+
+@Composable
+fun LottieNoPlaces(modifier: Modifier = Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.no_loaction))
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever,
+    )
+    LottieAnimation(
+        composition,
+        progress,
+        modifier = modifier
+    )
 }
