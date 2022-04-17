@@ -595,7 +595,7 @@ fun NoPlacesView(
         Spacer(modifier = Modifier.padding(8.dp))
         DefaultButtonOutlined(
             text = stringResource(id = R.string.add_new_place),
-            icon = painterResource(id = R.drawable.ic_add_catch),
+            icon = painterResource(id = R.drawable.ic_baseline_add_location_24),
             onClick = onAddNewPlaceClick
         )
     }

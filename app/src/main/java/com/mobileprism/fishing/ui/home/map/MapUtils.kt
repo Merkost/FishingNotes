@@ -219,7 +219,7 @@ fun BackPressHandler(
                 } else {
                     val currentMillis = System.currentTimeMillis()
                     if (currentMillis - lastPressed < 2000) {
-                        (context as MainActivity).finish()
+                        (context as MainActivity).finishAffinity()
                     } else {
                         showToast(context, context.getString(R.string.app_exit_message))
                     }
