@@ -2,7 +2,7 @@
 
 Fishing notes is an Android app for fishermen who whant to remember their fish spots on the map, save cathes on this spots, and share it with friands and other users.
 
-The project is in active development!
+The project is in active development! 🚧🏗️🛠️👷
 
 
 
