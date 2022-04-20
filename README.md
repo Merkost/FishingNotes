@@ -1,10 +1,10 @@
 # Fishing Notes🎣
 
-**This is not an official Google product**
-
 Fishing notes is an Android app for fishermen who whant to remember their fish spots on the map, save cathes on this spots, and share it with friands and other users.
 
 The project is in active development!
+
+
 
 ## Download
 
@@ -12,10 +12,13 @@ The project is in active development!
 <img src="https://play.google.com/intl/en_gb/badges/static/images/badges/en_badge_web_generic.png" width=240 />
 </a>
 
-## Used libraries:
+## Libraries:
+
+ * Entirely written in [Kotlin](https://kotlinlang.org/).
+ * UI completely written in [Jetpack Compose](https://developer.android.com/jetpack/compose)
+
 -   Retrofit - https://square.github.io/retrofit/
 -   Koin - https://insert-koin.io/
--   Bottom Picker - https://github.com/ParkSangGwon/TedBottomPicker
 -   Coil - https://coil-kt.github.io/coil/
 -   Firebase - https://firebase.google.com/
 -   Jetpack compose - https://developer.android.com/jetpack/compose
