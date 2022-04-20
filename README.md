@@ -1,3 +1,11 @@
+
+## Download
+
+<a href="https://play.google.com/store/apps/details?id=com.mobileprism.fishing" target="_blank">
+<img src="https://play.google.com/intl/en_gb/badges/static/images/badges/en_badge_web_generic.png" width=240 />
+</a>
+
+
 Fishing Notes
 =================
 Fishing notes is an Android app for fishermen who whant to remember their fish spots on the map, save cathes on this spots, and share it with friands and other users.
