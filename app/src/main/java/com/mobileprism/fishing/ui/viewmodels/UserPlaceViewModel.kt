@@ -17,6 +17,7 @@ import com.mobileprism.fishing.ui.home.SnackbarManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.launch
 
 class UserPlaceViewModel(
@@ -58,20 +59,15 @@ class UserPlaceViewModel(
         viewModelScope.launch {
             _marker.value?.let {
                 markerVisibility.value = newIsVisible
-                markersRepo.changeMarkerVisibility(it, changeTo = newIsVisible).collect {
-                    when (it) {
-                        is LiteProgress.Loading -> {}
-                        is LiteProgress.Complete -> {
-                            SnackbarManager.showMessage(R.string.marker_visibility_change_success)
-                        }
-                        is LiteProgress.Error -> {
-                            markerVisibility.value = !newIsVisible
-                            SnackbarManager.showMessage(R.string.marker_visibility_change_error)
-                        }
-                    }
+                markersRepo.changeMarkerVisibility(it, changeTo = newIsVisible).single().fold(
+                    onSuccess = {
+                        SnackbarManager.showMessage(R.string.marker_visibility_change_success)
+                    },
+                    onFailure = {
+                        markerVisibility.value = !newIsVisible
+                        SnackbarManager.showMessage(R.string.marker_visibility_change_error)
+                    })
                 }
-            }
-
         }
     }
 

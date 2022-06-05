@@ -21,6 +21,8 @@ class WeatherViewModel(
     private val locationManager: LocationManager,
 ) : ViewModel() {
 
+    val markersList = mutableStateListOf<UserMapMarker>()
+
     private val _weatherState =
         MutableStateFlow<BaseViewState<WeatherForecast>>(BaseViewState.Loading())
     val weatherState = _weatherState.asStateFlow()
@@ -28,15 +30,13 @@ class WeatherViewModel(
     private val _selectedPlace = MutableStateFlow<UserMapMarker?>(null)
     val selectedPlace = _selectedPlace.asStateFlow()
 
-    val markersList = mutableStateListOf<UserMapMarker>()
-
     init {
         getAllMarkers()
     }
 
     private fun getAllMarkers() {
         if (markersList.isEmpty()) {
-            viewModelScope.launch(Dispatchers.IO) {
+            viewModelScope.launch {
                 repository.getAllUserMarkersList().collect {
                     markersList.clear()
                     markersList.addAll(it as List<UserMapMarker>)
@@ -47,7 +47,7 @@ class WeatherViewModel(
 
     private fun getWeather(latitude: Double, longitude: Double) {
         _weatherState.value = BaseViewState.Loading()
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             weatherRepository.getWeather(latitude, longitude).collect { result ->
                 result.fold(
                     onSuccess = {

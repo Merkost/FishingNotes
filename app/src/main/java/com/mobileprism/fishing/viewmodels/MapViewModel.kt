@@ -1,22 +1,18 @@
 package com.mobileprism.fishing.viewmodels
 
-import android.location.Geocoder
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.SphericalUtil
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.raw.RawMapMarker
 import com.mobileprism.fishing.domain.entity.weather.CurrentWeatherFree
-import com.mobileprism.fishing.domain.repository.app.MarkersRepository
 import com.mobileprism.fishing.domain.use_cases.*
 import com.mobileprism.fishing.domain.use_cases.places.AddNewPlaceUseCase
 import com.mobileprism.fishing.domain.use_cases.places.GetUserPlacesListUseCase
-import com.mobileprism.fishing.domain.use_cases.places.GetUserPlacesUseCase
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.UiState
@@ -27,7 +23,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 class MapViewModel(
-    private val getUserPlacesUseCase: GetUserPlacesUseCase,
     private val getUserPlacesListUseCase: GetUserPlacesListUseCase,
     private val addNewPlaceUseCase: AddNewPlaceUseCase,
     private val getFreeWeatherUseCase: GetFreeWeatherUseCase,
@@ -42,10 +37,14 @@ class MapViewModel(
     val mapMarkers: StateFlow<List<UserMapMarker>>
         get() = _mapMarkers
 
-    init {
+    private val _mapUiState: MutableStateFlow<MapUiState> = MutableStateFlow(MapUiState.NormalMode)
+    val mapUiState = _mapUiState.asStateFlow()
 
+    private val _currentMarker: MutableStateFlow<UserMapMarker?> = MutableStateFlow(null)
+    val currentMarker = _currentMarker.asStateFlow()
+
+    init {
         loadUserMarkersList()
-        //loadUserPlaces()
     }
 
     private val initialPlaceSelected = MutableStateFlow(false)
@@ -55,10 +54,6 @@ class MapViewModel(
 
     private val _addNewMarkerState: MutableStateFlow<UiState?> = MutableStateFlow(null)
     val addNewMarkerState = _addNewMarkerState.asStateFlow()
-
-
-    private val _mapUiState: MutableStateFlow<MapUiState> = MutableStateFlow(MapUiState.NormalMode)
-    val mapUiState = _mapUiState.asStateFlow()
 
     private val _cameraMoveState = MutableStateFlow<CameraMoveState>(CameraMoveState.MoveFinish)
 
@@ -83,9 +78,6 @@ class MapViewModel(
 
     private val _currentCameraPosition = MutableStateFlow(Triple(LatLng(0.0, 0.0), 0f, 0f))
     val currentCameraPosition = _currentCameraPosition.asStateFlow()
-
-    private val _currentMarker: MutableStateFlow<UserMapMarker?> = MutableStateFlow(null)
-    val currentMarker = _currentMarker.asStateFlow()
 
     private val _currentMarkerAddressState =
         MutableStateFlow<GeocoderResult>(GeocoderResult.InProgress)
@@ -113,9 +105,7 @@ class MapViewModel(
         viewModelScope.launch {
             getUserPlacesListUseCase.invoke().collect { markers ->
                 _mapMarkers.value = markers as MutableList<UserMapMarker>
-                if (!markers.contains(currentMarker.value)) {
-                    resetMapUiState()
-                }
+                if (!markers.any { currentMarker.value == it }) { resetMapUiState() }
             }
         }
     }
@@ -264,7 +254,6 @@ class MapViewModel(
         _currentMarker.value = null
     }
 
-    @OptIn(ExperimentalPermissionsApi::class)
     fun onMyLocationClick() {
         viewModelScope.launch {
             val result = locationManager.getCurrentLocationFlow().singleOrNull()
@@ -327,9 +316,19 @@ class MapViewModel(
         _currentMarkerAddressState.value = GeocoderResult.InProgress
         _currentMarkerRawDistance.value = null
         getPlaceNameForMarkerDetails(latitude, longitude)
-        //getPlaceRawDistance(latitude, longitude)
+        getPlaceRawDistance(latitude, longitude)
         getFishActivity(latitude, longitude)
         getCurrentWeather(latitude, longitude)
+    }
+
+    private fun getPlaceRawDistance(latitude: Double, longitude: Double) {
+        viewModelScope.launch {
+            lastKnownLocation.value?.let {
+                _currentMarkerRawDistance.value = SphericalUtil.computeDistanceBetween(
+                    LatLng(latitude, longitude), LatLng(it.latitude, it.longitude)
+                )
+            }
+        }
     }
 
 

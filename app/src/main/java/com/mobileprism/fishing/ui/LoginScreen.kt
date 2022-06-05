@@ -6,6 +6,7 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -19,9 +20,11 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.airbnb.lottie.compose.*
 import com.google.accompanist.insets.systemBarsPadding
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.di.repositoryModuleLocal
 import com.mobileprism.fishing.ui.home.AppSnackbar
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
@@ -30,11 +33,12 @@ import com.mobileprism.fishing.utils.showErrorToast
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
+import org.koin.core.context.loadKoinModules
 
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen() {
 
     val coroutineScope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
@@ -57,12 +61,6 @@ fun LoginScreen(navController: NavController) {
                     delay(2500)
                     visible = false
                     delay((MainActivity.splashFadeDurationMillis * 2).toLong())
-
-                    navController.navigate(MainDestinations.HOME_ROUTE) {
-                        popUpTo(0) {
-                            inclusive = true
-                        }
-                    }
                 }
             }
             is BaseViewState.Loading -> {}
@@ -236,10 +234,13 @@ fun LoginScreen(navController: NavController) {
                         //Google button
                         Card(
                             shape = RoundedCornerShape(20.dp), elevation = 10.dp,
-                            onClickLabel = stringResource(
-                                R.string.google_login
-                            ),
-                            onClick = { googleLoading = true; (context as MainActivity).startGoogleLogin() },
+                            onClickLabel = stringResource(R.string.google_login),
+                            enabled = !googleLoading,
+                            onClick = {
+                                loginViewModel.continueWithGoogle()
+                                googleLoading = true;
+                                (context as MainActivity).startGoogleLogin()
+                            },
                         ) {
                             Row(
                                 modifier = Modifier
@@ -280,6 +281,20 @@ fun LoginScreen(navController: NavController) {
                                 .fillMaxWidth()
                                 .height(30.dp)
                         )
+                        OutlinedButton(
+                            onClick = {
+                                loginViewModel.continueWithoutLogin()
+                            },
+                            shape = CircleShape
+                        ) {
+                            Text(text = "Продолжить без входа")
+                        }
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(30.dp)
+                        )
+
                     }
                 }
             }

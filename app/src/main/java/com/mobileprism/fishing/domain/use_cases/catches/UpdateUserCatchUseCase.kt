@@ -11,19 +11,6 @@ class UpdateUserCatchUseCase(
     private val savePhotos: SavePhotosUseCase,
 ) {
     suspend operator fun invoke(newCatch: UserCatch) {
-        catchesRepository.updateUserCatch(
-            markerId = newCatch.userMarkerId,
-            catchId = newCatch.id,
-            data = mapOf(
-                "downloadPhotoLinks" to savePhotos(newCatch.downloadPhotoLinks.map { it.toUri() }),
-                "fishType" to newCatch.fishType,
-                "fishAmount" to newCatch.fishAmount,
-                "fishWeight" to newCatch.fishWeight,
-                "fishingRodType" to newCatch.fishingRodType,
-                "fishingBait" to newCatch.fishingBait,
-                "fishingLure" to newCatch.fishingLure,
-                "note" to newCatch.note
-            )
-        )
+        catchesRepository.updateUserCatch(newCatch)
     }
 }

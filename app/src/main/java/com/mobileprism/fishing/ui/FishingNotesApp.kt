@@ -38,47 +38,45 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @InternalCoroutinesApi
 @Composable
 fun FishingNotesApp() {
-    ProvideWindowInsets {
-        val appStateHolder = rememberAppStateHolder()
+    val appStateHolder = rememberAppStateHolder()
 
-        Scaffold(
-            bottomBar = {
-                if (appStateHolder.shouldShowBottomBar) {
-                    FishingNotesBottomBar(
-                        tabs = appStateHolder.bottomBarTabs,
-                        currentRoute = appStateHolder.currentRoute!!,
-                        navigateToRoute = appStateHolder::navigateToBottomBarRoute
-                    )
-                }
-            },
-            snackbarHost = {
-                SnackbarHost(
-                    hostState = it,
-                    modifier = Modifier.systemBarsPadding(),
-                    snackbar = { snackbarData -> AppSnackbar(snackbarData) }
+    Scaffold(
+        bottomBar = {
+            if (appStateHolder.shouldShowBottomBar) {
+                FishingNotesBottomBar(
+                    tabs = appStateHolder.bottomBarTabs,
+                    currentRoute = appStateHolder.currentRoute!!,
+                    navigateToRoute = appStateHolder::navigateToBottomBarRoute
                 )
-            },
-            scaffoldState = appStateHolder.scaffoldState,
-            /*modifier = if (appStateHolder.currentRoute == HomeSections.MAP.route)
-                Modifier.statusBarsHeight()
-            else Modifier*/
-        ) { innerPaddingModifier ->
-            Column() {
-
-                //Spacer(modifier = Modifier.statusBarsHeight())
-                NavHost(
-                    navController = appStateHolder.navController,
-                    startDestination = MainDestinations.HOME_ROUTE,
-                    modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
-                    Modifier.padding(innerPaddingModifier) /*else Modifier*/
-                ) {
-                    NavGraph(
-                        navController = appStateHolder.navController,
-                        upPress = appStateHolder::upPress,
-                    )
-                }
-
             }
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = it,
+                modifier = Modifier.systemBarsPadding(),
+                snackbar = { snackbarData -> AppSnackbar(snackbarData) }
+            )
+        },
+        scaffoldState = appStateHolder.scaffoldState,
+        /*modifier = if (appStateHolder.currentRoute == HomeSections.MAP.route)
+            Modifier.statusBarsHeight()
+        else Modifier*/
+    ) { innerPaddingModifier ->
+        Column() {
+
+            //Spacer(modifier = Modifier.statusBarsHeight())
+            NavHost(
+                navController = appStateHolder.navController,
+                startDestination = MainDestinations.HOME_ROUTE,
+                modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
+                Modifier.padding(innerPaddingModifier) /*else Modifier*/
+            ) {
+                NavGraph(
+                    navController = appStateHolder.navController,
+                    upPress = appStateHolder::upPress,
+                )
+            }
+
         }
     }
 }
@@ -99,10 +97,6 @@ private fun NavGraphBuilder.NavGraph(
         startDestination = HomeSections.MAP.route,
     ) {
         addHomeGraph(navController, upPress = upPress)
-    }
-
-    composable(MainDestinations.LOGIN_ROUTE) {
-        LoginScreen(navController = navController)
     }
 
     composable(MainDestinations.SETTINGS) {

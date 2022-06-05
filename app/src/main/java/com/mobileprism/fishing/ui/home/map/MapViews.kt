@@ -138,6 +138,7 @@ fun MyLocationButton(
     var locationDialogIsShowing by remember { mutableStateOf(false) }
     val shouldShowPermissions by userPreferences.shouldShowLocationPermission.collectAsState(false)
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
+    var locationButtonClicked by remember { mutableStateOf(false) }
 
     if (locationDialogIsShowing) {
 
@@ -160,6 +161,13 @@ fun MyLocationButton(
         }
     )
 
+    LaunchedEffect(permissionsState.allPermissionsGranted) {
+        if (permissionsState.allPermissionsGranted && locationButtonClicked) {
+            locationButtonClicked = false
+            onClick()
+        }
+    }
+
     Card(
         shape = CircleShape,
         modifier = modifier.size(40.dp)
@@ -174,10 +182,12 @@ fun MyLocationButton(
                         locationManager.checkGPSEnabled(context as MainActivity)
                         {
                             onClick()
+                            locationButtonClicked = true
                         }
                     }
                     false -> {
                         locationDialogIsShowing = true
+                        locationButtonClicked = true
                     }
                 }
             }

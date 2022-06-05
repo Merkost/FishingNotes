@@ -23,6 +23,12 @@ android {
         versionCode 13
         versionName "1.1.0"
 
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
+            }
+        }
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -72,6 +78,12 @@ dependencies {
     implementation 'id.zelory:compressor:3.0.1'
 
     //coreLibraryDesugaring Libs.jdkDesugar
+
+    //room
+    implementation "androidx.room:room-runtime:2.4.2"
+    kapt  "androidx.room:room-compiler:2.4.2"
+    implementation "androidx.room:room-ktx:2.4.2"
+    testImplementation "androidx.room:room-testing:2.4.2"
 
     implementation platform(Libs.Firebase.platform)
     implementation Libs.Firebase.core

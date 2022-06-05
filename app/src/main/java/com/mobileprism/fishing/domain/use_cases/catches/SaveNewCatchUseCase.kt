@@ -26,7 +26,7 @@ class SaveNewCatchUseCase(
             fishAndWeightState = data.fishAndWeightState,
             catchInfoState = data.catchInfoState,
             weather = mapWeatherValues(data.catchWeatherState),
-            photos = savePhotos(data.photos)
+            photos = savePhotos(data.photos),
         )
 
         data.placeAndTimeState.place?.let { it ->
@@ -65,6 +65,7 @@ class SaveNewCatchUseCase(
         photos: List<String>
     ) = UserCatch(
         id = getNewCatchId(),
+        markerId = placeAndTimeState.place?.id ?: "",
         userId = getCurrentUserId(),
         description = catchInfoState.note,
         date = placeAndTimeState.date,
@@ -74,7 +75,6 @@ class SaveNewCatchUseCase(
         fishingRodType = catchInfoState.rod,
         fishingBait = catchInfoState.bait,
         fishingLure = catchInfoState.lure,
-        userMarkerId = placeAndTimeState.place?.id ?: "",
         isPublic = false,
         downloadPhotoLinks = photos,
         placeTitle = placeAndTimeState.place?.title ?: "",

@@ -3,7 +3,7 @@ package com.mobileprism.fishing.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.domain.entity.common.User
-import com.mobileprism.fishing.domain.repository.UserRepository
+import com.mobileprism.fishing.domain.repository.FirebaseUserRepository
 import com.mobileprism.fishing.model.datastore.UserDatastore
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import kotlinx.coroutines.flow.*
@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 
 class EditProfileViewModel(
     private val userDatastore: UserDatastore,
-    private val userRepository: UserRepository,
+    private val firebaseUserRepository: FirebaseUserRepository,
 ) : ViewModel() {
 
     private val _bdUser = MutableStateFlow(User())
@@ -70,7 +70,7 @@ class EditProfileViewModel(
     fun updateProfile() {
         _uiState.value = BaseViewState.Loading()
         viewModelScope.launch {
-            userRepository.setNewProfileData(_currentUser.value).fold(
+            firebaseUserRepository.setNewProfileData(_currentUser.value).fold(
                 onSuccess = {
                     _uiState.value = BaseViewState.Success(Unit)
                 }, onFailure = {

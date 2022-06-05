@@ -19,6 +19,7 @@ import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class FirebaseCatchesRepositoryImpl(
     private val dbCollections: RepositoryCollections,
@@ -38,7 +39,7 @@ class FirebaseCatchesRepositoryImpl(
 
     @ExperimentalCoroutinesApi
     private suspend fun getUserCatchesStateListener(scope: ProducerScope<ContentStateOld<UserCatch>>)
-    : OnSuccessListener<in QuerySnapshot> =
+            : OnSuccessListener<in QuerySnapshot> =
         OnSuccessListener<QuerySnapshot> { task ->
             scope.launch {
                 getCatchesStateFromDoc(task.documents).collect {
@@ -76,6 +77,13 @@ class FirebaseCatchesRepositoryImpl(
                 }
         }
         awaitClose { }
+    }
+
+    override fun getCatchById(markerId: String, catchId: String): Flow<UserCatch?> = callbackFlow {
+        dbCollections.getUserCatchesCollection(markerId).document(catchId)
+            .addSnapshotListener { value, error ->
+                trySend(value?.toObject<UserCatch>())
+            }
     }
 
     override fun getAllUserCatchesList() = channelFlow {
@@ -140,14 +148,15 @@ class FirebaseCatchesRepositoryImpl(
     override fun addNewCatch(
         markerId: String,
         newCatch: UserCatch
-    ) = channelFlow {
+    ): Flow<Result<Unit>> = channelFlow {
         val isOnline = connectionManager.getConnectionState() is ConnectionState.Available
-
-        if (isOnline) {
-            addNewCatchOnline(markerId = markerId, newCatch = newCatch, scope = this)
-        } else {
-            addNewCatchOffline(markerId = markerId, newCatch = newCatch, scope = this)
-        }
+        Result.success(
+            if (isOnline) {
+                addNewCatchOnline(markerId = markerId, newCatch = newCatch, scope = this)
+            } else {
+                addNewCatchOffline(markerId = markerId, newCatch = newCatch, scope = this)
+            }
+        )
 
         awaitClose { }
     }
@@ -155,7 +164,7 @@ class FirebaseCatchesRepositoryImpl(
     private fun addNewCatchOnline(
         markerId: String,
         newCatch: UserCatch,
-        scope: ProducerScope<Result<Nothing?>>
+        scope: ProducerScope<Result<Unit>>
     ) {
         dbCollections.getUserCatchesCollection(markerId).document(newCatch.id)
             .set(newCatch)
@@ -165,7 +174,7 @@ class FirebaseCatchesRepositoryImpl(
                 }
                 if (it.isSuccessful) {
                     firebaseAnalytics.logEvent("new_catch", null)
-                    scope.trySend(Result.success(null))
+                    scope.trySend(Result.success(Unit))
                     incrementNumOfCatches(markerId)
                 }
             }
@@ -174,28 +183,27 @@ class FirebaseCatchesRepositoryImpl(
     private fun addNewCatchOffline(
         markerId: String,
         newCatch: UserCatch,
-        scope: ProducerScope<Result<Nothing?>>
+        scope: ProducerScope<Result<Unit>>
     ) {
         dbCollections.getUserCatchesCollection(markerId).document(newCatch.id).set(newCatch)
         firebaseAnalytics.logEvent("new_catch_offline", null)
-        scope.trySend(Result.success(null))
+        scope.trySend(Result.success(Unit))
         incrementNumOfCatches(markerId)
     }
 
 
     override suspend fun deleteCatch(userCatch: UserCatch) {
-        dbCollections.getUserCatchesCollection(userCatch.userMarkerId).document(userCatch.id)
+        dbCollections.getUserCatchesCollection(userCatch.markerId).document(userCatch.id)
             .delete().addOnSuccessListener {
-                decrementNumOfCatches(userCatch.userMarkerId)
+                decrementNumOfCatches(userCatch.markerId)
             }
     }
 
     override suspend fun updateUserCatch(
-        markerId: String,
-        catchId: String,
-        data: Map<String, Any>
+        userCatch: UserCatch,
     ) {
-        dbCollections.getUserCatchesCollection(markerId).document(catchId).update(data)
+        dbCollections.getUserCatchesCollection(userCatch.markerId).document(userCatch.id)
+            .set(userCatch)
     }
 
     override suspend fun updateUserCatchPhotos(

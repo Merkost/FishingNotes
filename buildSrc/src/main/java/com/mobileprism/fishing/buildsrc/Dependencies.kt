@@ -152,7 +152,7 @@ object Libs {
         const val authUi = "com.firebaseui:firebase-ui-auth:8.0.0"
 
         //Firebase Coroutine dependency:
-        const val coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.0"
+        const val coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.1"
 
     }
 

@@ -1,14 +1,18 @@
 package com.mobileprism.fishing.di
 
+import androidx.room.Room
 import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.domain.repository.PhotoStorage
-import com.mobileprism.fishing.domain.repository.UserRepository
+import com.mobileprism.fishing.domain.repository.FirebaseUserRepository
 import com.mobileprism.fishing.domain.repository.app.*
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.model.datasource.FreeWeatherRepositoryImpl
 import com.mobileprism.fishing.model.datasource.SolunarRetrofitRepositoryImpl
 import com.mobileprism.fishing.model.datasource.WeatherRepositoryRetrofitImpl
 import com.mobileprism.fishing.model.datasource.firebase.*
+import com.mobileprism.fishing.model.datasource.room.*
+import com.mobileprism.fishing.model.datasource.room.dao.CatchesDao
+import com.mobileprism.fishing.model.datasource.room.dao.MapMarkersDao
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -16,19 +20,8 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import java.util.concurrent.TimeUnit
 
-val userRepositoryModule = module {
-    single<UserRepository> {
-        FirebaseUserRepositoryImpl(
-            userDatastore = get(),
-            dbCollections = get(),
-            firebaseAnalytics = get(),
-            context = androidContext()
-        )
-    }
-}
 
-val repositoryModule = module {
-    single { RepositoryCollections() }
+val repositoryModuleFirebase = module {
 
     single<CatchesRepository> {
         FirebaseCatchesRepositoryImpl(
@@ -44,16 +37,53 @@ val repositoryModule = module {
             context = androidContext()
         )
     }
-    single<SolunarRepository> { SolunarRetrofitRepositoryImpl(firebaseAnalytics = get()) }
     single<PhotoStorage> {
         FirebaseCloudPhotoStorage(
             firebaseAnalytics = get(),
             context = androidContext()
         )
     }
-    single<WeatherRepository> { WeatherRepositoryRetrofitImpl(firebaseAnalytics = get()) }
-    single<FreeWeatherRepository> { FreeWeatherRepositoryImpl(firebaseAnalytics = get()) }
-    single<OfflineRepository> { FirebaseOfflineRepositoryImpl(dbCollections = get()) }
+
+}
+
+val repositoryModuleLocal = module {
+
+    single<FishingDatabase> {
+        Room.databaseBuilder(get(), FishingDatabase::class.java, "Fishing.db")
+            .fallbackToDestructiveMigration().build()
+    }
+    single<CatchesDao> { get<FishingDatabase>().catchesDao() }
+    single<MapMarkersDao> { get<FishingDatabase>().mapMarkersDao() }
+
+
+/*    single<FirebaseUserRepository> {
+        LocalUserRepositoryImpl(
+            userDatastore = get(),
+            firebaseAnalytics = get(),
+            context = androidContext()
+        )
+    }*/
+
+    single<CatchesRepository> {
+        LocalCatchesRepositoryImpl(
+            catchesDao = get(),
+            firebaseAnalytics = get(),
+        )
+    }
+    single<MarkersRepository> {
+        LocalMarkersRepositoryImpl(
+            markersDao = get(),
+            firebaseAnalytics = get(),
+        )
+    }
+
+    single<PhotoStorage> {
+        LocalCloudPhotoStorage(
+            firebaseAnalytics = get(),
+            context = androidContext()
+        )
+    }
+    //todo
 }
 
 fun createLoggingInterceptor(): HttpLoggingInterceptor {
@@ -67,13 +97,14 @@ fun createLoggingInterceptor(): HttpLoggingInterceptor {
  * Create a OkHttpClient which is used to send HTTP requests and read their responses.
  * @loggingInterceptor logging interceptor
  */
-private fun createOkHttpClient(
+fun createOkHttpClient(
     loggingInterceptor: HttpLoggingInterceptor,
 ): OkHttpClient {
     return OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
-        .connectTimeout(10, TimeUnit.SECONDS)
+        .callTimeout(10, TimeUnit.SECONDS)
+        .connectTimeout(7, TimeUnit.SECONDS)
         .writeTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(7, TimeUnit.SECONDS)
         .build()
 }

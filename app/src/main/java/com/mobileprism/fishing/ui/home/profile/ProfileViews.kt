@@ -1,8 +1,10 @@
 package com.mobileprism.fishing.ui.home.profile
 
+import android.app.Activity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -32,14 +34,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
+import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import com.airbnb.lottie.compose.*
 import com.google.android.gms.maps.model.Circle
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.di.repositoryModuleFirebase
+import com.mobileprism.fishing.di.repositoryModuleLocal
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.MainDestinations
+import com.mobileprism.fishing.ui.home.HomeSections
 import com.mobileprism.fishing.ui.home.notes.CatchItemView
 import com.mobileprism.fishing.ui.home.notes.ItemUserPlace
 import com.mobileprism.fishing.ui.home.views.*
@@ -50,6 +56,7 @@ import com.mobileprism.fishing.utils.time.toDateTextMonth
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
+import org.koin.core.context.unloadKoinModules
 
 @ExperimentalCoilApi
 @Composable
@@ -86,14 +93,25 @@ fun UserImage(
             }
 
             SubcomposeAsyncImage(
-                model = user.photoUrl.ifEmpty { painterResource(R.drawable.ic_fisher) },
+                model = user.photoUrl,
                 contentDescription = stringResource(id = R.string.user_photo),
                 contentScale = ContentScale.Crop,
                 error = {
                     Image(
-                        painter = painterResource(R.drawable.ic_fisher),
+                        painter = painterResource(R.drawable.no_photo),
+                        contentScale = ContentScale.Crop,
                         contentDescription = stringResource(id = R.string.fisher)
                     )
+                },
+                loading = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colors.surface),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 },
                 modifier = Modifier
                     .size(imgSize)
@@ -144,19 +162,18 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
         onNegativeClick = { dialogOnLogout.value = false },
         positiveButtonText = stringResource(id = R.string.yes),
         onPositiveClick = {
-            scope.launch {
-                viewModel.logoutCurrentUser().collect { isLogout ->
+            viewModel.logoutCurrentUser()
+            /*scope.launch {
+                dialogOnLogout.value = false*/
+                /*viewModel.logoutCurrentUser()*//*.collect { isLogout ->
                     if (isLogout) {
                         dialogOnLogout.value = false
 
-                        navController.navigate(MainDestinations.LOGIN_ROUTE) {
-                            popUpTo(0) {
-                                inclusive = true
-                            }
-                        }
+                        unloadKoinModules(repositoryModuleLocal)
+                        unloadKoinModules(repositoryModuleFirebase)
                     }
                 }
-            }
+            }*/
         },
         onDismiss = { dialogOnLogout.value = false },
         content = {

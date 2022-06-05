@@ -8,21 +8,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SnackbarDuration
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.os.bundleOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.ads.MobileAds
@@ -43,12 +40,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.entity.common.User
-import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.SnackbarAction
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.theme.FishingNotesTheme
-import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.Logger
 import com.mobileprism.fishing.viewmodels.MainViewModel
@@ -86,21 +80,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val viewModel: MainViewModel = getViewModel()
 
-        val userStateFlow = viewModel.mutableStateFlow
-
-        val userPreferences: UserPreferences = get()
-        val appTheme = mutableStateOf<AppThemeValues?>(null)
-
-        lifecycleScope.launchWhenStarted {
-            userPreferences.appTheme.collect {
-                appTheme.value = it
-            }
-        }
+        val screenState = viewModel.mutableStateFlow
+        val userState = viewModel.isUserLoggedState
+        val appTheme = viewModel.appTheme
 
         installSplashScreen().apply {
             setKeepOnScreenCondition {
-                userStateFlow.value is BaseViewState.Loading
-                        && appTheme.value == null
+                screenState.value is BaseViewState.Loading && appTheme.value == null
             }
             setOnExitAnimationListener { splashScreenViewProvider ->
                 // Get icon instance and start a fade out animation
@@ -123,7 +109,7 @@ class MainActivity : ComponentActivity() {
                         if (Build.VERSION.SDK_INT < 31) {
                             setContent {
                                 FishingNotesTheme(appTheme.value) {
-                                    DistributionScreen(viewModel.user)
+                                    Distribution(viewModel.isUserLoggedState)
                                 }
                             }
                         }
@@ -135,11 +121,10 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= 31) {
             setContent {
                 FishingNotesTheme(appTheme.value) {
-                    DistributionScreen(viewModel.user)
+                    Distribution(viewModel.isUserLoggedState)
                 }
             }
         }
-
 
 
         MobileAds.initialize(this) {}
@@ -238,18 +223,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @ExperimentalAnimationApi
-    @ExperimentalPermissionsApi
-    @ExperimentalPagerApi
-    @ExperimentalComposeUiApi
-    @ExperimentalMaterialApi
-    @InternalCoroutinesApi
-    @Composable
-    private fun DistributionScreen(user: User?) {
-        if (user != null) FishingNotesApp()
-        else Navigation()
-    }
-
     // This app draws behind the system bars, so we want to handle fitting system windows
     // WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -264,18 +237,11 @@ class MainActivity : ComponentActivity() {
     @ExperimentalAnimationApi
     @ExperimentalPermissionsApi
     @Composable
-    fun Navigation() {
-        val navController = rememberNavController()
-        NavHost(
-            navController = navController,
-            startDestination = "login_screen"
-        ) {
-            composable("login_screen") {
-                LoginScreen(navController = navController)
-            }
-            // Main Screen
-            composable(MainDestinations.HOME_ROUTE) {
-                FishingNotesApp()
+    fun Distribution(isUserLogged: MutableState<Boolean>) {
+        Crossfade(targetState = isUserLogged.value) { state ->
+            when(state) {
+                false -> LoginScreen()
+                true -> FishingNotesApp()
             }
         }
     }

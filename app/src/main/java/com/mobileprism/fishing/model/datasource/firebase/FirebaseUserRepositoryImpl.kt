@@ -14,14 +14,19 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
-import com.mobileprism.fishing.di.repositoryModule
+import com.mobileprism.fishing.di.repositoryModuleFirebase
+import com.mobileprism.fishing.di.repositoryModuleLocal
+import com.mobileprism.fishing.domain.entity.common.LoginType
 import com.mobileprism.fishing.domain.entity.common.Progress
 import com.mobileprism.fishing.domain.entity.common.User
-import com.mobileprism.fishing.domain.repository.UserRepository
+import com.mobileprism.fishing.domain.repository.FirebaseUserRepository
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.datastore.UserDatastore
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import org.koin.core.context.GlobalContext.loadKoinModules
@@ -35,7 +40,7 @@ class FirebaseUserRepositoryImpl(
     private val dbCollections: RepositoryCollections,
     private val firebaseAnalytics: FirebaseAnalytics,
     private val context: Context,
-) : UserRepository {
+) : FirebaseUserRepository {
 
     private val fireBaseAuth = FirebaseAuth.getInstance()
 
@@ -52,23 +57,44 @@ class FirebaseUserRepositoryImpl(
         }
 
     override val datastoreUser: Flow<User>
-        get() = flow { userDatastore.getUser.first() }
+        get() = userDatastore.getUser
+
+    override val datastoreNullableUser: Flow<User?>
+        get() = userDatastore.getNullableUser
 
     override suspend fun logoutCurrentUser() = callbackFlow {
         AuthUI.getInstance().signOut(context).addOnCompleteListener {
             if (it.isSuccessful) {
                 Firebase.analytics.logEvent("logout", null)
-                reloadRepositories()
+                runBlocking { userDatastore.clearUser() }
                 trySend(true)
-            } else trySend(false)
+            } else {
+                trySend(false)
+            }
         }
-        awaitClose {}
+        /*when (datastoreUser.first().loginType) {
+            LoginType.LOCAL -> {
+                userDatastore.clearUser()
+                trySend(true)
+            }
+            LoginType.GOOGLE -> {
+                AuthUI.getInstance().signOut(context).addOnCompleteListener {
+                    if (it.isSuccessful) {
+                        Firebase.analytics.logEvent("logout", null)
+                        runBlocking { userDatastore.clearUser() }
+                        trySend(true)
+                    } else trySend(false)
+                }
+            }
+            null -> TODO()
+        }*/
+        awaitClose()
     }
 
     private fun reloadRepositories() {
         clearPersistence()
-        unloadKoinModules(repositoryModule)
-        loadKoinModules(repositoryModule)
+        unloadKoinModules(repositoryModuleFirebase)
+        unloadKoinModules(repositoryModuleLocal)
     }
 
     private fun clearPersistence() {
@@ -82,7 +108,8 @@ class FirebaseUserRepositoryImpl(
                 email = firebaseUser.email ?: "",
                 displayName = displayName ?: "Anonymous",
                 photoUrl = photoUrl.toString(),
-                registerDate = Date().time
+                registerDate = Date().time,
+                loginType = LoginType.GOOGLE
             )
         }
         //TODO("change name")

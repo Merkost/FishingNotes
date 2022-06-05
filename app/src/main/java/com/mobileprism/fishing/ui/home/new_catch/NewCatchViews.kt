@@ -41,6 +41,7 @@ import com.mobileprism.fishing.ui.home.views.DatePickerDialog
 import com.mobileprism.fishing.ui.home.views.DefaultDialog
 import com.mobileprism.fishing.ui.home.views.TimePickerDialog
 import com.mobileprism.fishing.ui.home.views.WindIconItem
+import com.mobileprism.fishing.ui.home.weather.navigateToAddNewPlace
 import com.mobileprism.fishing.utils.Constants.WIND_ROTATION
 import com.mobileprism.fishing.utils.roundTo
 import com.mobileprism.fishing.utils.time.TimeConstants
@@ -256,7 +257,7 @@ fun NewCatchNoPlaceDialog(
         negativeButtonText = stringResource(id = R.string.cancel),
         onNegativeClick = { navController.popBackStack() },
         positiveButtonText = stringResource(id = R.string.add),
-        onPositiveClick = { onAddNewPlaceClick(navController) },
+        onPositiveClick = { navigateToAddNewPlace(navController) },
         onDismiss = { navController.popBackStack() },
         content = {
             LottieNoPlaces(
@@ -280,11 +281,6 @@ fun LottieNoPlaces(modifier: Modifier) {
         progress,
         modifier = modifier
     )
-}
-
-private fun onAddNewPlaceClick(navController: NavController) {
-    val addNewPlace = true
-    navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${addNewPlace}")
 }
 
 @ExperimentalComposeUiApi
