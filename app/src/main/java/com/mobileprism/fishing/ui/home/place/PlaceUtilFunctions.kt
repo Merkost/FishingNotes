@@ -17,10 +17,6 @@ import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.navigate
 import java.util.*
 
-fun newCatchClicked(navController: NavController, place: UserMapMarker) {
-        navController.navigate(MainDestinations.NEW_CATCH_ROUTE, Arguments.PLACE to place)
-}
-
 fun onRouteClicked(context: Context, marker: UserMapMarker) {
     val bundle = Bundle()
     bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "marker")
@@ -72,4 +68,8 @@ fun onShareClicked(
 
 fun onCatchItemClick(catch: UserCatch, navController: NavController) {
     navController.navigate(MainDestinations.CATCH_ROUTE, Arguments.CATCH to catch)
+}
+
+fun newCatchClicked(navController: NavController, place: UserMapMarker) {
+    navController.navigate(MainDestinations.NEW_CATCH_ROUTE, Arguments.PLACE to place)
 }

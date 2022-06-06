@@ -84,9 +84,7 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
         ) {
             marker?.let { userPlace ->
 
-                val userCatches by viewModel.getCatchesByMarkerId(userPlace.id)
-                    .collectAsState(listOf())
-
+                val userCatches by viewModel.catchesList.collectAsState(listOf())
                 val tabs = listOf(TabItem.PlaceCatches, TabItem.Note)
                 val pagerState = rememberPagerState(0)
 

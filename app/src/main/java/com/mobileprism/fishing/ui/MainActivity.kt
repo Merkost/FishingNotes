@@ -51,7 +51,7 @@ import com.mobileprism.fishing.ui.theme.FishingNotesTheme
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.Logger
-import com.mobileprism.fishing.viewmodels.MainViewModel
+import com.mobileprism.fishing.ui.viewmodels.MainViewModel
 import kotlinx.coroutines.InternalCoroutinesApi
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject

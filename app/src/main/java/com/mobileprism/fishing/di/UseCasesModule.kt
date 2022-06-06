@@ -29,4 +29,5 @@ val useCasesModule = module {
     factory { UpdateUserCatchUseCase(get(), get()) }
     factory { SubscribeOnUserCatchStateUseCase(get()) }
     factory { GetPlaceNameUseCase(get()) }
+    factory { GetUserCatchesByMarkerId(get()) }
 }

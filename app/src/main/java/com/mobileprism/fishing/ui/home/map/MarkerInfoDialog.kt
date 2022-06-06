@@ -34,7 +34,7 @@ import com.mobileprism.fishing.ui.home.views.SubtitleText
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.utils.Constants
-import com.mobileprism.fishing.viewmodels.MapViewModel
+import com.mobileprism.fishing.ui.viewmodels.MapViewModel
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 

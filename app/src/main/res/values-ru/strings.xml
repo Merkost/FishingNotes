@@ -143,7 +143,7 @@
     <string name="google_login_failed">Вход через Google не удался. Попробуйте еще раз!</string>
     <string name="add_place_success">Место сохранено на карте</string>
     <string name="no_cathces_added">Уловы не добавлены</string>
-    <string name="add_catch_text">+ Добавить новый улов</string>
+    <string name="add_catch_text">Новый улов</string>
     <string name="no_places_added">Нет добавленных мест</string>
     <string name="new_place_text">+ Добавить новое место</string>
     <string name="for_today">Сегодня</string>
@@ -352,6 +352,7 @@
     <string name="heavy_snow">Сильный снег</string>
     <string name="sleet">Мокый снег</string>
     <string name="shower_snow">Снегопад</string>
+    <string name="light_shower_snow">Умеренный снегопад</string>
     <string name="heavy_shower_snow">Сильный снегопад</string>
     <string name="rain_and_snow">Дождь со снегом</string>
     <string name="light_rain_and_snow">Легкий дождь со снегом</string>
@@ -359,6 +360,7 @@
     <string name="shower_sleet">Ливень с мокрым снегом</string>
     <string name="clear_sky">Ясно</string>
     <string name="choose_weather">Выберите погоду:</string>
+    <string name="more">Еще…</string>
     <string name="pressure_hpa">гПа</string>
     <string name="reset_dialog">Сбросить изменения</string>
     <string name="reset_dialog_secondary">Вы уверены, что хотите отменить все внесённые изменения?</string>

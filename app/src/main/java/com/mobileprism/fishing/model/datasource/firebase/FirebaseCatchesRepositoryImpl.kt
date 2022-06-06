@@ -5,7 +5,10 @@ import android.util.Log
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.firestore.*
+import com.google.firebase.firestore.DocumentChange
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.ktx.toObject
 import com.mobileprism.fishing.domain.entity.common.ContentStateOld
 import com.mobileprism.fishing.domain.entity.common.Progress
@@ -19,6 +22,8 @@ import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class FirebaseCatchesRepositoryImpl(
     private val dbCollections: RepositoryCollections,
@@ -38,7 +43,7 @@ class FirebaseCatchesRepositoryImpl(
 
     @ExperimentalCoroutinesApi
     private suspend fun getUserCatchesStateListener(scope: ProducerScope<ContentStateOld<UserCatch>>)
-    : OnSuccessListener<in QuerySnapshot> =
+            : OnSuccessListener<in QuerySnapshot> =
         OnSuccessListener<QuerySnapshot> { task ->
             scope.launch {
                 getCatchesStateFromDoc(task.documents).collect {
@@ -111,30 +116,34 @@ class FirebaseCatchesRepositoryImpl(
             }
         }
 
-    override fun getCatchesByMarkerId(markerId: String) = channelFlow {
-        val listener = dbCollections.getUserCatchesCollection(markerId)
-            .addSnapshotListener(getCatchSnapshotListener(this))
-        awaitClose {
-            listener.remove()
+    override suspend fun getCatchesByMarkerId(markerId: String) =
+        suspendCoroutine<Result<List<UserCatch>>> { continuation ->
+            dbCollections.getUserCatchesCollection(markerId).get()
+                .addOnFailureListener {
+                    Log.d("Fishing", "Catch snapshot listener", it)
+                    continuation.resumeWith(Result.failure(it))
+                }
+                .addOnSuccessListener {
+                    continuation.resume(Result.success(it.toObjects(UserCatch::class.java)))
+                }
         }
-    }
 
-    @ExperimentalCoroutinesApi
-    private fun getCatchSnapshotListener(scope: ProducerScope<List<UserCatch>>) =
-        EventListener<QuerySnapshot> { snapshots, error ->
-            if (error != null) {
-                Log.d("Fishing", "Catch snapshot listener", error)
-                return@EventListener
-            }
-
-            if (snapshots != null) {
-                val catches = snapshots.toObjects(UserCatch::class.java)
-                scope.trySend(catches)
-            } else {
-                scope.trySend(listOf())
-            }
-
-        }
+//    @ExperimentalCoroutinesApi
+//    private fun getCatchSnapshotListener(scope: ProducerScope<List<UserCatch>>) =
+//        EventListener<QuerySnapshot> { snapshots, error ->
+//            if (error != null) {
+//                Log.d("Fishing", "Catch snapshot listener", error)
+//                return@EventListener
+//            }
+//
+//            if (snapshots != null) {
+//                val catches = snapshots.toObjects(UserCatch::class.java)
+//                scope.trySend(catches)
+//            } else {
+//                scope.trySend(listOf())
+//            }
+//
+//        }
 
 
     override fun addNewCatch(

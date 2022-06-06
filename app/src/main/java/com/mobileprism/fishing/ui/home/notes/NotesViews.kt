@@ -1,16 +1,15 @@
 package com.mobileprism.fishing.ui.home.notes
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -19,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import com.airbnb.lottie.compose.*
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
@@ -26,6 +26,9 @@ import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.theme.cardColor
 import com.mobileprism.fishing.ui.theme.customColors
+import com.mobileprism.fishing.ui.theme.primaryBlueLightColorTransparent
+import com.mobileprism.fishing.ui.viewmodels.NoteCatchesState
+import com.mobileprism.fishing.ui.viewmodels.PlaceNoteItemUiState
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toTime
 import org.koin.androidx.compose.get
@@ -88,7 +91,7 @@ fun ItemUserPlace(
                 childModifier = childModifier,
                 icon = painterResource(id = R.drawable.ic_place_on_map),
                 tint = if (!place.visible) MaterialTheme.customColors.secondaryTextColor
-                        else MaterialTheme.colors.onSurface,
+                else MaterialTheme.colors.onSurface,
                 onClick = { navigateToMap() }
             )
 
@@ -115,6 +118,278 @@ fun ItemUserPlace(
                 tint = MaterialTheme.colors.primaryVariant.copy(0.25f)
             )
         }
+    }
+}
+
+@Composable
+fun ItemUserPlaceNote(
+    modifier: Modifier = Modifier,
+    placeNote: PlaceNoteItemUiState,
+    isExpanded: Boolean,
+    onExpandItemClick: (UserMapMarker) -> Unit,
+    onItemClick: (UserMapMarker) -> Unit,
+    onCatchClick: (UserCatch) -> Unit,
+    addNewCatch: (UserMapMarker) -> Unit
+) {
+    DefaultCard(
+        modifier = modifier,
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            ItemNotesPlace(
+                place = placeNote.place,
+                isExpanded = isExpanded,
+                onExpandItemClick = onExpandItemClick,
+                onItemClick = onItemClick
+            )
+            ItemNotesCatches(
+                isVisible = isExpanded,
+                addNewCatch = { addNewCatch(placeNote.place) },
+                navigateToCatch = onCatchClick,
+                onMoreClick = { onItemClick(placeNote.place) },
+                catchesState = placeNote.catchesState
+            )
+        }
+    }
+}
+
+@Composable
+fun ItemNotesPlace(
+    modifier: Modifier = Modifier,
+    place: UserMapMarker,
+    isExpanded: Boolean,
+    onExpandItemClick: (UserMapMarker) -> Unit,
+    onItemClick: (UserMapMarker) -> Unit
+) {
+    val iconRotation by animateFloatAsState(targetValue = if (isExpanded) 270f else 90f)
+
+    Row(
+        modifier = modifier
+            .clickable { onItemClick(place) }
+            .wrapContentHeight()
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+
+        Icon(
+            modifier = Modifier
+                .padding(8.dp)
+                .size(32.dp),
+            painter = painterResource(R.drawable.ic_baseline_location_on_24),
+            contentDescription = stringResource(R.string.place),
+            tint = Color(place.markerColor)
+        )
+
+        Column(
+            modifier = Modifier
+                .padding(vertical = 16.dp)
+                .fillMaxWidth(0.8f),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            PrimaryText(
+                text = place.title,
+                maxLines = 1
+            )
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                SupportText(
+                    text = place.dateOfCreation.toDateTextMonth()
+                )
+                ItemCounter(
+                    modifier = Modifier,
+                    count = place.catchesCount,
+                    icon = R.drawable.ic_fishing,
+                    tint = MaterialTheme.colors.primaryVariant.copy(0.25f)
+                )
+            }
+        }
+
+        DefaultIconButton(
+            modifier = Modifier
+                .padding(8.dp)
+                .rotate(iconRotation),
+            icon = painterResource(id = R.drawable.ic_baseline_chevron_right_24),
+            tint = MaterialTheme.colors.onSurface,
+            onClick = { onExpandItemClick(place) }
+        )
+
+    }
+}
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun ItemNotesCatches(
+    modifier: Modifier = Modifier,
+    isVisible: Boolean,
+    addNewCatch: () -> Unit,
+    navigateToCatch: (UserCatch) -> Unit,
+    onMoreClick: () -> Unit,
+    catchesState: NoteCatchesState,
+) {
+    val catchesToShow = 3
+    val animationDuration = 100
+
+    val transitionState = remember { MutableTransitionState(initialState = isVisible) }
+
+    LaunchedEffect(key1 = isVisible) {
+        transitionState.targetState = isVisible
+    }
+
+    val enterFadeIn = remember {
+        fadeIn(
+            animationSpec = TweenSpec(
+                durationMillis = animationDuration,
+                easing = FastOutLinearInEasing
+            )
+        )
+    }
+    val enterExpand = remember {
+        expandVertically(animationSpec = tween(animationDuration))
+    }
+    val exitFadeOut = remember {
+        fadeOut(
+            animationSpec = TweenSpec(
+                durationMillis = animationDuration,
+                easing = LinearOutSlowInEasing
+            )
+        )
+    }
+    val exitCollapse = remember {
+        shrinkVertically(animationSpec = tween(animationDuration))
+    }
+
+    AnimatedVisibility(
+        visibleState = transitionState,
+        enter = enterExpand + enterFadeIn,
+        exit = exitCollapse + exitFadeOut
+    ) {
+        when (catchesState) {
+            is NoteCatchesState.Loaded -> {
+                Column(modifier = modifier) {
+
+                    if (catchesState.catches.isNotEmpty()) {
+                        (catchesState.catches.sortedBy { it.date }.reversed()
+                            .takeLast(catchesToShow)).forEach {
+                                ItemNotesCatch(
+                                    catch = it,
+                                    onItemClick = navigateToCatch
+                                )
+                            }
+                    } else {
+                        NoContentView(
+                            modifier = Modifier.padding(16.dp),
+                            text = stringResource(id = R.string.no_cathces_added),
+                            icon = painterResource(id = R.drawable.ic_fishing)
+                        )
+                    }
+
+                    if (catchesState.catches.size > catchesToShow) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight()
+                                .padding(4.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            DefaultIconButton(
+                                icon = painterResource(id = R.drawable.ic_baseline_more_horiz_24),
+                                onClick = onMoreClick
+                            )
+                        }
+                    }
+
+                    ItemAddNewCatch(onClick = { addNewCatch() })
+
+                }
+            }
+            NoteCatchesState.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(32.dp))
+                }
+
+            }
+        }
+
+    }
+}
+
+@Composable
+fun ItemNotesCatch(
+    modifier: Modifier = Modifier,
+    catch: UserCatch,
+    onItemClick: (UserCatch) -> Unit,
+    preferences: UserPreferences = get()
+) {
+
+    val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
+
+    Column(
+        modifier = modifier
+            .padding(8.dp)
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+
+        SecondaryTextSmall(
+            modifier = Modifier.padding(top = 4.dp),
+            text = "${catch.date.toDateTextMonth()} ${catch.date.toTime(is12hTimeFormat)}",
+            textColor = MaterialTheme.colors.primary
+        )
+
+        Surface(
+            modifier = modifier
+                .padding(8.dp)
+                .clickable { onItemClick(catch) },
+            shape = RoundedCornerShape(24.dp),
+            color = primaryBlueLightColorTransparent
+        ) {
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(24.dp),
+                    painter = painterResource(id = R.drawable.ic_fish),
+                    contentDescription = stringResource(id = R.string.fish_catch)
+                )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(0.75f)
+                        .padding(horizontal = 8.dp)
+                ) {
+                    PrimaryText(
+                        modifier = Modifier,
+                        text = catch.fishType,
+                        maxLines = 1
+                    )
+                    SecondaryTextSmall(
+                        modifier = Modifier,
+                        text = "${stringResource(id = R.string.amount)}: ${catch.fishAmount}" +
+                                " ${stringResource(id = R.string.pc)}"
+                    )
+                }
+                PrimaryText(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    text = "${catch.fishWeight} ${stringResource(id = R.string.kg)}"
+                )
+            }
+        }
+
     }
 }
 
@@ -279,4 +554,63 @@ fun ItemCounter(
         SupportText(text = " x $count")
     }
 
+}
+
+@Composable
+fun ItemAddNewCatch(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .wrapContentHeight(),
+        horizontalAlignment = Alignment.End,
+        verticalArrangement = Arrangement.SpaceEvenly
+    ) {
+        DefaultButton(
+            modifier = Modifier,
+            icon = painterResource(id = R.drawable.ic_add_catch),
+            text = stringResource(id = R.string.add_catch_text),
+            onClick = onClick
+        )
+
+    }
+}
+
+@Composable
+fun NoPlacesView(
+    modifier: Modifier = Modifier,
+    onAddNewPlaceClick: () -> Unit
+) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        PrimaryText(text = stringResource(id = R.string.no_places_added))
+        Spacer(modifier = Modifier.padding(8.dp))
+        LottieNoPlaces(modifier = Modifier.size(128.dp))
+        Spacer(modifier = Modifier.padding(8.dp))
+        DefaultButtonOutlined(
+            text = stringResource(id = R.string.add_new_place),
+            icon = painterResource(id = R.drawable.ic_baseline_add_location_24),
+            onClick = onAddNewPlaceClick
+        )
+    }
+}
+
+@Composable
+fun LottieNoPlaces(modifier: Modifier = Modifier) {
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.no_loaction))
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever,
+    )
+    LottieAnimation(
+        composition,
+        progress,
+        modifier = modifier
+    )
 }

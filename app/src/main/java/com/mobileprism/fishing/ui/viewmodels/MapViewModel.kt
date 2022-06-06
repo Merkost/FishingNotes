@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.viewmodels
+package com.mobileprism.fishing.ui.viewmodels
 
 import android.location.Geocoder
 import androidx.compose.runtime.MutableState

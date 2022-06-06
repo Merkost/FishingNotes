@@ -142,7 +142,7 @@
     <string name="main">Main</string>
     <string name="icon">Icon</string>
     <string name="no_cathces_added">No catches added</string>
-    <string name="add_catch_text">+ Add new catch</string>
+    <string name="add_catch_text">New catch</string>
     <string name="no_places_added">No places added</string>
     <string name="new_place_text">+ Add new place</string>
 
@@ -370,6 +370,7 @@
     <string name="name_hint">Имя</string>
     <string name="email_hint">E-mail</string>
     <string name="username">Имя пользователя</string>
+    <string name="more">More…</string>
 
 
 </resources>

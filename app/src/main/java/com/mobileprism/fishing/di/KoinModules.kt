@@ -24,6 +24,8 @@ import com.mobileprism.fishing.utils.network.ConnectionManagerImpl
 import com.mobileprism.fishing.viewmodels.EditProfileViewModel
 import com.mobileprism.fishing.viewmodels.MainViewModel
 import com.mobileprism.fishing.viewmodels.MapViewModel
+import com.mobileprism.fishing.ui.viewmodels.MainViewModel
+import com.mobileprism.fishing.ui.viewmodels.MapViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -114,8 +116,8 @@ val mainModule = module {
             getUserPlacesListUseCase = get()
         )
     }
+    viewModel { NotesViewModel(getUserCatches = get(), getUserPlacesList = get()) }
 }
-
 
 fun createGeocoder(androidContext: Context): Geocoder {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
