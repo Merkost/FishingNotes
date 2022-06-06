@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.use_cases.GetUserCatchesByMarkerId
-import com.mobileprism.fishing.domain.use_cases.GetUserPlacesListUseCase
+import com.mobileprism.fishing.domain.use_cases.places.GetUserPlacesListUseCase
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

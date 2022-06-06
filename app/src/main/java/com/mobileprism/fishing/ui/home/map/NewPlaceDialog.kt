@@ -36,9 +36,7 @@ import com.mobileprism.fishing.ui.home.views.MyCard
 import com.mobileprism.fishing.ui.theme.Shapes
 import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
 import com.mobileprism.fishing.ui.utils.ColorPicker
-import com.mobileprism.fishing.viewmodels.MapViewModel
 import com.mobileprism.fishing.ui.viewmodels.MapViewModel
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 
 @ExperimentalAnimationApi
