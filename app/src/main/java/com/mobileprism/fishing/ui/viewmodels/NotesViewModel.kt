@@ -67,9 +67,7 @@ class NotesViewModel(
             }
         }
     }
-
 }
-
 
 data class PlaceNoteItemUiState(
     val place: UserMapMarker,
