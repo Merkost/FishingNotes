@@ -1,17 +1,15 @@
 package com.mobileprism.fishing.ui.home.views
 
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -21,6 +19,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.ui.theme.secondaryTextColor
@@ -81,7 +81,7 @@ fun SubtitleText(
         textAlign = textAlign,
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
-        )
+    )
 }
 
 @Composable
@@ -258,5 +258,68 @@ fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: ImageVector, text: Str
                 .size(24.dp)
         )
         SubtitleText(text = text)
+    }
+}
+
+@Composable
+fun DividerText(
+    modifier: Modifier = Modifier,
+    text: String,
+    icon: Painter? = null,
+    onIconClick: (() -> Unit)? = null
+) {
+    ConstraintLayout(
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        val (divider1, textView, iconView, divider2) = createRefs()
+        Divider(modifier = Modifier.constrainAs(divider1) {
+            top.linkTo(parent.top)
+            bottom.linkTo(parent.bottom)
+            absoluteLeft.linkTo(parent.absoluteLeft)
+            absoluteRight.linkTo(textView.absoluteLeft, 16.dp)
+            width = Dimension.fillToConstraints
+        })
+
+        SecondaryText(
+            modifier = Modifier.constrainAs(textView) {
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+            },
+            text = text
+        )
+
+        if (icon != null) {
+            IconButton(
+                modifier = Modifier.constrainAs(iconView) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    absoluteLeft.linkTo(textView.absoluteRight)
+                },
+                onClick = { onIconClick?.invoke() }
+            ) {
+                Icon(
+                    modifier = Modifier.size(24.dp),
+                    painter = icon,
+                    tint = MaterialTheme.customColors.secondaryIconColor,
+                    contentDescription = null
+                )
+            }
+
+        }
+
+
+        Divider(modifier = Modifier.constrainAs(divider2) {
+            top.linkTo(parent.top)
+            bottom.linkTo(parent.bottom)
+            absoluteRight.linkTo(parent.absoluteRight)
+            if (icon != null) {
+                absoluteLeft.linkTo(iconView.absoluteRight)
+            } else {
+                absoluteLeft.linkTo(textView.absoluteRight, 16.dp)
+            }
+            width = Dimension.fillToConstraints
+        })
     }
 }

@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui
 
+import android.content.Context
 import androidx.compose.animation.*
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -24,6 +25,7 @@ import com.google.accompanist.insets.systemBarsPadding
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.AppSnackbar
 import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.showErrorToast
@@ -172,7 +174,7 @@ fun LoginScreen(navController: NavController) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(450.dp)
+                        .wrapContentHeight()
                         .padding(30.dp),
                     elevation = 10.dp,
                     shape = RoundedCornerShape(30.dp)
@@ -195,7 +197,7 @@ fun LoginScreen(navController: NavController) {
                     }
 
                     Column(
-                        verticalArrangement = Arrangement.Center,
+                        verticalArrangement = Arrangement.Top,
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .constrainAs(cardColumn) {
@@ -216,69 +218,68 @@ fun LoginScreen(navController: NavController) {
                         Image(
                             painterResource(R.drawable.ic_launcher), stringResource(R.string.icon),
                             modifier = Modifier
-                                .padding(30.dp)
-                                .size(140.dp)
+                                .padding(vertical = 16.dp)
+                                .size(128.dp)
                         )
 
                         //Title
                         Text(
-                            stringResource(R.string.login_title),
+                            stringResource(R.string.app_name),
                             style = MaterialTheme.typography.h5,
-                            //color = Color.DarkGray
+                            color = MaterialTheme.colors.primaryVariant
                         )
 
                         Spacer(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(30.dp)
+                                .height(8.dp)
+                        )
+
+                        DividerText(
+                            modifier = Modifier.padding(horizontal = 24.dp),
+                            text = "Login/Registration",
+                            icon = painterResource(id = R.drawable.ic_baseline_help_outline_24)
+                        )
+
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                        )
+
+                        LoginRegisterView(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp)
+                        )
+
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                        )
+
+                        SecondaryText(text = "or")
+
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
                         )
 
                         //Google button
-                        Card(
-                            shape = RoundedCornerShape(20.dp), elevation = 10.dp,
-                            onClickLabel = stringResource(
-                                R.string.google_login
-                            ),
-                            onClick = { googleLoading = true; (context as MainActivity).startGoogleLogin() },
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .padding(10.dp)
-                                    .padding(end = 2.dp)
-                                    .animateContentSize(
-                                        animationSpec = tween(
-                                            durationMillis = 300,
-                                            easing = LinearOutSlowInEasing
-                                        )
-                                    ),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Image(
-                                    painterResource(R.drawable.googleg_standard_color_18),
-                                    stringResource(R.string.google_login),
-                                    modifier = Modifier.size(25.dp)
-                                )
-                                Text(
-                                    text = if (googleLoading) stringResource(R.string.signing_in)
-                                    else stringResource(R.string.sign_with_google)
-                                )
-                                if (googleLoading) {
-                                    //Spacer(modifier = Modifier.width(16.dp))
-                                    CircularProgressIndicator(
-                                        modifier = Modifier
-                                            .height(16.dp)
-                                            .width(16.dp),
-                                        strokeWidth = 2.dp,
-                                        color = MaterialTheme.colors.primary
-                                    )
-                                }
+                        LoginWithGoogleButton(
+                            modifier = Modifier,
+                            isLoading = googleLoading,
+                            onClick = {
+                                googleLoading = true
+                                loginWithGoogle(context)
                             }
-                        }
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(30.dp)
+                        )
+
+                        ContinueButton(
+                            modifier = Modifier.padding(top = 48.dp, bottom = 24.dp),
+                            onClick = {}
                         )
                     }
                 }
@@ -287,7 +288,6 @@ fun LoginScreen(navController: NavController) {
         }
     }
 }
-
 
 @Composable
 fun LottieSuccess(modifier: Modifier = Modifier, onFinished: () -> Unit) {
@@ -309,4 +309,129 @@ fun LottieSuccess(modifier: Modifier = Modifier, onFinished: () -> Unit) {
             onFinished()
         }
     }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun ContinueButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(20.dp), elevation = 10.dp,
+        onClickLabel = stringResource(
+            R.string.google_login
+        ),
+        onClick = onClick,
+        backgroundColor = MaterialTheme.colors.secondary
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(10.dp)
+                .padding(end = 2.dp)
+                .animateContentSize(
+                    animationSpec = tween(
+                        durationMillis = 300,
+                        easing = LinearOutSlowInEasing
+                    )
+                ),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_baseline_arrow_forward_24),
+                contentDescription = null,
+                modifier = Modifier.size(25.dp),
+                tint = MaterialTheme.colors.onSecondary
+            )
+            Text(
+                style = MaterialTheme.typography.h6,
+                text = stringResource(R.string.skip),
+                color = MaterialTheme.colors.onSecondary
+            )
+        }
+    }
+}
+
+@Composable
+fun LoginRegisterView(
+    modifier: Modifier = Modifier
+) {
+    val text = remember {
+        mutableStateOf("")
+    }
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.SpaceAround,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        SimpleOutlinedTextField(textState = text, label = "Login")
+        SimpleOutlinedTextField(textState = text, label = "Password")
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            DefaultButton(text = "Register", onClick = {})
+            DefaultButtonFilled(text = "LigIn") {
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun LoginWithGoogleButton(
+    modifier: Modifier = Modifier,
+    isLoading: Boolean,
+    onClick: () -> Unit,
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(20.dp), elevation = 10.dp,
+        onClickLabel = stringResource(
+            R.string.google_login
+        ),
+        onClick = onClick,
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(10.dp)
+                .padding(end = 2.dp)
+                .animateContentSize(
+                    animationSpec = tween(
+                        durationMillis = 300,
+                        easing = LinearOutSlowInEasing
+                    )
+                ),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Image(
+                painterResource(R.drawable.googleg_standard_color_18),
+                stringResource(R.string.google_login),
+                modifier = Modifier.size(25.dp)
+            )
+            Text(
+                text = if (isLoading) stringResource(R.string.signing_in)
+                else stringResource(R.string.sign_with_google)
+            )
+            if (isLoading) {
+                //Spacer(modifier = Modifier.width(16.dp))
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .height(16.dp)
+                        .width(16.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colors.primary
+                )
+            }
+        }
+    }
+}
+
+private fun loginWithGoogle(context: Context) {
+    (context as MainActivity).startGoogleLogin()
 }

@@ -11,8 +11,8 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.model.datastore.UserPreferences
+import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import org.koin.androidx.compose.get
 
 private val DarkColorPalette = darkColors(
@@ -48,6 +48,7 @@ private val GreenLightColorPalette = lightColors(
     primaryVariant = primaryFigmaDarkColor,
     secondary = secondaryFigmaColor,
     secondaryVariant = secondaryFigmaDarkColor,
+    onSecondary = primaryWhiteColor
 )
 
 private val GreenDarkColorPalette = darkColors(
@@ -55,6 +56,7 @@ private val GreenDarkColorPalette = darkColors(
     primaryVariant = primaryFigmaColor,
     secondary = secondaryFigmaDarkColor,
     secondaryVariant = secondaryFigmaColor,
+    onSecondary = secondaryWhiteColor
 )
 
 private val BlueLightColorPalette = lightColors(
@@ -63,6 +65,7 @@ private val BlueLightColorPalette = lightColors(
     secondary = secondaryBlueColor,
     secondaryVariant = secondaryBlueLightColor,
     onPrimary = primaryWhiteColor,
+    onSecondary = primaryWhiteColor
 )
 
 private val BlueDarkColorPalette = darkColors(
@@ -70,6 +73,7 @@ private val BlueDarkColorPalette = darkColors(
     primaryVariant = primaryBlueColor,
     secondary = secondaryBlueColor,
     secondaryVariant = secondaryBlueDarkColor,
+    onSecondary = secondaryWhiteColor
 )
 
 @Composable

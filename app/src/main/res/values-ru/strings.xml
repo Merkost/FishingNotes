@@ -370,5 +370,6 @@
     <string name="name_hint">Имя</string>
     <string name="email_hint">E-mail</string>
     <string name="username">Имя пользователя</string>
+    <string name="continue_button">Продолжить</string>
 
 </resources>
