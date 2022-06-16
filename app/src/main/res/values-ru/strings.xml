@@ -151,7 +151,7 @@
     <string name="login_title">Давайте начнём!</string>
     <string name="catch_photo">Фото улова</string>
     <string name="marker_icon">Иконка маркера</string>
-    <string name="sign_with_google">Войти через Google</string>
+    <string name="sign_with_google">Продолжить с Google</string>
     <string name="signing_in">Выполняется вход…</string>
     <string name="searching">Поиск…</string>
     <string name="unnamed_place">Место без названия</string>

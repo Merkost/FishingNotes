@@ -22,6 +22,13 @@ class LoginViewModel(private val repository: UserRepository) : ViewModel() {
         loadCurrentUser()
     }
 
+    fun createOfflineUser() {
+//        viewModelScope.launch {
+//            repository.addNewUser(User())
+//        }
+
+    }
+
     private fun loadCurrentUser() {
         viewModelScope.launch {
             repository.currentUser

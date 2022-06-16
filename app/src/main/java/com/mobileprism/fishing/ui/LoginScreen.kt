@@ -6,17 +6,23 @@ import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
@@ -26,6 +32,7 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.AppSnackbar
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.views.*
+import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.showErrorToast
@@ -207,6 +214,7 @@ fun LoginScreen(navController: NavController) {
                                 absoluteRight.linkTo(card.absoluteRight)
                             }
                             .fillMaxWidth()
+                            .padding(24.dp)
                             .animateContentSize(
                                 animationSpec = tween(
                                     durationMillis = 300,
@@ -214,13 +222,33 @@ fun LoginScreen(navController: NavController) {
                                 )
                             )
                     ) {
-                        //AppIcon
-                        Image(
-                            painterResource(R.drawable.ic_launcher), stringResource(R.string.icon),
-                            modifier = Modifier
-                                .padding(vertical = 16.dp)
-                                .size(128.dp)
-                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.Top,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Spacer(modifier = Modifier.size(32.dp))
+
+                            Image(
+                                painterResource(R.drawable.ic_launcher),
+                                stringResource(R.string.icon),
+                                modifier = Modifier
+                                    .padding(bottom = 16.dp)
+                                    .size(128.dp)
+                            )
+
+                            IconButton(
+                                onClick = { }
+                            ) {
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    painter = painterResource(id = R.drawable.ic_baseline_help_outline_24),
+                                    contentDescription = null,
+                                    tint = MaterialTheme.customColors.secondaryIconColor
+                                )
+                            }
+                        }
 
                         //Title
                         Text(
@@ -232,42 +260,9 @@ fun LoginScreen(navController: NavController) {
                         Spacer(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(8.dp)
+                                .height(48.dp)
                         )
 
-                        DividerText(
-                            modifier = Modifier.padding(horizontal = 24.dp),
-                            text = "Login/Registration",
-                            icon = painterResource(id = R.drawable.ic_baseline_help_outline_24)
-                        )
-
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(8.dp)
-                        )
-
-                        LoginRegisterView(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 24.dp)
-                        )
-
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(8.dp)
-                        )
-
-                        SecondaryText(text = "or")
-
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(8.dp)
-                        )
-
-                        //Google button
                         LoginWithGoogleButton(
                             modifier = Modifier,
                             isLoading = googleLoading,
@@ -277,10 +272,85 @@ fun LoginScreen(navController: NavController) {
                             }
                         )
 
-                        ContinueButton(
-                            modifier = Modifier.padding(top = 48.dp, bottom = 24.dp),
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(16.dp)
+                        )
+
+                        DividerText(
+                            modifier = Modifier,
+                            text = "or",
+//                            icon = painterResource(id = R.drawable.ic_baseline_help_outline_24)
+                        )
+
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(16.dp)
+                        )
+
+                        RegisterButton(
+                            isLoading = false,
                             onClick = {}
                         )
+
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            SecondaryText(
+                                text = "Have an account?"
+                            )
+
+                            Spacer(modifier = Modifier.size(8.dp))
+
+                            Text(
+                                modifier = Modifier.clickable { },
+                                fontSize = 18.sp,
+                                color = MaterialTheme.colors.primaryVariant,
+                                text = "Login",
+                                style = TextStyle(textDecoration = TextDecoration.Underline)
+                            )
+
+//                            DefaultButton(text = "Login", onClick = {})
+                        }
+
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            DefaultButtonOutlined(
+                                text = "Skip",
+                                icon = painterResource(id = R.drawable.ic_baseline_arrow_forward_24),
+                                onClick = { skipLoggingIn(loginViewModel) }
+                            )
+
+//                            DefaultButton(
+//                                text = "Skip", onClick = {},
+//                            )
+//                            Icon(
+//                                painter = painterResource(id = R.drawable.ic_baseline_arrow_forward_24),
+//                                contentDescription = null,
+//                                tint = MaterialTheme.colors.primaryVariant
+//                            )
+                        }
+
+
                     }
                 }
             }
@@ -313,18 +383,17 @@ fun LottieSuccess(modifier: Modifier = Modifier, onFinished: () -> Unit) {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ContinueButton(
+fun SkipButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(20.dp), elevation = 10.dp,
+        shape = RoundedCornerShape(20.dp), elevation = 4.dp,
         onClickLabel = stringResource(
             R.string.google_login
         ),
         onClick = onClick,
-        backgroundColor = MaterialTheme.colors.secondary
     ) {
         Row(
             modifier = Modifier
@@ -343,12 +412,12 @@ fun ContinueButton(
                 painter = painterResource(R.drawable.ic_baseline_arrow_forward_24),
                 contentDescription = null,
                 modifier = Modifier.size(25.dp),
-                tint = MaterialTheme.colors.onSecondary
+                tint = MaterialTheme.colors.primaryVariant
             )
             Text(
                 style = MaterialTheme.typography.h6,
                 text = stringResource(R.string.skip),
-                color = MaterialTheme.colors.onSecondary
+                color = MaterialTheme.colors.primaryVariant
             )
         }
     }
@@ -383,22 +452,24 @@ fun LoginRegisterView(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun LoginWithGoogleButton(
+fun RegisterButton(
     modifier: Modifier = Modifier,
     isLoading: Boolean,
     onClick: () -> Unit,
 ) {
     Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(20.dp), elevation = 10.dp,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp), elevation = 4.dp,
         onClickLabel = stringResource(
             R.string.google_login
         ),
         onClick = onClick,
+        backgroundColor = MaterialTheme.colors.secondaryVariant
     ) {
         Row(
             modifier = Modifier
-                .padding(10.dp)
+                .height(48.dp)
+                .padding(8.dp)
                 .padding(end = 2.dp)
                 .animateContentSize(
                     animationSpec = tween(
@@ -406,32 +477,122 @@ fun LoginWithGoogleButton(
                         easing = LinearOutSlowInEasing
                     )
                 ),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_baseline_person_24),
+                contentDescription = stringResource(R.string.login_title),
+                modifier = Modifier
+                    .size(32.dp)
+                    .padding(4.dp)
+                    .fillMaxWidth(0.15f),
+                tint = MaterialTheme.colors.onSecondary
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    modifier = Modifier,
+                    text = "Create an account",
+                    color = MaterialTheme.colors.onSecondary,
+                    style = MaterialTheme.typography.button
+                )
+            }
+
+            Icon(
+                painter = painterResource(R.drawable.ic_baseline_chevron_right_24),
+                contentDescription = stringResource(R.string.login_title),
+                modifier = Modifier
+                    .size(24.dp)
+                    .fillMaxWidth(0.15f),
+                tint = MaterialTheme.colors.onSecondary
+            )
+
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun LoginWithGoogleButton(
+    modifier: Modifier = Modifier,
+    isLoading: Boolean,
+    onClick: () -> Unit,
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp), elevation = 4.dp,
+        onClickLabel = stringResource(
+            R.string.google_login
+        ),
+        onClick = onClick,
+        backgroundColor = MaterialTheme.colors.primaryVariant
+    ) {
+        Row(
+            modifier = Modifier
+                .height(48.dp)
+                .padding(8.dp)
+                .padding(end = 2.dp)
+                .animateContentSize(
+                    animationSpec = tween(
+                        durationMillis = 300,
+                        easing = LinearOutSlowInEasing
+                    )
+                ),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Image(
-                painterResource(R.drawable.googleg_standard_color_18),
-                stringResource(R.string.google_login),
-                modifier = Modifier.size(25.dp)
+                painter = painterResource(R.drawable.googleg_standard_color_18),
+                contentDescription = stringResource(R.string.google_login),
+                modifier = Modifier
+                    .background(
+                        shape = RoundedCornerShape(24.dp),
+                        color = MaterialTheme.colors.onSecondary
+                    )
+                    .size(32.dp)
+                    .padding(4.dp)
+                    .fillMaxWidth(0.15f)
             )
-            Text(
-                text = if (isLoading) stringResource(R.string.signing_in)
-                else stringResource(R.string.sign_with_google)
-            )
-            if (isLoading) {
-                //Spacer(modifier = Modifier.width(16.dp))
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .height(16.dp)
-                        .width(16.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colors.primary
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    modifier = Modifier,
+                    text = if (isLoading) stringResource(R.string.signing_in)
+                    else stringResource(R.string.sign_with_google),
+                    color = MaterialTheme.colors.onSecondary,
+                    style = MaterialTheme.typography.button
                 )
             }
+
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(24.dp)
+                    .fillMaxWidth(0.15f),
+                strokeWidth = 2.dp,
+                color = if (isLoading) MaterialTheme.colors.onSecondary else Color.Transparent
+            )
+
         }
     }
 }
 
 private fun loginWithGoogle(context: Context) {
     (context as MainActivity).startGoogleLogin()
+}
+
+private fun skipLoggingIn(viewModel: LoginViewModel) {
+    viewModel.createOfflineUser()
 }
