@@ -40,7 +40,7 @@ fun SimpleOutlinedTextField(
             capitalization = KeyboardCapitalization.Sentences,
             imeAction = ImeAction.Next
         ),
-        singleLine = singleLine
+        singleLine = singleLine,
     )
 }
 

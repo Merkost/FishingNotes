@@ -47,11 +47,12 @@ import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.SnackbarAction
 import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.login.LoginScreen
 import com.mobileprism.fishing.ui.theme.FishingNotesTheme
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
+import com.mobileprism.fishing.ui.viewmodels.MainViewModel
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.Logger
-import com.mobileprism.fishing.ui.viewmodels.MainViewModel
 import kotlinx.coroutines.InternalCoroutinesApi
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject

@@ -23,4 +23,6 @@ object Constants {
 
     const val CURRENT_PLACE_ITEM_ID = "Current_place"
 
+    const val OFFLINE_USER_ID = "Anonymous"
+
 }

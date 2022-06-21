@@ -371,5 +371,14 @@
     <string name="email_hint">E-mail</string>
     <string name="username">Имя пользователя</string>
     <string name="continue_button">Продолжить</string>
+    <string name="create_an_account">Create an account</string>
+    <string name="or">or</string>
+    <string name="have_an_account">Have an account?</string>
+    <string name="login">Login</string>
+    <string name="sign_in">Sign in</string>
+    <string name="password">Password</string>
+    <string name="repeat_password">Repeat password</string>
+    <string name="register">Register</string>
+    <string name="passwords_must_match">Passwords must match</string>
 
 </resources>

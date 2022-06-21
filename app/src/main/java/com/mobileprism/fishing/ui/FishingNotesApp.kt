@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
-import androidx.compose.material.swipeable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -28,6 +27,7 @@ import com.mobileprism.fishing.ui.home.place.UserPlaceScreen
 import com.mobileprism.fishing.ui.home.profile.EditProfile
 import com.mobileprism.fishing.ui.home.settings.AboutApp
 import com.mobileprism.fishing.ui.home.weather.WeatherDaily
+import com.mobileprism.fishing.ui.login.LoginScreen
 import kotlinx.coroutines.InternalCoroutinesApi
 
 @ExperimentalComposeUiApi

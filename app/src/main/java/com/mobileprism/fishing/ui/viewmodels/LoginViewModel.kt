@@ -22,11 +22,10 @@ class LoginViewModel(private val repository: UserRepository) : ViewModel() {
         loadCurrentUser()
     }
 
-    fun createOfflineUser() {
-//        viewModelScope.launch {
-//            repository.addNewUser(User())
-//        }
-
+    fun skipAuthorization() {
+        viewModelScope.launch {
+            repository.addOfflineUser()
+        }
     }
 
     private fun loadCurrentUser() {

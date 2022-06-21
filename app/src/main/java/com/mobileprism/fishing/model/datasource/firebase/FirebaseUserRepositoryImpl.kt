@@ -20,6 +20,7 @@ import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.datastore.UserDatastore
+import com.mobileprism.fishing.utils.Constants.OFFLINE_USER_ID
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
@@ -41,14 +42,19 @@ class FirebaseUserRepositoryImpl(
 
     override val currentUser: Flow<User?>
         get() = callbackFlow {
-            val authListener = FirebaseAuth.AuthStateListener {
-                runBlocking {
-                    send(it.currentUser?.run { mapFirebaseUserToUser(this) })
+            val savedUser = userDatastore.getUser.first()
+            if (savedUser.uid == OFFLINE_USER_ID) {
+                send(savedUser)
+            } else {
+                val authListener = FirebaseAuth.AuthStateListener {
+                    runBlocking {
+                        send(it.currentUser?.run { mapFirebaseUserToUser(this) })
+                    }
                 }
-            }
 
-            fireBaseAuth.addAuthStateListener(authListener)
-            awaitClose { fireBaseAuth.removeAuthStateListener(authListener) }
+                fireBaseAuth.addAuthStateListener(authListener)
+                awaitClose { fireBaseAuth.removeAuthStateListener(authListener) }
+            }
         }
 
     override val datastoreUser: Flow<User>
@@ -122,6 +128,10 @@ class FirebaseUserRepositoryImpl(
         return flow
     }
 
+    override suspend fun addOfflineUser() {
+        userDatastore.saveUser(createOfflineUser())
+    }
+
     override suspend fun setUserListener(user: User) {
         val listeners = mutableListOf<ListenerRegistration>()
 
@@ -172,5 +182,7 @@ class FirebaseUserRepositoryImpl(
                 }
             }
         }
+
+    private fun createOfflineUser() = User(uid = OFFLINE_USER_ID)
 
 }

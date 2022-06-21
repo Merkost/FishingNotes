@@ -11,6 +11,7 @@ interface UserRepository {
 
     suspend fun logoutCurrentUser(): Flow<Boolean>
     suspend fun addNewUser(user: User): StateFlow<Progress>
+    suspend fun addOfflineUser()
     suspend fun setUserListener(user: User)
     suspend fun setNewProfileData(user: User): Result<Unit>
 
