@@ -380,5 +380,7 @@
     <string name="repeat_password">Repeat password</string>
     <string name="register">Register</string>
     <string name="passwords_must_match">Passwords must match</string>
+    <string name="incorrect_password_format">Incorrect password format</string>
+    <string name="incorrect_login_format">Incorrect login or e-mail format</string>
 
 </resources>

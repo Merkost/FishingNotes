@@ -9,6 +9,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -16,11 +18,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.entity.common.LoginPassword
 import com.mobileprism.fishing.ui.home.views.DefaultButton
 import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
 import com.mobileprism.fishing.ui.home.views.HeaderText
-import com.mobileprism.fishing.ui.home.views.SecondaryText
+import com.mobileprism.fishing.ui.home.views.SecondaryTextSmall
 import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
+import com.mobileprism.fishing.utils.*
 
 sealed class BottomSheetLoginScreen() {
     object LoginScreen : BottomSheetLoginScreen()
@@ -39,7 +43,7 @@ fun LoginModalBottomSheetContent(
                 modifier = Modifier
                     .padding(horizontal = 24.dp, vertical = 16.dp)
                     .fillMaxSize(),
-                onApply = { login, password ->
+                onApply = { loginPassword ->
 
                 },
                 onCloseBottomSheet = onCloseBottomSheet
@@ -50,7 +54,7 @@ fun LoginModalBottomSheetContent(
                 modifier = Modifier
                     .padding(horizontal = 24.dp, vertical = 16.dp)
                     .fillMaxSize(),
-                onApply = { login, password ->
+                onApply = { loginPassword ->
 
                 },
                 onCloseBottomSheet = onCloseBottomSheet
@@ -62,7 +66,7 @@ fun LoginModalBottomSheetContent(
 @Composable
 fun LoginScreenDialog(
     modifier: Modifier = Modifier,
-    onApply: (String, String) -> Unit,
+    onApply: (LoginPassword) -> Unit,
     onCloseBottomSheet: () -> Unit
 ) {
     val login = rememberSaveable() { mutableStateOf("") }
@@ -151,7 +155,7 @@ fun LoginScreenDialog(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             DefaultButton(
                 text = stringResource(id = R.string.close),
@@ -160,7 +164,7 @@ fun LoginScreenDialog(
 
             DefaultButtonFilled(
                 text = stringResource(id = R.string.login),
-                onClick = { onApply(login.value, password.value) }
+                onClick = { onApply(LoginPassword(login = login.value, password = password.value)) }
             )
         }
 
@@ -170,21 +174,35 @@ fun LoginScreenDialog(
 @Composable
 fun RegisterScreenDialog(
     modifier: Modifier = Modifier,
-    onApply: (String, String) -> Unit,
+    onApply: (LoginPassword) -> Unit,
     onCloseBottomSheet: () -> Unit
 ) {
+    val context = LocalContext.current
+
     val login = rememberSaveable() { mutableStateOf("") }
     val password = rememberSaveable() { mutableStateOf("") }
     val repeatedPassword = rememberSaveable() { mutableStateOf("") }
+
     val showPassword = rememberSaveable() { mutableStateOf(false) }
-    val isError = rememberSaveable() { mutableStateOf(false) }
+
+    val isLoginError = rememberSaveable() { mutableStateOf(false) }
+    val isPasswordError = rememberSaveable() { mutableStateOf(false) }
+    val isPasswordMatchError = rememberSaveable() { mutableStateOf(false) }
 
     LaunchedEffect(key1 = password.value, key2 = repeatedPassword.value) {
         if (password.value == repeatedPassword.value) {
-            isError.value = false
+            isPasswordMatchError.value = false
+        }
+        if (isPasswordInputCorrect(password.value)) {
+            isPasswordError.value = false
         }
     }
 
+    LaunchedEffect(key1 = login.value) {
+        if (isLoginInputCorrect(login.value) || isLoginInputCorrect(login.value)) {
+            isLoginError.value = false
+        }
+    }
 
     Column(
         modifier = modifier
@@ -195,8 +213,7 @@ fun RegisterScreenDialog(
             verticalAlignment = Alignment.CenterVertically
         ) {
             HeaderText(
-                text = stringResource(R.string.create_an_account),
-                textColor = MaterialTheme.colors.primaryVariant
+                text = stringResource(R.string.create_an_account)
             )
 
             IconButton(onClick = onCloseBottomSheet) {
@@ -206,6 +223,7 @@ fun RegisterScreenDialog(
                 )
             }
         }
+
 
         Spacer(modifier = Modifier.size(32.dp))
 
@@ -225,6 +243,15 @@ fun RegisterScreenDialog(
                 )
             }
         )
+        if (isLoginError.value) {
+            SecondaryTextSmall(
+                modifier = Modifier.height(8.dp),
+                text = stringResource(R.string.incorrect_login_format),
+                textColor = Color.Red
+            )
+        } else {
+            Spacer(modifier = Modifier.size(8.dp))
+        }
 
         Spacer(modifier = Modifier.size(16.dp))
 
@@ -263,6 +290,15 @@ fun RegisterScreenDialog(
                 }
             }
         )
+        if (isPasswordError.value) {
+            SecondaryTextSmall(
+                modifier = Modifier.height(8.dp),
+                text = stringResource(R.string.incorrect_password_format),
+                textColor = Color.Red
+            )
+        } else {
+            Spacer(modifier = Modifier.size(8.dp))
+        }
 
         Spacer(modifier = Modifier.size(16.dp))
 
@@ -274,7 +310,7 @@ fun RegisterScreenDialog(
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Next
             ),
-            isError = isError.value,
+            isError = isPasswordMatchError.value,
             singleLine = true,
             visualTransformation = if (showPassword.value) VisualTransformation.None else PasswordVisualTransformation(),
             leadingIcon = {
@@ -284,15 +320,21 @@ fun RegisterScreenDialog(
                 )
             }
         )
-        if (isError.value) {
-            SecondaryText(text = stringResource(R.string.passwords_must_match))
+        if (isPasswordMatchError.value) {
+            SecondaryTextSmall(
+                modifier = Modifier.height(8.dp),
+                text = stringResource(R.string.passwords_must_match),
+                textColor = Color.Red
+            )
+        } else {
+            Spacer(modifier = Modifier.size(8.dp))
         }
 
         Spacer(modifier = Modifier.size(16.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             DefaultButton(
                 text = stringResource(id = R.string.close),
@@ -303,9 +345,24 @@ fun RegisterScreenDialog(
                 text = stringResource(R.string.register),
                 onClick = {
                     if (password.value == repeatedPassword.value) {
-                        onApply(login.value, password.value)
+                        val loginPassword = LoginPassword(
+                            login = login.value,
+                            password = password.value
+                        )
+                        when (checkLoginPasswordCorrectInput(loginPassword = loginPassword)) {
+                            is LoginPasswordCheckResult.Success -> {
+                                onApply(loginPassword)
+                                showToast(context, "Success")
+                            }
+                            is LoginPasswordCheckResult.LoginError -> {
+                                isLoginError.value = true
+                            }
+                            is LoginPasswordCheckResult.PasswordError -> {
+                                isPasswordError.value = true
+                            }
+                        }
                     } else {
-                        isError.value = true
+                        isPasswordMatchError.value = true
                     }
 
                 }

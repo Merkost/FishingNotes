@@ -105,3 +105,4 @@ fun isCoordinatesFar(first: LatLng, second: LatLng): Boolean {
 }
 
 
+
