@@ -383,6 +383,10 @@
     <string name="passwords_must_match">Passwords must match</string>
     <string name="incorrect_password_format">Incorrect password format</string>
     <string name="incorrect_login_format">Incorrect login or e-mail format</string>
+    <string name="login_email">Login/E-mail</string>
+    <string name="password_min_length">Password min length: </string>
+    <string name="login_min_length">Login/e-mail min length: </string>
+    <string name="invalid_data_entry_format">Invalid data entry format</string>
 
 
 </resources>

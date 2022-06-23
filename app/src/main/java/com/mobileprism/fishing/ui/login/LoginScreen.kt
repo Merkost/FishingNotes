@@ -35,6 +35,7 @@ import com.mobileprism.fishing.ui.home.AppSnackbar
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.DividerText
+import com.mobileprism.fishing.ui.home.views.ModalLoadingDialog
 import com.mobileprism.fishing.ui.home.views.SecondaryText
 import com.mobileprism.fishing.ui.resources
 import com.mobileprism.fishing.ui.theme.customColors
@@ -60,6 +61,7 @@ fun LoginScreen(navController: NavController) {
 
     var visible by remember { mutableStateOf(false) }
     var googleLoading by remember { mutableStateOf(false) }
+    val loading = remember { mutableStateOf(false) }
     var showLottie by remember { mutableStateOf(false) }
 
     val loginViewModel: LoginViewModel = get()
@@ -99,7 +101,9 @@ fun LoginScreen(navController: NavController) {
                     }
                 }
             }
-            is BaseViewState.Loading -> {}
+            is BaseViewState.Loading -> {
+                loading.value = true
+            }
             is BaseViewState.Error -> {
                 showErrorToast(context, state.error?.message)
                 googleLoading = false
@@ -124,6 +128,8 @@ fun LoginScreen(navController: NavController) {
             }
         }
     }
+
+    ModalLoadingDialog(dialogSate = loading, text = "Logging in, please wait!")
 
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,

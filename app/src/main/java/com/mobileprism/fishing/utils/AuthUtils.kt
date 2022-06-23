@@ -1,47 +1,30 @@
 package com.mobileprism.fishing.utils
 
 import com.google.firebase.auth.FirebaseAuth
-import com.mobileprism.fishing.domain.entity.common.LoginPassword
 
-sealed class LoginPasswordCheckResult() {
-    object Success : LoginPasswordCheckResult()
-    object LoginError : LoginPasswordCheckResult()
-    object PasswordError : LoginPasswordCheckResult()
-}
+const val LOGIN_MIN_LENGTH = 3
+const val LOGIN_MAX_LENGTH = 20
+const val PASSWORD_MIN_LENGTH = 6
+const val PASSWORD_MAX_LENGTH = 20
 
 fun getCurrentUser() = FirebaseAuth.getInstance().currentUser
 
 fun getCurrentUserId() = getCurrentUser()?.uid ?: "Anonymous"
 
-fun checkLoginPasswordCorrectInput(
-    loginPassword: LoginPassword
-): LoginPasswordCheckResult {
-
-    if (!isLoginInputCorrect(loginPassword.login) && !isEmailInputCorrect(loginPassword.password)) {
-        return LoginPasswordCheckResult.LoginError
-    }
-
-    if (!isPasswordInputCorrect(loginPassword.password)) {
-        return LoginPasswordCheckResult.PasswordError
-    }
-
-    return LoginPasswordCheckResult.Success
-}
-
 fun isLoginInputCorrect(login: String): Boolean {
-    val loginPattern = """^[a-zA-Z][a-zA-Z0-9-_\.]{1,20}${'$'}""".toRegex()
+    val loginPattern =
+        "^(?=.{$LOGIN_MIN_LENGTH,$LOGIN_MAX_LENGTH}${'$'})(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$".toRegex()
 
     return loginPattern.matches(login)
 }
 
 fun isEmailInputCorrect(email: String): Boolean {
-    val emailPattern = """^[-\w.]+@([A-z0-9][-A-z0-9]+\.)+[A-z]{2,4}${'$'}""".toRegex()
-
-    return emailPattern.matches(email)
+    return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
 
 fun isPasswordInputCorrect(password: String): Boolean {
-    val passwordPattern = """^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).*${'$'}""".toRegex()
+    val passwordPattern =
+        "^[A-Za-z0-9!@#$%^&]{$PASSWORD_MIN_LENGTH,$PASSWORD_MAX_LENGTH}\$".toRegex()
 
     return passwordPattern.matches(password)
 }

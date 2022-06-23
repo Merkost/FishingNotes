@@ -2,6 +2,7 @@ package com.mobileprism.fishing.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mobileprism.fishing.domain.entity.common.LoginPassword
 import com.mobileprism.fishing.domain.entity.common.Progress
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.repository.UserRepository
@@ -20,6 +21,10 @@ class LoginViewModel(private val repository: UserRepository) : ViewModel() {
 
     init {
         loadCurrentUser()
+    }
+
+    fun registerNewUser(loginPassword: LoginPassword) {
+        _uiState.value = BaseViewState.Loading(null)
     }
 
     fun skipAuthorization() {

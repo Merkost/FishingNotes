@@ -54,9 +54,7 @@ fun LoginModalBottomSheetContent(
                 modifier = Modifier
                     .padding(horizontal = 24.dp, vertical = 16.dp)
                     .fillMaxSize(),
-                onApply = { loginPassword ->
-
-                },
+                onApply = { viewModel.registerNewUser(it) },
                 onCloseBottomSheet = onCloseBottomSheet
             )
         }
@@ -189,24 +187,69 @@ fun RegisterScreenDialog(
     val isPasswordError = rememberSaveable() { mutableStateOf(false) }
     val isPasswordMatchError = rememberSaveable() { mutableStateOf(false) }
 
-    LaunchedEffect(key1 = password.value, key2 = repeatedPassword.value) {
-        if (password.value == repeatedPassword.value) {
-            isPasswordMatchError.value = false
-        }
-        if (isPasswordInputCorrect(password.value)) {
-            isPasswordError.value = false
+    val loginErrorMassage =
+        rememberSaveable() { mutableStateOf(context.getString(R.string.login_min_length) + LOGIN_MIN_LENGTH) }
+    val passwordErrorMassage =
+        rememberSaveable() { mutableStateOf(context.getString(R.string.password_min_length) + PASSWORD_MIN_LENGTH) }
+
+
+    LaunchedEffect(key1 = login.value) {
+        if (isLoginInputCorrect(login.value) || isEmailInputCorrect(login.value)) {
+            isLoginError.value = false
         }
     }
 
-    LaunchedEffect(key1 = login.value) {
-        if (isLoginInputCorrect(login.value) || isLoginInputCorrect(login.value)) {
-            isLoginError.value = false
+    LaunchedEffect(key1 = password.value, key2 = repeatedPassword.value) {
+        if (isPasswordInputCorrect(password.value)) {
+            isPasswordError.value = false
+        }
+        if (password.value.length == repeatedPassword.value.length) {
+            isPasswordMatchError.value = false
+        }
+    }
+
+    fun validateLoginEmailInput() {
+        isLoginError.value =
+            !isLoginInputCorrect(login.value) && !isEmailInputCorrect(login.value)
+
+        loginErrorMassage.value = if (login.value.length < LOGIN_MIN_LENGTH) {
+            context.getString(R.string.login_min_length) + LOGIN_MIN_LENGTH
+        } else {
+            context.getString(R.string.incorrect_login_format)
+        }
+    }
+
+    fun validatePasswordInput() {
+        isPasswordError.value = !isPasswordInputCorrect(password.value)
+
+        passwordErrorMassage.value = if (password.value.length < PASSWORD_MIN_LENGTH) {
+            context.getString(R.string.password_min_length) + PASSWORD_MIN_LENGTH
+        } else {
+            context.getString(R.string.incorrect_password_format)
+        }
+
+        isPasswordMatchError.value = password.value != repeatedPassword.value
+    }
+
+    fun isInputsCorrect(): Boolean {
+        return !isLoginError.value && !isPasswordError.value && !isPasswordMatchError.value
+    }
+
+    fun onApplyRegistration() {
+        validateLoginEmailInput()
+        validatePasswordInput()
+
+        if (isInputsCorrect()) {
+            onApply(LoginPassword(login.value, password.value))
+        } else {
+            showToast(context, context.getString(R.string.invalid_data_entry_format))
         }
     }
 
     Column(
         modifier = modifier
     ) {
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -224,14 +267,13 @@ fun RegisterScreenDialog(
             }
         }
 
-
         Spacer(modifier = Modifier.size(32.dp))
 
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = login.value,
             onValueChange = { login.value = it },
-            label = { Text(text = stringResource(id = R.string.login)) },
+            label = { Text(text = stringResource(R.string.login_email)) },
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Next
             ),
@@ -246,11 +288,11 @@ fun RegisterScreenDialog(
         if (isLoginError.value) {
             SecondaryTextSmall(
                 modifier = Modifier.height(8.dp),
-                text = stringResource(R.string.incorrect_login_format),
+                text = loginErrorMassage.value,
                 textColor = Color.Red
             )
         } else {
-            Spacer(modifier = Modifier.size(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
         Spacer(modifier = Modifier.size(16.dp))
@@ -293,11 +335,11 @@ fun RegisterScreenDialog(
         if (isPasswordError.value) {
             SecondaryTextSmall(
                 modifier = Modifier.height(8.dp),
-                text = stringResource(R.string.incorrect_password_format),
+                text = passwordErrorMassage.value,
                 textColor = Color.Red
             )
         } else {
-            Spacer(modifier = Modifier.size(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
         Spacer(modifier = Modifier.size(16.dp))
@@ -343,32 +385,9 @@ fun RegisterScreenDialog(
 
             DefaultButtonFilled(
                 text = stringResource(R.string.register),
-                onClick = {
-                    if (password.value == repeatedPassword.value) {
-                        val loginPassword = LoginPassword(
-                            login = login.value,
-                            password = password.value
-                        )
-                        when (checkLoginPasswordCorrectInput(loginPassword = loginPassword)) {
-                            is LoginPasswordCheckResult.Success -> {
-                                onApply(loginPassword)
-                                showToast(context, "Success")
-                            }
-                            is LoginPasswordCheckResult.LoginError -> {
-                                isLoginError.value = true
-                            }
-                            is LoginPasswordCheckResult.PasswordError -> {
-                                isPasswordError.value = true
-                            }
-                        }
-                    } else {
-                        isPasswordMatchError.value = true
-                    }
-
-                }
+                onClick = { onApplyRegistration() }
             )
         }
-
     }
 }
 
