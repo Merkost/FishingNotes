@@ -14,6 +14,8 @@ import com.mobileprism.fishing.model.datastore.NotesPreferences
 import com.mobileprism.fishing.model.datastore.UserDatastore
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
+import com.mobileprism.fishing.BuildConfig
+import com.mobileprism.fishing.model.datastore.*
 import com.mobileprism.fishing.model.datastore.impl.NotesPreferencesImpl
 import com.mobileprism.fishing.model.datastore.impl.UserDatastoreImpl
 import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
@@ -25,9 +27,14 @@ import com.mobileprism.fishing.utils.location.LocationManagerImpl
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionManagerImpl
 import com.mobileprism.fishing.viewmodels.EditProfileViewModel
+import com.mobileprism.fishing.viewmodels.MainViewModel
+import com.mobileprism.fishing.viewmodels.MapViewModel
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
+import java.util.concurrent.TimeUnit
 
 val appModule = module {
     single { Logger() }
@@ -43,6 +50,12 @@ val appModule = module {
             .build()
     }
     single<LocationManager> { LocationManagerImpl(get()) }
+
+    //Create HttpLoggingInterceptor
+    single<HttpLoggingInterceptor> { createLoggingInterceptor() }
+
+    //Create OkHttpClient
+    single<OkHttpClient> { createOkHttpClient(get()) }
 }
 
 val settingsModule = module {
@@ -55,11 +68,10 @@ val settingsModule = module {
 }
 
 val mainModule = module {
-    viewModel { MainViewModel(repository = get()) }
-    viewModel { LoginViewModel(repository = get()) }
+    viewModel { MainViewModel(repository = get(), userPreferences = get()) }
+    viewModel { LoginViewModel(firebaseRepository = get(), userDatastore = get()) }
     viewModel {
         MapViewModel(
-            getUserPlacesUseCase = get(),
             getUserPlacesListUseCase = get(),
             addNewPlaceUseCase = get(),
             getFreeWeatherUseCase = get(),
@@ -72,18 +84,19 @@ val mainModule = module {
 
     viewModel {
         UserViewModel(
-            userRepository = get(),
+            firebaseUserRepository = get(),
             repository = get(),
             getUserCatchUseCase = get(),
             userDatastore = get()
         )
     }
     viewModel {
-        EditProfileViewModel(userDatastore = get(), userRepository = get())
+        EditProfileViewModel(userDatastore = get(), firebaseUserRepository = get())
     }
     viewModel { parameters ->
         UserCatchViewModel(
             userCatch = parameters.get(),
+            catchesRepository = get(),
             updateUserCatch = get(),
             deleteUserCatch = get(),
             getMapMarkerById = get(),

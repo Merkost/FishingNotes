@@ -6,9 +6,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
 import com.mobileprism.fishing.domain.entity.common.ContentState
-import com.mobileprism.fishing.domain.entity.common.LiteProgress
 import com.mobileprism.fishing.domain.entity.common.Note
-import com.mobileprism.fishing.domain.entity.content.MapMarker
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
@@ -16,9 +14,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.tasks.asDeferred
-import kotlinx.coroutines.tasks.await
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -28,104 +23,12 @@ class FirebaseMarkersRepositoryImpl(
     private val context: Context
 ) : MarkersRepository {
 
-    override fun getAllUserMarkers() = channelFlow {
-        val listeners = mutableListOf<ListenerRegistration>()
-
-        //UserMarkers
-        listeners.add(
-            dbCollections.getUserMapMarkersCollection().addSnapshotListener(
-                getMarkersSnapshotListener(
-                    this
-                )
-            )
-        )
-        //AllPublicMarkers
-        /*listeners.add(
-            dbCollections.getMapMarkersCollection()
-                .whereNotEqualTo("userId", getCurrentUserId())
-                .addSnapshotListener(getMarkersSnapshotListener(this))
-        )*/
-
-        awaitClose {
-            listeners.forEach { it.remove() }
-        }
-    }
-
-    /*override fun getAllUserMarkers() = channelFlow<ContentState<MapMarker>> {
-        val listeners = mutableListOf<Task<QuerySnapshot>>()
-
-        //UserMarkers
-        listeners.add(
-            dbCollections.getUserMapMarkersCollection().get().addOnSuccessListener(
-                getUserMarkersStateListener(this)
-            )
-        )
-        //AllPublicMarkers
-        *//*listeners.add(
-            dbCollections.getMapMarkersCollection()
-                .whereNotEqualTo("userId", getCurrentUserId())
-                .addSnapshotListener(getMarkersSnapshotListener(this))
-        )*//*
-
-        awaitClose {
-            listeners.forEach { listeners.remove(it) }
-        }
-    }
-
-    private fun getUserMarkersStateListener(scope: ProducerScope<ContentState<MapMarker>>)
-    : OnSuccessListener<in QuerySnapshot>  =
-        OnSuccessListener<QuerySnapshot> { task ->
-        scope.launch {
-            getMarkersStateFromDoc(task.documents).collect {
-                scope.trySend(it)
-            }
-        }
-    }
-
-    @ExperimentalCoroutinesApi
-    private fun getMarkersStateFromDoc(docs: List<DocumentSnapshot>) = callbackFlow {
-        docs.forEach { doc ->
-            doc.reference.collection(MARKERS_COLLECTION)
-                .addSnapshotListener { snapshots, error ->
-                    if (snapshots != null) {
-
-                        val result = ContentStateOld<UserCatch>()
-
-                        for (dc in snapshots.documentChanges) {
-                            val userCatch = dc.document.toObject<UserCatch>()
-                            when (dc.type) {
-                                DocumentChange.Type.ADDED -> {
-                                    result.added.add(userCatch)
-                                }
-                                DocumentChange.Type.MODIFIED -> {
-                                    result.modified.add(userCatch)
-                                }
-                                DocumentChange.Type.REMOVED -> {
-                                    result.deleted.add(userCatch)
-                                }
-                            }
-                        }
-
-                        trySend(result)
-                    }
-                }
-        }
-        awaitClose { }
-    }*/
-
     override fun getAllUserMarkersList() = channelFlow {
         val listeners = mutableListOf<ListenerRegistration>()
         listeners.add(
             dbCollections.getUserMapMarkersCollection()
                 .addSnapshotListener(getMarkersListSnapshotListener(this))
         )
-
-//        listeners.add(
-//            getMapMarkersCollection()
-//                .whereEqualTo("isPublic", true)
-//                .whereNotEqualTo("userId", getCurrentUserId())
-//                .addSnapshotListener(getMarkersListSnapshotListener(this))
-//        )
 
         awaitClose {
             listeners.forEach { it.remove() }
@@ -229,21 +132,19 @@ class FirebaseMarkersRepositoryImpl(
         return flow
     }*/
 
-    override suspend fun changeMarkerVisibility(marker: UserMapMarker, changeTo: Boolean)
-            : StateFlow<LiteProgress> {
-        val flow = MutableStateFlow<LiteProgress>(LiteProgress.Loading)
+    override suspend fun changeMarkerVisibility(marker: UserMapMarker, changeTo: Boolean) = callbackFlow {
         val documentRef = dbCollections.getUserMapMarkersCollection().document(marker.id)
         val task = documentRef.update("visible", changeTo)
         task.addOnCompleteListener {
             if (it.isSuccessful) {
                 firebaseAnalytics.logEvent("marker_visibility_change", null)
-                flow.tryEmit(LiteProgress.Complete)
+                trySend(Result.success(Unit))
             }
             if (it.isCanceled || it.exception != null) {
-                flow.tryEmit(LiteProgress.Error(task.exception?.cause))
+                trySend(Result.failure(task.exception?.cause ?: Throwable()))
             }
         }
-        return flow
+        awaitClose()
     }
 
     override suspend fun getMapMarker(markerId: String) =
@@ -263,7 +164,7 @@ class FirebaseMarkersRepositoryImpl(
         }
 
     @ExperimentalCoroutinesApi
-    private fun getMarkersSnapshotListener(scope: ProducerScope<ContentState<MapMarker>>) =
+    private fun getMarkersSnapshotListener(scope: ProducerScope<ContentState<UserMapMarker>>) =
         EventListener<QuerySnapshot> { snapshots, error ->
             if (error != null) {
                 Log.d("Fishing", "Marker snapshot listener", error)
@@ -275,15 +176,15 @@ class FirebaseMarkersRepositoryImpl(
                     when (dc.type) {
                         DocumentChange.Type.ADDED -> {
                             val mapMarker = dc.document.toObject<UserMapMarker>()
-                            scope.trySend(ContentState.ADDED<MapMarker>(mapMarker))
+                            scope.trySend(ContentState.ADDED<UserMapMarker>(mapMarker))
                         }
                         DocumentChange.Type.MODIFIED -> {
                             val mapMarker = dc.document.toObject<UserMapMarker>()
-                            scope.trySend(ContentState.MODIFIED<MapMarker>(mapMarker))
+                            scope.trySend(ContentState.MODIFIED<UserMapMarker>(mapMarker))
                         }
                         DocumentChange.Type.REMOVED -> {
                             val mapMarker = dc.document.toObject<UserMapMarker>()
-                            scope.trySend(ContentState.DELETED<MapMarker>(mapMarker))
+                            scope.trySend(ContentState.DELETED<UserMapMarker>(mapMarker))
                         }
                     }
                 }
@@ -306,19 +207,19 @@ class FirebaseMarkersRepositoryImpl(
         }
 
 
-    override suspend fun addNewMarker(newMarker: UserMapMarker)
-    = suspendCoroutine<Result<Unit>> { continuation ->
-        val task = dbCollections.getUserMapMarkersCollection().document(newMarker.id).set(newMarker)
-        task.addOnCompleteListener {
-            if (it.isSuccessful) {
-                firebaseAnalytics.logEvent("new_marker", null)
-                continuation.resume(Result.success(Unit))
-            }
-            if (it.isCanceled || it.exception != null) {
-                continuation.resume(Result.failure(it.exception ?: Throwable()))
+    override suspend fun addNewMarker(newMarker: UserMapMarker) =
+        suspendCoroutine<Result<Unit>> { continuation ->
+            val task = dbCollections.getUserMapMarkersCollection().document(newMarker.id).set(newMarker)
+            task.addOnCompleteListener {
+                if (it.isSuccessful) {
+                    firebaseAnalytics.logEvent("new_marker", null)
+                    continuation.resume(Result.success(Unit))
+                }
+                if (it.isCanceled || it.exception != null) {
+                    continuation.resume(Result.failure(it.exception ?: Throwable()))
+                }
             }
         }
-    }
 
 
     @ExperimentalCoroutinesApi

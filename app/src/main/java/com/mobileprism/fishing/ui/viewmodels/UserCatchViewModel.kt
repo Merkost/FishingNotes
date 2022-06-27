@@ -7,6 +7,7 @@ import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.domain.entity.common.Progress
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.domain.use_cases.catches.DeleteUserCatchUseCase
 import com.mobileprism.fishing.domain.use_cases.places.GetMapMarkerByIdUseCase
 import com.mobileprism.fishing.domain.use_cases.SubscribeOnUserCatchStateUseCase
@@ -16,7 +17,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class UserCatchViewModel(
-    userCatch: UserCatch,
+    private val userCatch: UserCatch,
+    private val catchesRepository: CatchesRepository,
     private val updateUserCatch: UpdateUserCatchUseCase,
     private val deleteUserCatch: DeleteUserCatchUseCase,
     private val getMapMarkerById: GetMapMarkerByIdUseCase,
@@ -33,7 +35,7 @@ class UserCatchViewModel(
     val loadingState = _loadingState.asStateFlow()
 
     init {
-        getMapMarker(userCatch.userMarkerId)
+        getMapMarker(userCatch.markerId)
     }
 
     fun updateCatchInfo(fishType: String, fishAmount: Int, fishWeight: Double) {

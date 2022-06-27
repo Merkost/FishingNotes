@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 interface LocationManager {
-    @OptIn(ExperimentalPermissionsApi::class)
     fun getCurrentLocationFlow(): Flow<LocationState>
 
     fun checkGPSEnabled(activity: Activity, onGpsEnabled: () -> Unit)

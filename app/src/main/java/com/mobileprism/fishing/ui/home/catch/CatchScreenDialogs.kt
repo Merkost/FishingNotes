@@ -378,10 +378,10 @@ fun EditNoteDialog(
             }, onClick = {
                 onDeleteNote(
                     Note(
-                        noteId.value,
-                        noteTitle.value,
-                        noteDescriptionState.value,
-                        noteDateCreated.value
+                        id = noteId.value,
+                        title = noteTitle.value,
+                        description = noteDescriptionState.value,
+                        dateCreated = noteDateCreated.value
                     )
                 )
                 onClose()

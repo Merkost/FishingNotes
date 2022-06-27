@@ -7,7 +7,6 @@ import com.mobileprism.fishing.domain.use_cases.notes.SaveUserMarkerNoteUseCase
 import com.mobileprism.fishing.domain.use_cases.places.AddNewPlaceUseCase
 import com.mobileprism.fishing.domain.use_cases.places.GetMapMarkerByIdUseCase
 import com.mobileprism.fishing.domain.use_cases.places.GetUserPlacesListUseCase
-import com.mobileprism.fishing.domain.use_cases.places.GetUserPlacesUseCase
 import org.koin.dsl.module
 
 val useCasesModule = module {
@@ -18,7 +17,6 @@ val useCasesModule = module {
     factory { GetUserCatchesUseCase(get()) }
     factory { GetNewCatchWeatherUseCase(get(), get()) }
     factory { SaveNewCatchUseCase(get(), get(), get()) }
-    factory { GetUserPlacesUseCase(get()) }
     factory { GetUserPlacesListUseCase(get()) }
     factory { AddNewPlaceUseCase(get()) }
     factory { GetFishActivityUseCase(get()) }

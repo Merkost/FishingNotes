@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.StateFlow
 interface CatchesRepositoryUpdate {
 
     fun subscribeOnUserCatchState(markerId: String, catchId: String): Flow<UserCatch>
-    suspend fun updateUserCatch(markerId: String, catchId: String, data: Map<String, Any>)
+    suspend fun updateUserCatch(userCatch: UserCatch)
     suspend fun updateUserCatchPhotos(markerId: String, catchId: String, newPhotos: List<Uri>): StateFlow<Progress>
 
     suspend fun deleteCatch(userCatch: UserCatch)
-    fun addNewCatch(markerId: String, newCatch: UserCatch): Flow<Result<Nothing?>>
+    fun addNewCatch(markerId: String, newCatch: UserCatch): Flow<Result<Unit>>
 }

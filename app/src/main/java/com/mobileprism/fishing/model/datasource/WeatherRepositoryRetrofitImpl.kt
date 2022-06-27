@@ -17,6 +17,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class WeatherRepositoryRetrofitImpl(
     private val firebaseAnalytics: FirebaseAnalytics,
+    private val okHttpClient: OkHttpClient,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : WeatherRepository {
 
@@ -24,24 +25,19 @@ class WeatherRepositoryRetrofitImpl(
 
     companion object {
         private const val BASE_WEATHER_URL = "https://api.openweathermap.org/data/2.5/"
-        private const val FREE_WEATHER_URL = "https://weather-by-api-ninjas.p.rapidapi.com/"
+    }
 
-        private fun getService(): WeatherApiService {
-            return createRetrofit().create(WeatherApiService::class.java)
-        }
+    private fun getService(): WeatherApiService {
+        return createRetrofit().create(WeatherApiService::class.java)
+    }
 
-        private fun createRetrofit(): Retrofit {
-            return Retrofit.Builder()
-                .baseUrl(BASE_WEATHER_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(CoroutineCallAdapterFactory())
-                .client(createOkHttpClient())
-                .build()
-        }
-
-        private fun createOkHttpClient(): OkHttpClient {
-            return OkHttpClient.Builder().build()
-        }
+    private fun createRetrofit(): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(BASE_WEATHER_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(CoroutineCallAdapterFactory())
+            .client(okHttpClient)
+            .build()
     }
 
     override suspend fun getWeather(lat: Double, lon: Double)

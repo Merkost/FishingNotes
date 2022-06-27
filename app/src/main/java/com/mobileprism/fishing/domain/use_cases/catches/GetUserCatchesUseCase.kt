@@ -9,9 +9,10 @@ class GetUserCatchesUseCase(val repository: CatchesRepository) {
     suspend operator fun invoke() = flow<List<UserCatch>> {
         val currentCatches: MutableList<UserCatch> = mutableListOf()
 
-        repository.getAllUserCatchesState().collect { contentState ->
+        repository.getAllUserCatchesList().collect { content ->
+            emit(content)
 
-            contentState.modified.forEach { newCatch ->
+            /*contentState.modified.forEach { newCatch ->
                 currentCatches.removeAll { oldCatch ->
                     newCatch.id == oldCatch.id
                 }
@@ -23,7 +24,7 @@ class GetUserCatchesUseCase(val repository: CatchesRepository) {
                 addAll(contentState.modified)
             }
 
-            emit(currentCatches)
+            emit(currentCatches)*/
         }
     }
 }

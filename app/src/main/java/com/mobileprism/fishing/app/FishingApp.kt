@@ -20,10 +20,9 @@ class FishingApp : Application() {
             modules(
                 appModule,
                 mainModule,
-                repositoryModule,
+                loginModule,
                 settingsModule,
                 useCasesModule,
-                userRepositoryModule
             )
 
         }

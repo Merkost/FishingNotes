@@ -35,7 +35,7 @@ class LoginViewModel(private val repository: UserRepository) : ViewModel() {
 
     private fun loadCurrentUser() {
         viewModelScope.launch {
-            repository.currentUser
+            firebaseRepository.currentUser
                 .catch { error -> handleError(error) }
                 .collectLatest { user -> user?.let { onSuccess(it) } }
         }
@@ -43,9 +43,11 @@ class LoginViewModel(private val repository: UserRepository) : ViewModel() {
 
     private fun onSuccess(user: User) {
         viewModelScope.launch {
-            repository.addNewUser(user).collect { progress ->
+            loadKoinModules(repositoryModuleFirebase)
+            firebaseRepository.addNewUser(user).collect { progress ->
                 when (progress) {
                     is Progress.Complete -> {
+                        userDatastore.saveUser(user)
                         _uiState.value = BaseViewState.Success(user)
                     }
                     is Progress.Loading -> {
@@ -61,6 +63,23 @@ class LoginViewModel(private val repository: UserRepository) : ViewModel() {
 
     private fun handleError(error: Throwable) {
         _uiState.value = BaseViewState.Error(error)
+    }
+
+    fun continueWithoutLogin() {
+        val user = createNewLocalUser()
+        loadKoinModules(repositoryModuleLocal)
+        viewModelScope.launch {
+            userDatastore.saveUser(user)
+            _uiState.value = BaseViewState.Success(user)
+        }
+    }
+
+    fun continueWithGoogle() {
+        loadCurrentUser()
+    }
+
+    private fun createNewLocalUser(): User {
+        return User(uid = getUUID(), loginType = LoginType.LOCAL)
     }
 
 }

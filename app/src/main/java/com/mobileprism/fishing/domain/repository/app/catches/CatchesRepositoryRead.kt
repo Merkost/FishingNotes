@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.Flow
 
 
 interface CatchesRepositoryRead {
+    fun getCatchById(markerId: String, catchId: String): Flow<UserCatch?>
+
     fun getAllUserCatchesList(): Flow<List<UserCatch>>
     fun getAllUserCatchesState(): Flow<ContentStateOld<UserCatch>>
     suspend fun getCatchesByMarkerId(markerId: String): Result<List<UserCatch>>

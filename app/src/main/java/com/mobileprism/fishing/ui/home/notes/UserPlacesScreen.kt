@@ -28,6 +28,7 @@ import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.NoContentView
+import com.mobileprism.fishing.ui.home.weather.navigateToAddNewPlace
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.utils.enums.PlacesSortValues
 import com.mobileprism.fishing.ui.viewmodels.UserPlacesViewModel
@@ -59,9 +60,7 @@ fun UserPlacesScreen(
                     Arguments.PLACE to it
                 )
             },
-        navigateToNewPlace = {
-            navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${true}")
-        })
+        navigateToNewPlace = { navigateToAddNewPlace(navController) })
     }
 }
 

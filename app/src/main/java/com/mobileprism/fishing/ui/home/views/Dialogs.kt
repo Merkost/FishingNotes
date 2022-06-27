@@ -57,6 +57,7 @@ fun DefaultDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
+                    .padding(horizontal = 8.dp)
                     .padding(bottom = 2.dp)
             ) {
                 val (title, subtitle, mainContent, neutralButton, negativeButton, positiveButton, buttonSpacer) = createRefs()
