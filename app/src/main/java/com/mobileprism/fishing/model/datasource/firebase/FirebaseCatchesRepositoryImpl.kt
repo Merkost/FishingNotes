@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-import kotlinx.coroutines.tasks.await
 
 class FirebaseCatchesRepositoryImpl(
     private val dbCollections: RepositoryCollections,
@@ -134,8 +133,6 @@ class FirebaseCatchesRepositoryImpl(
                 .addOnSuccessListener {
                     continuation.resume(Result.success(it.toObjects(UserCatch::class.java)))
                 }
-        }
-
         }
 
 

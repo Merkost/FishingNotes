@@ -4,16 +4,17 @@ import android.content.Context
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.domain.entity.common.Progress
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.repository.FirebaseUserRepository
 import com.mobileprism.fishing.model.datastore.UserDatastore
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlin.coroutines.resume
-import kotlin.coroutines.startCoroutine
 import kotlin.coroutines.suspendCoroutine
 
 class LocalUserRepositoryImpl(
@@ -82,9 +83,14 @@ class LocalUserRepositoryImpl(
         return flow
     }
 
+    override suspend fun addOfflineUser() {
+
+    }
+
     override suspend fun setUserListener(user: User) {
 
     }
+
 
     override suspend fun setNewProfileData(user: User): Result<Unit> {
         val result = Result.success(userDatastore.saveUser(user))

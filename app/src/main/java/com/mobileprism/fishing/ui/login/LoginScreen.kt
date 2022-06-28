@@ -25,12 +25,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 import com.google.accompanist.insets.systemBarsPadding
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.MainActivity
-import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.AppSnackbar
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
@@ -50,7 +48,7 @@ import org.koin.androidx.compose.get
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen() {
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -94,11 +92,11 @@ fun LoginScreen(navController: NavController) {
                     visible = false
                     delay((MainActivity.splashFadeDurationMillis * 2).toLong())
 
-                    navController.navigate(MainDestinations.HOME_ROUTE) {
-                        popUpTo(0) {
-                            inclusive = true
-                        }
-                    }
+//                    navController.navigate(MainDestinations.HOME_ROUTE) {
+//                        popUpTo(0) {
+//                            inclusive = true
+//                        }
+//                    }
                 }
             }
             is BaseViewState.Loading -> {

@@ -15,7 +15,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import coil.annotation.ExperimentalCoilApi
-import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -27,7 +26,6 @@ import com.mobileprism.fishing.ui.home.place.UserPlaceScreen
 import com.mobileprism.fishing.ui.home.profile.EditProfile
 import com.mobileprism.fishing.ui.home.settings.AboutApp
 import com.mobileprism.fishing.ui.home.weather.WeatherDaily
-import com.mobileprism.fishing.ui.login.LoginScreen
 import kotlinx.coroutines.InternalCoroutinesApi
 
 @ExperimentalComposeUiApi

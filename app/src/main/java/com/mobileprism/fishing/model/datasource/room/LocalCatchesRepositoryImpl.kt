@@ -1,25 +1,13 @@
 package com.mobileprism.fishing.model.datasource.room
 
 import android.net.Uri
-import android.util.Log
-import com.google.android.gms.tasks.OnSuccessListener
-import com.google.android.gms.tasks.Task
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.firestore.*
-import com.google.firebase.firestore.ktx.toObject
 import com.mobileprism.fishing.domain.entity.common.ContentStateOld
 import com.mobileprism.fishing.domain.entity.common.Progress
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.model.datasource.room.dao.CatchesDao
-import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
-import com.mobileprism.fishing.utils.network.ConnectionManager
-import com.mobileprism.fishing.utils.network.ConnectionState
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.ProducerScope
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 class LocalCatchesRepositoryImpl(
     private val catchesDao: CatchesDao,
@@ -57,17 +45,16 @@ class LocalCatchesRepositoryImpl(
         }
     }
 
-    override fun getCatchesByMarkerId(markerId: String) = channelFlow {
-        catchesDao.getCatchesByMarker(markerId).collect {
-            send(it)
-        }
-    }
+    override suspend fun getCatchesByMarkerId(markerId: String) =
+        Result.success(catchesDao.getCatchesByMarker(markerId).last())
 
-    override fun subscribeOnUserCatchState(markerId: String, catchId: String): Flow<UserCatch> = flow {
-        catchesDao.getCatchById(catchId).collect {
-            it?.let { emit(it) }
+
+    override fun subscribeOnUserCatchState(markerId: String, catchId: String): Flow<UserCatch> =
+        flow {
+            catchesDao.getCatchById(catchId).collect {
+                it?.let { emit(it) }
+            }
         }
-    }
 
 
     override fun addNewCatch(
@@ -84,7 +71,9 @@ class LocalCatchesRepositoryImpl(
 
     override suspend fun updateUserCatch(
         userCatch: UserCatch,
-    ) { catchesDao.updateCatch(userCatch) }
+    ) {
+        catchesDao.updateCatch(userCatch)
+    }
 
     override suspend fun updateUserCatchPhotos(
         markerId: String,

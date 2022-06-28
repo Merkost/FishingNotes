@@ -14,8 +14,6 @@ import com.mobileprism.fishing.model.datastore.NotesPreferences
 import com.mobileprism.fishing.model.datastore.UserDatastore
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
-import com.mobileprism.fishing.BuildConfig
-import com.mobileprism.fishing.model.datastore.*
 import com.mobileprism.fishing.model.datastore.impl.NotesPreferencesImpl
 import com.mobileprism.fishing.model.datastore.impl.UserDatastoreImpl
 import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
@@ -27,14 +25,11 @@ import com.mobileprism.fishing.utils.location.LocationManagerImpl
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionManagerImpl
 import com.mobileprism.fishing.viewmodels.EditProfileViewModel
-import com.mobileprism.fishing.viewmodels.MainViewModel
-import com.mobileprism.fishing.viewmodels.MapViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
-import java.util.concurrent.TimeUnit
 
 val appModule = module {
     single { Logger() }
