@@ -42,13 +42,17 @@ import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.showErrorToast
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    googleLoginState: StateFlow<Boolean>,
+    onLoginWithGoogle: () -> Unit
+) {
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -61,6 +65,7 @@ fun LoginScreen() {
     var googleLoading by remember { mutableStateOf(false) }
     val loading = remember { mutableStateOf(false) }
     var showLottie by remember { mutableStateOf(false) }
+    val isGoogleLoggedIn by googleLoginState.collectAsState()
 
     val loginViewModel: LoginViewModel = get()
     val context = LocalContext.current
@@ -80,6 +85,12 @@ fun LoginScreen() {
 
     if (!bottomSheetState.isVisible) {
         currentBottomSheet = null
+    }
+
+    LaunchedEffect(key1 = isGoogleLoggedIn) {
+        if (isGoogleLoggedIn) {
+            loginViewModel.continueWithGoogle()
+        }
     }
 
     LaunchedEffect(uiState) {
@@ -312,7 +323,8 @@ fun LoginScreen() {
                                 isLoading = googleLoading,
                                 onClick = {
                                     googleLoading = true
-                                    loginWithGoogle(context)
+                                    onLoginWithGoogle()
+//                                    loginWithGoogle(context)
                                 }
                             )
 
@@ -380,7 +392,7 @@ fun LoginScreen() {
                                 DefaultButtonOutlined(
                                     text = stringResource(id = R.string.skip),
                                     icon = painterResource(id = R.drawable.ic_baseline_arrow_forward_24),
-                                    onClick = { skipLoggingIn(loginViewModel) }
+                                    onClick = { loginViewModel.skipAuthorization() }
                                 )
                             }
                         }

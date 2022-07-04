@@ -2,8 +2,8 @@ package com.mobileprism.fishing.domain.use_cases.users
 
 import com.mobileprism.fishing.domain.repository.AuthManager
 
-class SubscribeOnCurrentUserUseCase(
+class SkipAuthorizationUseCase(
     private val authManager: AuthManager
 ) {
-    operator fun invoke() = authManager.currentUser
+    suspend operator fun invoke() = authManager.skipAuthorization()
 }

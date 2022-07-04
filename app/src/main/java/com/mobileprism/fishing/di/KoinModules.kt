@@ -10,11 +10,9 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
-import com.mobileprism.fishing.model.datastore.NotesPreferences
-import com.mobileprism.fishing.model.datastore.UserDatastore
-import com.mobileprism.fishing.model.datastore.UserPreferences
-import com.mobileprism.fishing.model.datastore.WeatherPreferences
+import com.mobileprism.fishing.model.datastore.*
 import com.mobileprism.fishing.model.datastore.impl.NotesPreferencesImpl
+import com.mobileprism.fishing.model.datastore.impl.TokenStoreImpl
 import com.mobileprism.fishing.model.datastore.impl.UserDatastoreImpl
 import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.ui.home.SnackbarManager
@@ -60,11 +58,24 @@ val settingsModule = module {
     single { NotesPreferencesImpl(androidContext()) }
     single<NotesPreferences> { NotesPreferencesImpl(androidContext()) }
     single<ConnectionManager> { ConnectionManagerImpl(androidContext()) }
+    single<TokenStore> { TokenStoreImpl(androidContext()) }
 }
 
 val mainModule = module {
-    viewModel { MainViewModel(repository = get(), userPreferences = get()) }
-    viewModel { LoginViewModel(firebaseRepository = get(), userDatastore = get()) }
+    viewModel {
+        MainViewModel(
+            subscribeOnCurrentUser = get(),
+            userPreferences = get()
+        )
+    }
+    viewModel {
+        LoginViewModel(
+            registerNewUserUseCase = get(),
+            signInUserUseCase = get(),
+            signInUserWithGoogleUseCase = get(),
+            skipAuthorizationUseCase = get()
+        )
+    }
     viewModel {
         MapViewModel(
             getUserPlacesListUseCase = get(),
@@ -86,7 +97,10 @@ val mainModule = module {
         )
     }
     viewModel {
-        EditProfileViewModel(userDatastore = get(), firebaseUserRepository = get())
+        EditProfileViewModel(
+            userDatastore = get(),
+            firebaseUserRepository = get()
+        )
     }
     viewModel { parameters ->
         UserCatchViewModel(

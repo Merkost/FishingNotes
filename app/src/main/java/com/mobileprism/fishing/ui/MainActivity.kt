@@ -44,11 +44,12 @@ import com.mobileprism.fishing.ui.home.SnackbarAction
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.login.LoginScreen
 import com.mobileprism.fishing.ui.theme.FishingNotesTheme
-import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewmodels.MainViewModel
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.Logger
 import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.getViewModel
@@ -62,6 +63,9 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
     private lateinit var googleSignInClient: GoogleSignInClient
+
+    private val _googleLoginState = MutableStateFlow(false)
+    private val googleLoginState = _googleLoginState.asStateFlow()
 
     private val registeredActivity =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -196,7 +200,7 @@ class MainActivity : ComponentActivity() {
         }
 
     private fun removeInstallStateUpdateListener() {
-       appUpdateManager.unregisterListener(installStateUpdatedListener)
+        appUpdateManager.unregisterListener(installStateUpdatedListener)
     }
 
     private fun popupSnackbarForCompleteUpdate() {
@@ -241,8 +245,11 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun Distribution(isUserLogged: MutableState<Boolean>) {
         Crossfade(targetState = isUserLogged.value) { state ->
-            when(state) {
-                false -> LoginScreen()
+            when (state) {
+                false -> LoginScreen(
+                    onLoginWithGoogle = { startGoogleLogin() },
+                    googleLoginState = googleLoginState
+                )
                 true -> FishingNotesApp()
             }
         }
@@ -269,8 +276,11 @@ class MainActivity : ComponentActivity() {
             task.isSuccessful -> {
                 try {
                     // Google Sign In was successful, authenticate with Firebase
-                    val account = task.getResult(ApiException::class.java)
-                    firebaseAuthWithGoogle(account.idToken!!)
+//                        val account = task.getResult(ApiException::class.java)
+//                        firebaseAuthWithGoogle(account.idToken!!)
+
+                    _googleLoginState.value = true
+
                 } catch (e: ApiException) {
                     // Google Sign In failed, update UI appropriately
                     handleError(e)
@@ -281,6 +291,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
 
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)

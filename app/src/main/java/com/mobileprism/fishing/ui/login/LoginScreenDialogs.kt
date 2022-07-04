@@ -43,9 +43,7 @@ fun LoginModalBottomSheetContent(
                 modifier = Modifier
                     .padding(horizontal = 24.dp, vertical = 16.dp)
                     .fillMaxSize(),
-                onApply = { loginPassword ->
-
-                },
+                onApply = { viewModel.signInUser(it) },
                 onCloseBottomSheet = onCloseBottomSheet
             )
         }
@@ -67,7 +65,7 @@ fun LoginScreenDialog(
     onApply: (LoginPassword) -> Unit,
     onCloseBottomSheet: () -> Unit
 ) {
-    val login = rememberSaveable() { mutableStateOf("") }
+    val email = rememberSaveable() { mutableStateOf("") }
     val password = rememberSaveable() { mutableStateOf("") }
     val showPassword = rememberSaveable() { mutableStateOf(false) }
 
@@ -96,9 +94,9 @@ fun LoginScreenDialog(
 
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = login.value,
-            onValueChange = { login.value = it },
-            label = { Text(text = stringResource(id = R.string.login)) },
+            value = email.value,
+            onValueChange = { email.value = it },
+            label = { Text(text = stringResource(R.string.email)) },
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Next
             ),
@@ -162,7 +160,7 @@ fun LoginScreenDialog(
 
             DefaultButtonFilled(
                 text = stringResource(id = R.string.login),
-                onClick = { onApply(LoginPassword(login = login.value, password = password.value)) }
+                onClick = { onApply(LoginPassword(login = email.value, password = password.value)) }
             )
         }
 
@@ -177,7 +175,7 @@ fun RegisterScreenDialog(
 ) {
     val context = LocalContext.current
 
-    val login = rememberSaveable() { mutableStateOf("") }
+    val email = rememberSaveable() { mutableStateOf("") }
     val password = rememberSaveable() { mutableStateOf("") }
     val repeatedPassword = rememberSaveable() { mutableStateOf("") }
 
@@ -193,8 +191,8 @@ fun RegisterScreenDialog(
         rememberSaveable() { mutableStateOf(context.getString(R.string.password_min_length) + PASSWORD_MIN_LENGTH) }
 
 
-    LaunchedEffect(key1 = login.value) {
-        if (isLoginInputCorrect(login.value) || isEmailInputCorrect(login.value)) {
+    LaunchedEffect(key1 = email.value) {
+        if (isEmailInputCorrect(email.value)) {
             isLoginError.value = false
         }
     }
@@ -210,9 +208,9 @@ fun RegisterScreenDialog(
 
     fun validateLoginEmailInput() {
         isLoginError.value =
-            !isLoginInputCorrect(login.value) && !isEmailInputCorrect(login.value)
+            !isLoginInputCorrect(email.value) && !isEmailInputCorrect(email.value)
 
-        loginErrorMassage.value = if (login.value.length < LOGIN_MIN_LENGTH) {
+        loginErrorMassage.value = if (email.value.length < LOGIN_MIN_LENGTH) {
             context.getString(R.string.login_min_length) + LOGIN_MIN_LENGTH
         } else {
             context.getString(R.string.incorrect_login_format)
@@ -240,7 +238,7 @@ fun RegisterScreenDialog(
         validatePasswordInput()
 
         if (isInputsCorrect()) {
-            onApply(LoginPassword(login.value, password.value))
+            onApply(LoginPassword(email.value, password.value))
         } else {
             showToast(context, context.getString(R.string.invalid_data_entry_format))
         }
@@ -271,9 +269,9 @@ fun RegisterScreenDialog(
 
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = login.value,
-            onValueChange = { login.value = it },
-            label = { Text(text = stringResource(R.string.login_email)) },
+            value = email.value,
+            onValueChange = { email.value = it },
+            label = { Text(text = stringResource(R.string.email)) },
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Next
             ),

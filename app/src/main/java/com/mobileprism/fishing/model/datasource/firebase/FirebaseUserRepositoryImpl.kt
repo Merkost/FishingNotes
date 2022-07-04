@@ -22,15 +22,14 @@ import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.repository.FirebaseUserRepository
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.datastore.UserDatastore
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
-import kotlinx.coroutines.async
 import com.mobileprism.fishing.utils.Constants.OFFLINE_USER_ID
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
-import org.koin.core.context.GlobalContext.loadKoinModules
 import org.koin.core.context.GlobalContext.unloadKoinModules
 import java.util.*
 import kotlin.coroutines.resume
@@ -47,19 +46,13 @@ class FirebaseUserRepositoryImpl(
 
     override val currentUser: Flow<User?>
         get() = callbackFlow {
-            val savedUser = userDatastore.getUser.first()
-            if (savedUser.uid == OFFLINE_USER_ID) {
-                send(savedUser)
-            } else {
-                val authListener = FirebaseAuth.AuthStateListener {
-                    runBlocking {
-                        send(it.currentUser?.run { mapFirebaseUserToUser(this) })
-                    }
+            val authListener = FirebaseAuth.AuthStateListener {
+                runBlocking {
+                    send(it.currentUser?.run { mapFirebaseUserToUser(this) })
                 }
-
-                fireBaseAuth.addAuthStateListener(authListener)
-                awaitClose { fireBaseAuth.removeAuthStateListener(authListener) }
             }
+            fireBaseAuth.addAuthStateListener(authListener)
+            awaitClose { fireBaseAuth.removeAuthStateListener(authListener) }
         }
 
     override val datastoreUser: Flow<User>

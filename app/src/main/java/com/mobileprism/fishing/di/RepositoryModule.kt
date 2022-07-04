@@ -3,17 +3,19 @@ package com.mobileprism.fishing.di
 import androidx.room.Room
 import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.domain.repository.PhotoStorage
-import com.mobileprism.fishing.domain.repository.FirebaseUserRepository
-import com.mobileprism.fishing.domain.repository.app.*
+import com.mobileprism.fishing.domain.repository.UserRepository
+import com.mobileprism.fishing.domain.repository.app.MarkersRepository
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
-import com.mobileprism.fishing.model.datasource.FreeWeatherRepositoryImpl
-import com.mobileprism.fishing.model.datasource.SolunarRetrofitRepositoryImpl
-import com.mobileprism.fishing.model.datasource.WeatherRepositoryRetrofitImpl
-import com.mobileprism.fishing.model.datasource.firebase.*
-import com.mobileprism.fishing.model.datasource.room.*
+import com.mobileprism.fishing.model.datasource.UserRepositoryRetrofitImpl
+import com.mobileprism.fishing.model.datasource.firebase.FirebaseCatchesRepositoryImpl
+import com.mobileprism.fishing.model.datasource.firebase.FirebaseCloudPhotoStorage
+import com.mobileprism.fishing.model.datasource.firebase.FirebaseMarkersRepositoryImpl
+import com.mobileprism.fishing.model.datasource.room.FishingDatabase
+import com.mobileprism.fishing.model.datasource.room.LocalCatchesRepositoryImpl
+import com.mobileprism.fishing.model.datasource.room.LocalCloudPhotoStorage
+import com.mobileprism.fishing.model.datasource.room.LocalMarkersRepositoryImpl
 import com.mobileprism.fishing.model.datasource.room.dao.CatchesDao
 import com.mobileprism.fishing.model.datasource.room.dao.MapMarkersDao
-import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
@@ -84,6 +86,13 @@ val repositoryModuleLocal = module {
         )
     }
     //todo
+
+    single<UserRepository> {
+        UserRepositoryRetrofitImpl(
+            firebaseAnalytics = get(),
+            okHttpClient = createOkHttpClient(createLoggingInterceptor()),
+        )
+    }
 }
 
 fun createLoggingInterceptor(): HttpLoggingInterceptor {

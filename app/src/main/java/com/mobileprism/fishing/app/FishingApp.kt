@@ -23,6 +23,7 @@ class FishingApp : Application() {
                 loginModule,
                 settingsModule,
                 useCasesModule,
+                repositoryModuleLocal
             )
 
         }
