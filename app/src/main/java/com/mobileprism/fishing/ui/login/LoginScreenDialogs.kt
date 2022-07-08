@@ -8,6 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -19,10 +20,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.common.LoginPassword
-import com.mobileprism.fishing.ui.home.views.DefaultButton
-import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
-import com.mobileprism.fishing.ui.home.views.HeaderText
-import com.mobileprism.fishing.ui.home.views.SecondaryTextSmall
+import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
 import com.mobileprism.fishing.utils.*
 
@@ -389,3 +387,20 @@ fun RegisterScreenDialog(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun LoginHelpDialog(
+    onDismiss: () -> Unit
+) {
+    DefaultDialog(
+        primaryText = stringResource(R.string.аuthentication),
+        onDismiss = onDismiss,
+        positiveButtonText = stringResource(id = R.string.close),
+        onPositiveClick = onDismiss
+    ) {
+        PrimaryText(
+            modifier = Modifier.padding(8.dp),
+            text = stringResource(R.string.login_help_text)
+        )
+    }
+}

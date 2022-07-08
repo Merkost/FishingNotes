@@ -388,6 +388,9 @@
     <string name="login_min_length">Login/e-mail min length: </string>
     <string name="invalid_data_entry_format">Invalid data entry format</string>
     <string name="email">E-mail</string>
+    <string name="login_loading_text">Logging in, please wait!</string>
+    <string name="login_help_text">Authentication provides access to net functions, such as: saving your data online, communication and data sharing with other users, etc.</string>
+    <string name="аuthentication">Authentication</string>
 
 
 </resources>

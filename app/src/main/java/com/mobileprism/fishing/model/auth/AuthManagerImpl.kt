@@ -10,8 +10,8 @@ import com.mobileprism.fishing.model.datastore.TokenStore
 import com.mobileprism.fishing.model.datastore.UserDatastore
 import com.mobileprism.fishing.model.entity.user.UserApiResponse
 import com.mobileprism.fishing.model.entity.user.UserData
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.*
 
 class AuthManagerImpl(
     private val userDatastore: UserDatastore,
@@ -22,6 +22,9 @@ class AuthManagerImpl(
 
     override val currentUser: Flow<User?>
         get() = userDatastore.getNullableUser
+
+    override val currentFirebaseUser: Flow<User?>
+        get() = firebaseUserRepository.currentUser
 
     override suspend fun registerNewUser(loginPassword: LoginPassword): Result<Unit> {
         userRepository.registerNewUser(loginPassword).fold(
@@ -52,31 +55,38 @@ class AuthManagerImpl(
         return Result.success(Unit)
     }
 
-    override suspend fun authWithGoogle(): Result<Unit> {
-
-        val currentGoogleUser = firebaseUserRepository.currentUser.first()
-
-        if (currentGoogleUser != null) {
-            userRepository.loginUserWithGoogle(
-                email = currentGoogleUser.email,
-                userId = currentGoogleUser.uid
-            ).fold(
-                onSuccess = {
-                    onLoginSuccess(it)
-                    return Result.success(Unit)
-                },
-                onFailure = {
-                    return Result.failure(it)
+    override suspend fun authWithGoogle(): Result<Unit> = callbackFlow<Result<Unit>> {
+        firebaseUserRepository.currentUser
+            .catch { error ->
+                trySend(Result.failure(error))
+            }
+            .collectLatest {
+                if (it != null) {
+                    userRepository.loginUserWithGoogle(
+                        email = it.email,
+                        userId = it.uid
+                    ).fold(
+                        onSuccess = {
+                            onLoginSuccess(it)
+                            trySend(Result.success(Unit))
+                        },
+                        onFailure = {
+                            trySend(Result.failure(it))
+                        }
+                    )
+                } else {
+                    trySend(Result.failure(Throwable()))
                 }
-            )
-        } else {
-            return Result.failure(Throwable())
-        }
-    }
+            }
+        awaitClose() {}
+    }.first()
 
     override suspend fun logoutCurrentUser(): Result<Unit> {
-        userDatastore.clearUser()
-        firebaseUserRepository.logoutCurrentUser()
+        firebaseUserRepository.logoutCurrentUser().collectLatest { isLoggedOut ->
+            if (isLoggedOut) {
+                userDatastore.clearUser()
+            }
+        }
         return Result.success(Unit)
     }
 

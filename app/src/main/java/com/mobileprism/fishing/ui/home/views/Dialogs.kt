@@ -1,11 +1,9 @@
 package com.mobileprism.fishing.ui.home.views
 
-import com.mobileprism.fishing.R
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -23,6 +21,7 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.mobileprism.fishing.R
 
 @ExperimentalComposeUiApi
 @Composable
@@ -183,10 +182,10 @@ fun LoadingDialog() {
 
 @Composable
 fun ModalLoadingDialog(
-    dialogSate: MutableState<Boolean>,
+    isLoading: Boolean,
     text: String
 ) {
-    if (dialogSate.value) {
+    if (isLoading) {
         Dialog(
             onDismissRequest = { },
             properties = DialogProperties(

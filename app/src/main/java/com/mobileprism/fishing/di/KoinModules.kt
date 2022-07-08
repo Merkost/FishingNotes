@@ -68,6 +68,7 @@ val mainModule = module {
             userPreferences = get()
         )
     }
+
     viewModel {
         LoginViewModel(
             registerNewUserUseCase = get(),
@@ -76,6 +77,7 @@ val mainModule = module {
             skipAuthorizationUseCase = get()
         )
     }
+
     viewModel {
         MapViewModel(
             getUserPlacesListUseCase = get(),
@@ -90,18 +92,20 @@ val mainModule = module {
 
     viewModel {
         UserViewModel(
-            firebaseUserRepository = get(),
+            signOutCurrentUser = get(),
+            subscribeOnCurrentUser = get(),
             repository = get(),
             getUserCatchUseCase = get(),
-            userDatastore = get()
         )
     }
+
     viewModel {
         EditProfileViewModel(
             userDatastore = get(),
             firebaseUserRepository = get()
         )
     }
+
     viewModel { parameters ->
         UserCatchViewModel(
             userCatch = parameters.get(),
@@ -112,6 +116,7 @@ val mainModule = module {
             subscribeOnUserCatchState = get()
         )
     }
+
     viewModel {
         WeatherViewModel(
             weatherRepository = get(),
@@ -119,6 +124,7 @@ val mainModule = module {
             locationManager = get()
         )
     }
+
     viewModel {
         UserPlaceViewModel(
             markersRepo = get(),
@@ -127,8 +133,15 @@ val mainModule = module {
             deleteUserMarkerNoteUseCase = get()
         )
     }
-    viewModel { UserCatchesViewModel(userCatchesUseCase = get()) }
-    viewModel { UserPlacesViewModel(repository = get()) }
+
+    viewModel {
+        UserCatchesViewModel(userCatchesUseCase = get())
+    }
+
+    viewModel {
+        UserPlacesViewModel(repository = get())
+    }
+
     viewModel { parameters ->
         NewCatchMasterViewModel(
             placeState = parameters.get(),
@@ -137,7 +150,10 @@ val mainModule = module {
             getUserPlacesListUseCase = get()
         )
     }
-    viewModel { NotesViewModel(getUserCatches = get(), getUserPlacesList = get()) }
+
+    viewModel {
+        NotesViewModel(getUserCatches = get(), getUserPlacesList = get())
+    }
 }
 
 fun createGeocoder(androidContext: Context): Geocoder {

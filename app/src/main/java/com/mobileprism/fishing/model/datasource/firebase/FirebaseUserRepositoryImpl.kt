@@ -65,7 +65,6 @@ class FirebaseUserRepositoryImpl(
         AuthUI.getInstance().signOut(context).addOnCompleteListener {
             if (it.isSuccessful) {
                 Firebase.analytics.logEvent("logout", null)
-                runBlocking { userDatastore.clearUser() }
                 trySend(true)
             } else {
                 trySend(false)

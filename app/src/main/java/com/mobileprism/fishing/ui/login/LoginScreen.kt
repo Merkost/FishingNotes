@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.ui.login
 
-import android.content.Context
 import androidx.compose.animation.*
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -38,9 +37,8 @@ import com.mobileprism.fishing.ui.home.views.SecondaryText
 import com.mobileprism.fishing.ui.resources
 import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.LoginScreenViewState
 import com.mobileprism.fishing.utils.Constants
-import com.mobileprism.fishing.utils.showErrorToast
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -62,10 +60,10 @@ fun LoginScreen(
     var currentBottomSheet: BottomSheetLoginScreen? by remember { mutableStateOf(null) }
 
     var visible by remember { mutableStateOf(false) }
-    var googleLoading by remember { mutableStateOf(false) }
-    val loading = remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
     var showLottie by remember { mutableStateOf(false) }
     val isGoogleLoggedIn by googleLoginState.collectAsState()
+    var helpDialogState by remember { mutableStateOf(false) }
 
     val loginViewModel: LoginViewModel = get()
     val context = LocalContext.current
@@ -94,40 +92,39 @@ fun LoginScreen(
     }
 
     LaunchedEffect(uiState) {
-        when (val state = uiState) {
-            is BaseViewState.Success<*> -> {
-                state.data?.let {
-                    googleLoading = false
+        uiState.let {
+            when (it) {
+                is LoginScreenViewState.LoginSuccess -> {
+                    isLoading = false
                     showLottie = true
                     delay(2500)
                     visible = false
                     delay((MainActivity.splashFadeDurationMillis * 2).toLong())
-
-//                    navController.navigate(MainDestinations.HOME_ROUTE) {
-//                        popUpTo(0) {
-//                            inclusive = true
-//                        }
-//                    }
+                }
+                is LoginScreenViewState.Loading -> {
+                    isLoading = true
+                }
+                is LoginScreenViewState.Error -> {
+                    isLoading = false
+                    scaffoldState.snackbarHostState.showSnackbar(
+                        it.error.message ?: context.getString(R.string.error_occured)
+                    )
+                }
+                is LoginScreenViewState.NotLoggedIn -> {
+                    isLoading = false
                 }
             }
-            is BaseViewState.Loading -> {
-                loading.value = true
-            }
-            is BaseViewState.Error -> {
-                showErrorToast(context, state.error?.message)
-                googleLoading = false
-                scaffoldState.snackbarHostState.showSnackbar(errorString)
-            }
         }
+
     }
 
     LaunchedEffect(true) {
         coroutineScope.launch {
             SnackbarManager.messages.collect { currentMessages ->
                 if (currentMessages.isNotEmpty()) {
-                    val message = currentMessages[0]
+                    val message = currentMessages.first()
                     val text = resources.getText(message.messageId)
-                    googleLoading = false
+                    isLoading = false
                     // Display the snackbar on the screen. `showSnackbar` is a function
                     // that suspends until the snackbar disappears from the screen
                     scaffoldState.snackbarHostState.showSnackbar(text.toString())
@@ -138,7 +135,12 @@ fun LoginScreen(
         }
     }
 
-    ModalLoadingDialog(dialogSate = loading, text = "Logging in, please wait!")
+    ModalLoadingDialog(isLoading = (isLoading), text = stringResource(R.string.login_loading_text))
+
+    if (helpDialogState) {
+        LoginHelpDialog(onDismiss = { helpDialogState = false })
+    }
+
 
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
@@ -294,7 +296,9 @@ fun LoginScreen(
                                 )
 
                                 IconButton(
-                                    onClick = { }
+                                    onClick = {
+                                        helpDialogState = true
+                                    }
                                 ) {
                                     Icon(
                                         modifier = Modifier.size(24.dp),
@@ -320,11 +324,9 @@ fun LoginScreen(
 
                             LoginWithGoogleButton(
                                 modifier = Modifier,
-                                isLoading = googleLoading,
                                 onClick = {
-                                    googleLoading = true
+                                    isLoading = true
                                     onLoginWithGoogle()
-//                                    loginWithGoogle(context)
                                 }
                             )
 
@@ -346,7 +348,6 @@ fun LoginScreen(
                             )
 
                             RegisterButton(
-                                isLoading = false,
                                 onClick = { openSheet(BottomSheetLoginScreen.RegisterScreen) }
                             )
 
@@ -436,7 +437,6 @@ fun LottieSuccess(modifier: Modifier = Modifier, onFinished: () -> Unit) {
 @Composable
 fun RegisterButton(
     modifier: Modifier = Modifier,
-    isLoading: Boolean,
     onClick: () -> Unit,
 ) {
     Card(
@@ -504,7 +504,6 @@ fun RegisterButton(
 @Composable
 fun LoginWithGoogleButton(
     modifier: Modifier = Modifier,
-    isLoading: Boolean,
     onClick: () -> Unit,
 ) {
     Card(
@@ -552,8 +551,7 @@ fun LoginWithGoogleButton(
             ) {
                 Text(
                     modifier = Modifier,
-                    text = if (isLoading) stringResource(R.string.signing_in)
-                    else stringResource(R.string.sign_with_google),
+                    text = stringResource(R.string.sign_with_google),
                     color = MaterialTheme.colors.onSecondary,
                     style = MaterialTheme.typography.button
                 )
@@ -564,17 +562,10 @@ fun LoginWithGoogleButton(
                     .size(24.dp)
                     .fillMaxWidth(0.15f),
                 strokeWidth = 2.dp,
-                color = if (isLoading) MaterialTheme.colors.onSecondary else Color.Transparent
+                color = Color.Transparent
             )
 
         }
     }
 }
 
-private fun loginWithGoogle(context: Context) {
-    (context as MainActivity).startGoogleLogin()
-}
-
-private fun skipLoggingIn(viewModel: LoginViewModel) {
-    viewModel.skipAuthorization()
-}

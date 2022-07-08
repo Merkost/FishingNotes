@@ -93,7 +93,7 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch) {
     }
 
     ModalLoadingDialog(
-        dialogSate = loadingDialogState,
+        isLoading = loadingDialogState.value,
         text = stringResource(R.string.saving_photos)
     )
 

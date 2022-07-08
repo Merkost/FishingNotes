@@ -1,7 +1,6 @@
 package com.mobileprism.fishing.ui.home.profile
 
 import android.annotation.SuppressLint
-import android.widget.Space
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.clickable
@@ -13,7 +12,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.EditCalendar
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -76,7 +78,7 @@ fun EditProfile(onBack: () -> Unit) {
     }
 
     if (uiState is BaseViewState.Loading) ModalLoadingDialog(
-        dialogSate = mutableStateOf(true),
+        isLoading = true,
         text = context.getString(R.string.loading)
     )
 

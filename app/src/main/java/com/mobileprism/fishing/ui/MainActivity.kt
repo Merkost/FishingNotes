@@ -276,10 +276,8 @@ class MainActivity : ComponentActivity() {
             task.isSuccessful -> {
                 try {
                     // Google Sign In was successful, authenticate with Firebase
-//                        val account = task.getResult(ApiException::class.java)
-//                        firebaseAuthWithGoogle(account.idToken!!)
-
-                    _googleLoginState.value = true
+                    val account = task.getResult(ApiException::class.java)
+                    firebaseAuthWithGoogle(account.idToken!!)
 
                 } catch (e: ApiException) {
                     // Google Sign In failed, update UI appropriately
@@ -301,6 +299,7 @@ class MainActivity : ComponentActivity() {
                 when {
                     task.isSuccessful -> {
                         // Sign in success, update UI with the signed-in user's information
+                        _googleLoginState.value = true
                     }
                     else -> {
                         handleError(task.exception)

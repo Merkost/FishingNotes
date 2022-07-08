@@ -5,5 +5,5 @@ import com.mobileprism.fishing.domain.repository.AuthManager
 class SignOutCurrentUserUserCase(
     private val authManager: AuthManager
 ) {
-    suspend operator fun invoke() = authManager.authWithGoogle()
+    suspend operator fun invoke() = authManager.logoutCurrentUser()
 }

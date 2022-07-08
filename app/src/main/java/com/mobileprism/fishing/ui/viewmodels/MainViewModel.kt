@@ -9,6 +9,7 @@ import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class MainViewModel(
@@ -40,7 +41,7 @@ class MainViewModel(
         viewModelScope.launch {
             mutableStateFlow.value = BaseViewState.Loading()
 
-            subscribeOnCurrentUser().collect { currentUser ->
+            subscribeOnCurrentUser().collectLatest { currentUser ->
                 isUserLoggedState.value = currentUser != null
             }
 

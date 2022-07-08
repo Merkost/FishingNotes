@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface AuthManager {
     val currentUser: Flow<User?>
+    val currentFirebaseUser: Flow<User?>
     suspend fun registerNewUser(loginPassword: LoginPassword): Result<Unit>
     suspend fun loginUser(loginPassword: LoginPassword): Result<Unit>
     suspend fun skipAuthorization(): Result<Unit>

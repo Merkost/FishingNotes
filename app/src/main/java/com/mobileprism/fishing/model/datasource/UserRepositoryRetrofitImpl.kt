@@ -22,7 +22,7 @@ class UserRepositoryRetrofitImpl(
 
     companion object {
         private const val BASE_USER_URL =
-            "https://virtserver.swaggerhub.com/MobilePrism/FishingNotesAPI/1.0.0"
+            "https://virtserver.swaggerhub.com/MobilePrism/FishingNotesAPI/1.0.0/"
     }
 
     private fun getService(): UserApiService {
@@ -57,7 +57,7 @@ class UserRepositoryRetrofitImpl(
     override suspend fun loginUser(loginPassword: LoginPassword): Result<UserApiResponse> =
         safeApiCall(dispatcher) {
 
-            firebaseAnalytics.logEvent("register_new_user", null)
+            firebaseAnalytics.logEvent("login_user", null)
 
 //            getService().loginUser(
 //                email = loginPassword.login,
@@ -75,11 +75,16 @@ class UserRepositoryRetrofitImpl(
         userId: String
     ): Result<UserApiResponse> = safeApiCall(dispatcher) {
 
-        firebaseAnalytics.logEvent("register_new_user", null)
+        firebaseAnalytics.logEvent("login_with_google", null)
 
-        getService().loginUserWithGoogle(
-            email = email,
-            googleAuthId = userId
+//        getService().loginUserWithGoogle(
+//            email = email,
+//            googleAuthId = userId
+//        )
+
+        UserApiResponse(
+            token = "123",
+            UserData(email = email, login = "Anonymous")
         )
     }
 }
