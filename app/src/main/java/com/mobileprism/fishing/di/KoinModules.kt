@@ -48,7 +48,7 @@ val appModule = module {
     single<HttpLoggingInterceptor> { createLoggingInterceptor() }
 
     //Create OkHttpClient
-    single<OkHttpClient> { createOkHttpClient(get()) }
+    single<OkHttpClient> { get() }
 }
 
 val settingsModule = module {

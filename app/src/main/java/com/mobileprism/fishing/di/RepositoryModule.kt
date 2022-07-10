@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.di
 
+import android.content.Context
 import androidx.room.Room
 import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.domain.repository.PhotoStorage
@@ -16,11 +17,19 @@ import com.mobileprism.fishing.model.datasource.room.LocalCloudPhotoStorage
 import com.mobileprism.fishing.model.datasource.room.LocalMarkersRepositoryImpl
 import com.mobileprism.fishing.model.datasource.room.dao.CatchesDao
 import com.mobileprism.fishing.model.datasource.room.dao.MapMarkersDao
+import com.mobileprism.fishing.utils.Constants
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
+import java.io.IOException
+import java.security.*
+import java.security.cert.Certificate
+import java.security.cert.CertificateException
+import java.security.cert.CertificateFactory
+import java.util.*
 import java.util.concurrent.TimeUnit
+import javax.net.ssl.*
 
 
 val repositoryModuleFirebase = module {
@@ -90,7 +99,7 @@ val repositoryModuleLocal = module {
     single<UserRepository> {
         UserRepositoryRetrofitImpl(
             firebaseAnalytics = get(),
-            okHttpClient = createOkHttpClient(createLoggingInterceptor()),
+            okHttpClient = createOkHttpClient(androidContext(), createLoggingInterceptor()),
         )
     }
 }
@@ -107,13 +116,69 @@ fun createLoggingInterceptor(): HttpLoggingInterceptor {
  * @loggingInterceptor logging interceptor
  */
 fun createOkHttpClient(
+    context: Context,
     loggingInterceptor: HttpLoggingInterceptor,
 ): OkHttpClient {
+
     return OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
         .callTimeout(10, TimeUnit.SECONDS)
         .connectTimeout(7, TimeUnit.SECONDS)
         .writeTimeout(10, TimeUnit.SECONDS)
         .readTimeout(7, TimeUnit.SECONDS)
+        .hostnameVerifier { hostname, session ->
+            if (Constants.API_URL.contains(hostname)) true else false
+        }
+        .sslSocketFactory(sslSocketFactory = getSSLConfig(context).socketFactory, systemDefaultTrustManager())
         .build()
+}
+
+@Throws(
+    CertificateException::class,
+    IOException::class,
+    KeyStoreException::class,
+    NoSuchAlgorithmException::class,
+    KeyManagementException::class
+)
+private fun getSSLConfig(context: Context): SSLContext {
+
+    // Loading CAs from an InputStream
+    val cf: CertificateFactory = CertificateFactory.getInstance("X.509")
+    var ca: Certificate
+    context.resources.openRawResource(com.mobileprism.fishing.R.raw.fishing_cert).use { cert ->
+        ca = cf.generateCertificate(cert)
+    }
+
+    // Creating a KeyStore containing our trusted CAs
+    val keyStoreType: String = KeyStore.getDefaultType()
+    val keyStore: KeyStore = KeyStore.getInstance(keyStoreType)
+    keyStore.load(null, null)
+    keyStore.setCertificateEntry("ca", ca)
+
+    // Creating a TrustManager that trusts the CAs in our KeyStore.
+    val tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm()
+    val tmf = TrustManagerFactory.getInstance(tmfAlgorithm)
+    tmf.init(keyStore)
+
+    // Creating an SSLSocketFactory that uses our TrustManager
+    val sslContext = SSLContext.getInstance("TLS")
+    sslContext.init(null, tmf.trustManagers, null)
+    return sslContext
+}
+
+private fun systemDefaultTrustManager(): X509TrustManager {
+    return try {
+        val trustManagerFactory =
+            TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+        trustManagerFactory.init(null as KeyStore?)
+        val trustManagers = trustManagerFactory.trustManagers
+        check(!(trustManagers.size != 1 || trustManagers[0] !is X509TrustManager)) {
+            "Unexpected default trust managers:" + Arrays.toString(
+                trustManagers
+            )
+        }
+        trustManagers[0] as X509TrustManager
+    } catch (e: GeneralSecurityException) {
+        throw AssertionError() // The system has no TLS. Just give up.
+    }
 }
