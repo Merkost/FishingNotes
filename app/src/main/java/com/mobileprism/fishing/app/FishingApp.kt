@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.app
 
 import android.app.Application
+import android.util.Log
 import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.di.*
 import org.koin.android.ext.koin.androidContext
@@ -13,6 +14,12 @@ class FishingApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        //Get device info
+        /*Log.d("DEVICE_INFO",
+            android.os.Build::class.java.fields.map { "Build.${it.name} = ${it.get(it.name)}" }
+                .joinToString("\n")
+        )*/
 
         startKoin {
             androidLogger(if (BuildConfig.DEBUG) Level.ERROR else Level.NONE)

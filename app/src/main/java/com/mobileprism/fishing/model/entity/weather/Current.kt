@@ -1,5 +1,7 @@
 package com.mobileprism.fishing.model.entity.weather
 
+import com.google.gson.annotations.SerializedName
+
 data class Current(
     val cloud: Int = 0,
     val condition: Condition = Condition(),
