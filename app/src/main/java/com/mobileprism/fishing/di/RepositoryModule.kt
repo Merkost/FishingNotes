@@ -5,12 +5,16 @@ import androidx.room.Room
 import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.domain.repository.PhotoStorage
 import com.mobileprism.fishing.domain.repository.UserRepository
-import com.mobileprism.fishing.domain.repository.app.MarkersRepository
+import com.mobileprism.fishing.domain.repository.app.*
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
+import com.mobileprism.fishing.model.datasource.FreeWeatherRepositoryImpl
+import com.mobileprism.fishing.model.datasource.SolunarRetrofitRepositoryImpl
 import com.mobileprism.fishing.model.datasource.UserRepositoryRetrofitImpl
+import com.mobileprism.fishing.model.datasource.WeatherRepositoryRetrofitImpl
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseCatchesRepositoryImpl
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseCloudPhotoStorage
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseMarkersRepositoryImpl
+import com.mobileprism.fishing.model.datasource.firebase.FirebaseOfflineRepositoryImpl
 import com.mobileprism.fishing.model.datasource.room.FishingDatabase
 import com.mobileprism.fishing.model.datasource.room.LocalCatchesRepositoryImpl
 import com.mobileprism.fishing.model.datasource.room.LocalCloudPhotoStorage
@@ -29,7 +33,9 @@ import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
 import java.util.*
 import java.util.concurrent.TimeUnit
-import javax.net.ssl.*
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManagerFactory
+import javax.net.ssl.X509TrustManager
 
 
 val repositoryModuleFirebase = module {
@@ -102,6 +108,20 @@ val repositoryModuleLocal = module {
             okHttpClient = createOkHttpClient(androidContext(), createLoggingInterceptor()),
         )
     }
+
+    single<SolunarRepository> { SolunarRetrofitRepositoryImpl(firebaseAnalytics = get()) }
+
+    single<WeatherRepository> {
+        WeatherRepositoryRetrofitImpl(
+            firebaseAnalytics = get(),
+            okHttpClient = createSimpleOkHttpClient(createLoggingInterceptor())
+        )
+    }
+
+    single<FreeWeatherRepository> { FreeWeatherRepositoryImpl(firebaseAnalytics = get()) }
+
+    single<OfflineRepository> { FirebaseOfflineRepositoryImpl(dbCollections = get()) }
+
 }
 
 fun createLoggingInterceptor(): HttpLoggingInterceptor {
@@ -109,6 +129,19 @@ fun createLoggingInterceptor(): HttpLoggingInterceptor {
         if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
         else HttpLoggingInterceptor.Level.NONE
     )
+}
+
+fun createSimpleOkHttpClient(
+    loggingInterceptor: HttpLoggingInterceptor,
+): OkHttpClient {
+
+    return OkHttpClient.Builder()
+        .addInterceptor(loggingInterceptor)
+        .callTimeout(10, TimeUnit.SECONDS)
+        .connectTimeout(7, TimeUnit.SECONDS)
+        .writeTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(7, TimeUnit.SECONDS)
+        .build()
 }
 
 /**

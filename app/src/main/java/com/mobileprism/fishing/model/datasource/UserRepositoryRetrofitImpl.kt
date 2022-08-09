@@ -2,12 +2,11 @@ package com.mobileprism.fishing.model.datasource
 
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
-import com.mobileprism.fishing.domain.entity.common.LoginPassword
+import com.mobileprism.fishing.domain.entity.common.EmailPassword
 import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.model.api.GoogleAuthRequest
 import com.mobileprism.fishing.model.api.UserApiService
 import com.mobileprism.fishing.model.entity.user.UserApiResponse
-import com.mobileprism.fishing.model.entity.user.UserData
 import com.mobileprism.fishing.model.utils.safeApiCall
 import com.mobileprism.fishing.utils.Constants.API_URL
 import kotlinx.coroutines.CoroutineDispatcher
@@ -35,14 +34,13 @@ class UserRepositoryRetrofitImpl(
             .build()
     }
 
-    override suspend fun registerNewUser(loginPassword: LoginPassword): Result<UserApiResponse> =
+    override suspend fun registerNewUser(emailPassword: EmailPassword): Result<UserApiResponse> =
         safeApiCall(dispatcher) {
 
             firebaseAnalytics.logEvent("register_new_user", null)
 
             getService().registerNewUser(
-                email = loginPassword.login,
-                password = loginPassword.password
+                body = emailPassword
             )
 
 //            UserApiResponse(
@@ -51,14 +49,13 @@ class UserRepositoryRetrofitImpl(
 //            )
         }
 
-    override suspend fun loginUser(loginPassword: LoginPassword): Result<UserApiResponse> =
+    override suspend fun loginUser(emailPassword: EmailPassword): Result<UserApiResponse> =
         safeApiCall(dispatcher) {
 
             firebaseAnalytics.logEvent("login_user", null)
 
             getService().loginUser(
-                email = loginPassword.login,
-                password = loginPassword.password
+                body = emailPassword
             )
 
 //            UserApiResponse(

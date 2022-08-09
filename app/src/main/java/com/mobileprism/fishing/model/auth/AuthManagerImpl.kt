@@ -1,6 +1,6 @@
 package com.mobileprism.fishing.model.auth
 
-import com.mobileprism.fishing.domain.entity.common.LoginPassword
+import com.mobileprism.fishing.domain.entity.common.EmailPassword
 import com.mobileprism.fishing.domain.entity.common.LoginType
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.repository.AuthManager
@@ -26,8 +26,8 @@ class AuthManagerImpl(
     override val currentFirebaseUser: Flow<User?>
         get() = firebaseUserRepository.currentUser
 
-    override suspend fun registerNewUser(loginPassword: LoginPassword): Result<Unit> {
-        userRepository.registerNewUser(loginPassword).fold(
+    override suspend fun registerNewUser(emailPassword: EmailPassword): Result<Unit> {
+        userRepository.registerNewUser(emailPassword).fold(
             onSuccess = {
                 onLoginSuccess(it)
                 return Result.success(Unit)
@@ -38,8 +38,8 @@ class AuthManagerImpl(
         )
     }
 
-    override suspend fun loginUser(loginPassword: LoginPassword): Result<Unit> {
-        userRepository.loginUser(loginPassword).fold(
+    override suspend fun loginUser(emailPassword: EmailPassword): Result<Unit> {
+        userRepository.loginUser(emailPassword).fold(
             onSuccess = {
                 onLoginSuccess(it)
                 return Result.success(Unit)

@@ -19,7 +19,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.entity.common.LoginPassword
+import com.mobileprism.fishing.domain.entity.common.EmailPassword
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
 import com.mobileprism.fishing.utils.*
@@ -60,7 +60,7 @@ fun LoginModalBottomSheetContent(
 @Composable
 fun LoginScreenDialog(
     modifier: Modifier = Modifier,
-    onApply: (LoginPassword) -> Unit,
+    onApply: (EmailPassword) -> Unit,
     onCloseBottomSheet: () -> Unit
 ) {
     val email = rememberSaveable() { mutableStateOf("") }
@@ -158,7 +158,7 @@ fun LoginScreenDialog(
 
             DefaultButtonFilled(
                 text = stringResource(id = R.string.login),
-                onClick = { onApply(LoginPassword(login = email.value, password = password.value)) }
+                onClick = { onApply(EmailPassword(email = email.value, password = password.value)) }
             )
         }
 
@@ -168,7 +168,7 @@ fun LoginScreenDialog(
 @Composable
 fun RegisterScreenDialog(
     modifier: Modifier = Modifier,
-    onApply: (LoginPassword) -> Unit,
+    onApply: (EmailPassword) -> Unit,
     onCloseBottomSheet: () -> Unit
 ) {
     val context = LocalContext.current
@@ -236,7 +236,7 @@ fun RegisterScreenDialog(
         validatePasswordInput()
 
         if (isInputsCorrect()) {
-            onApply(LoginPassword(email.value, password.value))
+            onApply(EmailPassword(email.value, password.value))
         } else {
             showToast(context, context.getString(R.string.invalid_data_entry_format))
         }

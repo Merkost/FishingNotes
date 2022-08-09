@@ -2,7 +2,7 @@ package com.mobileprism.fishing.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mobileprism.fishing.domain.entity.common.LoginPassword
+import com.mobileprism.fishing.domain.entity.common.EmailPassword
 import com.mobileprism.fishing.domain.use_cases.users.RegisterNewUserUseCase
 import com.mobileprism.fishing.domain.use_cases.users.SignInUserUserCase
 import com.mobileprism.fishing.domain.use_cases.users.SignInUserWithGoogleUseCase
@@ -23,11 +23,11 @@ class LoginViewModel(
         MutableStateFlow(LoginScreenViewState.NotLoggedIn)
     val uiState = _uiState.asStateFlow()
 
-    fun registerNewUser(loginPassword: LoginPassword) {
+    fun registerNewUser(emailPassword: EmailPassword) {
         _uiState.value = LoginScreenViewState.Loading
 
         viewModelScope.launch {
-            registerNewUserUseCase(loginPassword).fold(
+            registerNewUserUseCase(emailPassword).fold(
                 onSuccess = {
                     _uiState.value = LoginScreenViewState.LoginSuccess
                 },
@@ -38,11 +38,11 @@ class LoginViewModel(
         }
     }
 
-    fun signInUser(loginPassword: LoginPassword) {
+    fun signInUser(emailPassword: EmailPassword) {
         _uiState.value = LoginScreenViewState.Loading
 
         viewModelScope.launch {
-            signInUserUseCase(loginPassword).fold(
+            signInUserUseCase(emailPassword).fold(
                 onSuccess = {
                     _uiState.value = LoginScreenViewState.LoginSuccess
                 },

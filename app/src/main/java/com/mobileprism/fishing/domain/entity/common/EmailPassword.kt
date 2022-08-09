@@ -1,6 +1,6 @@
 package com.mobileprism.fishing.domain.entity.common
 
-data class LoginPassword(
-    val login: String,
+data class EmailPassword(
+    val email: String,
     val password: String
 )
