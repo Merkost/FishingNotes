@@ -105,7 +105,7 @@ val repositoryModuleLocal = module {
     single<UserRepository> {
         UserRepositoryRetrofitImpl(
             firebaseAnalytics = get(),
-            okHttpClient = createOkHttpClient(androidContext(), createLoggingInterceptor()),
+            okHttpClient = createFishingOkHttpClient(androidContext(), createLoggingInterceptor()),
         )
     }
 
@@ -114,7 +114,7 @@ val repositoryModuleLocal = module {
     single<WeatherRepository> {
         WeatherRepositoryRetrofitImpl(
             firebaseAnalytics = get(),
-            okHttpClient = createSimpleOkHttpClient(createLoggingInterceptor())
+            okHttpClient = createOkHttpClient(createLoggingInterceptor())
         )
     }
 
@@ -131,7 +131,7 @@ fun createLoggingInterceptor(): HttpLoggingInterceptor {
     )
 }
 
-fun createSimpleOkHttpClient(
+fun createOkHttpClient(
     loggingInterceptor: HttpLoggingInterceptor,
 ): OkHttpClient {
 
@@ -148,7 +148,7 @@ fun createSimpleOkHttpClient(
  * Create a OkHttpClient which is used to send HTTP requests and read their responses.
  * @loggingInterceptor logging interceptor
  */
-fun createOkHttpClient(
+fun createFishingOkHttpClient(
     context: Context,
     loggingInterceptor: HttpLoggingInterceptor,
 ): OkHttpClient {
