@@ -4,21 +4,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.domain.entity.common.User
-import com.mobileprism.fishing.domain.use_cases.users.SubscribeOnCurrentUserUseCase
+import com.mobileprism.fishing.domain.use_cases.users.SubscribeOnLoginState
+import com.mobileprism.fishing.model.auth.LoginState
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class MainViewModel(
-    private val subscribeOnCurrentUser: SubscribeOnCurrentUserUseCase,
+    private val subscribeOnLoginState: SubscribeOnLoginState,
     private val userPreferences: UserPreferences
 ) : ViewModel() {
 
-    val isUserLoggedState = mutableStateOf<Boolean>(false)
+    val isUserLoggedState = MutableStateFlow<Boolean>(false)
     val appTheme = mutableStateOf<AppThemeValues?>(null)
+    val googleLoginEvent = MutableSharedFlow<Unit>()
 
     val mutableStateFlow: MutableStateFlow<BaseViewState<User?>> =
         MutableStateFlow(BaseViewState.Loading(null))
@@ -36,14 +39,33 @@ class MainViewModel(
         }
     }
 
-
     private fun loadCurrentUser() {
         viewModelScope.launch {
-            mutableStateFlow.value = BaseViewState.Loading()
 
-            subscribeOnCurrentUser().collectLatest { currentUser ->
-                isUserLoggedState.value = currentUser != null
+            subscribeOnLoginState().collectLatest {
+                when (it) {
+                    is LoginState.LoggedIn -> {
+                        isUserLoggedState.value = true
+                    }
+
+                    is LoginState.LoginFailure -> {
+                        isUserLoggedState.value = false
+                        handleError(it.throwable)
+                    }
+
+                    is LoginState.NotLoggedIn -> {
+                        isUserLoggedState.value = false
+                    }
+
+                    is LoginState.GoogleAuthRequest -> {
+                        googleLoginEvent.emit(Unit)
+                    }
+                }
             }
+
+//            subscribeOnCurrentUser().collectLatest { currentUser ->
+//                isUserLoggedState.value = currentUser != null
+//            }
 
 //            val userFromDatastore = repository.datastoreNullableUser.collect { user ->
 //                when (user?.loginType) {

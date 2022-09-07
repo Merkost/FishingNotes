@@ -40,17 +40,13 @@ import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
 import com.mobileprism.fishing.ui.viewstates.LoginScreenViewState
 import com.mobileprism.fishing.utils.Constants
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @Composable
-fun LoginScreen(
-    googleLoginState: StateFlow<Boolean>,
-    onLoginWithGoogle: () -> Unit
-) {
+fun LoginScreen() {
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -62,7 +58,6 @@ fun LoginScreen(
     var visible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var showLottie by remember { mutableStateOf(false) }
-    val isGoogleLoggedIn by googleLoginState.collectAsState()
     var helpDialogState by remember { mutableStateOf(false) }
 
     val loginViewModel: LoginViewModel = get()
@@ -85,19 +80,13 @@ fun LoginScreen(
         currentBottomSheet = null
     }
 
-    LaunchedEffect(key1 = isGoogleLoggedIn) {
-        if (isGoogleLoggedIn) {
-            loginViewModel.continueWithGoogle()
-        }
-    }
-
     LaunchedEffect(uiState) {
         uiState.let {
             when (it) {
                 is LoginScreenViewState.LoginSuccess -> {
                     isLoading = false
                     showLottie = true
-                    delay(2500)
+//                    delay(2500)
                     visible = false
                     delay((MainActivity.splashFadeDurationMillis * 2).toLong())
                 }
@@ -326,7 +315,7 @@ fun LoginScreen(
                                 modifier = Modifier,
                                 onClick = {
                                     isLoading = true
-                                    onLoginWithGoogle()
+                                    loginViewModel.continueWithGoogle()
                                 }
                             )
 

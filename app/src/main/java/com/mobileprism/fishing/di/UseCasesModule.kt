@@ -35,4 +35,5 @@ val useCasesModule = module {
     factory { SignOutCurrentUserUserCase(get()) }
     factory { SubscribeOnCurrentUserUseCase(get()) }
     factory { SkipAuthorizationUseCase(get()) }
+    factory { SubscribeOnLoginState(get()) }
 }

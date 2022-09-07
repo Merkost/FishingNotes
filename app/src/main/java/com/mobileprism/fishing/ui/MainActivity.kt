@@ -13,13 +13,15 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SnackbarDuration
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.os.bundleOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.ads.MobileAds
@@ -48,8 +50,7 @@ import com.mobileprism.fishing.ui.viewmodels.MainViewModel
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.Logger
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.getViewModel
@@ -63,9 +64,6 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
     private lateinit var googleSignInClient: GoogleSignInClient
-
-    private val _googleLoginState = MutableStateFlow(false)
-    private val googleLoginState = _googleLoginState.asStateFlow()
 
     private val registeredActivity =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -87,8 +85,9 @@ class MainActivity : ComponentActivity() {
         val viewModel: MainViewModel = getViewModel()
 
         val screenState = viewModel.mutableStateFlow
-        val userState = viewModel.isUserLoggedState
         val appTheme = viewModel.appTheme
+
+        subscribeOnGoogleLoginEvents(viewModel.googleLoginEvent)
 
         installSplashScreen().apply {
             setKeepOnScreenCondition {
@@ -115,7 +114,7 @@ class MainActivity : ComponentActivity() {
                         if (Build.VERSION.SDK_INT < 31) {
                             setContent {
                                 FishingNotesTheme(appTheme.value) {
-                                    Distribution(viewModel.isUserLoggedState)
+                                    Distribution(viewModel.isUserLoggedState.collectAsState())
                                 }
                             }
                         }
@@ -127,7 +126,7 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= 31) {
             setContent {
                 FishingNotesTheme(appTheme.value) {
-                    Distribution(viewModel.isUserLoggedState)
+                    Distribution(viewModel.isUserLoggedState.collectAsState())
                 }
             }
         }
@@ -147,6 +146,14 @@ class MainActivity : ComponentActivity() {
         setAppMuted(true)
 
         checkForUpdates()
+    }
+
+    private fun subscribeOnGoogleLoginEvents(events: SharedFlow<Unit>) {
+        lifecycleScope.launchWhenStarted {
+            events.collect {
+                startGoogleLogin()
+            }
+        }
     }
 
     private fun checkForUpdates() {
@@ -243,21 +250,21 @@ class MainActivity : ComponentActivity() {
     @ExperimentalAnimationApi
     @ExperimentalPermissionsApi
     @Composable
-    fun Distribution(isUserLogged: MutableState<Boolean>) {
+    fun Distribution(isUserLogged: State<Boolean>) {
         Crossfade(targetState = isUserLogged.value) { state ->
             when (state) {
-                false -> LoginScreen(
-                    onLoginWithGoogle = { startGoogleLogin() },
-                    googleLoginState = googleLoginState
-                )
+                false -> LoginScreen()
                 true -> FishingNotesApp()
             }
         }
     }
 
-    fun startGoogleLogin() {
+    private fun startGoogleLogin() {
         // Configure GOOGLE sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+
+        auth.signOut()
+
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
@@ -299,7 +306,6 @@ class MainActivity : ComponentActivity() {
                 when {
                     task.isSuccessful -> {
                         // Sign in success, update UI with the signed-in user's information
-                        _googleLoginState.value = true
                     }
                     else -> {
                         handleError(task.exception)

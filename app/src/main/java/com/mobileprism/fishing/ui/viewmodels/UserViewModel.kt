@@ -81,14 +81,7 @@ class UserViewModel(
 
     fun logoutCurrentUser() {
         viewModelScope.launch {
-            signOutCurrentUser().fold(
-                onSuccess = {
-
-                },
-                onFailure = {
-
-                }
-            )
+            signOutCurrentUser()
         }
     }
 

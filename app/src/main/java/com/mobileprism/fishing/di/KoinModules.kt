@@ -64,13 +64,14 @@ val settingsModule = module {
 val mainModule = module {
     viewModel {
         MainViewModel(
-            subscribeOnCurrentUser = get(),
+            subscribeOnLoginState = get(),
             userPreferences = get()
         )
     }
 
     viewModel {
         LoginViewModel(
+            subscribeOnLoginStatus = get(),
             registerNewUserUseCase = get(),
             signInUserUseCase = get(),
             signInUserWithGoogleUseCase = get(),
