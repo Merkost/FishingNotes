@@ -7,10 +7,7 @@ import com.mobileprism.fishing.domain.repository.PhotoStorage
 import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.domain.repository.app.*
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
-import com.mobileprism.fishing.model.datasource.FreeWeatherRepositoryImpl
-import com.mobileprism.fishing.model.datasource.SolunarRetrofitRepositoryImpl
-import com.mobileprism.fishing.model.datasource.UserRepositoryRetrofitImpl
-import com.mobileprism.fishing.model.datasource.WeatherRepositoryRetrofitImpl
+import com.mobileprism.fishing.model.datasource.*
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseCatchesRepositoryImpl
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseCloudPhotoStorage
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseMarkersRepositoryImpl
@@ -106,6 +103,13 @@ val repositoryModuleLocal = module {
         UserRepositoryRetrofitImpl(
             firebaseAnalytics = get(),
             okHttpClient = createFishingOkHttpClient(androidContext(), createLoggingInterceptor()),
+        )
+    }
+
+    single<FishRepository> {
+        FishRepositoryRetrofitImpl(
+            firebaseAnalytics = get(),
+            okHttpClient = createFishingOkHttpClient(androidContext(), createLoggingInterceptor())
         )
     }
 

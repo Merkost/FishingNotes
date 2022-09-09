@@ -5,7 +5,7 @@ import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterF
 import com.mobileprism.fishing.domain.entity.common.EmailPassword
 import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.model.api.UserApiService
-import com.mobileprism.fishing.model.entity.user.UserApiResponse
+import com.mobileprism.fishing.model.entity.user.UserResponse
 import com.mobileprism.fishing.model.entity.user.UserData
 import com.mobileprism.fishing.model.utils.safeApiCall
 import com.mobileprism.fishing.utils.Constants.API_URL
@@ -34,7 +34,7 @@ class UserRepositoryRetrofitImpl(
             .build()
     }
 
-    override suspend fun registerNewUser(emailPassword: EmailPassword): Result<UserApiResponse> =
+    override suspend fun registerNewUser(emailPassword: EmailPassword): Result<UserResponse> =
         safeApiCall(dispatcher) {
 
             firebaseAnalytics.logEvent("register_new_user", null)
@@ -43,13 +43,13 @@ class UserRepositoryRetrofitImpl(
 //                body = emailPassword
 //            )
 
-            UserApiResponse(
+            UserResponse(
                 token = "123",
                 UserData(email = emailPassword.email, login = "Anonymous")
             )
         }
 
-    override suspend fun loginUser(emailPassword: EmailPassword): Result<UserApiResponse> =
+    override suspend fun loginUser(emailPassword: EmailPassword): Result<UserResponse> =
         safeApiCall(dispatcher) {
 
             firebaseAnalytics.logEvent("login_user", null)
@@ -58,7 +58,7 @@ class UserRepositoryRetrofitImpl(
 //                body = emailPassword
 //            )
 
-            UserApiResponse(
+            UserResponse(
                 token = "123",
                 UserData(email = emailPassword.email, login = "Anonymous")
             )
@@ -67,7 +67,7 @@ class UserRepositoryRetrofitImpl(
     override suspend fun loginUserWithGoogle(
         email: String,
         userId: String
-    ): Result<UserApiResponse> = safeApiCall(dispatcher) {
+    ): Result<UserResponse> = safeApiCall(dispatcher) {
 
         firebaseAnalytics.logEvent("login_with_google", null)
 
@@ -78,7 +78,7 @@ class UserRepositoryRetrofitImpl(
 //            )
 //        )
 
-        UserApiResponse(
+        UserResponse(
             token = "123",
             UserData(email = email, login = "Anonymous")
         )

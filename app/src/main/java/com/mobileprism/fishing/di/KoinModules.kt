@@ -155,6 +155,12 @@ val mainModule = module {
     viewModel {
         NotesViewModel(getUserCatches = get(), getUserPlacesList = get())
     }
+
+    viewModel {
+        SettingsViewModel(
+            fishRepository = get()
+        )
+    }
 }
 
 fun createGeocoder(androidContext: Context): Geocoder {

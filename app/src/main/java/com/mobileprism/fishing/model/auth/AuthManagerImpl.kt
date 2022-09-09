@@ -8,7 +8,7 @@ import com.mobileprism.fishing.domain.repository.FirebaseUserRepository
 import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.model.datastore.TokenStore
 import com.mobileprism.fishing.model.datastore.UserDatastore
-import com.mobileprism.fishing.model.entity.user.UserApiResponse
+import com.mobileprism.fishing.model.entity.user.UserResponse
 import com.mobileprism.fishing.model.entity.user.UserData
 import kotlinx.coroutines.flow.*
 
@@ -104,7 +104,7 @@ class AuthManagerImpl(
         }
     }
 
-    private suspend fun onLoginSuccess(data: UserApiResponse) {
+    private suspend fun onLoginSuccess(data: UserResponse) {
         saveUser(data.user)
         saveToken(data.token)
         loginEvent.emit(LoginState.LoggedIn)

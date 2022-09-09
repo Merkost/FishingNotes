@@ -152,12 +152,8 @@ fun MyLocationButton(
 
     val color = animateColorAsState(
         when {
-            !shouldShowPermissions || !permissionsState.allPermissionsGranted -> {
-                RedGoogleChrome
-            }
-            else -> {
-                LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
-            }
+            !shouldShowPermissions || !permissionsState.allPermissionsGranted -> { RedGoogleChrome }
+            else -> { LocalContentColor.current.copy(alpha = LocalContentAlpha.current) }
         }
     )
 

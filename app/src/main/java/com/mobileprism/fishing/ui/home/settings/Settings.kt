@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -42,9 +43,11 @@ import com.mobileprism.fishing.ui.home.weather.TemperatureValues
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.ui.utils.ColorPicker
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
+import com.mobileprism.fishing.ui.viewmodels.SettingsViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
+import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalPermissionsApi::class)
 @ExperimentalComposeUiApi
@@ -156,6 +159,9 @@ fun MainAppSettings(userPreferences: UserPreferences) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
+    val viewModel: SettingsViewModel = getViewModel()
+    val fishUpdateResult = viewModel.fishUpdateResult.collectAsState()
+
     val appTheme by userPreferences.appTheme.collectAsState(AppThemeValues.Blue)
     val use12hTimeFormat by userPreferences.use12hTimeFormat.collectAsState(false)
     val useFastFabAdd by userPreferences.useFabFastAdd.collectAsState(false)
@@ -185,6 +191,25 @@ fun MainAppSettings(userPreferences: UserPreferences) {
                 onClick = { isPermissionDialogOpen = true },
             )
         }
+
+        // TODO: finish fish saving
+        SettingsMenuLink(
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.Sync,
+                    contentDescription = Icons.Default.Sync.name
+                )
+            },
+            title = { Text(text = "Синхронизировать рыбу") },
+            subtitle = { Text(text = "Загрузить актуальную рыбу с сервера") },
+            onClick = { viewModel.updateFish() },
+            action = {
+                if (fishUpdateResult.value == UiState.InProgress) {
+                    CircularProgressIndicator()
+                } else null
+            }
+        )
+
         SettingsHeader(text = stringResource(R.string.settings_main))
         SettingsMenuLink(
             icon = {
