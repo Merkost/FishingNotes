@@ -13,10 +13,15 @@ interface UserApiService {
         @Body body: EmailPassword
     ): UserResponse
 
-    @POST("login")
-    suspend fun loginUser(
+    @POST("login/email")
+    suspend fun loginWithEmail(
         @Body body: EmailPassword
     ): UserResponse
+
+    /*@POST("login/username")
+    suspend fun loginWithUsername(
+        @Body body: UsernamePassword
+    ): UserResponse*/
 
     @POST("login/google")
     suspend fun loginUserWithGoogle(

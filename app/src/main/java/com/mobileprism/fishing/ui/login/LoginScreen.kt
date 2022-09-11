@@ -120,7 +120,10 @@ fun LoginScreen() {
     }
 
     ModalLoadingDialog(isLoading = isLoading, text = stringResource(R.string.login_loading_text),
-        onDismiss = { isLoading = false })
+        onDismiss = {
+            isLoading = false
+            // FIXME: cancel coroutine
+        })
 
     if (helpDialogState) {
         LoginHelpDialog(onDismiss = { helpDialogState = false })

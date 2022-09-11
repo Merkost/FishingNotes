@@ -54,7 +54,7 @@ class AuthRepositoryRetrofitImpl(
 
             firebaseAnalytics.logEvent("login_user", null)
 
-            getService().loginUser(
+            getService().loginWithEmail(
                 body = emailPassword
             )
 
