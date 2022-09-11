@@ -3,15 +3,19 @@ package com.mobileprism.fishing.ui.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.domain.entity.common.EmailPassword
+import com.mobileprism.fishing.domain.repository.AuthManager
 import com.mobileprism.fishing.domain.use_cases.users.*
 import com.mobileprism.fishing.model.auth.LoginState
 import com.mobileprism.fishing.ui.viewstates.LoginScreenViewState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+// TODO: Delete many UseCases
 class LoginViewModel(
+    private val authManager: AuthManager,
     private val subscribeOnLoginStatus: SubscribeOnLoginState,
     private val registerNewUserUseCase: RegisterNewUserUseCase,
     private val signInUserUseCase: SignInUserUserCase,
@@ -29,12 +33,15 @@ class LoginViewModel(
 
     private fun subscribeOnLoginState() {
         viewModelScope.launch {
-            subscribeOnLoginStatus().collectLatest {
+            authManager.loginState.collectLatest {
                 when (it) {
+                    // TODO: Deal with LoginScreenViewState mess
                     is LoginState.LoggedIn -> {
                         _uiState.value = LoginScreenViewState.LoginSuccess
                     }
-                    LoginState.GoogleAuthRequest -> {}
+                    LoginState.GoogleAuthInProcess -> {
+                        _uiState.update { LoginScreenViewState.Loading }
+                    }
                     is LoginState.LoginFailure -> {
                         _uiState.value = (LoginScreenViewState.NotLoggedIn)
                         handleError(it.throwable)
@@ -48,7 +55,7 @@ class LoginViewModel(
     }
 
     fun registerNewUser(emailPassword: EmailPassword) {
-        _uiState.value = LoginScreenViewState.Loading
+        _uiState.update { LoginScreenViewState.Loading }
 
         viewModelScope.launch {
             registerNewUserUseCase(emailPassword)
@@ -56,7 +63,7 @@ class LoginViewModel(
     }
 
     fun signInUser(emailPassword: EmailPassword) {
-        _uiState.value = LoginScreenViewState.Loading
+        _uiState.update { LoginScreenViewState.Loading }
 
         viewModelScope.launch {
             signInUserUseCase(emailPassword)
@@ -64,7 +71,7 @@ class LoginViewModel(
     }
 
     fun skipAuthorization() {
-        _uiState.value = LoginScreenViewState.Loading
+        _uiState.update { LoginScreenViewState.Loading }
 
         viewModelScope.launch {
             skipAuthorizationUseCase()
@@ -72,14 +79,13 @@ class LoginViewModel(
     }
 
     private fun handleError(error: Throwable) {
-        _uiState.value = LoginScreenViewState.Error(error)
+        _uiState.update { LoginScreenViewState.Error(error) }
     }
 
     fun continueWithGoogle() {
-        _uiState.value = LoginScreenViewState.Loading
-
         viewModelScope.launch {
-            signInUserWithGoogleUseCase()
+            _uiState.update { LoginScreenViewState.Loading }
+            authManager.googleLogin()
         }
     }
 

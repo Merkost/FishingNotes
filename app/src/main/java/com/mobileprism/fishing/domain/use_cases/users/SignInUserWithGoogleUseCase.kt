@@ -5,5 +5,5 @@ import com.mobileprism.fishing.domain.repository.AuthManager
 class SignInUserWithGoogleUseCase(
     private val authManager: AuthManager
 ) {
-    suspend operator fun invoke() = authManager.authWithGoogle()
+    suspend operator fun invoke() = authManager.googleLogin()
 }

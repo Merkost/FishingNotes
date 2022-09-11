@@ -14,9 +14,10 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -265,7 +266,7 @@ fun NewCatchPhotoView(
             if (tempPhotosState.isNotEmpty()) {
                 LazyVerticalGrid(
                     modifier = Modifier,
-                    cells = GridCells.Fixed(MAX_PHOTOS),
+                    columns = GridCells.Fixed(MAX_PHOTOS),
                     verticalArrangement = Arrangement.Center,
                     horizontalArrangement = Arrangement.Center
                 ) {

@@ -23,7 +23,7 @@ val loginModule = module {
     single<AuthManager> {
         AuthManagerImpl(
             userDatastore = get(),
-            userRepository = get(),
+            authRepository = get(),
             firebaseUserRepository = get(),
             tokenStore = get()
         )

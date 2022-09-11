@@ -3,10 +3,10 @@ package com.mobileprism.fishing.model.datasource
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.mobileprism.fishing.domain.entity.common.EmailPassword
-import com.mobileprism.fishing.domain.repository.UserRepository
+import com.mobileprism.fishing.domain.repository.AuthRepository
+import com.mobileprism.fishing.model.api.GoogleAuthRequest
 import com.mobileprism.fishing.model.api.UserApiService
 import com.mobileprism.fishing.model.entity.user.UserResponse
-import com.mobileprism.fishing.model.entity.user.UserData
 import com.mobileprism.fishing.model.utils.safeApiCall
 import com.mobileprism.fishing.utils.Constants.API_URL
 import kotlinx.coroutines.CoroutineDispatcher
@@ -15,11 +15,11 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class UserRepositoryRetrofitImpl(
+class AuthRepositoryRetrofitImpl(
     private val firebaseAnalytics: FirebaseAnalytics,
     private val okHttpClient: OkHttpClient,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
-) : UserRepository {
+) : AuthRepository {
 
     private fun getService(): UserApiService {
         return createRetrofit().create(UserApiService::class.java)
@@ -39,14 +39,14 @@ class UserRepositoryRetrofitImpl(
 
             firebaseAnalytics.logEvent("register_new_user", null)
 
-//            getService().registerNewUser(
-//                body = emailPassword
-//            )
+            getService().registerNewUser(
+                body = emailPassword
+            )
 
-            UserResponse(
+            /*UserResponse(
                 token = "123",
                 UserData(email = emailPassword.email, login = "Anonymous")
-            )
+            )*/
         }
 
     override suspend fun loginUser(emailPassword: EmailPassword): Result<UserResponse> =
@@ -54,14 +54,14 @@ class UserRepositoryRetrofitImpl(
 
             firebaseAnalytics.logEvent("login_user", null)
 
-//            getService().loginUser(
-//                body = emailPassword
-//            )
+            getService().loginUser(
+                body = emailPassword
+            )
 
-            UserResponse(
+            /*UserResponse(
                 token = "123",
                 UserData(email = emailPassword.email, login = "Anonymous")
-            )
+            )*/
         }
 
     override suspend fun loginUserWithGoogle(
@@ -71,16 +71,16 @@ class UserRepositoryRetrofitImpl(
 
         firebaseAnalytics.logEvent("login_with_google", null)
 
-//        getService().loginUserWithGoogle(
-//            GoogleAuthRequest(
-//                email = email,
-//                googleAuthId = userId
-//            )
-//        )
+        getService().loginUserWithGoogle(
+            GoogleAuthRequest(
+                email = email,
+                googleAuthId = userId
+            )
+        )
 
-        UserResponse(
+        /*UserResponse(
             token = "123",
             UserData(email = email, login = "Anonymous")
-        )
+        )*/
     }
 }

@@ -45,7 +45,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import coil.annotation.ExperimentalCoilApi
-import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
@@ -58,6 +57,7 @@ import com.mobileprism.fishing.ui.home.weather.WeatherScreen
 import com.mobileprism.fishing.ui.theme.FishingNotesTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import java.util.*
 
 @OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalCoroutinesApi
@@ -84,6 +84,7 @@ fun NavGraphBuilder.addHomeGraph(
     }
     composable(HomeSections.NOTES.route) {
         NotesScreen(navController = navController, upPress = upPress)
+        //Notes(navController = navController, upPress = upPress)
     }
     composable(HomeSections.WEATHER.route) { from ->
         val place: UserMapMarker? = from.arguments?.getParcelable(Arguments.PLACE)
@@ -138,7 +139,7 @@ fun FishingNotesBottomBar(
             itemCount = routes.size,
             indicator = { FishingNotesBottomNavIndicator() },
             animSpec = springSpec,
-            modifier = Modifier.navigationBarsPadding(start = false, end = false)
+            modifier = Modifier.navigationBarsPadding()
         ) {
             tabs.forEach { section ->
                 val selected = section == currentSection
@@ -163,7 +164,8 @@ fun FishingNotesBottomBar(
                             text = stringResource(section.title).uppercase(
                                 ConfigurationCompat.getLocales(
                                     LocalConfiguration.current
-                                ).get(0)
+                                ).get(0) ?: Locale.getDefault()
+                                // FIXME: Locales update fix
                             ),
                             color = tint,
                             style = MaterialTheme.typography.button,

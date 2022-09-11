@@ -3,8 +3,8 @@ package com.mobileprism.fishing.di
 import android.content.Context
 import androidx.room.Room
 import com.mobileprism.fishing.BuildConfig
+import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.domain.repository.PhotoStorage
-import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.domain.repository.app.*
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.model.datasource.*
@@ -97,10 +97,10 @@ val repositoryModuleLocal = module {
             context = androidContext()
         )
     }
-    //todo
 
-    single<UserRepository> {
-        UserRepositoryRetrofitImpl(
+    //todo
+    single<AuthRepository> {
+        AuthRepositoryRetrofitImpl(
             firebaseAnalytics = get(),
             okHttpClient = createFishingOkHttpClient(androidContext(), createLoggingInterceptor()),
         )
@@ -159,10 +159,10 @@ fun createFishingOkHttpClient(
 
     return OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
-        .callTimeout(10, TimeUnit.SECONDS)
-        .connectTimeout(7, TimeUnit.SECONDS)
-        .writeTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(7, TimeUnit.SECONDS)
+        .callTimeout(100, TimeUnit.SECONDS)
+        .connectTimeout(70, TimeUnit.SECONDS)
+        .writeTimeout(100, TimeUnit.SECONDS)
+        .readTimeout(70, TimeUnit.SECONDS)
         .hostnameVerifier { hostname, session ->
             if (Constants.API_URL.contains(hostname)) true else false
         }

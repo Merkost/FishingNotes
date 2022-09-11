@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
 import com.mobileprism.fishing.utils.network.currentConnectivityState
 import com.mobileprism.fishing.utils.network.observeConnectivityAsFlow
@@ -49,10 +48,11 @@ fun AdaptiveBannerAdvertView(modifier: Modifier = Modifier, adId: String) {
                 .wrapContentHeight(),
             factory = { context ->
                 AdView(context).apply {
-                    adSize = AdSize
+                    /*adSize = AdSize
                         .getCurrentOrientationAnchoredAdaptiveBannerAdSize(
                             context, configuration.screenWidthDp
-                        )
+                        )*/
+                    // FIXME: Fix AdView
                     adUnitId = adId
                     loadAd(AdRequest.Builder().build())
                 }
@@ -92,9 +92,10 @@ fun BannerAdvertView(modifier: Modifier = Modifier, adId: String, padding: Dp) {
                     .wrapContentHeight(),
                 factory = { context ->
                     AdView(context).apply {
-                        adSize = AdSize
+                       /* adSize = AdSize
                             .getCurrentOrientationAnchoredAdaptiveBannerAdSize(context,
-                                configuration.screenWidthDp-padding.value.toInt()*2)
+                                configuration.screenWidthDp-padding.value.toInt()*2)*/
+                        // FIXME: Fix AdView
                         adUnitId = adId
                         loadAd(AdRequest.Builder().build())
                     }

@@ -4,22 +4,23 @@ import com.mobileprism.fishing.domain.entity.common.EmailPassword
 import com.mobileprism.fishing.domain.entity.common.LoginType
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.repository.AuthManager
+import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.domain.repository.FirebaseUserRepository
-import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.model.datastore.TokenStore
 import com.mobileprism.fishing.model.datastore.UserDatastore
-import com.mobileprism.fishing.model.entity.user.UserResponse
 import com.mobileprism.fishing.model.entity.user.UserData
+import com.mobileprism.fishing.model.entity.user.UserResponse
 import kotlinx.coroutines.flow.*
 
 class AuthManagerImpl(
     private val userDatastore: UserDatastore,
-    private val userRepository: UserRepository,
+    private val authRepository: AuthRepository,
     private val firebaseUserRepository: FirebaseUserRepository,
     private val tokenStore: TokenStore,
 ) : AuthManager {
 
-    private val loginEvent = MutableStateFlow<LoginState>(LoginState.NotLoggedIn)
+    override val loginState: MutableStateFlow<LoginState> =
+        MutableStateFlow<LoginState>(LoginState.NotLoggedIn)
 
     override val currentUser: Flow<User?>
         get() = userDatastore.getNullableUser
@@ -27,13 +28,10 @@ class AuthManagerImpl(
     override val currentFirebaseUser: Flow<User?>
         get() = firebaseUserRepository.currentUser
 
-    override suspend fun subscribeOnLoginState(): Flow<LoginState> {
-        checkCurrentUser()
-        return loginEvent
-    }
+    override suspend fun subscribeOnLoginState(): Flow<LoginState> = loginState.asStateFlow()
 
     override suspend fun registerNewUser(emailPassword: EmailPassword) {
-        userRepository.registerNewUser(emailPassword).fold(
+        authRepository.registerNewUser(emailPassword).fold(
             onSuccess = {
                 onLoginSuccess(it)
             },
@@ -44,7 +42,7 @@ class AuthManagerImpl(
     }
 
     override suspend fun loginUser(emailPassword: EmailPassword) {
-        userRepository.loginUser(emailPassword).fold(
+        authRepository.loginUser(emailPassword).fold(
             onSuccess = {
                 onLoginSuccess(it)
             },
@@ -56,21 +54,19 @@ class AuthManagerImpl(
 
     override suspend fun skipAuthorization() {
         createOfflineUser()
-        loginEvent.emit(LoginState.LoggedIn)
+        loginState.update { LoginState.LoggedIn }
     }
 
-    override suspend fun authWithGoogle() {
-        loginEvent.emit(LoginState.GoogleAuthRequest)
+    override suspend fun googleLogin() {
+        loginState.update { LoginState.GoogleAuthInProcess }
 
         firebaseUserRepository.currentUser
-            .catch { error ->
-                onLoginFailure(error)
-            }
-            .collectLatest { it ->
-                if (it != null) {
-                    userRepository.loginUserWithGoogle(
-                        email = it.email,
-                        userId = it.uid
+            .catch { error -> onLoginFailure(error) }
+            .collectLatest { user ->
+                if (user != null) {
+                    authRepository.loginUserWithGoogle(
+                        email = user.email,
+                        userId = user.uid
                     ).fold(
                         onSuccess = {
                             onLoginSuccess(it)
@@ -79,8 +75,8 @@ class AuthManagerImpl(
                             onLoginFailure(it)
                         }
                     )
-                } else {
-                    onLoginFailure(Throwable())
+                } else if (loginState.value !is LoginState.GoogleAuthInProcess) {
+                    loginState.update { LoginState.NotLoggedIn }
                 }
             }
     }
@@ -89,7 +85,7 @@ class AuthManagerImpl(
         firebaseUserRepository.logoutCurrentUser().collectLatest { isLoggedOut ->
             if (isLoggedOut) {
                 userDatastore.clearUser()
-                loginEvent.emit(LoginState.NotLoggedIn)
+                loginState.update { LoginState.NotLoggedIn }
             }
         }
     }
@@ -98,20 +94,14 @@ class AuthManagerImpl(
         TODO("Not yet implemented")
     }
 
-    private suspend fun checkCurrentUser() {
-        if (currentUser.first() != null) {
-            loginEvent.emit(LoginState.LoggedIn)
-        }
-    }
-
     private suspend fun onLoginSuccess(data: UserResponse) {
         saveUser(data.user)
         saveToken(data.token)
-        loginEvent.emit(LoginState.LoggedIn)
+        loginState.update { LoginState.LoggedIn }
     }
 
     private suspend fun onLoginFailure(throwable: Throwable) {
-        loginEvent.emit(LoginState.LoginFailure(throwable))
+        loginState.update { LoginState.LoginFailure(throwable) }
     }
 
     private suspend fun createOfflineUser() {

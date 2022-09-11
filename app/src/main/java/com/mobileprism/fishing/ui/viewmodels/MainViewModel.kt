@@ -57,7 +57,7 @@ class MainViewModel(
                         isUserLoggedState.value = false
                     }
 
-                    is LoginState.GoogleAuthRequest -> {
+                    is LoginState.GoogleAuthInProcess -> {
                         googleLoginEvent.emit(Unit)
                     }
                 }

@@ -76,8 +76,8 @@ fun getClosestHourIndex(list: List<Hourly>, date: Long): Int {
     return 0
 }
 
-fun showToast(context: Context, text: String) {
-    Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+fun showToast(context: Context, text: String, length: Int = Toast.LENGTH_SHORT) {
+    Toast.makeText(context, text, length).show()
 }
 
 fun showErrorToast(context: Context, text: String? = null) {

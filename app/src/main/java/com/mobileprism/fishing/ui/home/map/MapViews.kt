@@ -38,11 +38,10 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.placeholder.shimmer
-import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.ui.home.SettingsHeader
+import com.mobileprism.fishing.ui.home.settings.SettingsHeader
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.views.DefaultDialog
 import com.mobileprism.fishing.ui.theme.RedGoogleChrome

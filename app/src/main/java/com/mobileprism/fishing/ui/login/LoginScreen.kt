@@ -47,9 +47,9 @@ import org.koin.androidx.compose.get
 @ExperimentalAnimationApi
 @Composable
 fun LoginScreen() {
+    val loginViewModel: LoginViewModel = get()
 
     val coroutineScope = rememberCoroutineScope()
-
     val scaffoldState = rememberScaffoldState()
 
     val bottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -60,11 +60,9 @@ fun LoginScreen() {
     var showLottie by remember { mutableStateOf(false) }
     var helpDialogState by remember { mutableStateOf(false) }
 
-    val loginViewModel: LoginViewModel = get()
     val context = LocalContext.current
     val uiState by loginViewModel.uiState.collectAsState()
 
-    val errorString = stringResource(R.string.signin_error)
     val resources = resources()
 
     val openSheet: (BottomSheetLoginScreen) -> Unit = {
@@ -81,30 +79,27 @@ fun LoginScreen() {
     }
 
     LaunchedEffect(uiState) {
-        uiState.let {
-            when (it) {
-                is LoginScreenViewState.LoginSuccess -> {
-                    isLoading = false
-                    showLottie = true
-//                    delay(2500)
-                    visible = false
-                    delay((MainActivity.splashFadeDurationMillis * 2).toLong())
-                }
-                is LoginScreenViewState.Loading -> {
-                    isLoading = true
-                }
-                is LoginScreenViewState.Error -> {
-                    isLoading = false
-                    scaffoldState.snackbarHostState.showSnackbar(
-                        it.error.message ?: context.getString(R.string.error_occured)
-                    )
-                }
-                is LoginScreenViewState.NotLoggedIn -> {
-                    isLoading = false
-                }
+        when (val state = uiState) {
+            is LoginScreenViewState.LoginSuccess -> {
+                isLoading = false
+                showLottie = true
+                //delay(2500)
+                visible = false
+                delay((MainActivity.splashFadeDurationMillis * 2).toLong())
+            }
+            is LoginScreenViewState.Loading -> {
+                isLoading = true
+            }
+            is LoginScreenViewState.Error -> {
+                isLoading = false
+                scaffoldState.snackbarHostState.showSnackbar(
+                    state.error.message ?: context.getString(R.string.error_occured)
+                )
+            }
+            is LoginScreenViewState.NotLoggedIn -> {
+                isLoading = false
             }
         }
-
     }
 
     LaunchedEffect(true) {
@@ -124,12 +119,12 @@ fun LoginScreen() {
         }
     }
 
-    ModalLoadingDialog(isLoading = (isLoading), text = stringResource(R.string.login_loading_text))
+    ModalLoadingDialog(isLoading = isLoading, text = stringResource(R.string.login_loading_text),
+        onDismiss = { isLoading = false })
 
     if (helpDialogState) {
         LoginHelpDialog(onDismiss = { helpDialogState = false })
     }
-
 
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
@@ -313,10 +308,7 @@ fun LoginScreen() {
 
                             LoginWithGoogleButton(
                                 modifier = Modifier,
-                                onClick = {
-                                    isLoading = true
-                                    loginViewModel.continueWithGoogle()
-                                }
+                                onClick = { loginViewModel.continueWithGoogle() }
                             )
 
                             Spacer(
@@ -431,9 +423,6 @@ fun RegisterButton(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp), elevation = 4.dp,
-        onClickLabel = stringResource(
-            R.string.google_login
-        ),
         onClick = onClick,
         backgroundColor = MaterialTheme.colors.secondaryVariant
     ) {
@@ -498,9 +487,10 @@ fun LoginWithGoogleButton(
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp), elevation = 4.dp,
-        onClickLabel = stringResource(
+        /*onClickLabel = stringResource(
             R.string.google_login
-        ),
+        ),*/
+        // FIXME:  onClickLabel
         onClick = onClick,
         backgroundColor = MaterialTheme.colors.primaryVariant
     ) {

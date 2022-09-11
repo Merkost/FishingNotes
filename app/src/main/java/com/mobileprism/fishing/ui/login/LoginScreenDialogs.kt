@@ -20,6 +20,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.common.EmailPassword
+import com.mobileprism.fishing.ui.custom.CircleButton
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
 import com.mobileprism.fishing.utils.*
@@ -402,5 +403,6 @@ fun LoginHelpDialog(
             modifier = Modifier.padding(8.dp),
             text = stringResource(R.string.login_help_text)
         )
+
     }
 }

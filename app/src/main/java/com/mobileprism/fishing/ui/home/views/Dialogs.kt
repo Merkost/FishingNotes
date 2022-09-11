@@ -3,6 +3,7 @@ package com.mobileprism.fishing.ui.home.views
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -22,6 +23,7 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.ui.custom.CircleButton
 
 @ExperimentalComposeUiApi
 @Composable
@@ -39,7 +41,7 @@ fun DefaultDialog(
     content: @Composable() (() -> Unit)? = null
 ) {
 
-    val textBias = when(textAlign) {
+    val textBias = when (textAlign) {
         TextAlign.Start -> 0f
         TextAlign.End -> 1f
         else -> 0.5f
@@ -59,13 +61,19 @@ fun DefaultDialog(
                     .padding(horizontal = 8.dp)
                     .padding(bottom = 2.dp)
             ) {
-                val (title, subtitle, mainContent, neutralButton, negativeButton, positiveButton, buttonSpacer) = createRefs()
+                val (title, subtitle, mainContent, neutralButton, negativeButton, positiveButton) = createRefs()
 
                 primaryText?.let {
                     PrimaryText(
                         modifier = Modifier.constrainAs(title) {
                             top.linkTo(parent.top, 16.dp)
-                            linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, bias = textBias)
+                            linkTo(
+                                parent.absoluteLeft,
+                                parent.absoluteRight,
+                                16.dp,
+                                16.dp,
+                                bias = textBias
+                            )
                             width = Dimension.fillToConstraints
                         },
                         textAlign = textAlign,
@@ -78,7 +86,13 @@ fun DefaultDialog(
                     PrimaryTextSmall(
                         modifier = Modifier.constrainAs(subtitle) {
                             top.linkTo(title.bottom, 2.dp)
-                            linkTo(start = parent.absoluteLeft, end = parent.absoluteRight, 16.dp, 16.dp, bias = 0.5f)
+                            linkTo(
+                                start = parent.absoluteLeft,
+                                end = parent.absoluteRight,
+                                16.dp,
+                                16.dp,
+                                bias = 0.5f
+                            )
                             width = Dimension.fillToConstraints
                         },
                         textAlign = textAlign,
@@ -108,7 +122,7 @@ fun DefaultDialog(
                     content?.invoke()
                 }
 
-                onNeutralClick?.let{
+                onNeutralClick?.let {
                     DefaultButtonSecondaryLight(
                         modifier = Modifier.constrainAs(neutralButton) {
                             top.linkTo(mainContent.bottom, 16.dp)
@@ -119,7 +133,7 @@ fun DefaultDialog(
                     )
                 }
 
-                onPositiveClick?.let{
+                onPositiveClick?.let {
                     DefaultButtonFilled(
                         modifier = Modifier.constrainAs(positiveButton) {
                             top.linkTo(mainContent.bottom, 16.dp)
@@ -183,7 +197,8 @@ fun LoadingDialog() {
 @Composable
 fun ModalLoadingDialog(
     isLoading: Boolean,
-    text: String
+    text: String,
+    onDismiss: (() -> Unit)? = null
 ) {
     if (isLoading) {
         Dialog(
@@ -195,19 +210,32 @@ fun ModalLoadingDialog(
         ) {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentWidth(),
+                    .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(64.dp)
-                )
-                PrimaryText(
-                    text = text,
-                    textColor = Color.White
-                )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(64.dp)
+                    )
+                    PrimaryText(
+                        text = text,
+                        textColor = Color.White
+                    )
+                }
+                onDismiss?.let {
+                    CircleButton(onClick = { onDismiss() }) {
+                        Text(stringResource(id = R.string.cancel))
+                    }
+                }
             }
         }
     }
 }
+

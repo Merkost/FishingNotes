@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
@@ -41,6 +42,7 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.ktx.Firebase
+import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.SnackbarAction
 import com.mobileprism.fishing.ui.home.SnackbarManager
@@ -49,6 +51,7 @@ import com.mobileprism.fishing.ui.theme.FishingNotesTheme
 import com.mobileprism.fishing.ui.viewmodels.MainViewModel
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.Logger
+import com.mobileprism.fishing.utils.showToast
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.SharedFlow
 import org.koin.android.ext.android.get
@@ -76,7 +79,7 @@ class MainActivity : ComponentActivity() {
     }
 
     @OptIn(
-        ExperimentalComposeUiApi::class, ExperimentalPermissionsApi::class,
+        ExperimentalPermissionsApi::class,
         ExperimentalAnimationApi::class, InternalCoroutinesApi::class,
         ExperimentalPagerApi::class, ExperimentalMaterialApi::class
     )
@@ -301,8 +304,7 @@ class MainActivity : ComponentActivity() {
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
 
-        auth.signInWithCredential(credential)
-            .addOnCompleteListener(this) { task ->
+        auth.signInWithCredential(credential).addOnCompleteListener(this) { task ->
                 when {
                     task.isSuccessful -> {
                         // Sign in success, update UI with the signed-in user's information
@@ -323,6 +325,9 @@ class MainActivity : ComponentActivity() {
 
             //Toast.makeText(this,  error.message, Toast.LENGTH_LONG).show()
             logger.log(error.message)
+            if (BuildConfig.DEBUG) {
+                showToast(this, text = error.message.toString(), Toast.LENGTH_LONG)
+            }
         }
         SnackbarManager.showMessage(R.string.google_login_failed)
 

@@ -1,8 +1,14 @@
 package com.mobileprism.fishing.ui.home.notes
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Sort
@@ -20,7 +26,7 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.datastore.NotesPreferences
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
-import com.mobileprism.fishing.ui.home.SettingsHeader
+import com.mobileprism.fishing.ui.home.settings.SettingsHeader
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.theme.primaryTextColor
 import com.mobileprism.fishing.ui.utils.enums.CatchesSortValues
@@ -30,8 +36,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
 enum class BottomSheetScreen {
-    Sort,
-    Filter,
+    Sort, Filter,
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -51,7 +56,6 @@ fun Notes(
 
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     var bottomSheetScreen by remember { mutableStateOf(BottomSheetScreen.Sort) }
-    val shouldShowBlur = remember { mutableStateOf(false) }
 
     val fabState = remember { mutableStateOf(MultiFabState.COLLAPSED) }
 
@@ -167,6 +171,9 @@ fun NotesModalBottomSheet(
                     }
                 }
                 BottomSheetScreen.Filter -> {
+                    Text(
+                        "Not yet implemented"
+                    )
                     /*Text("Not yet implemented")*/
                 }
             }
@@ -181,6 +188,9 @@ fun NotesModalBottomSheet(
                     }
                 }
                 BottomSheetScreen.Filter -> {
+                    Text(
+                        "Not yet implemented"
+                    )
                     /*Text("Not yet implemented")*/
                 }
             }

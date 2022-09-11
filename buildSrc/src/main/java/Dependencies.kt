@@ -1,5 +1,3 @@
-package com.mobileprism.fishing.buildsrc
-
 object Versions {
     const val ktlint = "0.41.0"
 }
@@ -22,8 +20,8 @@ object Libs {
 
     object GoogleMaps {
         const val maps = "com.google.android.libraries.maps:maps:3.1.0-beta"
-        const val mapsKtx = "com.google.maps.android:maps-ktx:3.3.0"
-        const val mapUtilsKtx = "com.google.maps.android:maps-utils-ktx:3.3.0"
+        const val mapsKtx = "com.google.maps.android:maps-ktx:3.4.0"
+        const val mapUtilsKtx = "com.google.maps.android:maps-utils-ktx:3.4.0"
 
         //Google maps distance between two latlng /*0.4.4*/
         const val mapUtils = "com.google.maps.android:android-maps-utils:2.3.0"
@@ -32,16 +30,16 @@ object Libs {
 
     object PlayServices {
         private const val version = "19.0.0"
-        private const val oldVersion = "18.0.2"
+        private const val oldVersion = "18.1.0"
 
         const val auth = "com.google.android.gms:play-services-auth:$version"
-        const val ads = "com.google.android.gms:play-services-ads:20.6.0"
-        const val billing = "com.android.billingclient:billing-ktx:4.0.0"
+        const val ads = "com.google.android.gms:play-services-ads:21.2.0"
+        const val billing = "com.android.billingclient:billing-ktx:5.0.0"
         const val core = "com.google.android.play:core-ktx:1.8.1"
 
         //Maps
         const val maps = "com.google.android.gms:play-services-maps:$oldVersion"
-        const val location = "com.google.android.gms:play-services-location:19.0.1"
+        const val location = "com.google.android.gms:play-services-location:20.0.0"
     }
 
     object Kotlin {
@@ -52,7 +50,7 @@ object Libs {
     }
 
     object Coroutines {
-        private const val version = "1.6.0"
+        private const val version = "1.6.4"
         const val core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version"
         const val android = "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version"
         const val test = "org.jetbrains.kotlinx:kotlinx-coroutines-test:$version"
@@ -65,20 +63,20 @@ object Libs {
         object Compose {
             const val version = "1.1.0"
 
-            const val foundation = "androidx.compose.foundation:foundation:${version}"
-            const val layout = "androidx.compose.foundation:foundation-layout:${version}"
-            const val ui = "androidx.compose.ui:ui:${version}"
-            const val uiUtil = "androidx.compose.ui:ui-util:${version}"
-            const val runtime = "androidx.compose.runtime:runtime:${version}"
-            const val material = "androidx.compose.material:material:${version}"
-            const val animation = "androidx.compose.animation:animation:${version}"
+            const val foundation = "androidx.compose.foundation:foundation:$version"
+            const val layout = "androidx.compose.foundation:foundation-layout:$version"
+            const val ui = "androidx.compose.ui:ui:$version"
+            const val uiUtil = "androidx.compose.ui:ui-util:$version"
+            const val runtime = "androidx.compose.runtime:runtime:$version"
+            const val material = "androidx.compose.material:material:$version"
+            const val animation = "androidx.compose.animation:animation:$version"
 
             //Theme
-            const val theme = "com.google.android.material:compose-theme-adapter:1.1.5"
-            const val lottie = "com.airbnb.android:lottie-compose:5.0.3"
+            const val theme = "com.google.android.material:compose-theme-adapter:1.1.18"
+            const val lottie = "com.airbnb.android:lottie-compose:5.2.0"
 
             // Tooling support (Previews, etc.)
-            const val tooling = "androidx.compose.ui:ui-tooling:${version}"
+            const val tooling = "androidx.compose.ui:ui-tooling:$version"
             const val iconsExtended = "androidx.compose.material:material-icons-extended:$version"
 
             // UI Tests
@@ -111,12 +109,12 @@ object Libs {
         }
 
         object DependencyInjection {
-            private const val koin_version = "3.2.0-beta-1"
+            private const val koin_version = "3.2.0"
 
-            const val koinMain = "io.insert-koin:koin-android:${koin_version}"
-            const val koinJava = "io.insert-koin:koin-android-compat:${koin_version}"
-            const val koinWorkManager = "io.insert-koin:koin-androidx-workmanager:${koin_version}"
-            const val koinCompose = "io.insert-koin:koin-androidx-compose:${koin_version}"
+            const val koinMain = "io.insert-koin:koin-android:$koin_version"
+            const val koinJava = "io.insert-koin:koin-android-compat:$koin_version"
+            const val koinWorkManager = "io.insert-koin:koin-androidx-workmanager:$koin_version"
+            const val koinCompose = "io.insert-koin:koin-androidx-compose:$koin_version"
         }
 
         object Test {
@@ -135,10 +133,8 @@ object Libs {
     }
 
     object Firebase {
-        private const val version = "20.0.2"
-
         // Import the Firebase BoM
-        const val platform = "com.google.firebase:firebase-bom:29.2.1"
+        const val platform = "com.google.firebase:firebase-bom:30.4.1"
 
         // When using the BoM, you don't specify versions in Firebase library dependencies
         const val auth = "com.google.firebase:firebase-auth-ktx"
@@ -162,7 +158,16 @@ object Libs {
     }
 
     object Coil {
-        const val coilCompose = "io.coil-kt:coil-compose:2.0.0-rc01"
+        const val coilCompose = "io.coil-kt:coil-compose:2.2.1"
+    }
+
+    object Room {
+        private const val roomVersion = "2.4.3"
+
+        const val roomRuntime = "androidx.room:room-runtime:$roomVersion"
+        const val roomCompiler = "androidx.room:room-compiler:$roomVersion"
+        const val roomKtx = "androidx.room:room-ktx:$roomVersion"
+        const val roomTesting = "androidx.room:room-testing:$roomVersion"
     }
 
     object Retrofit {

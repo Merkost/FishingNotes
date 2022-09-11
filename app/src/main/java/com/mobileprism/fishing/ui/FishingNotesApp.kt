@@ -25,6 +25,7 @@ import com.mobileprism.fishing.ui.home.new_catch.NewCatchMasterScreen
 import com.mobileprism.fishing.ui.home.place.UserPlaceScreen
 import com.mobileprism.fishing.ui.home.profile.EditProfile
 import com.mobileprism.fishing.ui.home.settings.AboutApp
+import com.mobileprism.fishing.ui.home.settings.SettingsScreen
 import com.mobileprism.fishing.ui.home.weather.WeatherDaily
 import kotlinx.coroutines.InternalCoroutinesApi
 

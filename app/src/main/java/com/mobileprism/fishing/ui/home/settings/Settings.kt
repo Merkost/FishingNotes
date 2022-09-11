@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.ui.home
+package com.mobileprism.fishing.ui.home.settings
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
@@ -21,7 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
 import com.alorma.compose.settings.ui.SettingsCheckbox
@@ -33,6 +32,8 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.ui.MainDestinations
+import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.map.GrantLocationPermissionsDialog
 import com.mobileprism.fishing.ui.home.map.LocationPermissionDialog
 import com.mobileprism.fishing.ui.home.map.checkLocationPermissions

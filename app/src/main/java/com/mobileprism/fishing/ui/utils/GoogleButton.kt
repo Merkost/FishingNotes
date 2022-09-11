@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.R
 
@@ -33,14 +32,17 @@ fun GoogleButton(
     var clicked by remember { mutableStateOf(false) }
 
 
-    Card(onClick = { clicked = !clicked },
+    Card(
+        onClick = { clicked = !clicked },
         shape = RoundedCornerShape(20.dp), elevation = 10.dp,
-        onClickLabel = stringResource(
+        /*onClickLabel = stringResource(
             R.string.google_login
-        ),
+        ),*/
+        // FIXME:  onClickLabel
         //border = BorderStroke(width = 1.dp, color = borderColor),
-        backgroundColor = backgroundColor)
-     {
+        backgroundColor = backgroundColor
+    )
+    {
         Row(
             modifier = Modifier
                 .padding(

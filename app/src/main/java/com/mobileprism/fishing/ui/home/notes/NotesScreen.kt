@@ -33,7 +33,6 @@ import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.Constants.modalBottomSheetCorners
 import org.koin.androidx.compose.getViewModel
 
-@OptIn(ExperimentalFoundationApi::class)
 @ExperimentalMaterialApi
 @ExperimentalPagerApi
 @ExperimentalAnimationApi
