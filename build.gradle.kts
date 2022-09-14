@@ -1,8 +1,7 @@
 apply(plugin = "com.github.ben-manes.versions")
 
 buildscript {
-    val kotlin_version = "1.6.10"
-    val navigation_version = "2.4.0-rc01"
+    val kotlin_version = "1.7.0"
 
     repositories {
         google()

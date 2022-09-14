@@ -30,7 +30,7 @@
             android:value="${MAPS_API_KEY}" />
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="@string/admob_app_id"/>
+            android:value="@string/admob_app_id" />
         <meta-data
             android:name="firebase_performance_logcat_enabled"
             android:value="@string/is_release_boolean" />
@@ -38,9 +38,12 @@
             android:name="firebase_crashlytics_collection_enabled"
             android:value="@string/is_release_boolean" />
 
-        <activity android:hardwareAccelerated="true"
+        <activity
             android:name="com.mobileprism.fishing.ui.MainActivity"
-            android:exported="true">
+            android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
+            android:exported="true"
+            android:hardwareAccelerated="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

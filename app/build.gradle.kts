@@ -27,7 +27,7 @@ android {
 
         javaCompileOptions {
             annotationProcessorOptions {
-                arguments += "room.schemaLocation" to "$projectDir/schemas".toString()
+                arguments += "room.schemaLocation" to "$projectDir/schemas"
             }
         }
 
@@ -148,6 +148,7 @@ dependencies {
     implementation(Libs.Accompanist.permissions)
     implementation(Libs.Accompanist.appCompatTheme)
     implementation(Libs.Accompanist.placeholder)
+    implementation(Libs.Accompanist.navigationComposeAnimated)
 
     implementation(Libs.Coil.coilCompose)
 
