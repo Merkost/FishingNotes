@@ -26,7 +26,7 @@ import com.mobileprism.fishing.model.datastore.NotesPreferences
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.UiState
-import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
+import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlinedOld
 import com.mobileprism.fishing.ui.home.views.NoContentView
 import com.mobileprism.fishing.ui.home.weather.navigateToAddNewPlace
 import com.mobileprism.fishing.ui.navigate
@@ -117,7 +117,7 @@ fun UserPlaces(
                                 icon = painterResource(id = R.drawable.ic_no_place_on_map)
                             )
                             Spacer(modifier = Modifier.size(16.dp))
-                            DefaultButtonOutlined(
+                            DefaultButtonOutlinedOld(
                                 text = stringResource(id = R.string.new_place_text),
                                 onClick = navigateToNewPlace
                             )

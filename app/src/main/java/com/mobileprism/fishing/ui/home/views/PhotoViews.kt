@@ -209,7 +209,7 @@ fun PhotosView(
                         text = stringResource(id = R.string.no_photos_added),
                         icon = painterResource(id = R.drawable.ic_no_photos)
                     )
-                    DefaultButtonOutlined(
+                    DefaultButtonOutlinedOld(
                         text = stringResource(id = R.string.add_photo),
                         icon = painterResource(id = R.drawable.ic_baseline_add_photo_alternate_24),
                         onClick = onEditClick

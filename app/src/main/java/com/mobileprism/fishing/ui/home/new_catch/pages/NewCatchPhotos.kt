@@ -24,7 +24,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.catch.addPhoto
-import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
+import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlinedOld
 import com.mobileprism.fishing.ui.home.views.MaxCounterView
 import com.mobileprism.fishing.ui.home.views.NewCatchPhotoView
 import com.mobileprism.fishing.ui.home.views.SubtitleWithIcon
@@ -81,7 +81,7 @@ fun NewCatchPhotos(viewModel: NewCatchMasterViewModel, navController: NavControl
             maxCount = Constants.MAX_PHOTOS
         )
 
-        DefaultButtonOutlined(
+        DefaultButtonOutlinedOld(
             modifier = Modifier.constrainAs(button) {
                 bottom.linkTo(parent.bottom, 8.dp)
                 absoluteRight.linkTo(parent.absoluteRight)

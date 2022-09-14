@@ -8,6 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -286,7 +287,7 @@ fun CatchTitleView(
                     top.linkTo(parent.top)
                     width = Dimension.fillToConstraints
                 },
-                text = catch.fishType
+                text = catch.fishType,
             )
 
             HeaderText(
@@ -294,7 +295,7 @@ fun CatchTitleView(
                     absoluteRight.linkTo(parent.absoluteRight, 8.dp)
                     top.linkTo(parent.top)
                 },
-                text = "${catch.fishWeight} ${stringResource(id = R.string.kg)}"
+                text = "${catch.fishWeight} ${stringResource(id = R.string.kg)}",
             )
 
             SecondaryText(
@@ -459,7 +460,7 @@ fun CatchWeatherView(
                     contentDescription = stringResource(id = R.string.weather)
                 )
 
-                HeaderText(
+                HeaderTextOld(
                     modifier = Modifier.padding(horizontal = 2.dp),
                     text = temperatureUnit.getTemperature(catch.weatherTemperature)
                             + stringResource(temperatureUnit.stringRes)
@@ -581,7 +582,7 @@ fun CatchWeatherView(
                         absoluteRight.linkTo(windText.absoluteRight)
                     }
                     .rotate(catch.weatherWindDeg.toFloat()),
-                painter = painterResource(id = R.drawable.ic_baseline_navigation_24),
+                imageVector = Icons.Default.ArrowForward,
                 contentDescription = stringResource(id = R.string.wind),
             )
         }

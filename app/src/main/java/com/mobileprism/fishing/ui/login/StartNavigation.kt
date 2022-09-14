@@ -23,8 +23,6 @@ fun StartNavigation() {
     val surfaceColor = MaterialTheme.colors.surface
     val primaryColor = MaterialTheme.colors.primary
 
-
-
     AnimatedNavHost(
         navController = navController,
         startDestination = LoginDestinations.START,

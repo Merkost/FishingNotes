@@ -25,8 +25,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
@@ -35,7 +33,7 @@ import com.mobileprism.fishing.ui.home.new_catch.DateAndTimeItem
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchNoPlaceDialog
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlaceSelectView
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlacesState
-import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
+import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlinedOld
 import com.mobileprism.fishing.ui.home.views.DefaultDialog
 import com.mobileprism.fishing.ui.home.views.SubtitleWithIcon
 
@@ -80,7 +78,7 @@ fun NewCatchPlace(viewModel: NewCatchMasterViewModel, navController: NavControll
             onInputError = { viewModel.setPlaceInputError(it) }
         )
 
-        DefaultButtonOutlined(
+        DefaultButtonOutlinedOld(
             modifier = Modifier.constrainAs(button) {
                 top.linkTo(field.bottom, 16.dp)
                 absoluteLeft.linkTo(parent.absoluteLeft)

@@ -10,9 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.ui.theme.customColors
-import com.mobileprism.fishing.ui.theme.secondaryTextColor
 
 @Composable
 fun DefaultButton(
@@ -41,7 +41,7 @@ fun DefaultButton(
         }
         Text(
             modifier = Modifier.padding(start = 4.dp, end = 4.dp),
-            text = text.uppercase(),
+            text = text,
             color = textColor,
             maxLines = 1
         )
@@ -87,7 +87,18 @@ fun DefaultButtonSecondaryLight(
 }
 
 @Composable
-fun DefaultButtonOutlined(
+@Deprecated("Method is deprecated", ReplaceWith(
+    "DefaultButtonOutlined(\n" +
+            "    modifier,\n" +
+            "    icon,\n" +
+            "    text,\n" +
+            "    enabled,\n" +
+            "    onClick\n" +
+            ")"
+),
+    level = DeprecationLevel.WARNING)
+
+fun DefaultButtonOutlinedOld(
     modifier: Modifier = Modifier,
     icon: Painter? = null,
     text: String,
@@ -127,6 +138,50 @@ fun DefaultButtonOutlined(
         )
     }
 }
+
+@Composable
+fun DefaultButtonOutlined(
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    text: String,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
+    val color = animateColorAsState(
+        targetValue = if (enabled) {
+            MaterialTheme.colors.primaryVariant
+        } else {
+            MaterialTheme.customColors.secondaryIconColor
+        }
+    )
+
+    TextButton(
+        modifier = modifier,
+        enabled = enabled,
+        border = BorderStroke(width = 1.dp, color = color.value),
+        shape = RoundedCornerShape(24.dp),
+        onClick = onClick
+    ) {
+        icon?.let {
+            Icon(
+                modifier = Modifier
+                    .size(24.dp)
+                    .padding(start = 4.dp),
+                imageVector = icon,
+                contentDescription = null,
+                tint = color.value
+            )
+        }
+        Text(
+            modifier = Modifier.padding(start = 4.dp, end = 4.dp),
+            text = text.uppercase(),
+            color = color.value,
+            maxLines = 1
+        )
+    }
+}
+
+
 
 @Composable
 fun LoadingIconButtonOutlined(
@@ -189,10 +244,9 @@ fun DefaultButtonFilled(
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
-    TextButton(
+    Button(
         modifier = modifier,
         enabled = enabled,
-        border = BorderStroke(width = 1.dp, color = MaterialTheme.colors.primaryVariant),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = MaterialTheme.colors.primaryVariant,
             contentColor = MaterialTheme.colors.onPrimary

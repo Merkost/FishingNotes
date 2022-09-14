@@ -183,7 +183,7 @@ fun WeatherNoPlaces(modifier: Modifier = Modifier, onAddNewPlace: () -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            DefaultButtonOutlined(
+            DefaultButtonOutlinedOld(
                 text = stringResource(id = R.string.new_place_text),
                 onClick = onAddNewPlace
             )

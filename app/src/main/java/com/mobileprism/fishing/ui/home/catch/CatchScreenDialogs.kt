@@ -508,7 +508,7 @@ fun AddPhotoDialog(
             onClick = onCloseBottomSheet
         )
 
-        DefaultButtonOutlined(
+        DefaultButtonOutlinedOld(
             modifier = Modifier.constrainAs(addButton) {
                 top.linkTo(saveButton.top)
                 bottom.linkTo(saveButton.bottom)

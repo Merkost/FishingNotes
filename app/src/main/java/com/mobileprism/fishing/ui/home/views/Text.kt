@@ -42,7 +42,12 @@ fun BigText(
 }
 
 @Composable
-fun HeaderText(
+@Deprecated("Updated", ReplaceWith("HeaderText(\n" +
+        "    modifier,\n" +
+        "    text,\n" +
+        "    textStyle)")
+)
+fun HeaderTextOld(
     modifier: Modifier = Modifier,
     text: String,
     textAlign: TextAlign = TextAlign.Start,
@@ -58,12 +63,28 @@ fun HeaderText(
 }
 
 @Composable
+fun HeaderText(
+    modifier: Modifier = Modifier,
+    text: String,
+    textStyle: TextStyle = MaterialTheme.typography.h5.copy(
+        textAlign = TextAlign.Start,
+        color = MaterialTheme.colors.onSurface
+    )
+) {
+    Text(
+        modifier = modifier,
+        style = textStyle,
+        text = text
+    )
+}
+
+@Composable
 fun HeaderTextSecondary(
     modifier: Modifier = Modifier,
     text: String,
     textAlign: TextAlign = TextAlign.Start
 ) {
-    HeaderText(modifier, text, textAlign, MaterialTheme.customColors.secondaryTextColor)
+    HeaderTextOld(modifier, text, textAlign, MaterialTheme.customColors.secondaryTextColor)
 }
 
 @Composable

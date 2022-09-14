@@ -593,7 +593,7 @@ fun NoPlacesView(
         Spacer(modifier = Modifier.padding(8.dp))
         LottieNoPlaces(modifier = Modifier.size(128.dp))
         Spacer(modifier = Modifier.padding(8.dp))
-        DefaultButtonOutlined(
+        DefaultButtonOutlinedOld(
             text = stringResource(id = R.string.add_new_place),
             icon = painterResource(id = R.drawable.ic_baseline_add_location_24),
             onClick = onAddNewPlaceClick

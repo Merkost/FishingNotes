@@ -72,7 +72,7 @@ fun PlaceTitleView(
             tint = Color(place.markerColor)
         )
 
-        HeaderText(
+        HeaderTextOld(
             modifier = Modifier.constrainAs(title) {
                 absoluteLeft.linkTo(icon.absoluteRight, 8.dp)
                 absoluteRight.linkTo(navigateButton.absoluteLeft, 8.dp)
@@ -303,7 +303,7 @@ fun PlaceCatchesView(
                         icon = painterResource(id = R.drawable.ic_fishing)
                     )
                     Spacer(modifier = Modifier.size(16.dp))
-                    DefaultButtonOutlined(
+                    DefaultButtonOutlinedOld(
                         text = stringResource(R.string.new_catch_text),
                         onClick = { onNewCatchClick() }
                     )
@@ -333,19 +333,19 @@ fun PlaceButtonsView(
     ) {
         Spacer(modifier = Modifier.padding(4.dp))
 
-        DefaultButtonOutlined(
+        DefaultButtonOutlinedOld(
             text = stringResource(id = R.string.new_catch),
             icon = painterResource(id = R.drawable.ic_add_catch),
             onClick = { newCatchClicked(navController, place) }
         )
 
-        DefaultButtonOutlined(
+        DefaultButtonOutlinedOld(
             text = stringResource(id = R.string.navigate),
             icon = painterResource(id = R.drawable.ic_baseline_navigation_24),
             onClick = { onRouteClicked(context, place) }
         )
 
-        DefaultButtonOutlined(
+        DefaultButtonOutlinedOld(
             text = stringResource(id = R.string.share),
             icon = painterResource(id = R.drawable.ic_baseline_share_24),
             onClick = { onShareClicked(context, place) }

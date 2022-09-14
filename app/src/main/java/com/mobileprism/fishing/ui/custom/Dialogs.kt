@@ -239,3 +239,23 @@ fun ModalLoadingDialog(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun LoginHelpDialog(
+    onDismiss: () -> Unit
+) {
+    DefaultDialog(
+        primaryText = stringResource(R.string.auth),
+        onDismiss = onDismiss,
+        positiveButtonText = stringResource(id = R.string.close),
+        onPositiveClick = onDismiss
+    ) {
+        PrimaryText(
+            modifier = Modifier.padding(8.dp),
+            text = stringResource(R.string.login_help_text)
+        )
+
+    }
+}
+
+

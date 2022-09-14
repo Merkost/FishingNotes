@@ -35,10 +35,6 @@ fun GoogleButton(
     Card(
         onClick = { clicked = !clicked },
         shape = RoundedCornerShape(20.dp), elevation = 10.dp,
-        /*onClickLabel = stringResource(
-            R.string.google_login
-        ),*/
-        // FIXME:  onClickLabel
         //border = BorderStroke(width = 1.dp, color = borderColor),
         backgroundColor = backgroundColor
     )
