@@ -367,9 +367,9 @@
     <string name="profile_edit">Редактирование профиля</string>
     <string name="birthday_hint">Дата рождения</string>
     <string name="birthday_set">Указать дату рождения</string>
-    <string name="name_hint">Имя</string>
+    <string name="name_hint">Name</string>
     <string name="email_hint">E-mail</string>
-    <string name="username">Имя пользователя</string>
+    <string name="username">Username</string>
     <string name="more">More…</string>
     <string name="continue_button">Continue</string>
     <string name="create_an_account">Create an account</string>
@@ -390,9 +390,10 @@
     <string name="email">E-mail</string>
     <string name="login_loading_text">Logging in, please wait!</string>
     <string name="login_help_text">Authentication provides access to net functions, such as: saving your data online, communication and data sharing with other users, etc.</string>
-    <string name="аuthentication">Authentication</string>
+    <string name="auth">Authentication</string>
     <string name="fishing_notes">Fishing Notes</string>
     <string name="email_or_username">Email or username</string>
+    <string name="sign_up">Sign Up</string>
 
 
 </resources>

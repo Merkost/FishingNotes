@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.domain.entity.common.EmailPassword
 import com.mobileprism.fishing.domain.repository.AuthManager
-import com.mobileprism.fishing.domain.use_cases.users.*
+import com.mobileprism.fishing.domain.use_cases.users.RegisterNewUserUseCase
+import com.mobileprism.fishing.domain.use_cases.users.SignInUserUserCase
+import com.mobileprism.fishing.domain.use_cases.users.SkipAuthorizationUseCase
 import com.mobileprism.fishing.model.auth.LoginState
 import com.mobileprism.fishing.ui.viewstates.LoginScreenViewState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,10 +18,8 @@ import kotlinx.coroutines.launch
 // TODO: Delete many UseCases
 class LoginViewModel(
     private val authManager: AuthManager,
-    private val subscribeOnLoginStatus: SubscribeOnLoginState,
     private val registerNewUserUseCase: RegisterNewUserUseCase,
     private val signInUserUseCase: SignInUserUserCase,
-    private val signInUserWithGoogleUseCase: SignInUserWithGoogleUseCase,
     private val skipAuthorizationUseCase: SkipAuthorizationUseCase
 ) : ViewModel() {
 

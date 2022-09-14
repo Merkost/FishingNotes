@@ -119,7 +119,8 @@ class AuthManagerImpl(
         userDatastore.saveUser(
             user = User(
                 email = user.email,
-                login = user.login
+                login = user.login,
+                loginType = LoginType.SERVER,
             )
         )
     }

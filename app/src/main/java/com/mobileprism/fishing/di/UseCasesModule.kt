@@ -31,9 +31,7 @@ val useCasesModule = module {
     factory { GetUserCatchesByMarkerId(get()) }
     factory { RegisterNewUserUseCase(get()) }
     factory { SignInUserUserCase(get()) }
-    factory { SignInUserWithGoogleUseCase(get()) }
     factory { SignOutCurrentUserUserCase(get()) }
     factory { SubscribeOnCurrentUserUseCase(get()) }
     factory { SkipAuthorizationUseCase(get()) }
-    factory { SubscribeOnLoginState(get()) }
 }

@@ -46,7 +46,7 @@ import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.SnackbarAction
 import com.mobileprism.fishing.ui.home.SnackbarManager
-import com.mobileprism.fishing.ui.login.LoginScreen
+import com.mobileprism.fishing.ui.login.StartNavigation
 import com.mobileprism.fishing.ui.theme.FishingNotesTheme
 import com.mobileprism.fishing.ui.viewmodels.MainViewModel
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
@@ -74,7 +74,7 @@ class MainActivity : ComponentActivity() {
         }
 
     companion object {
-        const val splashFadeDurationMillis = 300
+        const val splashFadeDurationMillis = 350
         const val UPDATE_REQUEST_CODE = 984165687
     }
 
@@ -256,7 +256,7 @@ class MainActivity : ComponentActivity() {
     fun Distribution(isUserLogged: State<Boolean>) {
         Crossfade(targetState = isUserLogged.value) { state ->
             when (state) {
-                false -> LoginScreen()
+                false -> StartNavigation()
                 true -> FishingNotesApp()
             }
         }

@@ -18,5 +18,6 @@ data class User(
 
 enum class LoginType {
     LOCAL,
-    GOOGLE;
+    GOOGLE,
+    SERVER;
 }

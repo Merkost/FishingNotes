@@ -98,7 +98,6 @@ val repositoryModuleLocal = module {
         )
     }
 
-    //todo
     single<AuthRepository> {
         AuthRepositoryRetrofitImpl(
             firebaseAnalytics = get(),
@@ -163,7 +162,7 @@ fun createFishingOkHttpClient(
         .connectTimeout(70, TimeUnit.SECONDS)
         .writeTimeout(100, TimeUnit.SECONDS)
         .readTimeout(70, TimeUnit.SECONDS)
-        .hostnameVerifier { hostname, session ->
+        .hostnameVerifier { hostname, _ ->
             if (Constants.API_URL.contains(hostname)) true else false
         }
         .sslSocketFactory(sslSocketFactory = getSSLConfig(context).socketFactory, systemDefaultTrustManager())

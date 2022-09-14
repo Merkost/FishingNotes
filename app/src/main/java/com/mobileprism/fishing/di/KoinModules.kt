@@ -64,7 +64,7 @@ val settingsModule = module {
 val mainModule = module {
     viewModel {
         MainViewModel(
-            subscribeOnLoginState = get(),
+            authManager = get(),
             userPreferences = get()
         )
     }
@@ -72,10 +72,8 @@ val mainModule = module {
     viewModel {
         LoginViewModel(
             authManager = get(),
-            subscribeOnLoginStatus = get(),
             registerNewUserUseCase = get(),
             signInUserUseCase = get(),
-            signInUserWithGoogleUseCase = get(),
             skipAuthorizationUseCase = get()
         )
     }

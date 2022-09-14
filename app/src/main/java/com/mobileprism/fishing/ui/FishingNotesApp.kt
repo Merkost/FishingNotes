@@ -1,7 +1,6 @@
 package com.mobileprism.fishing.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
@@ -19,7 +18,10 @@ import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
-import com.mobileprism.fishing.ui.home.*
+import com.mobileprism.fishing.ui.home.AppSnackbar
+import com.mobileprism.fishing.ui.home.FishingNotesBottomBar
+import com.mobileprism.fishing.ui.home.HomeSections
+import com.mobileprism.fishing.ui.home.addHomeGraph
 import com.mobileprism.fishing.ui.home.catch.UserCatchScreen
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchMasterScreen
 import com.mobileprism.fishing.ui.home.place.UserPlaceScreen
@@ -61,8 +63,6 @@ fun FishingNotesApp() {
             Modifier.statusBarsHeight()
         else Modifier*/
     ) { innerPaddingModifier ->
-        Column() {
-
             //Spacer(modifier = Modifier.statusBarsHeight())
             NavHost(
                 navController = appStateHolder.navController,
@@ -75,8 +75,6 @@ fun FishingNotesApp() {
                     upPress = appStateHolder::upPress,
                 )
             }
-
-        }
     }
 }
 

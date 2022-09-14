@@ -4,8 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.domain.entity.common.User
-import com.mobileprism.fishing.domain.use_cases.users.SubscribeOnLoginState
-import com.mobileprism.fishing.model.auth.LoginState
+import com.mobileprism.fishing.domain.repository.AuthManager
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
@@ -15,7 +14,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class MainViewModel(
-    private val subscribeOnLoginState: SubscribeOnLoginState,
+    private val authManager: AuthManager,
     private val userPreferences: UserPreferences
 ) : ViewModel() {
 
@@ -42,13 +41,16 @@ class MainViewModel(
     private fun loadCurrentUser() {
         viewModelScope.launch {
 
-            subscribeOnLoginState().collectLatest {
-                when (it) {
-                    is LoginState.LoggedIn -> {
+            authManager.currentUser.collectLatest {
+                when (it?.loginType) {
+                    null -> {
+                        isUserLoggedState.value = false
+                    }
+                    else -> {
                         isUserLoggedState.value = true
                     }
 
-                    is LoginState.LoginFailure -> {
+                    /*is LoginState.LoginFailure -> {
                         isUserLoggedState.value = false
                         handleError(it.throwable)
                     }
@@ -59,7 +61,7 @@ class MainViewModel(
 
                     is LoginState.GoogleAuthInProcess -> {
                         googleLoginEvent.emit(Unit)
-                    }
+                    }*/
                 }
             }
 
