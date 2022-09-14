@@ -16,6 +16,8 @@ object Libs {
         const val permissions = "com.google.accompanist:accompanist-permissions:$version"
         const val appCompatTheme = "com.google.accompanist:accompanist-appcompat-theme:$version"
         const val placeholder = "com.google.accompanist:accompanist-placeholder-material:$version"
+        const val navigationComposeAnimated = "com.google.accompanist:accompanist-navigation-animation:$version"
+
     }
 
     object GoogleMaps {
@@ -61,7 +63,7 @@ object Libs {
         const val splashScreen = "androidx.core:core-splashscreen:1.0.0-beta01"
 
         object Compose {
-            const val version = "1.1.0"
+            const val version = "1.2.0"
 
             const val foundation = "androidx.compose.foundation:foundation:$version"
             const val layout = "androidx.compose.foundation:foundation-layout:$version"
