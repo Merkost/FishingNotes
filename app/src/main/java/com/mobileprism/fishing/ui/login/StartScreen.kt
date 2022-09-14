@@ -43,16 +43,19 @@ object LoginDestinations {
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @Composable
-fun StartScreen(toLoginScreen: () -> Unit, toRegistration: () -> Unit) {
+fun StartScreen(
+    onStartGoogleLogin: () -> Unit,
+    toLoginScreen: () -> Unit,
+    toRegistration: () -> Unit
+) {
     val context = LocalContext.current
     val loginViewModel: LoginViewModel = get()
+    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
 
     val coroutineScope = rememberCoroutineScope()
     val scaffoldState = rememberScaffoldState()
 
     var visible by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
-    var showLottie by remember { mutableStateOf(false) }
     var helpDialogState by remember { mutableStateOf(false) }
 
     val uiState by loginViewModel.uiState.collectAsState()
@@ -62,23 +65,19 @@ fun StartScreen(toLoginScreen: () -> Unit, toRegistration: () -> Unit) {
     LaunchedEffect(uiState) {
         when (val state = uiState) {
             is LoginScreenViewState.LoginSuccess -> {
-                isLoading = false
-                showLottie = true
-                //delay(2500)
+                sheetState.hide()
                 visible = false
-                //delay((MainActivity.splashFadeDurationMillis * 2).toLong())
             }
             is LoginScreenViewState.Loading -> {
-                isLoading = true
+                sheetState.show()
             }
             is LoginScreenViewState.Error -> {
-                isLoading = false
                 scaffoldState.snackbarHostState.showSnackbar(
                     state.error.message ?: context.getString(R.string.error_occured)
                 )
             }
             is LoginScreenViewState.NotLoggedIn -> {
-                isLoading = false
+
             }
         }
     }
@@ -89,7 +88,6 @@ fun StartScreen(toLoginScreen: () -> Unit, toRegistration: () -> Unit) {
                 if (currentMessages.isNotEmpty()) {
                     val message = currentMessages.first()
                     val text = resources.getText(message.messageId)
-                    isLoading = false
                     // Display the snackbar on the screen. `showSnackbar` is a function
                     // that suspends until the snackbar disappears from the screen
                     scaffoldState.snackbarHostState.showSnackbar(text.toString())
@@ -100,120 +98,135 @@ fun StartScreen(toLoginScreen: () -> Unit, toRegistration: () -> Unit) {
         }
     }
 
-    ModalLoadingDialog(isLoading = isLoading, text = stringResource(R.string.login_loading_text),
-        onDismiss = {
-            isLoading = false
-            // FIXME: cancel coroutine
-        })
-
     if (helpDialogState) {
         LoginHelpDialog(onDismiss = { helpDialogState = false })
     }
 
-    Scaffold(
-        scaffoldState = scaffoldState,
-        snackbarHost = {
-            SnackbarHost(
-                hostState = it,
-                modifier = Modifier.systemBarsPadding(),
-                snackbar = { snackbarData -> AppSnackbar(snackbarData) }
-            )
-        }
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxSize()
-        ) {
-
+    ModalBottomSheetLayout(
+        sheetState = sheetState,
+        sheetShape = RoundedCornerShape(30.dp, 30.dp, 0.dp, 0.dp),
+        sheetContent = {
             Column(
-                modifier = Modifier
-                    .padding(vertical = 50.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(50.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Image(
-                    modifier = Modifier
-                        .size(150.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .aspectRatio(1f),
-                    painter = painterResource(id = R.drawable.ic_fishing_logo),
-                    contentDescription = "app logo"
-                )
-                HeaderText(
-                    text = stringResource(id = R.string.fishing_notes),
-                    textStyle = MaterialTheme.typography.h6.copy(
-                        fontFamily = FontFamily.SansSerif,
-                        color = MaterialTheme.colors.primaryVariant,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                SecondaryText(text = stringResource(id = R.string.loading))
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
+        }) {
+
+        Scaffold(
+            scaffoldState = scaffoldState,
+            snackbarHost = {
+                SnackbarHost(
+                    hostState = it,
+                    modifier = Modifier.systemBarsPadding(),
+                    snackbar = { snackbarData -> AppSnackbar(snackbarData) }
                 )
             }
-
+        ) {
             Column(
-                modifier = Modifier
-                    .weight(2f, true)/*.background(Color.LightGray)*/ ,
-                verticalArrangement = Arrangement.SpaceEvenly,
                 horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxSize()
             ) {
 
-
                 Column(
-                    modifier = Modifier.padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier = Modifier
+                        .padding(vertical = 50.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Text(
-                        text = stringResource(id = R.string.sign_up), style = MaterialTheme.typography.h4.copy(
+                    Image(
+                        modifier = Modifier
+                            .size(150.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .aspectRatio(1f),
+                        painter = painterResource(id = R.drawable.ic_fishing_logo),
+                        contentDescription = "app logo"
+                    )
+                    HeaderText(
+                        text = stringResource(id = R.string.fishing_notes),
+                        textStyle = MaterialTheme.typography.h6.copy(
+                            fontFamily = FontFamily.SansSerif,
+                            color = MaterialTheme.colors.primaryVariant,
                             fontWeight = FontWeight.SemiBold
                         )
                     )
-                    SecondaryText(text = "It's easier to sign up now")
                 }
 
                 Column(
-                    modifier = Modifier,
-                    verticalArrangement = Arrangement.spacedBy(1.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier = Modifier
+                        .weight(2f, true),/*.background(Color.LightGray)*/
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    LoginWithGoogleButton(
-                        modifier = Modifier,
-                        onClick = { loginViewModel.continueWithGoogle() }
-                    )
 
-                    DefaultButtonSecondaryLight(text = "Register with email/username") {
-                        toRegistration()
+
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.sign_up),
+                            style = MaterialTheme.typography.h4.copy(
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        )
+                        SecondaryText(text = "It's easier to sign up now")
                     }
-                }
+
+                    Column(
+                        modifier = Modifier,
+                        verticalArrangement = Arrangement.spacedBy(1.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        LoginWithGoogleButton(
+                            modifier = Modifier,
+                            onClick = {
+                                // FIXME: Improve this
+                                onStartGoogleLogin()
+                                loginViewModel.continueWithGoogle()
+                            }
+                        )
+
+                        DefaultButtonSecondaryLight(text = "Register with email/username") {
+                            toRegistration()
+                        }
+                    }
 
 
-                DefaultButtonOutlined(
-                    modifier = Modifier,
-                    text = stringResource(id = R.string.skip),
-                    icon = Icons.Default.ArrowForward,
-                    onClick = { loginViewModel.skipAuthorization() }
-                )
-
-                Row(
-                    modifier = Modifier.padding(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    SecondaryText(text = stringResource(R.string.have_an_account))
-
-                    Text(
-                        modifier = Modifier.clickable {
-                            toLoginScreen()
-                        },
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colors.primaryVariant,
-                        text = stringResource(R.string.sign_in),
-                        style = TextStyle(textDecoration = TextDecoration.Underline)
+                    DefaultButtonOutlined(
+                        modifier = Modifier,
+                        text = stringResource(id = R.string.skip),
+                        icon = Icons.Default.ArrowForward,
+                        onClick = { loginViewModel.skipAuthorization() }
                     )
-                }
 
+                    Row(
+                        modifier = Modifier.padding(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        SecondaryText(text = stringResource(R.string.have_an_account))
+
+                        Text(
+                            modifier = Modifier.clickable {
+                                toLoginScreen()
+                            },
+                            fontSize = 18.sp,
+                            color = MaterialTheme.colors.primaryVariant,
+                            text = stringResource(R.string.sign_in),
+                            style = TextStyle(textDecoration = TextDecoration.Underline)
+                        )
+                    }
+
+                }
             }
         }
     }
+
 }
 

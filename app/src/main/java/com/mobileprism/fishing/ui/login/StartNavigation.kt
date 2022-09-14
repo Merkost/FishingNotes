@@ -14,7 +14,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @Composable
-fun StartNavigation() {
+fun StartNavigation(onStartGoogleLogin: () -> Unit) {
     val navController = rememberAnimatedNavController()
     val upPress: () -> Unit = { navController.navigateUp() }
 
@@ -37,7 +37,7 @@ fun StartNavigation() {
                 systemUiController.setStatusBarColor(surfaceColor)
                 onDispose{}
             }
-            StartScreen(
+            StartScreen(onStartGoogleLogin = onStartGoogleLogin,
                 toLoginScreen = { navController.navigate(LoginDestinations.LOGIN) }
             ) { navController.navigate(LoginDestinations.REGISTER) }
         }

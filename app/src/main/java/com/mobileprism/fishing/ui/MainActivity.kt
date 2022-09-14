@@ -256,7 +256,7 @@ class MainActivity : ComponentActivity() {
     fun Distribution(isUserLogged: State<Boolean>) {
         Crossfade(targetState = isUserLogged.value) { state ->
             when (state) {
-                false -> StartNavigation()
+                false -> StartNavigation { startGoogleLogin() }
                 true -> FishingNotesApp()
             }
         }
