@@ -48,6 +48,7 @@ import com.mobileprism.fishing.ui.home.SnackbarAction
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.login.StartNavigation
 import com.mobileprism.fishing.ui.theme.FishingNotesTheme
+import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewmodels.MainViewModel
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.Logger
@@ -116,9 +117,10 @@ class MainActivity : ComponentActivity() {
                         splashScreenViewProvider.remove()
                         if (Build.VERSION.SDK_INT < 31) {
                             setContent {
-                                FishingNotesTheme(appTheme.value) {
-                                    Distribution(viewModel.isUserLoggedState.collectAsState())
-                                }
+                                Distribution(
+                                    appTheme = appTheme.value,
+                                    viewModel.isUserLoggedState.collectAsState()
+                                )
                             }
                         }
                     }
@@ -128,9 +130,10 @@ class MainActivity : ComponentActivity() {
 
         if (Build.VERSION.SDK_INT >= 31) {
             setContent {
-                FishingNotesTheme(appTheme.value) {
-                    Distribution(viewModel.isUserLoggedState.collectAsState())
-                }
+                Distribution(
+                    appTheme = appTheme.value,
+                    viewModel.isUserLoggedState.collectAsState()
+                )
             }
         }
 
@@ -253,11 +256,19 @@ class MainActivity : ComponentActivity() {
     @ExperimentalAnimationApi
     @ExperimentalPermissionsApi
     @Composable
-    fun Distribution(isUserLogged: State<Boolean>) {
+    fun Distribution(appTheme: AppThemeValues?, isUserLogged: State<Boolean>) {
         Crossfade(targetState = isUserLogged.value) { state ->
             when (state) {
-                false -> StartNavigation { startGoogleLogin() }
-                true -> FishingNotesApp()
+                false -> {
+                    FishingNotesTheme(appTheme, isLoginScreen = true) {
+                        StartNavigation { startGoogleLogin() }
+                    }
+                }
+                true -> {
+                    FishingNotesTheme(appTheme) {
+                        FishingNotesApp()
+                    }
+                }
             }
         }
     }
@@ -305,15 +316,15 @@ class MainActivity : ComponentActivity() {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
 
         auth.signInWithCredential(credential).addOnCompleteListener(this) { task ->
-                when {
-                    task.isSuccessful -> {
-                        // Sign in success, update UI with the signed-in user's information
-                    }
-                    else -> {
-                        handleError(task.exception)
-                    }
+            when {
+                task.isSuccessful -> {
+                    // Sign in success, update UI with the signed-in user's information
+                }
+                else -> {
+                    handleError(task.exception)
                 }
             }
+        }
     }
 
     private fun handleError(error: Exception?) {

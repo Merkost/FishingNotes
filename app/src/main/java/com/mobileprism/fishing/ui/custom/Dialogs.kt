@@ -1,14 +1,18 @@
 package com.mobileprism.fishing.ui.home.views
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -256,6 +260,24 @@ fun LoginHelpDialog(
         )
 
     }
+}
+
+@Composable
+fun AlertLoading() {
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false,
+        ),
+        content = {
+            Box(modifier = Modifier
+                .clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colors.surface)
+            ) {
+                CircularProgressIndicator(modifier = Modifier.padding(16.dp), strokeWidth = 4.dp)
+            }
+        }
+    )
 }
 
 

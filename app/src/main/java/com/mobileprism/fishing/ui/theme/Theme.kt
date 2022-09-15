@@ -79,6 +79,7 @@ private val BlueDarkColorPalette = darkColors(
 @Composable
 fun FishingNotesTheme(
     initialAppTheme: AppThemeValues? = null,
+    isLoginScreen: Boolean = false,
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable() () -> Unit
 ) {
@@ -91,16 +92,23 @@ fun FishingNotesTheme(
 
     val systemUiController = rememberSystemUiController()
     SideEffect {
-        if (darkTheme) {
-            systemUiController.apply {
-                setSystemBarsColor(color = colors.primary)
-                //setStatusBarColor(color = colors.primaryVariant)
+        systemUiController.apply {
+            when(isLoginScreen) {
+                true -> {
+                    setStatusBarColor(color = colors.surface)
+                    setNavigationBarColor(color = colors.primary)
+                }
+                else -> {
+                    if (darkTheme) {
+                        setSystemBarsColor(color = colors.primary)
+                        //setStatusBarColor(color = colors.primaryVariant)
+                    } else {
+                        setSystemBarsColor(color = colors.primary)
+                        //setStatusBarColor(color = colors.primary)
+                    }
+                }
             }
-        } else {
-            systemUiController.apply {
-                setSystemBarsColor(color = colors.primary)
-                //setStatusBarColor(color = colors.primary)
-            }
+
         }
     }
 
@@ -117,9 +125,11 @@ fun FishingNotesTheme(
 }
 
 fun chooseTheme(appTheme: AppThemeValues?, darkTheme: Boolean): Colors {
-    return when(appTheme) {
+    return when (appTheme) {
         AppThemeValues.Blue -> if (darkTheme) BlueDarkColorPalette else BlueLightColorPalette
         AppThemeValues.Green -> if (darkTheme) GreenDarkColorPalette else GreenLightColorPalette
-        else -> { InitColorPalette }
+        else -> {
+            InitColorPalette
+        }
     }
 }
