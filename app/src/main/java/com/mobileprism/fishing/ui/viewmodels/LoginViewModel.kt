@@ -31,6 +31,10 @@ class LoginViewModel(
         subscribeOnLoginState()
     }
 
+    fun googleAuthError(exception: Exception?) {
+        _uiState.update { LoginScreenViewState.Error(exception ?: Throwable()) }
+    }
+
     private fun subscribeOnLoginState() {
         viewModelScope.launch {
             authManager.loginState.collectLatest {

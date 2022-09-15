@@ -40,9 +40,10 @@ class FirebaseUserRepositoryImpl(
     private val dbCollections: RepositoryCollections,
     private val firebaseAnalytics: FirebaseAnalytics,
     private val context: Context,
+    private val fireBaseAuth: FirebaseAuth
 ) : FirebaseUserRepository {
 
-    private val fireBaseAuth = FirebaseAuth.getInstance()
+
 
     override val currentUser: Flow<User?>
         get() = callbackFlow {

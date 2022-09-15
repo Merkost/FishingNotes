@@ -263,7 +263,7 @@ fun LoginHelpDialog(
 }
 
 @Composable
-fun AlertLoading() {
+fun ModalLoading() {
     Dialog(
         onDismissRequest = {},
         properties = DialogProperties(

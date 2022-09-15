@@ -16,7 +16,8 @@ val loginModule = module {
             userDatastore = get(),
             dbCollections = get(),
             firebaseAnalytics = get(),
-            context = androidContext()
+            context = androidContext(),
+            fireBaseAuth = get()
         )
     }
 

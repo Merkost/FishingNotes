@@ -64,19 +64,13 @@ class MainActivity : ComponentActivity() {
 
     private val logger: Logger by inject()
     private val appUpdateManager: AppUpdateManager = get()
-    private val auth: FirebaseAuth = get()
 
     private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
-    private lateinit var googleSignInClient: GoogleSignInClient
-
-    private val registeredActivity =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            onActivityResult(result)
-        }
 
     companion object {
         const val splashFadeDurationMillis = 350
         const val UPDATE_REQUEST_CODE = 984165687
+
     }
 
     @OptIn(
@@ -90,8 +84,6 @@ class MainActivity : ComponentActivity() {
 
         val screenState = viewModel.mutableStateFlow
         val appTheme = viewModel.appTheme
-
-        subscribeOnGoogleLoginEvents(viewModel.googleLoginEvent)
 
         installSplashScreen().apply {
             setKeepOnScreenCondition {
@@ -152,14 +144,6 @@ class MainActivity : ComponentActivity() {
         setAppMuted(true)
 
         checkForUpdates()
-    }
-
-    private fun subscribeOnGoogleLoginEvents(events: SharedFlow<Unit>) {
-        lifecycleScope.launchWhenStarted {
-            events.collect {
-                startGoogleLogin()
-            }
-        }
     }
 
     private fun checkForUpdates() {
@@ -261,7 +245,7 @@ class MainActivity : ComponentActivity() {
             when (state) {
                 false -> {
                     FishingNotesTheme(appTheme, isLoginScreen = true) {
-                        StartNavigation { startGoogleLogin() }
+                        StartNavigation()
                     }
                 }
                 true -> {
@@ -271,77 +255,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    private fun startGoogleLogin() {
-        // Configure GOOGLE sign-in to request the user's ID, email address, and basic
-        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-
-        auth.signOut()
-
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
-            .requestEmail()
-            .build()
-        // Build a GoogleSignInClient with the options specified by gso.
-        googleSignInClient = GoogleSignIn.getClient(this, gso)
-        val signInIntent: Intent = googleSignInClient.signInIntent
-        registeredActivity.launch(signInIntent)
-    }
-
-    private fun onActivityResult(result: ActivityResult) {
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        val exception = task.exception
-        when {
-            task.isSuccessful -> {
-                try {
-                    // Google Sign In was successful, authenticate with Firebase
-                    val account = task.getResult(ApiException::class.java)
-                    firebaseAuthWithGoogle(account.idToken!!)
-
-                } catch (e: ApiException) {
-                    // Google Sign In failed, update UI appropriately
-                    handleError(e)
-                }
-            }
-            else -> {
-                handleError(exception)
-            }
-        }
-    }
-
-
-    private fun firebaseAuthWithGoogle(idToken: String) {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-
-        auth.signInWithCredential(credential).addOnCompleteListener(this) { task ->
-            when {
-                task.isSuccessful -> {
-                    // Sign in success, update UI with the signed-in user's information
-                }
-                else -> {
-                    handleError(task.exception)
-                }
-            }
-        }
-    }
-
-    private fun handleError(error: Exception?) {
-        error?.let {
-
-            val bundle = bundleOf()
-            bundle.putString(FirebaseAnalytics.Param.SCORE, error.message)
-            Firebase.analytics.logEvent("signin_error", bundle)
-
-            //Toast.makeText(this,  error.message, Toast.LENGTH_LONG).show()
-            logger.log(error.message)
-            if (BuildConfig.DEBUG) {
-                showToast(this, text = error.message.toString(), Toast.LENGTH_LONG)
-            }
-        }
-        SnackbarManager.showMessage(R.string.google_login_failed)
-
     }
 
     override fun onStop() {
