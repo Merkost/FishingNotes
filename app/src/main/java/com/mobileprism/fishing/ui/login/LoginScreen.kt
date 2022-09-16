@@ -30,8 +30,7 @@ import com.mobileprism.fishing.ui.home.AppSnackbar
 import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.HeaderText
-import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
-import com.mobileprism.fishing.ui.viewstates.LoginScreenViewState
+import com.mobileprism.fishing.ui.viewmodels.LoginScreenViewModel
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.get
 
@@ -39,40 +38,29 @@ import org.koin.androidx.compose.get
 @ExperimentalAnimationApi
 @Composable
 fun LoginScreen(upPress: () -> Unit) {
-    val loginViewModel: LoginViewModel = get()
 
-    val coroutineScope = rememberCoroutineScope()
+    val viewModel: LoginScreenViewModel = get()
+
     val scaffoldState = rememberScaffoldState()
 
     var visible by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
-    var helpDialogState by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    val uiState by loginViewModel.uiState.collectAsState()
 
+    val uiState by viewModel.uiState.collectAsState()
 
+    LaunchedEffect(uiState.isLoggedIn) {
+        if (uiState.isLoggedIn) {
+            visible = false
+            delay((MainActivity.splashFadeDurationMillis * 2).toLong())
+        }
+    }
 
-    LaunchedEffect(uiState) {
-        when (val state = uiState) {
-            is LoginScreenViewState.LoginSuccess -> {
-
-                //delay(2500)
-                visible = false
-                delay((MainActivity.splashFadeDurationMillis * 2).toLong())
-            }
-            is LoginScreenViewState.Loading -> {
-                isLoading = true
-            }
-            is LoginScreenViewState.Error -> {
-                isLoading = false
-                scaffoldState.snackbarHostState.showSnackbar(
-                    state.error.message ?: context.getString(R.string.error_occured)
-                )
-            }
-            is LoginScreenViewState.NotLoggedIn -> {
-                isLoading = false
-            }
+    LaunchedEffect(uiState.isError) {
+        if (uiState.isError) {
+            scaffoldState.snackbarHostState.showSnackbar(
+                uiState.errorText ?: context.getString(R.string.error_occured)
+            )
         }
     }
 
@@ -188,8 +176,7 @@ fun LoginScreen(upPress: () -> Unit) {
                         )
                 ) {
 
-
-                    val loginOrEmail = rememberSaveable() { mutableStateOf("") }
+                    val usernameOrEmail = rememberSaveable() { mutableStateOf("") }
                     val password = rememberSaveable() { mutableStateOf("") }
                     val showPassword = rememberSaveable() { mutableStateOf(false) }
 
@@ -220,9 +207,9 @@ fun LoginScreen(upPress: () -> Unit) {
 
                             OutlinedTextField(
                                 modifier = Modifier.fillMaxWidth(),
-                                enabled = uiState != LoginScreenViewState.Loading,
-                                value = loginOrEmail.value,
-                                onValueChange = { loginOrEmail.value = it },
+                                enabled = !uiState.isLoading,
+                                value = usernameOrEmail.value,
+                                onValueChange = { usernameOrEmail.value = it },
                                 label = {
                                     Text(
                                         text = stringResource(R.string.email_or_username),
@@ -247,7 +234,7 @@ fun LoginScreen(upPress: () -> Unit) {
                                 keyboardOptions = KeyboardOptions.Default.copy(
                                     imeAction = ImeAction.Next
                                 ),
-                                enabled = uiState != LoginScreenViewState.Loading,
+                                enabled = !uiState.isLoading,
                                 singleLine = true,
                                 visualTransformation = if (showPassword.value) VisualTransformation.None else PasswordVisualTransformation(),
                                 leadingIcon = {
@@ -278,14 +265,14 @@ fun LoginScreen(upPress: () -> Unit) {
 
 
                         Crossfade(
-                            targetState = uiState,
+                            targetState = uiState.isLoading,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(12.dp)
                                 .padding(vertical = 4.dp)
                         ) {
                             when (it) {
-                                LoginScreenViewState.Loading -> {
+                                true -> {
                                     LinearProgressIndicator(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -306,14 +293,16 @@ fun LoginScreen(upPress: () -> Unit) {
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Crossfade(uiState) {
+                            Crossfade(uiState.isLoading) {
                                 when (it) {
-                                    LoginScreenViewState.Loading -> DefaultButtonOutlined(
-                                        text = stringResource(R.string.cancel),
-                                        onClick = {
-                                            // TODO: Cancel login
-                                        }
-                                    )
+                                    true -> {
+                                        DefaultButtonOutlined(
+                                            text = stringResource(R.string.cancel),
+                                            onClick = {
+                                                // TODO: Cancel login
+                                            }
+                                        )
+                                    }
                                     else -> {
                                         Spacer(modifier = Modifier.size(4.dp))
                                     }
@@ -321,10 +310,10 @@ fun LoginScreen(upPress: () -> Unit) {
                             }
                             DefaultButtonFilled(
                                 text = stringResource(id = R.string.login),
-                                enabled = uiState != LoginScreenViewState.Loading,
+                                enabled = !uiState.isLoading,
                                 onClick = {
-                                    loginViewModel.signInUser(
-                                        loginOrEmail = loginOrEmail.value,
+                                    viewModel.signInUser(
+                                        usernameOrEmail = usernameOrEmail.value,
                                         password = password.value
                                     )
                                     // TODO:

@@ -3,6 +3,7 @@ package com.mobileprism.fishing.model.auth
 import com.mobileprism.fishing.domain.entity.common.EmailPassword
 import com.mobileprism.fishing.domain.entity.common.LoginType
 import com.mobileprism.fishing.domain.entity.common.User
+import com.mobileprism.fishing.domain.entity.common.UsernamePassword
 import com.mobileprism.fishing.domain.repository.AuthManager
 import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.domain.repository.FirebaseUserRepository
@@ -30,7 +31,7 @@ class AuthManagerImpl(
 
     override suspend fun subscribeOnLoginState(): Flow<LoginState> = loginState.asStateFlow()
 
-    override suspend fun registerNewUser(emailPassword: EmailPassword) {
+    override suspend fun registerNewUserWithEmail(emailPassword: EmailPassword) {
         authRepository.registerNewUser(emailPassword).fold(
             onSuccess = {
                 onLoginSuccess(it)
@@ -39,6 +40,11 @@ class AuthManagerImpl(
                 onLoginFailure(it)
             }
         )
+    }
+
+    override suspend fun registerNewUserWithUserName(userNamePassword: UsernamePassword) {
+        // TODO: Implement login with username
+        onLoginFailure(throwable = Throwable("Not implemented"))
     }
 
     override suspend fun loginUser(emailPassword: EmailPassword) {
@@ -58,7 +64,6 @@ class AuthManagerImpl(
     }
 
     override suspend fun googleLogin() {
-        loginState.update { LoginState.GoogleAuthInProcess }
 
         firebaseUserRepository.currentUser
             .catch { error -> onLoginFailure(error) }
@@ -75,7 +80,7 @@ class AuthManagerImpl(
                             onLoginFailure(it)
                         }
                     )
-                } else if (loginState.value !is LoginState.GoogleAuthInProcess) {
+                } else {
                     loginState.update { LoginState.NotLoggedIn }
                 }
             }

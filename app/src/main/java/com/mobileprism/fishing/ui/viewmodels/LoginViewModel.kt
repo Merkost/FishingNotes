@@ -38,9 +38,6 @@ class LoginViewModel(
                     is LoginState.LoggedIn -> {
                         _uiState.value = LoginScreenViewState.LoginSuccess
                     }
-                    LoginState.GoogleAuthInProcess -> {
-                        _uiState.update { LoginScreenViewState.Loading }
-                    }
                     is LoginState.LoginFailure -> {
                         _uiState.value = (LoginScreenViewState.NotLoggedIn)
                         handleError(it.throwable)
@@ -57,7 +54,7 @@ class LoginViewModel(
         _uiState.update { LoginScreenViewState.Loading }
 
         viewModelScope.launch {
-            authManager.registerNewUser(emailPassword)
+            authManager.registerNewUserWithEmail(emailPassword)
         }
     }
 
@@ -94,7 +91,6 @@ class LoginViewModel(
             authManager.googleLogin()
         }
     }
-
 }
 
 

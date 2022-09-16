@@ -6,6 +6,7 @@ import com.mobileprism.fishing.domain.entity.common.EmailPassword
 import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.model.api.GoogleAuthRequest
 import com.mobileprism.fishing.model.api.UserApiService
+import com.mobileprism.fishing.model.entity.user.UserData
 import com.mobileprism.fishing.model.entity.user.UserResponse
 import com.mobileprism.fishing.model.utils.safeApiCall
 import com.mobileprism.fishing.utils.Constants.API_URL
@@ -54,14 +55,14 @@ class AuthRepositoryRetrofitImpl(
 
             firebaseAnalytics.logEvent("login_user", null)
 
-            getService().loginWithEmail(
-                body = emailPassword
-            )
+//            getService().loginWithEmail(
+//                body = emailPassword
+//            )
 
-            /*UserResponse(
+            UserResponse(
                 token = "123",
                 UserData(email = emailPassword.email, login = "Anonymous")
-            )*/
+            )
         }
 
     override suspend fun loginUserWithGoogle(
