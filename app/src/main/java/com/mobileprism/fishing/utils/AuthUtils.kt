@@ -29,4 +29,18 @@ fun isPasswordInputCorrect(password: String): Boolean {
     return passwordPattern.matches(password)
 }
 
+fun checkLoginInputType(input: String) =
+    when {
+        isEmailInputCorrect(input) -> LoginInputType.Email
+        isLoginInputCorrect(input) -> LoginInputType.Login
+        else -> LoginInputType.IncorrectFormat
+    }
+
+
+sealed class LoginInputType {
+    object Login : LoginInputType()
+    object Email : LoginInputType()
+    object IncorrectFormat : LoginInputType()
+}
+
 

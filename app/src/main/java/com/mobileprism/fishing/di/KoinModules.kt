@@ -71,10 +71,7 @@ val mainModule = module {
 
     viewModel {
         LoginViewModel(
-            authManager = get(),
-            registerNewUserUseCase = get(),
-            signInUserUseCase = get(),
-            skipAuthorizationUseCase = get()
+            authManager = get()
         )
     }
 
