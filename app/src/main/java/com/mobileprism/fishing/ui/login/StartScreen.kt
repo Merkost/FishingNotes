@@ -71,7 +71,7 @@ fun StartScreen(
                         onGoogleError(it)
                     }
                 } ?: onGoogleError(null)
-            } else onGoogleError(null)
+            } else onGoogleError(Exception("Operation canceled by user"))
         }
 
     val coroutineScope = rememberCoroutineScope()
@@ -89,7 +89,7 @@ fun StartScreen(
 
             }
             is LoginScreenViewState.Error -> {
-                Toast.makeText(context, state.error?.message ?: context.getString(R.string.error_occured), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, state.error.message ?: context.getString(R.string.error_occured), Toast.LENGTH_SHORT).show()
             }
             is LoginScreenViewState.NotLoggedIn -> {
 
@@ -161,6 +161,7 @@ fun StartScreen(
                     onClick = {
                         /*// FIXME: Improve this
                         onStartGoogleLogin()*/
+
                         startForResult.launch(context.getGoogleLoginAuth().signInIntent)
                     }
                 )

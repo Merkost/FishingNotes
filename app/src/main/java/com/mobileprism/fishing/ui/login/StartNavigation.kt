@@ -8,6 +8,8 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.LifecycleEventObserver
 import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
@@ -18,10 +20,12 @@ import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.resources
 import kotlinx.coroutines.launch
 
+
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @Composable
 fun StartNavigation() {
+
     val navController = rememberAnimatedNavController()
     val upPress: () -> Unit = { navController.navigateUp() }
 
