@@ -25,7 +25,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.systemBarsPadding
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.entity.common.EmailPassword
 import com.mobileprism.fishing.ui.MainActivity
 import com.mobileprism.fishing.ui.home.AppSnackbar
 import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
@@ -190,7 +189,7 @@ fun LoginScreen(upPress: () -> Unit) {
                 ) {
 
 
-                    val email = rememberSaveable() { mutableStateOf("") }
+                    val loginOrEmail = rememberSaveable() { mutableStateOf("") }
                     val password = rememberSaveable() { mutableStateOf("") }
                     val showPassword = rememberSaveable() { mutableStateOf(false) }
 
@@ -222,8 +221,8 @@ fun LoginScreen(upPress: () -> Unit) {
                             OutlinedTextField(
                                 modifier = Modifier.fillMaxWidth(),
                                 enabled = uiState != LoginScreenViewState.Loading,
-                                value = email.value,
-                                onValueChange = { email.value = it },
+                                value = loginOrEmail.value,
+                                onValueChange = { loginOrEmail.value = it },
                                 label = {
                                     Text(
                                         text = stringResource(R.string.email_or_username),
@@ -325,10 +324,8 @@ fun LoginScreen(upPress: () -> Unit) {
                                 enabled = uiState != LoginScreenViewState.Loading,
                                 onClick = {
                                     loginViewModel.signInUser(
-                                        EmailPassword(
-                                            email = email.value,
-                                            password = password.value
-                                        )
+                                        loginOrEmail = loginOrEmail.value,
+                                        password = password.value
                                     )
                                     // TODO:
                                 }

@@ -4,23 +4,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.domain.entity.common.EmailPassword
 import com.mobileprism.fishing.domain.repository.AuthManager
-import com.mobileprism.fishing.domain.use_cases.users.RegisterNewUserUseCase
-import com.mobileprism.fishing.domain.use_cases.users.SignInUserUserCase
-import com.mobileprism.fishing.domain.use_cases.users.SkipAuthorizationUseCase
 import com.mobileprism.fishing.model.auth.LoginState
 import com.mobileprism.fishing.ui.viewstates.LoginScreenViewState
+import com.mobileprism.fishing.utils.LoginInputType
+import com.mobileprism.fishing.utils.checkLoginInputType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-// TODO: Delete many UseCases
 class LoginViewModel(
     private val authManager: AuthManager,
-    private val registerNewUserUseCase: RegisterNewUserUseCase,
-    private val signInUserUseCase: SignInUserUserCase,
-    private val skipAuthorizationUseCase: SkipAuthorizationUseCase
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<LoginScreenViewState> =
@@ -62,15 +57,22 @@ class LoginViewModel(
         _uiState.update { LoginScreenViewState.Loading }
 
         viewModelScope.launch {
-            registerNewUserUseCase(emailPassword)
+            authManager.registerNewUser(emailPassword)
         }
     }
 
-    fun signInUser(emailPassword: EmailPassword) {
+    fun signInUser(loginOrEmail: String, password: String) {
         _uiState.update { LoginScreenViewState.Loading }
 
         viewModelScope.launch {
-            signInUserUseCase(emailPassword)
+
+            when (checkLoginInputType(loginOrEmail)) {
+                LoginInputType.Email -> {
+                    authManager.loginUser(EmailPassword(loginOrEmail, password))
+                }
+                LoginInputType.Login -> TODO()
+                LoginInputType.IncorrectFormat -> TODO()
+            }
         }
     }
 
@@ -78,7 +80,7 @@ class LoginViewModel(
         _uiState.update { LoginScreenViewState.Loading }
 
         viewModelScope.launch {
-            skipAuthorizationUseCase()
+            authManager.skipAuthorization()
         }
     }
 
