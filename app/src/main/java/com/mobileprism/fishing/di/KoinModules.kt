@@ -17,6 +17,7 @@ import com.mobileprism.fishing.model.datastore.impl.UserDatastoreImpl
 import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.viewmodels.*
+import com.mobileprism.fishing.ui.viewmodels.login.LoginViewModel
 import com.mobileprism.fishing.utils.Logger
 import com.mobileprism.fishing.utils.location.LocationManager
 import com.mobileprism.fishing.utils.location.LocationManagerImpl

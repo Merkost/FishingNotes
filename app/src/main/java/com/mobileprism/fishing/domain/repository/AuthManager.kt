@@ -16,6 +16,7 @@ interface AuthManager {
     suspend fun registerNewUserWithEmail(emailPassword: EmailPassword)
     suspend fun registerNewUserWithUserName(userNamePassword: UsernamePassword)
     suspend fun loginUser(emailPassword: EmailPassword)
+    suspend fun loginUser(usernamePassword: UsernamePassword)
     suspend fun googleLogin()
     suspend fun skipAuthorization()
     suspend fun logoutCurrentUser()

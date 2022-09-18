@@ -58,6 +58,17 @@ class AuthManagerImpl(
         )
     }
 
+    override suspend fun loginUser(usernamePassword: UsernamePassword) {
+        authRepository.loginUser(usernamePassword).fold(
+            onSuccess = {
+                onLoginSuccess(it)
+            },
+            onFailure = {
+                onLoginFailure(it)
+            }
+        )
+    }
+
     override suspend fun skipAuthorization() {
         createOfflineUser()
         loginState.update { LoginState.LoggedIn }

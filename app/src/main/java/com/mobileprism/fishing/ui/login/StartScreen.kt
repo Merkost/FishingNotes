@@ -15,7 +15,10 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,7 +40,7 @@ import com.mobileprism.fishing.model.datasource.firebase.getGoogleLoginAuth
 import com.mobileprism.fishing.model.datasource.firebase.startFirebaseLogin
 import com.mobileprism.fishing.ui.custom.LoginWithGoogleButton
 import com.mobileprism.fishing.ui.home.views.*
-import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
+import com.mobileprism.fishing.ui.viewmodels.login.LoginViewModel
 import com.mobileprism.fishing.ui.viewstates.LoginScreenViewState
 import org.koin.androidx.compose.get
 
@@ -74,26 +77,14 @@ fun StartScreen(
             } else onGoogleError(Exception("Operation canceled by user"))
         }
 
-    val coroutineScope = rememberCoroutineScope()
-
-
-    var helpDialogState by remember { mutableStateOf(false) }
     val uiState by loginViewModel.uiState.collectAsState()
 
     LaunchedEffect(uiState) {
         when (val state = uiState) {
-            is LoginScreenViewState.LoginSuccess -> {
-
-            }
-            is LoginScreenViewState.Loading -> {
-
-            }
             is LoginScreenViewState.Error -> {
                 Toast.makeText(context, state.error.message ?: context.getString(R.string.error_occured), Toast.LENGTH_SHORT).show()
             }
-            is LoginScreenViewState.NotLoggedIn -> {
-
-            }
+            else -> {}
         }
     }
 

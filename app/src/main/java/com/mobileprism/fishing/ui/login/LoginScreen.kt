@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -23,14 +24,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.insets.systemBarsPadding
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.MainActivity
-import com.mobileprism.fishing.ui.home.AppSnackbar
 import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.HeaderText
-import com.mobileprism.fishing.ui.viewmodels.LoginScreenViewModel
+import com.mobileprism.fishing.ui.viewmodels.login.LoginScreenViewModel
+import com.mobileprism.fishing.utils.showToast
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.get
 
@@ -38,42 +38,28 @@ import org.koin.androidx.compose.get
 @ExperimentalAnimationApi
 @Composable
 fun LoginScreen(upPress: () -> Unit) {
-
     val viewModel: LoginScreenViewModel = get()
-
-    val scaffoldState = rememberScaffoldState()
-
     var visible by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(uiState.isLoggedIn) {
+
+    LaunchedEffect(uiState) {
+        val state = uiState
+        when  {
+            state.isError -> {
+                state.errorText?.let { showToast(context, state.errorText) }
+            }
+        }
         if (uiState.isLoggedIn) {
             visible = false
             delay((MainActivity.splashFadeDurationMillis * 2).toLong())
         }
     }
 
-    LaunchedEffect(uiState.isError) {
-        if (uiState.isError) {
-            scaffoldState.snackbarHostState.showSnackbar(
-                uiState.errorText ?: context.getString(R.string.error_occured)
-            )
-        }
-    }
 
-    Scaffold(
-        scaffoldState = scaffoldState,
-        snackbarHost = {
-            SnackbarHost(
-                hostState = it,
-                modifier = Modifier.systemBarsPadding(),
-                snackbar = { snackbarData -> AppSnackbar(snackbarData) }
-            )
-        }
-    ) {
+    Scaffold() {
         AnimatedVisibility(
             modifier = Modifier
                 .fillMaxSize(),
@@ -176,8 +162,8 @@ fun LoginScreen(upPress: () -> Unit) {
                         )
                 ) {
 
-                    val usernameOrEmail = rememberSaveable() { mutableStateOf("") }
-                    val password = rememberSaveable() { mutableStateOf("") }
+
+                    val loginInfo by viewModel.loginInfo.collectAsState()
                     val showPassword = rememberSaveable() { mutableStateOf(false) }
 
                     Column(
@@ -206,10 +192,15 @@ fun LoginScreen(upPress: () -> Unit) {
                         ) {
 
                             OutlinedTextField(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .onFocusEvent {
+                                        if (it.isFocused.not()) viewModel.validateLogin(skipEmpty = true)
+                                    },
                                 enabled = !uiState.isLoading,
-                                value = usernameOrEmail.value,
-                                onValueChange = { usernameOrEmail.value = it },
+                                isError = uiState.isLoginError,
+                                value = loginInfo.login,
+                                onValueChange = viewModel::setLogin,
                                 label = {
                                     Text(
                                         text = stringResource(R.string.email_or_username),
@@ -228,8 +219,9 @@ fun LoginScreen(upPress: () -> Unit) {
 
                             OutlinedTextField(
                                 modifier = Modifier.fillMaxWidth(),
-                                value = password.value,
-                                onValueChange = { password.value = it },
+                                isError = uiState.isPasswordError,
+                                value = loginInfo.password,
+                                onValueChange = viewModel::setPassword,
                                 label = { Text(text = stringResource(R.string.password)) },
                                 keyboardOptions = KeyboardOptions.Default.copy(
                                     imeAction = ImeAction.Next
@@ -262,7 +254,6 @@ fun LoginScreen(upPress: () -> Unit) {
                                 }
                             )
                         }
-
 
                         Crossfade(
                             targetState = uiState.isLoading,
@@ -298,9 +289,7 @@ fun LoginScreen(upPress: () -> Unit) {
                                     true -> {
                                         DefaultButtonOutlined(
                                             text = stringResource(R.string.cancel),
-                                            onClick = {
-                                                // TODO: Cancel login
-                                            }
+                                            onClick = viewModel::cancelLogin
                                         )
                                     }
                                     else -> {
@@ -311,13 +300,7 @@ fun LoginScreen(upPress: () -> Unit) {
                             DefaultButtonFilled(
                                 text = stringResource(id = R.string.login),
                                 enabled = !uiState.isLoading,
-                                onClick = {
-                                    viewModel.signInUser(
-                                        usernameOrEmail = usernameOrEmail.value,
-                                        password = password.value
-                                    )
-                                    // TODO:
-                                }
+                                onClick = viewModel::signInUser
                             )
                         }
                     }

@@ -3,6 +3,7 @@ package com.mobileprism.fishing.model.datasource
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.mobileprism.fishing.domain.entity.common.EmailPassword
+import com.mobileprism.fishing.domain.entity.common.UsernamePassword
 import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.model.api.GoogleAuthRequest
 import com.mobileprism.fishing.model.api.UserApiService
@@ -62,6 +63,21 @@ class AuthRepositoryRetrofitImpl(
             UserResponse(
                 token = "123",
                 UserData(email = emailPassword.email, login = "Anonymous")
+            )
+        }
+
+    override suspend fun loginUser(usernamePassword: UsernamePassword): Result<UserResponse> =
+        safeApiCall(dispatcher) {
+
+            firebaseAnalytics.logEvent("login_user", null)
+
+            /*getService().loginWithUsername(
+                body = usernamePassword
+            )*/
+
+            UserResponse(
+                token = "123",
+                UserData(login = usernamePassword.username, email = "fromServer@email.ru")
             )
         }
 

@@ -2,6 +2,7 @@ package com.mobileprism.fishing.model.api
 
 import android.os.Parcelable
 import com.mobileprism.fishing.domain.entity.common.EmailPassword
+import com.mobileprism.fishing.domain.entity.common.UsernamePassword
 import com.mobileprism.fishing.model.entity.user.UserResponse
 import kotlinx.parcelize.Parcelize
 import retrofit2.http.Body
@@ -18,10 +19,10 @@ interface UserApiService {
         @Body body: EmailPassword
     ): UserResponse
 
-    /*@POST("login/username")
+    @POST("login/username")
     suspend fun loginWithUsername(
         @Body body: UsernamePassword
-    ): UserResponse*/
+    ): UserResponse
 
     @POST("login/google")
     suspend fun loginUserWithGoogle(

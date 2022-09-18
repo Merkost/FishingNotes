@@ -24,7 +24,7 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
 import com.mobileprism.fishing.ui.home.views.HeaderText
 import com.mobileprism.fishing.ui.home.views.SecondaryTextSmall
-import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
+import com.mobileprism.fishing.ui.viewmodels.login.RegisterViewModel
 import com.mobileprism.fishing.utils.*
 import org.koin.androidx.compose.get
 
@@ -32,7 +32,7 @@ import org.koin.androidx.compose.get
 @ExperimentalAnimationApi
 @Composable
 fun RegisterScreen(upPress: () -> Unit) {
-    val loginViewModel: LoginViewModel = get()
+    val loginViewModel: RegisterViewModel = get()
 
     val context = LocalContext.current
 
