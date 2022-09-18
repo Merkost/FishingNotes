@@ -1,8 +1,8 @@
-package com.mobileprism.fishing.ui.viewmodels
+package com.mobileprism.fishing.ui.viewmodels.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mobileprism.fishing.domain.entity.common.EmailPassword
+import com.mobileprism.fishing.domain.entity.auth.EmailPassword
 import com.mobileprism.fishing.domain.repository.AuthManager
 import com.mobileprism.fishing.model.auth.LoginState
 import com.mobileprism.fishing.ui.viewstates.LoginScreenViewState
@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class LoginViewModel(
+class StartViewModel(
     private val authManager: AuthManager,
 ) : ViewModel() {
 

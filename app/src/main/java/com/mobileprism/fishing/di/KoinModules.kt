@@ -24,8 +24,6 @@ import com.mobileprism.fishing.utils.location.LocationManagerImpl
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionManagerImpl
 import com.mobileprism.fishing.viewmodels.EditProfileViewModel
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -45,11 +43,7 @@ val appModule = module {
     }
     single<LocationManager> { LocationManagerImpl(get()) }
 
-    //Create HttpLoggingInterceptor
-    single<HttpLoggingInterceptor> { createLoggingInterceptor() }
 
-    //Create OkHttpClient
-    single<OkHttpClient> { get() }
 }
 
 val settingsModule = module {

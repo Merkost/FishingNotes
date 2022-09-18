@@ -1,9 +1,9 @@
 package com.mobileprism.fishing.app
 
 import android.app.Application
-import android.util.Log
 import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.di.*
+import com.mobileprism.fishing.utils.Constants
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -27,6 +27,12 @@ class FishingApp : Application() {
             modules(
                 appModule,
                 mainModule,
+                networkModule,
+
+                fishingApiModule,
+                if (Constants.FAKE_API) fishingFakeRepositoryModule else fishingRepository,
+                fishingNetworkModule,
+
                 loginModule,
                 settingsModule,
                 useCasesModule,
