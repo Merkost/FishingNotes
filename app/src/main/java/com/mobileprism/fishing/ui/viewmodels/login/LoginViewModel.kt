@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class LoginScreenViewModel(
+class LoginViewModel(
     private val authManager: AuthManager
 ) : ViewModel() {
 
@@ -46,7 +46,6 @@ class LoginScreenViewModel(
     fun setPassword(password: String) {
         _loginInfo.update { _loginInfo.value.copy(password = password) }
         _uiState.update { _uiState.value.copy(isPasswordError = false) }
-
     }
 
 
@@ -142,8 +141,6 @@ class LoginScreenViewModel(
             }
         }
     }
-
-
 }
 
 data class LoginInfo(

@@ -2,6 +2,8 @@ package com.mobileprism.fishing.ui.viewmodels.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.perf.metrics.resource.ResourceType
+import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.auth.EmailPassword
 import com.mobileprism.fishing.domain.repository.AuthManager
 import com.mobileprism.fishing.model.auth.LoginState
@@ -27,6 +29,8 @@ class StartViewModel(
     }
 
     fun googleAuthError(exception: Exception?) {
+        // TODO:
+
         _uiState.update { LoginScreenViewState.Error(exception ?: Throwable()) }
     }
 
@@ -93,4 +97,8 @@ class StartViewModel(
     }
 }
 
+// TODO:
+sealed class GoogleAuth(@ResourceType res: Int) : Exception() {
+    class Canceled: GoogleAuth(R.string.error_occured)
+}
 

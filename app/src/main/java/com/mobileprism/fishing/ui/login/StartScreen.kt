@@ -62,6 +62,7 @@ fun StartScreen(
     val startViewModel: StartViewModel = get()
     val auth: FirebaseAuth = get()
 
+    // TODO:
     val onGoogleError: (Exception?) -> Unit = startViewModel::googleAuthError
 
     val startForResult =
@@ -76,6 +77,8 @@ fun StartScreen(
                 } ?: onGoogleError(null)
             } else onGoogleError(Exception("Operation canceled by user"))
         }
+
+
 
     val uiState by startViewModel.uiState.collectAsState()
 

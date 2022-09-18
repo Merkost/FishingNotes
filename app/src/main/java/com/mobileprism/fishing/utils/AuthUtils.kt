@@ -23,10 +23,12 @@ fun isEmailInputCorrect(email: String): Boolean {
 }
 
 fun isPasswordInputCorrect(password: String): Boolean {
-    val passwordPattern =
+    return password.toList().size.let { passSize ->
+        passSize in (PASSWORD_MIN_LENGTH .. PASSWORD_MAX_LENGTH)
+    }
+    /*val passwordPattern =
         "^[A-Za-z0-9!@#$%^&]{$PASSWORD_MIN_LENGTH,$PASSWORD_MAX_LENGTH}\$".toRegex()
-
-    return passwordPattern.matches(password)
+    return passwordPattern.matches(password)*/
 }
 
 fun checkLoginInputType(input: String) =

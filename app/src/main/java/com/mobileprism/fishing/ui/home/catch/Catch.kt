@@ -460,10 +460,10 @@ fun CatchWeatherView(
                     contentDescription = stringResource(id = R.string.weather)
                 )
 
-                HeaderTextOld(
+                HeaderText(
                     modifier = Modifier.padding(horizontal = 2.dp),
                     text = temperatureUnit.getTemperature(catch.weatherTemperature)
-                            + stringResource(temperatureUnit.stringRes)
+                            + stringResource(temperatureUnit.stringRes),
                 )
             }
 

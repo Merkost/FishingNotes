@@ -5,6 +5,8 @@ import com.mobileprism.fishing.domain.repository.FirebaseUserRepository
 import com.mobileprism.fishing.model.auth.AuthManagerImpl
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseUserRepositoryImpl
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
+import com.mobileprism.fishing.ui.viewmodels.login.RegisterViewModel
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
@@ -28,5 +30,9 @@ val loginModule = module {
             firebaseUserRepository = get(),
             tokenStore = get()
         )
+    }
+
+    viewModel {
+        RegisterViewModel(get())
     }
 }

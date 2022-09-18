@@ -38,9 +38,6 @@ class FishingApp : Application() {
                 useCasesModule,
                 repositoryModuleLocal
             )
-
         }
-        // FIXME: Reset koin
     }
-
 }

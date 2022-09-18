@@ -29,7 +29,7 @@ import com.mobileprism.fishing.ui.MainActivity
 import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.HeaderText
-import com.mobileprism.fishing.ui.viewmodels.login.LoginScreenViewModel
+import com.mobileprism.fishing.ui.viewmodels.login.LoginViewModel
 import com.mobileprism.fishing.utils.showToast
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.get
@@ -38,7 +38,7 @@ import org.koin.androidx.compose.get
 @ExperimentalAnimationApi
 @Composable
 fun LoginScreen(upPress: () -> Unit) {
-    val viewModel: LoginScreenViewModel = get()
+    val viewModel: LoginViewModel = get()
     var visible by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
@@ -195,7 +195,8 @@ fun LoginScreen(upPress: () -> Unit) {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .onFocusEvent {
-                                        if (it.isFocused.not()) viewModel.validateLogin(skipEmpty = true)
+                                        if (it.isFocused.not())
+                                            viewModel.validateLogin(skipEmpty = true)
                                     },
                                 enabled = !uiState.isLoading,
                                 isError = uiState.isLoginError,
@@ -255,29 +256,12 @@ fun LoginScreen(upPress: () -> Unit) {
                             )
                         }
 
-                        Crossfade(
-                            targetState = uiState.isLoading,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(12.dp)
-                                .padding(vertical = 4.dp)
-                        ) {
-                            when (it) {
-                                true -> {
-                                    LinearProgressIndicator(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                    )
-                                }
-                                else -> {
-                                    Divider(
-                                        modifier = Modifier
-                                            .fillMaxWidth(),
-                                    )
-                                }
-                            }
+                        AnimatedVisibility(visible = uiState.isLoading) {
+                            LinearProgressIndicator(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            )
                         }
-
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),

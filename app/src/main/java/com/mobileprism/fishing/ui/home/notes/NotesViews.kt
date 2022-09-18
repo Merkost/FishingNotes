@@ -6,6 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddLocation
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -593,9 +595,11 @@ fun NoPlacesView(
         Spacer(modifier = Modifier.padding(8.dp))
         LottieNoPlaces(modifier = Modifier.size(128.dp))
         Spacer(modifier = Modifier.padding(8.dp))
-        DefaultButtonOutlinedOld(
+        DefaultButtonOutlined(
+            modifier = Modifier,
+            icon = Icons.Default.AddLocation,
             text = stringResource(id = R.string.add_new_place),
-            icon = painterResource(id = R.drawable.ic_baseline_add_location_24),
+            enabled = true,
             onClick = onAddNewPlaceClick
         )
     }
