@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.domain.entity.common
+package com.mobileprism.fishing.domain.entity.auth
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

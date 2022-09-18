@@ -1,8 +1,8 @@
 package com.mobileprism.fishing.domain.repository
 
-import com.mobileprism.fishing.domain.entity.common.EmailPassword
+import com.mobileprism.fishing.domain.entity.auth.EmailPassword
 import com.mobileprism.fishing.domain.entity.common.User
-import com.mobileprism.fishing.domain.entity.common.UsernamePassword
+import com.mobileprism.fishing.domain.entity.auth.UsernamePassword
 import com.mobileprism.fishing.model.auth.LoginState
 import kotlinx.coroutines.flow.Flow
 

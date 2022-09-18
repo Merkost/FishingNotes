@@ -40,7 +40,7 @@ import com.mobileprism.fishing.model.datasource.firebase.getGoogleLoginAuth
 import com.mobileprism.fishing.model.datasource.firebase.startFirebaseLogin
 import com.mobileprism.fishing.ui.custom.LoginWithGoogleButton
 import com.mobileprism.fishing.ui.home.views.*
-import com.mobileprism.fishing.ui.viewmodels.login.LoginViewModel
+import com.mobileprism.fishing.ui.viewmodels.login.StartViewModel
 import com.mobileprism.fishing.ui.viewstates.LoginScreenViewState
 import org.koin.androidx.compose.get
 
@@ -59,15 +59,15 @@ fun StartScreen(
     toRegistration: () -> Unit
 ) {
     val context = LocalContext.current
-    val loginViewModel: LoginViewModel = get()
+    val startViewModel: StartViewModel = get()
     val auth: FirebaseAuth = get()
 
-    val onGoogleError: (Exception?) -> Unit = loginViewModel::googleAuthError
+    val onGoogleError: (Exception?) -> Unit = startViewModel::googleAuthError
 
     val startForResult =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
             if (result.resultCode == Activity.RESULT_OK) {
-                loginViewModel.continueWithGoogle()
+                startViewModel.continueWithGoogle()
                 result.data?.let { intent ->
                     val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(intent)
                     startFirebaseLogin(context, task, auth) {
@@ -77,7 +77,7 @@ fun StartScreen(
             } else onGoogleError(Exception("Operation canceled by user"))
         }
 
-    val uiState by loginViewModel.uiState.collectAsState()
+    val uiState by startViewModel.uiState.collectAsState()
 
     LaunchedEffect(uiState) {
         when (val state = uiState) {
@@ -167,7 +167,7 @@ fun StartScreen(
                 modifier = Modifier,
                 text = stringResource(id = R.string.skip),
                 icon = Icons.Default.ArrowForward,
-                onClick = { loginViewModel.skipAuthorization() }
+                onClick = { startViewModel.skipAuthorization() }
             )
 
             Row(

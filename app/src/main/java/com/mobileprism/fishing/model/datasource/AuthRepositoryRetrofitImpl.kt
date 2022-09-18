@@ -2,29 +2,27 @@ package com.mobileprism.fishing.model.datasource
 
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
-import com.mobileprism.fishing.domain.entity.common.EmailPassword
-import com.mobileprism.fishing.domain.entity.common.UsernamePassword
+import com.mobileprism.fishing.domain.entity.auth.EmailPassword
+import com.mobileprism.fishing.domain.entity.auth.UsernamePassword
 import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.model.api.GoogleAuthRequest
-import com.mobileprism.fishing.model.api.UserApiService
+import com.mobileprism.fishing.model.api.AuthApiService
 import com.mobileprism.fishing.model.entity.user.UserData
 import com.mobileprism.fishing.model.entity.user.UserResponse
 import com.mobileprism.fishing.model.utils.safeApiCall
 import com.mobileprism.fishing.utils.Constants.API_URL
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class AuthRepositoryRetrofitImpl(
     private val firebaseAnalytics: FirebaseAnalytics,
-    private val okHttpClient: OkHttpClient,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : AuthRepository {
 
-    private fun getService(): UserApiService {
-        return createRetrofit().create(UserApiService::class.java)
+    private fun getService(): AuthApiService {
+        return createRetrofit().create(AuthApiService::class.java)
     }
 
     private fun createRetrofit(): Retrofit {

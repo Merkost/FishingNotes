@@ -1,14 +1,14 @@
 package com.mobileprism.fishing.model.api
 
 import android.os.Parcelable
-import com.mobileprism.fishing.domain.entity.common.EmailPassword
-import com.mobileprism.fishing.domain.entity.common.UsernamePassword
+import com.mobileprism.fishing.domain.entity.auth.EmailPassword
+import com.mobileprism.fishing.domain.entity.auth.UsernamePassword
 import com.mobileprism.fishing.model.entity.user.UserResponse
 import kotlinx.parcelize.Parcelize
 import retrofit2.http.Body
 import retrofit2.http.POST
 
-interface UserApiService {
+interface AuthApiService {
     @POST("register")
     suspend fun registerNewUser(
         @Body body: EmailPassword
