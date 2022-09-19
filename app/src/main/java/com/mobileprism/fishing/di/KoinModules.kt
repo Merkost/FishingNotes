@@ -66,7 +66,8 @@ val mainModule = module {
 
     viewModel {
         StartViewModel(
-            authManager = get()
+            authManager = get(),
+            connectionManager = get()
         )
     }
 

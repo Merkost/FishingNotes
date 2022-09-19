@@ -1,10 +1,7 @@
 package com.mobileprism.fishing.ui.login
 
-import android.app.Activity
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -31,13 +28,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.FirebaseAuth
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.model.datasource.firebase.createLauncherActivityForGoogleAuth
 import com.mobileprism.fishing.model.datasource.firebase.getGoogleLoginAuth
-import com.mobileprism.fishing.model.datasource.firebase.startFirebaseLogin
 import com.mobileprism.fishing.ui.custom.LoginWithGoogleButton
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.viewmodels.login.StartViewModel
@@ -48,7 +41,6 @@ object LoginDestinations {
     const val START = "start_screen"
     const val LOGIN = "login_screen"
     const val REGISTER = "register_screen"
-
 }
 
 @ExperimentalMaterialApi
@@ -59,39 +51,30 @@ fun StartScreen(
     toRegistration: () -> Unit
 ) {
     val context = LocalContext.current
-    val startViewModel: StartViewModel = get()
-    val auth: FirebaseAuth = get()
+    val viewModel: StartViewModel = get()
 
-    // TODO:
-    val onGoogleError: (Exception?) -> Unit = startViewModel::googleAuthError
+    val startForResult = createLauncherActivityForGoogleAuth(
+        context = context,
+        onComplete = { viewModel.continueWithGoogle() },
+        onError = { viewModel.googleAuthError(it) }
+    )
 
-    val startForResult =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                startViewModel.continueWithGoogle()
-                result.data?.let { intent ->
-                    val task: Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(intent)
-                    startFirebaseLogin(context, task, auth) {
-                        onGoogleError(it)
-                    }
-                } ?: onGoogleError(null)
-            } else onGoogleError(Exception("Operation canceled by user"))
-        }
-
-
-
-    val uiState by startViewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(uiState) {
         when (val state = uiState) {
             is LoginScreenViewState.Error -> {
-                Toast.makeText(context, state.error.message ?: context.getString(R.string.error_occured), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    state.error.message ?: context.getString(R.string.error_occured),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             else -> {}
         }
     }
 
-    if (uiState == LoginScreenViewState.Loading) { ModalLoading() }
+    AnimatedVisibility(visible = uiState is LoginScreenViewState.Loading) { ModalLoading() }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -170,7 +153,7 @@ fun StartScreen(
                 modifier = Modifier,
                 text = stringResource(id = R.string.skip),
                 icon = Icons.Default.ArrowForward,
-                onClick = { startViewModel.skipAuthorization() }
+                onClick = { viewModel.skipAuthorization() }
             )
 
             Row(
@@ -194,7 +177,3 @@ fun StartScreen(
         }
     }
 }
-
-
-
-

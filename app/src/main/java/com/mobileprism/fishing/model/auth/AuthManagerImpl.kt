@@ -1,9 +1,9 @@
 package com.mobileprism.fishing.model.auth
 
 import com.mobileprism.fishing.domain.entity.auth.EmailPassword
+import com.mobileprism.fishing.domain.entity.auth.UsernamePassword
 import com.mobileprism.fishing.domain.entity.common.LoginType
 import com.mobileprism.fishing.domain.entity.common.User
-import com.mobileprism.fishing.domain.entity.auth.UsernamePassword
 import com.mobileprism.fishing.domain.repository.AuthManager
 import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.domain.repository.FirebaseUserRepository
@@ -29,9 +29,8 @@ class AuthManagerImpl(
     override val currentFirebaseUser: Flow<User?>
         get() = firebaseUserRepository.currentUser
 
-    override suspend fun subscribeOnLoginState(): Flow<LoginState> = loginState.asStateFlow()
 
-    override suspend fun registerNewUserWithEmail(emailPassword: EmailPassword) {
+    override suspend fun registerNewUser(emailPassword: EmailPassword) {
         authRepository.registerNewUser(emailPassword).fold(
             onSuccess = {
                 onLoginSuccess(it)
@@ -40,11 +39,6 @@ class AuthManagerImpl(
                 onLoginFailure(it)
             }
         )
-    }
-
-    override suspend fun registerNewUserWithUserName(userNamePassword: UsernamePassword) {
-        // TODO: Implement login with username
-        onLoginFailure(throwable = Throwable("Not implemented"))
     }
 
     override suspend fun loginUser(emailPassword: EmailPassword) {

@@ -4,6 +4,8 @@ import android.content.Context
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.utils.Constants
+import com.mobileprism.fishing.utils.network.ConnectionManager
+import com.mobileprism.fishing.utils.network.ConnectionManagerImpl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
@@ -29,6 +31,9 @@ val networkModule = module {
 
     //Create OkHttpClient
     single<OkHttpClient> { createOkHttpClient(get()) }
+
+    //Create ConnectionManager
+    single<ConnectionManager> { ConnectionManagerImpl(androidContext()) }
 }
 
 

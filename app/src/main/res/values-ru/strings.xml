@@ -388,8 +388,12 @@
     <string name="invalid_data_entry_format">Неверный формат ввода данных</string>
     <string name="email">E-mail</string>
     <string name="login_loading_text">Выполняется вход!</string>
-    <string name="login_help_text">Аутентификация дает доступ у дополнительным функциям, таким как: сохранеине данных онлайн, общение и обмен данными с другими пользователями, и т.д.</string>
+    <string name="login_help_text">Аутентификация дает доступ к дополнительным функциям, таким как: сохранеине данных онлайн, общение и обмен данными с другими пользователями, и т.д.</string>
     <string name="аuthentication">Authentication</string>
+    <string name="auth">Authentication</string>
+    <string name="fishing_notes">Заметки рыбака</string>
+    <string name="sign_up">Sign Up</string>
     <string name="email_or_username">Эл. адрес или имя пользователя</string>
+    <string name="cancelled_by_user">Операция отменена пользователем</string>
 
 </resources>

@@ -391,9 +391,11 @@
     <string name="login_loading_text">Logging in, please wait!</string>
     <string name="login_help_text">Authentication provides access to net functions, such as: saving your data online, communication and data sharing with other users, etc.</string>
     <string name="auth">Authentication</string>
+    <string name="аuthentication">Authentication</string>
     <string name="fishing_notes">Fishing Notes</string>
     <string name="email_or_username">Email or username</string>
     <string name="sign_up">Sign Up</string>
+    <string name="cancelled_by_user">Cancelled by user</string>
 
 
 </resources>

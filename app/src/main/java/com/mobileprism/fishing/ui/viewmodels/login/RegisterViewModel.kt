@@ -8,6 +8,7 @@ import com.mobileprism.fishing.model.auth.LoginState
 import com.mobileprism.fishing.ui.viewstates.LoginScreenViewState
 import com.mobileprism.fishing.utils.LoginInputType
 import com.mobileprism.fishing.utils.checkLoginInputType
+import com.mobileprism.fishing.utils.network.ConnectionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -16,6 +17,7 @@ import kotlinx.coroutines.launch
 
 class RegisterViewModel(
     private val authManager: AuthManager,
+    private val connectionManager: ConnectionManager
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<LoginScreenViewState> =
@@ -54,7 +56,7 @@ class RegisterViewModel(
         _uiState.update { LoginScreenViewState.Loading }
 
         viewModelScope.launch {
-            authManager.registerNewUserWithEmail(emailPassword)
+            authManager.registerNewUser(emailPassword)
         }
     }
 

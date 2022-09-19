@@ -2,14 +2,10 @@ package com.mobileprism.fishing.ui.viewmodels.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.perf.metrics.resource.ResourceType
-import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.entity.auth.EmailPassword
 import com.mobileprism.fishing.domain.repository.AuthManager
 import com.mobileprism.fishing.model.auth.LoginState
 import com.mobileprism.fishing.ui.viewstates.LoginScreenViewState
-import com.mobileprism.fishing.utils.LoginInputType
-import com.mobileprism.fishing.utils.checkLoginInputType
+import com.mobileprism.fishing.utils.network.ConnectionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -18,6 +14,7 @@ import kotlinx.coroutines.launch
 
 class StartViewModel(
     private val authManager: AuthManager,
+    private val connectionManager: ConnectionManager
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<LoginScreenViewState> =
@@ -26,12 +23,6 @@ class StartViewModel(
 
     init {
         subscribeOnLoginState()
-    }
-
-    fun googleAuthError(exception: Exception?) {
-        // TODO:
-
-        _uiState.update { LoginScreenViewState.Error(exception ?: Throwable()) }
     }
 
     private fun subscribeOnLoginState() {
@@ -54,27 +45,16 @@ class StartViewModel(
         }
     }
 
-    fun registerNewUser(emailPassword: EmailPassword) {
-        _uiState.update { LoginScreenViewState.Loading }
 
+    fun continueWithGoogle() {
         viewModelScope.launch {
-            authManager.registerNewUserWithEmail(emailPassword)
+            _uiState.update { LoginScreenViewState.Loading }
+            authManager.googleLogin()
         }
     }
 
-    fun signInUser(loginOrEmail: String, password: String) {
-        _uiState.update { LoginScreenViewState.Loading }
-
-        viewModelScope.launch {
-
-            when (checkLoginInputType(loginOrEmail)) {
-                LoginInputType.Email -> {
-                    authManager.loginUser(EmailPassword(loginOrEmail, password))
-                }
-                LoginInputType.Login -> TODO()
-                LoginInputType.IncorrectFormat -> TODO()
-            }
-        }
+    fun googleAuthError(exception: Exception) {
+        handleError(exception)
     }
 
     fun skipAuthorization() {
@@ -88,17 +68,5 @@ class StartViewModel(
     private fun handleError(error: Throwable) {
         _uiState.update { LoginScreenViewState.Error(error) }
     }
-
-    fun continueWithGoogle() {
-        viewModelScope.launch {
-            _uiState.update { LoginScreenViewState.Loading }
-            authManager.googleLogin()
-        }
-    }
-}
-
-// TODO:
-sealed class GoogleAuth(@ResourceType res: Int) : Exception() {
-    class Canceled: GoogleAuth(R.string.error_occured)
 }
 

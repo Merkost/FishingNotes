@@ -9,7 +9,6 @@ import com.mobileprism.fishing.domain.use_cases.places.GetMapMarkerByIdUseCase
 import com.mobileprism.fishing.domain.use_cases.places.GetUserPlacesListUseCase
 import com.mobileprism.fishing.domain.use_cases.users.SignOutCurrentUserUserCase
 import com.mobileprism.fishing.domain.use_cases.users.SubscribeOnCurrentUserUseCase
-import com.mobileprism.fishing.ui.viewmodels.login.LoginViewModel
 import org.koin.dsl.module
 
 val useCasesModule = module {
@@ -33,5 +32,4 @@ val useCasesModule = module {
     factory { GetUserCatchesByMarkerId(get()) }
     factory { SignOutCurrentUserUserCase(get()) }
     factory { SubscribeOnCurrentUserUseCase(get()) }
-    factory { LoginViewModel(get()) }
 }

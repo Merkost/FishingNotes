@@ -2,6 +2,12 @@ package com.mobileprism.fishing.model.datasource.firebase
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.Composable
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -16,6 +22,7 @@ import com.mobileprism.fishing.domain.entity.content.UserCatch
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
+import org.koin.androidx.compose.get
 
 const val CATCHES_COLLECTION = "catches"
 
@@ -28,10 +35,45 @@ fun Context.getGoogleLoginAuth(): GoogleSignInClient {
     return GoogleSignIn.getClient(this, gso)
 }
 
-fun startFirebaseLogin(
+@Composable
+fun createLauncherActivityForGoogleAuth(
+    context: Context,
+    onComplete: () -> Unit,
+    onError: (Exception) -> Unit,
+): ManagedActivityResultLauncher<Intent, ActivityResult> {
+    val auth: FirebaseAuth = get()
+
+    return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK) {
+
+            result.data?.let { intent ->
+                val task: Task<GoogleSignInAccount> =
+                    GoogleSignIn.getSignedInAccountFromIntent(intent)
+
+                startFirebaseLogin(
+                    context = context,
+                    task = task,
+                    firebaseAuth = auth,
+                    onComplete = onComplete,
+                    onError = {
+                        onError(
+                            it ?: Exception(context.getString(R.string.error_occured))
+                        )
+                    }
+                )
+
+            } ?: onError(Exception(context.getString(R.string.error_occured)))
+        } else {
+            onError(Exception(context.getString(R.string.cancelled_by_user)))
+        }
+    }
+}
+
+private fun startFirebaseLogin(
     context: Context,
     task: Task<GoogleSignInAccount>,
     firebaseAuth: FirebaseAuth,
+    onComplete: () -> Unit,
     onError: (Exception?) -> Unit,
 ) {
     when {
@@ -46,8 +88,11 @@ fun startFirebaseLogin(
                         when {
                             task.isSuccessful -> {
                                 // Sign in success, update UI with the signed-in user's information
+                                onComplete()
                             }
-                            else -> { onError(task.exception) }
+                            else -> {
+                                onError(task.exception)
+                            }
                         }
                     }
 
@@ -57,7 +102,7 @@ fun startFirebaseLogin(
             }
         }
         else -> {
-            onError(Exception("Task Unsuccessful"))
+            onError(Exception(context.getString(R.string.error_occured)))
         }
     }
 }
