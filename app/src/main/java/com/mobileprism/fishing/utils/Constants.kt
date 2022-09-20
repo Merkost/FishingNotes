@@ -14,7 +14,7 @@ object Constants {
     const val DEFAULT_DELAY: Long = 2000L
 
     const val TIME_TO_EXIT = 2000L
-    val defaultFabBottomPadding: Dp = 128.dp
+    val defaultFabBottomPadding: Dp = 32.dp
 
     val bottomBannerPadding: Dp = 80.dp
 
