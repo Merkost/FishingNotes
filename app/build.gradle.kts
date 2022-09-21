@@ -106,6 +106,7 @@ dependencies {
     implementation(Libs.Coroutines.android)
     implementation(Libs.Coroutines.core)
 
+    implementation(Libs.GoogleMaps.maps)
     implementation(Libs.GoogleMaps.mapsKtx)
     implementation(Libs.GoogleMaps.mapUtilsKtx)
 

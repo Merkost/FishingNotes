@@ -34,12 +34,11 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.*
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
+import com.google.maps.android.compose.*
 import com.google.maps.android.ktx.awaitMap
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
@@ -93,6 +92,9 @@ fun MapScreen(
     var newPlaceDialog by remember { mutableStateOf(false) }
     var mapLayersSelection by rememberSaveable { mutableStateOf(false) }
 
+    val cameraPositionState: CameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(bounds.center, 13f)
+    }
 
     BackPressHandler(
         mapUiState = mapUiState,
@@ -215,7 +217,9 @@ fun MapScreen(
                                 16.dp,
                                 bias = 1f
                             )
-                        }, onClick = viewModel::onZoomInClick
+                        }, onClick = {
+                            coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.zoomIn()) }
+                        }
                     )
 
                     MapZoomOutButton(
@@ -228,7 +232,9 @@ fun MapScreen(
                                 16.dp,
                                 bias = 1f
                             )
-                        }, onClick = viewModel::onZoomOutClick
+                        }, onClick = {
+                            coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.zoomOut()) }
+                        }
                     )
                 }
 
@@ -295,6 +301,29 @@ fun MapLayout(
         else markers.filter { it.visible })
     }
 
+    val mapUiSettings by remember {
+        mutableStateOf(
+            MapUiSettings(
+                zoomControlsEnabled = false,
+                myLocationButtonEnabled = false,
+                mapToolbarEnabled = false
+            )
+        )
+    }
+    var mapProperties by remember {
+        mutableStateOf(
+            MapProperties(
+                isMyLocationEnabled = permissionsState.allPermissionsGranted,
+                /*maxZoomPreference = 10f,
+                minZoomPreference = 5f,*/
+                /*latLngBoundsForCameraTarget = LatLngBounds(
+                    LatLng(42.737179, 132.490435),
+                    LatLng(43.388666, 131.629264)
+                )*/
+            )
+        )
+    }
+
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     var isMapVisible by remember { mutableStateOf(false) }
 
@@ -302,7 +331,11 @@ fun MapLayout(
         visible = isMapVisible,
         enter = fadeIn(), exit = fadeOut()
     ) {
-        AndroidView(
+
+        GoogleMap() {
+
+        }
+        /*AndroidView(
             { map },
             modifier = modifier
                 .fillMaxSize()
@@ -375,13 +408,12 @@ fun MapLayout(
                 googleMap.uiSettings.isCompassEnabled = false
                 googleMap.uiSettings.isMyLocationButtonEnabled = false
             }
-        }
+        }*/
     }
 
     LaunchedEffect(map, permissionsState.allPermissionsGranted) {
-        val googleMap = map.awaitMap()
         checkLocationPermissions(context)
-        googleMap.isMyLocationEnabled = permissionsState.allPermissionsGranted
+        mapProperties = mapProperties.copy(isMyLocationEnabled = permissionsState.allPermissionsGranted)
     }
 
     LaunchedEffect(Unit) {
