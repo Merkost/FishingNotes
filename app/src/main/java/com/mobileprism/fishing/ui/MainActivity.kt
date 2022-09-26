@@ -1,14 +1,13 @@
 package com.mobileprism.fishing.ui
 
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
@@ -20,29 +19,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.os.bundleOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.MobileAds.setAppMuted
 import com.google.android.gms.ads.RequestConfiguration
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.ktx.Firebase
-import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.SnackbarAction
 import com.mobileprism.fishing.ui.home.SnackbarManager
@@ -52,9 +39,8 @@ import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewmodels.MainViewModel
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.Logger
-import com.mobileprism.fishing.utils.showToast
+import com.mobileprism.fishing.utils.checkNotificationPolicyAccess
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.SharedFlow
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.getViewModel
@@ -241,6 +227,10 @@ class MainActivity : ComponentActivity() {
     @ExperimentalPermissionsApi
     @Composable
     fun Distribution(appTheme: AppThemeValues?, isUserLogged: State<Boolean>) {
+
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
         Crossfade(targetState = isUserLogged.value) { state ->
             when (state) {
                 false -> {
@@ -249,6 +239,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 true -> {
+                    checkNotificationPolicyAccess(notificationManager)
                     FishingNotesTheme(appTheme) {
                         FishingNotesApp()
                     }
