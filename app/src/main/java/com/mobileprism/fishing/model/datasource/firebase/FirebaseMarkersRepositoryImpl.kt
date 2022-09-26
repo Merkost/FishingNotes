@@ -13,7 +13,10 @@ import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.take
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -244,7 +247,6 @@ class FirebaseMarkersRepositoryImpl(
                 firebaseAnalytics.logEvent("new_marker", null)
                 trySend(userMapMarker.id)
             }
-            //todo: Если ошибка?
             if (it.isCanceled || it.exception != null) {
                 trySend("")
             }
