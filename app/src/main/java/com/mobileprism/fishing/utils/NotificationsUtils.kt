@@ -14,9 +14,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.res.stringResource
 import androidx.core.app.NotificationManagerCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
+import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.views.DefaultDialog
 
 @Composable
@@ -52,16 +54,19 @@ fun PermissionDialog(context: Context) {
 
     if (openDialog.value) {
         DefaultDialog(onDismiss = { openDialog.value = false },
-            primaryText = "Необходимо разрешение на отправку уведомлений",
-            secondaryText = "Без разрешения приложение не сможет отпаравлять уведомления и будет работать неправильно",
+            primaryText = stringResource(R.string.notification_permissions_required),
+            secondaryText = stringResource(R.string.notification_permissions_required_details),
             onPositiveClick = {
                 if (!smsPermissions.shouldShowRationale && smsPermissions.hasPermission.not() && smsPermissions.permissionRequested) {
+                    context.showToast(context.getString(R.string.notification_permission_settings_guide))
                     context.startSmsSettings()
                 } else {
                     smsPermissions.launchPermissionRequest()
                 }
             },
-            onNegativeClick = {
+            positiveButtonText = stringResource(id = R.string.good),
+            neutralButtonText = stringResource(id = R.string.cancel),
+            onNeutralClick = {
                 openDialog.value = false
             }
         )

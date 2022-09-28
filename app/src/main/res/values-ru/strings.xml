@@ -405,5 +405,8 @@
     <string name="login_invalid_error">Логин содержит недопустимые символы</string>
     <string name="login_max_length_error">Максимальная длина логина: %d символов</string>
     <string name="login_min_length_error">Логин должен быть не менее %d символов</string>
+    <string name="good">Хорошо</string>
+    <string name="notification_permissions_required">Необходимо разрешение на отправку уведомлений</string>
+    <string name="notification_permissions_required_details">Без разрешения приложение не сможет отправлять уведомления и будет работать неправильно</string>
 
 </resources>

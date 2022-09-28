@@ -97,8 +97,8 @@
     <string name="details">Details</string>
     <string name="add_new_catch">Add new catch</string>
     <string name="Choose_a_place">Choose a place</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
+    <string name="yes">YES</string>
+    <string name="no">NO</string>
     <string name="another_place_in_new_catch">Start adding a catch from the notes screen to choose another location!</string>
     <string name="locked">Locked</string>
     <string name="failed_to_determine">Failed to determine</string>
@@ -406,6 +406,10 @@
     <string name="login_invalid_error">Login contains invalid characters</string>
     <string name="login_max_length_error">Maximum login length is %d characters</string>
     <string name="login_min_length_error">Login must be at least %d characters</string>
+    <string name="good">Okay</string>
+    <string name="notification_permission_settings_guide">Разрешите отправку уведомлений в настройках</string>
+    <string name="notification_permissions_required">Необходимо разрешение на отправку уведомлений</string>
+    <string name="notification_permissions_required_details">Без разрешения приложение не сможет отправлять уведомления и будет работать неправильно</string>
 
 
 </resources>
