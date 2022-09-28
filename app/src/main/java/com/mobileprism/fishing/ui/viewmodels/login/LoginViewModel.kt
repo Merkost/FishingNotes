@@ -36,7 +36,7 @@ class LoginViewModel(
     private var loginJob: Job? = null
 
     init {
-        subscribeOnLoginState()
+        subscribeOnAuthState()
     }
 
     fun cancelLogin() {
@@ -130,20 +130,10 @@ class LoginViewModel(
         }
     }
 
-    private fun subscribeOnLoginState() {
+    private fun subscribeOnAuthState() {
         viewModelScope.launch {
             authManager.loginState.collectLatest { loginState ->
                 when (loginState) {
-                    is LoginState.LoggedIn -> {
-                        _uiState.update { UiState.Success }
-                        /*_uiState.update {
-                            _uiState.value.copy(
-                                isLoading = false,
-                                isLoggedIn = true,
-                                isError = false
-                            )
-                        }*/
-                    }
                     is LoginState.LoginFailure -> {
                         _uiState.update { UiState.Error }
 
@@ -152,6 +142,16 @@ class LoginViewModel(
                                 isLoading = false,
                                 isError = true,
                                 errorText = loginState.throwable.localizedMessage
+                            )
+                        }*/
+                    }
+                    is LoginState.LoggedIn -> {
+                        _uiState.update { UiState.Success }
+                        /*_uiState.update {
+                            _uiState.value.copy(
+                                isLoading = false,
+                                isLoggedIn = true,
+                                isError = false
                             )
                         }*/
                     }

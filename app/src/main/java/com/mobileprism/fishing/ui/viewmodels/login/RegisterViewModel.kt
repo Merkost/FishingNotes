@@ -6,10 +6,13 @@ import com.mobileprism.fishing.domain.entity.auth.EmailPassword
 import com.mobileprism.fishing.domain.repository.AuthManager
 import com.mobileprism.fishing.domain.use_cases.validation.ValidationResult
 import com.mobileprism.fishing.domain.use_cases.validation.ValidationUseCase
+import com.mobileprism.fishing.model.auth.LoginState
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.utils.network.ConnectionManager
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -25,6 +28,16 @@ class RegisterViewModel(
     private val _registerInfo = MutableStateFlow(RegisterInfo())
     val registerInfo = _registerInfo.asStateFlow()
 
+    private var registerJob: Job? = null
+
+    init {
+        subscribeOnAuthState()
+    }
+
+    fun cancelRegister() {
+        registerJob?.cancel()
+        _uiState.update { null }
+    }
 
     fun onEmailSet(newEmail: String) {
         _registerInfo.update { it.copy(email = newEmail) }
@@ -60,7 +73,7 @@ class RegisterViewModel(
 
 
     fun registerNewUser() {
-        viewModelScope.launch {
+        registerJob = viewModelScope.launch {
             registerInfo.value.apply {
 
                 val emailResult = validationUseCase.validateEmail(email)
@@ -108,6 +121,47 @@ class RegisterViewModel(
     fun validatePasswordInput() {
         _registerInfo.update {
             it.copy(passwordError = validationUseCase.validatePassword(it.password))
+        }
+    }
+
+    private fun subscribeOnAuthState() {
+        viewModelScope.launch {
+            authManager.loginState.collectLatest { loginState ->
+                when (loginState) {
+                    is LoginState.LoginFailure -> {
+                        _uiState.update { UiState.Error }
+// TODO:
+
+                        /*_uiState.update {
+                            _uiState.value.copy(
+                                isLoading = false,
+                                isError = true,
+                                errorText = loginState.throwable.localizedMessage
+                            )
+                        }*/
+                    }
+                    is LoginState.LoggedIn -> {
+                        _uiState.update { UiState.Success }
+                        /*_uiState.update {
+                            _uiState.value.copy(
+                                isLoading = false,
+                                isLoggedIn = true,
+                                isError = false
+                            )
+                        }*/
+                    }
+                    LoginState.NotLoggedIn -> {
+                        // TODO:
+                        /*_uiState.update {
+                            _uiState.value.copy(
+                                isLoading = false,
+                                isLoggedIn = false,
+                                isError = false
+                            )
+                        }*/
+                    }
+                }
+            }
         }
     }
 
