@@ -395,5 +395,15 @@
     <string name="sign_up">Sign Up</string>
     <string name="email_or_username">Эл. адрес или имя пользователя</string>
     <string name="cancelled_by_user">Операция отменена пользователем</string>
+    <string name="terms_error">You need to accept terms</string>
+    <string name="passwords_dont_match_error">The passwords don\'t match</string>
+    <string name="password_max_length_error">The password\'s max length is %d characters</string>
+    <string name="password_need_didgit_or_letter_error">Пароль должен содержать как минимум один символ и цифру</string>
+    <string name="password_min_length_error">Минимальная длина пароля: %d символов</string>
+    <string name="email_error">Неверный адрес электронной почты</string>
+    <string name="empty_email_error">Электронная почта не может быть пустой</string>
+    <string name="login_invalid_error">Логин содержит недопустимые символы</string>
+    <string name="login_max_length_error">Максимальная длина логина: %d символов</string>
+    <string name="login_min_length_error">Логин должен быть не менее %d символов</string>
 
 </resources>

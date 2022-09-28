@@ -396,6 +396,16 @@
     <string name="email_or_username">Email or username</string>
     <string name="sign_up">Sign Up</string>
     <string name="cancelled_by_user">Cancelled by user</string>
+    <string name="terms_error">You need to accept terms</string>
+    <string name="passwords_dont_match_error">The passwords don\'t match</string>
+    <string name="password_need_didgit_or_letter_error">The password must contain at least one letter and digit</string>
+    <string name="password_max_length_error">Max password length is %d characters</string>
+    <string name="password_min_length_error">Min password length is %d characters</string>
+    <string name="email_error">That\'s not a valid email</string>
+    <string name="empty_email_error">The email can\'t be blank</string>
+    <string name="login_invalid_error">Login contains invalid characters</string>
+    <string name="login_max_length_error">Maximum login length is %d characters</string>
+    <string name="login_min_length_error">Login must be at least %d characters</string>
 
 
 </resources>
