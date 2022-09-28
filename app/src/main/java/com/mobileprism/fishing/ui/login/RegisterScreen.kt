@@ -1,118 +1,61 @@
 package com.mobileprism.fishing.ui.login
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.ui.custom.FishingOutlinedTextField
+import com.mobileprism.fishing.ui.custom.FishingPasswordTextField
+import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
 import com.mobileprism.fishing.ui.home.views.HeaderText
 import com.mobileprism.fishing.ui.home.views.SecondaryTextSmall
 import com.mobileprism.fishing.ui.viewmodels.login.RegisterViewModel
-import com.mobileprism.fishing.utils.*
 import org.koin.androidx.compose.get
 
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @Composable
 fun RegisterScreen(upPress: () -> Unit) {
-    val loginViewModel: RegisterViewModel = get()
+    val viewModel: RegisterViewModel = get()
 
-    val context = LocalContext.current
-
-    val email = rememberSaveable() { mutableStateOf("") }
-    val password = rememberSaveable() { mutableStateOf("") }
-    val repeatedPassword = rememberSaveable() { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsState()
 
     val showPassword = rememberSaveable() { mutableStateOf(false) }
-
-    val isLoginError = rememberSaveable() { mutableStateOf(false) }
-    val isPasswordError = rememberSaveable() { mutableStateOf(false) }
-    val isPasswordMatchError = rememberSaveable() { mutableStateOf(false) }
-
-    val loginErrorMassage =
-        rememberSaveable() { mutableStateOf(context.getString(R.string.login_min_length) + LOGIN_MIN_LENGTH) }
-    val passwordErrorMassage =
-        rememberSaveable() { mutableStateOf(context.getString(R.string.password_min_length) + PASSWORD_MIN_LENGTH) }
-
-
-    LaunchedEffect(key1 = email.value) {
-        if (isEmailInputCorrect(email.value)) {
-            isLoginError.value = false
-        }
-    }
-
-    LaunchedEffect(key1 = password.value, key2 = repeatedPassword.value) {
-        if (isPasswordInputCorrect(password.value)) {
-            isPasswordError.value = false
-        }
-        if (password.value.length == repeatedPassword.value.length) {
-            isPasswordMatchError.value = false
-        }
-    }
-
-    fun validateLoginEmailInput() {
-        isLoginError.value =
-            !isLoginInputCorrect(email.value) && !isEmailInputCorrect(email.value)
-
-        loginErrorMassage.value = if (email.value.length < LOGIN_MIN_LENGTH) {
-            context.getString(R.string.login_min_length) + LOGIN_MIN_LENGTH
-        } else {
-            context.getString(R.string.incorrect_login_format)
-        }
-    }
-
-    fun validatePasswordInput() {
-        isPasswordError.value = !isPasswordInputCorrect(password.value)
-
-        passwordErrorMassage.value = if (password.value.length < PASSWORD_MIN_LENGTH) {
-            context.getString(R.string.password_min_length) + PASSWORD_MIN_LENGTH
-        } else {
-            context.getString(R.string.incorrect_password_format)
-        }
-
-        isPasswordMatchError.value = password.value != repeatedPassword.value
-    }
-
-    fun isInputsCorrect(): Boolean {
-        return !isLoginError.value && !isPasswordError.value && !isPasswordMatchError.value
-    }
-
-    fun onApplyRegistration() {
-        validateLoginEmailInput()
-        validatePasswordInput()
-
-        if (isInputsCorrect()) {
-            // TODO:
-            //onApply(EmailPassword(email.value, password.value))
-        } else {
-            showToast(context, context.getString(R.string.invalid_data_entry_format))
-        }
-    }
+    val registerInfo = viewModel.registerInfo.collectAsState()
+    val focusManager = LocalFocusManager.current
 
     Scaffold {
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(30.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
@@ -128,99 +71,128 @@ fun RegisterScreen(upPress: () -> Unit) {
                 }
             }
 
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = email.value,
-                onValueChange = { email.value = it },
-                label = { Text(text = stringResource(R.string.email_or_username)) },
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Next
+            FishingOutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusEvent {
+                        if (it.isFocused.not() && registerInfo.value.email.isNotEmpty()) viewModel.validateEmailInput()
+                    },
+                value = registerInfo.value.email,
+                onValueChange = viewModel::onEmailSet,
+                placeholder = stringResource(R.string.email),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next,
+                    keyboardType = KeyboardType.Email
                 ),
                 singleLine = true,
                 leadingIcon = {
                     Icon(Icons.Default.Person, Icons.Default.Person.name)
-                }
+                },
+                isError = registerInfo.value.emailError.successful.not(),
+                errorString = registerInfo.value.emailError.errorMessage,
+                enabled = uiState !is UiState.InProgress,
             )
-            if (isLoginError.value) {
-                SecondaryTextSmall(
-                    modifier = Modifier.height(8.dp),
-                    text = loginErrorMassage.value,
-                    textColor = Color.Red
-                )
-            } else {
-                Spacer(modifier = Modifier.height(8.dp))
-            }
 
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = password.value,
-                onValueChange = { password.value = it },
-                label = { Text(text = stringResource(R.string.password)) },
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Next
-                ),
-                singleLine = true,
-                visualTransformation = if (showPassword.value) VisualTransformation.None else PasswordVisualTransformation(),
-                leadingIcon = { Icon(Icons.Default.Password, Icons.Default.Password.name) },
-                trailingIcon = {
-                    if (showPassword.value) {
-                        IconButton(onClick = { showPassword.value = !showPassword.value }) {
-                            Icon(Icons.Default.VisibilityOff, Icons.Default.VisibilityOff.name)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                FishingPasswordTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusEvent {
+                            if (it.isFocused.not() && registerInfo.value.password.isNotEmpty()) viewModel.validatePasswordInput()
+                        },
+                    password = registerInfo.value.password,
+                    onValueChange = viewModel::onPasswordSet,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Next
+                    ),
+                    isError = registerInfo.value.passwordError.successful.not(),
+                    errorString = registerInfo.value.passwordError.errorMessage,
+                    enabled = uiState !is UiState.InProgress,
+                    showPassword = showPassword.value,
+                    onShowPasswordChanged = { showPassword.value = !showPassword.value },
+                )
+
+                FishingPasswordTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    password = registerInfo.value.repeatPassword,
+                    onValueChange = viewModel::onRepeatPasswordSet,
+                    placeholder = stringResource(R.string.repeat_password),
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Done,
+                        keyboardType = KeyboardType.Password
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            focusManager.clearFocus()
+                            viewModel.registerNewUser()
                         }
-                    } else {
-                        IconButton(onClick = { showPassword.value = !showPassword.value }) {
-                            Icon(Icons.Default.Visibility, Icons.Default.Visibility.name)
-                        }
-
-                    }
-                }
-            )
-            if (isPasswordError.value) {
-                SecondaryTextSmall(
-                    modifier = Modifier.height(8.dp),
-                    text = passwordErrorMassage.value,
-                    textColor = Color.Red
+                    ),
+                    isError = registerInfo.value.repeatPasswordError.successful.not(),
+                    errorString = registerInfo.value.repeatPasswordError.errorMessage,
+                    enabled = uiState !is UiState.InProgress,
+                    showPassword = showPassword.value
                 )
             }
 
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = repeatedPassword.value,
-                onValueChange = { repeatedPassword.value = it },
-                label = { Text(text = stringResource(R.string.repeat_password)) },
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Next
-                ),
-                isError = isPasswordMatchError.value,
-                singleLine = true,
-                visualTransformation = if (showPassword.value) VisualTransformation.None else PasswordVisualTransformation(),
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_password_24),
-                        contentDescription = null
-                    )
-                }
-            )
-            if (isPasswordMatchError.value) {
-                SecondaryTextSmall(
-                    modifier = Modifier.height(8.dp),
-                    text = stringResource(R.string.passwords_must_match),
-                    textColor = Color.Red
-                )
+            AnimatedVisibility(visible = uiState is UiState.InProgress) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
 
+            AnimatedVisibility(visible = registerInfo.value.termsError.successful.not()) {
+                Text(
+                    text = registerInfo.value.termsError.errorMessage?.let { "$it  \uD83D\uDC47" } ?: "",
+                    color = MaterialTheme.colors.error,
+                    modifier = Modifier.fillMaxWidth().align(Alignment.End)
+                )
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                RulesCheckBox(
+                    modifier = Modifier.weight(1f, false),
+                    registerInfo.value.terms,
+                    onCheckedChange = viewModel::onTermsSet
+                )
 
                 DefaultButtonFilled(
+
                     text = stringResource(R.string.register),
-                    onClick = { onApplyRegistration() }
+                    onClick = viewModel::registerNewUser
                 )
             }
         }
     }
 
 }
+
+@Composable
+fun RulesCheckBox(
+    modifier: Modifier = Modifier,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+
+        Switch(
+            modifier = Modifier.clip(MaterialTheme.shapes.medium),
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            interactionSource = MutableInteractionSource(),
+            colors = SwitchDefaults.colors(
+                checkedTrackColor = MaterialTheme.colors.primary,
+                checkedThumbColor = MaterialTheme.colors.primaryVariant
+            )
+        )
+        SecondaryTextSmall(text = "Принимаю условия пользования", modifier = Modifier.padding(horizontal = 8.dp),
+            textAlign = TextAlign.Start)
+    }
+}
+
+
