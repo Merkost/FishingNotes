@@ -2,6 +2,7 @@ package com.mobileprism.fishing.di
 
 import com.mobileprism.fishing.domain.repository.AuthManager
 import com.mobileprism.fishing.domain.repository.FirebaseUserRepository
+import com.mobileprism.fishing.domain.use_cases.validation.ValidationUseCase
 import com.mobileprism.fishing.model.auth.AuthManagerImpl
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseUserRepositoryImpl
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
@@ -13,6 +14,10 @@ import org.koin.dsl.module
 
 val loginModule = module {
     single { RepositoryCollections() }
+
+    factory<ValidationUseCase> {
+        ValidationUseCase(androidContext())
+    }
 
     single<FirebaseUserRepository> {
         FirebaseUserRepositoryImpl(
@@ -36,14 +41,16 @@ val loginModule = module {
     viewModel {
         RegisterViewModel(
             authManager = get(),
-            connectionManager = get()
+            connectionManager = get(),
+            validationUseCase = get()
         )
     }
 
     viewModel() {
         LoginViewModel(
             authManager = get(),
-            connectionManager = get()
+            connectionManager = get(),
+            validationUseCase = get()
         )
     }
 }

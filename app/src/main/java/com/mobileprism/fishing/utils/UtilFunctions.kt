@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
+import android.util.Patterns
 import android.widget.Toast
 import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.R
@@ -132,6 +133,8 @@ fun Context.isNetworkAvailable(): Boolean {
     }
     return false
 }
+
+
 
 
 

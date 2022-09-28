@@ -1,11 +1,19 @@
 package com.mobileprism.fishing.domain.use_cases.validation
 
+import android.content.Context
 import android.util.Patterns
+import com.mobileprism.fishing.R
 import com.mobileprism.fishing.utils.*
 
-class ValidationUseCase {
+class ValidationUseCase(private val context: Context) {
 
     companion object {
+
+        const val LOGIN_MIN_LENGTH = 3
+        const val LOGIN_MAX_LENGTH = 20
+        const val PASSWORD_MIN_LENGTH = 8
+        const val PASSWORD_MAX_LENGTH = 25
+
         private val loginPattern =
             "^(?=.{$LOGIN_MIN_LENGTH,$LOGIN_MAX_LENGTH}${'$'})(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$".toRegex()
 
@@ -13,27 +21,33 @@ class ValidationUseCase {
             get() = !isNullOrEmpty() && Patterns.EMAIL_ADDRESS.matcher(this).matches()
 
         private val CharSequence.containsLettersAndDigits: Boolean
-            get() =  any { it.isDigit() } && any { it.isLetter() }
+            get() = any { it.isDigit() } && any { it.isLetter() }
 
     }
 
     fun validateUsername(login: String): ValidationResult {
-        if(login.length < LOGIN_MIN_LENGTH) {
+        if (login.length < LOGIN_MIN_LENGTH) {
             return ValidationResult(
                 successful = false,
-                errorMessage = "The login needs to consist of at least $LOGIN_MIN_LENGTH characters"
+                errorMessage = String.format(
+                    context.getString(R.string.login_min_length_error),
+                    LOGIN_MIN_LENGTH
+                )
             )
         }
-        if(login.length > LOGIN_MAX_LENGTH) {
+        if (login.length > LOGIN_MAX_LENGTH) {
             return ValidationResult(
                 successful = false,
-                errorMessage = "The login's max length is $LOGIN_MAX_LENGTH characters"
+                errorMessage = String.format(
+                    context.getString(R.string.login_max_length_error),
+                    LOGIN_MAX_LENGTH
+                )
             )
         }
-        if(loginPattern.matches(login).not()) {
+        if (loginPattern.matches(login).not()) {
             return ValidationResult(
                 successful = false,
-                errorMessage = "The login contains prohibit symbols"
+                errorMessage = context.getString(R.string.login_invalid_error)
             )
         }
         return ValidationResult(
@@ -42,16 +56,16 @@ class ValidationUseCase {
     }
 
     fun validateEmail(email: String): ValidationResult {
-        if(email.isBlank()) {
+        if (email.isBlank()) {
             return ValidationResult(
                 successful = false,
-                errorMessage = "The email can't be blank"
+                errorMessage = context.getString(R.string.empty_email_error)
             )
         }
-        if(email.isValidEmail.not()) {
+        if (email.isValidEmail.not()) {
             return ValidationResult(
                 successful = false,
-                errorMessage = "That's not a valid email"
+                errorMessage = context.getString(R.string.email_error)
             )
         }
         return ValidationResult(
@@ -60,22 +74,28 @@ class ValidationUseCase {
     }
 
     fun validatePassword(password: String): ValidationResult {
-        if(password.length < PASSWORD_MIN_LENGTH) {
+        if (password.length < PASSWORD_MIN_LENGTH) {
             return ValidationResult(
                 successful = false,
-                errorMessage = "Min password length is 8 characters"
+                errorMessage = String.format(
+                    context.getString(R.string.password_min_length_error),
+                    PASSWORD_MIN_LENGTH
+                )
             )
         }
-        if(password.length > PASSWORD_MAX_LENGTH) {
+        if (password.length > PASSWORD_MAX_LENGTH) {
             return ValidationResult(
                 successful = false,
-                errorMessage = "The password's max length is 20 characters"
+                errorMessage = String.format(
+                    context.getString(R.string.password_max_length_error),
+                    PASSWORD_MAX_LENGTH
+                )
             )
         }
-        if(password.containsLettersAndDigits.not()) {
+        if (password.containsLettersAndDigits.not()) {
             return ValidationResult(
                 successful = false,
-                errorMessage = "The password needs to contain at least one letter and digit"
+                errorMessage = context.getString(R.string.password_need_didgit_or_letter_error)
             )
         }
         return ValidationResult(
@@ -84,10 +104,10 @@ class ValidationUseCase {
     }
 
     fun validateRepeatedPassword(password: String, repeatedPassword: String): ValidationResult {
-        if(password != repeatedPassword) {
+        if (password != repeatedPassword) {
             return ValidationResult(
                 successful = false,
-                errorMessage = "The passwords don't match"
+                errorMessage = context.getString(R.string.passwords_dont_match_error)
             )
         }
         return ValidationResult(
@@ -96,10 +116,10 @@ class ValidationUseCase {
     }
 
     fun validateTerms(terms: Boolean): ValidationResult {
-        if(terms.not()) {
+        if (terms.not()) {
             return ValidationResult(
                 successful = false,
-                errorMessage = "You need to check terms"
+                errorMessage = context.getString(R.string.terms_error)
             )
         }
         return ValidationResult(
@@ -112,7 +132,6 @@ class ValidationUseCase {
             is LoginInputType.Email -> validateEmail(login)
             is LoginInputType.Username -> validateUsername(login)
         }
-
 
 
 }
