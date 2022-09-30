@@ -78,6 +78,7 @@ fun FishingOutlinedTextField(
         )
         AnimatedVisibility(visible = errorString.isNullOrBlank().not()) {
             Text(
+                style = MaterialTheme.typography.body2,
                 text = errorString ?: "",
                 color = MaterialTheme.colors.error,
                 modifier = Modifier.align(Alignment.End)
