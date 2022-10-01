@@ -29,7 +29,7 @@ import com.mobileprism.fishing.ui.MainActivity
 import com.mobileprism.fishing.ui.custom.FishingOutlinedTextField
 import com.mobileprism.fishing.ui.custom.FishingPasswordTextField
 import com.mobileprism.fishing.ui.home.UiState
-import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
+import com.mobileprism.fishing.ui.home.views.FishingButtonFilled
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.HeaderText
 import com.mobileprism.fishing.ui.viewmodels.login.LoginViewModel
@@ -258,7 +258,7 @@ fun LoginScreen(upPress: () -> Unit) {
                                     }
                                 }
                             }
-                            DefaultButtonFilled(
+                            FishingButtonFilled(
                                 text = stringResource(id = R.string.login),
                                 enabled = uiState !is UiState.InProgress,
                                 onClick = viewModel::signInUser

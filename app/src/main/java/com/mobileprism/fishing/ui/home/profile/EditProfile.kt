@@ -35,8 +35,8 @@ import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.ui.home.settings.GrayText
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.theme.customColors
-import com.mobileprism.fishing.ui.utils.showError
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.utils.showErrorToastOld
 import com.mobileprism.fishing.utils.time.toDate
 import com.mobileprism.fishing.viewmodels.EditProfileViewModel
 import org.koin.androidx.compose.getViewModel
@@ -71,7 +71,7 @@ fun EditProfile(onBack: () -> Unit) {
 
     LaunchedEffect(uiState) {
         when (val state = uiState) {
-            is BaseViewState.Error -> showError(context.applicationContext, state.error?.message)
+            is BaseViewState.Error -> showErrorToastOld(context.applicationContext, state.error?.message)
             is BaseViewState.Success -> onBack()
             else -> {}
         }

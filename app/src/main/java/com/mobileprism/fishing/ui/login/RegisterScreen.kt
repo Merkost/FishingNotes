@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.ui.login
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -31,7 +32,8 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.custom.FishingOutlinedTextField
 import com.mobileprism.fishing.ui.custom.FishingPasswordTextField
 import com.mobileprism.fishing.ui.home.UiState
-import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
+import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
+import com.mobileprism.fishing.ui.home.views.FishingButtonFilled
 import com.mobileprism.fishing.ui.home.views.HeaderText
 import com.mobileprism.fishing.ui.home.views.SecondaryTextSmall
 import com.mobileprism.fishing.ui.viewmodels.login.RegisterViewModel
@@ -142,30 +144,59 @@ fun RegisterScreen(upPress: () -> Unit) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
 
-            AnimatedVisibility(visible = registerInfo.value.termsError.successful.not()) {
-                Text(
-                    text = registerInfo.value.termsError.errorMessage?.let { "$it  \uD83D\uDC47" } ?: "",
-                    color = MaterialTheme.colors.error,
-                    modifier = Modifier.fillMaxWidth().align(Alignment.End)
-                )
-            }
+
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                RulesCheckBox(
-                    modifier = Modifier.weight(1f, false),
-                    registerInfo.value.terms,
-                    onCheckedChange = viewModel::onTermsSet
-                )
+                Crossfade(uiState is UiState.InProgress) {
+                    when (it) {
+                        true -> {
+                            DefaultButtonOutlined(
+                                text = stringResource(R.string.cancel),
+                                onClick = viewModel::cancelRegister
+                            )
+                        }
+                        else -> {
+                            Spacer(modifier = Modifier.size(4.dp))
+                        }
+                    }
+                }
 
-                DefaultButtonFilled(
-
+                FishingButtonFilled(
                     text = stringResource(R.string.register),
-                    onClick = viewModel::registerNewUser
+                    onClick = {
+                        focusManager.clearFocus()
+                        viewModel.registerNewUser()
+                    }
                 )
+            }
+
+
+            Column {
+                AnimatedVisibility(visible = registerInfo.value.termsError.successful.not()) {
+                    Text(
+                        text = registerInfo.value.termsError.errorMessage?.let { "$it  \uD83D\uDC47" }
+                            ?: "",
+                        color = MaterialTheme.colors.error,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.End)
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    RulesCheckBox(
+                        //modifier = Modifier.weight(1f, false),
+                        checked = registerInfo.value.terms,
+                        onCheckedChange = viewModel::onTermsSet
+                    )
+                }
             }
         }
     }
@@ -178,7 +209,10 @@ fun RulesCheckBox(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = modifier, verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
 
         Switch(
             modifier = Modifier.clip(MaterialTheme.shapes.medium),
@@ -190,8 +224,10 @@ fun RulesCheckBox(
                 checkedThumbColor = MaterialTheme.colors.primaryVariant
             )
         )
-        SecondaryTextSmall(text = "Принимаю условия пользования", modifier = Modifier.padding(horizontal = 8.dp),
-            textAlign = TextAlign.Start)
+        SecondaryTextSmall(
+            text = "Принимаю условия пользования", modifier = Modifier.padding(horizontal = 8.dp),
+            textAlign = TextAlign.Start
+        )
     }
 }
 

@@ -158,7 +158,7 @@ fun FishTypeAmountAndWeightDialog(
             weightState = fishWeight
         )
 
-        DefaultButtonFilled(
+        FishingButtonFilled(
             modifier = Modifier.constrainAs(saveButton) {
                 top.linkTo(amountAndWeight.bottom, 16.dp)
                 absoluteRight.linkTo(parent.absoluteRight)
@@ -256,7 +256,7 @@ fun EditWayOfFishingDialog(
             singleLine = false
         )
 
-        DefaultButtonFilled(
+        FishingButtonFilled(
             modifier = Modifier.constrainAs(saveButton) {
                 top.linkTo(lureField.bottom, 16.dp)
                 absoluteRight.linkTo(parent.absoluteRight)
@@ -340,7 +340,7 @@ fun EditNoteDialog(
             singleLine = false
         )
 
-        DefaultButtonFilled(
+        FishingButtonFilled(
             modifier = Modifier.constrainAs(saveButton) {
                 top.linkTo(editNote.bottom, 16.dp)
                 absoluteRight.linkTo(parent.absoluteRight)
@@ -414,7 +414,7 @@ fun AddPhotoDialog(
     val choosePhotoLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { value ->
             if ((value.size + tempDialogPhotosState.size) > MAX_PHOTOS) {
-                showToast(context, context.getString(R.string.max_photos_allowed))
+                context.showToast(context.getString(R.string.max_photos_allowed))
             }
             tempDialogPhotosState.addAll(value)
         }
@@ -481,7 +481,7 @@ fun AddPhotoDialog(
             }
         }
 
-        DefaultButtonFilled(
+        FishingButtonFilled(
             modifier = Modifier.constrainAs(saveButton) {
                 top.linkTo(content.bottom, 16.dp)
                 bottom.linkTo(parent.bottom, 32.dp)
@@ -490,7 +490,7 @@ fun AddPhotoDialog(
             text = stringResource(id = R.string.save),
             onClick = {
                 if (tempDialogPhotosState.size > MAX_PHOTOS) {
-                    showToast(context, context.getString(R.string.max_photos_allowed))
+                    context.showToast(context.getString(R.string.max_photos_allowed))
                 } else {
                     onSavePhotosClick(tempDialogPhotosState)
                     onCloseBottomSheet()

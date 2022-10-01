@@ -237,7 +237,7 @@ fun LoadingIconButtonOutlined(
 }
 
 @Composable
-fun DefaultButtonFilled(
+fun FishingButtonFilled(
     modifier: Modifier = Modifier,
     icon: Painter? = null,
     text: String,
@@ -265,7 +265,7 @@ fun DefaultButtonFilled(
         }
         Text(
             modifier = Modifier.padding(start = 4.dp, end = 4.dp),
-            text = text.uppercase(),
+            text = text,
             maxLines = 1
         )
     }

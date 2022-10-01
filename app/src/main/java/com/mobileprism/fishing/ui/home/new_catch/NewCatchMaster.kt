@@ -282,7 +282,7 @@ fun NewCatchButtons(
             pagerState = pagerState
         )
 
-        DefaultButtonFilled(
+        FishingButtonFilled(
             modifier = Modifier.constrainAs(next) {
                 top.linkTo(parent.top, 8.dp)
                 bottom.linkTo(parent.bottom)

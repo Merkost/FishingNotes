@@ -143,21 +143,19 @@ fun DefaultDialog(
                     CompositionLocalProvider(
                         LocalContentAlpha provides ContentAlpha.disabled
                     ) {
-                        ProvideTextStyle(textStyle) {
                             FishingTextButton(
                                 modifier = Modifier.constrainAs(neutralButton) {
                                     top.linkTo(mainContent.bottom, 16.dp)
                                     absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
                                 },
-                                content = { Text(neutralButtonText, color = MaterialTheme.customColors.secondaryTextColor) },
+                                content = { Text(neutralButtonText) },
                                 onClick = onNeutralClick,
                             )
-                        }
                     }
                 }
 
                 onPositiveClick?.let {
-                    DefaultButtonFilled(
+                    FishingButtonFilled(
                         modifier = Modifier.constrainAs(positiveButton) {
                             top.linkTo(mainContent.bottom, 16.dp)
                             bottom.linkTo(parent.bottom, 4.dp)

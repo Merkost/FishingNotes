@@ -239,8 +239,8 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 true -> {
-                    checkNotificationPolicyAccess(notificationManager)
                     FishingNotesTheme(appTheme) {
+                        checkNotificationPolicyAccess(notificationManager)
                         FishingNotesApp()
                     }
                 }
