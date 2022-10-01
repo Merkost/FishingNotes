@@ -406,7 +406,9 @@
     <string name="login_max_length_error">Максимальная длина логина: %d символов</string>
     <string name="login_min_length_error">Логин должен быть не менее %d символов</string>
     <string name="good">Хорошо</string>
-    <string name="notification_permissions_required">Необходимо разрешение на отправку уведомлений</string>
+    <string name="notification_permissions_required">Разрешить приложению отправлять уведомления?</string>
     <string name="notification_permissions_required_details">Без разрешения приложение не сможет отправлять уведомления и будет работать неправильно</string>
+    <string name="notification_permission_settings_guide">Разрешите отправку уведомлений в настройках</string>
+    <string name="allow">Разрешить</string>
 
 </resources>

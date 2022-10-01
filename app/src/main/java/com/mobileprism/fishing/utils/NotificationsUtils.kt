@@ -64,7 +64,7 @@ fun PermissionDialog(context: Context) {
                     smsPermissions.launchPermissionRequest()
                 }
             },
-            positiveButtonText = stringResource(id = R.string.good),
+            positiveButtonText = stringResource(id = R.string.allow),
             neutralButtonText = stringResource(id = R.string.cancel),
             onNeutralClick = {
                 openDialog.value = false
@@ -77,14 +77,17 @@ fun PermissionDialog(context: Context) {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun OldPermissionDialog(context: Context) {
+    val openDialog = remember { mutableStateOf(true) }
 
-    DefaultDialog(onDismiss = { /*TODO*/ },
-        primaryText = "Необходимо разрешение на отправку уведомлений",
-        secondaryText = "Без разрешения приложение не сможет отпаравлять уведомления и будет работать неправильно",
-        onPositiveClick = {
-            context.startSmsSettings()
-        })
-
+    if (openDialog.value) {
+        DefaultDialog(onDismiss = { openDialog.value = false },
+            primaryText = stringResource(R.string.notification_permissions_required),
+            secondaryText = stringResource(R.string.notification_permissions_required_details),
+            positiveButtonText = stringResource(R.string.allow),
+            negativeButtonText = stringResource(R.string.cancel),
+            onPositiveClick = { context.startSmsSettings() },
+            onNegativeClick = { openDialog.value = false })
+    }
 }
 
 private fun Context.startSmsSettings() {

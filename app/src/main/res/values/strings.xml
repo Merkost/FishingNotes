@@ -408,8 +408,9 @@
     <string name="login_min_length_error">Login must be at least %d characters</string>
     <string name="good">Okay</string>
     <string name="notification_permission_settings_guide">Разрешите отправку уведомлений в настройках</string>
-    <string name="notification_permissions_required">Необходимо разрешение на отправку уведомлений</string>
+    <string name="notification_permissions_required">Разрешить приложению отправлять уведомления?</string>
     <string name="notification_permissions_required_details">Без разрешения приложение не сможет отправлять уведомления и будет работать неправильно</string>
+    <string name="allow">Разрешить</string>
 
 
 </resources>
