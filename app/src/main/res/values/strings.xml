@@ -411,6 +411,7 @@
     <string name="notification_permissions_required">Разрешить приложению отправлять уведомления?</string>
     <string name="notification_permissions_required_details">Без разрешения приложение не сможет отправлять уведомления и будет работать неправильно</string>
     <string name="allow">Разрешить</string>
+    <string name="allow_notifications_manually">Включить уведомления в настройках приложения</string>
 
 
 </resources>

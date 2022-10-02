@@ -80,16 +80,16 @@ fun getClosestHourIndex(list: List<Hourly>, date: Long): Int {
 }
 
 fun Context.showToast(text: String, length: Int = Toast.LENGTH_SHORT) {
-    Toast.makeText(this, text, length).show()
+    Toast.makeText(applicationContext, text, length).show()
 }
 
 fun Context.showErrorToast(text: String? = null) {
-    Toast.makeText(this, text ?: getString(R.string.error_occured), Toast.LENGTH_SHORT).show()
+    Toast.makeText(applicationContext, text ?: getString(R.string.error_occured), Toast.LENGTH_SHORT).show()
 }
 
 @Deprecated("Check new method", replaceWith = ReplaceWith("showErrorToast"))
 fun showErrorToastOld(context: Context, text: String? = null) {
-    Toast.makeText(context, text ?: context.getString(R.string.error_occured), Toast.LENGTH_SHORT).show()
+    Toast.makeText(context.applicationContext, text ?: context.getString(R.string.error_occured), Toast.LENGTH_SHORT).show()
 }
 
 fun getCameraPosition(latLng: LatLng): Pair<LatLng, Float> {

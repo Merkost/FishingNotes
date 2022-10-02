@@ -4,7 +4,6 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
@@ -22,17 +21,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.datasource.firebase.createLauncherActivityForGoogleAuth
 import com.mobileprism.fishing.model.datasource.firebase.getGoogleLoginAuth
+import com.mobileprism.fishing.ui.custom.FishingTextButton
 import com.mobileprism.fishing.ui.custom.LoginWithGoogleButton
-import com.mobileprism.fishing.ui.home.views.*
+import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
+import com.mobileprism.fishing.ui.home.views.HeaderText
+import com.mobileprism.fishing.ui.home.views.ModalLoading
+import com.mobileprism.fishing.ui.home.views.SecondaryText
+import com.mobileprism.fishing.ui.theme.customColors
+import com.mobileprism.fishing.ui.utils.noRippleClickable
 import com.mobileprism.fishing.ui.viewmodels.login.StartViewModel
 import com.mobileprism.fishing.ui.viewstates.LoginScreenViewState
 import org.koin.androidx.compose.get
@@ -143,9 +146,15 @@ fun StartScreen(
                     }
                 )
 
-                DefaultButtonSecondaryLight(text = "I'll use email or phone number") {
-                    toRegistration()
-                }
+                FishingTextButton(
+                    onClick = toRegistration,
+                    content = {
+                        Text(
+                            text = "Register with email",
+                            style = MaterialTheme.typography.body1.copy(color = MaterialTheme.customColors.secondaryTextColor)
+                        )
+                    },
+                )
             }
 
 
@@ -157,23 +166,25 @@ fun StartScreen(
             )
 
             Row(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier
+                    .padding(8.dp)
+                    .noRippleClickable { toLoginScreen() },
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                SecondaryText(text = stringResource(R.string.have_an_account))
+                Text(
+                    text = stringResource(R.string.have_an_account),
+                    style = MaterialTheme.typography.body1.copy(color = MaterialTheme.customColors.secondaryTextColor)
+                )
 
                 Text(
-                    modifier = Modifier.clickable {
-                        toLoginScreen()
-                    },
-                    fontSize = 18.sp,
-                    color = MaterialTheme.colors.primaryVariant,
                     text = stringResource(R.string.sign_in),
-                    style = TextStyle(textDecoration = TextDecoration.Underline)
+                    style = MaterialTheme.typography.body1.copy(
+                        color = MaterialTheme.colors.primaryVariant,
+                        textDecoration = TextDecoration.Underline
+                    )
                 )
             }
-
         }
     }
 }
