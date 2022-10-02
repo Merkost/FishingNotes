@@ -17,7 +17,9 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.res.stringResource
 import androidx.core.app.NotificationManagerCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.views.DefaultDialog
 
@@ -46,8 +48,8 @@ fun PermissionDialog(context: Context) {
     val openDialog = remember { mutableStateOf(true) }
     val smsPermissions = rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
 
-    LaunchedEffect(smsPermissions.hasPermission){
-        if (smsPermissions.hasPermission) {
+    LaunchedEffect(smsPermissions.status){
+        if (smsPermissions.status.isGranted) {
             openDialog.value = false
         }
     }
@@ -57,11 +59,13 @@ fun PermissionDialog(context: Context) {
             primaryText = stringResource(R.string.notification_permissions_required),
             secondaryText = stringResource(R.string.notification_permissions_required_details),
             onPositiveClick = {
-                if (!smsPermissions.shouldShowRationale && smsPermissions.hasPermission.not() && smsPermissions.permissionRequested) {
-                    context.showToast(context.getString(R.string.notification_permission_settings_guide))
-                    context.startSmsSettings()
-                } else {
-                    smsPermissions.launchPermissionRequest()
+                with(smsPermissions.status) {
+                    if (shouldShowRationale) {
+                        context.showToast(context.getString(R.string.notification_permission_settings_guide))
+                        context.startSmsSettings()
+                    } else {
+                        smsPermissions.launchPermissionRequest()
+                    }
                 }
             },
             positiveButtonText = stringResource(id = R.string.allow),
