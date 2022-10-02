@@ -7,7 +7,7 @@ object Libs {
     const val jdkDesugar = "com.android.tools:desugar_jdk_libs:1.1.5"
 
     object Accompanist {
-        private const val version = "0.24.1-alpha"
+        private const val version = "0.26.3-beta"
         const val insets = "com.google.accompanist:accompanist-insets:$version"
         const val systemuicontroller = "com.google.accompanist:accompanist-systemuicontroller:$version"
         const val flowlayouts = "com.google.accompanist:accompanist-flowlayout:$version"
@@ -45,7 +45,7 @@ object Libs {
     }
 
     object Kotlin {
-        private const val version = "1.6.10"
+        private const val version = "1.7.0"
         const val stdlib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version"
         const val gradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$version"
         const val extensions = "org.jetbrains.kotlin:kotlin-android-extensions:$version"

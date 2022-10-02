@@ -122,6 +122,7 @@ val mainModule = module {
         UserPlaceViewModel(
             markersRepo = get(),
             catchesRepo = get(),
+            initialMarker = it.get(),
             saveNewUserMarkerNoteUseCase = get(),
             deleteUserMarkerNoteUseCase = get()
         )
