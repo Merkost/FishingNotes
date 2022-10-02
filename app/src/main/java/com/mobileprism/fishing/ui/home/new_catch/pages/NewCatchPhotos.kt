@@ -23,13 +23,13 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.SnackbarManager
-import com.mobileprism.fishing.ui.home.catch.addPhoto
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlinedOld
 import com.mobileprism.fishing.ui.home.views.MaxCounterView
 import com.mobileprism.fishing.ui.home.views.NewCatchPhotoView
 import com.mobileprism.fishing.ui.home.views.SubtitleWithIcon
 import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
 import com.mobileprism.fishing.utils.Constants
+import com.mobileprism.fishing.utils.addPhoto
 import com.mobileprism.fishing.utils.network.ConnectionState
 import com.mobileprism.fishing.utils.network.observeConnectivityAsFlow
 

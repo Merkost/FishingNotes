@@ -1,7 +1,5 @@
 package com.mobileprism.fishing.ui.viewmodels
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.R
@@ -13,23 +11,22 @@ import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.domain.use_cases.notes.DeleteUserMarkerNoteUseCase
 import com.mobileprism.fishing.domain.use_cases.notes.SaveUserMarkerNoteUseCase
 import com.mobileprism.fishing.ui.home.SnackbarManager
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.single
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class UserPlaceViewModel(
     private val markersRepo: MarkersRepository,
     private val catchesRepo: CatchesRepository,
+    private val initialMarker: UserMapMarker,
     private val saveNewUserMarkerNoteUseCase: SaveUserMarkerNoteUseCase,
     private val deleteUserMarkerNoteUseCase: DeleteUserMarkerNoteUseCase
 ) : ViewModel() {
 
-    var markerVisibility: MutableState<Boolean?> = mutableStateOf(true)
+    private val _markerVisibility = MutableStateFlow(true)
+    val markerVisibility = _markerVisibility.asStateFlow()
 
-    private val _marker: MutableStateFlow<UserMapMarker?> = MutableStateFlow(null)
-    val marker: StateFlow<UserMapMarker?>
+    private val _marker: MutableStateFlow<UserMapMarker> = MutableStateFlow(initialMarker)
+    val marker: StateFlow<UserMapMarker>
         get() = _marker
 
     private val _markerNotes = MutableStateFlow<List<Note>>(listOf())
@@ -39,7 +36,8 @@ class UserPlaceViewModel(
     private val _catchesList = MutableStateFlow<List<UserCatch>>(listOf())
     val catchesList = _catchesList.asStateFlow()
 
-    val currentNote: MutableState<Note?> = mutableStateOf(null)
+    private val _currentNote = MutableStateFlow<Note?>(null)
+    val currentNote = _currentNote.asStateFlow()
 
 
     private fun getCatchesByMarkerId(markerId: String) {
@@ -57,25 +55,21 @@ class UserPlaceViewModel(
 
     fun deletePlace() {
         viewModelScope.launch {
-            _marker.value?.let {
-                markersRepo.deleteMarker(it)
-            }
+            markersRepo.deleteMarker(marker.value)
         }
     }
 
     fun changeVisibility(newIsVisible: Boolean) {
         viewModelScope.launch {
-            _marker.value?.let {
-                markerVisibility.value = newIsVisible
-                markersRepo.changeMarkerVisibility(it, changeTo = newIsVisible).single().fold(
-                    onSuccess = {
-                        SnackbarManager.showMessage(R.string.marker_visibility_change_success)
-                    },
-                    onFailure = {
-                        markerVisibility.value = !newIsVisible
-                        SnackbarManager.showMessage(R.string.marker_visibility_change_error)
-                    })
-                }
+            _markerVisibility.update { newIsVisible }
+            markersRepo.changeMarkerVisibility(marker.value, changeTo = newIsVisible).single().fold(
+                onSuccess = {
+                    SnackbarManager.showMessage(R.string.marker_visibility_change_success)
+                },
+                onFailure = {
+                    _markerVisibility.update { !newIsVisible }
+                    SnackbarManager.showMessage(R.string.marker_visibility_change_error)
+                })
         }
     }
 
@@ -127,7 +121,11 @@ class UserPlaceViewModel(
         getCatchesByMarkerId(m.id)
         _marker.value = m
         _markerNotes.value = m.notes
-        markerVisibility.value = m.visible
+        //markerVisibility.value = m.visible
+    }
+
+    fun setCurrentNote(note: Note) {
+        _currentNote.update{ note }
     }
 
 }

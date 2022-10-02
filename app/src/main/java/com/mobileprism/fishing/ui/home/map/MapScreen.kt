@@ -32,7 +32,6 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
@@ -407,52 +406,6 @@ fun MapLayout(
 
         onDispose { viewModel.saveLastCameraPosition() }
     }
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@ExperimentalPermissionsApi
-@Composable
-fun LocationPermissionDialog(
-    modifier: Modifier = Modifier,
-    userPreferences: UserPreferences,
-    onCloseCallback: () -> Unit = { },
-) {
-    val context = LocalContext.current
-    var isDialogOpen by remember { mutableStateOf(true) }
-    val coroutineScope = rememberCoroutineScope()
-
-    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
-    PermissionsRequired(
-        multiplePermissionsState = permissionsState,
-        permissionsNotGrantedContent = {
-            if (isDialogOpen) {
-                GrantLocationPermissionsDialog(
-                    onDismiss = {
-                        isDialogOpen = false
-                        onCloseCallback()
-                    },
-                    onNegativeClick = {
-                        isDialogOpen = false
-                        onCloseCallback()
-                    },
-                    onPositiveClick = {
-                        isDialogOpen = false
-                        permissionsState.launchMultiplePermissionRequest()
-                        onCloseCallback()
-                    },
-                    onDontAskClick = {
-                        isDialogOpen = false
-                        SnackbarManager.showMessage(R.string.location_dont_ask)
-                        coroutineScope.launch {
-                            userPreferences.saveLocationPermissionStatus(false)
-                        }
-                        onCloseCallback()
-                    }
-                )
-            }
-        },
-        permissionsNotAvailableContent = { onCloseCallback(); SnackbarManager.showMessage(R.string.location_permission_denied) })
-    { checkLocationPermissions(context); }
 }
 
 @ExperimentalMaterialApi

@@ -63,18 +63,18 @@ fun FishingNotesApp() {
             Modifier.statusBarsHeight()
         else Modifier*/
     ) { innerPaddingModifier ->
-            //Spacer(modifier = Modifier.statusBarsHeight())
-            NavHost(
+        //Spacer(modifier = Modifier.statusBarsHeight())
+        NavHost(
+            navController = appStateHolder.navController,
+            startDestination = MainDestinations.HOME_ROUTE,
+            modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
+            Modifier.padding(innerPaddingModifier) /*else Modifier*/
+        ) {
+            NavGraph(
                 navController = appStateHolder.navController,
-                startDestination = MainDestinations.HOME_ROUTE,
-                modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
-                Modifier.padding(innerPaddingModifier) /*else Modifier*/
-            ) {
-                NavGraph(
-                    navController = appStateHolder.navController,
-                    upPress = appStateHolder::upPress,
-                )
-            }
+                upPress = appStateHolder::upPress,
+            )
+        }
     }
 }
 

@@ -204,14 +204,16 @@ fun PlaceTabsContentView(
 @ExperimentalComposeUiApi
 @Composable
 fun NoteModalBottomSheet(
-    viewModel: UserPlaceViewModel,
+    currentNote: Note?,
+    onNoteUpdate: (Note) -> Unit,
+    onNoteDelete: (Note) -> Unit,
     onCloseBottomSheet: () -> Unit,
 ) {
     EditNoteDialog(
-        note = viewModel.currentNote.value ?: Note(),
-        onSaveNote = viewModel::updateMarkerNotes,
-        deleteOption = (viewModel.currentNote.value ?: Note()).id.isNotEmpty(),
-        onDeleteNote = viewModel::deleteMarkerNote,
+        note = currentNote ?: Note(),
+        onSaveNote = onNoteUpdate,
+        deleteOption = (currentNote ?: Note()).id.isNotEmpty(),
+        onDeleteNote = onNoteDelete,
         onCloseDialog = onCloseBottomSheet
     )
 }
@@ -401,7 +403,7 @@ fun LottieWarning(modifier: Modifier) {
     )
     LottieAnimation(
         composition,
-        progress,
+        progress = { progress },
         modifier = modifier
     )
 }
@@ -409,17 +411,16 @@ fun LottieWarning(modifier: Modifier) {
 @Composable
 fun PlaceTopBar(
     backPress: () -> Unit,
-    viewModel: UserPlaceViewModel,
+    placeVisibility: Boolean,
     modifier: Modifier = Modifier,
     onDelete: () -> Unit,
+    onVisibilityChanged: (Boolean)-> Unit,
     ) {
-
-    val isVisible by remember { viewModel.markerVisibility }
 
     var menuOpened by remember { mutableStateOf(false) }
 
     val color = animateColorAsState(
-        targetValue = if (isVisible!!) {
+        targetValue = if (placeVisibility) {
             MaterialTheme.colors.onPrimary
         } else {
             supportTextColor
@@ -432,10 +433,8 @@ fun PlaceTopBar(
         title = stringResource(id = R.string.place),
         onNavClick = backPress,
         actions = {
-            IconToggleButton(checked = isVisible!!,
-                onCheckedChange = {
-                    viewModel.changeVisibility(it)
-                }) {
+            IconToggleButton(checked = placeVisibility,
+                onCheckedChange = onVisibilityChanged) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_baseline_remove_red_eye_24),
                     contentDescription = null,

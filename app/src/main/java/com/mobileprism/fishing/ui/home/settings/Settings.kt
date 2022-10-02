@@ -26,7 +26,6 @@ import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
 import com.alorma.compose.settings.ui.SettingsCheckbox
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.datastore.UserPreferences
@@ -35,16 +34,18 @@ import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.map.GrantLocationPermissionsDialog
-import com.mobileprism.fishing.ui.home.map.LocationPermissionDialog
 import com.mobileprism.fishing.ui.home.map.checkLocationPermissions
 import com.mobileprism.fishing.ui.home.map.locationPermissionsList
-import com.mobileprism.fishing.ui.home.views.*
+import com.mobileprism.fishing.ui.home.views.DefaultAppBar
+import com.mobileprism.fishing.ui.home.views.DefaultDialog
+import com.mobileprism.fishing.ui.home.views.ItemsSelection
 import com.mobileprism.fishing.ui.home.weather.PressureValues
 import com.mobileprism.fishing.ui.home.weather.TemperatureValues
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.ui.utils.ColorPicker
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewmodels.SettingsViewModel
+import com.mobileprism.fishing.utils.LocationPermissionDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -459,25 +460,6 @@ fun GetWindSpeedUnit(
     }
 }
 
-@ExperimentalComposeUiApi
-@Composable
-@OptIn(ExperimentalPermissionsApi::class)
-fun GetLocationPermission(closeDialog: () -> Unit) {
-    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
-    val context = LocalContext.current
-    PermissionsRequired(
-        multiplePermissionsState = permissionsState,
-        permissionsNotGrantedContent = {
-            GrantLocationPermissionsDialog(
-                onDismiss = closeDialog,
-                onNegativeClick = closeDialog,
-                onPositiveClick = closeDialog,
-                onDontAskClick = closeDialog
-            )
-        },
-        permissionsNotAvailableContent = { SnackbarManager.showMessage(R.string.location_permission_denied) })
-    { checkLocationPermissions(context) }
-}
 
 @Composable
 fun SettingsTopAppBar(backPress: () -> Unit) {
