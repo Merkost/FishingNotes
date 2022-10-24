@@ -52,15 +52,7 @@ fun RegisterScreen(upPress: () -> Unit) {
     val focusManager = LocalFocusManager.current
 
     Scaffold {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(30.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
+        DefaultAuthColumn() {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -201,6 +193,20 @@ fun RegisterScreen(upPress: () -> Unit) {
         }
     }
 
+}
+
+@Composable
+fun DefaultAuthColumn(content: @Composable () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(30.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        content()
+    }
 }
 
 @Composable

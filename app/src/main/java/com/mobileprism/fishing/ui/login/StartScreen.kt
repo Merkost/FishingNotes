@@ -43,6 +43,7 @@ import org.koin.androidx.compose.get
 object LoginDestinations {
     const val START = "start_screen"
     const val LOGIN = "login_screen"
+    const val FORGOT_PASSWORD = "forgot_password_screen"
     const val REGISTER = "register_screen"
 }
 

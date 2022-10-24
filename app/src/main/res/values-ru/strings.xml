@@ -411,5 +411,6 @@
     <string name="notification_permission_settings_guide">Разрешите отправку уведомлений в настройках</string>
     <string name="allow">Разрешить</string>
     <string name="allow_notifications_manually">Включить уведомления в настройках приложения</string>
+    <string name="password_recovery">Восстановление пароля</string>
 
 </resources>

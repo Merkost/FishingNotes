@@ -76,6 +76,10 @@ fun StartNavigation() {
                 LoginScreen(upPress = upPress)
             }
 
+            composable(LoginDestinations.FORGOT_PASSWORD) {
+                ForgotPasswordScreen(upPress = upPress)
+            }
+
             composable(LoginDestinations.REGISTER,
                 enterTransition = {
                     slideInHorizontally(initialOffsetX = { 1500 }, animationSpec = tween(600))

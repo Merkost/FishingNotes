@@ -6,6 +6,7 @@ import com.mobileprism.fishing.domain.use_cases.validation.ValidationUseCase
 import com.mobileprism.fishing.model.auth.AuthManagerImpl
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseUserRepositoryImpl
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
+import com.mobileprism.fishing.ui.viewmodels.login.ForgotPasswordViewModel
 import com.mobileprism.fishing.ui.viewmodels.login.LoginViewModel
 import com.mobileprism.fishing.ui.viewmodels.login.RegisterViewModel
 import org.koin.android.ext.koin.androidContext
@@ -50,6 +51,12 @@ val loginModule = module {
         LoginViewModel(
             authManager = get(),
             connectionManager = get(),
+            validationUseCase = get()
+        )
+    }
+
+    viewModel() {
+        ForgotPasswordViewModel(
             validationUseCase = get()
         )
     }

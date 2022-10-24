@@ -66,17 +66,8 @@ class LoginViewModel(
         if (skipEmpty && _loginInfo.value.login.isEmpty()) return
 
         loginInfo.value.apply {
-            when (login.contains("@")) {
-                true -> {
-                    _loginInfo.update {
-                        it.copy(loginError = validationUseCase.validateEmail(login))
-                    }
-                }
-                false -> {
-                    _loginInfo.update {
-                        it.copy(loginError = validationUseCase.validateUsername(login))
-                    }
-                }
+            _loginInfo.update {
+                it.copy(loginError = validationUseCase.validateLogin(login))
             }
         }
     }
