@@ -13,15 +13,13 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -37,6 +35,8 @@ import com.mobileprism.fishing.ui.home.views.FishingButtonFilled
 import com.mobileprism.fishing.ui.home.views.HeaderText
 import com.mobileprism.fishing.ui.home.views.SecondaryTextSmall
 import com.mobileprism.fishing.ui.viewmodels.login.RegisterViewModel
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.utils.showError
 import org.koin.androidx.compose.get
 
 @ExperimentalMaterialApi
@@ -50,6 +50,16 @@ fun RegisterScreen(upPress: () -> Unit) {
     val showPassword = rememberSaveable() { mutableStateOf(false) }
     val registerInfo = viewModel.registerInfo.collectAsState()
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
+
+    LaunchedEffect(uiState) {
+        when(val state = uiState) {
+            UiState.Error -> {
+                context.applicationContext.showError(BaseViewState.Error())
+            }
+            else -> {}
+        }
+    }
 
     Scaffold {
         DefaultAuthColumn() {

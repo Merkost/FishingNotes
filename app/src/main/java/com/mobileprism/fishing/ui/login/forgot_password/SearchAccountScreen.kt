@@ -3,17 +3,22 @@ package com.mobileprism.fishing.ui.login.forgot_password
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.VpnKey
+import androidx.compose.material.icons.filled.VpnKeyOff
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.custom.FishingOutlinedTextField
@@ -26,6 +31,7 @@ import com.mobileprism.fishing.ui.viewmodels.restore.SearchAccountViewModel
 import com.mobileprism.fishing.ui.viewmodels.restore.UserLogin
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.Constants
+import com.mobileprism.fishing.utils.showError
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 
@@ -36,6 +42,8 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
     val searchState = viewModel.searchState.collectAsState()
     val confirmState = viewModel.confirmState.collectAsState()
     val loginInfo by viewModel.restoreInfo.collectAsState()
+
+    val context = LocalContext.current
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -48,7 +56,7 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
     LaunchedEffect(confirmState.value) {
         when (val state = confirmState.value) {
             is BaseViewState.Error -> {
-                // TODO: error handling
+                context.applicationContext.showError(state)
             }
             is BaseViewState.Loading -> {}
             is BaseViewState.Success -> {
@@ -88,11 +96,30 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
                 )
 
                 FishingOutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = loginInfo.otp,
-                    onValueChange = viewModel::onOtpSet,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onFocusEvent {
+                            if (it.isFocused.not())
+                                viewModel.validateOtp(skipEmpty = true)
+                        },
+                    enabled = confirmState.value !is BaseViewState.Loading,
                     isError = loginInfo.otpError.successful.not(),
                     errorString = loginInfo.otpError.errorMessage,
+                    value = loginInfo.otp,
+                    onValueChange = viewModel::onOtpSet,
+                    placeholder = stringResource(R.string.confirmation_code),
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Done,
+                        keyboardType = KeyboardType.Number
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                        viewModel.confirmAccount()
+                    }),
+                    singleLine = true,
+                    leadingIcon = {
+                        Icon(Icons.Default.VpnKey, Icons.Default.VpnKey.name)
+                    }
                 )
                 AnimatedVisibility(visible = confirmState.value is BaseViewState.Loading) {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())

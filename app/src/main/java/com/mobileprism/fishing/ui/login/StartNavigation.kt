@@ -11,6 +11,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
+import com.google.accompanist.navigation.animation.navigation
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.mobileprism.fishing.ui.Arguments
@@ -19,6 +20,7 @@ import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.login.forgot_password.ResetAccountScreen
 import com.mobileprism.fishing.ui.login.forgot_password.RestoreDestinations
 import com.mobileprism.fishing.ui.login.forgot_password.SearchAccountScreen
+import com.mobileprism.fishing.ui.login.forgot_password.addForgotPasswordGraph
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.requiredArg
 import com.mobileprism.fishing.ui.resources
@@ -37,7 +39,6 @@ fun StartNavigation() {
     val scaffoldState = rememberScaffoldState()
 
     val systemUiController = rememberSystemUiController()
-
     val surfaceColor = MaterialTheme.colors.surface
     val primaryColor = MaterialTheme.colors.primary
 
@@ -83,21 +84,15 @@ fun StartNavigation() {
                 }
             }
 
-            composable(RestoreDestinations.SEARCH_AND_CONFIRM_ACCOUNT) { from ->
-                SearchAccountScreen(upPress = upPress, onNext = {
-                    navController.navigate(RestoreDestinations.RESET_ACCOUNT, Arguments.USER_LOGIN to it)
-                })
+            navigation(
+                RestoreDestinations.SEARCH_AND_CONFIRM_ACCOUNT,
+                route = LoginDestinations.FORGOT_PASSWORD
+            ) {
+                // TODO: change statusBar color
+                addForgotPasswordGraph(navController, upPress = upPress)
             }
 
-            composable(RestoreDestinations.RESET_ACCOUNT) { from ->
-                val userLogin = from.requiredArg<UserLogin>(Arguments.USER_LOGIN)
-                ResetAccountScreen(userLogin = userLogin, upPress = upPress, onNext = {
-                    navController.popBackStack(
-                        RestoreDestinations.SEARCH_AND_CONFIRM_ACCOUNT,
-                        inclusive = true
-                    )
-                })
-            }
+
 
             composable(LoginDestinations.REGISTER,
                 enterTransition = {

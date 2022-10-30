@@ -118,15 +118,17 @@ class ValidationUseCase(private val context: Context) {
     }
 
     fun validateOTP(otp: String): ValidationResult {
-        if (otp.toIntOrNull()?.toString()?.length == OTP_LENGTH) {
-            return ValidationResult(
+        return if (otp.toIntOrNull() == null || otp.length != OTP_LENGTH) {
+            ValidationResult(
+                successful = false,
+                errorMessage = context.getString(R.string.otp_must_contain_6_digits)
+            )
+        } else {
+            ValidationResult(
                 successful = true
             )
         }
-        return ValidationResult(
-            successful = false,
-            errorMessage = context.getString(R.string.otp_must_contain_6_digits)
-        )
+
     }
 
     fun validateTerms(terms: Boolean): ValidationResult {

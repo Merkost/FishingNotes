@@ -417,6 +417,8 @@
     <string name="otp_must_contain_6_digits">Код должен состоять из 6 цифр</string>
     <string name="confirm">Подтвердить</string>
     <string name="new_password">Новый пароль</string>
+    <string name="confirmation_code">Код подтверждения</string>
+    <string name="api_error_message">Не удалось связаться с сервером. Повторите попытку позже</string>
 
 
 </resources>

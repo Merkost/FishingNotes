@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -35,6 +36,8 @@ import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.HeaderText
 import com.mobileprism.fishing.ui.home.views.SecondaryTextSmall
 import com.mobileprism.fishing.ui.viewmodels.login.LoginViewModel
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.utils.showError
 import org.koin.androidx.compose.get
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -48,13 +51,13 @@ fun LoginScreen(upPress: () -> Unit, forgotPassword: () -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
     val focusManager = LocalFocusManager.current
     val localSoftwareKeyboardController = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
 
 
     LaunchedEffect(uiState) {
         when (val state = uiState) {
             UiState.Error -> {
-                // TODO: create auth state
-                //state.errorText?.let { showToast(context, state.errorText) }
+                context.applicationContext.showError(BaseViewState.Error())
             }
             UiState.InProgress -> {
                 focusManager.clearFocus()

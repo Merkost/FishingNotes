@@ -42,11 +42,14 @@ class SearchAccountViewModel(
     }
 
     fun onOtpSet(otp: String) {
-        _restoreInfo.update {
-            _restoreInfo.value.copy(
-                otp = otp, otpError = ValidationResult(true)
-            )
+        if (otp.isEmpty() || (otp.length <= ValidationUseCase.OTP_LENGTH && otp.toIntOrNull() != null)) {
+            _restoreInfo.update {
+                _restoreInfo.value.copy(
+                    otp = otp, otpError = ValidationResult(true)
+                )
+            }
         }
+
     }
 
     fun validateLogin(skipEmpty: Boolean = false) {
@@ -55,6 +58,16 @@ class SearchAccountViewModel(
         restoreInfo.value.apply {
             _restoreInfo.update {
                 it.copy(loginError = validationUseCase.validateLogin(login))
+            }
+        }
+    }
+
+    fun validateOtp(skipEmpty: Boolean = false) {
+        if (skipEmpty && _restoreInfo.value.otp.isEmpty()) return
+
+        restoreInfo.value.apply {
+            _restoreInfo.update {
+                it.copy(otpError = validationUseCase.validateOTP(otp))
             }
         }
     }
@@ -107,7 +120,8 @@ class SearchAccountViewModel(
 
                 _restoreInfo.update {
                     it.copy(
-                        loginError = loginResult, otpError = otpError
+                        loginError = loginResult,
+                        otpError = otpResult
                     )
                 }
 
@@ -117,7 +131,7 @@ class SearchAccountViewModel(
                 restoreRepository.confirmOTP(RestoreRemoteConfirm(login, otp.toIntOrNull() ?: 0))
                     .single().fold(onSuccess = {
                         if (it.success)
-                        _confirmState.update { BaseViewState.Success(UserLogin(login = login)) }
+                            _confirmState.update { BaseViewState.Success(UserLogin(login = login)) }
                         else _confirmState.update { BaseViewState.Error(null) }
                     }, onError = {
                         _confirmState.update { BaseViewState.Error(null) }
@@ -138,6 +152,7 @@ class SearchAccountViewModel(
         resetSearchState()
         resetConfirmState()
     }
+
 
 }
 

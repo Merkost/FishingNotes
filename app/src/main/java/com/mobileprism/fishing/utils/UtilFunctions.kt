@@ -10,6 +10,7 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.Hourly
 import com.mobileprism.fishing.ui.home.map.DEFAULT_ZOOM
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.time.TimeConstants.MILLISECONDS_IN_DAY
 import com.mobileprism.fishing.utils.time.TimeConstants.MOON_PHASE_INCREMENT_IN_DAY
 import com.mobileprism.fishing.utils.time.TimeConstants.MOON_ZERO_DATE_SECONDS
@@ -77,6 +78,16 @@ fun getClosestHourIndex(list: List<Hourly>, date: Long): Int {
         }
     }
     return 0
+}
+
+fun Context.showError(errorState: BaseViewState.Error) {
+    errorState.stringRes?.let {
+        showToast(getString(it))
+    } ?: showToast(errorState.text ?: getString(R.string.api_error_message))
+}
+
+fun Context.showError(text: String?) {
+    showToast(text ?: getString(R.string.api_error_message))
 }
 
 fun Context.showToast(text: String, length: Int = Toast.LENGTH_SHORT) {
