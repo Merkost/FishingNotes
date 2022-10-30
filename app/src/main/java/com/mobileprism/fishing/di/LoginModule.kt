@@ -6,9 +6,11 @@ import com.mobileprism.fishing.domain.use_cases.validation.ValidationUseCase
 import com.mobileprism.fishing.model.auth.AuthManagerImpl
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseUserRepositoryImpl
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
-import com.mobileprism.fishing.ui.viewmodels.login.ForgotPasswordViewModel
+import com.mobileprism.fishing.ui.viewmodels.restore.ConfirmAccountViewModel
+import com.mobileprism.fishing.ui.viewmodels.restore.SearchAccountViewModel
 import com.mobileprism.fishing.ui.viewmodels.login.LoginViewModel
 import com.mobileprism.fishing.ui.viewmodels.login.RegisterViewModel
+import com.mobileprism.fishing.ui.viewmodels.restore.ResetAccountViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -56,8 +58,23 @@ val loginModule = module {
     }
 
     viewModel() {
-        ForgotPasswordViewModel(
-            validationUseCase = get()
+        SearchAccountViewModel(
+            validationUseCase = get(),
+            restoreRepository = get()
+        )
+    }
+
+    viewModel() {
+        ConfirmAccountViewModel(
+            restoreRepository = get()
+        )
+    }
+
+    viewModel() {
+        ResetAccountViewModel(
+            userLogin = it.get(),
+            validationUseCase = get(),
+            restoreRepository = get()
         )
     }
 }

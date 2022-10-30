@@ -30,8 +30,8 @@ class LoginViewModel(
     private val _uiState = MutableStateFlow<UiState?>(null)
     val uiState = _uiState.asStateFlow()
 
-    private val _loginInfo = MutableStateFlow(LoginInfo())
-    val loginInfo = _loginInfo.asStateFlow()
+    private val _authInfo = MutableStateFlow(AuthInfo())
+    val loginInfo = _authInfo.asStateFlow()
 
     private var loginJob: Job? = null
 
@@ -45,8 +45,8 @@ class LoginViewModel(
     }
 
     fun setLogin(login: String) {
-        _loginInfo.update {
-            _loginInfo.value.copy(
+        _authInfo.update {
+            _authInfo.value.copy(
                 login = login,
                 loginError = ValidationResult(true)
             )
@@ -54,8 +54,8 @@ class LoginViewModel(
     }
 
     fun setPassword(password: String) {
-        _loginInfo.update {
-            _loginInfo.value.copy(
+        _authInfo.update {
+            _authInfo.value.copy(
                 password = password,
                 passwordError = ValidationResult(true)
             )
@@ -63,10 +63,10 @@ class LoginViewModel(
     }
 
     fun validateLogin(skipEmpty: Boolean = false) {
-        if (skipEmpty && _loginInfo.value.login.isEmpty()) return
+        if (skipEmpty && _authInfo.value.login.isEmpty()) return
 
         loginInfo.value.apply {
-            _loginInfo.update {
+            _authInfo.update {
                 it.copy(loginError = validationUseCase.validateLogin(login))
             }
         }
@@ -85,7 +85,7 @@ class LoginViewModel(
                 ).any { !it.successful }
 
 
-                _loginInfo.update {
+                _authInfo.update {
                     it.copy(
                         loginError = loginResult,
                         passwordError = passwordResult,
@@ -96,7 +96,7 @@ class LoginViewModel(
 
                 _uiState.update { UiState.InProgress }
                 if (BuildConfig.DEBUG) delay(2000)
-                _loginInfo.value.let { loginInfo ->
+                _authInfo.value.let { loginInfo ->
 
                     when (checkLoginInputType(loginInfo.login)) {
                         LoginInputType.Email -> {
@@ -162,7 +162,7 @@ class LoginViewModel(
     }
 }
 
-data class LoginInfo(
+data class AuthInfo(
     val login: String = "",
     val loginError: ValidationResult = ValidationResult(true),
     val password: String = "",

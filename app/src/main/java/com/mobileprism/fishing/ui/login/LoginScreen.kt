@@ -4,6 +4,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,6 +33,7 @@ import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.views.FishingButtonFilled
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.HeaderText
+import com.mobileprism.fishing.ui.home.views.SecondaryTextSmall
 import com.mobileprism.fishing.ui.viewmodels.login.LoginViewModel
 import org.koin.androidx.compose.get
 
@@ -39,7 +41,7 @@ import org.koin.androidx.compose.get
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @Composable
-fun LoginScreen(upPress: () -> Unit) {
+fun LoginScreen(upPress: () -> Unit, forgotPassword: () -> Unit) {
     val viewModel: LoginViewModel = get()
     var visible by remember { mutableStateOf(false) }
 
@@ -263,6 +265,15 @@ fun LoginScreen(upPress: () -> Unit) {
                                 enabled = uiState !is UiState.InProgress,
                                 onClick = viewModel::signInUser
                             )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            SecondaryTextSmall(
+                                text = "Forgot your password?",
+                                modifier = Modifier.clickable { forgotPassword() })
                         }
                     }
                 }

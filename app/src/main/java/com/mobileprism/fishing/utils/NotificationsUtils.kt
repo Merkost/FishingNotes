@@ -21,7 +21,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.ui.home.views.DefaultDialog
+import com.mobileprism.fishing.ui.custom.DefaultDialog
 
 @Composable
 fun Context.checkNotificationPolicyAccess(

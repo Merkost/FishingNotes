@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.ui.home.profile
 
-import android.app.Activity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -11,7 +10,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
@@ -20,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
@@ -34,18 +31,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
-import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import com.airbnb.lottie.compose.*
-import com.google.android.gms.maps.model.Circle
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.di.repositoryModuleFirebase
-import com.mobileprism.fishing.di.repositoryModuleLocal
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.MainDestinations
-import com.mobileprism.fishing.ui.home.HomeSections
+import com.mobileprism.fishing.ui.custom.DefaultDialog
 import com.mobileprism.fishing.ui.home.notes.CatchItemView
 import com.mobileprism.fishing.ui.home.notes.ItemUserPlace
 import com.mobileprism.fishing.ui.home.views.*
@@ -54,9 +47,7 @@ import com.mobileprism.fishing.ui.theme.primaryTextColor
 import com.mobileprism.fishing.ui.viewmodels.UserViewModel
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
-import org.koin.core.context.unloadKoinModules
 
 @ExperimentalCoilApi
 @Composable

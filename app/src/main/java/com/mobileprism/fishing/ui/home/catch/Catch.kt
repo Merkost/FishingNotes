@@ -34,6 +34,8 @@ import com.mobileprism.fishing.model.mappers.getMoonIconByPhase
 import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
+import com.mobileprism.fishing.ui.custom.DefaultDialog
+import com.mobileprism.fishing.ui.custom.ModalLoadingDialog
 import com.mobileprism.fishing.ui.home.notes.ItemUserPlace
 import com.mobileprism.fishing.ui.home.place.LottieWarning
 import com.mobileprism.fishing.ui.home.views.*

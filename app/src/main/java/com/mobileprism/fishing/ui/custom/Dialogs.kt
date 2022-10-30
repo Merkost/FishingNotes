@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.ui.home.views
+package com.mobileprism.fishing.ui.custom
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -25,11 +25,12 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.ui.custom.CircleButton
-import com.mobileprism.fishing.ui.custom.FishingTextButton
+import com.mobileprism.fishing.ui.home.views.DefaultButton
+import com.mobileprism.fishing.ui.home.views.DefaultCard
+import com.mobileprism.fishing.ui.home.views.FishingButtonFilled
+import com.mobileprism.fishing.ui.home.views.PrimaryText
 import com.mobileprism.fishing.ui.theme.customColors
 
-@ExperimentalComposeUiApi
 @Composable
 fun DefaultDialog(
     primaryText: String? = null,

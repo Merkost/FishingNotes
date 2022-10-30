@@ -31,13 +31,10 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.ui.MainDestinations
-import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.UiState
-import com.mobileprism.fishing.ui.home.map.GrantLocationPermissionsDialog
-import com.mobileprism.fishing.ui.home.map.checkLocationPermissions
 import com.mobileprism.fishing.ui.home.map.locationPermissionsList
 import com.mobileprism.fishing.ui.home.views.DefaultAppBar
-import com.mobileprism.fishing.ui.home.views.DefaultDialog
+import com.mobileprism.fishing.ui.custom.DefaultDialog
 import com.mobileprism.fishing.ui.home.views.ItemsSelection
 import com.mobileprism.fishing.ui.home.weather.PressureValues
 import com.mobileprism.fishing.ui.home.weather.TemperatureValues

@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.common.User
+import com.mobileprism.fishing.ui.custom.DefaultDialog
+import com.mobileprism.fishing.ui.custom.ModalLoadingDialog
 import com.mobileprism.fishing.ui.home.settings.GrayText
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.theme.customColors

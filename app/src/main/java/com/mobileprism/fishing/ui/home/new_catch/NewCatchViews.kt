@@ -33,12 +33,10 @@ import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
-import com.mobileprism.fishing.ui.Arguments
-import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.new_catch.weather.SelectedWeather
 import com.mobileprism.fishing.ui.home.views.DatePickerDialog
-import com.mobileprism.fishing.ui.home.views.DefaultDialog
+import com.mobileprism.fishing.ui.custom.DefaultDialog
 import com.mobileprism.fishing.ui.home.views.TimePickerDialog
 import com.mobileprism.fishing.ui.home.views.WindIconItem
 import com.mobileprism.fishing.ui.home.weather.navigateToAddNewPlace

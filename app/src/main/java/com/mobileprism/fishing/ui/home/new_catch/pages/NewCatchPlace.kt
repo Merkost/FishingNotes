@@ -34,7 +34,7 @@ import com.mobileprism.fishing.ui.home.new_catch.NewCatchNoPlaceDialog
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlaceSelectView
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlacesState
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlinedOld
-import com.mobileprism.fishing.ui.home.views.DefaultDialog
+import com.mobileprism.fishing.ui.custom.DefaultDialog
 import com.mobileprism.fishing.ui.home.views.SubtitleWithIcon
 
 @ExperimentalComposeUiApi

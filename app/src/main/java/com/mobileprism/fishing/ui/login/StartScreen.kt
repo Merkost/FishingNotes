@@ -32,7 +32,7 @@ import com.mobileprism.fishing.ui.custom.FishingTextButton
 import com.mobileprism.fishing.ui.custom.LoginWithGoogleButton
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.HeaderText
-import com.mobileprism.fishing.ui.home.views.ModalLoading
+import com.mobileprism.fishing.ui.custom.ModalLoading
 import com.mobileprism.fishing.ui.home.views.SecondaryText
 import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.ui.utils.noRippleClickable

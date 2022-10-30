@@ -45,7 +45,7 @@ import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.MainActivity
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.settings.SettingsHeader
-import com.mobileprism.fishing.ui.home.views.DefaultDialog
+import com.mobileprism.fishing.ui.custom.DefaultDialog
 import com.mobileprism.fishing.ui.theme.RedGoogleChrome
 import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
 import com.mobileprism.fishing.ui.theme.supportTextColor

@@ -34,6 +34,7 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.ui.custom.DefaultDialog
 import com.mobileprism.fishing.ui.home.catch.EditNoteDialog
 import com.mobileprism.fishing.ui.home.notes.*
 import com.mobileprism.fishing.ui.home.views.*

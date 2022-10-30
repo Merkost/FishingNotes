@@ -413,6 +413,10 @@
     <string name="allow">Разрешить</string>
     <string name="allow_notifications_manually">Включить уведомления в настройках приложения</string>
     <string name="password_recovery">Восстановление пароля</string>
+    <string name="find_account">Найти аккаунт</string>
+    <string name="otp_must_contain_6_digits">Код должен состоять из 6 цифр</string>
+    <string name="confirm">Подтвердить</string>
+    <string name="new_password">Новый пароль</string>
 
 
 </resources>

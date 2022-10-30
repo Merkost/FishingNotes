@@ -24,6 +24,8 @@ import com.google.accompanist.pager.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.ui.custom.DefaultDialog
+import com.mobileprism.fishing.ui.custom.ModalLoadingDialog
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.new_catch.pages.NewCatchPage
 import com.mobileprism.fishing.ui.home.place.LottieWarning

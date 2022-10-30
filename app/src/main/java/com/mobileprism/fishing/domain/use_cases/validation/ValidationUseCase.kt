@@ -13,6 +13,8 @@ class ValidationUseCase(private val context: Context) {
         const val LOGIN_MAX_LENGTH = 20
         const val PASSWORD_MIN_LENGTH = 8
         const val PASSWORD_MAX_LENGTH = 25
+        const val OTP_LENGTH = 6
+
 
         private val loginPattern =
             "^(?=.{$LOGIN_MIN_LENGTH,$LOGIN_MAX_LENGTH}${'$'})(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$".toRegex()
@@ -112,6 +114,18 @@ class ValidationUseCase(private val context: Context) {
         }
         return ValidationResult(
             successful = true
+        )
+    }
+
+    fun validateOTP(otp: String): ValidationResult {
+        if (otp.toIntOrNull()?.toString()?.length == OTP_LENGTH) {
+            return ValidationResult(
+                successful = true
+            )
+        }
+        return ValidationResult(
+            successful = false,
+            errorMessage = context.getString(R.string.otp_must_contain_6_digits)
         )
     }
 

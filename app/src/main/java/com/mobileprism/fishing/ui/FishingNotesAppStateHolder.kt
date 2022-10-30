@@ -45,6 +45,7 @@ object MainDestinations {
 }
 
 object Arguments {
+    const val USER_LOGIN = "user_login_arg"
     const val PLACE = "place_arg"
     const val CATCH = "catch_arg"
     const val WEATHER_DATA = "daily_weather_data_arg"
