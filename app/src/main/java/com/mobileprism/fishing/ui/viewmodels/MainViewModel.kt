@@ -8,40 +8,35 @@ import com.mobileprism.fishing.domain.repository.AuthManager
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.koin.core.KoinApplication.Companion.init
 
 class MainViewModel(
     private val authManager: AuthManager,
     private val userPreferences: UserPreferences
 ) : ViewModel() {
 
-    val isUserLoggedState = MutableStateFlow<Boolean>(false)
-    val appTheme = mutableStateOf<AppThemeValues?>(null)
+    val isUserLoggedState = authManager.currentUser.map { it?.loginType != null }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val appTheme = userPreferences.appTheme
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
     val googleLoginEvent = MutableSharedFlow<Unit>()
 
     val mutableStateFlow: MutableStateFlow<BaseViewState<User?>> =
-        MutableStateFlow(BaseViewState.Loading(null))
+        MutableStateFlow(BaseViewState.Loading)
 
     init {
-        loadCurrentUser()
-        loadCurrentTheme()
-    }
-
-    private fun loadCurrentTheme() {
-        viewModelScope.launch {
-            userPreferences.appTheme.collect {
-                appTheme.value = it
-            }
-        }
+        //loadCurrentUser()
+        //loadCurrentTheme()
     }
 
     private fun loadCurrentUser() {
         viewModelScope.launch {
 
-            authManager.currentUser.collectLatest {
+            /*authManager.currentUser.collectLatest {
                 when (it?.loginType) {
                     null -> {
                         isUserLoggedState.value = false
@@ -50,7 +45,7 @@ class MainViewModel(
                         isUserLoggedState.value = true
                     }
 
-                    /*is LoginState.LoginFailure -> {
+                    *//*is LoginState.LoginFailure -> {
                         isUserLoggedState.value = false
                         handleError(it.throwable)
                     }
@@ -61,9 +56,9 @@ class MainViewModel(
 
                     is LoginState.GoogleAuthInProcess -> {
                         googleLoginEvent.emit(Unit)
-                    }*/
+                    }*//*
                 }
-            }
+            }*/
 
 //            subscribeOnCurrentUser().collectLatest { currentUser ->
 //                isUserLoggedState.value = currentUser != null

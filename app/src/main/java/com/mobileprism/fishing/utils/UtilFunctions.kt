@@ -83,7 +83,8 @@ fun getClosestHourIndex(list: List<Hourly>, date: Long): Int {
 fun Context.showError(errorState: BaseViewState.Error) {
     errorState.stringRes?.let {
         showToast(getString(it))
-    } ?: showToast(errorState.text ?: getString(R.string.api_error_message))
+    } ?: if(Constants.isDebug) showToast(errorState.text ?: getString(R.string.api_error_message))
+    else showToast(getString(R.string.api_error_message))
 }
 
 fun Context.showError(text: String?) {

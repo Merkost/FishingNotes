@@ -20,7 +20,7 @@ class NotesViewModel(
     private val userPlacesList = mutableStateListOf<PlaceNoteItemUiState>()
 
     private val _uiState =
-        MutableStateFlow<BaseViewState<List<PlaceNoteItemUiState>>>(BaseViewState.Loading())
+        MutableStateFlow<BaseViewState<List<PlaceNoteItemUiState>>>(BaseViewState.Loading)
     val uiState = _uiState.asStateFlow()
 
     private val _expandedItems = MutableStateFlow<List<UserMapMarker>>(listOf())

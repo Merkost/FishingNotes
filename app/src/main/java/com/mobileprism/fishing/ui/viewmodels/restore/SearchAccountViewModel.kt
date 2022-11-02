@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.ui.viewmodels.restore
 
 import android.os.Parcelable
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.domain.entity.auth.restore.RestoreRemoteConfirm
@@ -8,6 +9,8 @@ import com.mobileprism.fishing.domain.entity.auth.restore.RestoreRemoteFind
 import com.mobileprism.fishing.domain.repository.RestoreRepository
 import com.mobileprism.fishing.domain.use_cases.validation.ValidationResult
 import com.mobileprism.fishing.domain.use_cases.validation.ValidationUseCase
+import com.mobileprism.fishing.model.entity.FishingCodes
+import com.mobileprism.fishing.model.entity.FishingResponse
 import com.mobileprism.fishing.model.utils.fold
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
@@ -21,7 +24,7 @@ class SearchAccountViewModel(
     private val restoreRepository: RestoreRepository
 ) : ViewModel() {
 
-    private val _searchState = MutableStateFlow<UiState?>(null)
+    private val _searchState = MutableStateFlow<BaseViewState<FishingResponse>?>(null)
     val searchState = _searchState.asStateFlow()
 
     private val _confirmState = MutableStateFlow<BaseViewState<UserLogin>?>(null)
@@ -84,26 +87,26 @@ class SearchAccountViewModel(
                 val loginResult = validationUseCase.validateLogin(login)
                 val hasError = loginResult.successful.not()
 
-
-
-                _restoreInfo.update {
-                    it.copy(
-                        loginError = loginResult,
-                    )
-                }
+                _restoreInfo.update { it.copy(loginError = loginResult) }
 
                 if (hasError) return@launch
 
-                _searchState.update { UiState.InProgress }
+                _searchState.update { BaseViewState.Loading }
                 restoreRepository.searchAccount(RestoreRemoteFind(restoreInfo.value.login)).single()
-                    .fold(onSuccess = {
-                        _searchState.update { UiState.Success }
-                    }, onError = {
-                        _searchState.update { UiState.Error }
-                    })
+                    .fold(
+                        onSuccess = { result ->
+                            if (result.success) {
+                                _searchState.update { BaseViewState.Success(result) }
+                            } else {
+                                _searchState.update { BaseViewState.Error(stringRes = result.fishingCode.stringRes) }
+                            }
+                        }, onError = { error ->
+                            _searchState.update { BaseViewState.Error(stringRes = error.fishingCode.stringRes) }
+                        })
             }
         }
     }
+
 
     fun cancelConfirm() {
         confirmJob?.cancel()
@@ -127,15 +130,19 @@ class SearchAccountViewModel(
 
                 if (hasError) return@launch
 
-                _confirmState.update { BaseViewState.Loading() }
+                _confirmState.update { BaseViewState.Loading }
                 restoreRepository.confirmOTP(RestoreRemoteConfirm(login, otp.toIntOrNull() ?: 0))
-                    .single().fold(onSuccess = {
-                        if (it.success)
-                            _confirmState.update { BaseViewState.Success(UserLogin(login = login)) }
-                        else _confirmState.update { BaseViewState.Error(null) }
-                    }, onError = {
-                        _confirmState.update { BaseViewState.Error(null) }
-                    })
+                    .single()
+                    .fold(
+                        onSuccess = { result ->
+                            if (result.success) {
+                                _confirmState.update { BaseViewState.Success(UserLogin(login = login)) }
+                            } else {
+                                _confirmState.update { BaseViewState.Error(stringRes = result.fishingCode.stringRes) }
+                            }
+                        }, onError = { error ->
+                            _confirmState.update { BaseViewState.Error(stringRes = error.fishingCode.stringRes) }
+                        })
             }
         }
     }

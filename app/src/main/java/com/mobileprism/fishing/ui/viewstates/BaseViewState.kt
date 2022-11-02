@@ -9,6 +9,6 @@ sealed class BaseViewState<out T> {
         val text: String? = null,
         @StringRes val stringRes: Int? = null,
     ) : BaseViewState<Nothing>()
-    class Loading(val progress: Int? = null) : BaseViewState<Nothing>()
+    object Loading : BaseViewState<Nothing>()
 }
 

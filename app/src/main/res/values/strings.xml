@@ -419,6 +419,13 @@
     <string name="new_password">Новый пароль</string>
     <string name="confirmation_code">Код подтверждения</string>
     <string name="api_error_message">Не удалось связаться с сервером. Повторите попытку позже</string>
+    <string name="success">Успешно</string>
+    <string name="fc_user_not_found">Such user was not found</string>
+    <string name="fc_invalid_otp">Invalif verification code</string>
+    <string name="fc_invalid_credentials">Invalid credentials</string>
+    <string name="fc_username_not_found">Username not found</string>
+    <string name="fc_unknown_error">Unknown error</string>
+    <string name="fc_network_error">Unable to reach the server</string>
 
 
 </resources>

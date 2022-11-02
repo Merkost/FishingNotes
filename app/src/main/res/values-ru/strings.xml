@@ -412,5 +412,11 @@
     <string name="allow">Разрешить</string>
     <string name="allow_notifications_manually">Включить уведомления в настройках приложения</string>
     <string name="password_recovery">Восстановление пароля</string>
+    <string name="fc_user_not_found">Пользователь не найден</string>
+    <string name="fc_username_not_found">Имя пользователя не найдено</string>
+    <string name="fc_invalid_credentials">Неверный логин или пароль</string>
+    <string name="fc_invalid_otp">Неверный код подтверждения</string>
+    <string name="fc_unknown_error">Неизвестная ошибка</string>
+    <string name="fc_network_error">Не удалось связаться с сервером</string>
 
 </resources>

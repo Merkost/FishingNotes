@@ -68,7 +68,7 @@ class EditProfileViewModel(
     }
 
     fun updateProfile() {
-        _uiState.value = BaseViewState.Loading()
+        _uiState.value = BaseViewState.Loading
         viewModelScope.launch {
             firebaseUserRepository.setNewProfileData(_currentUser.value).fold(
                 onSuccess = {

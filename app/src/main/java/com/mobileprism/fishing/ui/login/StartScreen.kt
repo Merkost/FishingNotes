@@ -159,12 +159,12 @@ fun StartScreen(
             }
 
 
-            DefaultButtonOutlined(
-                modifier = Modifier,
-                text = stringResource(id = R.string.skip),
-                icon = Icons.Default.ArrowForward,
-                onClick = { viewModel.skipAuthorization() }
-            )
+//            DefaultButtonOutlined(
+//                modifier = Modifier,
+//                text = stringResource(id = R.string.skip),
+//                icon = Icons.Default.ArrowForward,
+//                onClick = { viewModel.skipAuthorization() }
+//            )
 
             Row(
                 modifier = Modifier

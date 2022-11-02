@@ -67,8 +67,15 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
         }
     }
     LaunchedEffect(searchState.value) {
-        if (searchState.value is UiState.Success) {
-            modalBottomSheetState.animateTo(targetValue = ModalBottomSheetValue.Expanded)
+        when(val state = searchState.value) {
+            is BaseViewState.Error -> {
+                context.applicationContext.showError(state)
+            }
+            is BaseViewState.Success -> {
+                modalBottomSheetState.animateTo(targetValue = ModalBottomSheetValue.Expanded)
+
+            }
+            else -> {}
         }
     }
 
@@ -173,7 +180,7 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
                             if (it.isFocused.not())
                                 viewModel.validateLogin(skipEmpty = true)
                         },
-                    enabled = searchState.value !is UiState.InProgress,
+                    enabled = searchState.value !is BaseViewState.Loading,
                     isError = loginInfo.loginError.successful.not(),
                     errorString = loginInfo.loginError.errorMessage,
                     value = loginInfo.login,
@@ -188,7 +195,7 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
                     }
                 )
 
-                AnimatedVisibility(visible = searchState.value is UiState.InProgress) {
+                AnimatedVisibility(visible = searchState.value is BaseViewState.Loading) {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 }
 
@@ -197,7 +204,7 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Crossfade(searchState.value is UiState.InProgress) {
+                    Crossfade(searchState.value is BaseViewState.Loading) {
                         when (it) {
                             true -> {
                                 DefaultButtonOutlined(
