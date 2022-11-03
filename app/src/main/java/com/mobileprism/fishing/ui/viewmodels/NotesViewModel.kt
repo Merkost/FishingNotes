@@ -60,7 +60,7 @@ class NotesViewModel(
                                 item.copy(catchesState = NoteCatchesState.Loaded(it))
                         },
                         onFailure = {
-                            _uiState.value = BaseViewState.Error(it)
+                            _uiState.value = BaseViewState.Error(error = it)
                         }
                     )
                 }

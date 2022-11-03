@@ -98,10 +98,10 @@ class SearchAccountViewModel(
                             if (result.success) {
                                 _searchState.update { BaseViewState.Success(result) }
                             } else {
-                                _searchState.update { BaseViewState.Error(stringRes = result.fishingCode.stringRes) }
+                                _searchState.update { BaseViewState.Error(fishingError = result) }
                             }
                         }, onError = { error ->
-                            _searchState.update { BaseViewState.Error(stringRes = error.fishingCode.stringRes) }
+                            _searchState.update { BaseViewState.Error(fishingError = error) }
                         })
             }
         }
@@ -138,10 +138,10 @@ class SearchAccountViewModel(
                             if (result.success) {
                                 _confirmState.update { BaseViewState.Success(UserLogin(login = login)) }
                             } else {
-                                _confirmState.update { BaseViewState.Error(stringRes = result.fishingCode.stringRes) }
+                                _confirmState.update { BaseViewState.Error(fishingError = result) }
                             }
                         }, onError = { error ->
-                            _confirmState.update { BaseViewState.Error(stringRes = error.fishingCode.stringRes) }
+                            _confirmState.update { BaseViewState.Error(fishingError = error) }
                         })
             }
         }

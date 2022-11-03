@@ -97,8 +97,4 @@ class MainViewModel(
 //            mutableStateFlow.value = BaseViewState.Success(user)
         }
     }
-
-    private fun handleError(error: Throwable) {
-        mutableStateFlow.value = BaseViewState.Error(error)
-    }
 }

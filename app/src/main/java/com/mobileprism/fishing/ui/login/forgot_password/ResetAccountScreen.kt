@@ -48,16 +48,14 @@ fun ResetAccountScreen(userLogin: UserLogin, onNext: () -> Unit, upPress: () -> 
     val context = LocalContext.current
 
     LaunchedEffect(uiState.value) {
-        when(uiState.value) {
-            UiState.Error -> {
-                context.applicationContext.showError(BaseViewState.Error())
+        when(val state = uiState.value) {
+            is BaseViewState.Error -> {
+                context.applicationContext.showError(state.fishingError)
             }
-            UiState.InProgress -> {
-            }
-            UiState.Success -> {
+            is BaseViewState.Success -> {
                 onNext()
             }
-            null -> {}
+            else -> {}
         }
     }
 
@@ -87,7 +85,7 @@ fun ResetAccountScreen(userLogin: UserLogin, onNext: () -> Unit, upPress: () -> 
                     ),
                     isError = resetInfo.value.passwordError.successful.not(),
                     errorString = resetInfo.value.passwordError.errorMessage,
-                    enabled = uiState.value !is UiState.InProgress,
+                    enabled = uiState.value !is BaseViewState.Loading,
                     showPassword = showPassword.value,
                     onShowPasswordChanged = { showPassword.value = !showPassword.value },
                 )
@@ -109,12 +107,12 @@ fun ResetAccountScreen(userLogin: UserLogin, onNext: () -> Unit, upPress: () -> 
                     ),
                     isError = resetInfo.value.repeatPasswordError.successful.not(),
                     errorString = resetInfo.value.repeatPasswordError.errorMessage,
-                    enabled = uiState.value !is UiState.InProgress,
+                    enabled = uiState.value !is BaseViewState.Loading,
                     showPassword = showPassword.value
                 )
             }
 
-            AnimatedVisibility(visible = uiState.value is UiState.InProgress) {
+            AnimatedVisibility(visible = uiState.value is BaseViewState.Loading) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
 
@@ -123,7 +121,7 @@ fun ResetAccountScreen(userLogin: UserLogin, onNext: () -> Unit, upPress: () -> 
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Crossfade(uiState.value is UiState.InProgress) {
+                Crossfade(uiState.value is BaseViewState.Loading) {
                     when (it) {
                         true -> {
                             DefaultButtonOutlined(

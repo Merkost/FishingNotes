@@ -74,7 +74,7 @@ class EditProfileViewModel(
                 onSuccess = {
                     _uiState.value = BaseViewState.Success(Unit)
                 }, onFailure = {
-                    _uiState.value = BaseViewState.Error(it)
+                    _uiState.value = BaseViewState.Error(error = it)
                 }
             )
         }

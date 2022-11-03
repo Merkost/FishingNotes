@@ -55,11 +55,11 @@ fun LoginScreen(upPress: () -> Unit, forgotPassword: () -> Unit) {
 
 
     LaunchedEffect(uiState) {
-        when (val state = uiState) {
-            UiState.Error -> {
-                context.applicationContext.showError(BaseViewState.Error())
+        when (uiState) {
+            is BaseViewState.Error -> {
+                context.applicationContext.showError(fishingResponse = null)
             }
-            UiState.InProgress -> {
+            is BaseViewState.Loading -> {
                 focusManager.clearFocus()
                 localSoftwareKeyboardController?.hide()
             }
@@ -211,7 +211,7 @@ fun LoginScreen(upPress: () -> Unit, forgotPassword: () -> Unit) {
                                         if (it.isFocused.not())
                                             viewModel.validateLogin(skipEmpty = true)
                                     },
-                                enabled = uiState !is UiState.InProgress,
+                                enabled = uiState !is BaseViewState.Loading,
                                 isError = loginInfo.loginError.successful.not(),
                                 errorString = loginInfo.loginError.errorMessage,
                                 value = loginInfo.login,
@@ -230,7 +230,7 @@ fun LoginScreen(upPress: () -> Unit, forgotPassword: () -> Unit) {
                                 modifier = Modifier.fillMaxWidth(),
                                 password = loginInfo.password,
                                 onValueChange = viewModel::setPassword,
-                                enabled = uiState !is UiState.InProgress,
+                                enabled = uiState !is BaseViewState.Loading,
                                 isError = loginInfo.passwordError.successful.not(),
                                 errorString = loginInfo.passwordError.errorMessage,
                                 showPassword = showPassword.value,
@@ -238,7 +238,7 @@ fun LoginScreen(upPress: () -> Unit, forgotPassword: () -> Unit) {
                             )
                         }
 
-                        AnimatedVisibility(visible = uiState is UiState.InProgress) {
+                        AnimatedVisibility(visible = uiState is BaseViewState.Loading) {
                             LinearProgressIndicator(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -250,7 +250,7 @@ fun LoginScreen(upPress: () -> Unit, forgotPassword: () -> Unit) {
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Crossfade(uiState is UiState.InProgress) {
+                            Crossfade(uiState is BaseViewState.Loading) {
                                 when (it) {
                                     true -> {
                                         DefaultButtonOutlined(
@@ -265,7 +265,7 @@ fun LoginScreen(upPress: () -> Unit, forgotPassword: () -> Unit) {
                             }
                             FishingButtonFilled(
                                 text = stringResource(id = R.string.login),
-                                enabled = uiState !is UiState.InProgress,
+                                enabled = uiState !is BaseViewState.Loading,
                                 onClick = viewModel::signInUser
                             )
                         }

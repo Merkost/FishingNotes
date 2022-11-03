@@ -54,7 +54,7 @@ class WeatherViewModel(
                         _weatherState.value = BaseViewState.Success(it)
                     },
                     onFailure = {
-                        _weatherState.value = BaseViewState.Error(it)
+                        _weatherState.value = BaseViewState.Error(error = it)
                     }
                 )
             }

@@ -9,6 +9,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.Hourly
+import com.mobileprism.fishing.model.entity.FishingResponse
 import com.mobileprism.fishing.ui.home.map.DEFAULT_ZOOM
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.time.TimeConstants.MILLISECONDS_IN_DAY
@@ -80,10 +81,10 @@ fun getClosestHourIndex(list: List<Hourly>, date: Long): Int {
     return 0
 }
 
-fun Context.showError(errorState: BaseViewState.Error) {
-    errorState.stringRes?.let {
+fun Context.showError(fishingResponse: FishingResponse?) {
+    fishingResponse?.fishingCode?.stringRes?.let {
         showToast(getString(it))
-    } ?: if(Constants.isDebug) showToast(errorState.text ?: getString(R.string.api_error_message))
+    } ?: if (Constants.isDebug) showToast(fishingResponse?.description ?: getString(R.string.api_error_message))
     else showToast(getString(R.string.api_error_message))
 }
 
@@ -96,12 +97,20 @@ fun Context.showToast(text: String, length: Int = Toast.LENGTH_SHORT) {
 }
 
 fun Context.showErrorToast(text: String? = null) {
-    Toast.makeText(applicationContext, text ?: getString(R.string.error_occured), Toast.LENGTH_SHORT).show()
+    Toast.makeText(
+        applicationContext,
+        text ?: getString(R.string.error_occured),
+        Toast.LENGTH_SHORT
+    ).show()
 }
 
 @Deprecated("Check new method", replaceWith = ReplaceWith("showErrorToast"))
 fun showErrorToastOld(context: Context, text: String? = null) {
-    Toast.makeText(context.applicationContext, text ?: context.getString(R.string.error_occured), Toast.LENGTH_SHORT).show()
+    Toast.makeText(
+        context.applicationContext,
+        text ?: context.getString(R.string.error_occured),
+        Toast.LENGTH_SHORT
+    ).show()
 }
 
 fun getCameraPosition(latLng: LatLng): Pair<LatLng, Float> {
@@ -144,7 +153,7 @@ fun Context.isNetworkAvailable(): Boolean {
                 return true
             }
         } catch (e: Exception) {
-           // e.showLog()
+            // e.showLog()
         }
     }
     return false

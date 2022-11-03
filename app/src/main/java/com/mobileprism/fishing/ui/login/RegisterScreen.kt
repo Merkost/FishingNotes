@@ -54,9 +54,7 @@ fun RegisterScreen(upPress: () -> Unit) {
 
     LaunchedEffect(uiState) {
         when(val state = uiState) {
-            UiState.Error -> {
-                context.applicationContext.showError(BaseViewState.Error())
-            }
+            UiState.Error -> { context.applicationContext.showError(fishingResponse = null) }
             else -> {}
         }
     }

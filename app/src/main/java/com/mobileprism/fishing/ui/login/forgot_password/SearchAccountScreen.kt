@@ -56,7 +56,7 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
     LaunchedEffect(confirmState.value) {
         when (val state = confirmState.value) {
             is BaseViewState.Error -> {
-                context.applicationContext.showError(state)
+                context.applicationContext.showError(state.fishingError)
             }
             is BaseViewState.Loading -> {}
             is BaseViewState.Success -> {
@@ -69,7 +69,7 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
     LaunchedEffect(searchState.value) {
         when(val state = searchState.value) {
             is BaseViewState.Error -> {
-                context.applicationContext.showError(state)
+                context.applicationContext.showError(state.fishingError)
             }
             is BaseViewState.Success -> {
                 modalBottomSheetState.animateTo(targetValue = ModalBottomSheetValue.Expanded)

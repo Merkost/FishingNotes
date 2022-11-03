@@ -108,10 +108,6 @@ class RegisterViewModel(
     }
 
 
-    private fun handleError(error: Throwable) {
-        //_uiState.update { LoginScreenViewState.Error(error) }
-    }
-
     fun validateEmailInput() {
         _registerInfo.update {
             it.copy(emailError = validationUseCase.validateEmail(_registerInfo.value.email))
