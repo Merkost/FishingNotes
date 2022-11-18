@@ -10,5 +10,10 @@ interface AuthRepository {
     suspend fun registerNewUser(emailPassword: EmailPassword): Flow<ResultWrapper<UserResponse>>
     suspend fun loginUser(emailPassword: EmailPassword): Flow<ResultWrapper<UserResponse>>
     suspend fun loginUser(usernamePassword: UsernamePassword): Flow<ResultWrapper<UserResponse>>
-    suspend fun loginUserWithGoogle(email: String, userId: String, firebaseAuthId: String?): Flow<ResultWrapper<UserResponse>>
+    suspend fun loginUserWithGoogle(
+        email: String,
+        googleAuthId: String,
+        googleAuthIdToken: String,
+        firebaseAuthId: String
+    ): Flow<ResultWrapper<UserResponse>>
 }

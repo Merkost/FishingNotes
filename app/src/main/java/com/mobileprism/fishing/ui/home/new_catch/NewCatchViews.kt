@@ -79,7 +79,6 @@ fun FishSpecies(
     }
 }
 
-@ExperimentalComposeUiApi
 @Composable
 fun PickWeatherIconDialog(onWeatherSelected: (SelectedWeather) -> Unit, onDismiss: () -> Unit) {
     DefaultDialog(
@@ -244,7 +243,6 @@ fun PickWindDirDialog(onDirectionSelected: (Float) -> Unit, onDismiss: () -> Uni
     )
 }
 
-@ExperimentalComposeUiApi
 @Composable
 fun NewCatchNoPlaceDialog(
     navController: NavController
@@ -281,7 +279,7 @@ fun LottieNoPlaces(modifier: Modifier) {
     )
 }
 
-@ExperimentalComposeUiApi
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun NewCatchPlaceSelectView(
     modifier: Modifier = Modifier,

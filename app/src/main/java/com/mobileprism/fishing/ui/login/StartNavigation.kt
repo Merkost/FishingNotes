@@ -32,7 +32,7 @@ import kotlinx.coroutines.launch
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @Composable
-fun StartNavigation() {
+fun StartNavigation(toHomeScreen: () -> Unit) {
     FishingNotesTheme(isLoginScreen = true) {
         val navController = rememberAnimatedNavController()
         val upPress: () -> Unit = { navController.navigateUp() }
@@ -71,8 +71,10 @@ fun StartNavigation() {
                         onDispose {}
                     }
                     StartScreen(
-                        toLoginScreen = { navController.navigate(LoginDestinations.LOGIN) }
-                    ) { navController.navigate(LoginDestinations.REGISTER) }
+                        toLoginScreen = { navController.navigate(LoginDestinations.LOGIN) },
+                        toRegistration = { navController.navigate(LoginDestinations.REGISTER) },
+                        toHomeScreen = toHomeScreen
+                    )
                 }
 
                 composable(LoginDestinations.LOGIN) {
@@ -80,7 +82,7 @@ fun StartNavigation() {
                         systemUiController.setStatusBarColor(primaryColor)
                         onDispose {}
                     }
-                    LoginScreen(upPress = upPress) {
+                    LoginScreen(upPress = upPress, toHomeScreen = toHomeScreen) {
                         navController.navigate(RestoreDestinations.SEARCH_AND_CONFIRM_ACCOUNT)
                     }
                 }
@@ -109,7 +111,7 @@ fun StartNavigation() {
                         slideOutHorizontally(targetOffsetX = { 1500 }, animationSpec = tween(600))
                     }
                 ) {
-                    RegisterScreen(upPress)
+                    RegisterScreen(upPress, toHomeScreen = toHomeScreen)
                 }
 
             }

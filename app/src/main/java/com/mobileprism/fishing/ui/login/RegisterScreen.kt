@@ -41,7 +41,7 @@ import org.koin.androidx.compose.get
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @Composable
-fun RegisterScreen(upPress: () -> Unit) {
+fun RegisterScreen(upPress: () -> Unit, toHomeScreen: () -> Unit) {
     val viewModel: RegisterViewModel = get()
 
     val uiState by viewModel.uiState.collectAsState()
@@ -53,6 +53,7 @@ fun RegisterScreen(upPress: () -> Unit) {
 
     LaunchedEffect(uiState) {
         when(val state = uiState) {
+            is FishingViewState.Success -> toHomeScreen()
             is FishingViewState.Error -> { context.applicationContext.showError(state.fishingError) }
             else -> {}
         }

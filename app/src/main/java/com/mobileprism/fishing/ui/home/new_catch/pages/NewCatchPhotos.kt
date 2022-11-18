@@ -34,8 +34,6 @@ import com.mobileprism.fishing.utils.network.ConnectionState
 import com.mobileprism.fishing.utils.network.observeConnectivityAsFlow
 
 @OptIn(ExperimentalPermissionsApi::class)
-@ExperimentalComposeUiApi
-@ExperimentalAnimationApi
 @Composable
 fun NewCatchPhotos(viewModel: NewCatchMasterViewModel, navController: NavController) {
 

@@ -1,7 +1,9 @@
 package com.mobileprism.fishing.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
@@ -31,7 +33,6 @@ import com.mobileprism.fishing.ui.home.weather.WeatherDaily
 import com.mobileprism.fishing.ui.login.StartNavigation
 import kotlinx.coroutines.InternalCoroutinesApi
 
-@ExperimentalComposeUiApi
 @ExperimentalPermissionsApi
 @ExperimentalAnimationApi
 @ExperimentalPagerApi
@@ -59,6 +60,7 @@ fun FishingNotesApp(startDestination: String = MainDestinations.HOME_ROUTE) {
             )
         },
         scaffoldState = appStateHolder.scaffoldState,
+        modifier = Modifier.fillMaxSize().systemBarsPadding()
     ) { innerPaddingModifier ->
         NavHost(
             navController = appStateHolder.navController,
@@ -73,9 +75,7 @@ fun FishingNotesApp(startDestination: String = MainDestinations.HOME_ROUTE) {
     }
 }
 
-@ExperimentalComposeUiApi
 @ExperimentalPermissionsApi
-@ExperimentalCoilApi
 @ExperimentalPagerApi
 @ExperimentalAnimationApi
 @InternalCoroutinesApi
@@ -94,7 +94,13 @@ private fun NavGraphBuilder.NavGraph(
     composable(
         route = MainDestinations.AUTH_ROUTE,
     ) {
-        StartNavigation()
+        StartNavigation(toHomeScreen = {
+            navController.navigate(MainDestinations.HOME_ROUTE) {
+                popUpTo(MainDestinations.HOME_ROUTE) {
+                    inclusive = false
+                }
+            }
+        })
     }
 
     composable(MainDestinations.SETTINGS) {

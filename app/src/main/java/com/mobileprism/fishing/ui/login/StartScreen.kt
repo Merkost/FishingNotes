@@ -49,7 +49,8 @@ object LoginDestinations {
 @Composable
 fun StartScreen(
     toLoginScreen: () -> Unit,
-    toRegistration: () -> Unit
+    toRegistration: () -> Unit,
+    toHomeScreen: () -> Unit
 ) {
     val context = LocalContext.current
     val viewModel: StartViewModel = get()
@@ -64,6 +65,9 @@ fun StartScreen(
 
     LaunchedEffect(uiState) {
         when (val state = uiState) {
+            is BaseViewState.Success -> {
+                toHomeScreen()
+            }
             is BaseViewState.Error -> {
                 Toast.makeText(
                     context,

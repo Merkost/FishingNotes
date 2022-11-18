@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.model.datastore.impl
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -32,10 +33,19 @@ class UserDatastoreImpl(private val context: Context): UserDatastore {
             val token = Gson().fromJson(preferences[TOKEN_KEY], Token::class.java)
 
             when {
-                user != null && token.token.isBlank().not() -> AuthState.LoggedIn(user, token)
-                else -> AuthState.NotLoggedIn
+                user != null && token.token.isBlank().not() -> {
+                    Log.d("AUTH", "AuthState.LoggedIn")
+                    AuthState.LoggedIn(user, token)
+                }
+                else -> {
+                    Log.d("AUTH", "AuthState.NotLoggedIn")
+                    AuthState.NotLoggedIn
+                }
             }
-        }.catch { emit(AuthState.NotLoggedIn) }
+        }.catch { error ->
+            Log.d("AUTH_ERROR", error.message ?: "")
+            emit(AuthState.NotLoggedIn)
+        }
 
     //get the saved value
     override val getUser: Flow<UserData> = context.dataStore.data

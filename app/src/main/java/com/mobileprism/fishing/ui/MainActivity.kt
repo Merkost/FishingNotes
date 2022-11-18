@@ -13,10 +13,12 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SnackbarDuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.ads.MobileAds
@@ -63,6 +65,10 @@ class MainActivity : ComponentActivity() {
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // This app draws behind the system bars, so we want to handle fitting system windows
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         val viewModel: MainViewModel = getViewModel()
 
         val authState = viewModel.authState
@@ -94,7 +100,7 @@ class MainActivity : ComponentActivity() {
                             setContent {
                                 Distribution(
                                     appTheme = appTheme.value,
-                                    authState.value
+                                    authState.collectAsState().value
                                 )
                             }
                         }
@@ -107,7 +113,7 @@ class MainActivity : ComponentActivity() {
             setContent {
                 Distribution(
                     appTheme = appTheme.value,
-                    authState.value
+                    authState.collectAsState().value
                 )
             }
         }
@@ -210,8 +216,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // This app draws behind the system bars, so we want to handle fitting system windows
-    // WindowCompat.setDecorFitsSystemWindows(window, false)
+
 
     @OptIn(ExperimentalComposeUiApi::class)
     @InternalCoroutinesApi

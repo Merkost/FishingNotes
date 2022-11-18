@@ -129,9 +129,6 @@ fun ItemPhoto(
     }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
-@ExperimentalAnimationApi
-@ExperimentalComposeUiApi
 @Composable
 fun PhotosView(
     modifier: Modifier = Modifier,
@@ -369,8 +366,6 @@ fun FullSizePhotoView(
     }
 }
 
-@ExperimentalAnimationApi
-@ExperimentalComposeUiApi
 @Composable
 fun ItemCatchPhotoView(
     modifier: Modifier = Modifier,
@@ -401,8 +396,7 @@ fun ItemCatchPhotoView(
 }
 
 
-@ExperimentalComposeUiApi
-@ExperimentalAnimationApi
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun FullScreenPhoto(photo: MutableState<Uri?>) {
 

@@ -52,8 +52,8 @@ class StartViewModel(
     fun continueWithGoogle(account: GoogleSignInAccount, firebaseUser: FirebaseUser?) {
         viewModelScope.launch {
             _uiState.update { BaseViewState.Loading }
-            if (account.email != null && account.idToken != null) {
-                authManager.googleLogin(account.email!!, account.idToken!!, firebaseUser?.uid).single().fold(
+            if (account.email != null && account.idToken != null && account.id != null && firebaseUser?.uid != null) {
+                authManager.googleLogin(account.email!!, account.id!!, account.idToken!!, firebaseUser.uid).single().fold(
                     onSuccess = {
                         _uiState.update { BaseViewState.Success(Unit) }
                     },

@@ -48,9 +48,9 @@ sealed class BottomSheetCatchScreen() {
     object EditWayOfFishingScreen : BottomSheetCatchScreen()
 }
 
-@ExperimentalPermissionsApi
-@ExperimentalAnimationApi
-@ExperimentalComposeUiApi
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalAnimationApi::class,
+    ExperimentalPermissionsApi::class
+)
 @Composable
 fun CatchModalBottomSheetContent(
     currentScreen: BottomSheetCatchScreen,

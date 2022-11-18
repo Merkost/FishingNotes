@@ -36,5 +36,6 @@ interface AuthApiService {
 data class GoogleAuthRequest(
     val email: String,
     val googleAuthId: String,
+    val googleAuthIdToken: String,
     val firebaseAuthId: String?,
 ) : Parcelable

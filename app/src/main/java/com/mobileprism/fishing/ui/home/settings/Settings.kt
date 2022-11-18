@@ -49,7 +49,6 @@ import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalPermissionsApi::class)
-@ExperimentalComposeUiApi
 @Composable
 fun SettingsScreen(backPress: () -> Unit, navController: NavController) {
 
@@ -152,7 +151,6 @@ fun WeatherSettings(weatherPreferencesImpl: WeatherPreferences) {
 }
 
 @ExperimentalPermissionsApi
-@ExperimentalComposeUiApi
 @Composable
 fun MainAppSettings(userPreferences: UserPreferences) {
     val context = LocalContext.current

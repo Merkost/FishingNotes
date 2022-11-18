@@ -68,8 +68,18 @@ class AuthManagerImpl(
         userDatastore.logout()
     }
 
-    override suspend fun googleLogin(email: String, googleAuthId: String, firebaseAuthId: String?) = flow {
-        val result = authRepository.loginUserWithGoogle(email, googleAuthId, firebaseAuthId).single()
+    override suspend fun googleLogin(
+        email: String,
+        googleAuthId: String,
+        googleAuthIdToken: String,
+        firebaseAuthId: String
+    ) = flow {
+        val result = authRepository.loginUserWithGoogle(
+            email,
+            googleAuthId,
+            googleAuthIdToken,
+            firebaseAuthId
+        ).single()
         if (result is ResultWrapper.Success) {
             onLoginSuccess(result.data)
         }
@@ -119,11 +129,11 @@ class AuthManagerImpl(
     }
 
     private suspend fun createOfflineUser() {
-        userDatastore.saveUser(
+        /*userDatastore.saveUser(
             user = UserData(
                 login = "Anonymous",
             )
-        )
+        )*/
     }
 
 }

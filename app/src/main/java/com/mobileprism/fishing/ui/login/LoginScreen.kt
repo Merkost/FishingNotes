@@ -43,7 +43,7 @@ import org.koin.androidx.compose.get
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @Composable
-fun LoginScreen(upPress: () -> Unit, forgotPassword: () -> Unit) {
+fun LoginScreen(upPress: () -> Unit, toHomeScreen: () -> Unit, forgotPassword: () -> Unit) {
     val viewModel: LoginViewModel = get()
     var visible by remember { mutableStateOf(false) }
 
@@ -55,6 +55,9 @@ fun LoginScreen(upPress: () -> Unit, forgotPassword: () -> Unit) {
 
     LaunchedEffect(uiState) {
         when (val state = uiState) {
+            is FishingViewState.Success -> {
+                toHomeScreen()
+            }
             is FishingViewState.Error -> {
                 context.applicationContext.showError(state.fishingError)
             }

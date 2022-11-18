@@ -56,8 +56,9 @@ class FakeAuthRepositoryRetrofitImpl(private val dispatcher: CoroutineDispatcher
 
     override suspend fun loginUserWithGoogle(
         email: String,
-        userId: String,
-        firebaseAuthId: String?,
+        googleAuthId: String,
+        googleAuthIdToken: String,
+        firebaseAuthId: String,
     ) = flow {
         emit(fishingSafeApiCall(dispatcher) {
             delay(Constants.DEFAULT_DELAY)

@@ -52,10 +52,7 @@ import org.koin.androidx.compose.get
 import org.koin.androidx.compose.viewModel
 import org.koin.core.parameter.parametersOf
 
-@ExperimentalPermissionsApi
-@ExperimentalComposeUiApi
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UserCatchScreen(navController: NavController, catch: UserCatch) {
     val coroutineScope = rememberCoroutineScope()
@@ -188,9 +185,6 @@ fun DeleteCatchDialog(
     )
 }
 
-@ExperimentalMaterialApi
-@OptIn(ExperimentalComposeUiApi::class)
-@ExperimentalAnimationApi
 @Composable
 fun CatchContent(
     navController: NavController,
@@ -261,8 +255,6 @@ fun CatchContent(
 
 }
 
-@ExperimentalComposeUiApi
-@ExperimentalAnimationApi
 @Composable
 fun CatchTitleView(
     modifier: Modifier = Modifier,
@@ -328,7 +320,6 @@ fun CatchPhotosView(
 }
 
 
-@ExperimentalComposeUiApi
 @Composable
 fun WayOfFishingView(
     modifier: Modifier = Modifier,

@@ -37,7 +37,6 @@ import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlinedOld
 import com.mobileprism.fishing.ui.custom.DefaultDialog
 import com.mobileprism.fishing.ui.home.views.SubtitleWithIcon
 
-@ExperimentalComposeUiApi
 @Composable
 fun NewCatchPlace(viewModel: NewCatchMasterViewModel, navController: NavController) {
 
@@ -121,7 +120,6 @@ fun NewCatchPlace(viewModel: NewCatchMasterViewModel, navController: NavControll
     }
 }
 
-@ExperimentalComposeUiApi
 @Composable
 fun setMarkerListListener(markersList: NewCatchPlacesState, navController: NavController) {
     when (markersList) {

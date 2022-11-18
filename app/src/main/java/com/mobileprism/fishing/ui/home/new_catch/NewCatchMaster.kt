@@ -39,9 +39,6 @@ import org.koin.androidx.compose.viewModel
 import org.koin.core.parameter.parametersOf
 
 @ExperimentalPermissionsApi
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
-@ExperimentalComposeUiApi
 @ExperimentalPagerApi
 @Composable
 fun NewCatchMasterScreen(
@@ -356,7 +353,6 @@ private fun handlePagerNextClick(
 
 }
 
-@ExperimentalComposeUiApi
 @Composable
 fun CancelNewCatchDialog(
     onDismiss: () -> Unit,

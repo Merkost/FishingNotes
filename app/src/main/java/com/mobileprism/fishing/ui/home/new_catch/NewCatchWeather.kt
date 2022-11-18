@@ -127,7 +127,6 @@ fun <T> WeatherTypeItem(it: T, onWeatherSelected: (SelectedWeather) -> Unit) whe
     }
 
 
-@ExperimentalComposeUiApi
 @Composable
 fun NewCatchWeatherPrimary(
     modifier: Modifier = Modifier,
