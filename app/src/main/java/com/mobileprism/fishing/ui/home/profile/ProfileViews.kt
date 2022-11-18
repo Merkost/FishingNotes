@@ -154,6 +154,11 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
         positiveButtonText = stringResource(id = R.string.yes),
         onPositiveClick = {
             viewModel.logoutCurrentUser()
+            navController.navigate(MainDestinations.AUTH_ROUTE) {
+                popUpTo(MainDestinations.HOME_ROUTE) {
+                    inclusive = true
+                }
+            }
             /*scope.launch {
                 dialogOnLogout.value = false*/
                 /*viewModel.logoutCurrentUser()*//*.collect { isLogout ->

@@ -60,7 +60,7 @@ fun FishingNotesApp(startDestination: String = MainDestinations.HOME_ROUTE) {
             )
         },
         scaffoldState = appStateHolder.scaffoldState,
-        modifier = Modifier.fillMaxSize().systemBarsPadding()
+        modifier = Modifier.fillMaxSize()
     ) { innerPaddingModifier ->
         NavHost(
             navController = appStateHolder.navController,
