@@ -8,14 +8,11 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SnackbarDuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -31,13 +28,13 @@ import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.model.auth.AuthState
 import com.mobileprism.fishing.ui.home.SnackbarAction
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.login.StartNavigation
 import com.mobileprism.fishing.ui.theme.FishingNotesTheme
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewmodels.MainViewModel
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.Logger
 import com.mobileprism.fishing.utils.checkNotificationPolicyAccess
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -68,12 +65,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val viewModel: MainViewModel = getViewModel()
 
-        val screenState = viewModel.mutableStateFlow
+        val authState = viewModel.authState
         val appTheme = viewModel.appTheme
 
         installSplashScreen().apply {
             setKeepOnScreenCondition {
-                screenState.value is BaseViewState.Loading && appTheme.value == null
+                authState.value == null && appTheme.value == null
             }
             setOnExitAnimationListener { splashScreenViewProvider ->
                 // Get icon instance and start a fade out animation
@@ -97,7 +94,7 @@ class MainActivity : ComponentActivity() {
                             setContent {
                                 Distribution(
                                     appTheme = appTheme.value,
-                                    viewModel.isUserLoggedState.collectAsState()
+                                    authState.value
                                 )
                             }
                         }
@@ -110,7 +107,7 @@ class MainActivity : ComponentActivity() {
             setContent {
                 Distribution(
                     appTheme = appTheme.value,
-                    viewModel.isUserLoggedState.collectAsState()
+                    authState.value
                 )
             }
         }
@@ -216,10 +213,6 @@ class MainActivity : ComponentActivity() {
     // This app draws behind the system bars, so we want to handle fitting system windows
     // WindowCompat.setDecorFitsSystemWindows(window, false)
 
-    //light тема
-    //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
-
     @OptIn(ExperimentalComposeUiApi::class)
     @InternalCoroutinesApi
     @ExperimentalMaterialApi
@@ -227,23 +220,21 @@ class MainActivity : ComponentActivity() {
     @ExperimentalAnimationApi
     @ExperimentalPermissionsApi
     @Composable
-    fun Distribution(appTheme: AppThemeValues?, isUserLogged: State<Boolean>) {
+    fun Distribution(appTheme: AppThemeValues?, authState: AuthState?) {
 
         val notificationManager: NotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        Crossfade(targetState = isUserLogged.value) { state ->
-            when (state) {
-                false -> {
-                    FishingNotesTheme(appTheme, isLoginScreen = true) {
-                        StartNavigation()
-                    }
+        when (authState) {
+            is AuthState.LoggedIn -> {
+                FishingNotesTheme(appTheme) {
+                    checkNotificationPolicyAccess(notificationManager)
+                    FishingNotesApp()
                 }
-                true -> {
-                    FishingNotesTheme(appTheme) {
-                        checkNotificationPolicyAccess(notificationManager)
-                        FishingNotesApp()
-                    }
+            }
+            else -> {
+                FishingNotesTheme(appTheme) {
+                    FishingNotesApp(startDestination = MainDestinations.AUTH_ROUTE)
                 }
             }
         }

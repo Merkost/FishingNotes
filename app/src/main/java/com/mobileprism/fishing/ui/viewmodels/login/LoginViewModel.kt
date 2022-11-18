@@ -9,8 +9,9 @@ import com.mobileprism.fishing.domain.repository.AuthManager
 import com.mobileprism.fishing.domain.use_cases.validation.ValidationResult
 import com.mobileprism.fishing.domain.use_cases.validation.ValidationUseCase
 import com.mobileprism.fishing.model.auth.LoginState
-import com.mobileprism.fishing.ui.home.UiState
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.model.entity.FishingCodes
+import com.mobileprism.fishing.model.entity.FishingResponse
+import com.mobileprism.fishing.ui.viewstates.FishingViewState
 import com.mobileprism.fishing.utils.LoginInputType
 import com.mobileprism.fishing.utils.checkLoginInputType
 import com.mobileprism.fishing.utils.network.ConnectionManager
@@ -28,7 +29,7 @@ class LoginViewModel(
     private val validationUseCase: ValidationUseCase,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<BaseViewState<Unit>?>(null)
+    private val _uiState = MutableStateFlow<FishingViewState<FishingResponse>?>(null)
     val uiState = _uiState.asStateFlow()
 
     private val _authInfo = MutableStateFlow(AuthInfo())
@@ -95,7 +96,7 @@ class LoginViewModel(
 
                 if (hasError) return@launch
 
-                _uiState.update { BaseViewState.Loading }
+                _uiState.update { FishingViewState.Loading }
                 if (BuildConfig.DEBUG) delay(2000)
                 _authInfo.value.let { loginInfo ->
 
@@ -127,7 +128,15 @@ class LoginViewModel(
             authManager.loginState.collectLatest { loginState ->
                 when (loginState) {
                     is LoginState.LoginFailure -> {
-                        _uiState.update { BaseViewState.Error() }
+                        _uiState.update {
+                            FishingViewState.Error(
+                                FishingResponse(
+                                    fishingCode = FishingCodes.UNKNOWN_ERROR,
+                                    // TODO:  
+//                                    description = loginState. .message ?: ""
+                                )
+                            )
+                        }
 
                         /*_uiState.update {
                             _uiState.value.copy(
@@ -138,7 +147,7 @@ class LoginViewModel(
                         }*/
                     }
                     is LoginState.LoggedIn -> {
-                        _uiState.update { BaseViewState.Success(Unit) }
+                        _uiState.update { FishingViewState.Success(FishingResponse(true)) }
                         /*_uiState.update {
                             _uiState.value.copy(
                                 isLoading = false,

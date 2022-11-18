@@ -10,7 +10,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.VpnKey
-import androidx.compose.material.icons.filled.VpnKeyOff
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,14 +21,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.custom.FishingOutlinedTextField
-import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.FishingButtonFilled
 import com.mobileprism.fishing.ui.home.views.HeaderText
 import com.mobileprism.fishing.ui.login.DefaultAuthColumn
 import com.mobileprism.fishing.ui.viewmodels.restore.SearchAccountViewModel
 import com.mobileprism.fishing.ui.viewmodels.restore.UserLogin
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.FishingViewState
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.showError
 import kotlinx.coroutines.launch
@@ -55,11 +53,11 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
 
     LaunchedEffect(confirmState.value) {
         when (val state = confirmState.value) {
-            is BaseViewState.Error -> {
-                context.applicationContext.showError(state.fishingError)
+            is FishingViewState.Error -> {
+                context.showError(state.fishingError)
             }
-            is BaseViewState.Loading -> {}
-            is BaseViewState.Success -> {
+            is FishingViewState.Loading -> {}
+            is FishingViewState.Success -> {
                 onNext(state.data)
                 viewModel.resetStates()
             }
@@ -68,10 +66,10 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
     }
     LaunchedEffect(searchState.value) {
         when(val state = searchState.value) {
-            is BaseViewState.Error -> {
+            is FishingViewState.Error -> {
                 context.applicationContext.showError(state.fishingError)
             }
-            is BaseViewState.Success -> {
+            is FishingViewState.Success -> {
                 modalBottomSheetState.animateTo(targetValue = ModalBottomSheetValue.Expanded)
 
             }
@@ -109,7 +107,7 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
                             if (it.isFocused.not())
                                 viewModel.validateOtp(skipEmpty = true)
                         },
-                    enabled = confirmState.value !is BaseViewState.Loading,
+                    enabled = confirmState.value !is FishingViewState.Loading,
                     isError = loginInfo.otpError.successful.not(),
                     errorString = loginInfo.otpError.errorMessage,
                     value = loginInfo.otp,
@@ -128,7 +126,7 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
                         Icon(Icons.Default.VpnKey, Icons.Default.VpnKey.name)
                     }
                 )
-                AnimatedVisibility(visible = confirmState.value is BaseViewState.Loading) {
+                AnimatedVisibility(visible = confirmState.value is FishingViewState.Loading) {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 }
                 Row(
@@ -136,7 +134,7 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Crossfade(confirmState.value is BaseViewState.Loading) {
+                    Crossfade(confirmState.value is FishingViewState.Loading) {
                         when (it) {
                             true -> {
                                 DefaultButtonOutlined(
@@ -180,7 +178,7 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
                             if (it.isFocused.not())
                                 viewModel.validateLogin(skipEmpty = true)
                         },
-                    enabled = searchState.value !is BaseViewState.Loading,
+                    enabled = searchState.value !is FishingViewState.Loading,
                     isError = loginInfo.loginError.successful.not(),
                     errorString = loginInfo.loginError.errorMessage,
                     value = loginInfo.login,
@@ -195,7 +193,7 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
                     }
                 )
 
-                AnimatedVisibility(visible = searchState.value is BaseViewState.Loading) {
+                AnimatedVisibility(visible = searchState.value is FishingViewState.Loading) {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                 }
 
@@ -204,7 +202,7 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Crossfade(searchState.value is BaseViewState.Loading) {
+                    Crossfade(searchState.value is FishingViewState.Loading) {
                         when (it) {
                             true -> {
                                 DefaultButtonOutlined(

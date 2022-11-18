@@ -1,11 +1,9 @@
 package com.mobileprism.fishing.ui.home.notes
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
@@ -30,6 +28,7 @@ import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.viewmodels.NotesViewModel
 import com.mobileprism.fishing.ui.viewmodels.PlaceNoteItemUiState
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.FishingViewState
 import com.mobileprism.fishing.utils.Constants.modalBottomSheetCorners
 import org.koin.androidx.compose.getViewModel
 

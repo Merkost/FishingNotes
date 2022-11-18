@@ -7,7 +7,7 @@ import com.mobileprism.fishing.domain.repository.AuthManager
 import com.mobileprism.fishing.domain.use_cases.validation.ValidationResult
 import com.mobileprism.fishing.domain.use_cases.validation.ValidationUseCase
 import com.mobileprism.fishing.model.auth.LoginState
-import com.mobileprism.fishing.ui.home.UiState
+import com.mobileprism.fishing.ui.viewstates.FishingViewState
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +22,7 @@ class RegisterViewModel(
     private val validationUseCase: ValidationUseCase,
 ) : ViewModel() {
 
-    private val _uiState: MutableStateFlow<UiState?> = MutableStateFlow(null)
+    private val _uiState: MutableStateFlow<FishingViewState<Unit>?> = MutableStateFlow(null)
     val uiState = _uiState.asStateFlow()
 
     private val _registerInfo = MutableStateFlow(RegisterInfo())
@@ -101,7 +101,7 @@ class RegisterViewModel(
 
                 if (hasError) return@launch
 
-                _uiState.update { UiState.InProgress }
+                _uiState.update { FishingViewState.Loading }
                 authManager.registerNewUser(EmailPassword(email = email, password = password))
             }
         }
@@ -125,26 +125,10 @@ class RegisterViewModel(
             authManager.loginState.collectLatest { loginState ->
                 when (loginState) {
                     is LoginState.LoginFailure -> {
-                        _uiState.update { UiState.Error }
-// TODO:
-
-                        /*_uiState.update {
-                            _uiState.value.copy(
-                                isLoading = false,
-                                isError = true,
-                                errorText = loginState.throwable.localizedMessage
-                            )
-                        }*/
+                        _uiState.update { FishingViewState.Error(loginState.fishingResponse) }
                     }
                     is LoginState.LoggedIn -> {
-                        _uiState.update { UiState.Success }
-                        /*_uiState.update {
-                            _uiState.value.copy(
-                                isLoading = false,
-                                isLoggedIn = true,
-                                isError = false
-                            )
-                        }*/
+                        _uiState.update { FishingViewState.Success(Unit) }
                     }
                     LoginState.NotLoggedIn -> {
                         // TODO:

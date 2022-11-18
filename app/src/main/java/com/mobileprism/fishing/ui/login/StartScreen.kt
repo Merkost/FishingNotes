@@ -9,8 +9,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,14 +28,13 @@ import com.mobileprism.fishing.model.datasource.firebase.createLauncherActivityF
 import com.mobileprism.fishing.model.datasource.firebase.getGoogleLoginAuth
 import com.mobileprism.fishing.ui.custom.FishingTextButton
 import com.mobileprism.fishing.ui.custom.LoginWithGoogleButton
-import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.HeaderText
 import com.mobileprism.fishing.ui.custom.ModalLoading
 import com.mobileprism.fishing.ui.home.views.SecondaryText
 import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.ui.utils.noRippleClickable
 import com.mobileprism.fishing.ui.viewmodels.login.StartViewModel
-import com.mobileprism.fishing.ui.viewstates.LoginScreenViewState
+import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import org.koin.androidx.compose.get
 
 object LoginDestinations {
@@ -59,7 +56,7 @@ fun StartScreen(
 
     val startForResult = createLauncherActivityForGoogleAuth(
         context = context,
-        onComplete = { viewModel.continueWithGoogle() },
+        onComplete = viewModel::continueWithGoogle,
         onError = { viewModel.googleAuthError(it) }
     )
 
@@ -67,10 +64,10 @@ fun StartScreen(
 
     LaunchedEffect(uiState) {
         when (val state = uiState) {
-            is LoginScreenViewState.Error -> {
+            is BaseViewState.Error -> {
                 Toast.makeText(
                     context,
-                    state.error.message ?: context.getString(R.string.error_occured),
+                    context.getString(R.string.error_occured),
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -78,7 +75,7 @@ fun StartScreen(
         }
     }
 
-    AnimatedVisibility(visible = uiState is LoginScreenViewState.Loading) { ModalLoading() }
+    AnimatedVisibility(visible = uiState is BaseViewState.Loading) { ModalLoading() }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,

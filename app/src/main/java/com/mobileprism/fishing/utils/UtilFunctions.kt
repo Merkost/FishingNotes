@@ -6,12 +6,10 @@ import android.net.NetworkCapabilities
 import android.os.Build
 import android.widget.Toast
 import com.google.android.gms.maps.model.LatLng
-import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.Hourly
 import com.mobileprism.fishing.model.entity.FishingResponse
 import com.mobileprism.fishing.ui.home.map.DEFAULT_ZOOM
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.time.TimeConstants.MILLISECONDS_IN_DAY
 import com.mobileprism.fishing.utils.time.TimeConstants.MOON_PHASE_INCREMENT_IN_DAY
 import com.mobileprism.fishing.utils.time.TimeConstants.MOON_ZERO_DATE_SECONDS
@@ -81,36 +79,25 @@ fun getClosestHourIndex(list: List<Hourly>, date: Long): Int {
     return 0
 }
 
-fun Context.showError(fishingResponse: FishingResponse?) {
-    fishingResponse?.fishingCode?.stringRes?.let {
-        showToast(getString(it))
-    } ?: if (Constants.isDebug) showToast(fishingResponse?.description ?: getString(R.string.api_error_message))
-    else showToast(getString(R.string.api_error_message))
+fun Context.showError(string: String?) {
+    string?.let { showToast(string) }
 }
 
-fun Context.showError(text: String?) {
-    showToast(text ?: getString(R.string.api_error_message))
+
+
+fun Context.showError(fishingResponse: FishingResponse) {
+    when (Constants.isDebug) {
+        true -> {
+            showToast(fishingResponse.description.ifBlank { getString(fishingResponse.fishingCode.stringRes) })
+        }
+        else -> {
+            fishingResponse.fishingCode.stringRes.let { showToast(getString(it)) }
+        }
+    }
 }
 
 fun Context.showToast(text: String, length: Int = Toast.LENGTH_SHORT) {
     Toast.makeText(applicationContext, text, length).show()
-}
-
-fun Context.showErrorToast(text: String? = null) {
-    Toast.makeText(
-        applicationContext,
-        text ?: getString(R.string.error_occured),
-        Toast.LENGTH_SHORT
-    ).show()
-}
-
-@Deprecated("Check new method", replaceWith = ReplaceWith("showErrorToast"))
-fun showErrorToastOld(context: Context, text: String? = null) {
-    Toast.makeText(
-        context.applicationContext,
-        text ?: context.getString(R.string.error_occured),
-        Toast.LENGTH_SHORT
-    ).show()
 }
 
 fun getCameraPosition(latLng: LatLng): Pair<LatLng, Float> {

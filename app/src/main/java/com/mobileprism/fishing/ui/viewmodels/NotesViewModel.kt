@@ -8,6 +8,7 @@ import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.use_cases.GetUserCatchesByMarkerId
 import com.mobileprism.fishing.domain.use_cases.places.GetUserPlacesListUseCase
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.FishingViewState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -60,7 +61,7 @@ class NotesViewModel(
                                 item.copy(catchesState = NoteCatchesState.Loaded(it))
                         },
                         onFailure = {
-                            _uiState.value = BaseViewState.Error(error = it)
+                            _uiState.value = BaseViewState.Error(throwable = it)
                         }
                     )
                 }

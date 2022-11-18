@@ -2,18 +2,14 @@ package com.mobileprism.fishing.ui.viewmodels.restore
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mobileprism.fishing.domain.entity.auth.EmailPassword
-import com.mobileprism.fishing.domain.entity.auth.restore.RestoreRemoteConfirm
 import com.mobileprism.fishing.domain.entity.auth.restore.RestoreRemoteReset
 import com.mobileprism.fishing.domain.repository.RestoreRepository
 import com.mobileprism.fishing.domain.use_cases.validation.ValidationResult
 import com.mobileprism.fishing.domain.use_cases.validation.ValidationUseCase
 import com.mobileprism.fishing.model.entity.FishingResponse
 import com.mobileprism.fishing.model.utils.fold
-import com.mobileprism.fishing.ui.home.UiState
-import com.mobileprism.fishing.ui.viewmodels.login.AuthInfo
 import com.mobileprism.fishing.ui.viewmodels.login.RegisterInfo
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.FishingViewState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,7 +23,7 @@ class ResetAccountViewModel(
     private val restoreRepository: RestoreRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<BaseViewState<FishingResponse>?>(null)
+    private val _uiState = MutableStateFlow<FishingViewState<FishingResponse>?>(null)
     val uiState = _uiState.asStateFlow()
 
     private val _resetInfo = MutableStateFlow(RegisterInfo())
@@ -95,16 +91,16 @@ class ResetAccountViewModel(
 
                 if (hasError) return@launch
 
-                _uiState.update { BaseViewState.Loading }
+                _uiState.update { FishingViewState.Loading }
                 restoreRepository.restorePassword(RestoreRemoteReset(userLogin.login, password))
                     .single().fold(onSuccess = { result ->
                         if (result.success) {
-                            _uiState.update { BaseViewState.Success(result) }
+                            _uiState.update { FishingViewState.Success(result) }
                         } else {
-                            _uiState.update { BaseViewState.Error(result) }
+                            _uiState.update { FishingViewState.Error(result) }
                         }
                     }, onError = { error ->
-                        _uiState.update { BaseViewState.Error(error) }
+                        _uiState.update { FishingViewState.Error(error) }
                     })
             }
         }

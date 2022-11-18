@@ -22,6 +22,7 @@ class UserViewModel(
     private val getUserCatchUseCase: GetUserCatchesUseCase
 ) : ViewModel() {
 
+    // TODO: current user listener
     private val _currentUser = MutableStateFlow<User>(User())
     val currentUser = _currentUser.asStateFlow()
 
@@ -38,7 +39,6 @@ class UserViewModel(
     val favoritePlace = _favoritePlace.asStateFlow()
 
     init {
-        getCurrentUser()
         getUserCatches()
         getUserPlaces()
     }
@@ -46,12 +46,6 @@ class UserViewModel(
     /*private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
     val uiState: StateFlow<BaseViewState>
         get() = _uiState*/
-
-    private fun getCurrentUser() = viewModelScope.launch {
-        subscribeOnCurrentUser().collect {
-            it?.let { _currentUser.value = it }
-        }
-    }
 
     private fun getUserPlaces() = viewModelScope.launch {
         repository.getAllUserMarkersList().collect {

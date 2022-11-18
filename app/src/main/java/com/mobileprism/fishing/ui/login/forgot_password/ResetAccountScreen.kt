@@ -24,14 +24,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.custom.FishingPasswordTextField
-import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.FishingButtonFilled
 import com.mobileprism.fishing.ui.home.views.HeaderText
 import com.mobileprism.fishing.ui.login.DefaultAuthColumn
 import com.mobileprism.fishing.ui.viewmodels.restore.ResetAccountViewModel
 import com.mobileprism.fishing.ui.viewmodels.restore.UserLogin
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.FishingViewState
 import com.mobileprism.fishing.utils.showError
 import org.koin.androidx.compose.getViewModel
 import org.koin.core.parameter.parametersOf
@@ -49,10 +48,10 @@ fun ResetAccountScreen(userLogin: UserLogin, onNext: () -> Unit, upPress: () -> 
 
     LaunchedEffect(uiState.value) {
         when(val state = uiState.value) {
-            is BaseViewState.Error -> {
+            is FishingViewState.Error -> {
                 context.applicationContext.showError(state.fishingError)
             }
-            is BaseViewState.Success -> {
+            is FishingViewState.Success -> {
                 onNext()
             }
             else -> {}
@@ -85,7 +84,7 @@ fun ResetAccountScreen(userLogin: UserLogin, onNext: () -> Unit, upPress: () -> 
                     ),
                     isError = resetInfo.value.passwordError.successful.not(),
                     errorString = resetInfo.value.passwordError.errorMessage,
-                    enabled = uiState.value !is BaseViewState.Loading,
+                    enabled = uiState.value !is FishingViewState.Loading,
                     showPassword = showPassword.value,
                     onShowPasswordChanged = { showPassword.value = !showPassword.value },
                 )
@@ -107,12 +106,12 @@ fun ResetAccountScreen(userLogin: UserLogin, onNext: () -> Unit, upPress: () -> 
                     ),
                     isError = resetInfo.value.repeatPasswordError.successful.not(),
                     errorString = resetInfo.value.repeatPasswordError.errorMessage,
-                    enabled = uiState.value !is BaseViewState.Loading,
+                    enabled = uiState.value !is FishingViewState.Loading,
                     showPassword = showPassword.value
                 )
             }
 
-            AnimatedVisibility(visible = uiState.value is BaseViewState.Loading) {
+            AnimatedVisibility(visible = uiState.value is FishingViewState.Loading) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
 
@@ -121,7 +120,7 @@ fun ResetAccountScreen(userLogin: UserLogin, onNext: () -> Unit, upPress: () -> 
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Crossfade(uiState.value is BaseViewState.Loading) {
+                Crossfade(uiState.value is FishingViewState.Loading) {
                     when (it) {
                         true -> {
                             DefaultButtonOutlined(

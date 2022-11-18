@@ -29,13 +29,12 @@ import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.custom.FishingOutlinedTextField
 import com.mobileprism.fishing.ui.custom.FishingPasswordTextField
-import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.FishingButtonFilled
 import com.mobileprism.fishing.ui.home.views.HeaderText
 import com.mobileprism.fishing.ui.home.views.SecondaryTextSmall
 import com.mobileprism.fishing.ui.viewmodels.login.RegisterViewModel
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.FishingViewState
 import com.mobileprism.fishing.utils.showError
 import org.koin.androidx.compose.get
 
@@ -54,7 +53,7 @@ fun RegisterScreen(upPress: () -> Unit) {
 
     LaunchedEffect(uiState) {
         when(val state = uiState) {
-            UiState.Error -> { context.applicationContext.showError(fishingResponse = null) }
+            is FishingViewState.Error -> { context.applicationContext.showError(state.fishingError) }
             else -> {}
         }
     }
@@ -92,7 +91,7 @@ fun RegisterScreen(upPress: () -> Unit) {
                 },
                 isError = registerInfo.value.emailError.successful.not(),
                 errorString = registerInfo.value.emailError.errorMessage,
-                enabled = uiState !is UiState.InProgress,
+                enabled = uiState !is FishingViewState.Loading,
             )
 
             Column(
@@ -113,7 +112,7 @@ fun RegisterScreen(upPress: () -> Unit) {
                     ),
                     isError = registerInfo.value.passwordError.successful.not(),
                     errorString = registerInfo.value.passwordError.errorMessage,
-                    enabled = uiState !is UiState.InProgress,
+                    enabled = uiState !is FishingViewState.Loading,
                     showPassword = showPassword.value,
                     onShowPasswordChanged = { showPassword.value = !showPassword.value },
                 )
@@ -135,12 +134,12 @@ fun RegisterScreen(upPress: () -> Unit) {
                     ),
                     isError = registerInfo.value.repeatPasswordError.successful.not(),
                     errorString = registerInfo.value.repeatPasswordError.errorMessage,
-                    enabled = uiState !is UiState.InProgress,
+                    enabled = uiState !is FishingViewState.Loading,
                     showPassword = showPassword.value
                 )
             }
 
-            AnimatedVisibility(visible = uiState is UiState.InProgress) {
+            AnimatedVisibility(visible = uiState is FishingViewState.Loading) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
 
@@ -149,7 +148,7 @@ fun RegisterScreen(upPress: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Crossfade(uiState is UiState.InProgress) {
+                Crossfade(uiState is FishingViewState.Loading) {
                     when (it) {
                         true -> {
                             DefaultButtonOutlined(

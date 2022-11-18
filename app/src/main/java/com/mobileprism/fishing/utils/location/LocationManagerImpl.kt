@@ -104,7 +104,7 @@ class LocationManagerImpl(private val context: Context) : LocationManager {
         val request = LocationRequest.create().apply {
             interval = 8000
             fastestInterval = 5000
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            priority = Priority.PRIORITY_HIGH_ACCURACY
         }
         val builder = LocationSettingsRequest.Builder().addLocationRequest(request)
         val client: SettingsClient = LocationServices.getSettingsClient(context)

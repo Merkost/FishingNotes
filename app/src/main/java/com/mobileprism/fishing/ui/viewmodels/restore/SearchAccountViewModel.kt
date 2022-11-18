@@ -1,7 +1,6 @@
 package com.mobileprism.fishing.ui.viewmodels.restore
 
 import android.os.Parcelable
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.domain.entity.auth.restore.RestoreRemoteConfirm
@@ -9,11 +8,9 @@ import com.mobileprism.fishing.domain.entity.auth.restore.RestoreRemoteFind
 import com.mobileprism.fishing.domain.repository.RestoreRepository
 import com.mobileprism.fishing.domain.use_cases.validation.ValidationResult
 import com.mobileprism.fishing.domain.use_cases.validation.ValidationUseCase
-import com.mobileprism.fishing.model.entity.FishingCodes
 import com.mobileprism.fishing.model.entity.FishingResponse
 import com.mobileprism.fishing.model.utils.fold
-import com.mobileprism.fishing.ui.home.UiState
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.FishingViewState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -24,10 +21,10 @@ class SearchAccountViewModel(
     private val restoreRepository: RestoreRepository
 ) : ViewModel() {
 
-    private val _searchState = MutableStateFlow<BaseViewState<FishingResponse>?>(null)
+    private val _searchState = MutableStateFlow<FishingViewState<FishingResponse>?>(null)
     val searchState = _searchState.asStateFlow()
 
-    private val _confirmState = MutableStateFlow<BaseViewState<UserLogin>?>(null)
+    private val _confirmState = MutableStateFlow<FishingViewState<UserLogin>?>(null)
     val confirmState = _confirmState.asStateFlow()
 
     private val _restoreInfo = MutableStateFlow(RestoreInfo())
@@ -91,17 +88,17 @@ class SearchAccountViewModel(
 
                 if (hasError) return@launch
 
-                _searchState.update { BaseViewState.Loading }
+                _searchState.update { FishingViewState.Loading }
                 restoreRepository.searchAccount(RestoreRemoteFind(restoreInfo.value.login)).single()
                     .fold(
                         onSuccess = { result ->
                             if (result.success) {
-                                _searchState.update { BaseViewState.Success(result) }
+                                _searchState.update { FishingViewState.Success(result) }
                             } else {
-                                _searchState.update { BaseViewState.Error(fishingError = result) }
+                                _searchState.update { FishingViewState.Error(fishingError = result) }
                             }
                         }, onError = { error ->
-                            _searchState.update { BaseViewState.Error(fishingError = error) }
+                            _searchState.update { FishingViewState.Error(fishingError = error) }
                         })
             }
         }
@@ -130,18 +127,18 @@ class SearchAccountViewModel(
 
                 if (hasError) return@launch
 
-                _confirmState.update { BaseViewState.Loading }
+                _confirmState.update { FishingViewState.Loading }
                 restoreRepository.confirmOTP(RestoreRemoteConfirm(login, otp.toIntOrNull() ?: 0))
                     .single()
                     .fold(
                         onSuccess = { result ->
                             if (result.success) {
-                                _confirmState.update { BaseViewState.Success(UserLogin(login = login)) }
+                                _confirmState.update { FishingViewState.Success(UserLogin(login = login)) }
                             } else {
-                                _confirmState.update { BaseViewState.Error(fishingError = result) }
+                                _confirmState.update { FishingViewState.Error(fishingError = result) }
                             }
                         }, onError = { error ->
-                            _confirmState.update { BaseViewState.Error(fishingError = error) }
+                            _confirmState.update { FishingViewState.Error(fishingError = error) }
                         })
             }
         }

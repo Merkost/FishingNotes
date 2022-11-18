@@ -30,13 +30,12 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.MainActivity
 import com.mobileprism.fishing.ui.custom.FishingOutlinedTextField
 import com.mobileprism.fishing.ui.custom.FishingPasswordTextField
-import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.views.FishingButtonFilled
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.HeaderText
 import com.mobileprism.fishing.ui.home.views.SecondaryTextSmall
 import com.mobileprism.fishing.ui.viewmodels.login.LoginViewModel
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.FishingViewState
 import com.mobileprism.fishing.utils.showError
 import org.koin.androidx.compose.get
 
@@ -55,11 +54,11 @@ fun LoginScreen(upPress: () -> Unit, forgotPassword: () -> Unit) {
 
 
     LaunchedEffect(uiState) {
-        when (uiState) {
-            is BaseViewState.Error -> {
-                context.applicationContext.showError(fishingResponse = null)
+        when (val state = uiState) {
+            is FishingViewState.Error -> {
+                context.applicationContext.showError(state.fishingError)
             }
-            is BaseViewState.Loading -> {
+            is FishingViewState.Loading -> {
                 focusManager.clearFocus()
                 localSoftwareKeyboardController?.hide()
             }
@@ -211,7 +210,7 @@ fun LoginScreen(upPress: () -> Unit, forgotPassword: () -> Unit) {
                                         if (it.isFocused.not())
                                             viewModel.validateLogin(skipEmpty = true)
                                     },
-                                enabled = uiState !is BaseViewState.Loading,
+                                enabled = uiState !is FishingViewState.Loading,
                                 isError = loginInfo.loginError.successful.not(),
                                 errorString = loginInfo.loginError.errorMessage,
                                 value = loginInfo.login,
@@ -230,7 +229,7 @@ fun LoginScreen(upPress: () -> Unit, forgotPassword: () -> Unit) {
                                 modifier = Modifier.fillMaxWidth(),
                                 password = loginInfo.password,
                                 onValueChange = viewModel::setPassword,
-                                enabled = uiState !is BaseViewState.Loading,
+                                enabled = uiState !is FishingViewState.Loading,
                                 isError = loginInfo.passwordError.successful.not(),
                                 errorString = loginInfo.passwordError.errorMessage,
                                 showPassword = showPassword.value,
@@ -238,7 +237,7 @@ fun LoginScreen(upPress: () -> Unit, forgotPassword: () -> Unit) {
                             )
                         }
 
-                        AnimatedVisibility(visible = uiState is BaseViewState.Loading) {
+                        AnimatedVisibility(visible = uiState is FishingViewState.Loading) {
                             LinearProgressIndicator(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -250,7 +249,7 @@ fun LoginScreen(upPress: () -> Unit, forgotPassword: () -> Unit) {
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Crossfade(uiState is BaseViewState.Loading) {
+                            Crossfade(uiState is FishingViewState.Loading) {
                                 when (it) {
                                     true -> {
                                         DefaultButtonOutlined(
@@ -265,7 +264,7 @@ fun LoginScreen(upPress: () -> Unit, forgotPassword: () -> Unit) {
                             }
                             FishingButtonFilled(
                                 text = stringResource(id = R.string.login),
-                                enabled = uiState !is BaseViewState.Loading,
+                                enabled = uiState !is FishingViewState.Loading,
                                 onClick = viewModel::signInUser
                             )
                         }

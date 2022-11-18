@@ -8,9 +8,9 @@ import com.mobileprism.fishing.domain.entity.weather.WeatherForecast
 import com.mobileprism.fishing.domain.repository.app.MarkersRepository
 import com.mobileprism.fishing.domain.repository.app.WeatherRepository
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.FishingViewState
 import com.mobileprism.fishing.utils.isLocationsTooFar
 import com.mobileprism.fishing.utils.location.LocationManager
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -54,7 +54,7 @@ class WeatherViewModel(
                         _weatherState.value = BaseViewState.Success(it)
                     },
                     onFailure = {
-                        _weatherState.value = BaseViewState.Error(error = it)
+                        _weatherState.value = BaseViewState.Error(it)
                     }
                 )
             }

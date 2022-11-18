@@ -25,10 +25,10 @@ import com.mobileprism.fishing.ui.home.addHomeGraph
 import com.mobileprism.fishing.ui.home.catch.UserCatchScreen
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchMasterScreen
 import com.mobileprism.fishing.ui.home.place.UserPlaceScreen
-import com.mobileprism.fishing.ui.home.profile.EditProfile
 import com.mobileprism.fishing.ui.home.settings.AboutApp
 import com.mobileprism.fishing.ui.home.settings.SettingsScreen
 import com.mobileprism.fishing.ui.home.weather.WeatherDaily
+import com.mobileprism.fishing.ui.login.StartNavigation
 import kotlinx.coroutines.InternalCoroutinesApi
 
 @ExperimentalComposeUiApi
@@ -38,7 +38,7 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @ExperimentalMaterialApi
 @InternalCoroutinesApi
 @Composable
-fun FishingNotesApp() {
+fun FishingNotesApp(startDestination: String = MainDestinations.HOME_ROUTE) {
     val appStateHolder = rememberAppStateHolder()
 
     Scaffold(
@@ -59,16 +59,11 @@ fun FishingNotesApp() {
             )
         },
         scaffoldState = appStateHolder.scaffoldState,
-        /*modifier = if (appStateHolder.currentRoute == HomeSections.MAP.route)
-            Modifier.statusBarsHeight()
-        else Modifier*/
     ) { innerPaddingModifier ->
-        //Spacer(modifier = Modifier.statusBarsHeight())
         NavHost(
             navController = appStateHolder.navController,
-            startDestination = MainDestinations.HOME_ROUTE,
-            modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
-            Modifier.padding(innerPaddingModifier) /*else Modifier*/
+            startDestination = startDestination,
+            modifier = Modifier.padding(innerPaddingModifier)
         ) {
             NavGraph(
                 navController = appStateHolder.navController,
@@ -94,6 +89,12 @@ private fun NavGraphBuilder.NavGraph(
         startDestination = HomeSections.MAP.route,
     ) {
         addHomeGraph(navController, upPress = upPress)
+    }
+
+    composable(
+        route = MainDestinations.AUTH_ROUTE,
+    ) {
+        StartNavigation()
     }
 
     composable(MainDestinations.SETTINGS) {
@@ -126,9 +127,9 @@ private fun NavGraphBuilder.NavGraph(
         route = MainDestinations.CATCH_ROUTE,
     ) { UserCatchScreen(navController, it.requiredArg(Arguments.CATCH)) }
 
-    composable(
+    /*composable(
         route = MainDestinations.EDIT_PROFILE,
-    ) { EditProfile(upPress) }
+    ) { EditProfile(upPress) }*/
 
     composable(
         route = MainDestinations.DAILY_WEATHER_ROUTE,

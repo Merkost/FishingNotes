@@ -53,6 +53,7 @@ import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.ui.viewmodels.WeatherViewModel
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.FishingViewState
 import com.mobileprism.fishing.utils.location.LocationManager
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toDayOfWeek

@@ -418,5 +418,6 @@
     <string name="fc_invalid_otp">Неверный код подтверждения</string>
     <string name="fc_unknown_error">Неизвестная ошибка</string>
     <string name="fc_network_error">Не удалось связаться с сервером</string>
+    <string name="unknown_error">Неизвестная ошибка</string>
 
 </resources>

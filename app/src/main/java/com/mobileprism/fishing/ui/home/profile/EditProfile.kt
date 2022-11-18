@@ -1,3 +1,4 @@
+/*
 package com.mobileprism.fishing.ui.home.profile
 
 import android.annotation.SuppressLint
@@ -38,7 +39,7 @@ import com.mobileprism.fishing.ui.home.settings.GrayText
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
-import com.mobileprism.fishing.utils.showErrorToastOld
+import com.mobileprism.fishing.utils.showError
 import com.mobileprism.fishing.utils.time.toDate
 import com.mobileprism.fishing.viewmodels.EditProfileViewModel
 import org.koin.androidx.compose.getViewModel
@@ -62,18 +63,20 @@ fun EditProfile(onBack: () -> Unit) {
     )
 
 
-    var datePickerShown by remember { mutableStateOf(false) }
+    */
+/*var datePickerShown by remember { mutableStateOf(false) }
     if (datePickerShown) {
         DatePickerDialog(context,
             initialDate = currentUser.birthDate.takeIf { it != 0L } ?: Calendar.getInstance()
                 .apply { this.add(Calendar.YEAR, -18) }.timeInMillis,
             maxDate = Calendar.getInstance().apply { this.add(Calendar.YEAR, -18) }.timeInMillis,
             onDismiss = { datePickerShown = false }, onDateChange = viewModel::birthdaySelected)
-    }
+    }*//*
+
 
     LaunchedEffect(uiState) {
         when (val state = uiState) {
-            is BaseViewState.Error -> showErrorToastOld(context.applicationContext, state.error?.message)
+            is BaseViewState.Error -> context.showError(state.throwable?.message)
             is BaseViewState.Success -> onBack()
             else -> {}
         }
@@ -117,12 +120,14 @@ fun EditProfile(onBack: () -> Unit) {
                 )
 
 
-                EditProfileTextFieldWithHeader(
+                */
+/*EditProfileTextFieldWithHeader(
                     modifier = Modifier.fillMaxWidth(),
                     value = currentUser.displayName,
                     onValueChange = viewModel::onNameChange,
                     hintText = stringResource(id = R.string.name_hint)
-                )
+                )*//*
+
 
                 EditProfileTextFieldWithHeader(
                     modifier = Modifier.fillMaxWidth(),
@@ -275,4 +280,4 @@ fun EditProfileTopAppBar(
             }
         }
     }
-}
+}*/
