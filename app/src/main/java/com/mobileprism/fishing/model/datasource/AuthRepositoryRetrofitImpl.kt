@@ -7,9 +7,11 @@ import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.model.api.AuthApiService
 import com.mobileprism.fishing.model.api.GoogleAuthRequest
 import com.mobileprism.fishing.model.entity.user.UserResponse
+import com.mobileprism.fishing.model.utils.fishingSafeApiCall
 import com.mobileprism.fishing.model.utils.safeApiCall
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flow
 
 class AuthRepositoryRetrofitImpl(
     private val firebaseAnalytics: FirebaseAnalytics,
@@ -17,52 +19,48 @@ class AuthRepositoryRetrofitImpl(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : AuthRepository {
 
-    override suspend fun registerNewUser(emailPassword: EmailPassword): Result<UserResponse> =
-        safeApiCall(dispatcher) {
-
+    override suspend fun registerNewUser(emailPassword: EmailPassword) = flow {
+        val result = fishingSafeApiCall(dispatcher) {
             firebaseAnalytics.logEvent("register_new_user", null)
-
-            authApiService.registerNewUser(
-                body = emailPassword
-            )
-
+            authApiService.registerNewUser(body = emailPassword)
         }
+        emit(result)
+    }
 
-    override suspend fun loginUser(emailPassword: EmailPassword): Result<UserResponse> =
-        safeApiCall(dispatcher) {
-
+    override suspend fun loginUser(emailPassword: EmailPassword) = flow {
+        val result = fishingSafeApiCall(dispatcher) {
             firebaseAnalytics.logEvent("login_user", null)
-
-            authApiService.loginWithEmail(
-                body = emailPassword
-            )
-
+            authApiService.loginWithEmail(body = emailPassword)
         }
+        emit(result)
+    }
 
-    override suspend fun loginUser(usernamePassword: UsernamePassword): Result<UserResponse> =
-        safeApiCall(dispatcher) {
-
+    override suspend fun loginUser(usernamePassword: UsernamePassword) = flow {
+        val result = fishingSafeApiCall(dispatcher) {
             firebaseAnalytics.logEvent("login_user", null)
-
             authApiService.loginWithUsername(
                 body = usernamePassword
             )
-
         }
+        emit(result)
+    }
+
 
     override suspend fun loginUserWithGoogle(
         email: String,
-        userId: String
-    ): Result<UserResponse> = safeApiCall(dispatcher) {
-
-        firebaseAnalytics.logEvent("login_with_google", null)
-
-        authApiService.loginUserWithGoogle(
-            GoogleAuthRequest(
-                email = email,
-                googleAuthId = userId
+        userId: String,
+        firebaseAuthId: String?
+    ) = flow {
+        val result = fishingSafeApiCall(dispatcher) {
+            firebaseAnalytics.logEvent("login_with_google", null)
+            authApiService.loginUserWithGoogle(
+                GoogleAuthRequest(
+                    email = email,
+                    googleAuthId = userId,
+                    firebaseAuthId = firebaseAuthId
+                )
             )
-        )
-
+        }
+        emit(result)
     }
 }

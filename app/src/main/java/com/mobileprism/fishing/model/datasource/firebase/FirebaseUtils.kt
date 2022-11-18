@@ -15,6 +15,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.DocumentSnapshot
 import com.mobileprism.fishing.R
@@ -38,7 +39,7 @@ fun Context.getGoogleLoginAuth(): GoogleSignInClient {
 @Composable
 fun createLauncherActivityForGoogleAuth(
     context: Context,
-    onComplete: () -> Unit,
+    onComplete: (GoogleSignInAccount, FirebaseUser?) -> Unit,
     onError: (Exception) -> Unit,
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
     val auth: FirebaseAuth = get()
@@ -73,7 +74,7 @@ private fun startFirebaseLogin(
     context: Context,
     task: Task<GoogleSignInAccount>,
     firebaseAuth: FirebaseAuth,
-    onComplete: () -> Unit,
+    onComplete: (GoogleSignInAccount, FirebaseUser?) -> Unit,
     onError: (Exception?) -> Unit,
 ) {
     when {
@@ -84,16 +85,16 @@ private fun startFirebaseLogin(
                 val credential = GoogleAuthProvider.getCredential(account.idToken, null)
 
                 firebaseAuth.signInWithCredential(credential)
-                    .addOnCompleteListener(context as Activity) { task ->
+                    .addOnCompleteListener(context as Activity) { completedTask ->
                         when {
                             task.isSuccessful -> {
                                 // Sign in success, update UI with the signed-in user's information
-                                onComplete()
+                                onComplete(account, completedTask.result.user)
                             }
-                            else -> {
-                                onError(task.exception)
-                            }
+                            else -> { onError(task.exception) }
                         }
+                    }.addOnFailureListener(context as Activity) { completedTask ->
+                        onError(completedTask.cause as Exception?)
                     }
 
             } catch (e: ApiException) {
