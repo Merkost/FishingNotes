@@ -8,7 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
-import com.mobileprism.fishing.domain.entity.common.User
+import com.mobileprism.fishing.domain.entity.common.FishingFirebaseUser
 import com.mobileprism.fishing.model.auth.AuthState
 import com.mobileprism.fishing.model.datastore.UserDatastore
 import com.mobileprism.fishing.model.entity.user.Token
@@ -24,6 +24,7 @@ class UserDatastoreImpl(private val context: Context): UserDatastore {
         private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("appSettings")
 
         private val USER_KEY = stringPreferencesKey("user")
+        private val FIREBASE_USER_KEY = stringPreferencesKey("firebase_user")
         private val TOKEN_KEY = stringPreferencesKey("token")
     }
 
@@ -53,9 +54,20 @@ class UserDatastoreImpl(private val context: Context): UserDatastore {
             Gson().fromJson(preferences[USER_KEY], UserData::class.java) ?: UserData()
         }.catch { emit(UserData()) }
 
+    override val getFirebaseUser: Flow<FishingFirebaseUser?> = context.dataStore.data
+        .map { preferences ->
+            Gson().fromJson(preferences[FIREBASE_USER_KEY], FishingFirebaseUser::class.java) ?: null
+        }.catch { emit(null) }
+
     override suspend fun saveUser(user: UserData) {
         context.dataStore.edit { preferences ->
             preferences[USER_KEY] = Gson().toJson(user)
+        }
+    }
+
+    override suspend fun saveFirebaseUser(firebaseUser: FishingFirebaseUser) {
+        context.dataStore.edit { preferences ->
+            preferences[FIREBASE_USER_KEY] = Gson().toJson(firebaseUser)
         }
     }
 

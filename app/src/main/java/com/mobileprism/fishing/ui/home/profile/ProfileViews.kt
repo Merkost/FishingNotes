@@ -34,9 +34,10 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.SubcomposeAsyncImage
 import com.airbnb.lottie.compose.*
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.entity.common.User
+import com.mobileprism.fishing.domain.entity.common.FishingFirebaseUser
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.model.entity.user.UserData
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.custom.DefaultDialog
 import com.mobileprism.fishing.ui.home.notes.CatchItemView
@@ -53,7 +54,7 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun UserImage(
     modifier: Modifier = Modifier,
-    user: User,
+    photoUrl: String,
     imgSize: Dp,
     shape: Shape = CircleShape,
     icon: ImageVector? = null,
@@ -84,7 +85,7 @@ fun UserImage(
             }
 
             SubcomposeAsyncImage(
-                model = user.photoUrl,
+                model = photoUrl,
                 contentDescription = stringResource(id = R.string.user_photo),
                 contentScale = ContentScale.Crop,
                 error = {

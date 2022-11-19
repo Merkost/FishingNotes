@@ -67,6 +67,7 @@ fun StartScreen(
         when (val state = uiState) {
             is BaseViewState.Success -> {
                 toHomeScreen()
+                // TODO: Create restoration from Firebase screen
             }
             is BaseViewState.Error -> {
                 Toast.makeText(

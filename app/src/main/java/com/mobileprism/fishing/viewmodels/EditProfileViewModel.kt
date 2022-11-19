@@ -2,7 +2,6 @@ package com.mobileprism.fishing.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.repository.FirebaseUserRepository
 import com.mobileprism.fishing.model.datastore.UserDatastore
 import com.mobileprism.fishing.model.entity.user.UserData

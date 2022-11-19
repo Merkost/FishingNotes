@@ -6,6 +6,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseUser
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.auth.GoogleAuthRequest
+import com.mobileprism.fishing.domain.entity.common.FishingFirebaseUser
 import com.mobileprism.fishing.domain.repository.AuthManager
 import com.mobileprism.fishing.model.auth.LoginState
 import com.mobileprism.fishing.model.utils.fold
@@ -13,6 +14,13 @@ import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+
+private val FirebaseUser.toFishingFirebaseUser: FishingFirebaseUser
+    get() = FishingFirebaseUser(
+        uid = uid,
+        email = email,
+        displayName = displayName,
+    )
 
 class StartViewModel(
     private val authManager: AuthManager,
@@ -23,37 +31,12 @@ class StartViewModel(
         MutableStateFlow(null)
     val uiState = _uiState.asStateFlow()
 
-/*    init {
-        subscribeOnLoginState()
-    }*/
-/*
-    private fun subscribeOnLoginState() {
-        viewModelScope.launch {
-            authManager.loginState.collectLatest {
-                when (it) {
-                    // TODO: Deal with LoginScreenViewState mess
-                    is LoginState.LoggedIn -> {
-                        _uiState.value = LoginScreenViewState.LoginSuccess
-                    }
-                    is LoginState.LoginFailure -> {
-                        _uiState.value = (LoginScreenViewState.NotLoggedIn)
-                        // TODO:
-                        //handleError(it.fishingResponse)
-                    }
-                    LoginState.NotLoggedIn -> {
-                        _uiState.value = (LoginScreenViewState.NotLoggedIn)
-                    }
-                }
-            }
-        }
-    }*/
-
-
     fun continueWithGoogle(account: GoogleSignInAccount, firebaseUser: FirebaseUser?) {
         viewModelScope.launch {
             _uiState.update { BaseViewState.Loading }
-            if (account.email != null && account.idToken != null && account.id != null && firebaseUser?.uid != null) {
-                authManager.googleLogin(account.email!!, account.id!!, account.idToken!!, firebaseUser.uid).single().fold(
+
+            if (account.email != null && account.idToken != null && account.id != null && firebaseUser != null) {
+                authManager.googleLogin(account.email!!, account.id!!, account.idToken!!, firebaseUser.toFishingFirebaseUser).single().fold(
                     onSuccess = {
                         _uiState.update { BaseViewState.Success(Unit) }
                     },

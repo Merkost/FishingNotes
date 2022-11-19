@@ -2,7 +2,7 @@ package com.mobileprism.fishing.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mobileprism.fishing.domain.entity.common.User
+import com.mobileprism.fishing.domain.entity.common.FishingFirebaseUser
 import com.mobileprism.fishing.domain.repository.AuthManager
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.viewstates.FishingViewState
@@ -18,9 +18,4 @@ class MainViewModel(
 
     val appTheme = userPreferences.appTheme
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
-
-    val mutableStateFlow: MutableStateFlow<FishingViewState<User?>> =
-        MutableStateFlow(FishingViewState.Loading)
-
 }

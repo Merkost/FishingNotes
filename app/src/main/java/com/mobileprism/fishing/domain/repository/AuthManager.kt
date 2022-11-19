@@ -1,9 +1,8 @@
 package com.mobileprism.fishing.domain.repository
 
 import com.mobileprism.fishing.domain.entity.auth.EmailPassword
-import com.mobileprism.fishing.domain.entity.auth.GoogleAuthRequest
 import com.mobileprism.fishing.domain.entity.auth.UsernamePassword
-import com.mobileprism.fishing.domain.entity.common.User
+import com.mobileprism.fishing.domain.entity.common.FishingFirebaseUser
 import com.mobileprism.fishing.model.auth.AuthState
 import com.mobileprism.fishing.model.auth.LoginState
 import com.mobileprism.fishing.model.entity.user.UserData
@@ -25,10 +24,10 @@ interface AuthManager {
         email: String,
         googleAuthId: String,
         googleAuthIdToken: String,
-        firebaseAuthId: String
+        firebaseUser: FishingFirebaseUser
     ): Flow<ResultWrapper<UserResponse>>
 
     suspend fun skipAuthorization()
     suspend fun logoutCurrentUser()
-    suspend fun updateUserProfileData(user: User)
+    suspend fun updateUserProfileData(user: FishingFirebaseUser)
 }

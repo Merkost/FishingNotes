@@ -1,22 +1,14 @@
 package com.mobileprism.fishing.model.auth
 
 import com.mobileprism.fishing.domain.entity.auth.EmailPassword
-import com.mobileprism.fishing.domain.entity.auth.GoogleAuthRequest
 import com.mobileprism.fishing.domain.entity.auth.UsernamePassword
-import com.mobileprism.fishing.domain.entity.common.LoginType
-import com.mobileprism.fishing.domain.entity.common.User
+import com.mobileprism.fishing.domain.entity.common.FishingFirebaseUser
 import com.mobileprism.fishing.domain.repository.AuthManager
 import com.mobileprism.fishing.domain.repository.AuthRepository
-import com.mobileprism.fishing.domain.repository.FirebaseUserRepository
 import com.mobileprism.fishing.model.datastore.UserDatastore
-import com.mobileprism.fishing.model.entity.FishingCodes
-import com.mobileprism.fishing.model.entity.FishingResponse
 import com.mobileprism.fishing.model.entity.user.UserData
 import com.mobileprism.fishing.model.entity.user.UserResponse
 import com.mobileprism.fishing.model.utils.ResultWrapper
-import com.mobileprism.fishing.model.utils.fishingSafeApiCall
-import com.mobileprism.fishing.model.utils.fold
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 
 class AuthManagerImpl(
@@ -72,45 +64,21 @@ class AuthManagerImpl(
         email: String,
         googleAuthId: String,
         googleAuthIdToken: String,
-        firebaseAuthId: String
+        firebaseUser: FishingFirebaseUser
     ) = flow {
+        userDatastore.saveFirebaseUser(firebaseUser)
+
         val result = authRepository.loginUserWithGoogle(
-            email,
-            googleAuthId,
-            googleAuthIdToken,
-            firebaseAuthId
+            email = email,
+            googleAuthId = googleAuthId,
+            googleAuthIdToken = googleAuthIdToken,
+            firebaseAuthId = firebaseUser.uid
         ).single()
         if (result is ResultWrapper.Success) {
             onLoginSuccess(result.data)
         }
         emit(result)
 
-        /*firebaseUserRepository.currentUser
-            .catch { error ->
-                onLoginFailure(
-                    FishingResponse(
-                        fishingCode = FishingCodes.UNKNOWN_ERROR,
-                        description = error.message ?: ""
-                    )
-                )
-            }
-            .collectLatest { user ->
-                if (user != null) {
-                    authRepository.loginUserWithGoogle(
-                        email = user.email,
-                        userId = user.uid
-                    ).single().fold(
-                        onSuccess = {
-                            onLoginSuccess(it)
-                        },
-                        onError = {
-                            onLoginFailure(it)
-                        }
-                    )
-                } else {
-                    loginState.update { LoginState.NotLoggedIn }
-                }
-            }*/
     }
 
     /*override suspend fun logoutCurrentUser() {
@@ -119,7 +87,7 @@ class AuthManagerImpl(
         }
     }*/
 
-    override suspend fun updateUserProfileData(user: User) {
+    override suspend fun updateUserProfileData(user: FishingFirebaseUser) {
         TODO("Not yet implemented")
     }
 
