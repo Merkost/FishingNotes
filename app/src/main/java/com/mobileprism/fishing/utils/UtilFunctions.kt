@@ -1,9 +1,13 @@
 package com.mobileprism.fishing.utils
 
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.widget.Toast
 import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
@@ -144,6 +148,29 @@ fun Context.isNetworkAvailable(): Boolean {
         }
     }
     return false
+}
+
+fun Context.displayAppDetailsSettings() {
+    try {
+        /*
+            Settings
+                The Settings provider contains global system-level device preferences.
+        */
+        /*
+            String ACTION_APPLICATION_DETAILS_SETTINGS
+                Activity Action : Show screen of details about a particular application.
+                In some cases, a matching Activity may not exist,
+                so ensure you safeguard against this.
+                Constant Value : "android.settings.APPLICATION_DETAILS_SETTINGS"
+        */
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        intent.data = Uri.parse("package:$packageName");
+        startActivity(intent);
+    } catch (e: ActivityNotFoundException) {
+        e.printStackTrace();
+        val alternateIntent = Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS)
+        startActivity(alternateIntent)
+    }
 }
 
 

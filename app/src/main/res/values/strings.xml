@@ -428,6 +428,7 @@
     <string name="fc_network_error">Unable to reach the server</string>
     <string name="fc_otp_attempts_exceeded">Превышено количество попыток, запросите новый код</string>
     <string name="unknown_error">Неизвестная ошибка</string>
+    <string name="enable_gps_in_settings">Разрешите доступ к вашему местоположению в настройках</string>
 
 
 </resources>
