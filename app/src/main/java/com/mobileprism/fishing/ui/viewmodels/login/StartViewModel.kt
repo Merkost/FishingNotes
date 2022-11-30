@@ -15,12 +15,14 @@ import com.mobileprism.fishing.utils.network.ConnectionManager
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-private val FirebaseUser.toFishingFirebaseUser: FishingFirebaseUser
-    get() = FishingFirebaseUser(
-        uid = uid,
-        email = email,
-        displayName = displayName,
-    )
+private val FirebaseUser.toFishingFirebaseUser: FishingFirebaseUser?
+    get() = kotlin.runCatching {
+        FishingFirebaseUser(
+            uid = uid,
+            email = email!!,
+            displayName = displayName!!,
+        )
+    }.getOrNull()
 
 class StartViewModel(
     private val authManager: AuthManager,
@@ -36,7 +38,12 @@ class StartViewModel(
             _uiState.update { BaseViewState.Loading }
 
             if (account.email != null && account.idToken != null && account.id != null && firebaseUser != null) {
-                authManager.googleLogin(account.email!!, account.id!!, account.idToken!!, firebaseUser.toFishingFirebaseUser).single().fold(
+                authManager.googleLogin(
+                    account.email!!,
+                    account.id!!,
+                    account.idToken!!,
+                    firebaseUser.toFishingFirebaseUser
+                ).single().fold(
                     onSuccess = {
                         _uiState.update { BaseViewState.Success(Unit) }
                     },

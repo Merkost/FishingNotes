@@ -6,9 +6,9 @@ import java.util.*
 
 @Parcelize
 data class FishingFirebaseUser(
-    val uid: String = "",
-    val email: String? = null,
-    val displayName: String? = null,
+    val uid: String,
+    val email: String,
+    val displayName: String,
     val photoUrl: String? = null,
 ): Parcelable
 

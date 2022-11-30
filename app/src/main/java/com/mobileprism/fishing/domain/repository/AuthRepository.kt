@@ -14,6 +14,6 @@ interface AuthRepository {
         email: String,
         googleAuthId: String,
         googleAuthIdToken: String,
-        firebaseAuthId: String
+        firebaseAuthId: String?
     ): Flow<ResultWrapper<UserResponse>>
 }

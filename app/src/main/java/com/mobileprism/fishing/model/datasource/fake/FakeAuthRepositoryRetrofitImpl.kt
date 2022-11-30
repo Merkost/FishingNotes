@@ -58,7 +58,7 @@ class FakeAuthRepositoryRetrofitImpl(private val dispatcher: CoroutineDispatcher
         email: String,
         googleAuthId: String,
         googleAuthIdToken: String,
-        firebaseAuthId: String,
+        firebaseAuthId: String?,
     ) = flow {
         emit(fishingSafeApiCall(dispatcher) {
             delay(Constants.DEFAULT_DELAY)

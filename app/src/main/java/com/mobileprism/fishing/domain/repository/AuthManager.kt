@@ -24,7 +24,7 @@ interface AuthManager {
         email: String,
         googleAuthId: String,
         googleAuthIdToken: String,
-        firebaseUser: FishingFirebaseUser
+        firebaseUser: FishingFirebaseUser?
     ): Flow<ResultWrapper<UserResponse>>
 
     suspend fun skipAuthorization()

@@ -64,15 +64,15 @@ class AuthManagerImpl(
         email: String,
         googleAuthId: String,
         googleAuthIdToken: String,
-        firebaseUser: FishingFirebaseUser
+        firebaseUser: FishingFirebaseUser?
     ) = flow {
-        userDatastore.saveFirebaseUser(firebaseUser)
+        firebaseUser?.let { userDatastore.saveFirebaseUser(firebaseUser) }
 
         val result = authRepository.loginUserWithGoogle(
             email = email,
             googleAuthId = googleAuthId,
             googleAuthIdToken = googleAuthIdToken,
-            firebaseAuthId = firebaseUser.uid
+            firebaseAuthId = firebaseUser?.uid
         ).single()
         if (result is ResultWrapper.Success) {
             onLoginSuccess(result.data)
