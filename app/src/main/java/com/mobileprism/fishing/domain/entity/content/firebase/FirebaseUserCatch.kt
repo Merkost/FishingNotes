@@ -1,27 +1,15 @@
-package com.mobileprism.fishing.domain.entity.content
+package com.mobileprism.fishing.domain.entity.content.firebase
 
 import android.os.Parcelable
-import androidx.room.*
 import com.mobileprism.fishing.domain.entity.common.Note
-import com.mobileprism.fishing.model.datasource.room.Converters
-import com.mobileprism.fishing.model.entity.FishingWeather
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-@Entity(
-    tableName = "catches",
-    foreignKeys = [ForeignKey(entity = UserMapMarker::class,
-        parentColumns = arrayOf("id"),
-        childColumns = arrayOf("markerId"),
-        onDelete = ForeignKey.CASCADE)]
-)
-data class UserCatch(
-    @PrimaryKey
+data class FirebaseUserCatch(
     var id: String = "",
     var markerId: String = "",
     var userId: String = "",
     var description: String = "",
-    @TypeConverters(Converters::class)
     var note: Note = Note(),
     var date: Long = 0,
     var dateOfCreation: Long = 0,
@@ -32,11 +20,10 @@ data class UserCatch(
     var fishingBait: String = "",
     var fishingLure: String = "",
     var placeTitle: String = "",
-    @JvmField
     var isPublic: Boolean = false,
-    @Ignore
     var downloadPhotoLinks: List<String> = listOf(),
-    var weather: FishingWeather = FishingWeather.SUN,
+    var weatherPrimary: String = "",
+    var weatherIcon: String = "01",
     var weatherTemperature: Float = 0.0f,
     var weatherWindSpeed: Float = 0.0f,
     var weatherWindDeg: Int = 0,

@@ -28,9 +28,9 @@ import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.Daily
 import com.mobileprism.fishing.domain.entity.weather.Temperature
 import com.mobileprism.fishing.domain.entity.weather.Weather
+import com.mobileprism.fishing.domain.use_cases.catches.OpenWeatherMapper
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.mappers.getMoonIconByPhase
-import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.ui.home.views.BigText
 import com.mobileprism.fishing.ui.home.views.PrimaryText
 import com.mobileprism.fishing.ui.home.views.SecondaryText
@@ -67,7 +67,7 @@ fun PrimaryWeatherItemView(
                     absoluteRight.linkTo(temp.absoluteLeft)
                     absoluteLeft.linkTo(parent.absoluteLeft)
                 },
-            painter = painterResource(id = getWeatherIconByName(weather.icon)),
+            painter = painterResource(id = OpenWeatherMapper.getFishingWeather(weather.icon).iconRes),
             contentDescription = stringResource(id = R.string.weather),
             tint = iconTint
         )

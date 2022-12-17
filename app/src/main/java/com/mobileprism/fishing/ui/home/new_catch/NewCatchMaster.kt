@@ -339,11 +339,7 @@ private fun handlePagerNextClick(
 
             }
             3 -> {
-                if (viewModel.catchWeatherState.value.isInputCorrect) {
-                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                } else {
-                    SnackbarManager.showMessage(R.string.weather_error)
-                }
+                pagerState.animateScrollToPage(pagerState.currentPage + 1)
             }
             else -> {
                 pagerState.animateScrollToPage(pagerState.currentPage + 1)

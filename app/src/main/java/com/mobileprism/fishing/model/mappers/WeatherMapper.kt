@@ -4,6 +4,7 @@ import com.mobileprism.fishing.domain.entity.weather.*
 import com.mobileprism.fishing.model.entity.weather.Forecastday
 import com.mobileprism.fishing.model.entity.weather.Hour
 import com.mobileprism.fishing.model.entity.weather.WeatherApiForecast
+import com.mobileprism.fishing.model.entity.FishingWeather
 
 fun convertWeatherApiForecast(forecast: WeatherApiForecast): WeatherForecast {
     return WeatherForecast(

@@ -2,40 +2,6 @@ package com.mobileprism.fishing.model.mappers
 
 import com.mobileprism.fishing.R
 
-fun getWeatherIconByName(name: String): Int {
-    return when (true) {
-        name.startsWith("01", true) -> {
-            R.drawable.ic_weather_sun
-        }
-        name.startsWith("02", true) -> {
-            R.drawable.ic_weather_cloudly
-        }
-        name.startsWith("03", true) -> {
-            R.drawable.ic_weaether_clouds
-        }
-        name.startsWith("04", true) -> {
-            R.drawable.ic_weather_broken_clouds
-        }
-        name.startsWith("09", true) -> {
-            R.drawable.ic_weather_hevy_rain
-        }
-        name.startsWith("10", true) -> {
-            R.drawable.ic_weather_light_rain
-        }
-        name.startsWith("11", true) -> {
-            R.drawable.ic_weather_ligtning
-        }
-        name.startsWith("13", true) -> {
-            R.drawable.ic_weather_snow
-        }
-        name.startsWith("50", true) -> {
-            R.drawable.ic_weather_mist
-        }
-        else -> {
-            R.drawable.ic_weather_sun
-        }
-    }
-}
 
 fun getWeatherNameByIcon(res: Int): String {
     return when (res) {
@@ -90,9 +56,6 @@ fun getMoonIconByPhase(phase: Float): Int {
         }
         phase <= 0.98f -> {
             R.drawable.moon_waning_crescent
-        }
-        phase <= 0.1f -> {
-            R.drawable.moon_new
         }
         else -> {
             R.drawable.moon_full

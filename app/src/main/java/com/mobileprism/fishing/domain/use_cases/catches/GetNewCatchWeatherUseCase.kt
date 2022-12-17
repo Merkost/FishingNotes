@@ -69,8 +69,8 @@ class GetNewCatchWeatherUseCase(
         return NewCatchWeatherData(
             lat = location.latitude,
             lng = location.longitude,
-            primary = weatherForecast.hourly[hour].weather.first().description.replaceFirstChar { it.uppercase() },
-            icon = weatherForecast.hourly[hour].weather.first().icon,
+            //primary = weatherForecast.hourly[hour].weather.first().description.replaceFirstChar { it.uppercase() },
+            fishingWeather = OpenWeatherMapper.getFishingWeather(weatherForecast.hourly[hour].weather.first().icon),
             temperature = tempUnits.getTemperature(weatherForecast.hourly[hour].temperature),
             windSpeed = windUnits.getWindSpeed(weatherForecast.hourly[hour].windSpeed.toDouble()),
             windDeg = weatherForecast.hourly[hour].windDeg,
