@@ -4,6 +4,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,55 +12,69 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.MainActivity
-import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
+import com.mobileprism.fishing.ui.custom.FishingOutlinedTextField
+import com.mobileprism.fishing.ui.custom.FishingPasswordTextField
+import com.mobileprism.fishing.ui.home.views.FishingButtonFilled
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.HeaderText
+import com.mobileprism.fishing.ui.home.views.SecondaryTextSmall
 import com.mobileprism.fishing.ui.viewmodels.login.LoginViewModel
-import com.mobileprism.fishing.utils.showToast
-import kotlinx.coroutines.delay
+import com.mobileprism.fishing.ui.viewstates.FishingViewState
+import com.mobileprism.fishing.utils.showError
 import org.koin.androidx.compose.get
 
+@OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @Composable
-fun LoginScreen(upPress: () -> Unit) {
+fun LoginScreen(upPress: () -> Unit, toHomeScreen: () -> Unit, forgotPassword: () -> Unit) {
     val viewModel: LoginViewModel = get()
     var visible by remember { mutableStateOf(false) }
 
-    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+    val focusManager = LocalFocusManager.current
+    val localSoftwareKeyboardController = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
 
 
     LaunchedEffect(uiState) {
-        val state = uiState
-        when  {
-            state.isError -> {
-                state.errorText?.let { showToast(context, state.errorText) }
+        when (val state = uiState) {
+            is FishingViewState.Success -> {
+                toHomeScreen()
             }
+            is FishingViewState.Error -> {
+                context.applicationContext.showError(state.fishingError)
+            }
+            is FishingViewState.Loading -> {
+                focusManager.clearFocus()
+                localSoftwareKeyboardController?.hide()
+            }
+            else -> {}
         }
-        if (uiState.isLoggedIn) {
+        /*if (uiState.isLoggedIn) {
             visible = false
             delay((MainActivity.splashFadeDurationMillis * 2).toLong())
-        }
+        }*/
     }
 
 
-    Scaffold() {
+    Scaffold(modifier = Modifier) {
         AnimatedVisibility(
             modifier = Modifier
                 .fillMaxSize(),
@@ -125,7 +140,7 @@ fun LoginScreen(upPress: () -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
-                    .padding(horizontal = 30.dp, vertical = 15.dp),
+                    .padding(horizontal = 30.dp, vertical = 20.dp),
                 elevation = 10.dp,
                 shape = RoundedCornerShape(30.dp)
             ) {
@@ -191,24 +206,19 @@ fun LoginScreen(upPress: () -> Unit) {
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
 
-                            OutlinedTextField(
+                            FishingOutlinedTextField(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .onFocusEvent {
                                         if (it.isFocused.not())
                                             viewModel.validateLogin(skipEmpty = true)
                                     },
-                                enabled = !uiState.isLoading,
-                                isError = uiState.isLoginError,
+                                enabled = uiState !is FishingViewState.Loading,
+                                isError = loginInfo.loginError.successful.not(),
+                                errorString = loginInfo.loginError.errorMessage,
                                 value = loginInfo.login,
                                 onValueChange = viewModel::setLogin,
-                                label = {
-                                    Text(
-                                        text = stringResource(R.string.email_or_username),
-                                        overflow = TextOverflow.Ellipsis,
-                                        maxLines = 1,
-                                    )
-                                },
+                                placeholder = stringResource(R.string.email_or_username),
                                 keyboardOptions = KeyboardOptions.Default.copy(
                                     imeAction = ImeAction.Next
                                 ),
@@ -218,45 +228,19 @@ fun LoginScreen(upPress: () -> Unit) {
                                 }
                             )
 
-                            OutlinedTextField(
+                            FishingPasswordTextField(
                                 modifier = Modifier.fillMaxWidth(),
-                                isError = uiState.isPasswordError,
-                                value = loginInfo.password,
+                                password = loginInfo.password,
                                 onValueChange = viewModel::setPassword,
-                                label = { Text(text = stringResource(R.string.password)) },
-                                keyboardOptions = KeyboardOptions.Default.copy(
-                                    imeAction = ImeAction.Next
-                                ),
-                                enabled = !uiState.isLoading,
-                                singleLine = true,
-                                visualTransformation = if (showPassword.value) VisualTransformation.None else PasswordVisualTransformation(),
-                                leadingIcon = {
-                                    Icon(Icons.Default.Password, Icons.Default.Password.name)
-                                },
-                                trailingIcon = {
-                                    when (showPassword.value) {
-                                        true -> IconButton(onClick = {
-                                            showPassword.value = !showPassword.value
-                                        }) {
-                                            Icon(
-                                                Icons.Default.VisibilityOff,
-                                                Icons.Default.VisibilityOff.name
-                                            )
-                                        }
-                                        else -> IconButton(onClick = {
-                                            showPassword.value = !showPassword.value
-                                        }) {
-                                            Icon(
-                                                Icons.Default.Visibility,
-                                                Icons.Default.Visibility.name
-                                            )
-                                        }
-                                    }
-                                }
+                                enabled = uiState !is FishingViewState.Loading,
+                                isError = loginInfo.passwordError.successful.not(),
+                                errorString = loginInfo.passwordError.errorMessage,
+                                showPassword = showPassword.value,
+                                onShowPasswordChanged = { showPassword.value = !showPassword.value }
                             )
                         }
 
-                        AnimatedVisibility(visible = uiState.isLoading) {
+                        AnimatedVisibility(visible = uiState is FishingViewState.Loading) {
                             LinearProgressIndicator(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -268,7 +252,7 @@ fun LoginScreen(upPress: () -> Unit) {
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Crossfade(uiState.isLoading) {
+                            Crossfade(uiState is FishingViewState.Loading) {
                                 when (it) {
                                     true -> {
                                         DefaultButtonOutlined(
@@ -281,11 +265,20 @@ fun LoginScreen(upPress: () -> Unit) {
                                     }
                                 }
                             }
-                            DefaultButtonFilled(
+                            FishingButtonFilled(
                                 text = stringResource(id = R.string.login),
-                                enabled = !uiState.isLoading,
+                                enabled = uiState !is FishingViewState.Loading,
                                 onClick = viewModel::signInUser
                             )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            SecondaryTextSmall(
+                                text = "Forgot your password?",
+                                modifier = Modifier.clickable { forgotPassword() })
                         }
                     }
                 }

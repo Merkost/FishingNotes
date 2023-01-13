@@ -2,100 +2,121 @@ package com.mobileprism.fishing.ui.login
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.lifecycle.LifecycleEventObserver
-import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
+import com.google.accompanist.navigation.animation.navigation
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.home.AppSnackbar
 import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.login.forgot_password.ResetAccountScreen
+import com.mobileprism.fishing.ui.login.forgot_password.RestoreDestinations
+import com.mobileprism.fishing.ui.login.forgot_password.SearchAccountScreen
+import com.mobileprism.fishing.ui.login.forgot_password.addForgotPasswordGraph
+import com.mobileprism.fishing.ui.navigate
+import com.mobileprism.fishing.ui.requiredArg
 import com.mobileprism.fishing.ui.resources
+import com.mobileprism.fishing.ui.theme.FishingNotesTheme
+import com.mobileprism.fishing.ui.viewmodels.restore.UserLogin
 import kotlinx.coroutines.launch
 
 
 @ExperimentalAnimationApi
 @ExperimentalMaterialApi
 @Composable
-fun StartNavigation() {
+fun StartNavigation(toHomeScreen: () -> Unit) {
+    FishingNotesTheme(isLoginScreen = true) {
+        val navController = rememberAnimatedNavController()
+        val upPress: () -> Unit = { navController.navigateUp() }
 
-    val navController = rememberAnimatedNavController()
-    val upPress: () -> Unit = { navController.navigateUp() }
+        val scaffoldState = rememberScaffoldState()
 
-    val scaffoldState = rememberScaffoldState()
+        val systemUiController = rememberSystemUiController()
+        val surfaceColor = MaterialTheme.colors.surface
+        val primaryColor = MaterialTheme.colors.primary
 
-    val systemUiController = rememberSystemUiController()
+        setSnackbarsListener(scaffoldState)
 
-    val surfaceColor = MaterialTheme.colors.surface
-    val primaryColor = MaterialTheme.colors.primary
-
-    setSnackbarsListener(scaffoldState)
-
-    Scaffold(
-        scaffoldState = scaffoldState,
-        snackbarHost = {
-            SnackbarHost(
-                hostState = it,
-                modifier = Modifier.systemBarsPadding(),
-                snackbar = { snackbarData -> AppSnackbar(snackbarData) }
-            )
-        }
-    ) {
-
-        AnimatedNavHost(
-            navController = navController,
-            startDestination = LoginDestinations.START,
-            enterTransition = { fadeIn(animationSpec = tween(600)) },
-            exitTransition = { fadeOut(animationSpec = tween(600)) },
-            popEnterTransition = { fadeIn(animationSpec = tween(600)) },
-            popExitTransition = { fadeOut(animationSpec = tween(600)) }
+        Scaffold(
+            scaffoldState = scaffoldState,
+            snackbarHost = {
+                SnackbarHost(
+                    hostState = it,
+                    modifier = Modifier.systemBarsPadding(),
+                    snackbar = { snackbarData -> AppSnackbar(snackbarData) }
+                )
+            }
         ) {
 
-            composable(LoginDestinations.START) {
-                DisposableEffect(this) {
-                    systemUiController.setStatusBarColor(surfaceColor)
-                    onDispose {}
-                }
-                StartScreen(
-                    toLoginScreen = { navController.navigate(LoginDestinations.LOGIN) }
-                ) { navController.navigate(LoginDestinations.REGISTER) }
-            }
-
-            composable(LoginDestinations.LOGIN) {
-                DisposableEffect(this) {
-                    systemUiController.setStatusBarColor(primaryColor)
-                    onDispose {}
-                }
-                LoginScreen(upPress = upPress)
-            }
-
-            composable(LoginDestinations.REGISTER,
-                enterTransition = {
-                    slideInHorizontally(initialOffsetX = { 1500 }, animationSpec = tween(600))
-                },
-                exitTransition = {
-                    slideOutHorizontally(targetOffsetX = { -1500 }, animationSpec = tween(600))
-                },
-                popEnterTransition = {
-                    slideInHorizontally(initialOffsetX = { -1500 }, animationSpec = tween(600))
-                },
-                popExitTransition = {
-                    slideOutHorizontally(targetOffsetX = { 1500 }, animationSpec = tween(600))
-                }
+            AnimatedNavHost(
+                navController = navController,
+                startDestination = LoginDestinations.START,
+                enterTransition = { fadeIn(animationSpec = tween(600)) },
+                exitTransition = { fadeOut(animationSpec = tween(600)) },
+                popEnterTransition = { fadeIn(animationSpec = tween(600)) },
+                popExitTransition = { fadeOut(animationSpec = tween(600)) }
             ) {
-                RegisterScreen(upPress)
-            }
 
+                composable(LoginDestinations.START) {
+                    DisposableEffect(this) {
+                        systemUiController.setStatusBarColor(surfaceColor)
+                        onDispose {}
+                    }
+                    StartScreen(
+                        toLoginScreen = { navController.navigate(LoginDestinations.LOGIN) },
+                        toRegistration = { navController.navigate(LoginDestinations.REGISTER) },
+                        toHomeScreen = toHomeScreen
+                    )
+                }
+
+                composable(LoginDestinations.LOGIN) {
+                    DisposableEffect(this) {
+                        systemUiController.setStatusBarColor(primaryColor)
+                        onDispose {}
+                    }
+                    LoginScreen(upPress = upPress, toHomeScreen = toHomeScreen) {
+                        navController.navigate(RestoreDestinations.SEARCH_AND_CONFIRM_ACCOUNT)
+                    }
+                }
+
+                navigation(
+                    RestoreDestinations.SEARCH_AND_CONFIRM_ACCOUNT,
+                    route = LoginDestinations.FORGOT_PASSWORD
+                ) {
+                    // TODO: change statusBar color
+                    addForgotPasswordGraph(navController, upPress = upPress)
+                }
+
+
+
+                composable(LoginDestinations.REGISTER,
+                    enterTransition = {
+                        slideInHorizontally(initialOffsetX = { 1500 }, animationSpec = tween(600))
+                    },
+                    exitTransition = {
+                        slideOutHorizontally(targetOffsetX = { -1500 }, animationSpec = tween(600))
+                    },
+                    popEnterTransition = {
+                        slideInHorizontally(initialOffsetX = { -1500 }, animationSpec = tween(600))
+                    },
+                    popExitTransition = {
+                        slideOutHorizontally(targetOffsetX = { 1500 }, animationSpec = tween(600))
+                    }
+                ) {
+                    RegisterScreen(upPress, toHomeScreen = toHomeScreen)
+                }
+
+            }
         }
     }
-
 }
 
 @Composable

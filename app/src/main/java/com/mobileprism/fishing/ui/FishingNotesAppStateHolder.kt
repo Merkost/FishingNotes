@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
  */
 object MainDestinations {
 
+    const val AUTH_ROUTE = "auth"
     const val EDIT_PROFILE = "edit_profile"
     const val LOGIN_ROUTE = "login"
     const val HOME_ROUTE = "home"
@@ -45,6 +46,7 @@ object MainDestinations {
 }
 
 object Arguments {
+    const val USER_LOGIN = "user_login_arg"
     const val PLACE = "place_arg"
     const val CATCH = "catch_arg"
     const val WEATHER_DATA = "daily_weather_data_arg"

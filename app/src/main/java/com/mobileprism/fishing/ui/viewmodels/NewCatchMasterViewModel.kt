@@ -11,12 +11,15 @@ import com.mobileprism.fishing.domain.use_cases.places.GetUserPlacesListUseCase
 import com.mobileprism.fishing.domain.use_cases.catches.SaveNewCatchUseCase
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlacesState
 import com.mobileprism.fishing.ui.home.new_catch.ReceivedPlaceState
+import com.mobileprism.fishing.model.entity.FishingWeather
+import com.mobileprism.fishing.ui.utils.toDoubleExOrNull
 import com.mobileprism.fishing.ui.viewstates.NewCatchViewState
 import com.mobileprism.fishing.utils.calcMoonPhase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.*
 
@@ -101,25 +104,27 @@ class NewCatchMasterViewModel(
         _catchInfoState.value = _catchInfoState.value.copy(lure = lureValue)
     }
 
-    fun setWeatherPrimary(weather: String) {
-        _catchWeatherState.value = _catchWeatherState.value.copy(primary = weather)
-    }
-
     fun setWeatherTemperature(temperature: String) {
-        _catchWeatherState.value =
-            _catchWeatherState.value.copy(temperature = temperature)
+        if (temperature.toIntOrNull() != null && temperature.length <= 3) {
+            _catchWeatherState.update { it.copy(temperature = temperature) }
+        }
     }
 
-    fun setWeatherIconId(icon: String) {
-        _catchWeatherState.value = _catchWeatherState.value.copy(icon = icon)
+    fun setWeather(weather: FishingWeather) {
+        _catchWeatherState.update { it.copy(weather = weather) }
     }
 
     fun setWeatherPressure(pressure: String) {
-        _catchWeatherState.value = _catchWeatherState.value.copy(pressure = pressure)
+        if(pressure.toDoubleOrNull() != null && pressure.endsWith(".").not()) {
+            _catchWeatherState.update { it.copy(pressure = pressure) }
+
+        }
     }
 
     fun setWeatherWindSpeed(windSpeed: String) {
-        _catchWeatherState.value = _catchWeatherState.value.copy(windSpeed = windSpeed)
+        if (windSpeed.toDoubleExOrNull() != null && windSpeed.length <= 4) {
+            _catchWeatherState.update { it.copy(windSpeed = windSpeed) }
+        }
     }
 
     fun setWeatherWindDeg(windDeg: Int) {
@@ -128,10 +133,6 @@ class NewCatchMasterViewModel(
 
     private fun setWeatherMoonPhase(moonPhase: Float) {
         _catchWeatherState.value = _catchWeatherState.value.copy(moonPhase = moonPhase)
-    }
-
-    fun setWeatherIsError(isError: Boolean) {
-        _catchWeatherState.value = _catchWeatherState.value.copy(isInputCorrect = !isError)
     }
 
     fun addPhotos(newPhotos: List<Uri>) {
@@ -172,8 +173,7 @@ class NewCatchMasterViewModel(
 
     private fun refreshWeatherState(weather: NewCatchWeatherData) {
         _catchWeatherState.value = _catchWeatherState.value.copy(
-            primary = weather.primary,
-            icon = weather.icon,
+            weather = weather.fishingWeather,
             temperature = weather.temperature,
             windSpeed = weather.windSpeed,
             windDeg = weather.windDeg,
@@ -247,8 +247,7 @@ data class CatchInfoState(
 )
 
 data class CatchWeatherState(
-    val primary: String = "",
-    val icon: String = "01",
+    val weather: FishingWeather = FishingWeather.SUN,
     val temperature: String = "0",
     val windSpeed: String = "0",
     val windDeg: Int = 0,
@@ -256,7 +255,6 @@ data class CatchWeatherState(
     val moonPhase: Float = calcMoonPhase(Date().time),
     val isLoading: Boolean = false,
     val isDownloadAvailable: Boolean = true,
-    val isInputCorrect: Boolean = (primary != ""),
     val isError: Boolean = true
 )
 

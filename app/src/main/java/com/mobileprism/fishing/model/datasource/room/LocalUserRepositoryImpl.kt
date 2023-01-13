@@ -1,3 +1,4 @@
+/*
 package com.mobileprism.fishing.model.datasource.room
 
 import android.content.Context
@@ -9,6 +10,7 @@ import com.mobileprism.fishing.domain.entity.common.Progress
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.repository.FirebaseUserRepository
 import com.mobileprism.fishing.model.datastore.UserDatastore
+import com.mobileprism.fishing.model.entity.user.UserData
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,14 +25,12 @@ class LocalUserRepositoryImpl(
     private val context: Context,
 ) : FirebaseUserRepository {
 
-    override val currentUser: Flow<User?>
-        get() = datastoreNullableUser
+    override val currentUser: Flow<UserData> = userDatastore.getUser
 
-    override val datastoreUser: Flow<User>
+
+    override val datastoreUser: Flow<UserData>
         get() = userDatastore.getUser
 
-    override val datastoreNullableUser: Flow<User?>
-        get() = userDatastore.getNullableUser
 
     override suspend fun logoutCurrentUser() = callbackFlow {
         AuthUI.getInstance().signOut(context).addOnCompleteListener {
@@ -43,16 +43,18 @@ class LocalUserRepositoryImpl(
         awaitClose {}
     }
 
+
     private fun reloadRepositories() {
         //clearPersistence()
         //GlobalContext.unloadKoinModules(repositoryModuleFirebase)
         //GlobalContext.loadKoinModules(repositoryModuleFirebase)
     }
 
-    override suspend fun addNewUser(user: User): StateFlow<Progress> {
+    override suspend fun addNewUser(user: UserData): StateFlow<Progress> {
         val flow = MutableStateFlow<Progress>(Progress.Loading())
 
-        /* val userFromDatabase =
+        */
+/* val userFromDatabase =
              dbCollections.getUsersCollection().document(user.uid).get().await()
                  .toObject(User::class.java)
 
@@ -79,24 +81,24 @@ class LocalUserRepositoryImpl(
                      flow.tryEmit(Progress.Complete)
                  }
 
-         }*/
+         }*//*
+
         return flow
     }
 
     override suspend fun addOfflineUser() {
-
+        TODO("Not yet implemented")
     }
 
-    override suspend fun setUserListener(user: User) {
-
+    override suspend fun setUserListener(user: UserData) {
+        TODO("Not yet implemented")
     }
 
-
-    override suspend fun setNewProfileData(user: User): Result<Unit> {
+    override suspend fun setNewProfileData(user: UserData): Result<Unit> {
         val result = Result.success(userDatastore.saveUser(user))
         return suspendCoroutine<Result<Unit>> {
             it.resume(result)
         }
     }
 
-}
+}*/

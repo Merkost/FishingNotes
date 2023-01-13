@@ -183,6 +183,7 @@ fun SecondaryText(
     modifier: Modifier = Modifier, text: String,
     maxLines: Int = Int.MAX_VALUE,
     textAlign: TextAlign = TextAlign.Center,
+    style: TextStyle = LocalTextStyle.current,
     textColor: Color = MaterialTheme.customColors.secondaryTextColor
 ) {
     Text(

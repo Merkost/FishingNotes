@@ -48,8 +48,8 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.SnackbarManager
-import com.mobileprism.fishing.ui.home.catch.addPhoto
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
+import com.mobileprism.fishing.utils.addPhoto
 import com.mobileprism.fishing.utils.network.ConnectionState
 import com.mobileprism.fishing.utils.network.currentConnectivityState
 import com.mobileprism.fishing.utils.network.observeConnectivityAsFlow
@@ -129,9 +129,6 @@ fun ItemPhoto(
     }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
-@ExperimentalAnimationApi
-@ExperimentalComposeUiApi
 @Composable
 fun PhotosView(
     modifier: Modifier = Modifier,
@@ -302,7 +299,7 @@ fun NewCatchPhotoView(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class, androidx.compose.animation.ExperimentalAnimationApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalAnimationApi::class)
 @Composable
 fun FullSizePhotoView(
     modifier: Modifier = Modifier,
@@ -369,8 +366,6 @@ fun FullSizePhotoView(
     }
 }
 
-@ExperimentalAnimationApi
-@ExperimentalComposeUiApi
 @Composable
 fun ItemCatchPhotoView(
     modifier: Modifier = Modifier,
@@ -401,8 +396,7 @@ fun ItemCatchPhotoView(
 }
 
 
-@ExperimentalComposeUiApi
-@ExperimentalAnimationApi
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun FullScreenPhoto(photo: MutableState<Uri?>) {
 

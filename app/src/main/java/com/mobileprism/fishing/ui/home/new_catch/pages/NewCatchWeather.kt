@@ -6,7 +6,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -18,36 +17,22 @@ import androidx.navigation.NavController
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
 import com.mobileprism.fishing.ui.home.new_catch.*
+import com.mobileprism.fishing.ui.home.new_catch.weather.NewCatchMoonView
+import com.mobileprism.fishing.ui.home.new_catch.weather.NewCatchPressureView
+import com.mobileprism.fishing.ui.home.new_catch.weather.NewCatchWindView
 import com.mobileprism.fishing.ui.home.views.SubtitleWithIcon
 import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.utils.network.ConnectionState
 import com.mobileprism.fishing.utils.network.observeConnectivityAsFlow
 
-@ExperimentalComposeUiApi
 @Composable
 fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavController) {
 
-    val state by viewModel.catchWeatherState.collectAsState()
+    val weatherState by viewModel.catchWeatherState.collectAsState()
 
     val context = LocalContext.current
     val internetConnectionState = context.observeConnectivityAsFlow()
         .collectAsState(initial = ConnectionState.Available)
-
-    var primaryWeatherError by remember { mutableStateOf(false) }
-    var temperatureError by remember { mutableStateOf(false) }
-    var pressureError by remember { mutableStateOf(false) }
-    var windError by remember { mutableStateOf(false) }
-
-    val isError1 by remember(primaryWeatherError, temperatureError) {
-        mutableStateOf(primaryWeatherError || temperatureError)
-    }
-    val isError2 by remember(pressureError, windError) {
-        mutableStateOf(pressureError || windError)
-    }
-
-    LaunchedEffect(key1 = isError1, isError2) {
-        viewModel.setWeatherIsError(isError1 || isError2)
-    }
 
     ConstraintLayout(
         modifier = Modifier
@@ -88,23 +73,23 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
             },
             onClick = {
                 when {
-                    state.isDownloadAvailable
+                    weatherState.isDownloadAvailable
                             && internetConnectionState.value is ConnectionState.Available -> {
                         viewModel.loadWeather()
                     }
-                    state.isLoading -> {}
+                    weatherState.isLoading -> {}
                     else -> {
                         viewModel.loadWeather()
                     }
                 }
             }
         ) {
-            if (state.isLoading) {
+            if (weatherState.isLoading) {
                 CircularProgressIndicator()
             } else {
                 Icon(
                     painter = when {
-                        state.isDownloadAvailable
+                        weatherState.isDownloadAvailable
                                 && internetConnectionState.value is ConnectionState.Available -> painterResource(
                             id = R.drawable.ic_baseline_download_24
                         )
@@ -123,11 +108,8 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
                 absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                 width = Dimension.fillToConstraints
             },
-            weatherDescription = state.primary,
-            weatherIconId = state.icon,
-            onDescriptionChange = { viewModel.setWeatherPrimary(it) },
-            onIconChange = { viewModel.setWeatherIconId(it) },
-            onError = { primaryWeatherError = it }
+            fishingWeather = weatherState.weather,
+            onWeatherChange = viewModel::setWeather,
         )
 
         NewCatchTemperatureView(
@@ -137,9 +119,8 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
                 absoluteRight.linkTo(guideline, 4.dp)
                 width = Dimension.fillToConstraints
             },
-            temperature = state.temperature,
-            onTemperatureChange = { viewModel.setWeatherTemperature(it) },
-            onError = { temperatureError = it }
+            temperature = weatherState.temperature,
+            onTemperatureChange = viewModel::setWeatherTemperature,
         )
 
         NewCatchPressureView(
@@ -149,9 +130,8 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
                 absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                 width = Dimension.fillToConstraints
             },
-            pressure = state.pressure,
-            onPressureChange = { viewModel.setWeatherPressure(it) },
-            onError = { pressureError = it }
+            pressure = weatherState.pressure,
+            onPressureChange = viewModel::setWeatherPressure,
         )
 
         NewCatchWindView(
@@ -161,11 +141,10 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
                 absoluteRight.linkTo(guideline, 4.dp)
                 width = Dimension.fillToConstraints
             },
-            wind = state.windSpeed,
-            windDeg = state.windDeg,
-            onWindChange = { viewModel.setWeatherWindSpeed(it) },
+            wind = weatherState.windSpeed,
+            windDeg = weatherState.windDeg,
+            onWindChange = viewModel::setWeatherWindSpeed,
             onWindDirChange = { viewModel.setWeatherWindDeg(it.toInt()) },
-            onError = { windError = it }
         )
 
         NewCatchMoonView(
@@ -175,7 +154,7 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
                 absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                 width = Dimension.fillToConstraints
             },
-            moonPhase = state.moonPhase
+            moonPhase = weatherState.moonPhase
         )
     }
 }

@@ -24,6 +24,8 @@ import com.google.accompanist.pager.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.ui.custom.DefaultDialog
+import com.mobileprism.fishing.ui.custom.ModalLoadingDialog
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.new_catch.pages.NewCatchPage
 import com.mobileprism.fishing.ui.home.place.LottieWarning
@@ -37,9 +39,6 @@ import org.koin.androidx.compose.viewModel
 import org.koin.core.parameter.parametersOf
 
 @ExperimentalPermissionsApi
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
-@ExperimentalComposeUiApi
 @ExperimentalPagerApi
 @Composable
 fun NewCatchMasterScreen(
@@ -282,7 +281,7 @@ fun NewCatchButtons(
             pagerState = pagerState
         )
 
-        DefaultButtonFilled(
+        FishingButtonFilled(
             modifier = Modifier.constrainAs(next) {
                 top.linkTo(parent.top, 8.dp)
                 bottom.linkTo(parent.bottom)
@@ -340,11 +339,7 @@ private fun handlePagerNextClick(
 
             }
             3 -> {
-                if (viewModel.catchWeatherState.value.isInputCorrect) {
-                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                } else {
-                    SnackbarManager.showMessage(R.string.weather_error)
-                }
+                pagerState.animateScrollToPage(pagerState.currentPage + 1)
             }
             else -> {
                 pagerState.animateScrollToPage(pagerState.currentPage + 1)
@@ -354,7 +349,6 @@ private fun handlePagerNextClick(
 
 }
 
-@ExperimentalComposeUiApi
 @Composable
 fun CancelNewCatchDialog(
     onDismiss: () -> Unit,

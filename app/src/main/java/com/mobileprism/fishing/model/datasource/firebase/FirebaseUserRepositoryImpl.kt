@@ -1,3 +1,4 @@
+/*
 package com.mobileprism.fishing.model.datasource.firebase
 
 import android.content.Context
@@ -22,12 +23,10 @@ import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.repository.FirebaseUserRepository
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.datastore.UserDatastore
+import com.mobileprism.fishing.model.entity.user.UserData
 import com.mobileprism.fishing.utils.Constants.OFFLINE_USER_ID
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 import org.koin.core.context.GlobalContext.unloadKoinModules
@@ -45,7 +44,7 @@ class FirebaseUserRepositoryImpl(
 
 
 
-    override val currentUser: Flow<User?>
+    override val currentUser: Flow<UserData?>
         get() = callbackFlow {
             val authListener = FirebaseAuth.AuthStateListener {
                 runBlocking {
@@ -56,11 +55,8 @@ class FirebaseUserRepositoryImpl(
             awaitClose { fireBaseAuth.removeAuthStateListener(authListener) }
         }
 
-    override val datastoreUser: Flow<User>
+    override val datastoreUser: Flow<UserData>
         get() = userDatastore.getUser
-
-    override val datastoreNullableUser: Flow<User?>
-        get() = userDatastore.getNullableUser
 
     override suspend fun logoutCurrentUser() = callbackFlow {
         AuthUI.getInstance().signOut(context).addOnCompleteListener {
@@ -71,7 +67,7 @@ class FirebaseUserRepositoryImpl(
                 trySend(false)
             }
         }
-        /*when (datastoreUser.first().loginType) {
+when (datastoreUser.first().loginType) {
             LoginType.LOCAL -> {
                 userDatastore.clearUser()
                 trySend(true)
@@ -86,7 +82,8 @@ class FirebaseUserRepositoryImpl(
                 }
             }
             null -> TODO()
-        }*/
+        }
+
         awaitClose()
     }
 
@@ -100,21 +97,23 @@ class FirebaseUserRepositoryImpl(
         Firebase.firestore.clearPersistence()
     }
 
-    private fun mapFirebaseUserToUser(firebaseUser: FirebaseUser): User {
+    private fun mapFirebaseUserToUser(firebaseUser: FirebaseUser): UserData {
         return with(firebaseUser) {
-            User(
+            // TODO: fix firebase user
+            UserData()
+UserData(
                 uid = uid,
                 email = firebaseUser.email ?: "",
                 displayName = displayName ?: "Anonymous",
                 photoUrl = photoUrl.toString(),
                 registerDate = Date().time,
-                loginType = LoginType.GOOGLE
             )
+
         }
-        //TODO("change name")
+
     }
 
-    override suspend fun addNewUser(user: User): StateFlow<Progress> {
+    override suspend fun addNewUser(user: UserData): StateFlow<Progress> {
         val flow = MutableStateFlow<Progress>(Progress.Loading())
 
         val userFromDatabase =
@@ -206,3 +205,4 @@ class FirebaseUserRepositoryImpl(
     private fun createOfflineUser() = User(uid = OFFLINE_USER_ID)
 
 }
+*/

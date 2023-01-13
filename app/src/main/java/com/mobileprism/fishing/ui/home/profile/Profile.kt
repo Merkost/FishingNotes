@@ -32,7 +32,8 @@ import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.placeholder.shimmer
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.entity.common.User
+import com.mobileprism.fishing.domain.entity.common.FishingFirebaseUser
+import com.mobileprism.fishing.model.entity.user.UserData
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.views.SecondaryText
@@ -82,7 +83,9 @@ fun Profile(
                     width = Dimension.fillToConstraints
                 }
                 .zIndex(2f),
-                user = user,
+
+                // TODO: photoUrl
+                photoUrl = "",
                 imgSize = imgSize,
                 icon = Icons.Default.Edit,
                 borderStroke = imageBorderStroke) {
@@ -119,7 +122,7 @@ fun Profile(
                         }
                         .zIndex(2f))
 
-                    SecondaryText(
+                    /*SecondaryText(
                         modifier = Modifier
                             .constrainAs(registerDate) {
                                 top.linkTo(name.bottom, 2.dp)
@@ -128,9 +131,9 @@ fun Profile(
                             }
                             .zIndex(2f),
                         text = "${stringResource(id = R.string.register_date)}: " +
-                                (user?.registerDate?.toDateTextMonth() ?: "")
+                                (user.dateTimeRegistered.format())
                     )
-
+*/
                     FavoritePlaceView(
                         modifier = Modifier.constrainAs(favorite) {
                             top.linkTo(registerDate.bottom, 32.dp)
@@ -208,17 +211,13 @@ fun LottieMyStats(modifier: Modifier) {
 }
 
 @Composable
-fun UserText(user: User?, modifier: Modifier) {
-    user?.let {
-        Text(
-            modifier = modifier,
-            text = when (user.displayName.isEmpty()) {
-                true -> stringResource(R.string.anonymous)
-                false -> user.displayName
-            }, style = MaterialTheme.typography.h6,
-            textAlign = TextAlign.Center
-        )
-    }
+fun UserText(user: UserData, modifier: Modifier) {
+    Text(
+        modifier = modifier,
+        text = user.login,
+        style = MaterialTheme.typography.h6,
+        textAlign = TextAlign.Center
+    )
 }
 
 @Composable

@@ -12,7 +12,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.model.datastore.*
 import com.mobileprism.fishing.model.datastore.impl.NotesPreferencesImpl
-import com.mobileprism.fishing.model.datastore.impl.TokenStoreImpl
 import com.mobileprism.fishing.model.datastore.impl.UserDatastoreImpl
 import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.ui.home.SnackbarManager
@@ -53,7 +52,6 @@ val settingsModule = module {
     single { NotesPreferencesImpl(androidContext()) }
     single<NotesPreferences> { NotesPreferencesImpl(androidContext()) }
     single<ConnectionManager> { ConnectionManagerImpl(androidContext()) }
-    single<TokenStore> { TokenStoreImpl(androidContext()) }
 }
 
 val mainModule = module {
@@ -122,6 +120,7 @@ val mainModule = module {
         UserPlaceViewModel(
             markersRepo = get(),
             catchesRepo = get(),
+            initialMarker = it.get(),
             saveNewUserMarkerNoteUseCase = get(),
             deleteUserMarkerNoteUseCase = get()
         )

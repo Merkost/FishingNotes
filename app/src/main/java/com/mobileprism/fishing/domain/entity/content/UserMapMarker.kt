@@ -8,6 +8,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.model.datasource.room.Converters
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import java.lang.reflect.Type
 
@@ -30,6 +31,7 @@ data class UserMapMarker(
     var notes: List<Note> = listOf(),
 ) : Parcelable {
 
+    @IgnoredOnParcel
     val latLng: LatLng
         get() = LatLng(latitude, longitude)
 

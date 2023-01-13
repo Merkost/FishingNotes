@@ -1,7 +1,6 @@
 package com.mobileprism.fishing.model.datasource.room.dao
 
 import androidx.room.*
-import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import kotlinx.coroutines.flow.Flow
 

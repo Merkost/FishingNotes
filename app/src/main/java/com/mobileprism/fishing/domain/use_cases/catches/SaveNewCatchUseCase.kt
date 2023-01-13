@@ -41,8 +41,7 @@ class SaveNewCatchUseCase(
         val windUnits = weatherPreferences.getWindSpeedUnit.take(1).first()
 
         return NewCatchWeather(
-            weatherDescription = weatherState.primary.replaceFirstChar { it.uppercase() },
-            icon = weatherState.icon,
+            fishingWeather = weatherState.weather,
             temperatureInC = tempUnits.getDefaultTemperature(
                 weatherState.temperature.toStandardNumber().toDouble()
             ),
@@ -78,8 +77,7 @@ class SaveNewCatchUseCase(
         isPublic = false,
         downloadPhotoLinks = photos,
         placeTitle = placeAndTimeState.place?.title ?: "",
-        weatherPrimary = weather.weatherDescription,
-        weatherIcon = weather.icon,
+        weather = weather.fishingWeather,
         weatherTemperature = weather.temperatureInC.toFloat(),
         weatherWindSpeed = weather.windInMs.toFloat(),
         weatherWindDeg = weather.windDirInDeg.toInt(),

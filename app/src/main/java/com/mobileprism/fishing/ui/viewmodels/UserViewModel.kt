@@ -2,13 +2,14 @@ package com.mobileprism.fishing.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mobileprism.fishing.domain.entity.common.User
+import com.mobileprism.fishing.domain.entity.common.FishingFirebaseUser
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.repository.app.OfflineRepository
 import com.mobileprism.fishing.domain.use_cases.catches.GetUserCatchesUseCase
 import com.mobileprism.fishing.domain.use_cases.users.SignOutCurrentUserUserCase
 import com.mobileprism.fishing.domain.use_cases.users.SubscribeOnCurrentUserUseCase
+import com.mobileprism.fishing.model.entity.user.UserData
 import com.mobileprism.fishing.ui.home.profile.findBestCatch
 import com.mobileprism.fishing.ui.home.profile.findFavoritePlace
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,8 @@ class UserViewModel(
     private val getUserCatchUseCase: GetUserCatchesUseCase
 ) : ViewModel() {
 
-    private val _currentUser = MutableStateFlow<User>(User())
+    // TODO: current user listener
+    private val _currentUser = MutableStateFlow<UserData>(UserData())
     val currentUser = _currentUser.asStateFlow()
 
     private val _currentPlaces = MutableStateFlow<List<UserMapMarker>?>(null)
@@ -38,7 +40,6 @@ class UserViewModel(
     val favoritePlace = _favoritePlace.asStateFlow()
 
     init {
-        getCurrentUser()
         getUserCatches()
         getUserPlaces()
     }
@@ -46,12 +47,6 @@ class UserViewModel(
     /*private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
     val uiState: StateFlow<BaseViewState>
         get() = _uiState*/
-
-    private fun getCurrentUser() = viewModelScope.launch {
-        subscribeOnCurrentUser().collect {
-            it?.let { _currentUser.value = it }
-        }
-    }
 
     private fun getUserPlaces() = viewModelScope.launch {
         repository.getAllUserMarkersList().collect {

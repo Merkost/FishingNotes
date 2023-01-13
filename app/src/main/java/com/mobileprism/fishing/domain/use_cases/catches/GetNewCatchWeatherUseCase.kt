@@ -5,6 +5,7 @@ import com.mobileprism.fishing.domain.entity.weather.NewCatchWeatherData
 import com.mobileprism.fishing.domain.entity.weather.WeatherForecast
 import com.mobileprism.fishing.domain.repository.app.WeatherRepository
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
+import com.mobileprism.fishing.model.mappers.OpenWeatherMapper
 import com.mobileprism.fishing.utils.calcMoonPhase
 import com.mobileprism.fishing.utils.getClosestHourIndex
 import com.mobileprism.fishing.utils.isDateInList
@@ -69,8 +70,8 @@ class GetNewCatchWeatherUseCase(
         return NewCatchWeatherData(
             lat = location.latitude,
             lng = location.longitude,
-            primary = weatherForecast.hourly[hour].weather.first().description.replaceFirstChar { it.uppercase() },
-            icon = weatherForecast.hourly[hour].weather.first().icon,
+            //primary = weatherForecast.hourly[hour].weather.first().description.replaceFirstChar { it.uppercase() },
+            fishingWeather = OpenWeatherMapper.getFishingWeather(weatherForecast.hourly[hour].weather.first().icon),
             temperature = tempUnits.getTemperature(weatherForecast.hourly[hour].temperature),
             windSpeed = windUnits.getWindSpeed(weatherForecast.hourly[hour].windSpeed.toDouble()),
             windDeg = weatherForecast.hourly[hour].windDeg,

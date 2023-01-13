@@ -41,15 +41,16 @@ import com.google.accompanist.placeholder.shimmer
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.ui.home.settings.SettingsHeader
+import com.mobileprism.fishing.model.datastore.UserPreferences
+import com.mobileprism.fishing.ui.MainActivity
 import com.mobileprism.fishing.ui.home.SnackbarManager
-import com.mobileprism.fishing.ui.home.views.DefaultDialog
+import com.mobileprism.fishing.ui.home.settings.SettingsHeader
+import com.mobileprism.fishing.ui.custom.DefaultDialog
 import com.mobileprism.fishing.ui.theme.RedGoogleChrome
 import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
 import com.mobileprism.fishing.ui.theme.supportTextColor
 import com.mobileprism.fishing.ui.viewmodels.MapViewModel
-import com.mobileprism.fishing.model.datastore.UserPreferences
-import com.mobileprism.fishing.ui.MainActivity
+import com.mobileprism.fishing.utils.LocationPermissionDialog
 import com.mobileprism.fishing.utils.location.LocationManager
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -140,10 +141,8 @@ fun MyLocationButton(
     var locationButtonClicked by remember { mutableStateOf(false) }
 
     if (locationDialogIsShowing) {
-
         if (shouldShowPermissions) {
             LocationPermissionDialog(userPreferences = userPreferences) {
-                checkLocationPermissions(context)
                 locationDialogIsShowing = false
             }
         } else SnackbarManager.showMessage(R.string.location_permission_denied)
@@ -600,7 +599,6 @@ fun SetPlaceNameResultListener(geocoderResult: GeocoderResult, setPlaceName: (St
 }
 
 @ExperimentalComposeUiApi
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 @ExperimentalPermissionsApi
 fun GrantLocationPermissionsDialog(

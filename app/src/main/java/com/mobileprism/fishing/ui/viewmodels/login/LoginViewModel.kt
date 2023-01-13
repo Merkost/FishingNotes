@@ -6,7 +6,12 @@ import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.domain.entity.auth.EmailPassword
 import com.mobileprism.fishing.domain.entity.auth.UsernamePassword
 import com.mobileprism.fishing.domain.repository.AuthManager
+import com.mobileprism.fishing.domain.use_cases.validation.ValidationResult
+import com.mobileprism.fishing.domain.use_cases.validation.ValidationUseCase
 import com.mobileprism.fishing.model.auth.LoginState
+import com.mobileprism.fishing.model.entity.FishingCodes
+import com.mobileprism.fishing.model.entity.FishingResponse
+import com.mobileprism.fishing.ui.viewstates.FishingViewState
 import com.mobileprism.fishing.utils.LoginInputType
 import com.mobileprism.fishing.utils.checkLoginInputType
 import com.mobileprism.fishing.utils.network.ConnectionManager
@@ -20,86 +25,96 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel(
     private val authManager: AuthManager,
-    private val connectionManager: ConnectionManager
+    private val connectionManager: ConnectionManager,
+    private val validationUseCase: ValidationUseCase,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(LoginScreenViewState())
+    private val _uiState = MutableStateFlow<FishingViewState<FishingResponse>?>(null)
     val uiState = _uiState.asStateFlow()
 
-    private val _loginInfo = MutableStateFlow(LoginInfo())
-    val loginInfo = _loginInfo.asStateFlow()
+    private val _authInfo = MutableStateFlow(AuthInfo())
+    val loginInfo = _authInfo.asStateFlow()
 
     private var loginJob: Job? = null
 
     init {
-        subscribeOnLoginState()
+        subscribeOnAuthState()
     }
 
     fun cancelLogin() {
         loginJob?.cancel()
-        _uiState.update { _uiState.value.copy(isLoading = false) }
+        _uiState.update { null }
     }
 
     fun setLogin(login: String) {
-        _loginInfo.update { _loginInfo.value.copy(login = login) }
-        _uiState.update { _uiState.value.copy(isLoginError = false) }
+        _authInfo.update {
+            _authInfo.value.copy(
+                login = login,
+                loginError = ValidationResult(true)
+            )
+        }
     }
 
     fun setPassword(password: String) {
-        _loginInfo.update { _loginInfo.value.copy(password = password) }
-        _uiState.update { _uiState.value.copy(isPasswordError = false) }
-    }
-
-
-    fun validateLogin(skipEmpty: Boolean = false) {
-        if (skipEmpty && _loginInfo.value.login.isEmpty()) return
-        when (checkLoginInputType(_loginInfo.value.login)) {
-            is LoginInputType.IncorrectFormat -> {
-                _uiState.update { _uiState.value.copy(isLoginError = true) }
-            }
-            else -> {
-                _uiState.update { _uiState.value.copy(isLoginError = false) }
-            }
-        }
-    }
-
-    fun validatePassword() {
-        when {
-            // TODO:  
-            /*_loginInfo.value.password.toList().size < 8 -> {
-                _loginInfo.update { _loginInfo.value.copy(isPasswordError = true) }
-            }*/
-            else -> {
-                _uiState.update { _uiState.value.copy(isPasswordError = false) }
-            }
-        }
-    }
-
-
-    fun signInUser() {
-        _uiState.update {
-            _uiState.value.copy(
-                isLoading = true,
-                isError = false
+        _authInfo.update {
+            _authInfo.value.copy(
+                password = password,
+                passwordError = ValidationResult(true)
             )
         }
+    }
 
+    fun validateLogin(skipEmpty: Boolean = false) {
+        if (skipEmpty && _authInfo.value.login.isEmpty()) return
+
+        loginInfo.value.apply {
+            _authInfo.update {
+                it.copy(loginError = validationUseCase.validateLogin(login))
+            }
+        }
+    }
+
+    fun signInUser() {
         loginJob = viewModelScope.launch {
-            if (BuildConfig.DEBUG) delay(2000)
-            _loginInfo.value.let { loginInfo ->
+            loginInfo.value.apply {
 
-                when (checkLoginInputType(loginInfo.login)) {
-                    LoginInputType.Email -> {
-                        authManager.loginUser(EmailPassword(loginInfo.login, loginInfo.password))
-                    }
-                    LoginInputType.Login -> {
-                        authManager.loginUser(UsernamePassword(loginInfo.login, loginInfo.password))
-                    }
-                    LoginInputType.IncorrectFormat -> {
-                        _uiState.update {
-                            _uiState.value.copy(
-                                isLoading = false,
-                                isLoginError = true
+                val loginResult = validationUseCase.validateLogin(login)
+                val passwordResult = validationUseCase.validatePassword(password)
+
+                val hasError = listOf(
+                    loginResult,
+                    passwordResult,
+                ).any { !it.successful }
+
+
+                _authInfo.update {
+                    it.copy(
+                        loginError = loginResult,
+                        passwordError = passwordResult,
+                    )
+                }
+
+                if (hasError) return@launch
+
+                _uiState.update { FishingViewState.Loading }
+                if (BuildConfig.DEBUG) delay(2000)
+                _authInfo.value.let { loginInfo ->
+
+                    when (checkLoginInputType(loginInfo.login)) {
+                        LoginInputType.Email -> {
+                            authManager.loginUser(
+                                EmailPassword(
+                                    loginInfo.login,
+                                    loginInfo.password
+                                )
+                            )
+                        }
+                        LoginInputType.Username -> {
+                            authManager.loginUser(
+                                UsernamePassword(
+                                    loginInfo.login,
+                                    loginInfo.password
+                                )
                             )
                         }
                     }
@@ -108,36 +123,48 @@ class LoginViewModel(
         }
     }
 
-    private fun subscribeOnLoginState() {
+    private fun subscribeOnAuthState() {
         viewModelScope.launch {
             authManager.loginState.collectLatest { loginState ->
                 when (loginState) {
-                    is LoginState.LoggedIn -> {
-                        _uiState.update {
-                            _uiState.value.copy(
-                                isLoading = false,
-                                isLoggedIn = true,
-                                isError = false
-                            )
-                        }
-                    }
                     is LoginState.LoginFailure -> {
                         _uiState.update {
+                            FishingViewState.Error(
+                                FishingResponse(
+                                    fishingCode = FishingCodes.UNKNOWN_ERROR,
+                                    // TODO:  
+//                                    description = loginState. .message ?: ""
+                                )
+                            )
+                        }
+
+                        /*_uiState.update {
                             _uiState.value.copy(
                                 isLoading = false,
                                 isError = true,
                                 errorText = loginState.throwable.localizedMessage
                             )
-                        }
+                        }*/
+                    }
+                    is LoginState.LoggedIn -> {
+                        _uiState.update { FishingViewState.Success(FishingResponse(true)) }
+                        /*_uiState.update {
+                            _uiState.value.copy(
+                                isLoading = false,
+                                isLoggedIn = true,
+                                isError = false
+                            )
+                        }*/
                     }
                     LoginState.NotLoggedIn -> {
-                        _uiState.update {
+                        // TODO:
+                        /*_uiState.update {
                             _uiState.value.copy(
                                 isLoading = false,
                                 isLoggedIn = false,
                                 isError = false
                             )
-                        }
+                        }*/
                     }
                 }
             }
@@ -145,16 +172,15 @@ class LoginViewModel(
     }
 }
 
-data class LoginInfo(
+data class AuthInfo(
     val login: String = "",
+    val loginError: ValidationResult = ValidationResult(true),
     val password: String = "",
+    val passwordError: ValidationResult = ValidationResult(true),
 )
 
-data class LoginScreenViewState(
+data class AuthUiState(
     val isLoading: Boolean = false,
-    val isLoginError: Boolean = false,
-    val isPasswordError: Boolean = false,
     val isError: Boolean = false,
-    val errorText: String? = "",
     val isLoggedIn: Boolean = false
 )

@@ -76,6 +76,13 @@ android {
 
 dependencies {
 
+    //Moshi
+    implementation("com.squareup.moshi:moshi:1.11.0")
+    implementation("com.squareup.moshi:moshi-kotlin:1.11.0")
+    // Retrofit with Moshi Converter
+    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+    kapt("com.squareup.moshi:moshi-kotlin-codegen:1.11.0")
+
     //Settings
     implementation("com.github.alorma:compose-settings-ui:0.11.0")
 

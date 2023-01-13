@@ -1,8 +1,9 @@
 package com.mobileprism.fishing.domain.entity.raw
 
+import com.mobileprism.fishing.model.entity.FishingWeather
+
 data class NewCatchWeather(
-    var weatherDescription: String = "",
-    var icon: String = "",
+    var fishingWeather: FishingWeather = FishingWeather.SUN,
     var temperatureInC: Int = 0,
     var pressureInMmhg: Int = 0,
     var windInMs: Int = 0,

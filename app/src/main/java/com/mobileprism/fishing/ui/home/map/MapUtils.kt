@@ -233,7 +233,7 @@ fun BackPressHandler(
                     if (currentMillis - lastPressed < TIME_TO_EXIT) {
                         upPress()
                     } else {
-                        showToast(context.applicationContext, context.getString(R.string.app_exit_message))
+                        context.showToast(context.getString(R.string.app_exit_message))
                     }
                     lastPressed = currentMillis
                 }

@@ -1,11 +1,18 @@
 package com.mobileprism.fishing.utils
 
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.Uri
+import android.os.Build
+import android.provider.Settings
 import android.widget.Toast
 import com.google.android.gms.maps.model.LatLng
-import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.Hourly
+import com.mobileprism.fishing.model.entity.FishingResponse
 import com.mobileprism.fishing.ui.home.map.DEFAULT_ZOOM
 import com.mobileprism.fishing.utils.time.TimeConstants.MILLISECONDS_IN_DAY
 import com.mobileprism.fishing.utils.time.TimeConstants.MOON_PHASE_INCREMENT_IN_DAY
@@ -76,12 +83,25 @@ fun getClosestHourIndex(list: List<Hourly>, date: Long): Int {
     return 0
 }
 
-fun showToast(context: Context, text: String, length: Int = Toast.LENGTH_SHORT) {
-    Toast.makeText(context, text, length).show()
+fun Context.showError(string: String?) {
+    string?.let { showToast(string) }
 }
 
-fun showErrorToast(context: Context, text: String? = null) {
-    Toast.makeText(context, text ?: context.getString(R.string.error_occured), Toast.LENGTH_SHORT).show()
+
+
+fun Context.showError(fishingResponse: FishingResponse) {
+    when (Constants.isDebug) {
+        true -> {
+            showToast(fishingResponse.description.ifBlank { getString(fishingResponse.fishingCode.stringRes) })
+        }
+        else -> {
+            fishingResponse.fishingCode.stringRes.let { showToast(getString(it)) }
+        }
+    }
+}
+
+fun Context.showToast(text: String, length: Int = Toast.LENGTH_SHORT) {
+    Toast.makeText(applicationContext, text, length).show()
 }
 
 fun getCameraPosition(latLng: LatLng): Pair<LatLng, Float> {
@@ -103,6 +123,57 @@ fun isCoordinatesFar(first: LatLng, second: LatLng): Boolean {
                 + ((first.longitude - second.longitude).pow(2))
     ) > 0.1)
 }
+
+fun Context.isNetworkAvailable(): Boolean {
+    val manager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val capabilities = manager.getNetworkCapabilities(manager.activeNetwork)
+        if (capabilities != null) {
+            if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                return true
+            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                return true
+            } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
+                return true
+            }
+        }
+    } else {
+        try {
+            val activeNetworkInfo = manager.activeNetworkInfo
+            if (activeNetworkInfo != null && activeNetworkInfo.isConnected) {
+                return true
+            }
+        } catch (e: Exception) {
+            // e.showLog()
+        }
+    }
+    return false
+}
+
+fun Context.displayAppDetailsSettings() {
+    try {
+        /*
+            Settings
+                The Settings provider contains global system-level device preferences.
+        */
+        /*
+            String ACTION_APPLICATION_DETAILS_SETTINGS
+                Activity Action : Show screen of details about a particular application.
+                In some cases, a matching Activity may not exist,
+                so ensure you safeguard against this.
+                Constant Value : "android.settings.APPLICATION_DETAILS_SETTINGS"
+        */
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        intent.data = Uri.parse("package:$packageName");
+        startActivity(intent);
+    } catch (e: ActivityNotFoundException) {
+        e.printStackTrace();
+        val alternateIntent = Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS)
+        startActivity(alternateIntent)
+    }
+}
+
+
 
 
 

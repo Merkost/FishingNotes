@@ -28,21 +28,14 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
-import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
-import com.google.accompanist.flowlayout.FlowMainAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
-import com.mobileprism.fishing.ui.Arguments
-import com.mobileprism.fishing.ui.MainDestinations
+import com.mobileprism.fishing.ui.custom.DefaultDialog
+import com.mobileprism.fishing.ui.custom.FishingOutlinedTextField
 import com.mobileprism.fishing.ui.home.SnackbarManager
-import com.mobileprism.fishing.ui.home.new_catch.weather.SelectedWeather
 import com.mobileprism.fishing.ui.home.views.DatePickerDialog
-import com.mobileprism.fishing.ui.home.views.DefaultDialog
 import com.mobileprism.fishing.ui.home.views.TimePickerDialog
-import com.mobileprism.fishing.ui.home.views.WindIconItem
 import com.mobileprism.fishing.ui.home.weather.navigateToAddNewPlace
-import com.mobileprism.fishing.utils.Constants.WIND_ROTATION
 import com.mobileprism.fishing.utils.roundTo
 import com.mobileprism.fishing.utils.time.TimeConstants
 import com.mobileprism.fishing.utils.time.toDate
@@ -61,10 +54,10 @@ fun FishSpecies(
     Column(
         modifier = modifier
     ) {
-        OutlinedTextField(
+        FishingOutlinedTextField(
             value = name,
             onValueChange = onNameChange,
-            label = { Text(stringResource(R.string.fish_species)) },
+            placeholder = stringResource(R.string.fish_species),
             modifier = Modifier.fillMaxWidth(),
             isError = name.isBlank(),
             singleLine = true,
@@ -81,172 +74,7 @@ fun FishSpecies(
     }
 }
 
-@ExperimentalComposeUiApi
-@Composable
-fun PickWeatherIconDialog(onWeatherSelected: (SelectedWeather) -> Unit, onDismiss: () -> Unit) {
-    DefaultDialog(
-        stringResource(R.string.choose_weather),
-        content = {
-            WeatherTypesSheet() { onWeatherSelected(it) }
-        },
-        onDismiss = onDismiss
-    )
-}
 
-@Composable
-fun FishAmountAndWeightView(
-    modifier: Modifier = Modifier,
-    amountState: MutableState<String>,
-    weightState: MutableState<String>
-) {
-    Row(modifier = modifier) {
-        Column(Modifier.weight(1F)) {
-            OutlinedTextField(
-                value = amountState.value,
-                onValueChange = {
-                    if (it.isEmpty()) amountState.value = it
-                    else {
-                        amountState.value = when (it.toIntOrNull()) {
-                            null -> amountState.value //old value
-                            else -> it   //new value
-                        }
-                    }
-                },
-                isError = amountState.value.isEmpty(),
-                label = { Text(text = stringResource(R.string.amount)) },
-                trailingIcon = { Text(stringResource(R.string.pc)) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Next
-                )
-            )
-            Spacer(modifier = Modifier.size(6.dp))
-            Row(Modifier.fillMaxWidth()) {
-                OutlinedButton(
-                    onClick = {
-                        if (amountState.value.toInt() >= 1 && amountState.value.isNotBlank())
-                            amountState.value = ((amountState.value.toInt() - 1).toString())
-                    },
-                    Modifier
-                        .weight(1F)
-                        .align(Alignment.CenterVertically)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_minus),
-                        tint = MaterialTheme.colors.primary,
-                        contentDescription = ""
-                    )
-                }
-                Spacer(modifier = Modifier.size(6.dp))
-                OutlinedButton(
-                    onClick = {
-                        if (amountState.value.isEmpty()) amountState.value = 1.toString()
-                        else amountState.value =
-                            ((amountState.value.toInt() + 1).toString())
-                    },
-                    Modifier
-                        .weight(1F)
-                        .align(Alignment.CenterVertically)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_plus),
-                        tint = MaterialTheme.colors.primary,
-                        contentDescription = ""
-                    )
-                }
-            }
-
-        }
-        Spacer(modifier = Modifier.size(6.dp))
-        Column(Modifier.weight(1F)) {
-            OutlinedTextField(
-                value = weightState.value,
-                onValueChange = {
-                    if (it.isEmpty()) weightState.value = it
-                    else {
-                        weightState.value = when (it.toDoubleOrNull()) {
-                            null -> weightState.value //old value
-                            else -> it   //new value
-                        }
-                    }
-                },
-                label = { Text(text = stringResource(R.string.weight)) },
-                trailingIcon = {
-                    Text(stringResource(R.string.kg))
-                },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Next
-                )
-            )
-            Spacer(modifier = Modifier.size(6.dp))
-            Row(Modifier.fillMaxWidth()) {
-                OutlinedButton(
-                    onClick = {
-                        if (weightState.value.toDouble() >= 0.1 && weightState.value.isNotBlank())
-                            weightState.value =
-                                ((weightState.value.toDouble() - 0.1).roundTo(1).toString())
-                    },
-                    Modifier
-                        .weight(1F)
-                        .align(Alignment.CenterVertically)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_minus),
-                        tint = MaterialTheme.colors.primary,
-                        contentDescription = ""
-                    )
-                }
-                Spacer(modifier = Modifier.size(6.dp))
-                OutlinedButton(
-                    onClick = {
-                        if (weightState.value.isEmpty()) weightState.value =
-                            0.1f.roundTo(1).toString()
-                        else weightState.value =
-                            ((weightState.value.toDouble() + 0.1).roundTo(1).toString())
-                    },
-                    Modifier
-                        .weight(1F)
-                        .align(Alignment.CenterVertically)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_plus),
-                        tint = MaterialTheme.colors.primary,
-                        contentDescription = ""
-                    )
-                }
-            }
-        }
-    }
-}
-
-@ExperimentalComposeUiApi
-@Composable
-fun PickWindDirDialog(onDirectionSelected: (Float) -> Unit, onDismiss: () -> Unit) {
-    DefaultDialog(
-        primaryText = stringResource(R.string.choose_wind_direction),
-        content = {
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                mainAxisAlignment = FlowMainAxisAlignment.Center,
-                crossAxisAlignment = FlowCrossAxisAlignment.Center,
-            ) {
-                (0..7).forEach {
-                    WindIconItem(
-                        rotation = it * WIND_ROTATION,
-                        onIconSelected = { onDirectionSelected(it * WIND_ROTATION) }
-                    )
-                }
-            }
-        }, onDismiss = onDismiss
-    )
-}
-
-@ExperimentalComposeUiApi
 @Composable
 fun NewCatchNoPlaceDialog(
     navController: NavController
@@ -283,7 +111,7 @@ fun LottieNoPlaces(modifier: Modifier) {
     )
 }
 
-@ExperimentalComposeUiApi
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun NewCatchPlaceSelectView(
     modifier: Modifier = Modifier,
@@ -378,8 +206,7 @@ fun NewCatchPlaceSelectView(
                     .fillMaxWidth()
                     .onFocusChanged {
                         isDropMenuOpen = it.isFocused
-                    }
-,
+                    },
                 label = { Text(text = stringResource(R.string.place)) },
                 trailingIcon = {
                     if (textFieldValue.isNotEmpty()) {

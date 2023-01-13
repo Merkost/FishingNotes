@@ -9,7 +9,6 @@ import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
 typealias NewCatchScreenItem = @Composable (viewModel: NewCatchMasterViewModel, navController: NavController) -> Unit
 
 sealed class NewCatchPage(var screen: NewCatchScreenItem) {
-    @ExperimentalComposeUiApi
     class NewCatchPlacePage() : NewCatchPage(screen = { viewModel, navController ->
         NewCatchPlace(viewModel, navController)
     })
@@ -22,13 +21,10 @@ sealed class NewCatchPage(var screen: NewCatchScreenItem) {
         NewCatchNote(viewModel, navController)
     })
 
-    @ExperimentalComposeUiApi
     class NewCatchWeatherPage() : NewCatchPage(screen = { viewModel, navController ->
         NewCatchWeather(viewModel, navController)
     })
 
-    @ExperimentalAnimationApi
-    @ExperimentalComposeUiApi
     class NewCatchPhotosPage() : NewCatchPage(screen = { viewModel, navController ->
         NewCatchPhotos(viewModel, navController)
     })

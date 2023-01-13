@@ -40,9 +40,9 @@ import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.Daily
 import com.mobileprism.fishing.domain.entity.weather.Hourly
 import com.mobileprism.fishing.domain.entity.weather.WeatherForecast
+import com.mobileprism.fishing.model.mappers.OpenWeatherMapper
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
-import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.map.LocationState
@@ -340,7 +340,7 @@ fun HourlyWeatherItem(
         ) {
             Image(
                 modifier = childModifier.size(32.dp),
-                painter = painterResource(id = getWeatherIconByName(forecast.weather.first().icon)),
+                painter = painterResource(id = OpenWeatherMapper.getFishingWeather(forecast.weather.first().icon).iconRes),
                 contentDescription = "",
                 //colorFilter = ColorFilter.tint(color = color)
             )
@@ -439,7 +439,7 @@ fun DailyWeatherItem(
                     absoluteRight.linkTo(guideline, 48.dp)
                 },
             painter = painterResource(
-                id = getWeatherIconByName(forecast.weather.first().icon)
+                id = OpenWeatherMapper.getFishingWeather(forecast.weather.first().icon).iconRes,
             ),
             contentDescription = "",
         )

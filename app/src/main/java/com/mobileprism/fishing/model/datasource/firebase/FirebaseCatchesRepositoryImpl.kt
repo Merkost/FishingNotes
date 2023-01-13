@@ -31,7 +31,6 @@ class FirebaseCatchesRepositoryImpl(
     private val connectionManager: ConnectionManager
 ) : CatchesRepository {
 
-
     override fun getAllUserCatchesState() = channelFlow<ContentStateOld<UserCatch>> {
         val listeners = mutableListOf<Task<QuerySnapshot>>()
         listeners.add(
@@ -97,12 +96,6 @@ class FirebaseCatchesRepositoryImpl(
             dbCollections.getUserMapMarkersCollection().get()
                 .addOnSuccessListener(getUserCatchesSuccessListener(this))
         )
-        /* TODO: Get user's public markers
-        listeners.add(
-            getMapMarkersCollection()
-                .whereEqualTo("userId", getCurrentUserId())
-                .addOnCompleteListener(getUserCatchesSuccessListener(this))
-        )*/
         awaitClose {
             //listeners.forEach { it.remove() }
         }

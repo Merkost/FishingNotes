@@ -31,9 +31,10 @@ import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.mappers.getMoonIconByPhase
-import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
+import com.mobileprism.fishing.ui.custom.DefaultDialog
+import com.mobileprism.fishing.ui.custom.ModalLoadingDialog
 import com.mobileprism.fishing.ui.home.notes.ItemUserPlace
 import com.mobileprism.fishing.ui.home.place.LottieWarning
 import com.mobileprism.fishing.ui.home.views.*
@@ -50,10 +51,7 @@ import org.koin.androidx.compose.get
 import org.koin.androidx.compose.viewModel
 import org.koin.core.parameter.parametersOf
 
-@ExperimentalPermissionsApi
-@ExperimentalComposeUiApi
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun UserCatchScreen(navController: NavController, catch: UserCatch) {
     val coroutineScope = rememberCoroutineScope()
@@ -186,9 +184,6 @@ fun DeleteCatchDialog(
     )
 }
 
-@ExperimentalMaterialApi
-@OptIn(ExperimentalComposeUiApi::class)
-@ExperimentalAnimationApi
 @Composable
 fun CatchContent(
     navController: NavController,
@@ -259,8 +254,6 @@ fun CatchContent(
 
 }
 
-@ExperimentalComposeUiApi
-@ExperimentalAnimationApi
 @Composable
 fun CatchTitleView(
     modifier: Modifier = Modifier,
@@ -326,7 +319,6 @@ fun CatchPhotosView(
 }
 
 
-@ExperimentalComposeUiApi
 @Composable
 fun WayOfFishingView(
     modifier: Modifier = Modifier,
@@ -456,7 +448,7 @@ fun CatchWeatherView(
                     modifier = Modifier
                         .size(48.dp)
                         .padding(horizontal = 2.dp),
-                    painter = painterResource(id = getWeatherIconByName(catch.weatherIcon)),
+                    painter = painterResource(id = catch.weather.iconRes),
                     contentDescription = stringResource(id = R.string.weather)
                 )
 
@@ -473,7 +465,7 @@ fun CatchWeatherView(
                     absoluteLeft.linkTo(primary.absoluteLeft)
                     absoluteRight.linkTo((primary.absoluteRight))
                 },
-                text = catch.weatherPrimary.replaceFirstChar { it.uppercase() }
+                text = stringResource(id = catch.weather.stringRes)
             )
 
             SecondaryText(

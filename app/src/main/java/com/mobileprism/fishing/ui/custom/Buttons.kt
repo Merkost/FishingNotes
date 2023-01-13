@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.custom
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -21,10 +22,13 @@ fun CircleButton(
     colors: ButtonColors = ButtonDefaults.buttonColors(),
     enabled: Boolean = true,
     function: @Composable () -> Unit
-) {
-    OutlinedButton(enabled = enabled, onClick = onClick, modifier = modifier, shape = CircleShape, colors = colors) { function() }
-}
-
+) = OutlinedButton(
+    enabled = enabled,
+    onClick = onClick,
+    modifier = modifier,
+    shape = CircleShape,
+    colors = colors
+) { function() }
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -76,3 +80,19 @@ fun LoginWithGoogleButton(
         }
     }
 }
+
+@Composable
+fun FishingTextButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    border: BorderStroke? = null,
+    content: @Composable RowScope.() -> Unit
+) = TextButton(
+    onClick = onClick,
+    modifier = modifier,
+    enabled = enabled,
+    shape = MaterialTheme.shapes.large,
+    border = border,
+    content = content
+)

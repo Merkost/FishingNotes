@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.room.*
 import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.model.datasource.room.Converters
+import com.mobileprism.fishing.model.entity.FishingWeather
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -35,8 +36,7 @@ data class UserCatch(
     var isPublic: Boolean = false,
     @Ignore
     var downloadPhotoLinks: List<String> = listOf(),
-    var weatherPrimary: String = "",
-    var weatherIcon: String = "01",
+    var weather: FishingWeather = FishingWeather.SUN,
     var weatherTemperature: Float = 0.0f,
     var weatherWindSpeed: Float = 0.0f,
     var weatherWindDeg: Int = 0,

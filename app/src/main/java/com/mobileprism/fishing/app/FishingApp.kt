@@ -28,11 +28,9 @@ class FishingApp : Application() {
                 appModule,
                 mainModule,
                 networkModule,
-
+                fishingNetworkModule,
                 fishingApiModule,
                 if (Constants.FAKE_API) fishingFakeRepositoryModule else fishingRepository,
-                fishingNetworkModule,
-
                 loginModule,
                 settingsModule,
                 useCasesModule,

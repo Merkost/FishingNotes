@@ -1,60 +1,45 @@
 package com.mobileprism.fishing.ui
 
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SnackbarDuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.os.bundleOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.lifecycleScope
+import androidx.core.view.WindowCompat
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.MobileAds.setAppMuted
 import com.google.android.gms.ads.RequestConfiguration
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.ktx.Firebase
-import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.model.auth.AuthState
 import com.mobileprism.fishing.ui.home.SnackbarAction
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.login.StartNavigation
 import com.mobileprism.fishing.ui.theme.FishingNotesTheme
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewmodels.MainViewModel
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.Logger
-import com.mobileprism.fishing.utils.showToast
+import com.mobileprism.fishing.utils.checkNotificationPolicyAccess
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.SharedFlow
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.getViewModel
@@ -80,14 +65,18 @@ class MainActivity : ComponentActivity() {
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // This app draws behind the system bars, so we want to handle fitting system windows
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         val viewModel: MainViewModel = getViewModel()
 
-        val screenState = viewModel.mutableStateFlow
+        val authState = viewModel.authState
         val appTheme = viewModel.appTheme
 
         installSplashScreen().apply {
             setKeepOnScreenCondition {
-                screenState.value is BaseViewState.Loading && appTheme.value == null
+                authState.value == null && appTheme.value == null
             }
             setOnExitAnimationListener { splashScreenViewProvider ->
                 // Get icon instance and start a fade out animation
@@ -111,7 +100,7 @@ class MainActivity : ComponentActivity() {
                             setContent {
                                 Distribution(
                                     appTheme = appTheme.value,
-                                    viewModel.isUserLoggedState.collectAsState()
+                                    authState.collectAsState().value
                                 )
                             }
                         }
@@ -124,7 +113,7 @@ class MainActivity : ComponentActivity() {
             setContent {
                 Distribution(
                     appTheme = appTheme.value,
-                    viewModel.isUserLoggedState.collectAsState()
+                    authState.collectAsState().value
                 )
             }
         }
@@ -208,6 +197,7 @@ class MainActivity : ComponentActivity() {
         )
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == UPDATE_REQUEST_CODE) {
@@ -226,11 +216,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // This app draws behind the system bars, so we want to handle fitting system windows
-    // WindowCompat.setDecorFitsSystemWindows(window, false)
-
-    //light тема
-    //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
 
     @OptIn(ExperimentalComposeUiApi::class)
@@ -240,18 +225,21 @@ class MainActivity : ComponentActivity() {
     @ExperimentalAnimationApi
     @ExperimentalPermissionsApi
     @Composable
-    fun Distribution(appTheme: AppThemeValues?, isUserLogged: State<Boolean>) {
-        Crossfade(targetState = isUserLogged.value) { state ->
-            when (state) {
-                false -> {
-                    FishingNotesTheme(appTheme, isLoginScreen = true) {
-                        StartNavigation()
-                    }
+    fun Distribution(appTheme: AppThemeValues?, authState: AuthState?) {
+
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        when (authState) {
+            is AuthState.LoggedIn -> {
+                FishingNotesTheme(appTheme) {
+                    checkNotificationPolicyAccess(notificationManager)
+                    FishingNotesApp()
                 }
-                true -> {
-                    FishingNotesTheme(appTheme) {
-                        FishingNotesApp()
-                    }
+            }
+            else -> {
+                FishingNotesTheme(appTheme) {
+                    FishingNotesApp(startDestination = MainDestinations.AUTH_ROUTE)
                 }
             }
         }

@@ -1,13 +1,12 @@
-package com.mobileprism.fishing.ui.home.views
+package com.mobileprism.fishing.ui.custom
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -16,7 +15,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -27,14 +25,17 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.ui.custom.CircleButton
+import com.mobileprism.fishing.ui.home.views.DefaultButton
+import com.mobileprism.fishing.ui.home.views.DefaultCard
+import com.mobileprism.fishing.ui.home.views.FishingButtonFilled
+import com.mobileprism.fishing.ui.home.views.PrimaryText
+import com.mobileprism.fishing.ui.theme.customColors
 
-@ExperimentalComposeUiApi
 @Composable
 fun DefaultDialog(
     primaryText: String? = null,
     secondaryText: String? = null,
-    textAlign: TextAlign = TextAlign.Start,
+    primaryTextWeight: FontWeight = FontWeight.SemiBold,
     neutralButtonText: String = "",
     onNeutralClick: (() -> Unit)? = null,
     negativeButtonText: String = stringResource(id = R.string.no),
@@ -45,11 +46,11 @@ fun DefaultDialog(
     content: @Composable() (() -> Unit)? = null
 ) {
 
-    val textBias = when (textAlign) {
+    /*val textBias = when (textAlign) {
         TextAlign.Start -> 0f
         TextAlign.End -> 1f
         else -> 0.5f
-    }
+    }*/
 
     Dialog(onDismissRequest = onDismiss) {
         DefaultCard(
@@ -68,40 +69,50 @@ fun DefaultDialog(
                 val (title, subtitle, mainContent, neutralButton, negativeButton, positiveButton) = createRefs()
 
                 primaryText?.let {
-                    PrimaryText(
-                        modifier = Modifier.constrainAs(title) {
-                            top.linkTo(parent.top, 16.dp)
-                            linkTo(
-                                parent.absoluteLeft,
-                                parent.absoluteRight,
-                                16.dp,
-                                16.dp,
-                                bias = textBias
+                    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.high) {
+                        val textStyle = MaterialTheme.typography.subtitle1
+                        ProvideTextStyle(textStyle) {
+                            Text(
+                                modifier = Modifier.constrainAs(title) {
+                                    top.linkTo(parent.top, 16.dp)
+                                    linkTo(
+                                        parent.absoluteLeft,
+                                        parent.absoluteRight,
+                                        16.dp,
+                                        16.dp,
+                                        bias = 0f
+                                    )
+                                    width = Dimension.fillToConstraints
+                                },
+                                text = primaryText,
+                                fontWeight = primaryTextWeight,
                             )
-                            width = Dimension.fillToConstraints
-                        },
-                        textAlign = textAlign,
-                        fontWeight = FontWeight.SemiBold,
-                        text = primaryText,
-                    )
+                        }
+                    }
                 }
 
                 if (secondaryText != null) {
-                    PrimaryTextSmall(
-                        modifier = Modifier.constrainAs(subtitle) {
-                            top.linkTo(title.bottom, 2.dp)
-                            linkTo(
-                                start = parent.absoluteLeft,
-                                end = parent.absoluteRight,
-                                16.dp,
-                                16.dp,
-                                bias = 0.5f
+                    CompositionLocalProvider(
+                        LocalContentAlpha provides ContentAlpha.medium
+                    ) {
+                        val textStyle = MaterialTheme.typography.body2
+                        ProvideTextStyle(textStyle) {
+                            Text(
+                                modifier = Modifier.constrainAs(subtitle) {
+                                    top.linkTo(title.bottom, 8.dp)
+                                    linkTo(
+                                        start = parent.absoluteLeft,
+                                        end = parent.absoluteRight,
+                                        16.dp,
+                                        16.dp,
+                                        bias = 0f
+                                    )
+                                    width = Dimension.fillToConstraints
+                                },
+                                text = secondaryText,
                             )
-                            width = Dimension.fillToConstraints
-                        },
-                        textAlign = textAlign,
-                        text = secondaryText,
-                    )
+                        }
+                    }
                 } else {
                     Spacer(modifier = Modifier
                         .size(0.dp)
@@ -127,22 +138,29 @@ fun DefaultDialog(
                 }
 
                 onNeutralClick?.let {
-                    DefaultButtonSecondaryLight(
-                        modifier = Modifier.constrainAs(neutralButton) {
-                            top.linkTo(mainContent.bottom, 16.dp)
-                            absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-                        },
-                        text = neutralButtonText,
-                        onClick = onNeutralClick,
-                    )
+                    // TODO: Разобраться с цветом
+                    val textStyle = MaterialTheme.typography.body2.copy(color = MaterialTheme.customColors.secondaryTextColor)
+
+                    CompositionLocalProvider(
+                        LocalContentAlpha provides ContentAlpha.disabled
+                    ) {
+                            FishingTextButton(
+                                modifier = Modifier.constrainAs(neutralButton) {
+                                    top.linkTo(mainContent.bottom, 16.dp)
+                                    absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
+                                },
+                                content = { Text(neutralButtonText) },
+                                onClick = onNeutralClick,
+                            )
+                    }
                 }
 
                 onPositiveClick?.let {
-                    DefaultButtonFilled(
+                    FishingButtonFilled(
                         modifier = Modifier.constrainAs(positiveButton) {
                             top.linkTo(mainContent.bottom, 16.dp)
-                            bottom.linkTo(parent.bottom)
-                            absoluteRight.linkTo(parent.absoluteRight, 8.dp)
+                            bottom.linkTo(parent.bottom, 4.dp)
+                            absoluteRight.linkTo(parent.absoluteRight, 4.dp)
                         },
                         text = positiveButtonText,
                         onClick = onPositiveClick,
@@ -154,7 +172,7 @@ fun DefaultDialog(
                             .constrainAs(positiveButton) {
                                 top.linkTo(mainContent.bottom, 16.dp)
                                 bottom.linkTo(parent.bottom)
-                                absoluteRight.linkTo(parent.absoluteRight, 8.dp)
+                                absoluteRight.linkTo(parent.absoluteRight, 4.dp)
                             },
                     )
                 }
@@ -163,7 +181,7 @@ fun DefaultDialog(
                     DefaultButton(
                         modifier = Modifier.constrainAs(negativeButton) {
                             top.linkTo(mainContent.bottom, 16.dp)
-                            absoluteRight.linkTo(positiveButton.absoluteLeft, 8.dp)
+                            absoluteRight.linkTo(positiveButton.absoluteLeft, 4.dp)
                         },
                         text = negativeButtonText,
                         onClick = onNegativeClick,
@@ -271,8 +289,10 @@ fun ModalLoading() {
             dismissOnClickOutside = false,
         ),
         content = {
-            Box(modifier = Modifier
-                .clip(RoundedCornerShape(14.dp)).background(MaterialTheme.colors.surface)
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colors.surface)
             ) {
                 CircularProgressIndicator(modifier = Modifier.padding(16.dp), strokeWidth = 4.dp)
             }

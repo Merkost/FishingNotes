@@ -8,9 +8,9 @@ import com.mobileprism.fishing.domain.entity.weather.WeatherForecast
 import com.mobileprism.fishing.domain.repository.app.MarkersRepository
 import com.mobileprism.fishing.domain.repository.app.WeatherRepository
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.viewstates.FishingViewState
 import com.mobileprism.fishing.utils.isLocationsTooFar
 import com.mobileprism.fishing.utils.location.LocationManager
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -24,7 +24,7 @@ class WeatherViewModel(
     val markersList = mutableStateListOf<UserMapMarker>()
 
     private val _weatherState =
-        MutableStateFlow<BaseViewState<WeatherForecast>>(BaseViewState.Loading())
+        MutableStateFlow<BaseViewState<WeatherForecast>>(BaseViewState.Loading)
     val weatherState = _weatherState.asStateFlow()
 
     private val _selectedPlace = MutableStateFlow<UserMapMarker?>(null)
@@ -46,7 +46,7 @@ class WeatherViewModel(
     }
 
     private fun getWeather(latitude: Double, longitude: Double) {
-        _weatherState.value = BaseViewState.Loading()
+        _weatherState.value = BaseViewState.Loading
         viewModelScope.launch {
             weatherRepository.getWeather(latitude, longitude).collect { result ->
                 result.fold(

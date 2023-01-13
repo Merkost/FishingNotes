@@ -33,8 +33,8 @@ import com.mobileprism.fishing.ui.home.views.PrimaryText
 import com.mobileprism.fishing.ui.home.views.SubtitleText
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.ui.navigate
-import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.ui.viewmodels.MapViewModel
+import com.mobileprism.fishing.utils.Constants
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
@@ -79,6 +79,8 @@ fun MarkerInfoDialog(
     val paddingDp = 8.dp
     val cornersDp = 16.dp
     val elevationDp = 6.dp
+
+    Spacer(modifier = Modifier.size(1.dp))
 
     receivedMarker?.let { marker ->
         Card(

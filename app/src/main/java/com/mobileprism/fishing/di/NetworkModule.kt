@@ -13,6 +13,7 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 import java.io.IOException
 import java.security.*
 import java.security.cert.Certificate
@@ -55,7 +56,7 @@ fun createFishingRetrofit(okHttpClient: OkHttpClient): Retrofit {
         .baseUrl(Constants.API_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .addCallAdapterFactory(CoroutineCallAdapterFactory())
-        /*.addConverterFactory(MoshiConverterFactory.create())*/
+        .addConverterFactory(MoshiConverterFactory.create())
         .client(okHttpClient)
         .build()
 }
@@ -92,12 +93,12 @@ fun createFishingOkHttpClient(
 
     return OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
-        .callTimeout(100, TimeUnit.SECONDS)
-        .connectTimeout(70, TimeUnit.SECONDS)
-        .writeTimeout(100, TimeUnit.SECONDS)
-        .readTimeout(70, TimeUnit.SECONDS)
+        .callTimeout(10, TimeUnit.SECONDS)
+        .connectTimeout(7, TimeUnit.SECONDS)
+        .writeTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(7, TimeUnit.SECONDS)
         .hostnameVerifier { hostname, _ ->
-            if (Constants.API_URL.contains(hostname)) true else false
+            Constants.API_URL.contains(hostname)
         }
         .sslSocketFactory(
             sslSocketFactory = getSSLConfig(context).socketFactory,

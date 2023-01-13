@@ -6,15 +6,16 @@ import androidx.compose.ui.unit.dp
 
 object Constants {
 
+    const val isDebug: Boolean = true
     const val API_URL = "https://fishingnotes.adedf20efbbfa8aea975805b.keenetic.io:8443/"
     //const val API_URL = "http://fishingnotes.adedf20efbbfa8aea975805b.keenetic.io:8080/"
 
-    const val FAKE_API: Boolean = true
+    const val FAKE_API: Boolean = false
 
     const val DEFAULT_DELAY: Long = 2000L
 
     const val TIME_TO_EXIT = 2000L
-    val defaultFabBottomPadding: Dp = 128.dp
+    val defaultFabBottomPadding: Dp = 32.dp
 
     val bottomBannerPadding: Dp = 80.dp
 
