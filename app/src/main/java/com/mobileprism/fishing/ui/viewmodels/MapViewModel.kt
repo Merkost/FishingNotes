@@ -275,11 +275,12 @@ class MapViewModel(
         }
     }
 
-    fun onMarkerClicked(marker: UserMapMarker?) {
-        marker?.let {
+    fun onMarkerClicked(marker: UserMapMarker): Boolean {
+        return marker.let {
             setNewCameraLocation(it.latLng, DEFAULT_ZOOM)
             _currentMarker.value = it
             _mapUiState.value = MapUiState.BottomSheetInfoMode
+            true
         }
     }
 

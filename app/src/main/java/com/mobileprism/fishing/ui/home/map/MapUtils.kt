@@ -60,6 +60,12 @@ data class PlaceTileState(
     val pointerState: PointerState = PointerState.ShowMarker,
 )
 
+fun getHueFromColor(color: Color) = getHue(
+    red = color.red,
+    green = color.green,
+    blue = color.blue
+)
+
 fun getHue(red: Float, green: Float, blue: Float): Float {
     val min = min(min(red, green), blue)
     val max = max(max(red, green), blue)
@@ -233,7 +239,9 @@ fun BackPressHandler(
                     if (currentMillis - lastPressed < TIME_TO_EXIT) {
                         upPress()
                     } else {
-                        context.showToast(context.getString(R.string.app_exit_message))
+                        context.applicationContext.showToast(
+                            context.getString(R.string.app_exit_message)
+                        )
                     }
                     lastPressed = currentMillis
                 }

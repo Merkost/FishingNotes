@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.ui.home.map
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
@@ -27,13 +28,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.model.*
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
@@ -51,6 +52,8 @@ import com.mobileprism.fishing.ui.viewmodels.MapViewModel
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
+import com.mobileprism.fishing.utils.displayAppDetailsSettings
+import com.mobileprism.fishing.utils.showToast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
@@ -91,9 +94,8 @@ fun MapScreen(
     var newPlaceDialog by remember { mutableStateOf(false) }
     var mapLayersSelection by rememberSaveable { mutableStateOf(false) }
 
-    val cameraPositionState: CameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(bounds.center, 13f)
-    }
+    val cameraPositionState = rememberCameraPositionState()
+
 
     BackPressHandler(
         mapUiState = mapUiState,
@@ -145,7 +147,10 @@ fun MapScreen(
                 val verticalMyLocationButtonGl = createGuidelineFromAbsoluteRight(56.dp)
                 val centerHorizontal = createGuidelineFromBottom(0.5f)
 
-                MapLayout(modifier = Modifier.constrainAs(mapLayout) { centerTo(parent) })
+                MapLayout(
+                    modifier = Modifier.constrainAs(mapLayout) { centerTo(parent) },
+                    cameraPositionState = cameraPositionState
+                )
 
                 MapLayersButton(
                     modifier = Modifier.constrainAs(mapLayersButton) {
@@ -276,6 +281,7 @@ fun onMapSettingsClicked(
     }
 }
 
+@OptIn(MapsComposeExperimentalApi::class)
 @SuppressLint("PotentialBehaviorOverride", "MissingPermission")
 @ExperimentalAnimationApi
 @ExperimentalCoroutinesApi
@@ -283,8 +289,11 @@ fun onMapSettingsClicked(
 @Composable
 fun MapLayout(
     modifier: Modifier = Modifier,
+    cameraPositionState: CameraPositionState
 ) {
     val viewModel: MapViewModel = getViewModel()
+    val firstCameraPosition by viewModel.firstCameraPosition.collectAsState()
+    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     val map = rememberMapViewWithLifecycle()
     val userPreferences: UserPreferences = get()
     val coroutineScope = rememberCoroutineScope()
@@ -300,9 +309,11 @@ fun MapLayout(
         else markers.filter { it.visible })
     }
 
+
     val mapUiSettings by remember {
         mutableStateOf(
             MapUiSettings(
+                compassEnabled = false,
                 zoomControlsEnabled = false,
                 myLocationButtonEnabled = false,
                 mapToolbarEnabled = false
@@ -313,26 +324,50 @@ fun MapLayout(
         mutableStateOf(
             MapProperties(
                 isMyLocationEnabled = permissionsState.allPermissionsGranted,
-                /*maxZoomPreference = 10f,
-                minZoomPreference = 5f,*/
-                /*latLngBoundsForCameraTarget = LatLngBounds(
-                    LatLng(42.737179, 132.490435),
-                    LatLng(43.388666, 131.629264)
-                )*/
+                mapStyleOptions = context.getMapStyleByTheme(darkTheme),
+                mapType = MapType.values()[mapType]
             )
         )
     }
 
-    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     var isMapVisible by remember { mutableStateOf(false) }
 
     AnimatedVisibility(
         visible = isMapVisible,
         enter = fadeIn(), exit = fadeOut()
     ) {
+        MapEffect(darkTheme) { googleMap ->
+            //Map styles: https://mapstyle.withgoogle.com
+            googleMap.setMapStyle(context.getMapStyleByTheme(darkTheme))
+        }
+        GoogleMap(
+            modifier = modifier
+                .fillMaxSize()
+                .zIndex(-1.0f),
+            cameraPositionState = cameraPositionState,
+            googleMapOptionsFactory = {
+                GoogleMapOptions()/*.mapId("MyMapId")*/
+            },
+            uiSettings = mapUiSettings,
+            properties = mapProperties,
+            onMapClick = {
+                viewModel.resetMapUiState()
+            }
 
-        GoogleMap() {
-
+        ) {
+            markersToShow.forEach { myMarker ->
+                Marker(
+                    state = MarkerState(position = LatLng(myMarker.latitude, myMarker.longitude)),
+                    title = myMarker.title,
+                    icon = BitmapDescriptorFactory.defaultMarker(
+                        getHueFromColor(Color(myMarker.markerColor))
+                    ),
+                    tag = myMarker.id,
+                    onClick = {
+                        viewModel.onMarkerClicked(myMarker)
+                    }
+                )
+            }
         }
         /*AndroidView(
             { map },
@@ -343,42 +378,10 @@ fun MapLayout(
             coroutineScope.launch {
                 val googleMap = mapView.awaitMap()
 
-                //Map styles: https://mapstyle.withgoogle.com
-                if (darkTheme) {
-                    googleMap.setMapStyle(
-                        MapStyleOptions.loadRawResourceStyle(
-                            context,
-                            R.raw.map_style_fishing_night
-                        )
-                    )
-                } else {
-                    googleMap.setMapStyle(
-                        MapStyleOptions.loadRawResourceStyle(
-                            context,
-                            R.raw.map_style_fishing
-                        )
-                    )
-                }
+
 
                 googleMap.clear()
-                markersToShow.forEach {
-                    val position = LatLng(it.latitude, it.longitude)
-                    val markerColor = Color(it.markerColor)
-                    val hue = getHue(
-                        red = markerColor.red,
-                        green = markerColor.green,
-                        blue = markerColor.blue
-                    )
-                    val marker = googleMap
-                        .addMarker(
-                            MarkerOptions()
-                                .position(position)
-                                .title(it.title)
-                                .icon(BitmapDescriptorFactory.defaultMarker(hue))
 
-                        )
-                    marker?.tag = it.id
-                }
                 googleMap.setOnCameraMoveStartedListener {
                     viewModel.setCameraMoveState(CameraMoveState.MoveStart)
                 }
@@ -393,26 +396,15 @@ fun MapLayout(
                     viewModel.setCameraMoveState(CameraMoveState.MoveFinish)
                     viewModel.saveLastCameraPosition()
                 }
-                googleMap.setOnMarkerClickListener { marker ->
-                    viewModel.onMarkerClicked(
-                        markers.find { it.id == marker.tag },
-                    )
-                    true
-                }
-                googleMap.setOnMapClickListener {
-                    viewModel.resetMapUiState()
-                    return@setOnMapClickListener
-                }
 
-                googleMap.uiSettings.isCompassEnabled = false
-                googleMap.uiSettings.isMyLocationButtonEnabled = false
             }
         }*/
     }
 
     LaunchedEffect(map, permissionsState.allPermissionsGranted) {
         checkLocationPermissions(context)
-        mapProperties = mapProperties.copy(isMyLocationEnabled = permissionsState.allPermissionsGranted)
+        mapProperties =
+            mapProperties.copy(isMyLocationEnabled = permissionsState.allPermissionsGranted)
     }
 
     LaunchedEffect(Unit) {
@@ -437,6 +429,53 @@ fun MapLayout(
         viewModel.getLastLocation()
 
         onDispose { viewModel.saveLastCameraPosition() }
+    }
+}
+
+fun Context.getMapStyleByTheme(darkTheme: Boolean): MapStyleOptions {
+    return if (darkTheme) {
+        MapStyleOptions.loadRawResourceStyle(
+            this,
+            R.raw.map_style_fishing_night
+        )
+    } else {
+        MapStyleOptions.loadRawResourceStyle(
+            this,
+            R.raw.map_style_fishing
+        )
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@ExperimentalPermissionsApi
+@Composable
+fun LocationPermissionDialog(
+    onCloseCallback: () -> Unit = { },
+) {
+    val userPreferences: UserPreferences = get()
+    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    if (permissionsState.allPermissionsGranted.not()) {
+        GrantLocationPermissionsDialog(
+            onDismiss = { onCloseCallback() },
+            onNegativeClick = { onCloseCallback() },
+            onPositiveClick = {
+                if (permissionsState.shouldShowRationale) {
+                    context.displayAppDetailsSettings()
+                    context.showToast(context.getString(R.string.enable_gps_in_settings))
+                } else {
+                    permissionsState.launchMultiplePermissionRequest()
+                }
+                onCloseCallback()
+            },
+            onDontAskClick = {
+                coroutineScope.launch {
+                    userPreferences.saveLocationPermissionStatus(false)
+                }
+                onCloseCallback()
+            }
+        )
     }
 }
 
