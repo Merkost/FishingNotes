@@ -28,7 +28,7 @@ import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.Daily
 import com.mobileprism.fishing.domain.entity.weather.Temperature
 import com.mobileprism.fishing.domain.entity.weather.Weather
-import com.mobileprism.fishing.domain.use_cases.catches.OpenWeatherMapper
+import com.mobileprism.fishing.model.mappers.OpenWeatherMapper
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.mappers.getMoonIconByPhase
 import com.mobileprism.fishing.ui.home.views.BigText

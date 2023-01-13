@@ -31,7 +31,6 @@ class FirebaseCatchesRepositoryImpl(
     private val connectionManager: ConnectionManager
 ) : CatchesRepository {
 
-
     override fun getAllUserCatchesState() = channelFlow<ContentStateOld<UserCatch>> {
         val listeners = mutableListOf<Task<QuerySnapshot>>()
         listeners.add(

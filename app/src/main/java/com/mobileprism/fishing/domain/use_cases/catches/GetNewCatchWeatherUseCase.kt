@@ -5,6 +5,7 @@ import com.mobileprism.fishing.domain.entity.weather.NewCatchWeatherData
 import com.mobileprism.fishing.domain.entity.weather.WeatherForecast
 import com.mobileprism.fishing.domain.repository.app.WeatherRepository
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
+import com.mobileprism.fishing.model.mappers.OpenWeatherMapper
 import com.mobileprism.fishing.utils.calcMoonPhase
 import com.mobileprism.fishing.utils.getClosestHourIndex
 import com.mobileprism.fishing.utils.isDateInList

@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.domain.use_cases.catches
+package com.mobileprism.fishing.model.mappers
 
 import com.mobileprism.fishing.model.entity.FishingWeather
 
