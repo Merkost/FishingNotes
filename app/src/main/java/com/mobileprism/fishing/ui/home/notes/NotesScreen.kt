@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.notes
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,9 +33,8 @@ import com.mobileprism.fishing.ui.viewstates.FishingViewState
 import com.mobileprism.fishing.utils.Constants.modalBottomSheetCorners
 import org.koin.androidx.compose.getViewModel
 
-@ExperimentalMaterialApi
-@ExperimentalPagerApi
-@ExperimentalAnimationApi
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
 fun NotesScreen(
     modifier: Modifier = Modifier,
@@ -60,7 +60,7 @@ fun NotesScreen(
     ) {
         Scaffold(
             modifier = modifier,
-            topBar = { NotesAppBar(onSortClick = { }) }
+            topBar = { NotesAppBar(onSortClick = { /*todo:*/ }) }
         ) {
 
                 when (val state = uiState) {

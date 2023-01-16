@@ -50,7 +50,6 @@ import com.mobileprism.fishing.utils.time.toDateTextMonth
 import kotlinx.coroutines.InternalCoroutinesApi
 import org.koin.androidx.compose.getViewModel
 
-@ExperimentalCoilApi
 @Composable
 fun UserImage(
     modifier: Modifier = Modifier,
@@ -293,8 +292,6 @@ fun BestCatchView(
     }
 }
 
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
 @Composable
 fun FavoritePlaceView(
     modifier: Modifier = Modifier,

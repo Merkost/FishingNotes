@@ -38,8 +38,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.viewModel
 import org.koin.core.parameter.parametersOf
 
-@ExperimentalPermissionsApi
-@ExperimentalPagerApi
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun NewCatchMasterScreen(
     modifier: Modifier,
@@ -166,7 +165,7 @@ fun NewCatchMasterScreen(
             )
         }
     ) {
-        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+        ConstraintLayout(modifier = Modifier.fillMaxSize().padding(it)) {
             val (pager, buttons) = createRefs()
 
             NewCatchPager(
@@ -235,7 +234,7 @@ fun NewCatchPager(
                         onDrag = { change, _ ->
                             change.changedToDownIgnoreConsumed()
                             change.changedToUpIgnoreConsumed()
-                            change.consumeAllChanges()
+                            change.consume()
                         }
                     )
                 },

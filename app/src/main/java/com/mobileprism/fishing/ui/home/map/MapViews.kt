@@ -516,7 +516,6 @@ fun FishLoading(modifier: Modifier) {
     )
 }
 
-@ExperimentalAnimationApi
 @Composable
 fun PlaceTileView(
     modifier: Modifier,

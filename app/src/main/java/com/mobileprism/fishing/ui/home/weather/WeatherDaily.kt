@@ -25,9 +25,7 @@ import com.mobileprism.fishing.utils.time.toDayOfWeekAndDate
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
-@ExperimentalAnimationApi
-@ExperimentalMaterialApi
-@ExperimentalPagerApi
+@OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
 fun WeatherDaily(
     modifier: Modifier,

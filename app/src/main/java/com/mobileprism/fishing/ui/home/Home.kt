@@ -59,14 +59,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import java.util.*
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterialApi::class,
-    ExperimentalAnimationApi::class
-)
-@ExperimentalCoroutinesApi
-@ExperimentalPermissionsApi
-@ExperimentalPagerApi
-@ExperimentalCoilApi
-@InternalCoroutinesApi
 fun NavGraphBuilder.addHomeGraph(
     navController: NavController,
     modifier: Modifier = Modifier,

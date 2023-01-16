@@ -30,11 +30,6 @@ import com.mobileprism.fishing.ui.home.weather.WeatherDaily
 import com.mobileprism.fishing.ui.login.StartNavigation
 import kotlinx.coroutines.InternalCoroutinesApi
 
-@OptIn(ExperimentalMaterialApi::class)
-@ExperimentalPermissionsApi
-@ExperimentalAnimationApi
-@ExperimentalPagerApi
-@InternalCoroutinesApi
 @Composable
 fun FishingNotesApp(startDestination: String = MainDestinations.HOME_ROUTE) {
     val appStateHolder = rememberAppStateHolder()
@@ -73,11 +68,6 @@ fun FishingNotesApp(startDestination: String = MainDestinations.HOME_ROUTE) {
     }
 }
 
-@ExperimentalPermissionsApi
-@ExperimentalPagerApi
-@ExperimentalAnimationApi
-@InternalCoroutinesApi
-@ExperimentalMaterialApi
 private fun NavGraphBuilder.NavGraph(
     upPress: () -> Unit,
     navController: NavController,

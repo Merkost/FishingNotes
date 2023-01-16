@@ -60,12 +60,11 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
-@OptIn(ExperimentalLayoutApi::class)
-@ExperimentalComposeUiApi
-@ExperimentalAnimationApi
-@ExperimentalCoroutinesApi
-@ExperimentalMaterialApi
-@ExperimentalPermissionsApi
+@OptIn(
+    ExperimentalMaterialApi::class,
+    ExperimentalLayoutApi::class,
+    ExperimentalPermissionsApi::class
+)
 @Composable
 fun MapScreen(
     modifier: Modifier = Modifier,
@@ -285,11 +284,7 @@ fun onMapSettingsClicked(
     }
 }
 
-@OptIn(MapsComposeExperimentalApi::class)
-@SuppressLint("PotentialBehaviorOverride", "MissingPermission")
-@ExperimentalAnimationApi
-@ExperimentalCoroutinesApi
-@ExperimentalPermissionsApi
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun MapLayout(
     modifier: Modifier = Modifier,

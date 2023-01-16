@@ -30,7 +30,7 @@ import com.mobileprism.fishing.ui.viewmodels.restore.UserLogin
 import kotlinx.coroutines.launch
 
 
-@ExperimentalAnimationApi
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun StartNavigation(toHomeScreen: () -> Unit) {
     val navController = rememberAnimatedNavController()
