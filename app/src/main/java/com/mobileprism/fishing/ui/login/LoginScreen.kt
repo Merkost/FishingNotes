@@ -42,8 +42,6 @@ import org.koin.androidx.compose.get
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @OptIn(ExperimentalComposeUiApi::class)
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
 @Composable
 fun LoginScreen(upPress: () -> Unit, toHomeScreen: () -> Unit, forgotPassword: () -> Unit) {
     val viewModel: LoginViewModel = get()

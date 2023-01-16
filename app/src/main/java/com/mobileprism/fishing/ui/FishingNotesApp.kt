@@ -8,15 +8,12 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import coil.annotation.ExperimentalCoilApi
-import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
@@ -33,10 +30,10 @@ import com.mobileprism.fishing.ui.home.weather.WeatherDaily
 import com.mobileprism.fishing.ui.login.StartNavigation
 import kotlinx.coroutines.InternalCoroutinesApi
 
+@OptIn(ExperimentalMaterialApi::class)
 @ExperimentalPermissionsApi
 @ExperimentalAnimationApi
 @ExperimentalPagerApi
-@ExperimentalMaterialApi
 @InternalCoroutinesApi
 @Composable
 fun FishingNotesApp(startDestination: String = MainDestinations.HOME_ROUTE) {

@@ -1,7 +1,6 @@
 apply(plugin = "com.github.ben-manes.versions")
 
 buildscript {
-    val kotlin_version = "1.7.10"
 
     repositories {
         google()
@@ -14,7 +13,7 @@ buildscript {
     dependencies {
         classpath("com.android.tools:r8:3.3.75")
         classpath("com.android.tools.build:gradle:7.2.2")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.20")
         classpath("com.google.gms:google-services:4.3.14")
         classpath("com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1")
 

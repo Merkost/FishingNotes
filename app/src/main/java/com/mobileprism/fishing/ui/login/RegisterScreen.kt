@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.login
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -38,8 +39,7 @@ import com.mobileprism.fishing.ui.viewstates.FishingViewState
 import com.mobileprism.fishing.utils.showError
 import org.koin.androidx.compose.get
 
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun RegisterScreen(upPress: () -> Unit, toHomeScreen: () -> Unit) {
     val viewModel: RegisterViewModel = get()

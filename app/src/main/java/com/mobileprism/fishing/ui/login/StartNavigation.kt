@@ -31,7 +31,6 @@ import kotlinx.coroutines.launch
 
 
 @ExperimentalAnimationApi
-@ExperimentalMaterialApi
 @Composable
 fun StartNavigation(toHomeScreen: () -> Unit) {
     val navController = rememberAnimatedNavController()

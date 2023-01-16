@@ -4,10 +4,6 @@ plugins {
     id("kotlin-parcelize")
     id("kotlin-kapt")
 
-    /*kotlin("android")
-    kotlin("parcelize")
-    kotlin("kapt")*/
-
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
     id("com.google.firebase.firebase-perf")
@@ -59,7 +55,7 @@ android {
         //coreLibraryDesugaringEnabled = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = Libs.AndroidX.Compose.version
+        kotlinCompilerExtensionVersion = "1.3.2"
     }
     kotlinOptions {
         jvmTarget = "11"
@@ -104,7 +100,6 @@ dependencies {
     implementation(Libs.Firebase.crashlytics)
     implementation(Libs.Firebase.performance)
     implementation(Libs.Firebase.auth)
-    implementation(Libs.Firebase.authUi)
     implementation(Libs.Firebase.firestore)
     implementation(Libs.Firebase.storage)
     implementation(Libs.Firebase.coroutines)
@@ -117,6 +112,7 @@ dependencies {
     implementation(Libs.GoogleMaps.mapsKtx)
     implementation(Libs.GoogleMaps.mapUtilsKtx)
 
+    implementation(Libs.PlayServices.auth)
     implementation(Libs.PlayServices.maps)
     implementation(Libs.PlayServices.location)
     implementation(Libs.PlayServices.ads)
@@ -131,6 +127,7 @@ dependencies {
     implementation(Libs.AndroidX.ConstraintLayout.constraintLayoutCompose)
     implementation(Libs.AndroidX.Datastore.datastorePreferences)
 
+    implementation(platform(Libs.AndroidX.Compose.platform))
     implementation(Libs.AndroidX.Compose.runtime)
     implementation(Libs.AndroidX.Compose.foundation)
     implementation(Libs.AndroidX.Compose.layout)
@@ -148,7 +145,6 @@ dependencies {
     implementation(Libs.AndroidX.DependencyInjection.koinWorkManager)
     implementation(Libs.AndroidX.DependencyInjection.koinCompose)
 
-    implementation(Libs.Accompanist.insets)
     implementation(Libs.Accompanist.systemuicontroller)
     implementation(Libs.Accompanist.flowlayouts)
     implementation(Libs.Accompanist.pager)

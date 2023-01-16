@@ -7,8 +7,7 @@ object Libs {
     const val jdkDesugar = "com.android.tools:desugar_jdk_libs:1.1.5"
 
     object Accompanist {
-        private const val version = "0.26.3-beta"
-        const val insets = "com.google.accompanist:accompanist-insets:$version"
+        private const val version = "0.28.0"
         const val systemuicontroller = "com.google.accompanist:accompanist-systemuicontroller:$version"
         const val flowlayouts = "com.google.accompanist:accompanist-flowlayout:$version"
         const val pager = "com.google.accompanist:accompanist-pager:$version"
@@ -34,7 +33,7 @@ object Libs {
     }
 
     object PlayServices {
-        private const val version = "19.0.0"
+        private const val version = "20.4.0"
         private const val oldVersion = "18.1.0"
 
         const val auth = "com.google.android.gms:play-services-auth:$version"
@@ -48,7 +47,7 @@ object Libs {
     }
 
     object Kotlin {
-        private const val version = "1.7.10"
+        private const val version = "1.7.20"
         const val stdlib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version"
         const val gradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$version"
         const val extensions = "org.jetbrains.kotlin:kotlin-android-extensions:$version"
@@ -66,26 +65,27 @@ object Libs {
         const val splashScreen = "androidx.core:core-splashscreen:1.0.0-beta01"
 
         object Compose {
-            const val version = "1.3.1"
+            const val version = "2023.01.00"
+            const val platform = "androidx.compose:compose-bom:$version"
 
-            const val foundation = "androidx.compose.foundation:foundation:$version"
-            const val layout = "androidx.compose.foundation:foundation-layout:$version"
-            const val ui = "androidx.compose.ui:ui:$version"
-            const val uiUtil = "androidx.compose.ui:ui-util:$version"
-            const val runtime = "androidx.compose.runtime:runtime:$version"
-            const val material = "androidx.compose.material:material:$version"
-            const val animation = "androidx.compose.animation:animation:$version"
+            const val foundation = "androidx.compose.foundation:foundation"
+            const val layout = "androidx.compose.foundation:foundation-layout"
+            const val ui = "androidx.compose.ui:ui"
+            const val uiUtil = "androidx.compose.ui:ui-util"
+            const val runtime = "androidx.compose.runtime:runtime"
+            const val material = "androidx.compose.material:material"
+            const val animation = "androidx.compose.animation:animation"
 
             //Theme
             const val theme = "com.google.android.material:compose-theme-adapter:1.1.18"
             const val lottie = "com.airbnb.android:lottie-compose:5.2.0"
 
             // Tooling support (Previews, etc.)
-            const val tooling = "androidx.compose.ui:ui-tooling:$version"
-            const val iconsExtended = "androidx.compose.material:material-icons-extended:$version"
+            const val tooling = "androidx.compose.ui:ui-tooling"
+            const val iconsExtended = "androidx.compose.material:material-icons-extended"
 
             // UI Tests
-            const val uiTest = "androidx.compose.ui:ui-test-junit4:$version"
+            const val uiTest = "androidx.compose.ui:ui-test-junit4"
         }
 
         object Activity {
@@ -139,18 +139,20 @@ object Libs {
 
     object Firebase {
         // Import the Firebase BoM
-        const val platform = "com.google.firebase:firebase-bom:30.4.1"
+        const val platform = "com.google.firebase:firebase-bom:31.1.1"
 
         // When using the BoM, you don't specify versions in Firebase library dependencies
         const val auth = "com.google.firebase:firebase-auth-ktx"
+
         const val analytics = "com.google.firebase:firebase-analytics-ktx"
         const val crashlytics = "com.google.firebase:firebase-crashlytics-ktx"
         const val performance = "com.google.firebase:firebase-perf-ktx"
         const val storage = "com.google.firebase:firebase-storage-ktx"
-        const val core = "com.google.firebase:firebase-core"
 
-        const val firestore = "com.google.firebase:firebase-firestore-ktx:24.0.2"
-        const val authUi = "com.firebaseui:firebase-ui-auth:8.0.0"
+        const val core = "com.google.firebase:firebase-core:21.1.1"
+
+        const val firestore = "com.google.firebase:firebase-firestore-ktx"
+//        const val authUi = "com.firebaseui:firebase-ui-auth:8.0.0"
 
         //Firebase Coroutine dependency:
         const val coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.1"
@@ -163,7 +165,7 @@ object Libs {
     }
 
     object Coil {
-        const val coilCompose = "io.coil-kt:coil-compose:2.2.1"
+        const val coilCompose = "io.coil-kt:coil-compose:2.2.2"
     }
 
     object Room {

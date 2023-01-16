@@ -44,8 +44,6 @@ object LoginDestinations {
     const val REGISTER = "register_screen"
 }
 
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
 @Composable
 fun StartScreen(
     toLoginScreen: () -> Unit,

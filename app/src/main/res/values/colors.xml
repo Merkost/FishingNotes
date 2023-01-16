@@ -33,6 +33,8 @@
     <color name="text_secondary_color">#8A000000</color>
     <color name="text_support_color">#42000000</color>
 
+    <color name="fui_transparent">#00000000</color>
+
     <color name="blue">#FF4D5EFF</color>
     <color name="dark_gray">#0F0E0F</color>
 
