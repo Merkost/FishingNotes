@@ -98,7 +98,7 @@ fun WeatherScreen(
     val scrollState = rememberScrollState()
     val weatherUiState by viewModel.weatherState.collectAsState()
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         topBar = {
             val elevation =
                 animateDpAsState(targetValue = if (scrollState.value > 0) 4.dp else 0.dp)

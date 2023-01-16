@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.login
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.*
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -39,6 +40,7 @@ import com.mobileprism.fishing.ui.viewstates.FishingViewState
 import com.mobileprism.fishing.utils.showError
 import org.koin.androidx.compose.get
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi

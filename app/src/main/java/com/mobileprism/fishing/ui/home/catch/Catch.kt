@@ -53,7 +53,7 @@ import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun UserCatchScreen(navController: NavController, catch: UserCatch) {
+fun UserCatchScreen(modifier: Modifier, navController: NavController, catch: UserCatch) {
     val coroutineScope = rememberCoroutineScope()
 
     val viewModel: UserCatchViewModel by viewModel { parametersOf(catch) }
@@ -113,6 +113,7 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch) {
         }
     ) {
         Scaffold(
+            modifier = modifier,
             topBar = {
                 CatchTopBar(
                     navController = navController,

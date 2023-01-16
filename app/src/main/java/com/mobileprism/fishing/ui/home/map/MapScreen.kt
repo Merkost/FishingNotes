@@ -6,11 +6,8 @@ import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.*
@@ -40,9 +37,11 @@ import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.google.maps.android.compose.*
 import com.google.maps.android.ktx.awaitMap
+import com.google.maps.android.ktx.awaitMapLoad
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.datastore.UserPreferences
+import com.mobileprism.fishing.model.utils.UserHandler
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainActivity
 import com.mobileprism.fishing.ui.MainDestinations
@@ -61,6 +60,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
+@OptIn(ExperimentalLayoutApi::class)
 @ExperimentalComposeUiApi
 @ExperimentalAnimationApi
 @ExperimentalCoroutinesApi
@@ -105,6 +105,7 @@ fun MapScreen(
     )
 
     ModalBottomSheetLayout(
+        modifier = Modifier,
         sheetState = modalBottomSheetState,
         sheetShape = Constants.modalBottomSheetCorners,
         sheetContent = {
@@ -112,6 +113,7 @@ fun MapScreen(
         }
     ) {
         MapScaffold(
+            modifier = modifier.consumedWindowInsets(WindowInsets.statusBars).background(Color.Red),
             mapUiState = mapUiState,
             scaffoldState = scaffoldState,
             fab = {
@@ -139,8 +141,8 @@ fun MapScreen(
                     onMarkerIconClicked = viewModel::onMarkerClicked
                 ) { coroutineScope.launch { scaffoldState.bottomSheetState.collapse() } }
             }
-        ) {
-            ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+        ) { paddingValues ->
+            ConstraintLayout(modifier = Modifier.fillMaxSize().padding(paddingValues).statusBarsPadding()) {
                 val (mapLayout, addMarkerFragment, mapMyLocationButton,
                     mapCompassButton, mapLayersButton, zoomInButton, zoomOutButton,
                     mapSettingsButton, mapLayersView, pointer) = createRefs()
@@ -152,11 +154,19 @@ fun MapScreen(
                     cameraPositionState = cameraPositionState
                 )
 
+                Box(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars), contentAlignment = Alignment.TopEnd) {
+                    MyLocationButton(
+                        modifier = Modifier.padding(16.dp),
+                        onClick = viewModel::onMyLocationClick
+                    )
+                }
+
                 MapLayersButton(
-                    modifier = Modifier.constrainAs(mapLayersButton) {
+                    modifier = Modifier
+                        .constrainAs(mapLayersButton) {
                         top.linkTo(parent.top, 16.dp)
                         absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                    }) { mapLayersSelection = true }
+                    }.windowInsetsPadding(WindowInsets.statusBars)) { mapLayersSelection = true }
 
                 if (mapLayersSelection)
                     Surface(modifier = Modifier
@@ -188,19 +198,13 @@ fun MapScreen(
                 }
 
                 MapSettingsButton(
-                    modifier = Modifier.constrainAs(mapSettingsButton) {
+                    modifier = Modifier
+                        .constrainAs(mapSettingsButton) {
                         top.linkTo(mapLayersButton.bottom, 16.dp)
                         absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                    }) { onMapSettingsClicked(coroutineScope, modalBottomSheetState) }
+                    }.windowInsetsPadding(WindowInsets.statusBars)) { onMapSettingsClicked(coroutineScope, modalBottomSheetState) }
 
-                MyLocationButton(
-                    modifier = modifier.constrainAs(mapMyLocationButton) {
-                        top.linkTo(parent.top, 16.dp)
-                        absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-                    },
-                    userPreferences = userPreferences,
-                    onClick = viewModel::onMyLocationClick
-                )
+
 
                 CompassButton(
                     modifier = modifier.constrainAs(mapCompassButton) {
@@ -289,14 +293,11 @@ fun onMapSettingsClicked(
 @Composable
 fun MapLayout(
     modifier: Modifier = Modifier,
-    cameraPositionState: CameraPositionState
+    cameraPositionState: CameraPositionState,
 ) {
     val viewModel: MapViewModel = getViewModel()
-    val firstCameraPosition by viewModel.firstCameraPosition.collectAsState()
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
-    val map = rememberMapViewWithLifecycle()
     val userPreferences: UserPreferences = get()
-    val coroutineScope = rememberCoroutineScope()
     val darkTheme = isSystemInDarkTheme()
 
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
@@ -308,7 +309,6 @@ fun MapLayout(
         mutableStateOf(if (showHiddenPlaces) markers
         else markers.filter { it.visible })
     }
-
 
     val mapUiSettings by remember {
         mutableStateOf(
@@ -324,138 +324,126 @@ fun MapLayout(
         mutableStateOf(
             MapProperties(
                 isMyLocationEnabled = permissionsState.allPermissionsGranted,
+                //Map styles: https://mapstyle.withgoogle.com
                 mapStyleOptions = context.getMapStyleByTheme(darkTheme),
                 mapType = MapType.values()[mapType]
             )
         )
     }
 
-    var isMapVisible by remember { mutableStateOf(false) }
-
-    AnimatedVisibility(
-        visible = isMapVisible,
-        enter = fadeIn(), exit = fadeOut()
+    GoogleMap(
+        modifier = modifier
+            .fillMaxSize()
+            .zIndex(-1.0f),
+        cameraPositionState = cameraPositionState,
+        googleMapOptionsFactory = {
+            GoogleMapOptions().mapId(
+                when (darkTheme) {
+                    true -> context.resources.getString(R.string.dark_map_id)
+                    false -> context.resources.getString(R.string.light_map_id)
+                }
+            )
+        },
+        uiSettings = mapUiSettings,
+        properties = mapProperties,
+        onMapClick = { viewModel.resetMapUiState() },
     ) {
-        MapEffect(darkTheme) { googleMap ->
-            //Map styles: https://mapstyle.withgoogle.com
-            googleMap.setMapStyle(context.getMapStyleByTheme(darkTheme))
+
+        markersToShow.forEach { myMarker ->
+            Marker(
+                state = MarkerState(position = LatLng(myMarker.latitude, myMarker.longitude)),
+                title = myMarker.title,
+                icon = BitmapDescriptorFactory.defaultMarker(
+                    getHueFromColor(Color(myMarker.markerColor))
+                ),
+                tag = myMarker.id,
+                onClick = {
+                    viewModel.onMarkerClicked(myMarker)
+                }
+            )
         }
-        GoogleMap(
-            modifier = modifier
-                .fillMaxSize()
-                .zIndex(-1.0f),
-            cameraPositionState = cameraPositionState,
-            googleMapOptionsFactory = {
-                GoogleMapOptions()/*.mapId("MyMapId")*/
-            },
-            uiSettings = mapUiSettings,
-            properties = mapProperties,
-            onMapClick = {
-                viewModel.resetMapUiState()
+
+        MapEffect(Unit) {map ->
+            launch {
+                viewModel.newMapCameraPosition.collectLatest {
+                    map.awaitMapLoad()
+                    moveCameraToLocation(cameraPositionState, it.first, it.second, it.third)
+                }
             }
 
-        ) {
-            markersToShow.forEach { myMarker ->
-                Marker(
-                    state = MarkerState(position = LatLng(myMarker.latitude, myMarker.longitude)),
-                    title = myMarker.title,
-                    icon = BitmapDescriptorFactory.defaultMarker(
-                        getHueFromColor(Color(myMarker.markerColor))
-                    ),
-                    tag = myMarker.id,
-                    onClick = {
-                        viewModel.onMarkerClicked(myMarker)
-                    }
+            launch {
+                viewModel.firstCameraPosition.collectLatest {
+                    map.awaitMapLoad()
+                    it?.let { setCameraPosition(cameraPositionState, it.first, it.second, it.third) }
+                }
+            }
+        }
+
+    }
+    /*AndroidView(
+        { map },
+        modifier = modifier
+            .fillMaxSize()
+            .zIndex(-1.0f)
+    ) { mapView ->
+        coroutineScope.launch {
+            val googleMap = mapView.awaitMap()
+
+
+
+            googleMap.clear()
+
+            googleMap.setOnCameraMoveStartedListener {
+                viewModel.setCameraMoveState(CameraMoveState.MoveStart)
+            }
+            googleMap.setOnCameraMoveListener {
+                viewModel.onCameraMove(
+                    googleMap.cameraPosition.target,
+                    googleMap.cameraPosition.zoom,
+                    googleMap.cameraPosition.bearing
                 )
             }
-        }
-        /*AndroidView(
-            { map },
-            modifier = modifier
-                .fillMaxSize()
-                .zIndex(-1.0f)
-        ) { mapView ->
-            coroutineScope.launch {
-                val googleMap = mapView.awaitMap()
-
-
-
-                googleMap.clear()
-
-                googleMap.setOnCameraMoveStartedListener {
-                    viewModel.setCameraMoveState(CameraMoveState.MoveStart)
-                }
-                googleMap.setOnCameraMoveListener {
-                    viewModel.onCameraMove(
-                        googleMap.cameraPosition.target,
-                        googleMap.cameraPosition.zoom,
-                        googleMap.cameraPosition.bearing
-                    )
-                }
-                googleMap.setOnCameraIdleListener {
-                    viewModel.setCameraMoveState(CameraMoveState.MoveFinish)
-                    viewModel.saveLastCameraPosition()
-                }
-
+            googleMap.setOnCameraIdleListener {
+                viewModel.setCameraMoveState(CameraMoveState.MoveFinish)
+                viewModel.saveLastCameraPosition()
             }
-        }*/
-    }
 
-    LaunchedEffect(map, permissionsState.allPermissionsGranted) {
+        }
+    }*/
+
+
+
+    LaunchedEffect(Unit, permissionsState.allPermissionsGranted) {
         checkLocationPermissions(context)
         mapProperties =
             mapProperties.copy(isMyLocationEnabled = permissionsState.allPermissionsGranted)
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.newMapCameraPosition.collectLatest {
-            moveCameraToLocation(this, map, it.first, it.second, it.third)
-        }
-    }
 
-    LaunchedEffect(Unit) {
-        viewModel.firstCameraPosition.collectLatest {
-            it?.let { setCameraPosition(this, map, it.first, it.second, it.third) }
-        }
-    }
 
     LaunchedEffect(mapType) {
-        val googleMap = map.awaitMap()
-        googleMap.mapType = mapType
+        mapProperties = mapProperties.copy(mapType = MapType.values()[mapType])
     }
-
+/*
     DisposableEffect(map) {
         isMapVisible = true
         viewModel.getLastLocation()
 
         onDispose { viewModel.saveLastCameraPosition() }
-    }
-}
-
-fun Context.getMapStyleByTheme(darkTheme: Boolean): MapStyleOptions {
-    return if (darkTheme) {
-        MapStyleOptions.loadRawResourceStyle(
-            this,
-            R.raw.map_style_fishing_night
-        )
-    } else {
-        MapStyleOptions.loadRawResourceStyle(
-            this,
-            R.raw.map_style_fishing
-        )
-    }
+    }*/
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalPermissionsApi
 @Composable
 fun LocationPermissionDialog(
-    onCloseCallback: () -> Unit = { },
+    onCloseCallback: () -> Unit,
 ) {
-    val userPreferences: UserPreferences = get()
-    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
-    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val userPreferences: UserPreferences = get()
+    val coroutineScope = rememberCoroutineScope()
+
+    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     if (permissionsState.allPermissionsGranted.not()) {
         GrantLocationPermissionsDialog(
             onDismiss = { onCloseCallback() },
@@ -470,6 +458,7 @@ fun LocationPermissionDialog(
                 onCloseCallback()
             },
             onDontAskClick = {
+                SnackbarManager.showMessage(R.string.location_dont_ask)
                 coroutineScope.launch {
                     userPreferences.saveLocationPermissionStatus(false)
                 }
@@ -489,7 +478,6 @@ fun MapFab(
 ) {
     val state by viewModel.mapUiState.collectAsState()
     val useFastFabAdd by userSettings.useFabFastAdd.collectAsState(false)
-    val fabImg = remember { mutableStateOf(R.drawable.ic_baseline_add_location_24) }
 
     val context = LocalContext.current
 
@@ -532,7 +520,8 @@ fun MapFab(
         FishingFab(
             modifier = Modifier
                 .animateContentSize()
-                .padding(bottom = paddingBottom.value, top = paddingTop.value),
+                .windowInsetsPadding(WindowInsets.navigationBars),
+                //.padding(bottom = paddingBottom.value, top = paddingTop.value),
             onClick = onClick,
             onLongPress = {
                 if (state == MapUiState.NormalMode && useFastFabAdd) {

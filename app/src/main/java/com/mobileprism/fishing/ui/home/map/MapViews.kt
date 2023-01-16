@@ -38,6 +38,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.placeholder.shimmer
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
@@ -47,10 +48,11 @@ import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.settings.SettingsHeader
 import com.mobileprism.fishing.ui.custom.DefaultDialog
 import com.mobileprism.fishing.ui.theme.RedGoogleChrome
+import com.mobileprism.fishing.ui.theme.chooseTheme
 import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
 import com.mobileprism.fishing.ui.theme.supportTextColor
+import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewmodels.MapViewModel
-import com.mobileprism.fishing.utils.LocationPermissionDialog
 import com.mobileprism.fishing.utils.location.LocationManager
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -67,6 +69,22 @@ fun MapScaffold(
     content: @Composable (PaddingValues) -> Unit,
 
     ) {
+    val userPreferences: UserPreferences = get()
+    val systemUiController = rememberSystemUiController()
+
+    val appTheme by userPreferences.appTheme.collectAsState(AppThemeValues.Blue)
+    val darkTheme = isSystemInDarkTheme()
+
+    DisposableEffect(Unit) {
+        systemUiController.apply {
+            setStatusBarColor(color = Color.Transparent)
+        }
+        onDispose {
+            systemUiController.apply {
+                setStatusBarColor(color = chooseTheme(appTheme, darkTheme).primary)
+            }
+        }
+    }
 
     val dp = animateDpAsState(
         when (mapUiState) {
@@ -130,28 +148,31 @@ fun MapModalBottomSheet(
 @Composable
 fun MyLocationButton(
     modifier: Modifier = Modifier,
-    userPreferences: UserPreferences,
     onClick: () -> Unit,
 ) {
     val context = LocalContext.current
     val locationManager: LocationManager = get()
-    var locationDialogIsShowing by remember { mutableStateOf(false) }
+    val userPreferences: UserPreferences = get()
+
     val shouldShowPermissions by userPreferences.shouldShowLocationPermission.collectAsState(false)
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
+    var locationDialogIsShowing by remember { mutableStateOf(false) }
     var locationButtonClicked by remember { mutableStateOf(false) }
 
     if (locationDialogIsShowing) {
         if (shouldShowPermissions) {
-            LocationPermissionDialog(userPreferences = userPreferences) {
-                locationDialogIsShowing = false
-            }
+            LocationPermissionDialog { locationDialogIsShowing = false }
         } else SnackbarManager.showMessage(R.string.location_permission_denied)
     }
 
     val color = animateColorAsState(
         when {
-            !shouldShowPermissions || !permissionsState.allPermissionsGranted -> { RedGoogleChrome }
-            else -> { LocalContentColor.current.copy(alpha = LocalContentAlpha.current) }
+            !shouldShowPermissions || !permissionsState.allPermissionsGranted -> {
+                RedGoogleChrome
+            }
+            else -> {
+                LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+            }
         }
     )
 

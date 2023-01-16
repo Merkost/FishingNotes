@@ -60,12 +60,13 @@ fun FishingNotesApp(startDestination: String = MainDestinations.HOME_ROUTE) {
             )
         },
         scaffoldState = appStateHolder.scaffoldState,
-        modifier = Modifier.fillMaxSize().systemBarsPadding()
+        modifier = Modifier.fillMaxSize()
     ) { innerPaddingModifier ->
         NavHost(
             navController = appStateHolder.navController,
             startDestination = startDestination,
-            modifier = Modifier.padding(innerPaddingModifier)
+            modifier = Modifier
+                .padding(innerPaddingModifier)
         ) {
             NavGraph(
                 navController = appStateHolder.navController,
@@ -83,12 +84,13 @@ fun FishingNotesApp(startDestination: String = MainDestinations.HOME_ROUTE) {
 private fun NavGraphBuilder.NavGraph(
     upPress: () -> Unit,
     navController: NavController,
+    modifier: Modifier = Modifier.systemBarsPadding(),
 ) {
     navigation(
         route = MainDestinations.HOME_ROUTE,
         startDestination = HomeSections.MAP.route,
     ) {
-        addHomeGraph(navController, upPress = upPress)
+        addHomeGraph(navController, modifier = modifier, upPress = upPress)
     }
 
     composable(
@@ -104,11 +106,15 @@ private fun NavGraphBuilder.NavGraph(
     }
 
     composable(MainDestinations.SETTINGS) {
-        SettingsScreen(upPress, navController = navController)
+        SettingsScreen(
+            modifier = modifier,
+            upPress,
+            navController = navController
+        )
     }
 
     composable(MainDestinations.ABOUT_APP) {
-        AboutApp(upPress)
+        AboutApp(modifier = modifier, upPress)
     }
 
     composable(
@@ -117,7 +123,7 @@ private fun NavGraphBuilder.NavGraph(
         val place: UserMapMarker? = it.arguments?.getParcelable(Arguments.PLACE)
         it.arguments?.clear()
 
-        NewCatchMasterScreen(place, navController) {
+        NewCatchMasterScreen(modifier = modifier, place, navController) {
             navController.popBackStack(
                 route = MainDestinations.NEW_CATCH_ROUTE,
                 inclusive = true
@@ -127,11 +133,18 @@ private fun NavGraphBuilder.NavGraph(
 
     composable(
         route = MainDestinations.PLACE_ROUTE,
-    ) { UserPlaceScreen(upPress, navController, it.requiredArg(Arguments.PLACE)) }
+    ) {
+        UserPlaceScreen(
+            modifier = modifier,
+            upPress,
+            navController,
+            it.requiredArg(Arguments.PLACE)
+        )
+    }
 
     composable(
         route = MainDestinations.CATCH_ROUTE,
-    ) { UserCatchScreen(navController, it.requiredArg(Arguments.CATCH)) }
+    ) { UserCatchScreen(modifier = modifier, navController, it.requiredArg(Arguments.CATCH)) }
 
     /*composable(
         route = MainDestinations.EDIT_PROFILE,
@@ -141,6 +154,7 @@ private fun NavGraphBuilder.NavGraph(
         route = MainDestinations.DAILY_WEATHER_ROUTE,
     ) {
         WeatherDaily(
+            modifier = modifier,
             upPress = { navController.popBackStack() },
             data = it.requiredArg(Arguments.WEATHER_DATA)
         )

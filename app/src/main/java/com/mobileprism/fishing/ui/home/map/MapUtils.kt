@@ -25,7 +25,10 @@ import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.ktx.awaitMap
+import com.google.maps.android.ktx.model.cameraPosition
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.WeatherForecast
@@ -128,48 +131,38 @@ val locationPermissionsList = listOf(
     Manifest.permission.ACCESS_COARSE_LOCATION
 )
 
-fun moveCameraToLocation(
-    coroutineScope: CoroutineScope,
-    map: MapView,
+suspend fun moveCameraToLocation(
+    cameraPositionState: CameraPositionState,
     location: LatLng,
     zoom: Float = DEFAULT_ZOOM,
     bearing: Float = 0f
 ) {
-    coroutineScope.launch {
-        val googleMap = map.awaitMap()
-        googleMap.stopAnimation()
-        googleMap.animateCamera(
-            CameraUpdateFactory.newCameraPosition(
-                CameraPosition.Builder()
-                    .zoom(zoom)
-                    .target(location)
-                    .bearing(bearing)
-                    .build()
-            )
+    cameraPositionState.animate(
+        CameraUpdateFactory.newCameraPosition(
+            CameraPosition.Builder()
+                .zoom(zoom)
+                .target(location)
+                .bearing(bearing)
+                .build()
         )
-    }
+    )
 }
 
-fun setCameraPosition(
-    coroutineScope: CoroutineScope,
-    map: MapView,
+suspend fun setCameraPosition(
+    cameraPositionState: CameraPositionState,
     location: LatLng,
     zoom: Float = DEFAULT_ZOOM,
     bearing: Float = DEFAULT_BEARING
 ) {
-    coroutineScope.launch {
-        val googleMap = map.awaitMap()
-        googleMap.stopAnimation()
-        googleMap.moveCamera(
-            CameraUpdateFactory.newCameraPosition(
-                CameraPosition.Builder()
-                    .zoom(zoom)
-                    .target(location)
-                    .bearing(bearing)
-                    .build()
-            )
+    cameraPositionState.move(
+        CameraUpdateFactory.newCameraPosition(
+            CameraPosition.Builder()
+                .zoom(zoom)
+                .target(location)
+                .bearing(bearing)
+                .build()
         )
-    }
+    )
 }
 
 fun checkLocationPermissions(context: Context): Boolean {
@@ -251,38 +244,6 @@ fun BackPressHandler(
     }
 }
 
-@Composable
-fun rememberMapViewWithLifecycle(): MapView {
-    val context = (LocalContext.current as MainActivity)
-    val isDarkMode = isSystemInDarkTheme()
-    val mapOptions = when (isDarkMode) {
-        true -> {
-            GoogleMapOptions().mapId(context.resources.getString(R.string.dark_map_id))
-        }
-        false -> {
-            GoogleMapOptions().mapId(context.resources.getString(R.string.light_map_id))
-        }
-    }
-    val mapView: MapView = remember(isDarkMode) {
-        MapView(
-            context,
-            mapOptions
-        )
-    }.apply { id = R.id.map }
-
-
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    DisposableEffect(lifecycle, mapView) {
-        // Make MapView follow the current lifecycle
-        val lifecycleObserver = getMapLifecycleObserver(mapView)
-        lifecycle.addObserver(lifecycleObserver)
-        onDispose {
-            lifecycle.removeObserver(lifecycleObserver)
-        }
-    }
-    return mapView
-}
-
 object DistanceFormat {
     val df = DecimalFormat("#.#")
 }
@@ -310,4 +271,18 @@ fun getIconTintByWeatherIn8H(forecast: WeatherForecast): Color {
 
 fun getIconTintByWeatherIn16H(forecast: WeatherForecast): Color {
     return if (forecast.hourly[7].pressure > forecast.hourly[15].pressure) Color.Red else Color.Green
+}
+
+fun Context.getMapStyleByTheme(darkTheme: Boolean): MapStyleOptions {
+    return if (darkTheme) {
+        MapStyleOptions.loadRawResourceStyle(
+            this,
+            R.raw.map_style_fishing_night
+        )
+    } else {
+        MapStyleOptions.loadRawResourceStyle(
+            this,
+            R.raw.map_style_fishing
+        )
+    }
 }

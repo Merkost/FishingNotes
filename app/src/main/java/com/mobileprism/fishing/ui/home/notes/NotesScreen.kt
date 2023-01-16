@@ -52,7 +52,6 @@ fun NotesScreen(
     val expandedItems by viewModel.expandedItems.collectAsState()
 
     ModalBottomSheetLayout(
-        modifier = modifier,
         sheetState = bottomState,
         sheetShape = modalBottomSheetCorners,
         sheetContent = {
@@ -60,12 +59,11 @@ fun NotesScreen(
         },
     ) {
         Scaffold(
-            topBar = {
-                NotesAppBar(onSortClick = { })
-            }
+            modifier = modifier,
+            topBar = { NotesAppBar(onSortClick = { }) }
         ) {
-            uiState.let { state ->
-                when (state) {
+
+                when (val state = uiState) {
                     is BaseViewState.Success -> {
                         UserPlacesList(
                             placeNotes = state.data,
@@ -84,7 +82,6 @@ fun NotesScreen(
                         UserPlacesError()
                     }
                 }
-            }
         }
     }
 }

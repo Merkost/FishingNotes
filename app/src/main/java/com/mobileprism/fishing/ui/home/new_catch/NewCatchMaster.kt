@@ -42,6 +42,7 @@ import org.koin.core.parameter.parametersOf
 @ExperimentalPagerApi
 @Composable
 fun NewCatchMasterScreen(
+    modifier: Modifier,
     receivedPlace: UserMapMarker?,
     navController: NavController,
     upPress: () -> Unit,
@@ -144,6 +145,7 @@ fun NewCatchMasterScreen(
             WeatherTypesSheet()
         }) {*/
     Scaffold(
+        modifier = modifier,
         topBar = {
             DefaultAppBar(
                 title = stringResource(id = R.string.new_catch),

@@ -49,7 +49,6 @@ val loginModule = module {
     viewModel() {
         LoginViewModel(
             authManager = get(),
-            connectionManager = get(),
             validationUseCase = get()
         )
     }

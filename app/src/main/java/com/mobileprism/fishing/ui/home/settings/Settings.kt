@@ -35,6 +35,7 @@ import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.map.locationPermissionsList
 import com.mobileprism.fishing.ui.home.views.DefaultAppBar
 import com.mobileprism.fishing.ui.custom.DefaultDialog
+import com.mobileprism.fishing.ui.home.map.LocationPermissionDialog
 import com.mobileprism.fishing.ui.home.views.ItemsSelection
 import com.mobileprism.fishing.ui.home.weather.PressureValues
 import com.mobileprism.fishing.ui.home.weather.TemperatureValues
@@ -42,7 +43,6 @@ import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.ui.utils.ColorPicker
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewmodels.SettingsViewModel
-import com.mobileprism.fishing.utils.LocationPermissionDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -50,17 +50,18 @@ import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun SettingsScreen(backPress: () -> Unit, navController: NavController) {
+fun SettingsScreen(modifier: Modifier, backPress: () -> Unit, navController: NavController) {
 
     val userPreferences: UserPreferences = get()
     val weatherPreferencesImpl: WeatherPreferences = get()
 
     Scaffold(
         topBar = { SettingsTopAppBar(backPress) },
-        modifier = Modifier.fillMaxSize()
-    )
-    {
-        Column(modifier = Modifier.verticalScroll(rememberScrollState(0))) {
+        modifier = modifier.fillMaxSize()
+    ) {
+        Column(modifier = Modifier
+            .verticalScroll(rememberScrollState(0))
+            .padding(it)) {
             MainAppSettings(userPreferences)
             WeatherSettings(weatherPreferencesImpl)
             AboutSettings(navController)
@@ -169,10 +170,7 @@ fun MainAppSettings(userPreferences: UserPreferences) {
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
 
 
-    if (isPermissionDialogOpen)
-        LocationPermissionDialog(userPreferences = userPreferences) {
-            isPermissionDialogOpen = false
-        }
+    if (isPermissionDialogOpen) LocationPermissionDialog { isPermissionDialogOpen = false }
 
     Column {
         AnimatedVisibility(!permissionsState.allPermissionsGranted) {

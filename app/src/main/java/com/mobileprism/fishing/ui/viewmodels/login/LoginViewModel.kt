@@ -25,7 +25,6 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel(
     private val authManager: AuthManager,
-    private val connectionManager: ConnectionManager,
     private val validationUseCase: ValidationUseCase,
 ) : ViewModel() {
 

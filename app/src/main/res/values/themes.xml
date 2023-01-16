@@ -10,7 +10,7 @@
         <item name="colorOnSecondary">@color/text_secondary_color</item>
         <item name="android:textColorSecondary">@color/text_secondary_color</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">@color/fui_transparent</item>
+        <item name="android:statusBarColor" >@color/fui_transparent</item>
         <item name="android:navigationBarColor">@color/fui_transparent</item>
         <!-- Customize your theme here. -->
     </style>
@@ -19,7 +19,7 @@
     <style name="Theme.AnimatedSplashScreen" parent="Theme.Fishing">
         <item name="colorPrimary">@color/white</item>
         <item name="colorOnPrimary">@color/white</item>
-        <item name="android:statusBarColor" tools:targetApi="l">@color/white</item>
+        <item name="android:statusBarColor" >@color/white</item>
     </style>
 
     <style name="Theme.AppSplash" parent="Theme.SplashScreen">
@@ -51,8 +51,8 @@
         <item name="android:textColorPrimary">@color/primaryFigmaTextColor</item>
         <item name="android:textColorSecondary">@color/secondaryFigmaTextColor</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
-        <item name="android:navigationBarColor">@color/primaryFigmaColor</item>
+<!--        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>-->
+<!--        <item name="android:navigationBarColor">@color/primaryFigmaColor</item>-->
         <!-- Customize your theme here. -->
         <item name="colorOnBackgroundTint">@color/primaryFigmaBackgroundTint</item>
         <item name="colorControlNormal">@color/colorOnPrimary</item>

@@ -33,7 +33,6 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.auth.AuthState
 import com.mobileprism.fishing.ui.home.SnackbarAction
 import com.mobileprism.fishing.ui.home.SnackbarManager
-import com.mobileprism.fishing.ui.login.StartNavigation
 import com.mobileprism.fishing.ui.theme.FishingNotesTheme
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewmodels.MainViewModel
@@ -88,12 +87,12 @@ class MainActivity : ComponentActivity() {
                         .start()
                 }
 
-                splashScreenViewProvider.iconView
+                /*splashScreenViewProvider.iconView
                     .animate()
                     .setDuration(splashFadeDurationMillis.toLong())
                     .alpha(0f)
-                    /*.scaleX(50f)
-                    .scaleY(50f)*/
+                    *//*.scaleX(50f)
+                    .scaleY(50f)*//*
                     .withEndAction {
                         splashScreenViewProvider.remove()
                         if (Build.VERSION.SDK_INT < 31) {
@@ -105,18 +104,18 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }
-                    .start()
+                    .start()*/
             }
         }
 
-        if (Build.VERSION.SDK_INT >= 31) {
-            setContent {
-                Distribution(
-                    appTheme = appTheme.value,
-                    authState.collectAsState().value
-                )
-            }
+//        if (Build.VERSION.SDK_INT >= 31) {
+        setContent {
+            Distribution(
+                appTheme.collectAsState().value,
+                authState.collectAsState().value
+            )
         }
+//        }
 
 
         MobileAds.initialize(this) {}
@@ -217,7 +216,6 @@ class MainActivity : ComponentActivity() {
     }
 
 
-
     @OptIn(ExperimentalComposeUiApi::class)
     @InternalCoroutinesApi
     @ExperimentalMaterialApi
@@ -230,15 +228,13 @@ class MainActivity : ComponentActivity() {
         val notificationManager: NotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        when (authState) {
-            is AuthState.LoggedIn -> {
-                FishingNotesTheme(appTheme) {
+        FishingNotesTheme(appTheme) {
+            when (authState) {
+                is AuthState.LoggedIn -> {
                     checkNotificationPolicyAccess(notificationManager)
                     FishingNotesApp()
                 }
-            }
-            else -> {
-                FishingNotesTheme(appTheme) {
+                else -> {
                     FishingNotesApp(startDestination = MainDestinations.AUTH_ROUTE)
                 }
             }

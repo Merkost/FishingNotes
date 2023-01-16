@@ -24,7 +24,7 @@ object Libs {
         //KTX for the Maps SDK for Android library
         // KTX for the Maps SDK for Android Utility Library
         //"com.google.android.libraries.maps:maps:3.1.0-beta"
-        const val maps = "com.google.maps.android:maps-compose:2.7.0"
+        const val maps = "com.google.maps.android:maps-compose:2.8.0"
         const val mapsKtx = "com.google.maps.android:maps-ktx:3.4.0"
         const val mapUtilsKtx = "com.google.maps.android:maps-utils-ktx:3.4.0"
 

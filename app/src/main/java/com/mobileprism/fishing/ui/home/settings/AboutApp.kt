@@ -57,7 +57,7 @@ private val purchaseUpdateListener = PurchasesUpdatedListener { billingResult, p
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun AboutApp(upPress: () -> Unit) {
+fun AboutApp(modifier: Modifier, upPress: () -> Unit) {
     val billingClient: BillingClient = get(parameters = { parametersOf(purchaseUpdateListener) })
 
     val coroutineScope = rememberCoroutineScope()
@@ -76,9 +76,8 @@ fun AboutApp(upPress: () -> Unit) {
 
     Scaffold(
         topBar = { AboutAppAppBar(upPress) },
-        modifier = Modifier.fillMaxSize()
-    )
-    {
+        modifier = modifier.fillMaxSize()
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()

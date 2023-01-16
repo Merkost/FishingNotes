@@ -33,7 +33,7 @@ import org.koin.core.parameter.parametersOf
     ExperimentalAnimationApi::class, ExperimentalPagerApi::class, ExperimentalComposeUiApi::class
 )
 @Composable
-fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: UserMapMarker) {
+fun UserPlaceScreen(modifier: Modifier, backPress: () -> Unit, navController: NavController, place: UserMapMarker) {
 
     val viewModel: UserPlaceViewModel = getViewModel(parameters = { parametersOf(place) })
     val marker by viewModel.marker.collectAsState()
@@ -66,6 +66,7 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
             }
         }) {
         BottomSheetScaffold(
+            modifier = modifier,
             scaffoldState = scaffoldState,
             topBar = {
                 PlaceTopBar(

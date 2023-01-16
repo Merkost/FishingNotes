@@ -30,6 +30,7 @@ import org.koin.androidx.compose.get
 @ExperimentalPagerApi
 @Composable
 fun WeatherDaily(
+    modifier: Modifier,
     upPress: () -> Unit,
     data: DailyWeatherData?
 ) {
@@ -37,6 +38,7 @@ fun WeatherDaily(
     val pagerState = rememberPagerState(initialPage = data?.selectedDay ?: 0)
 
     BottomSheetScaffold(
+        modifier = modifier,
         topBar = {
             DefaultAppBar(
                 onNavClick = { upPress() },

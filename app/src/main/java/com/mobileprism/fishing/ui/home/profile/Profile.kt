@@ -49,8 +49,8 @@ import org.koin.androidx.compose.getViewModel
 @ExperimentalCoilApi
 @Composable
 fun Profile(
+    modifier: Modifier = Modifier,
     navController: NavController,
-    modifier: Modifier = Modifier
 ) {
     val viewModel = getViewModel<UserViewModel>()
     val user by viewModel.currentUser.collectAsState()
@@ -62,7 +62,7 @@ fun Profile(
         backgroundColor = MaterialTheme.colors.primary
     ) {
         ConstraintLayout(
-            modifier = modifier.fillMaxSize()
+            modifier = modifier.fillMaxSize().padding(it)
         ) {
             val (image, card, editButton) = createRefs()
 

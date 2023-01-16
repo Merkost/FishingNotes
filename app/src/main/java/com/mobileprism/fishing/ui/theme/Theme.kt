@@ -5,10 +5,7 @@ import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.mobileprism.fishing.model.datastore.UserPreferences
@@ -84,9 +81,9 @@ fun FishingNotesTheme(
     content: @Composable() () -> Unit
 ) {
     val userPreferences: UserPreferences = get()
-    val appTheme = userPreferences.appTheme.collectAsState(initialAppTheme)
+    val appTheme by userPreferences.appTheme.collectAsState(initialAppTheme)
 
-    val colors = chooseTheme(appTheme.value, darkTheme)
+    val colors = chooseTheme(appTheme, darkTheme)
 
     val customColors = if (darkTheme) darkCustomColors() else lightCustomColors()
 

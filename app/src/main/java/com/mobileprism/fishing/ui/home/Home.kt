@@ -80,20 +80,31 @@ fun NavGraphBuilder.addHomeGraph(
         val place: UserMapMarker? = from.arguments?.getParcelable(Arguments.PLACE)
         from.arguments?.clear()
         //from.arguments?.getBoolean(Arguments.MAP_NEW_PLACE)!!
-        MapScreen(modifier, navController, addPlace, place, upPress)
+        MapScreen(Modifier, navController, addPlace, place, upPress)
     }
     composable(HomeSections.NOTES.route) {
-        NotesScreen(navController = navController, upPress = upPress)
+        NotesScreen(
+            modifier = Modifier.systemBarsPadding(),
+            navController = navController,
+            upPress = upPress
+        )
         //Notes(navController = navController, upPress = upPress)
     }
     composable(HomeSections.WEATHER.route) { from ->
         val place: UserMapMarker? = from.arguments?.getParcelable(Arguments.PLACE)
         from.arguments?.clear()
-        WeatherScreen(modifier, navController, place)
+        WeatherScreen(
+            modifier,
+            navController,
+            place
+        )
         { navController.popBackStack() }
     }
     composable(HomeSections.PROFILE.route) {
-        Profile(navController, modifier)
+        Profile(
+            modifier = modifier,
+            navController = navController
+        )
     }
 }
 
@@ -367,14 +378,14 @@ private val BottomNavLabelTransformOrigin = TransformOrigin(0f, 0.5f)
 private val BottomNavIndicatorShape = RoundedCornerShape(percent = 50)
 private val BottomNavigationItemPadding = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
 
-@Preview
-@Composable
-private fun FishingNotesBottomNavPreview() {
-    FishingNotesTheme {
-        FishingNotesBottomBar(
-            tabs = HomeSections.values(),
-            currentRoute = "home/map",
-            navigateToRoute = { }
-        )
-    }
-}
+//@Preview
+//@Composable
+//private fun FishingNotesBottomNavPreview() {
+//    FishingNotesTheme {
+//        FishingNotesBottomBar(
+//            tabs = HomeSections.values(),
+//            currentRoute = "home/map",
+//            navigateToRoute = { }
+//        )
+//    }
+//}

@@ -32,6 +32,10 @@ class MapViewModel(
     private val locationManager: LocationManager,
 ) : ViewModel() {
 
+    //init {
+       // getFirstLaunchLocation()
+    //}
+
     private var _mapMarkers: MutableStateFlow<MutableList<UserMapMarker>> =
         MutableStateFlow(mutableListOf())
     val mapMarkers: StateFlow<List<UserMapMarker>>
