@@ -43,6 +43,7 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun MarkerInfoDialog(
     modifier: Modifier = Modifier,
+    marker: UserMapMarker,
     navController: NavController,
     onMarkerIconClicked: (UserMapMarker) -> Unit,
     onBottomSheetClose: () -> Unit,
@@ -50,7 +51,8 @@ fun MarkerInfoDialog(
     val context = LocalContext.current
 
     val viewModel: MapViewModel = getViewModel()
-    val receivedMarker by viewModel.currentMarker.collectAsState()
+//    val receivedMarker by viewModel.currentMarker.collectAsState()
+    val receivedMarker = marker
     val weatherPreferences: WeatherPreferences = get()
 
     val windUnit by weatherPreferences.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)

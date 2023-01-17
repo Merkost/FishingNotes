@@ -1,7 +1,5 @@
 package com.mobileprism.fishing.ui.home.map
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
@@ -15,7 +13,6 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
@@ -36,25 +33,19 @@ import com.google.android.gms.maps.model.*
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.google.maps.android.compose.*
-import com.google.maps.android.ktx.awaitMap
 import com.google.maps.android.ktx.awaitMapLoad
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.datastore.UserPreferences
-import com.mobileprism.fishing.model.utils.UserHandler
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainActivity
 import com.mobileprism.fishing.ui.MainDestinations
-import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.viewmodels.MapViewModel
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
-import com.mobileprism.fishing.utils.displayAppDetailsSettings
-import com.mobileprism.fishing.utils.showToast
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -134,10 +125,13 @@ fun MapScreen(
             },
             bottomSheet = {
                 Spacer(modifier = Modifier.height(1.dp))
-                MarkerInfoDialog(
-                    navController = navController,
-                    onMarkerIconClicked = viewModel::onMarkerClicked
-                ) { coroutineScope.launch { scaffoldState.bottomSheetState.collapse() } }
+                (mapUiState as? MapUiState.BottomSheetInfoMode)?.marker?.let { marker ->
+                    MarkerInfoDialog(
+                        navController = navController,
+                        marker = marker,
+                        onMarkerIconClicked = viewModel::onMarkerClicked
+                    ) { coroutineScope.launch { scaffoldState.bottomSheetState.collapse() } }
+                }
             }
         ) { paddingValues ->
             ConstraintLayout(modifier = Modifier.fillMaxSize()) {
@@ -293,7 +287,7 @@ fun onMapSettingsClicked(
     }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class, MapsComposeExperimentalApi::class)
 @Composable
 fun MapLayout(
     modifier: Modifier = Modifier,
@@ -333,6 +327,16 @@ fun MapLayout(
                 mapType = MapType.values()[mapType]
             )
         )
+    }
+
+    DisposableEffect(Unit) {
+        viewModel.getLastLocation()
+        onDispose { }
+
+    }
+
+    LaunchedEffect(cameraPositionState.position) {
+        viewModel.saveLastCameraPosition(cameraPositionState.position)
     }
 
     GoogleMap(
@@ -578,14 +582,14 @@ fun FishingFab(
 private val FabSize = 56.dp
 
 private fun onAddNewCatchClick(navController: NavController, marker: UserMapMarker) {
-        if (marker.id != CURRENT_PLACE_ITEM_ID) {
-            navController.navigate(
-                MainDestinations.NEW_CATCH_ROUTE,
-                Arguments.PLACE to marker
-            )
-        } else {
-            // TODO: добавить улов на текущее местоположение
-        }
+    if (marker.id != CURRENT_PLACE_ITEM_ID) {
+        navController.navigate(
+            MainDestinations.NEW_CATCH_ROUTE,
+            Arguments.PLACE to marker
+        )
+    } else {
+        // TODO: добавить улов на текущее местоположение
+    }
 }
 
 private fun onMarkerDetailsClick(navController: NavController, marker: UserMapMarker) {
