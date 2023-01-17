@@ -232,7 +232,8 @@ class MapViewModel(
             else -> {
                 initialPlaceSelected.value = true
                 _currentMarker.value = place
-                _mapUiState.value = MapUiState.BottomSheetInfoMode
+                // TODO: deal with marker in state
+                _mapUiState.value = MapUiState.BottomSheetInfoMode(place)
                 _firstCameraPosition.value =
                     currentCameraPosition.value.copy(place.latLng, second = DEFAULT_ZOOM)
             }
@@ -283,7 +284,7 @@ class MapViewModel(
         return marker.let {
             setNewCameraLocation(it.latLng, DEFAULT_ZOOM)
             _currentMarker.value = it
-            _mapUiState.value = MapUiState.BottomSheetInfoMode
+            _mapUiState.value = MapUiState.BottomSheetInfoMode(it)
             true
         }
     }

@@ -80,19 +80,17 @@ fun MarkerInfoDialog(
     val cornersDp = 16.dp
     val elevationDp = 6.dp
 
-    Spacer(modifier = Modifier.size(1.dp))
-
     receivedMarker?.let { marker ->
         Card(
             shape = RoundedCornerShape(cornersDp),
             elevation = elevationDp,
             backgroundColor = MaterialTheme.colors.surface,
-            modifier = Modifier
+            modifier = modifier
                 .zIndex(1.0f)
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .padding(paddingDp),
-            onClick = { onMarkerClicked(marker, navController) }
+            onClick = { receivedMarker?.let { marker -> onMarkerClicked(marker, navController) } }
         ) {
             AnimatedVisibility(
                 true,
@@ -299,7 +297,7 @@ fun MarkerInfoDialog(
                 }
             }
         }
-    } ?: onBottomSheetClose()
+    }
 }
 
 fun onMarkerClicked(marker: UserMapMarker, navController: NavController) {

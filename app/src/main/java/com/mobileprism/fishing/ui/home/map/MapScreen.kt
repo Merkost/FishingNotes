@@ -62,7 +62,6 @@ import org.koin.androidx.compose.getViewModel
 
 @OptIn(
     ExperimentalMaterialApi::class,
-    ExperimentalLayoutApi::class,
     ExperimentalPermissionsApi::class
 )
 @Composable
@@ -87,7 +86,6 @@ fun MapScreen(
     val userPreferences: UserPreferences = get()
     val useZoomButtons by userPreferences.useMapZoomButons.collectAsState(false)
 
-    // FIXME: Opened sheet on start
     val scaffoldState = rememberBottomSheetScaffoldState()
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     var newPlaceDialog by remember { mutableStateOf(false) }
@@ -112,21 +110,21 @@ fun MapScreen(
         }
     ) {
         MapScaffold(
-            modifier = modifier.consumedWindowInsets(WindowInsets.statusBars).background(Color.Red),
+            modifier = modifier,
             mapUiState = mapUiState,
             scaffoldState = scaffoldState,
             fab = {
                 MapFab(
                     viewModel = viewModel,
                     onClick = {
-                        when (mapUiState) {
+                        when (val state = mapUiState) {
                             MapUiState.NormalMode -> viewModel.setPlaceSelectionMode()
                             MapUiState.PlaceSelectMode -> {
                                 newPlaceDialog = true
                                 viewModel.resetMapUiState()
                             }
-                            MapUiState.BottomSheetInfoMode -> {
-                                onAddNewCatchClick(navController, viewModel)
+                            is MapUiState.BottomSheetInfoMode -> {
+                                onAddNewCatchClick(navController, state.marker)
                             }
                         }
                     },
@@ -135,13 +133,14 @@ fun MapScreen(
                 )
             },
             bottomSheet = {
+                Spacer(modifier = Modifier.height(1.dp))
                 MarkerInfoDialog(
                     navController = navController,
                     onMarkerIconClicked = viewModel::onMarkerClicked
                 ) { coroutineScope.launch { scaffoldState.bottomSheetState.collapse() } }
             }
         ) { paddingValues ->
-            ConstraintLayout(modifier = Modifier.fillMaxSize().padding(paddingValues).statusBarsPadding()) {
+            ConstraintLayout(modifier = Modifier.fillMaxSize()) {
                 val (mapLayout, addMarkerFragment, mapMyLocationButton,
                     mapCompassButton, mapLayersButton, zoomInButton, zoomOutButton,
                     mapSettingsButton, mapLayersView, pointer) = createRefs()
@@ -153,7 +152,13 @@ fun MapScreen(
                     cameraPositionState = cameraPositionState
                 )
 
-                Box(modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.statusBars), contentAlignment = Alignment.TopEnd) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .statusBarsPadding(),
+                    contentAlignment = Alignment.TopEnd
+                ) {
                     MyLocationButton(
                         modifier = Modifier.padding(16.dp),
                         onClick = viewModel::onMyLocationClick
@@ -163,9 +168,11 @@ fun MapScreen(
                 MapLayersButton(
                     modifier = Modifier
                         .constrainAs(mapLayersButton) {
-                        top.linkTo(parent.top, 16.dp)
-                        absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                    }.windowInsetsPadding(WindowInsets.statusBars)) { mapLayersSelection = true }
+                            top.linkTo(parent.top, 16.dp)
+                            absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                        }
+                        .windowInsetsPadding(WindowInsets.statusBars)
+                ) { mapLayersSelection = true }
 
                 if (mapLayersSelection)
                     Surface(modifier = Modifier
@@ -199,9 +206,11 @@ fun MapScreen(
                 MapSettingsButton(
                     modifier = Modifier
                         .constrainAs(mapSettingsButton) {
-                        top.linkTo(mapLayersButton.bottom, 16.dp)
-                        absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                    }.windowInsetsPadding(WindowInsets.statusBars)) { onMapSettingsClicked(coroutineScope, modalBottomSheetState) }
+                            top.linkTo(mapLayersButton.bottom, 16.dp)
+                            absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                        }
+                        .windowInsetsPadding(WindowInsets.statusBars)
+                ) { onMapSettingsClicked(coroutineScope, modalBottomSheetState) }
 
 
 
@@ -358,7 +367,7 @@ fun MapLayout(
             )
         }
 
-        MapEffect(Unit) {map ->
+        MapEffect(Unit) { map ->
             launch {
                 viewModel.newMapCameraPosition.collectLatest {
                     map.awaitMapLoad()
@@ -369,7 +378,14 @@ fun MapLayout(
             launch {
                 viewModel.firstCameraPosition.collectLatest {
                     map.awaitMapLoad()
-                    it?.let { setCameraPosition(cameraPositionState, it.first, it.second, it.third) }
+                    it?.let {
+                        setCameraPosition(
+                            cameraPositionState,
+                            it.first,
+                            it.second,
+                            it.third
+                        )
+                    }
                 }
             }
         }
@@ -428,41 +444,6 @@ fun MapLayout(
     }*/
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
-@ExperimentalPermissionsApi
-@Composable
-fun LocationPermissionDialog(
-    onCloseCallback: () -> Unit,
-) {
-    val context = LocalContext.current
-    val userPreferences: UserPreferences = get()
-    val coroutineScope = rememberCoroutineScope()
-
-    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
-    if (permissionsState.allPermissionsGranted.not()) {
-        GrantLocationPermissionsDialog(
-            onDismiss = { onCloseCallback() },
-            onNegativeClick = { onCloseCallback() },
-            onPositiveClick = {
-                if (permissionsState.shouldShowRationale) {
-                    context.displayAppDetailsSettings()
-                    context.showToast(context.getString(R.string.enable_gps_in_settings))
-                } else {
-                    permissionsState.launchMultiplePermissionRequest()
-                }
-                onCloseCallback()
-            },
-            onDontAskClick = {
-                SnackbarManager.showMessage(R.string.location_dont_ask)
-                coroutineScope.launch {
-                    userPreferences.saveLocationPermissionStatus(false)
-                }
-                onCloseCallback()
-            }
-        )
-    }
-}
-
 @ExperimentalMaterialApi
 @Composable
 fun MapFab(
@@ -481,7 +462,7 @@ fun MapFab(
             MapUiState.NormalMode -> {
                 defaultFabBottomPadding
             }
-            MapUiState.BottomSheetInfoMode -> {
+            is MapUiState.BottomSheetInfoMode -> {
                 34.dp
             }
             MapUiState.PlaceSelectMode -> {
@@ -495,7 +476,7 @@ fun MapFab(
             MapUiState.NormalMode -> {
                 0.dp
             }
-            MapUiState.BottomSheetInfoMode -> {
+            is MapUiState.BottomSheetInfoMode -> {
                 26.dp
             }
             MapUiState.PlaceSelectMode -> {
@@ -515,8 +496,8 @@ fun MapFab(
         FishingFab(
             modifier = Modifier
                 .animateContentSize()
-                .windowInsetsPadding(WindowInsets.navigationBars),
-                //.padding(bottom = paddingBottom.value, top = paddingTop.value),
+                .navigationBarsPadding()
+                .padding(bottom = paddingBottom.value, top = paddingTop.value),
             onClick = onClick,
             onLongPress = {
                 if (state == MapUiState.NormalMode && useFastFabAdd) {
@@ -596,18 +577,15 @@ fun FishingFab(
 
 private val FabSize = 56.dp
 
-private fun onAddNewCatchClick(navController: NavController, viewModel: MapViewModel) {
-    viewModel.currentMarker.value?.let {
-        if (it.id != CURRENT_PLACE_ITEM_ID) {
+private fun onAddNewCatchClick(navController: NavController, marker: UserMapMarker) {
+        if (marker.id != CURRENT_PLACE_ITEM_ID) {
             navController.navigate(
                 MainDestinations.NEW_CATCH_ROUTE,
-                Arguments.PLACE to it
+                Arguments.PLACE to marker
             )
         } else {
-            // TODO: Нельзя добавить улов на текущее местоположение
+            // TODO: добавить улов на текущее местоположение
         }
-
-    }
 }
 
 private fun onMarkerDetailsClick(navController: NavController, marker: UserMapMarker) {

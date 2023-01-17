@@ -76,7 +76,7 @@ fun NavGraphBuilder.addHomeGraph(
     }
     composable(HomeSections.NOTES.route) {
         NotesScreen(
-            modifier = Modifier.systemBarsPadding(),
+            modifier = modifier,
             navController = navController,
             upPress = upPress
         )

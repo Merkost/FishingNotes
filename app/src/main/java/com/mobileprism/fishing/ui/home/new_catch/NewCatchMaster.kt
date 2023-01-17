@@ -35,6 +35,7 @@ import com.mobileprism.fishing.ui.viewstates.NewCatchViewState
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.getViewModel
 import org.koin.androidx.compose.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -46,7 +47,7 @@ fun NewCatchMasterScreen(
     navController: NavController,
     upPress: () -> Unit,
 ) {
-    val viewModel: NewCatchMasterViewModel by viewModel {
+    val viewModel: NewCatchMasterViewModel = getViewModel(parameters = {
         parametersOf(
             if (receivedPlace != null) {
                 ReceivedPlaceState.Received(receivedPlace)
@@ -54,7 +55,7 @@ fun NewCatchMasterScreen(
                 ReceivedPlaceState.NotReceived
             }
         )
-    }
+    })
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -165,7 +166,11 @@ fun NewCatchMasterScreen(
             )
         }
     ) {
-        ConstraintLayout(modifier = Modifier.fillMaxSize().padding(it)) {
+        ConstraintLayout(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+        ) {
             val (pager, buttons) = createRefs()
 
             NewCatchPager(

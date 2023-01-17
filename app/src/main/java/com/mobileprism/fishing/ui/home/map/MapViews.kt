@@ -53,7 +53,9 @@ import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
 import com.mobileprism.fishing.ui.theme.supportTextColor
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewmodels.MapViewModel
+import com.mobileprism.fishing.utils.displayAppDetailsSettings
 import com.mobileprism.fishing.utils.location.LocationManager
+import com.mobileprism.fishing.utils.showToast
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
@@ -674,6 +676,41 @@ fun BottomSheetLine(modifier: Modifier = Modifier) {
                 .size(width = 25.dp, height = 3.dp)
                 .clip(CircleShape)
                 .background(Color.Gray)
+        )
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@ExperimentalPermissionsApi
+@Composable
+fun LocationPermissionDialog(
+    onCloseCallback: () -> Unit,
+) {
+    val context = LocalContext.current
+    val userPreferences: UserPreferences = get()
+    val coroutineScope = rememberCoroutineScope()
+
+    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
+    if (permissionsState.allPermissionsGranted.not()) {
+        GrantLocationPermissionsDialog(
+            onDismiss = { onCloseCallback() },
+            onNegativeClick = { onCloseCallback() },
+            onPositiveClick = {
+                if (permissionsState.shouldShowRationale) {
+                    context.displayAppDetailsSettings()
+                    context.showToast(context.getString(R.string.enable_gps_in_settings))
+                } else {
+                    permissionsState.launchMultiplePermissionRequest()
+                }
+                onCloseCallback()
+            },
+            onDontAskClick = {
+                SnackbarManager.showMessage(R.string.location_dont_ask)
+                coroutineScope.launch {
+                    userPreferences.saveLocationPermissionStatus(false)
+                }
+                onCloseCallback()
+            }
         )
     }
 }

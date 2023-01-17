@@ -119,7 +119,7 @@ sealed class LocationState() {
 sealed class MapUiState {
     object NormalMode : MapUiState()
     object PlaceSelectMode : MapUiState()
-    object BottomSheetInfoMode : MapUiState()
+    class BottomSheetInfoMode(val marker: UserMapMarker) : MapUiState()
     //object BottomSheetFullyExpanded : MapUiState()
 }
 
