@@ -46,7 +46,6 @@ import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.map.LocationState
-import com.mobileprism.fishing.ui.home.map.checkLocationPermissions
 import com.mobileprism.fishing.ui.home.map.locationPermissionsList
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.navigate
@@ -54,6 +53,7 @@ import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.ui.viewmodels.WeatherViewModel
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.location.LocationManager
+import com.mobileprism.fishing.utils.location.checkLocationPermissions
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toDayOfWeek
 import com.mobileprism.fishing.utils.time.toDayOfWeekAndDate
@@ -63,6 +63,7 @@ import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import kotlin.math.min
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun WeatherScreen(

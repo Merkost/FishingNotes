@@ -165,15 +165,7 @@ suspend fun setCameraPosition(
     )
 }
 
-fun checkLocationPermissions(context: Context): Boolean {
-    return ActivityCompat.checkSelfPermission(
-        context,
-        Manifest.permission.ACCESS_FINE_LOCATION
-    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-        context,
-        Manifest.permission.ACCESS_COARSE_LOCATION
-    ) != PackageManager.PERMISSION_GRANTED
-}
+
 
 fun getMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
     LifecycleEventObserver { _, event ->

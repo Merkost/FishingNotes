@@ -41,6 +41,7 @@ import com.google.accompanist.placeholder.shimmer
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
+import com.google.maps.android.compose.CameraPositionState
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.MainActivity
@@ -222,9 +223,12 @@ fun MyLocationButton(
 @Composable
 fun CompassButton(
     modifier: Modifier = Modifier,
-    mapBearing: State<Float>,
-    onClick: () -> Unit
+    cameraPositionState: CameraPositionState,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val mapBearing = remember(cameraPositionState.position.bearing) {
+        mutableStateOf(cameraPositionState.position.bearing)
+    }
 
     AnimatedVisibility(
         modifier = modifier,
@@ -239,7 +243,13 @@ fun CompassButton(
             IconButton(modifier = Modifier
                 .padding(8.dp)
                 .fillMaxSize(),
-                onClick = { onClick() }) {
+                onClick = {
+                    cameraPositionState.position.let {
+                        coroutineScope.launch {
+                            moveCameraToLocation(cameraPositionState, it.target, it.zoom, 0f)
+                        }
+                    }
+                }) {
                 Icon(
                     painterResource(
                         if (mapBearing.value > 356f ||

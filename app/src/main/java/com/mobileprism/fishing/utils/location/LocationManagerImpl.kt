@@ -1,12 +1,15 @@
 package com.mobileprism.fishing.utils.location
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.IntentSender
+import android.content.pm.PackageManager
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.app.ActivityCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.android.gms.common.api.ResolvableApiException
@@ -16,9 +19,7 @@ import com.google.android.gms.tasks.Task
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.map.LocationState
-import com.mobileprism.fishing.ui.home.map.checkLocationPermissions
-import com.mobileprism.fishing.utils.isCoordinatesFar
-import kotlinx.coroutines.channels.awaitClose
+import com.mobileprism.fishing.utils.showToast
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
@@ -64,9 +65,8 @@ class LocationManagerImpl(private val context: Context) : LocationManager {
     }
 
     @SuppressLint("MissingPermission")
-    @OptIn(ExperimentalPermissionsApi::class)
     override fun getCurrentLocationFlow(): Flow<LocationState> = flow {
-        val locationPermissionsGiven = checkLocationPermissions(context).not()
+        val locationPermissionsGiven = checkLocationPermissions(context)
         when {
             manager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)
                 .not() -> {
@@ -74,19 +74,15 @@ class LocationManagerImpl(private val context: Context) : LocationManager {
             }
             locationPermissionsGiven -> {
                 val locationResult = fusedLocationProviderClient.lastLocation.await()
-                try {
+                kotlin.runCatching {
                     val newCoordinates = LatLng(locationResult.latitude, locationResult.longitude)
-                        //if (isCoordinatesFar(lastCoordinates.value, newCoordinates)) {
-                        emit(LocationState.LocationGranted(newCoordinates))
-                        lastCoordinates.value = newCoordinates
-                        //}
-                } catch (e: Exception) {
+                    //if (isCoordinatesFar(lastCoordinates.value, newCoordinates)) {
+                    emit(LocationState.LocationGranted(newCoordinates))
+                    lastCoordinates.value = newCoordinates
+                    //}
+                }.onFailure {
                     Log.d("MAP", "GPS is off")
-                    Toast.makeText(
-                        context,
-                        R.string.cant_get_current_location,
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    context.showToast(context.getString(R.string.cant_get_current_location))
                 }
             }
             else -> { emit(LocationState.NoPermission) }
@@ -128,4 +124,16 @@ class LocationManagerImpl(private val context: Context) : LocationManager {
             onGpsEnabled()
         }
     }
+
+
+}
+
+fun checkLocationPermissions(context: Context): Boolean {
+    return ActivityCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
 }

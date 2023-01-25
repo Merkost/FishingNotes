@@ -65,15 +65,14 @@ class UserPreferences(private val context: Context) {
             preferences[MAP_ZOOM_BUTTONS_KEY] ?: false
         }
 
-    val getLastMapCameraLocation: Flow<Triple<LatLng, Float, Float>> = context.dataStore.data
+    val getLastMapCameraLocation: Flow<Pair<LatLng, Float>> = context.dataStore.data
         .map { preferences ->
-            Triple(
+            Pair(
                 LatLng(
                     preferences[LAST_MAP_LATITUDE] ?: 0.0,
                     preferences[LAST_MAP_LONGITUDE] ?: 0.0,
                 ),
-                preferences[LAST_MAP_ZOOM] ?: 0f,
-                preferences[LAST_MAP_BEARING] ?: 0f,
+                preferences[LAST_MAP_ZOOM] ?: 0f
                 )
         }
 

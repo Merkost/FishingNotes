@@ -45,6 +45,7 @@ import com.mobileprism.fishing.ui.viewmodels.MapViewModel
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
+import com.mobileprism.fishing.utils.location.checkLocationPermissions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -153,10 +154,20 @@ fun MapScreen(
                         .statusBarsPadding(),
                     contentAlignment = Alignment.TopEnd
                 ) {
-                    MyLocationButton(
+                    Column(
                         modifier = Modifier.padding(16.dp),
-                        onClick = viewModel::onMyLocationClick
-                    )
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        MyLocationButton(
+                            modifier = Modifier,
+                            onClick = viewModel::onMyLocationClick
+                        )
+
+                        CompassButton(modifier = modifier, cameraPositionState = cameraPositionState)
+                    }
+
+
                 }
 
                 MapLayersButton(
@@ -207,14 +218,6 @@ fun MapScreen(
                 ) { onMapSettingsClicked(coroutineScope, modalBottomSheetState) }
 
 
-
-                CompassButton(
-                    modifier = modifier.constrainAs(mapCompassButton) {
-                        top.linkTo(mapMyLocationButton.bottom, 16.dp)
-                        absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-                    }, mapBearing = viewModel.mapBearing.collectAsState(),
-                    onClick = viewModel::resetMapBearing
-                )
 
                 if (useZoomButtons) {
                     MapZoomInButton(
@@ -372,68 +375,38 @@ fun MapLayout(
         }
 
         MapEffect(Unit) { map ->
+            map.awaitMapLoad()
+
             launch {
                 viewModel.newMapCameraPosition.collectLatest {
-                    map.awaitMapLoad()
-                    moveCameraToLocation(cameraPositionState, it.first, it.second, it.third)
+                    moveCameraToLocation(cameraPositionState, it.first, it.second)
                 }
             }
 
             launch {
                 viewModel.firstCameraPosition.collectLatest {
-                    map.awaitMapLoad()
-                    it?.let {
-                        setCameraPosition(
-                            cameraPositionState,
-                            it.first,
-                            it.second,
-                            it.third
-                        )
-                    }
+                    it?.let { setCameraPosition(cameraPositionState, it.first, it.second) }
+                }
+            }
+
+            launch {
+                map.setOnCameraIdleListener {
+                    viewModel.setCameraMoveState(CameraMoveState.MoveFinish)
+                }
+            }
+
+            launch {
+                map.setOnCameraMoveListener {
+                    viewModel.setCameraMoveState(CameraMoveState.MoveStart)
                 }
             }
         }
-
-    }
-    /*AndroidView(
-        { map },
-        modifier = modifier
-            .fillMaxSize()
-            .zIndex(-1.0f)
-    ) { mapView ->
-        coroutineScope.launch {
-            val googleMap = mapView.awaitMap()
-
-
-
-            googleMap.clear()
-
-            googleMap.setOnCameraMoveStartedListener {
-                viewModel.setCameraMoveState(CameraMoveState.MoveStart)
-            }
-            googleMap.setOnCameraMoveListener {
-                viewModel.onCameraMove(
-                    googleMap.cameraPosition.target,
-                    googleMap.cameraPosition.zoom,
-                    googleMap.cameraPosition.bearing
-                )
-            }
-            googleMap.setOnCameraIdleListener {
-                viewModel.setCameraMoveState(CameraMoveState.MoveFinish)
-                viewModel.saveLastCameraPosition()
-            }
-
-        }
-    }*/
-
-
-
-    LaunchedEffect(Unit, permissionsState.allPermissionsGranted) {
-        checkLocationPermissions(context)
-        mapProperties =
-            mapProperties.copy(isMyLocationEnabled = permissionsState.allPermissionsGranted)
     }
 
+
+    LaunchedEffect(permissionsState.allPermissionsGranted) {
+        mapProperties = mapProperties.copy(isMyLocationEnabled = permissionsState.allPermissionsGranted)
+    }
 
 
     LaunchedEffect(mapType) {

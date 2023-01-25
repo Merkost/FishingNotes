@@ -33,9 +33,6 @@ class MapViewModel(
     private val locationManager: LocationManager,
 ) : ViewModel() {
 
-    //init {
-       // getFirstLaunchLocation()
-    //}
 
     private var _mapMarkers: MutableStateFlow<MutableList<UserMapMarker>> =
         MutableStateFlow(mutableListOf())
@@ -49,12 +46,13 @@ class MapViewModel(
 //    val currentMarker = _currentMarker.asStateFlow()
 
     init {
+        getFirstLaunchLocation()
         loadUserMarkersList()
     }
 
     private val initialPlaceSelected = MutableStateFlow(false)
 
-    private val _firstCameraPosition = MutableStateFlow<Triple<LatLng, Float, Float>?>(null)
+    private val _firstCameraPosition = MutableStateFlow<Pair<LatLng, Float>?>(null)
     val firstCameraPosition = _firstCameraPosition.asStateFlow()
 
     private val _addNewMarkerState: MutableStateFlow<UiState?> = MutableStateFlow(null)
@@ -201,7 +199,13 @@ class MapViewModel(
     fun saveLastCameraPosition(position: CameraPosition) {
         viewModelScope.launch {
             if (!initialPlaceSelected.value) {
-                userPreferences.saveLastMapCameraLocation(Triple(position.target, position.zoom, position.bearing))
+                userPreferences.saveLastMapCameraLocation(
+                    Triple(
+                        position.target,
+                        position.zoom,
+                        position.bearing
+                    )
+                )
             }
             lastMapCameraPosition.value = currentCameraPosition.value
         }
@@ -228,16 +232,18 @@ class MapViewModel(
             place == null -> initialPlaceSelected.value = false
             place.id == Constants.CURRENT_PLACE_ITEM_ID -> {
                 initialPlaceSelected.value = true
-                _firstCameraPosition.value =
-                    currentCameraPosition.value.copy(place.latLng, second = DEFAULT_ZOOM)
+                // TODO:
+//                _firstCameraPosition.value =
+//                    currentCameraPosition.value.copy(place.latLng, second = DEFAULT_ZOOM)
             }
             else -> {
                 initialPlaceSelected.value = true
 //                _currentMarker.value = place
                 // TODO: deal with marker in state
                 _mapUiState.value = MapUiState.BottomSheetInfoMode(place)
-                _firstCameraPosition.value =
-                    currentCameraPosition.value.copy(place.latLng, second = DEFAULT_ZOOM)
+                // TODO:
+//                _firstCameraPosition.value =
+//                    currentCameraPosition.value.copy(place.latLng, second = DEFAULT_ZOOM)
             }
         }
         /*place?.let {
@@ -296,12 +302,6 @@ class MapViewModel(
 
     fun setPlaceSelectionMode() {
         _mapUiState.value = MapUiState.PlaceSelectMode
-    }
-
-    fun resetMapBearing() {
-        viewModelScope.launch {
-            _newMapCameraPosition.emit(_currentCameraPosition.value.copy(third = 0f))
-        }
     }
 
     override fun onCleared() {
@@ -376,8 +376,7 @@ class MapViewModel(
         val currentState = mapUiState.value
         if (currentState is MapUiState.BottomSheetInfoMode/*!initialPlaceSelected.value*/) {
             /*currentMarker.value*/currentState.marker?.let {
-                _firstCameraPosition.value =
-                    currentCameraPosition.value.copy(it.latLng, DEFAULT_ZOOM)
+                _firstCameraPosition.update { currentState.marker.latLng to DEFAULT_ZOOM }
             } ?: getFirstLaunchLocation()
         }
 
@@ -385,9 +384,7 @@ class MapViewModel(
 
     private fun getFirstLaunchLocation() {
         viewModelScope.launch {
-            // TODO: deal with marker in state
-
-            if (mapUiState.value !is MapUiState.BottomSheetInfoMode/*currentMarker.value == null*/) {
+            if (mapUiState.value !is MapUiState.BottomSheetInfoMode) {
                 val fromBd = userPreferences.getLastMapCameraLocation.first()
                 _firstCameraPosition.emit(fromBd)
             }
@@ -395,7 +392,7 @@ class MapViewModel(
     }
 
     fun resetAddNewMarkerState() {
-        _addNewMarkerState.value = null
+        _addNewMarkerState.update { null }
     }
 
 }
