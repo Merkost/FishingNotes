@@ -15,13 +15,19 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.io.IOException
-import java.security.*
+import java.security.GeneralSecurityException
+import java.security.KeyManagementException
+import java.security.KeyStore
+import java.security.KeyStoreException
+import java.security.NoSuchAlgorithmException
 import java.security.cert.Certificate
 import java.security.cert.CertificateException
 import java.security.cert.CertificateFactory
-import java.util.*
+import java.security.cert.X509Certificate
+import java.util.Arrays
 import java.util.concurrent.TimeUnit
 import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
 import javax.net.ssl.TrustManagerFactory
 import javax.net.ssl.X509TrustManager
 
@@ -97,13 +103,14 @@ fun createFishingOkHttpClient(
         .connectTimeout(7, TimeUnit.SECONDS)
         .writeTimeout(10, TimeUnit.SECONDS)
         .readTimeout(7, TimeUnit.SECONDS)
-        .hostnameVerifier { hostname, _ ->
-            Constants.API_URL.contains(hostname)
-        }
-        .sslSocketFactory(
-            sslSocketFactory = getSSLConfig(context).socketFactory,
-            systemDefaultTrustManager()
-        )
+//        .hostnameVerifier { hostname, _ ->
+//            if (BuildConfig.DEBUG) true
+//            else Constants.API_URL.contains(hostname)
+//        }
+//        .sslSocketFactory(
+//            sslSocketFactory = getSSLConfig(context).socketFactory,
+//            systemDefaultTrustManager()
+//        )
         .build()
 }
 
@@ -140,16 +147,20 @@ private fun getSSLConfig(context: Context): SSLContext {
     return sslContext
 }
 
+var TRUST_ALL_CERTS: TrustManager = object : X509TrustManager {
+    override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
+    override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
+    override fun getAcceptedIssuers(): Array<X509Certificate> {
+        return arrayOf()
+    }
+}
 private fun systemDefaultTrustManager(): X509TrustManager {
     return try {
-        val trustManagerFactory =
-            TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+        val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
         trustManagerFactory.init(null as KeyStore?)
         val trustManagers = trustManagerFactory.trustManagers
         check(!(trustManagers.size != 1 || trustManagers[0] !is X509TrustManager)) {
-            "Unexpected default trust managers:" + Arrays.toString(
-                trustManagers
-            )
+            "Unexpected default trust managers:" + Arrays.toString(trustManagers)
         }
         trustManagers[0] as X509TrustManager
     } catch (e: GeneralSecurityException) {

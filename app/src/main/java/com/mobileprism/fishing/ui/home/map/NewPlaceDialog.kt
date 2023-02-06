@@ -28,6 +28,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.constraintlayout.compose.ConstraintLayout
+import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.raw.RawMapMarker
 import com.mobileprism.fishing.ui.home.SnackbarManager
@@ -43,13 +44,13 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun NewPlaceDialog(
     dialogState: Boolean,
+    cameraPosition: LatLng,
     onDismiss: () -> Unit,
 ) {
     if (dialogState) {
         Dialog(onDismissRequest = { onDismiss() }) {
             val context = LocalContext.current
             val viewModel: MapViewModel = getViewModel()
-            val currentCameraPosition by viewModel.currentCameraPosition.collectAsState()
             val uiState by viewModel.addNewMarkerState.collectAsState()
 
             LaunchedEffect(uiState) {
@@ -226,18 +227,15 @@ fun NewPlaceDialog(
                                     false -> titleValue.value
                                 },
                                 description = descriptionValue.value,
-                                latitude = currentCameraPosition.first.latitude,
-                                longitude = currentCameraPosition.first.longitude,
+                                latitude = cameraPosition.latitude,
+                                longitude = cameraPosition.longitude,
                                 markerColor = markerColor.value
                             )
                         )
                     }, enabled = uiState !is UiState.InProgress
                     ) {
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(
-                                6.dp,
-                                Alignment.CenterHorizontally
-                            ),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.animateContentSize()
                         ) {

@@ -23,6 +23,7 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
+import com.google.maps.android.compose.CameraPositionState
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.CurrentWeatherFree
@@ -44,6 +45,7 @@ import org.koin.androidx.compose.getViewModel
 fun MarkerInfoDialog(
     modifier: Modifier = Modifier,
     marker: UserMapMarker,
+    cameraPositionState: CameraPositionState,
     navController: NavController,
     onMarkerIconClicked: (UserMapMarker) -> Unit,
     onBottomSheetClose: () -> Unit,
@@ -284,7 +286,7 @@ fun MarkerInfoDialog(
                         IconButton(onClick = { onWeatherIconClicked(marker, navController) }) {
                             Icon(
                                 painterResource(R.drawable.ic_baseline_navigation_24), "",
-                                modifier = Modifier.rotate(viewModel.windIconRotation),
+                                modifier = Modifier.rotate(cameraPositionState.position.bearing),
                                 tint = if (currentWeather == null) Color.LightGray else MaterialTheme.colors.primaryVariant
                             )
                         }

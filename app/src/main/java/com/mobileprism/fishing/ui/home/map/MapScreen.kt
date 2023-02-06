@@ -47,6 +47,8 @@ import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
 import com.mobileprism.fishing.utils.location.checkLocationPermissions
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
@@ -115,6 +117,7 @@ fun MapScreen(
                                 newPlaceDialog = true
                                 viewModel.resetMapUiState()
                             }
+
                             is MapUiState.BottomSheetInfoMode -> {
                                 onAddNewCatchClick(navController, state.marker)
                             }
@@ -130,8 +133,12 @@ fun MapScreen(
                     MarkerInfoDialog(
                         navController = navController,
                         marker = marker,
-                        onMarkerIconClicked = viewModel::onMarkerClicked
-                    ) { coroutineScope.launch { scaffoldState.bottomSheetState.collapse() } }
+                        cameraPositionState = cameraPositionState,
+                        onMarkerIconClicked = viewModel::onMarkerClicked,
+                        onBottomSheetClose = {
+                            coroutineScope.launch { scaffoldState.bottomSheetState.collapse() }
+                        }
+                    )
                 }
             }
         ) { paddingValues ->
@@ -142,9 +149,19 @@ fun MapScreen(
                 val verticalMyLocationButtonGl = createGuidelineFromAbsoluteRight(56.dp)
                 val centerHorizontal = createGuidelineFromBottom(0.5f)
 
+
                 MapLayout(
                     modifier = Modifier.constrainAs(mapLayout) { centerTo(parent) },
-                    cameraPositionState = cameraPositionState
+                    cameraPositionState = cameraPositionState,
+                    mapType = viewModel.mapType.collectAsState().value,
+                    markers = viewModel.mapMarkers.collectAsState().value,
+                    onMarkerClicked = viewModel::onMarkerClicked,
+//                    initialPosition = editableAddress?.latLng,
+                    firstCameraPosition = viewModel.firstCameraPosition,
+                    newMapCameraPosition = viewModel.newMapCameraPosition,
+                    onAutoToMyLocation = viewModel::onAutoToMyLocation,
+                    onMapClick = viewModel::onMapClicked,
+                    onCameraStateChanged = viewModel::setCameraMoveState
                 )
 
                 Box(
@@ -164,7 +181,10 @@ fun MapScreen(
                             onClick = viewModel::onMyLocationClick
                         )
 
-                        CompassButton(modifier = modifier, cameraPositionState = cameraPositionState)
+                        CompassButton(
+                            modifier = modifier,
+                            cameraPositionState = cameraPositionState
+                        )
                     }
 
 
@@ -270,10 +290,13 @@ fun MapScreen(
                 ) {
                     PlaceTileView(
                         modifier = Modifier.wrapContentSize(),
+                        viewModel.placeTileViewNameState.collectAsState().value,
+                        onGetPlaceName = viewModel::getPlaceTileViewName,
+                        onStopGettingPlaceName = viewModel::cancelPlaceTileNameJob
                     )
                 }
 
-                NewPlaceDialog(dialogState = newPlaceDialog) { newPlaceDialog = false }
+                NewPlaceDialog(dialogState = newPlaceDialog, cameraPosition = cameraPositionState.position.target) { newPlaceDialog = false }
             }
         }
     }
@@ -295,16 +318,20 @@ fun onMapSettingsClicked(
 fun MapLayout(
     modifier: Modifier = Modifier,
     cameraPositionState: CameraPositionState,
+    mapType: Int,
+    markers: List<UserMapMarker>,
+    onMarkerClicked: (UserMapMarker) -> Unit,
+    firstCameraPosition: StateFlow<Pair<LatLng, Float>?>,
+    newMapCameraPosition: SharedFlow<Pair<LatLng, Float?>>,
+    onAutoToMyLocation: (LatLng) -> Unit,
+    onMapClick: (LatLng) -> Unit,
+    onCameraStateChanged: (CameraMoveState) -> Unit,
 ) {
-    val viewModel: MapViewModel = getViewModel()
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
     val userPreferences: UserPreferences = get()
     val darkTheme = isSystemInDarkTheme()
-
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
-    val mapType by viewModel.mapType.collectAsState()
     val context = LocalContext.current
-    val markers by viewModel.mapMarkers.collectAsState()
 
     val markersToShow by remember(markers, showHiddenPlaces) {
         mutableStateOf(if (showHiddenPlaces) markers
@@ -332,15 +359,14 @@ fun MapLayout(
         )
     }
 
-    DisposableEffect(Unit) {
-        viewModel.getLastLocation()
-        onDispose { }
+//    DisposableEffect(Unit) {
+//        onA
+//        onDispose { }
+//    }
 
-    }
-
-    LaunchedEffect(cameraPositionState.position) {
-        viewModel.saveLastCameraPosition(cameraPositionState.position)
-    }
+//    LaunchedEffect(cameraPositionState.position) {
+//        viewModel.saveLastCameraPosition(cameraPositionState.position)
+//    }
 
     GoogleMap(
         modifier = modifier
@@ -357,47 +383,49 @@ fun MapLayout(
         },
         uiSettings = mapUiSettings,
         properties = mapProperties,
-        onMapClick = { viewModel.resetMapUiState() },
+        onMapClick = onMapClick,
     ) {
 
         markersToShow.forEach { myMarker ->
             Marker(
                 state = MarkerState(position = LatLng(myMarker.latitude, myMarker.longitude)),
                 title = myMarker.title,
-                icon = BitmapDescriptorFactory.defaultMarker(
-                    getHueFromColor(Color(myMarker.markerColor))
-                ),
+                icon = BitmapDescriptorFactory.defaultMarker(getHueFromColor(Color(myMarker.markerColor))),
                 tag = myMarker.id,
                 onClick = {
-                    viewModel.onMarkerClicked(myMarker)
+                    onMarkerClicked(myMarker)
+                    true
                 }
             )
         }
 
         MapEffect(Unit) { map ->
-            map.awaitMapLoad()
 
             launch {
-                viewModel.newMapCameraPosition.collectLatest {
+                newMapCameraPosition.collectLatest {
+                    map.awaitMapLoad()
+
                     moveCameraToLocation(cameraPositionState, it.first, it.second)
                 }
             }
 
             launch {
-                viewModel.firstCameraPosition.collectLatest {
+                firstCameraPosition.collectLatest {
+                    map.awaitMapLoad()
+
                     it?.let { setCameraPosition(cameraPositionState, it.first, it.second) }
                 }
             }
 
             launch {
                 map.setOnCameraIdleListener {
-                    viewModel.setCameraMoveState(CameraMoveState.MoveFinish)
+                    onCameraStateChanged(CameraMoveState.MoveFinish(map.cameraPosition.target))
                 }
             }
 
             launch {
                 map.setOnCameraMoveListener {
-                    viewModel.setCameraMoveState(CameraMoveState.MoveStart)
+                    onCameraStateChanged(CameraMoveState.MoveStart)
                 }
             }
         }
@@ -405,20 +433,21 @@ fun MapLayout(
 
 
     LaunchedEffect(permissionsState.allPermissionsGranted) {
-        mapProperties = mapProperties.copy(isMyLocationEnabled = permissionsState.allPermissionsGranted)
+        mapProperties =
+            mapProperties.copy(isMyLocationEnabled = permissionsState.allPermissionsGranted)
     }
 
 
     LaunchedEffect(mapType) {
         mapProperties = mapProperties.copy(mapType = MapType.values()[mapType])
     }
-/*
-    DisposableEffect(map) {
-        isMapVisible = true
-        viewModel.getLastLocation()
+    /*
+        DisposableEffect(map) {
+            isMapVisible = true
+            viewModel.getLastLocation()
 
-        onDispose { viewModel.saveLastCameraPosition() }
-    }*/
+            onDispose { viewModel.saveLastCameraPosition() }
+        }*/
 }
 
 @ExperimentalMaterialApi
@@ -439,9 +468,11 @@ fun MapFab(
             MapUiState.NormalMode -> {
                 defaultFabBottomPadding
             }
+
             is MapUiState.BottomSheetInfoMode -> {
                 34.dp
             }
+
             MapUiState.PlaceSelectMode -> {
                 defaultFabBottomPadding
             }
@@ -453,9 +484,11 @@ fun MapFab(
             MapUiState.NormalMode -> {
                 0.dp
             }
+
             is MapUiState.BottomSheetInfoMode -> {
                 26.dp
             }
+
             MapUiState.PlaceSelectMode -> {
                 0.dp
             }

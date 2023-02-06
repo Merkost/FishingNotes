@@ -102,7 +102,7 @@ fun getHue(red: Float, green: Float, blue: Float): Float {
 
 sealed class CameraMoveState {
     object MoveStart : CameraMoveState()
-    object MoveFinish : CameraMoveState()
+    class MoveFinish(val latLng: LatLng) : CameraMoveState()
 }
 
 sealed class PointerState {
@@ -116,12 +116,7 @@ sealed class LocationState() {
     object GpsNotEnabled : LocationState()
 }
 
-sealed class MapUiState {
-    object NormalMode : MapUiState()
-    object PlaceSelectMode : MapUiState()
-    class BottomSheetInfoMode(val marker: UserMapMarker) : MapUiState()
-    //object BottomSheetFullyExpanded : MapUiState()
-}
+
 
 const val DEFAULT_ZOOM = 15f
 const val DEFAULT_BEARING = 0f
@@ -134,15 +129,23 @@ val locationPermissionsList = listOf(
 suspend fun moveCameraToLocation(
     cameraPositionState: CameraPositionState,
     location: LatLng,
-    zoom: Float = DEFAULT_ZOOM,
-    bearing: Float = 0f
+    zoom: Float? = null,
+    bearing: Float? = null
 ) {
     cameraPositionState.animate(
         CameraUpdateFactory.newCameraPosition(
             CameraPosition.Builder()
-                .zoom(zoom)
+                .apply {
+                    zoom?.let {
+                        zoom(zoom)
+                    }
+                }
+                .apply {
+                    bearing?.let {
+                        bearing(bearing)
+                    }
+                }
                 .target(location)
-                .bearing(bearing)
                 .build()
         )
     )

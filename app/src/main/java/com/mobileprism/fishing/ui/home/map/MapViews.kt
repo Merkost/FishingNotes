@@ -531,16 +531,15 @@ fun FishLoading(modifier: Modifier) {
 @Composable
 fun PlaceTileView(
     modifier: Modifier,
+    placeTileViewNameState: PlaceTileState,
+    onGetPlaceName: () -> Unit,
+    onStopGettingPlaceName: () -> Unit,
 ) {
-    val context = LocalContext.current
-    val viewModel: MapViewModel = getViewModel()
-    val placeTileViewNameState by viewModel.placeTileViewNameState.collectAsState()
-
     val selectedPlace = remember { mutableStateOf("") }
 
     DisposableEffect(Unit) {
-        viewModel.getPlaceTileViewName()
-        onDispose { viewModel.cancelPlaceTileNameJob() }
+        onGetPlaceName()
+        onDispose { onStopGettingPlaceName() }
     }
 
     SetPlaceNameResultListener(placeTileViewNameState.geocoderResult) { newPlaceName ->

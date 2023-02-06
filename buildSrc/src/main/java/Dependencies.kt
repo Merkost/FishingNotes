@@ -27,6 +27,8 @@ object Libs {
         const val mapsKtx = "com.google.maps.android:maps-ktx:3.4.0"
         const val mapUtilsKtx = "com.google.maps.android:maps-utils-ktx:3.4.0"
 
+        const val mapsPlayServices = "com.google.android.gms:play-services-maps:18.1.0"
+
         //Google maps distance between two latlng /*0.4.4*/
         const val mapUtils = "com.google.maps.android:android-maps-utils:2.3.0"
 

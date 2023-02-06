@@ -3,12 +3,14 @@ package com.mobileprism.fishing.domain.use_cases
 import android.location.Address
 import android.location.Geocoder
 import android.os.Build
+import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.ui.home.map.GeocoderResult
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 
 class GetPlaceNameUseCase(private val geocoder: Geocoder) {
 
+    suspend fun invoke(latLng: LatLng) = invoke(latLng.latitude, latLng.longitude)
     suspend operator fun invoke(
         latitude: Double,
         longitude: Double,

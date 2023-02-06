@@ -73,7 +73,7 @@ class UserPreferences(private val context: Context) {
                     preferences[LAST_MAP_LONGITUDE] ?: 0.0,
                 ),
                 preferences[LAST_MAP_ZOOM] ?: 0f
-                )
+            )
         }
 
     //save values

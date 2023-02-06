@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         applicationId = "com.mobileprism.fishing"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 33
         versionCode = 13
         versionName = "1.1.0"
@@ -111,6 +111,7 @@ dependencies {
     implementation(Libs.GoogleMaps.maps)
     implementation(Libs.GoogleMaps.mapsKtx)
     implementation(Libs.GoogleMaps.mapUtilsKtx)
+    implementation(Libs.GoogleMaps.mapsPlayServices)
 
     implementation(Libs.PlayServices.auth)
     implementation(Libs.PlayServices.maps)

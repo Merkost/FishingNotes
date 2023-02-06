@@ -58,7 +58,7 @@ class MapViewModel(
     private val _addNewMarkerState: MutableStateFlow<UiState?> = MutableStateFlow(null)
     val addNewMarkerState = _addNewMarkerState.asStateFlow()
 
-    private val _cameraMoveState = MutableStateFlow<CameraMoveState>(CameraMoveState.MoveFinish)
+    private val _cameraMoveState = MutableStateFlow<CameraMoveState>(CameraMoveState.MoveStart)
 
     private val _mapType = MutableStateFlow(MapTypes.roadmap)
     val mapType = _mapType.asStateFlow()
@@ -66,21 +66,11 @@ class MapViewModel(
         _mapType.value = layer
     }
 
-    val mapBearing = MutableStateFlow(0f)
-
     private val _lastKnownLocation = MutableStateFlow<LatLng?>(null)
     val lastKnownLocation = _lastKnownLocation.asStateFlow()
 
-    private val lastMapCameraPosition = mutableStateOf<Triple<LatLng, Float, Float>?>(null)
-
-    /**
-     * A Triple of LatLng, Zoom and Bearing
-     */
-    private val _newMapCameraPosition = MutableSharedFlow<Triple<LatLng, Float, Float>>()
+    private val _newMapCameraPosition = MutableSharedFlow<Pair<LatLng, Float?>>()
     val newMapCameraPosition = _newMapCameraPosition.asSharedFlow()
-
-    private val _currentCameraPosition = MutableStateFlow(Triple(LatLng(0.0, 0.0), 0f, 0f))
-    val currentCameraPosition = _currentCameraPosition.asStateFlow()
 
     private val _currentMarkerAddressState =
         MutableStateFlow<GeocoderResult>(GeocoderResult.InProgress)
@@ -95,13 +85,26 @@ class MapViewModel(
     val fishActivity: MutableState<Int?> = mutableStateOf(null)
     val currentWeather: MutableState<CurrentWeatherFree?> = mutableStateOf(null)
 
-    val windIconRotation: Float
-        get() = currentWeather.value?.wind_degrees?.minus(_currentCameraPosition.value.third)
-            ?: _currentCameraPosition.value.third
-
-
     fun setCameraMoveState(newState: CameraMoveState) {
         _cameraMoveState.value = newState
+    }
+
+    private fun moveCamera(location: LatLng, zoom: Float? = null) {
+        viewModelScope.launch {
+            _newMapCameraPosition.emit(Pair(location, zoom))
+        }
+    }
+
+    fun onMapClicked(latLng: LatLng) {
+        moveCamera(latLng, DEFAULT_ZOOM)
+    }
+
+    fun onAutoToMyLocation(target: LatLng) {
+//        viewModelScope.launch {
+//            if (target == DEFAULT_CAM_POSITION.first) {
+//                onMyLocationClick()
+//            }
+//        }
     }
 
     private fun loadUserMarkersList() {
@@ -207,7 +210,6 @@ class MapViewModel(
                     )
                 )
             }
-            lastMapCameraPosition.value = currentCameraPosition.value
         }
     }
 
@@ -236,6 +238,7 @@ class MapViewModel(
 //                _firstCameraPosition.value =
 //                    currentCameraPosition.value.copy(place.latLng, second = DEFAULT_ZOOM)
             }
+
             else -> {
                 initialPlaceSelected.value = true
 //                _currentMarker.value = place
@@ -275,8 +278,9 @@ class MapViewModel(
             when (result) {
                 is LocationState.LocationGranted -> {
                     _lastKnownLocation.value = result.location
-                    setNewCameraLocation(result.location)
+                    moveCamera(result.location, DEFAULT_ZOOM)
                 }
+
                 else -> {
                     SnackbarManager.showMessage(R.string.cant_get_current_location)
                 }
@@ -284,15 +288,9 @@ class MapViewModel(
         }
     }
 
-    private fun setNewCameraLocation(position: LatLng, zoom: Float = DEFAULT_ZOOM) {
-        viewModelScope.launch {
-            _newMapCameraPosition.emit(_currentCameraPosition.value.copy(position, zoom))
-        }
-    }
-
     fun onMarkerClicked(marker: UserMapMarker): Boolean {
         return marker.let {
-            setNewCameraLocation(it.latLng, DEFAULT_ZOOM)
+            moveCamera(it.latLng, DEFAULT_ZOOM)
             // TODO:  
 //            _currentMarker.value = it
             _mapUiState.value = MapUiState.BottomSheetInfoMode(it)
@@ -338,20 +336,18 @@ class MapViewModel(
 
     fun getPlaceTileViewName() {
         placeTileNameJob = viewModelScope.launch(Dispatchers.Default) {
-            _cameraMoveState.collectLatest {
-                when (it) {
+            _cameraMoveState.collectLatest { cameraState ->
+                when (cameraState) {
                     CameraMoveState.MoveStart -> {
                         _placeTileViewNameState.value = _placeTileViewNameState.value.copy(
                             geocoderResult = GeocoderResult.InProgress,
                             pointerState = PointerState.ShowMarker
                         )
                     }
-                    CameraMoveState.MoveFinish -> {
+
+                    is CameraMoveState.MoveFinish -> {
                         delay(1200)
-                        getPlaceNameUseCase.invoke(
-                            currentCameraPosition.value.first.latitude,
-                            currentCameraPosition.value.first.longitude,
-                        ).collect { result ->
+                        getPlaceNameUseCase.invoke(cameraState.latLng).collect { result ->
                             _placeTileViewNameState.value =
                                 _placeTileViewNameState.value.copy(
                                     geocoderResult = result,
@@ -385,8 +381,10 @@ class MapViewModel(
     private fun getFirstLaunchLocation() {
         viewModelScope.launch {
             if (mapUiState.value !is MapUiState.BottomSheetInfoMode) {
-                val fromBd = userPreferences.getLastMapCameraLocation.first()
-                _firstCameraPosition.emit(fromBd)
+                userPreferences.getLastMapCameraLocation.singleOrNull()?.let {
+                    _firstCameraPosition.emit(it)
+
+                }
             }
         }
     }
