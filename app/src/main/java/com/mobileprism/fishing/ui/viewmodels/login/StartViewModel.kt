@@ -4,11 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.firebase.auth.FirebaseUser
-import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.entity.auth.GoogleAuthRequest
 import com.mobileprism.fishing.domain.entity.common.FishingFirebaseUser
 import com.mobileprism.fishing.domain.repository.AuthManager
-import com.mobileprism.fishing.model.auth.LoginState
 import com.mobileprism.fishing.model.utils.fold
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.network.ConnectionManager
@@ -21,6 +18,7 @@ private val FirebaseUser.toFishingFirebaseUser: FishingFirebaseUser?
             uid = uid,
             email = email!!,
             displayName = displayName!!,
+            photoUrl = photoUrl?.toString()
         )
     }.getOrNull()
 
@@ -67,17 +65,5 @@ class StartViewModel(
             )
         )*/
     }
-
-    /*fun skipAuthorization() {
-        _uiState.update { LoginScreenViewState.Loading }
-
-        viewModelScope.launch {
-            authManager.skipAuthorization()
-        }
-    }*/
-
-    /*private fun handleError(error: Throwable) {
-        _uiState.update { LoginScreenViewState.Error(error) }
-    }*/
 }
 

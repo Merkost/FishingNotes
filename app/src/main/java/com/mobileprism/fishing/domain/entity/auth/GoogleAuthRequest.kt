@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class GoogleAuthRequest(
+data class GoogleAuthRestoreRequest(
     val email: String,
     val googleAuthId: String
 ) : Parcelable
