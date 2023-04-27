@@ -46,10 +46,10 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun NewPlaceDialog(
     dialogState: Boolean,
-    cameraPosition: LatLng,
+    cameraPosition: LatLng?,
     onDismiss: () -> Unit,
 ) {
-    if (dialogState) {
+    if (dialogState && cameraPosition != null) {
         Dialog(onDismissRequest = { onDismiss() }) {
             val context = LocalContext.current
             val viewModel: MapViewModel = getViewModel()

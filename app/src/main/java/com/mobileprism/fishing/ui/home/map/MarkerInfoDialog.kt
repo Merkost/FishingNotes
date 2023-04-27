@@ -53,7 +53,6 @@ fun MarkerInfoDialog(
     val context = LocalContext.current
 
     val viewModel: MapViewModel = getViewModel()
-//    val receivedMarker by viewModel.currentMarker.collectAsState()
     val receivedMarker = marker
     val weatherPreferences: WeatherPreferences = get()
 

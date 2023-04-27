@@ -135,16 +135,8 @@ suspend fun moveCameraToLocation(
     cameraPositionState.animate(
         CameraUpdateFactory.newCameraPosition(
             CameraPosition.Builder()
-                .apply {
-                    zoom?.let {
-                        zoom(zoom)
-                    }
-                }
-                .apply {
-                    bearing?.let {
-                        bearing(bearing)
-                    }
-                }
+                .apply { zoom?.let { zoom(zoom) } }
+                .apply { bearing?.let { bearing(bearing) } }
                 .target(location)
                 .build()
         )

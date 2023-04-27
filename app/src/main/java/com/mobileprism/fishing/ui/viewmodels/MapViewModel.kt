@@ -58,7 +58,12 @@ class MapViewModel(
     private val _addNewMarkerState: MutableStateFlow<UiState?> = MutableStateFlow(null)
     val addNewMarkerState = _addNewMarkerState.asStateFlow()
 
+    // TODO:  
+    private val _cameraPosition = MutableStateFlow<CameraTarget?>(null)
+    val cameraPosition = _cameraPosition.asStateFlow()
+
     private val _cameraMoveState = MutableStateFlow<CameraMoveState>(CameraMoveState.MoveStart)
+    val cameraMoveState = _cameraMoveState.asStateFlow()
 
     private val _mapType = MutableStateFlow(MapTypes.roadmap)
     val mapType = _mapType.asStateFlow()
@@ -338,7 +343,7 @@ class MapViewModel(
         placeTileNameJob = viewModelScope.launch(Dispatchers.Default) {
             _cameraMoveState.collectLatest { cameraState ->
                 when (cameraState) {
-                    CameraMoveState.MoveStart -> {
+                    is CameraMoveState.MoveStart -> {
                         _placeTileViewNameState.value = _placeTileViewNameState.value.copy(
                             geocoderResult = GeocoderResult.InProgress,
                             pointerState = PointerState.ShowMarker
@@ -394,4 +399,9 @@ class MapViewModel(
     }
 
 }
+
+data class CameraTarget(
+    val latLng: LatLng,
+    val bearing: Int,
+)
 

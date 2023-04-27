@@ -86,11 +86,13 @@ fun MapScreen(
     var newPlaceDialog by remember { mutableStateOf(false) }
     var mapLayersSelection by rememberSaveable { mutableStateOf(false) }
 
-    val cameraPositionState = rememberCameraPositionState()
-//    LaunchedEffect(cameraPositionState) {
-//        Log.e("CAMERA_POS", cameraPositionState.position.target.toString())
-//    }
-
+    val singapore = LatLng(1.35, 103.87)
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(singapore, 10f)
+    }
+    LaunchedEffect(cameraPositionState) {
+        Log.e("CAMERA_POS", cameraPositionState.position.target.toString())
+    }
 
     BackPressHandler(
         mapUiState = mapUiState,
@@ -99,8 +101,7 @@ fun MapScreen(
         upPress = { (context as MainActivity).finishAffinity() },
     )
 
-    ModalBottomSheetLayout(
-        modifier = Modifier,
+    ModalBottomSheetLayout(modifier = Modifier,
         sheetState = modalBottomSheetState,
         sheetShape = Constants.modalBottomSheetCorners,
         sheetContent = {
@@ -134,94 +135,88 @@ fun MapScreen(
             bottomSheet = {
                 Spacer(modifier = Modifier.height(1.dp))
                 (mapUiState as? MapUiState.BottomSheetInfoMode)?.marker?.let { marker ->
-                    MarkerInfoDialog(
-                        navController = navController,
+                    MarkerInfoDialog(navController = navController,
                         marker = marker,
                         cameraPositionState = cameraPositionState,
                         onMarkerIconClicked = viewModel::onMarkerClicked,
                         onBottomSheetClose = {
                             coroutineScope.launch { scaffoldState.bottomSheetState.collapse() }
-                        }
+                        })
+                }
+            }) {
+
+            MapLayout(
+                modifier = Modifier.fillMaxSize(),
+                cameraPositionState = cameraPositionState,
+                mapType = viewModel.mapType.collectAsState().value,
+                markers = viewModel.mapMarkers.collectAsState().value,
+                onMarkerClicked = viewModel::onMarkerClicked,
+//                    initialPosition = editableAddress?.latLng,
+                firstCameraPosition = viewModel.firstCameraPosition,
+                newMapCameraPosition = viewModel.newMapCameraPosition,
+                onAutoToMyLocation = viewModel::onAutoToMyLocation,
+                onMapClick = viewModel::onMapClicked,
+                onCameraStateChanged = viewModel::setCameraMoveState
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .windowInsetsPadding(WindowInsets.statusBars)
+                    .padding(16.dp),
+                contentAlignment = Alignment.TopEnd
+            ) {
+                Column(
+                    modifier = Modifier,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    MyLocationButton(
+                        modifier = Modifier, onClick = viewModel::onMyLocationClick
+                    )
+
+                    CompassButton(
+                        modifier = modifier, cameraPositionState = cameraPositionState
                     )
                 }
-            }
-        ) { paddingValues ->
-            ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-                val (mapLayout, addMarkerFragment, mapMyLocationButton,
-                    mapCompassButton, mapLayersButton, zoomInButton, zoomOutButton,
-                    mapSettingsButton, mapLayersView, pointer) = createRefs()
-                val verticalMyLocationButtonGl = createGuidelineFromAbsoluteRight(56.dp)
-                val centerHorizontal = createGuidelineFromBottom(0.5f)
 
-
-                MapLayout(
-                    modifier = Modifier.constrainAs(mapLayout) { centerTo(parent) },
-                    cameraPositionState = cameraPositionState,
-                    mapType = viewModel.mapType.collectAsState().value,
-                    markers = viewModel.mapMarkers.collectAsState().value,
-                    onMarkerClicked = viewModel::onMarkerClicked,
-//                    initialPosition = editableAddress?.latLng,
-                    firstCameraPosition = viewModel.firstCameraPosition,
-                    newMapCameraPosition = viewModel.newMapCameraPosition,
-                    onAutoToMyLocation = viewModel::onAutoToMyLocation,
-                    onMapClick = viewModel::onMapClicked,
-                    onCameraStateChanged = viewModel::setCameraMoveState
-                )
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .statusBarsPadding(),
-                    contentAlignment = Alignment.TopEnd
+                Column(
+                    modifier = Modifier.align(Alignment.TopStart),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        MyLocationButton(
-                            modifier = Modifier,
-                            onClick = viewModel::onMyLocationClick
-                        )
+                    MapLayersButton(
+                        modifier = Modifier
+                    ) { mapLayersSelection = true }
 
-                        CompassButton(
-                            modifier = modifier,
-                            cameraPositionState = cameraPositionState
-                        )
+                    MapSettingsButton(modifier = Modifier) {
+                        onMapSettingsClicked(coroutineScope, modalBottomSheetState)
                     }
+
                 }
 
-                MapLayersButton(
-                    modifier = Modifier
-                        .constrainAs(mapLayersButton) {
-                            top.linkTo(parent.top, 16.dp)
-                            absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                        }
-                        .windowInsetsPadding(WindowInsets.statusBars)
-                ) { mapLayersSelection = true }
+                if (mapLayersSelection) Surface(modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(0f)
+                    .zIndex(4f)
+                    .clickable { mapLayersSelection = false }) {}
 
-                if (mapLayersSelection)
-                    Surface(modifier = Modifier
-                        .fillMaxSize()
-                        .alpha(0f)
-                        .zIndex(4f)
-                        .clickable { mapLayersSelection = false }) {}
+                val layersEnterTransition = expandIn(
+                    expandFrom = Alignment.TopStart, animationSpec = tween(380)
+                ) + fadeIn(animationSpec = tween(480))
+
+
+                val layersExitTransition = shrinkOut(
+                    shrinkTowards = Alignment.TopStart, animationSpec = tween(380)
+                ) + fadeOut(animationSpec = tween(480))
+
                 AnimatedVisibility(
                     mapLayersSelection,
-                    enter = expandIn(
-                        expandFrom = Alignment.TopStart,
-                        animationSpec = tween(380)
-                    ) + fadeIn(animationSpec = tween(480)),
-                    exit = shrinkOut(
-                        shrinkTowards = Alignment.TopStart,
-                        animationSpec = tween(380)
-                    ) + fadeOut(animationSpec = tween(480)),
+                    enter = layersEnterTransition,
+                    exit = layersExitTransition,
                     modifier = Modifier
-                        .constrainAs(mapLayersView) {
-                            top.linkTo(parent.top, 16.dp)
-                            absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                        }
+                        .align(Alignment.TopStart)
+//                        .padding(16.dp)
                         .zIndex(5f)
                 ) {
                     LayersView(
@@ -230,65 +225,49 @@ fun MapScreen(
                     ) { mapLayersSelection = false }
                 }
 
-                MapSettingsButton(
-                    modifier = Modifier
-                        .constrainAs(mapSettingsButton) {
-                            top.linkTo(mapLayersButton.bottom, 16.dp)
-                            absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                        }
-                        .windowInsetsPadding(WindowInsets.statusBars)
-                ) { onMapSettingsClicked(coroutineScope, modalBottomSheetState) }
-
-
-
                 if (useZoomButtons) {
-                    MapZoomInButton(
-                        modifier = Modifier.constrainAs(zoomInButton) {
-                            linkTo(parent.top, centerHorizontal, 4.dp, 4.dp, bias = 1f)
-                            linkTo(
-                                parent.absoluteLeft,
-                                parent.absoluteRight,
-                                16.dp,
-                                16.dp,
-                                bias = 1f
-                            )
-                        }, onClick = {
-                            coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.zoomIn()) }
-                        }
-                    )
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        MapZoomInButton(modifier = Modifier, onClick = {
+                            coroutineScope.launch {
+                                cameraPositionState.animate(
+                                    CameraUpdateFactory.zoomIn()
+                                )
+                            }
+                        })
 
-                    MapZoomOutButton(
-                        modifier = Modifier.constrainAs(zoomOutButton) {
-                            linkTo(centerHorizontal, parent.bottom, 4.dp, 4.dp, bias = 0f)
-                            linkTo(
-                                parent.absoluteLeft,
-                                parent.absoluteRight,
-                                16.dp,
-                                16.dp,
-                                bias = 1f
-                            )
-                        }, onClick = {
-                            coroutineScope.launch { cameraPositionState.animate(CameraUpdateFactory.zoomOut()) }
-                        }
+                        MapZoomOutButton(modifier = Modifier, onClick = {
+                            coroutineScope.launch {
+                                cameraPositionState.animate(
+                                    CameraUpdateFactory.zoomOut()
+                                )
+                            }
+                        })
+                    }
+                }
+
+                AnimatedVisibility(
+                    mapUiState == MapUiState.PlaceSelectMode,
+                    enter = fadeIn(), exit = fadeOut(),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(bottom = 85.dp),
+                ) {
+                    PointerIcon(
+                        viewModel.placeTileViewNameState.collectAsState().value.pointerState
                     )
                 }
 
-                AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode,
-                    enter = fadeIn(), exit = fadeOut(),
-                    modifier = Modifier.constrainAs(pointer) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom, 65.dp)
-                        centerHorizontallyTo(parent)
-                    }) { PointerIcon(viewModel.placeTileViewNameState.collectAsState().value.pointerState) }
-
-                AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection,
+                AnimatedVisibility(
+                    mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection,
                     enter = fadeIn(animationSpec = tween(300)),
                     exit = fadeOut(animationSpec = tween(300)),
-                    modifier = Modifier.constrainAs(addMarkerFragment) {
-                        top.linkTo(parent.top, 16.dp)
-                        absoluteLeft.linkTo(mapLayersButton.absoluteRight, 8.dp)
-                        absoluteRight.linkTo(verticalMyLocationButtonGl, 8.dp)
-                    }
+                    modifier = Modifier.align(Alignment.TopCenter)
                 ) {
                     PlaceTileView(
                         modifier = Modifier.wrapContentSize(),
@@ -297,18 +276,22 @@ fun MapScreen(
                         onStopGettingPlaceName = viewModel::cancelPlaceTileNameJob
                     )
                 }
+            }
+
 
 //                Log.e("CAMERA_POS", cameraPositionState.position.target)
-                NewPlaceDialog(dialogState = newPlaceDialog, cameraPosition = cameraPositionState.position.target) { newPlaceDialog = false }
-            }
+            val cameraMove by viewModel.cameraMoveState.collectAsState()
+            NewPlaceDialog(
+                dialogState = newPlaceDialog,
+                cameraPosition = (cameraMove as? CameraMoveState.MoveFinish)?.latLng
+            ) { newPlaceDialog = false }
         }
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 fun onMapSettingsClicked(
-    coroutineScope: CoroutineScope,
-    modalBottomSheetState: ModalBottomSheetState
+    coroutineScope: CoroutineScope, modalBottomSheetState: ModalBottomSheetState
 ) {
     coroutineScope.launch {
         Firebase.analytics.logEvent("map_settings", null)
@@ -362,15 +345,6 @@ fun MapLayout(
         )
     }
 
-//    DisposableEffect(Unit) {
-//        onA
-//        onDispose { }
-//    }
-
-//    LaunchedEffect(cameraPositionState.position) {
-//        viewModel.saveLastCameraPosition(cameraPositionState.position)
-//    }
-
     GoogleMap(
         modifier = modifier
             .fillMaxSize()
@@ -388,10 +362,11 @@ fun MapLayout(
         properties = mapProperties,
         onMapClick = onMapClick,
     ) {
-
+        LaunchedEffect(cameraPositionState.position.target) {
+            Log.e("CAMERA_MAP", cameraPositionState.position.target.toString())
+        }
         markersToShow.forEach { myMarker ->
-            Marker(
-                state = MarkerState(position = LatLng(myMarker.latitude, myMarker.longitude)),
+            Marker(state = MarkerState(position = LatLng(myMarker.latitude, myMarker.longitude)),
                 title = myMarker.title,
                 icon = BitmapDescriptorFactory.defaultMarker(getHueFromColor(Color(myMarker.markerColor))),
                 tag = myMarker.id,
@@ -443,8 +418,7 @@ fun MapLayout(
 
     LaunchedEffect(mapType) {
         mapProperties = mapProperties.copy(mapType = MapType.values()[mapType])
-    }
-    /*
+    }/*
         DisposableEffect(map) {
             isMapVisible = true
             viewModel.getLastLocation()
@@ -501,27 +475,22 @@ fun MapFab(
     val adding_place = stringResource(R.string.adding_place_on_current_location)
     val permissions_required = stringResource(R.string.location_permissions_required)
     AnimatedVisibility(
-        true,
-        exit = fadeOut(),
-        enter = fadeIn()
+        true, exit = fadeOut(), enter = fadeIn()
     ) {
 
-        FishingFab(
-            modifier = Modifier
-                .animateContentSize()
-                .navigationBarsPadding()
-                .padding(bottom = paddingBottom.value, top = paddingTop.value),
+        FishingFab(modifier = Modifier
+            .animateContentSize()
+            .navigationBarsPadding()
+            .padding(bottom = paddingBottom.value, top = paddingTop.value),
             onClick = onClick,
             onLongPress = {
                 if (state == MapUiState.NormalMode && useFastFabAdd) {
                     if (!checkLocationPermissions(context)) {
                         Toast.makeText(context, adding_place, Toast.LENGTH_SHORT).show()
                         onLongPress()
-                    } else Toast.makeText(context, permissions_required, Toast.LENGTH_SHORT)
-                        .show()
+                    } else Toast.makeText(context, permissions_required, Toast.LENGTH_SHORT).show()
                 }
-            }
-        ) {
+            }) {
             AnimatedVisibility(state is MapUiState.NormalMode) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_baseline_add_location_24),
@@ -580,8 +549,7 @@ fun FishingFab(
                             onClick = onClick,
                             onDoubleClick = { },
                             onLongClick = onLongPress
-                        ),
-                    contentAlignment = Alignment.Center
+                        ), contentAlignment = Alignment.Center
                 ) { content() }
             }
         }
@@ -593,8 +561,7 @@ private val FabSize = 56.dp
 private fun onAddNewCatchClick(navController: NavController, marker: UserMapMarker) {
     if (marker.id != CURRENT_PLACE_ITEM_ID) {
         navController.navigate(
-            MainDestinations.NEW_CATCH_ROUTE,
-            Arguments.PLACE to marker
+            MainDestinations.NEW_CATCH_ROUTE, Arguments.PLACE to marker
         )
     } else {
         // TODO: добавить улов на текущее местоположение

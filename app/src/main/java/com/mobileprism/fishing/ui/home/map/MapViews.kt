@@ -69,7 +69,7 @@ fun MapScaffold(
     scaffoldState: BottomSheetScaffoldState,
     fab: @Composable() (() -> Unit)?,
     bottomSheet: @Composable() (ColumnScope.() -> Unit),
-    content: @Composable (PaddingValues) -> Unit,
+    content: @Composable BoxScope.() -> Unit,
 
     ) {
     val userPreferences: UserPreferences = get()
@@ -106,7 +106,15 @@ fun MapScaffold(
         floatingActionButton = fab,
         sheetContent = bottomSheet,
         sheetGesturesEnabled = true,
-        content = content
+        content = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it)
+            ) {
+                content()
+            }
+        }
     )
 }
 
