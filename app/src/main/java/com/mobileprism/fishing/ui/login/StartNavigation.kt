@@ -56,7 +56,10 @@ fun StartNavigation(toHomeScreen: () -> Unit) {
     ) {
 
         AnimatedNavHost(
-            modifier = Modifier.padding(it),
+            // TODO: remove status bar coloring and systemBarsPadding
+            modifier = Modifier
+                .padding(it)
+                .systemBarsPadding(),
             navController = navController,
             startDestination = LoginDestinations.START,
             enterTransition = { fadeIn(animationSpec = tween(600)) },

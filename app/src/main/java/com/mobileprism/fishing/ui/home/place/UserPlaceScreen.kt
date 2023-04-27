@@ -125,9 +125,7 @@ fun UserPlaceScreen(modifier: Modifier, backPress: () -> Unit, navController: Na
                     onNewCatchClick = { newCatchClicked(navController, place) }
                 ) { note ->
                     viewModel.setCurrentNote(note)
-                    coroutineScope.launch {
-                        modalBottomSheetState.animateTo(ModalBottomSheetValue.HalfExpanded)
-                    }
+                    coroutineScope.launch { modalBottomSheetState.show() }
                 }
 
                 Spacer(modifier = Modifier.size(bottomBannerPadding))

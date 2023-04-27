@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -80,83 +81,85 @@ fun StartScreen(
 
     AnimatedVisibility(visible = uiState is BaseViewState.Loading) { ModalLoading() }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxSize()
-    ) {
+    Scaffold {
 
         Column(
-            modifier = Modifier
-                .padding(vertical = 50.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxSize().padding(it)
         ) {
-            Image(
-                modifier = Modifier
-                    .size(150.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .aspectRatio(1f),
-                painter = painterResource(id = R.drawable.ic_fishing_logo),
-                contentDescription = "app logo"
-            )
-            HeaderText(
-                text = stringResource(id = R.string.fishing_notes),
-                textStyle = MaterialTheme.typography.h6.copy(
-                    fontFamily = FontFamily.SansSerif,
-                    color = MaterialTheme.colors.primaryVariant,
-                    fontWeight = FontWeight.SemiBold
-                )
-            )
-        }
-
-        Column(
-            modifier = Modifier
-                .weight(2f, true),/*.background(Color.LightGray)*/
-            verticalArrangement = Arrangement.SpaceEvenly,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-
 
             Column(
-                modifier = Modifier.padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier
+                    .padding(vertical = 50.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(
-                    text = stringResource(id = R.string.sign_up),
-                    style = MaterialTheme.typography.h4.copy(
+                Image(
+                    modifier = Modifier
+                        .size(150.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .aspectRatio(1f),
+                    painter = painterResource(id = R.drawable.ic_fishing_logo),
+                    contentDescription = "app logo"
+                )
+                HeaderText(
+                    text = stringResource(id = R.string.fishing_notes),
+                    textStyle = MaterialTheme.typography.h6.copy(
+                        fontFamily = FontFamily.SansSerif,
+                        color = MaterialTheme.colors.primaryVariant,
                         fontWeight = FontWeight.SemiBold
                     )
                 )
-                SecondaryText(text = "It's easier to sign up now")
             }
 
             Column(
-                modifier = Modifier,
-                verticalArrangement = Arrangement.spacedBy(1.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier
+                    .weight(2f, true),/*.background(Color.LightGray)*/
+                verticalArrangement = Arrangement.SpaceEvenly,
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                LoginWithGoogleButton(
-                    modifier = Modifier,
-                    onClick = {
-                        /*// FIXME: Improve this
-                        onStartGoogleLogin()*/
 
-                        startForResult.launch(context.getGoogleLoginAuth().signInIntent)
-                    }
-                )
 
-                FishingTextButton(
-                    onClick = toRegistration,
-                    content = {
-                        Text(
-                            text = "Register with email",
-                            style = MaterialTheme.typography.body1.copy(color = MaterialTheme.customColors.secondaryTextColor)
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.sign_up),
+                        style = MaterialTheme.typography.h4.copy(
+                            fontWeight = FontWeight.SemiBold
                         )
-                    },
-                )
-            }
+                    )
+                    SecondaryText(text = "It's easier to sign up now")
+                }
+
+                Column(
+                    modifier = Modifier,
+                    verticalArrangement = Arrangement.spacedBy(1.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    LoginWithGoogleButton(
+                        modifier = Modifier,
+                        onClick = {
+                            /*// FIXME: Improve this
+                            onStartGoogleLogin()*/
+
+                            startForResult.launch(context.getGoogleLoginAuth().signInIntent)
+                        }
+                    )
+
+                    FishingTextButton(
+                        onClick = toRegistration,
+                        content = {
+                            Text(
+                                text = "Register with email",
+                                style = MaterialTheme.typography.body1.copy(color = MaterialTheme.customColors.secondaryTextColor)
+                            )
+                        },
+                    )
+                }
 
 
 //            DefaultButtonOutlined(
@@ -166,25 +169,26 @@ fun StartScreen(
 //                onClick = { viewModel.skipAuthorization() }
 //            )
 
-            Row(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .noRippleClickable { toLoginScreen() },
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.have_an_account),
-                    style = MaterialTheme.typography.body1.copy(color = MaterialTheme.customColors.secondaryTextColor)
-                )
-
-                Text(
-                    text = stringResource(R.string.sign_in),
-                    style = MaterialTheme.typography.body1.copy(
-                        color = MaterialTheme.colors.primaryVariant,
-                        textDecoration = TextDecoration.Underline
+                Row(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .noRippleClickable { toLoginScreen() },
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.have_an_account),
+                        style = MaterialTheme.typography.body1.copy(color = MaterialTheme.customColors.secondaryTextColor)
                     )
-                )
+
+                    Text(
+                        text = stringResource(R.string.sign_in),
+                        style = MaterialTheme.typography.body1.copy(
+                            color = MaterialTheme.colors.primaryVariant,
+                            textDecoration = TextDecoration.Underline
+                        )
+                    )
+                }
             }
         }
     }

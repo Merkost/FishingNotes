@@ -55,7 +55,7 @@ android {
         //coreLibraryDesugaringEnabled = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.3.2"
+        kotlinCompilerExtensionVersion = "1.4.6"
     }
     kotlinOptions {
         jvmTarget = "11"
@@ -68,6 +68,7 @@ android {
     buildFeatures {
         compose = true
     }
+    namespace = "com.mobileprism.fishing"
 }
 
 dependencies {
@@ -147,7 +148,6 @@ dependencies {
     implementation(Libs.AndroidX.DependencyInjection.koinCompose)
 
     implementation(Libs.Accompanist.systemuicontroller)
-    implementation(Libs.Accompanist.flowlayouts)
     implementation(Libs.Accompanist.pager)
     implementation(Libs.Accompanist.pagerindicators)
     implementation(Libs.Accompanist.permissions)

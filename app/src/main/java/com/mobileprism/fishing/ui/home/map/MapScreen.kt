@@ -87,6 +87,9 @@ fun MapScreen(
     var mapLayersSelection by rememberSaveable { mutableStateOf(false) }
 
     val cameraPositionState = rememberCameraPositionState()
+//    LaunchedEffect(cameraPositionState) {
+//        Log.e("CAMERA_POS", cameraPositionState.position.target.toString())
+//    }
 
 
     BackPressHandler(
@@ -187,8 +190,6 @@ fun MapScreen(
                             cameraPositionState = cameraPositionState
                         )
                     }
-
-
                 }
 
                 MapLayersButton(

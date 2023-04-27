@@ -9,7 +9,6 @@ object Libs {
     object Accompanist {
         private const val version = "0.28.0"
         const val systemuicontroller = "com.google.accompanist:accompanist-systemuicontroller:$version"
-        const val flowlayouts = "com.google.accompanist:accompanist-flowlayout:$version"
         const val pager = "com.google.accompanist:accompanist-pager:$version"
         const val pagerindicators = "com.google.accompanist:accompanist-pager-indicators:$version"
         const val permissions = "com.google.accompanist:accompanist-permissions:$version"
@@ -23,7 +22,7 @@ object Libs {
         //KTX for the Maps SDK for Android library
         // KTX for the Maps SDK for Android Utility Library
         //"com.google.android.libraries.maps:maps:3.1.0-beta"
-        const val maps = "com.google.maps.android:maps-compose:2.8.0"
+        const val maps = "com.google.maps.android:maps-compose:2.11.0"
         const val mapsKtx = "com.google.maps.android:maps-ktx:3.4.0"
         const val mapUtilsKtx = "com.google.maps.android:maps-utils-ktx:3.4.0"
 
@@ -49,7 +48,7 @@ object Libs {
     }
 
     object Kotlin {
-        private const val version = "1.7.20"
+        private const val version = "1.8.20"
         const val stdlib = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version"
         const val gradlePlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$version"
         const val extensions = "org.jetbrains.kotlin:kotlin-android-extensions:$version"
@@ -67,7 +66,7 @@ object Libs {
         const val splashScreen = "androidx.core:core-splashscreen:1.0.0-beta01"
 
         object Compose {
-            const val version = "2023.01.00"
+            const val version = "2023.04.01"
             const val platform = "androidx.compose:compose-bom:$version"
 
             const val foundation = "androidx.compose.foundation:foundation"
@@ -77,22 +76,20 @@ object Libs {
             const val runtime = "androidx.compose.runtime:runtime"
             const val material = "androidx.compose.material:material"
             const val animation = "androidx.compose.animation:animation"
+            const val tooling = "androidx.compose.ui:ui-tooling"
+            const val iconsExtended = "androidx.compose.material:material-icons-extended"
+
+            const val uiTest = "androidx.compose.ui:ui-test-junit4:1.4.2"
 
             //Theme
             const val theme = "com.google.android.material:compose-theme-adapter:1.1.18"
             const val lottie = "com.airbnb.android:lottie-compose:5.2.0"
 
-            // Tooling support (Previews, etc.)
-            const val tooling = "androidx.compose.ui:ui-tooling"
-            const val iconsExtended = "androidx.compose.material:material-icons-extended"
-
-            // UI Tests
-            const val uiTest = "androidx.compose.ui:ui-test-junit4"
         }
 
         object Activity {
             // Integration with activities
-            const val activityCompose = "androidx.activity:activity-compose:1.4.0"
+            const val activityCompose = "androidx.activity:activity-compose:1.7.1"
         }
 
         object Lifecycle {
@@ -102,7 +99,7 @@ object Libs {
         }
 
         object Navigation {
-            const val version = "2.4.0"
+            const val version = "2.5.3"
             const val navigationCompose = "androidx.navigation:navigation-compose:$version"
         }
 
@@ -141,7 +138,7 @@ object Libs {
 
     object Firebase {
         // Import the Firebase BoM
-        const val platform = "com.google.firebase:firebase-bom:31.1.1"
+        const val platform = "com.google.firebase:firebase-bom:31.5.0"
 
         // When using the BoM, you don't specify versions in Firebase library dependencies
         const val auth = "com.google.firebase:firebase-auth-ktx"

@@ -60,7 +60,8 @@ fun FishingNotesApp(startDestination: String = MainDestinations.HOME_ROUTE) {
         NavHost(
             navController = appStateHolder.navController,
             startDestination = startDestination,
-            modifier = Modifier.padding(innerPaddingModifier)
+            modifier = Modifier
+                .padding(innerPaddingModifier)
                 .consumedWindowInsets(innerPaddingModifier)
 //                .systemBarsPadding()
         ) {
@@ -137,9 +138,11 @@ private fun NavGraphBuilder.NavGraph(
         route = MainDestinations.CATCH_ROUTE,
     ) { UserCatchScreen(modifier = modifier, navController, it.requiredArg(Arguments.CATCH)) }
 
-    /*composable(
+    composable(
         route = MainDestinations.EDIT_PROFILE,
-    ) { EditProfile(upPress) }*/
+    ) { /*EditProfile(upPress)*/
+        // TODO: Fix editProfile screen
+    }
 
     composable(
         route = MainDestinations.DAILY_WEATHER_ROUTE,

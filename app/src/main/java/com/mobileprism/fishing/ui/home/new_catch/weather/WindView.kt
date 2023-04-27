@@ -1,18 +1,19 @@
 package com.mobileprism.fishing.ui.home.new_catch.weather
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
-import com.google.accompanist.flowlayout.FlowMainAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.ui.custom.DefaultDialog
@@ -71,6 +72,7 @@ fun NewCatchWindView(
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PickWindDirDialog(onDirectionSelected: (Float) -> Unit, onDismiss: () -> Unit) {
     DefaultDialog(
@@ -78,8 +80,8 @@ fun PickWindDirDialog(onDirectionSelected: (Float) -> Unit, onDismiss: () -> Uni
         content = {
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                mainAxisAlignment = FlowMainAxisAlignment.Center,
-                crossAxisAlignment = FlowCrossAxisAlignment.Center,
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 (0..7).forEach {
                     WindIconItem(

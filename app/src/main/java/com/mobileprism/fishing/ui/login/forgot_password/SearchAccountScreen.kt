@@ -70,7 +70,7 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
                 context.applicationContext.showError(state.fishingError)
             }
             is FishingViewState.Success -> {
-                modalBottomSheetState.animateTo(targetValue = ModalBottomSheetValue.Expanded)
+                modalBottomSheetState.show()
 
             }
             else -> {}
@@ -85,7 +85,7 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
             DefaultAuthColumn {
                 AuthTopBar({
                     coroutineScope.launch {
-                        modalBottomSheetState.animateTo(targetValue = ModalBottomSheetValue.Hidden)
+                        modalBottomSheetState.hide()
                     }
                 }) {
                     HeaderText(
