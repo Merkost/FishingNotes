@@ -1,6 +1,8 @@
 package com.mobileprism.fishing.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.consumedWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -30,6 +32,7 @@ import com.mobileprism.fishing.ui.home.weather.WeatherDaily
 import com.mobileprism.fishing.ui.login.StartNavigation
 import kotlinx.coroutines.InternalCoroutinesApi
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun FishingNotesApp(startDestination: String = MainDestinations.HOME_ROUTE) {
     val appStateHolder = rememberAppStateHolder()
@@ -52,13 +55,14 @@ fun FishingNotesApp(startDestination: String = MainDestinations.HOME_ROUTE) {
             )
         },
         scaffoldState = appStateHolder.scaffoldState,
-        modifier = Modifier.fillMaxSize().systemBarsPadding()
+        modifier = Modifier.fillMaxSize()
     ) { innerPaddingModifier ->
         NavHost(
             navController = appStateHolder.navController,
             startDestination = startDestination,
-            modifier = Modifier
-                .padding(innerPaddingModifier)
+            modifier = Modifier.padding(innerPaddingModifier)
+                .consumedWindowInsets(innerPaddingModifier)
+//                .systemBarsPadding()
         ) {
             NavGraph(
                 navController = appStateHolder.navController,

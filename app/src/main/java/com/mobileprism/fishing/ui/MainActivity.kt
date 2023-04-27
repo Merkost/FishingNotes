@@ -108,14 +108,12 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-//        if (Build.VERSION.SDK_INT >= 31) {
         setContent {
             Distribution(
                 appTheme.collectAsState().value,
                 authState.collectAsState().value
             )
         }
-//        }
 
 
         MobileAds.initialize(this) {}

@@ -104,6 +104,7 @@ fun WeatherScreen(
             }
 
             TopAppBar(
+                modifier = Modifier.statusBarsPadding(),
                 elevation = elevation.value,
                 backgroundColor = MaterialTheme.colors.primary,
                 title = {

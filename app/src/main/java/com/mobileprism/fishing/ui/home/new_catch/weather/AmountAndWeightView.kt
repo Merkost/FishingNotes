@@ -41,7 +41,7 @@ fun FishAmountAndWeightView(
                 isError = amountState.value.isEmpty(),
                 placeholder = stringResource(R.string.amount),
                 trailingIcon = { Text(stringResource(R.string.pc)) },
-                modifier = Modifier.fillMaxWidth(),
+                textFieldModifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
@@ -102,7 +102,7 @@ fun FishAmountAndWeightView(
                 trailingIcon = {
                     Text(stringResource(R.string.kg))
                 },
-                modifier = Modifier.fillMaxWidth(),
+                textFieldModifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,

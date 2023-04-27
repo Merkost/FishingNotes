@@ -3,7 +3,6 @@ package com.mobileprism.fishing.ui.login
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -74,7 +73,7 @@ fun RegisterScreen(upPress: () -> Unit, toHomeScreen: () -> Unit) {
             }
 
             FishingOutlinedTextField(
-                modifier = Modifier
+                textFieldModifier = Modifier
                     .fillMaxWidth()
                     .onFocusEvent {
                         if (it.isFocused.not() && registerInfo.value.email.isNotEmpty()) viewModel.validateEmailInput()

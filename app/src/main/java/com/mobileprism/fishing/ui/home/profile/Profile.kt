@@ -118,7 +118,7 @@ fun Profile(
                         }
                         .zIndex(2f))
 
-                    /*SecondaryText(
+                    SecondaryText(
                         modifier = Modifier
                             .constrainAs(registerDate) {
                                 top.linkTo(name.bottom, 2.dp)
@@ -129,7 +129,7 @@ fun Profile(
                         text = "${stringResource(id = R.string.register_date)}: " +
                                 (user.dateTimeRegistered.format())
                     )
-*/
+
                     FavoritePlaceView(
                         modifier = Modifier.constrainAs(favorite) {
                             top.linkTo(registerDate.bottom, 32.dp)

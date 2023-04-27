@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.map
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
@@ -56,7 +57,7 @@ import org.koin.androidx.compose.getViewModel
 
 @OptIn(
     ExperimentalMaterialApi::class,
-    ExperimentalPermissionsApi::class
+    ExperimentalPermissionsApi::class,
 )
 @Composable
 fun MapScreen(
@@ -296,6 +297,7 @@ fun MapScreen(
                     )
                 }
 
+//                Log.e("CAMERA_POS", cameraPositionState.position.target)
                 NewPlaceDialog(dialogState = newPlaceDialog, cameraPosition = cameraPositionState.position.target) { newPlaceDialog = false }
             }
         }

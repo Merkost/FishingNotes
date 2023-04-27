@@ -5,6 +5,7 @@ import com.mobileprism.fishing.domain.entity.auth.UsernamePassword
 import com.mobileprism.fishing.domain.entity.common.FishingFirebaseUser
 import com.mobileprism.fishing.domain.repository.AuthManager
 import com.mobileprism.fishing.domain.repository.AuthRepository
+import com.mobileprism.fishing.model.api.GoogleAuthRequest
 import com.mobileprism.fishing.model.datastore.UserDatastore
 import com.mobileprism.fishing.model.entity.user.UserData
 import com.mobileprism.fishing.model.entity.user.UserResponse
@@ -68,12 +69,15 @@ class AuthManagerImpl(
     ) = flow {
         firebaseUser?.let { userDatastore.saveFirebaseUser(firebaseUser) }
 
-        val result = authRepository.loginUserWithGoogle(
+        val googleAuthRequest = GoogleAuthRequest(
             email = email,
             googleAuthId = googleAuthId,
             googleAuthIdToken = googleAuthIdToken,
-            firebaseAuthId = firebaseUser?.uid
-        ).single()
+            firebaseAuthId = firebaseUser?.uid,
+            googlePhotoUrl = firebaseUser?.photoUrl
+        )
+
+        val result = authRepository.loginUserWithGoogle(googleAuthRequest).single()
         if (result is ResultWrapper.Success) {
             onLoginSuccess(result.data)
         }

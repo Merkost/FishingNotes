@@ -1,25 +1,43 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Theme.Fishing" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorOnPrimary">@color/colorOnPrimary</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/colorSecondary</item>
-        <item name="colorOnSecondary">@color/text_secondary_color</item>
-        <item name="android:textColorSecondary">@color/text_secondary_color</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor" >@color/fui_transparent</item>
-        <item name="android:navigationBarColor">@color/fui_transparent</item>
-        <!-- Customize your theme here. -->
+        <item name="android:navigationBarColor">
+            @android:color/transparent
+        </item>
+
+        <!-- Optional: set to transparent if your app is drawing behind the status bar. -->
+        <item name="android:statusBarColor">
+            @android:color/transparent
+        </item>
+
+        <!-- Optional: set the status bar light and content dark. -->
+        <item name="android:windowLightStatusBar">
+            true
+        </item>
     </style>
+
+    <!-- values-v29/themes.xml -->
+<!--    <style name="Theme.MyApp">-->
+<!--        <item name="android:navigationBarColor">-->
+<!--            @android:color/transparent-->
+<!--        </item>-->
+
+<!--        &lt;!&ndash; Optional: set to transparent if your app is drawing behind the status bar. &ndash;&gt;-->
+<!--        <item name="android:statusBarColor">-->
+<!--            @android:color/transparent-->
+<!--        </item>-->
+
+<!--        &lt;!&ndash; Optional: set the status bar light and content dark. &ndash;&gt;-->
+<!--        <item name="android:windowLightStatusBar">-->
+<!--            true-->
+<!--        </item>-->
+<!--    </style>-->
 
     <!-- Base application theme. -->
     <style name="Theme.AnimatedSplashScreen" parent="Theme.Fishing">
         <item name="colorPrimary">@color/white</item>
         <item name="colorOnPrimary">@color/white</item>
-        <item name="android:statusBarColor" >@color/white</item>
+<!--        <item name="android:statusBarColor" >@color/white</item>-->
     </style>
 
     <style name="Theme.AppSplash" parent="Theme.SplashScreen">

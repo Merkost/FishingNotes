@@ -1,7 +1,11 @@
 package com.mobileprism.fishing.ui.home.views
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -39,9 +43,9 @@ fun DefaultAppBar(
     }
 
     TopAppBar(
-        modifier = modifier,
+        modifier = modifier.statusBarsPadding(),
         title = {
-            Column() {
+            Column {
                 Text(text = title)
                 if (subtitle != null) {
                     SecondaryTextSmall(

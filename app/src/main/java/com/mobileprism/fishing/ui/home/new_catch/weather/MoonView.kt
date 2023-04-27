@@ -21,7 +21,7 @@ fun NewCatchMoonView(
     moonPhase: Float,
 ) {
     FishingOutlinedTextField(
-        modifier = modifier.fillMaxWidth(),
+        textFieldModifier = modifier.fillMaxWidth(),
         readOnly = true,
         value = (moonPhase * 100).toInt().toString(),
         leadingIcon = {

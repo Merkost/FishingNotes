@@ -118,6 +118,7 @@ fun UserImage(
 fun ProfileAppBar(navController: NavController) {
 
     val dialogOnLogout = rememberSaveable { mutableStateOf(false) }
+
     DefaultAppBar(
         title = stringResource(R.string.profile),
         actions = {
@@ -138,7 +139,6 @@ fun ProfileAppBar(navController: NavController) {
     if (dialogOnLogout.value) LogoutDialog(dialogOnLogout, navController)
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @InternalCoroutinesApi
 @Composable
 fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavController) {
@@ -161,7 +161,7 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
             }
             /*scope.launch {
                 dialogOnLogout.value = false*/
-                /*viewModel.logoutCurrentUser()*//*.collect { isLogout ->
+            /*viewModel.logoutCurrentUser()*//*.collect { isLogout ->
                     if (isLogout) {
                         dialogOnLogout.value = false
 

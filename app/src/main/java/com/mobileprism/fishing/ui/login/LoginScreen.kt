@@ -59,7 +59,7 @@ fun LoginScreen(upPress: () -> Unit, toHomeScreen: () -> Unit, forgotPassword: (
                 toHomeScreen()
             }
             is FishingViewState.Error -> {
-                context.applicationContext.showError(state.fishingError)
+                context.showError(state.fishingError)
             }
             is FishingViewState.Loading -> {
                 focusManager.clearFocus()
@@ -140,6 +140,7 @@ fun LoginScreen(upPress: () -> Unit, toHomeScreen: () -> Unit, forgotPassword: (
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
+                    .imePadding()
                     .padding(horizontal = 30.dp, vertical = 20.dp),
                 elevation = 10.dp,
                 shape = RoundedCornerShape(30.dp)
@@ -207,7 +208,7 @@ fun LoginScreen(upPress: () -> Unit, toHomeScreen: () -> Unit, forgotPassword: (
                         ) {
 
                             FishingOutlinedTextField(
-                                modifier = Modifier
+                                textFieldModifier = Modifier
                                     .fillMaxWidth()
                                     .onFocusEvent {
                                         if (it.isFocused.not())

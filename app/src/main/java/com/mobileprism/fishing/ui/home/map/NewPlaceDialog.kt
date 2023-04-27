@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.map
 
+import android.util.Log
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -31,6 +32,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.raw.RawMapMarker
+import com.mobileprism.fishing.ui.custom.FishingOutlinedTextField
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.views.MyCard
@@ -53,6 +55,10 @@ fun NewPlaceDialog(
             val viewModel: MapViewModel = getViewModel()
             val uiState by viewModel.addNewMarkerState.collectAsState()
 
+            SideEffect {
+                Log.e("CAMERA", cameraPosition.toString())
+            }
+
             LaunchedEffect(uiState) {
                 when (uiState) {
                     UiState.Success -> {
@@ -60,14 +66,20 @@ fun NewPlaceDialog(
                         viewModel.resetAddNewMarkerState()
                         SnackbarManager.showMessage(R.string.add_place_success)
                     }
+
                     UiState.Error -> {
                         SnackbarManager.showMessage(R.string.add_new_place_error)
                     }
+
                     else -> {}
                 }
             }
 
-            MyCard(shape = Shapes.large, modifier = Modifier.wrapContentHeight().fillMaxWidth()) {
+            MyCard(
+                shape = Shapes.large, modifier = Modifier
+                    .wrapContentHeight()
+                    .fillMaxWidth()
+            ) {
                 ConstraintLayout(
                     modifier = Modifier
                         .wrapContentHeight()
@@ -98,10 +110,10 @@ fun NewPlaceDialog(
                     val (textField1, textField2) = remember { FocusRequester.createRefs() }
                     val keyboardController = LocalSoftwareKeyboardController.current
 
-                    OutlinedTextField(
+                    FishingOutlinedTextField(
                         value = titleValue.value,
                         onValueChange = { titleValue.value = it },
-                        label = { Text(text = stringResource(R.string.title)) },
+                        placeholder = stringResource(R.string.title),
                         singleLine = true,
                         visualTransformation = VisualTransformation.None,
                         keyboardOptions = KeyboardOptions(
@@ -122,7 +134,7 @@ fun NewPlaceDialog(
                                 }
                             }
                         },
-                        modifier = Modifier
+                        mainModifier = Modifier
                             .constrainAs(title) {
                                 top.linkTo(name.bottom, 8.dp)
                                 absoluteLeft.linkTo(parent.absoluteLeft)
@@ -133,12 +145,12 @@ fun NewPlaceDialog(
                             .fillMaxWidth()
                     )
 
-                    OutlinedTextField(
+                    FishingOutlinedTextField(
                         value = descriptionValue.value,
                         onValueChange = {
                             descriptionValue.value = it
                         },
-                        label = { Text(text = stringResource(R.string.description)) },
+                        placeholder = stringResource(R.string.description),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Text,
@@ -147,7 +159,7 @@ fun NewPlaceDialog(
                         keyboardActions = KeyboardActions(
                             onDone = { keyboardController?.hide() }
                         ),
-                        modifier = Modifier
+                        mainModifier = Modifier
                             .constrainAs(description) {
                                 top.linkTo(title.bottom, 2.dp)
                                 absoluteLeft.linkTo(parent.absoluteLeft)
@@ -235,7 +247,10 @@ fun NewPlaceDialog(
                     }, enabled = uiState !is UiState.InProgress
                     ) {
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                            horizontalArrangement = Arrangement.spacedBy(
+                                6.dp,
+                                Alignment.CenterHorizontally
+                            ),
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.animateContentSize()
                         ) {

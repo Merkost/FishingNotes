@@ -88,26 +88,26 @@ fun FishingNotesTheme(
     val customColors = if (darkTheme) darkCustomColors() else lightCustomColors()
 
     val systemUiController = rememberSystemUiController()
-    SideEffect {
-        systemUiController.apply {
-            when(isLoginScreen) {
-                true -> {
-                    setStatusBarColor(color = colors.surface)
-                    setNavigationBarColor(color = colors.primary)
-                }
-                else -> {
-                    if (darkTheme) {
-                        setSystemBarsColor(color = colors.primary)
-                        //setStatusBarColor(color = colors.primaryVariant)
-                    } else {
-                        setSystemBarsColor(color = colors.primary)
-                        //setStatusBarColor(color = colors.primary)
-                    }
-                }
-            }
-
-        }
-    }
+//    SideEffect {
+//        systemUiController.apply {
+//            when(isLoginScreen) {
+//                true -> {
+//                    setStatusBarColor(color = colors.surface)
+//                    setNavigationBarColor(color = colors.primary)
+//                }
+//                else -> {
+//                    if (darkTheme) {
+//                        setSystemBarsColor(color = colors.primary)
+//                        //setStatusBarColor(color = colors.primaryVariant)
+//                    } else {
+//                        setSystemBarsColor(color = colors.primary)
+//                        //setStatusBarColor(color = colors.primary)
+//                    }
+//                }
+//            }
+//
+//        }
+//    }
 
     CompositionLocalProvider(
         LocalColors provides customColors

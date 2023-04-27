@@ -30,7 +30,8 @@ import com.mobileprism.fishing.R
 fun FishingOutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier,
+    mainModifier: Modifier = Modifier,
     enabled: Boolean = true,
     readOnly: Boolean = false,
     textStyle: TextStyle = LocalTextStyle.current,
@@ -47,9 +48,9 @@ fun FishingOutlinedTextField(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     colors: TextFieldColors = TextFieldDefaults.outlinedTextFieldColors(),
 ) {
-    Column(modifier = Modifier) {
+    Column(modifier = mainModifier) {
         OutlinedTextField(
-            modifier = modifier,
+            modifier = textFieldModifier,
             value = value,
             onValueChange = onValueChange,
             shape = RoundedCornerShape(12.dp),
@@ -107,7 +108,7 @@ fun FishingPasswordTextField(
 ) {
 
     FishingOutlinedTextField(
-        modifier = modifier,
+        textFieldModifier = modifier,
         value = password,
         onValueChange = onValueChange,
         placeholder = placeholder,

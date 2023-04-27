@@ -1,6 +1,8 @@
 package com.mobileprism.fishing.ui.home.settings
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -57,11 +59,14 @@ fun SettingsScreen(modifier: Modifier, backPress: () -> Unit, navController: Nav
 
     Scaffold(
         topBar = { SettingsTopAppBar(backPress) },
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
     ) {
-        Column(modifier = Modifier
-            .verticalScroll(rememberScrollState(0))
-            .padding(it)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState(0))
+                .padding(it)
+        ) {
             MainAppSettings(userPreferences)
             WeatherSettings(weatherPreferencesImpl)
             AboutSettings(navController)
@@ -83,9 +88,7 @@ fun AboutSettings(navController: NavController) {
             )
         },
         title = { Text(text = stringResource(R.string.settings_about)) },
-        onClick = {
-            navController.navigate(MainDestinations.ABOUT_APP)
-        }
+        onClick = { navController.navigate(MainDestinations.ABOUT_APP) }
     )
     /*SettingsMenuLink(
         icon = {

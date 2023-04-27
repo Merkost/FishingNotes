@@ -39,8 +39,7 @@ enum class BottomSheetScreen {
     Sort, Filter,
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-@ExperimentalMaterialApi
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @ExperimentalPagerApi
 @ExperimentalAnimationApi
 @Composable
@@ -59,17 +58,18 @@ fun Notes(
 
     val fabState = remember { mutableStateOf(MultiFabState.COLLAPSED) }
 
-    ModalBottomSheetLayout(
-        sheetState = bottomState,
-        sheetShape = modalBottomSheetCorners,
-        sheetContent = {
-            NotesModalBottomSheet(
-                pagerState = pagerState,
-                bottomSheetScreen = bottomSheetScreen,
-                notesPreferences = notesPreferences,
-            )
-        }) {
+//    ModalBottomSheetLayout(
+//        sheetState = bottomState,
+//        sheetShape = modalBottomSheetCorners,
+//        sheetContent = {
+//            NotesModalBottomSheet(
+//                pagerState = pagerState,
+//                bottomSheetScreen = bottomSheetScreen,
+//                notesPreferences = notesPreferences,
+//            )
+//        }) {
         Scaffold(
+            modifier = modifier.fillMaxSize(),
             topBar = {
                 NotesAppBar(pagerState) { newSheetState ->
                     bottomSheetScreen = newSheetState
@@ -114,7 +114,7 @@ fun Notes(
                 TabsContent(tabs = tabs, pagerState = pagerState, navController)
             }
         }
-    }
+//    }
 }
 
 @ExperimentalPagerApi

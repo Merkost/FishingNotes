@@ -51,6 +51,7 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.home.map.MapScreen
+import com.mobileprism.fishing.ui.home.notes.Notes
 import com.mobileprism.fishing.ui.home.notes.NotesScreen
 import com.mobileprism.fishing.ui.home.profile.Profile
 import com.mobileprism.fishing.ui.home.weather.WeatherScreen
@@ -59,6 +60,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import java.util.*
 
+@OptIn(ExperimentalPagerApi::class, ExperimentalAnimationApi::class)
 fun NavGraphBuilder.addHomeGraph(
     navController: NavController,
     modifier: Modifier = Modifier,
@@ -75,12 +77,12 @@ fun NavGraphBuilder.addHomeGraph(
         MapScreen(Modifier, navController, addPlace, place, upPress)
     }
     composable(HomeSections.NOTES.route) {
-        NotesScreen(
-            modifier = modifier,
-            navController = navController,
-            upPress = upPress
-        )
-        //Notes(navController = navController, upPress = upPress)
+//        NotesScreen(
+//            modifier = modifier,
+//            navController = navController,
+//            upPress = upPress
+//        )
+        Notes(navController = navController, upPress = upPress)
     }
     composable(HomeSections.WEATHER.route) { from ->
         val place: UserMapMarker? = from.arguments?.getParcelable(Arguments.PLACE)

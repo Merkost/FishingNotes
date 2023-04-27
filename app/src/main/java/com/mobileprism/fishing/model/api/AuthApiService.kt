@@ -38,4 +38,5 @@ data class GoogleAuthRequest(
     val googleAuthId: String,
     val googleAuthIdToken: String,
     val firebaseAuthId: String?,
+    val googlePhotoUrl: String?,
 ) : Parcelable

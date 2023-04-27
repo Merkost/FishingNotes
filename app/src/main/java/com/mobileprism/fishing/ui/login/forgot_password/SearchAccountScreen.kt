@@ -101,7 +101,7 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
                 )
 
                 FishingOutlinedTextField(
-                    modifier = Modifier
+                    textFieldModifier = Modifier
                         .fillMaxWidth()
                         .onFocusEvent {
                             if (it.isFocused.not())
@@ -172,7 +172,7 @@ fun SearchAccountScreen(upPress: () -> Unit, onNext: (UserLogin) -> Unit) {
                 }
 
                 FishingOutlinedTextField(
-                    modifier = Modifier
+                    textFieldModifier = Modifier
                         .fillMaxWidth()
                         .onFocusEvent {
                             if (it.isFocused.not())

@@ -58,7 +58,7 @@ fun FishSpecies(
             value = name,
             onValueChange = onNameChange,
             placeholder = stringResource(R.string.fish_species),
-            modifier = Modifier.fillMaxWidth(),
+            textFieldModifier = Modifier.fillMaxWidth(),
             isError = name.isBlank(),
             singleLine = true,
             keyboardOptions = KeyboardOptions(

@@ -705,7 +705,7 @@ fun LocationPermissionDialog(
             onDismiss = { onCloseCallback() },
             onNegativeClick = { onCloseCallback() },
             onPositiveClick = {
-                if (permissionsState.shouldShowRationale) {
+                if (permissionsState.shouldShowRationale.not()) {
                     context.displayAppDetailsSettings()
                     context.showToast(context.getString(R.string.enable_gps_in_settings))
                 } else {

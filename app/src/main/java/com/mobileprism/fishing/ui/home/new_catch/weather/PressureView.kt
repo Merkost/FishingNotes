@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -30,7 +29,7 @@ fun NewCatchPressureView(
     val pressureUnit by weatherSettings.getPressureUnit.collectAsState(PressureValues.mmHg)
 
     FishingOutlinedTextField(
-        modifier = modifier.fillMaxWidth(),
+        textFieldModifier = modifier.fillMaxWidth(),
         readOnly = false,
         value = pressure,
         leadingIcon = {

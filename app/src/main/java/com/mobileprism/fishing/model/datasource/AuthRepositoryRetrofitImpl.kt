@@ -47,18 +47,11 @@ class AuthRepositoryRetrofitImpl(
 
 
     override suspend fun loginUserWithGoogle(
-        email: String, googleAuthId: String, googleAuthIdToken: String, firebaseAuthId: String?
+        loginAuthRequest: GoogleAuthRequest
     ) = flow {
         val result = fishingSafeApiCall(dispatcher) {
             firebaseAnalytics.logEvent("login_with_google", null)
-            authApiService.loginUserWithGoogle(
-                GoogleAuthRequest(
-                    email = email,
-                    googleAuthId = googleAuthId,
-                    googleAuthIdToken = googleAuthIdToken,
-                    firebaseAuthId = firebaseAuthId
-                )
-            )
+            authApiService.loginUserWithGoogle(loginAuthRequest)
         }
         emit(result)
     }

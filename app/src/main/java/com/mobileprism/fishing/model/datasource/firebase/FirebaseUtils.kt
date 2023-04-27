@@ -46,7 +46,6 @@ fun createLauncherActivityForGoogleAuth(
 
     return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
         if (result.resultCode == Activity.RESULT_OK) {
-
             result.data?.let { intent ->
                 val task: Task<GoogleSignInAccount> =
                     GoogleSignIn.getSignedInAccountFromIntent(intent)

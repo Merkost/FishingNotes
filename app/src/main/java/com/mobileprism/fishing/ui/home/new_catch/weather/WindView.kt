@@ -19,7 +19,6 @@ import com.mobileprism.fishing.ui.custom.DefaultDialog
 import com.mobileprism.fishing.ui.custom.FishingOutlinedTextField
 import com.mobileprism.fishing.ui.home.views.WindIconItem
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
-import com.mobileprism.fishing.ui.utils.toDoubleExOrNull
 import com.mobileprism.fishing.utils.Constants
 import org.koin.androidx.compose.get
 
@@ -47,7 +46,7 @@ fun NewCatchWindView(
     }
 
     FishingOutlinedTextField(
-        modifier = modifier.fillMaxWidth(),
+        textFieldModifier = modifier.fillMaxWidth(),
         readOnly = false,
         value = wind,
         leadingIcon = {
