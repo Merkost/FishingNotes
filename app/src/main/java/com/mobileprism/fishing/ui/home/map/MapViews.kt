@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.map
 
+import android.util.Log
 import androidx.compose.animation.*
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -53,6 +54,7 @@ import com.mobileprism.fishing.ui.theme.chooseTheme
 import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
 import com.mobileprism.fishing.ui.theme.supportTextColor
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
+import com.mobileprism.fishing.ui.viewmodels.FishingCameraPosition
 import com.mobileprism.fishing.ui.viewmodels.MapViewModel
 import com.mobileprism.fishing.utils.displayAppDetailsSettings
 import com.mobileprism.fishing.utils.location.LocationManager
@@ -181,6 +183,7 @@ fun MyLocationButton(
             !shouldShowPermissions || !permissionsState.allPermissionsGranted -> {
                 RedGoogleChrome
             }
+
             else -> {
                 LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
             }
@@ -211,6 +214,7 @@ fun MyLocationButton(
                             locationButtonClicked = true
                         }
                     }
+
                     false -> {
                         locationDialogIsShowing = true
                         locationButtonClicked = true
@@ -234,7 +238,7 @@ fun CompassButton(
     cameraPositionState: CameraPositionState,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val mapBearing = remember(cameraPositionState.position.bearing) {
+    val mapBearing = remember(cameraPositionState.position) {
         mutableStateOf(cameraPositionState.position.bearing)
     }
 
@@ -254,7 +258,10 @@ fun CompassButton(
                 onClick = {
                     cameraPositionState.position.let {
                         coroutineScope.launch {
-                            moveCameraToLocation(cameraPositionState, it.target, it.zoom, 0f)
+                            moveCameraToLocation(
+                                cameraPositionState,
+                                FishingCameraPosition(it.target, it.zoom, 0f)
+                            )
                         }
                     }
                 }) {
@@ -623,12 +630,15 @@ fun SetPlaceNameResultListener(geocoderResult: GeocoderResult, setPlaceName: (St
                 is GeocoderResult.Success -> {
                     setPlaceName(it.placeName)
                 }
+
                 GeocoderResult.NoNamePlace -> {
                     setPlaceName(context.getString(R.string.unnamed_place))
                 }
+
                 GeocoderResult.Failed -> {
                     setPlaceName(context.getString(R.string.cant_recognize_place))
                 }
+
                 GeocoderResult.InProgress -> {
                     setPlaceName("")
                 }

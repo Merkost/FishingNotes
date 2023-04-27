@@ -109,10 +109,13 @@ dependencies {
     implementation(Libs.Coroutines.android)
     implementation(Libs.Coroutines.core)
 
-    implementation(Libs.GoogleMaps.maps)
+    implementation(Libs.GoogleMaps.mapsCompose)
+    implementation(Libs.GoogleMaps.mapsUtilsCompose)
+    implementation(Libs.GoogleMaps.mapsPlayServices)
+    
+
     implementation(Libs.GoogleMaps.mapsKtx)
     implementation(Libs.GoogleMaps.mapUtilsKtx)
-    implementation(Libs.GoogleMaps.mapsPlayServices)
 
     implementation(Libs.PlayServices.auth)
     implementation(Libs.PlayServices.maps)

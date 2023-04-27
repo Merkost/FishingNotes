@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.viewmodels
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -34,39 +35,29 @@ class MapViewModel(
 ) : ViewModel() {
 
 
-    private var _mapMarkers: MutableStateFlow<MutableList<UserMapMarker>> =
-        MutableStateFlow(mutableListOf())
-    val mapMarkers: StateFlow<List<UserMapMarker>>
-        get() = _mapMarkers
+    val mapMarkers = getUserPlacesListUseCase.invoke()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
 
     private val _mapUiState: MutableStateFlow<MapUiState> = MutableStateFlow(MapUiState.NormalMode)
     val mapUiState = _mapUiState.asStateFlow()
 
-//    private val _currentMarker: MutableStateFlow<UserMapMarker?> = MutableStateFlow(null)
-//    val currentMarker = _currentMarker.asStateFlow()
-
-    init {
-        getFirstLaunchLocation()
-        loadUserMarkersList()
-    }
-
     private val initialPlaceSelected = MutableStateFlow(false)
 
-    private val _firstCameraPosition = MutableStateFlow<Pair<LatLng, Float>?>(null)
+    private val _firstCameraPosition = MutableStateFlow<FishingCameraPosition?>(null)
     val firstCameraPosition = _firstCameraPosition.asStateFlow()
+
+//    val firstCameraPosition = userPreferences.getLastMapCameraLocation
+//        .stateIn(viewModelScope, SharingStarted.Eagerly, FishingCameraPosition(DEFAULT_LOCATION)
+//    )
 
     private val _addNewMarkerState: MutableStateFlow<UiState?> = MutableStateFlow(null)
     val addNewMarkerState = _addNewMarkerState.asStateFlow()
 
-    // TODO:  
-    private val _cameraPosition = MutableStateFlow<CameraTarget?>(null)
-    val cameraPosition = _cameraPosition.asStateFlow()
-
     private val _cameraMoveState = MutableStateFlow<CameraMoveState>(CameraMoveState.MoveStart)
-    val cameraMoveState = _cameraMoveState.asStateFlow()
 
     private val _mapType = MutableStateFlow(MapTypes.roadmap)
     val mapType = _mapType.asStateFlow()
+
     fun onLayerSelected(layer: Int) {
         _mapType.value = layer
     }
@@ -74,7 +65,7 @@ class MapViewModel(
     private val _lastKnownLocation = MutableStateFlow<LatLng?>(null)
     val lastKnownLocation = _lastKnownLocation.asStateFlow()
 
-    private val _newMapCameraPosition = MutableSharedFlow<Pair<LatLng, Float?>>()
+    private val _newMapCameraPosition = MutableSharedFlow<FishingCameraPosition>()
     val newMapCameraPosition = _newMapCameraPosition.asSharedFlow()
 
     private val _currentMarkerAddressState =
@@ -90,18 +81,26 @@ class MapViewModel(
     val fishActivity: MutableState<Int?> = mutableStateOf(null)
     val currentWeather: MutableState<CurrentWeatherFree?> = mutableStateOf(null)
 
+    init {
+        getFirstLaunchLocation()
+    }
+
     fun setCameraMoveState(newState: CameraMoveState) {
         _cameraMoveState.value = newState
     }
 
     private fun moveCamera(location: LatLng, zoom: Float? = null) {
         viewModelScope.launch {
-            _newMapCameraPosition.emit(Pair(location, zoom))
+            _newMapCameraPosition.emit(FishingCameraPosition(location, zoom))
         }
     }
 
     fun onMapClicked(latLng: LatLng) {
-        moveCamera(latLng, DEFAULT_ZOOM)
+        if (mapUiState.value !is MapUiState.BottomSheetInfoMode) {
+            moveCamera(latLng, DEFAULT_ZOOM)
+        } else {
+            resetMapUiState()
+        }
     }
 
     fun onAutoToMyLocation(target: LatLng) {
@@ -110,16 +109,6 @@ class MapViewModel(
 //                onMyLocationClick()
 //            }
 //        }
-    }
-
-    private fun loadUserMarkersList() {
-        viewModelScope.launch {
-            getUserPlacesListUseCase.invoke().collect { markers ->
-                _mapMarkers.value = markers as MutableList<UserMapMarker>
-                // TODO:
-//                if (!markers.any { currentMarker.value == it }) { resetMapUiState() }
-            }
-        }
     }
 
     /*private fun loadUserPlaces() {
@@ -208,7 +197,7 @@ class MapViewModel(
         viewModelScope.launch {
             if (!initialPlaceSelected.value) {
                 userPreferences.saveLastMapCameraLocation(
-                    Triple(
+                    FishingCameraPosition(
                         position.target,
                         position.zoom,
                         position.bearing
@@ -218,7 +207,8 @@ class MapViewModel(
         }
     }
 
-    fun quickAddPlace(name: String) {
+    fun quickAddPlace(position: LatLng, name: String) {
+        // TODO: fix
         if (mapUiState.value is MapUiState.NormalMode) {
             viewModelScope.launch {
                 _lastKnownLocation.value?.let {
@@ -240,8 +230,9 @@ class MapViewModel(
             place.id == Constants.CURRENT_PLACE_ITEM_ID -> {
                 initialPlaceSelected.value = true
                 // TODO:
-//                _firstCameraPosition.value =
-//                    currentCameraPosition.value.copy(place.latLng, second = DEFAULT_ZOOM)
+                _firstCameraPosition.update {
+                    FishingCameraPosition(place.latLng)
+                }
             }
 
             else -> {
@@ -249,9 +240,9 @@ class MapViewModel(
 //                _currentMarker.value = place
                 // TODO: deal with marker in state
                 _mapUiState.value = MapUiState.BottomSheetInfoMode(place)
-                // TODO:
-//                _firstCameraPosition.value =
-//                    currentCameraPosition.value.copy(place.latLng, second = DEFAULT_ZOOM)
+                _firstCameraPosition.update {
+                    FishingCameraPosition(place.latLng)
+                }
             }
         }
         /*place?.let {
@@ -375,20 +366,22 @@ class MapViewModel(
 
     fun getLastLocation() {
         val currentState = mapUiState.value
-        if (currentState is MapUiState.BottomSheetInfoMode/*!initialPlaceSelected.value*/) {
-            /*currentMarker.value*/currentState.marker?.let {
-                _firstCameraPosition.update { currentState.marker.latLng to DEFAULT_ZOOM }
-            } ?: getFirstLaunchLocation()
-        }
+        // TODO: fix
+
+//        if (currentState is MapUiState.BottomSheetInfoMode/*!initialPlaceSelected.value*/) {
+//            currentState.marker?.let {
+//                _firstCameraPosition.update { currentState.marker.latLng to DEFAULT_ZOOM }
+//            } ?: getFirstLaunchLocation()
+//        }
 
     }
 
     private fun getFirstLaunchLocation() {
         viewModelScope.launch {
             if (mapUiState.value !is MapUiState.BottomSheetInfoMode) {
-                userPreferences.getLastMapCameraLocation.singleOrNull()?.let {
-                    _firstCameraPosition.emit(it)
-
+                userPreferences.getLastMapCameraLocation.firstOrNull()?.let {
+                    _firstCameraPosition.update { it }
+                    Log.e("_firstCameraPosition", _firstCameraPosition.value.toString())
                 }
             }
         }
@@ -398,10 +391,23 @@ class MapViewModel(
         _addNewMarkerState.update { null }
     }
 
+    fun saveFirstLaunchLocation(cameraPosition: CameraPosition) {
+        viewModelScope.launch {
+            userPreferences.saveLastMapCameraLocation(
+                FishingCameraPosition(
+                    cameraPosition.target,
+                    cameraPosition.zoom,
+                    cameraPosition.bearing
+                )
+            )
+        }
+    }
+
 }
 
-data class CameraTarget(
-    val latLng: LatLng,
-    val bearing: Int,
+data class FishingCameraPosition(
+    val latLng: LatLng = DEFAULT_LOCATION,
+    val zoom: Float? = DEFAULT_ZOOM,
+    val bearing: Float? = DEFAULT_BEARING,
 )
 

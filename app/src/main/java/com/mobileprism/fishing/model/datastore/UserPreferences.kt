@@ -4,9 +4,12 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.mobileprism.fishing.ui.home.map.DEFAULT_BEARING
 import com.mobileprism.fishing.ui.home.map.DEFAULT_ZOOM
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
+import com.mobileprism.fishing.ui.viewmodels.FishingCameraPosition
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -65,14 +68,15 @@ class UserPreferences(private val context: Context) {
             preferences[MAP_ZOOM_BUTTONS_KEY] ?: false
         }
 
-    val getLastMapCameraLocation: Flow<Pair<LatLng, Float>> = context.dataStore.data
+    val getLastMapCameraLocation: Flow<FishingCameraPosition> = context.dataStore.data
         .map { preferences ->
-            Pair(
+            FishingCameraPosition(
                 LatLng(
                     preferences[LAST_MAP_LATITUDE] ?: 0.0,
                     preferences[LAST_MAP_LONGITUDE] ?: 0.0,
                 ),
-                preferences[LAST_MAP_ZOOM] ?: 0f
+                preferences[LAST_MAP_ZOOM] ?: 0f,
+                preferences[LAST_MAP_BEARING] ?: 0f
             )
         }
 
@@ -113,12 +117,12 @@ class UserPreferences(private val context: Context) {
         }
     }
 
-    suspend fun saveLastMapCameraLocation(triple: Triple<LatLng, Float, Float>) {
+    suspend fun saveLastMapCameraLocation(position: FishingCameraPosition) {
         context.dataStore.edit { preferences ->
-            preferences[LAST_MAP_LATITUDE] = triple.first.latitude
-            preferences[LAST_MAP_LONGITUDE] = triple.first.longitude
-            preferences[LAST_MAP_ZOOM] = triple.second
-            preferences[LAST_MAP_BEARING] = triple.third
+            preferences[LAST_MAP_LATITUDE] = position.latLng.latitude
+            preferences[LAST_MAP_LONGITUDE] = position.latLng.longitude
+            preferences[LAST_MAP_ZOOM] = position.zoom ?: DEFAULT_ZOOM
+            preferences[LAST_MAP_BEARING] = position.bearing ?: DEFAULT_BEARING
         }
     }
 

@@ -33,6 +33,7 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.WeatherForecast
 import com.mobileprism.fishing.ui.MainActivity
+import com.mobileprism.fishing.ui.viewmodels.FishingCameraPosition
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.TIME_TO_EXIT
 import com.mobileprism.fishing.utils.showToast
@@ -117,7 +118,7 @@ sealed class LocationState() {
 }
 
 
-
+val DEFAULT_LOCATION = LatLng(0.0,0.0)
 const val DEFAULT_ZOOM = 15f
 const val DEFAULT_BEARING = 0f
 
@@ -128,16 +129,14 @@ val locationPermissionsList = listOf(
 
 suspend fun moveCameraToLocation(
     cameraPositionState: CameraPositionState,
-    location: LatLng,
-    zoom: Float? = null,
-    bearing: Float? = null
+    fishingCameraPosition: FishingCameraPosition
 ) {
     cameraPositionState.animate(
         CameraUpdateFactory.newCameraPosition(
             CameraPosition.Builder()
-                .apply { zoom?.let { zoom(zoom) } }
-                .apply { bearing?.let { bearing(bearing) } }
-                .target(location)
+                .apply { fishingCameraPosition.zoom?.let { zoom(it) } }
+                .apply { fishingCameraPosition.bearing?.let { bearing(it) } }
+                .target(fishingCameraPosition.latLng)
                 .build()
         )
     )
@@ -145,16 +144,17 @@ suspend fun moveCameraToLocation(
 
 suspend fun setCameraPosition(
     cameraPositionState: CameraPositionState,
-    location: LatLng,
-    zoom: Float = DEFAULT_ZOOM,
-    bearing: Float = DEFAULT_BEARING
+    fishingCameraPosition: FishingCameraPosition
+//    location: LatLng,
+//    zoom: Float = DEFAULT_ZOOM,
+//    bearing: Float = DEFAULT_BEARING
 ) {
     cameraPositionState.move(
         CameraUpdateFactory.newCameraPosition(
             CameraPosition.Builder()
-                .zoom(zoom)
-                .target(location)
-                .bearing(bearing)
+                .apply { fishingCameraPosition.zoom?.let { zoom(it) } }
+                .apply { fishingCameraPosition.bearing?.let { bearing(it) } }
+                .target(fishingCameraPosition.latLng)
                 .build()
         )
     )
@@ -242,22 +242,6 @@ fun Context.convertDistance(distanceInMeters: Double): String {
             .toString() + " ${getString(R.string.km)}"
         else -> distanceInMeters.div(1000).toInt().toString() + " ${getString(R.string.km)}"
     }
-}
-
-fun getIconRotationByWeatherIn8H(forecast: WeatherForecast): Float {
-    return if (forecast.hourly.first().pressure > forecast.hourly[7].pressure) 180f else 0f
-}
-
-fun getIconRotationByWeatherIn16H(forecast: WeatherForecast): Float {
-    return if (forecast.hourly[7].pressure > forecast.hourly[15].pressure) 180f else 0f
-}
-
-fun getIconTintByWeatherIn8H(forecast: WeatherForecast): Color {
-    return if (forecast.hourly.first().pressure > forecast.hourly[7].pressure) Color.Red else Color.Green
-}
-
-fun getIconTintByWeatherIn16H(forecast: WeatherForecast): Color {
-    return if (forecast.hourly[7].pressure > forecast.hourly[15].pressure) Color.Red else Color.Green
 }
 
 fun Context.getMapStyleByTheme(darkTheme: Boolean): MapStyleOptions {

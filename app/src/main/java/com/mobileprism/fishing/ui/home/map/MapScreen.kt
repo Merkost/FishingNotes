@@ -24,7 +24,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -42,12 +41,14 @@ import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainActivity
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.navigate
+import com.mobileprism.fishing.ui.viewmodels.FishingCameraPosition
 import com.mobileprism.fishing.ui.viewmodels.MapViewModel
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
 import com.mobileprism.fishing.utils.location.checkLocationPermissions
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -88,10 +89,11 @@ fun MapScreen(
 
     val singapore = LatLng(1.35, 103.87)
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(singapore, 10f)
+        position = CameraPosition.fromLatLngZoom(DEFAULT_LOCATION, 0f)
     }
-    LaunchedEffect(cameraPositionState) {
-        Log.e("CAMERA_POS", cameraPositionState.position.target.toString())
+
+    val currentPosition = remember(cameraPositionState.position) {
+        mutableStateOf(cameraPositionState.position.target)
     }
 
     BackPressHandler(
@@ -128,7 +130,12 @@ fun MapScreen(
                             }
                         }
                     },
-                    onLongPress = { viewModel.quickAddPlace(name = context.getString(R.string.no_name_place)) },
+                    onLongPress = {
+                        viewModel.quickAddPlace(
+                            position = currentPosition.value,
+                            name = context.getString(R.string.no_name_place)
+                        )
+                    },
                     userSettings = userPreferences,
                 )
             },
@@ -154,6 +161,7 @@ fun MapScreen(
 //                    initialPosition = editableAddress?.latLng,
                 firstCameraPosition = viewModel.firstCameraPosition,
                 newMapCameraPosition = viewModel.newMapCameraPosition,
+                onSaveLastLocation = viewModel::saveFirstLaunchLocation,
                 onAutoToMyLocation = viewModel::onAutoToMyLocation,
                 onMapClick = viewModel::onMapClicked,
                 onCameraStateChanged = viewModel::setCameraMoveState
@@ -171,13 +179,8 @@ fun MapScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    MyLocationButton(
-                        modifier = Modifier, onClick = viewModel::onMyLocationClick
-                    )
-
-                    CompassButton(
-                        modifier = modifier, cameraPositionState = cameraPositionState
-                    )
+                    MyLocationButton(modifier = Modifier, onClick = viewModel::onMyLocationClick)
+                    CompassButton(modifier = modifier, cameraPositionState = cameraPositionState)
                 }
 
                 Column(
@@ -278,12 +281,13 @@ fun MapScreen(
                 }
             }
 
+//            LaunchedEffect(cameraPositionState.position) {
+//                Log.e("LaunchedEffect", cameraPositionState.position.target.toString())
+//            }
 
-//                Log.e("CAMERA_POS", cameraPositionState.position.target)
-            val cameraMove by viewModel.cameraMoveState.collectAsState()
             NewPlaceDialog(
                 dialogState = newPlaceDialog,
-                cameraPosition = (cameraMove as? CameraMoveState.MoveFinish)?.latLng
+                cameraPosition = cameraPositionState.position.target
             ) { newPlaceDialog = false }
         }
     }
@@ -307,8 +311,9 @@ fun MapLayout(
     mapType: Int,
     markers: List<UserMapMarker>,
     onMarkerClicked: (UserMapMarker) -> Unit,
-    firstCameraPosition: StateFlow<Pair<LatLng, Float>?>,
-    newMapCameraPosition: SharedFlow<Pair<LatLng, Float?>>,
+    firstCameraPosition: StateFlow<FishingCameraPosition?>,
+    newMapCameraPosition: SharedFlow<FishingCameraPosition>,
+    onSaveLastLocation: (CameraPosition) -> Unit,
     onAutoToMyLocation: (LatLng) -> Unit,
     onMapClick: (LatLng) -> Unit,
     onCameraStateChanged: (CameraMoveState) -> Unit,
@@ -362,9 +367,7 @@ fun MapLayout(
         properties = mapProperties,
         onMapClick = onMapClick,
     ) {
-        LaunchedEffect(cameraPositionState.position.target) {
-            Log.e("CAMERA_MAP", cameraPositionState.position.target.toString())
-        }
+
         markersToShow.forEach { myMarker ->
             Marker(state = MarkerState(position = LatLng(myMarker.latitude, myMarker.longitude)),
                 title = myMarker.title,
@@ -379,21 +382,22 @@ fun MapLayout(
 
         MapEffect(Unit) { map ->
 
-            launch {
+            launch(Dispatchers.Main) {
                 newMapCameraPosition.collectLatest {
                     map.awaitMapLoad()
 
-                    moveCameraToLocation(cameraPositionState, it.first, it.second)
+                    moveCameraToLocation(cameraPositionState, it)
                 }
             }
 
-            launch {
+            launch(Dispatchers.Main) {
                 firstCameraPosition.collectLatest {
                     map.awaitMapLoad()
 
-                    it?.let { setCameraPosition(cameraPositionState, it.first, it.second) }
+                    it?.let { setCameraPosition(cameraPositionState, it) }
                 }
             }
+
 
             launch {
                 map.setOnCameraIdleListener {
@@ -401,8 +405,10 @@ fun MapLayout(
                 }
             }
 
+
+//
             launch {
-                map.setOnCameraMoveListener {
+                map.setOnCameraMoveStartedListener {
                     onCameraStateChanged(CameraMoveState.MoveStart)
                 }
             }
@@ -418,13 +424,11 @@ fun MapLayout(
 
     LaunchedEffect(mapType) {
         mapProperties = mapProperties.copy(mapType = MapType.values()[mapType])
-    }/*
-        DisposableEffect(map) {
-            isMapVisible = true
-            viewModel.getLastLocation()
+    }
 
-            onDispose { viewModel.saveLastCameraPosition() }
-        }*/
+//    DisposableEffect(Unit) {
+//        onDispose { onSaveLastLocation(cameraPositionState.position) }
+//    }
 }
 
 @ExperimentalMaterialApi

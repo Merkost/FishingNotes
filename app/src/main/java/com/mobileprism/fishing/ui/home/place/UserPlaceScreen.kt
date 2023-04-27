@@ -45,7 +45,7 @@ fun UserPlaceScreen(modifier: Modifier, backPress: () -> Unit, navController: Na
 
     if (deleteDialogIsShowing) {
         DeletePlaceDialog(place, onDismiss = { deleteDialogIsShowing = false }) {
-            //viewModel.deletePlace()
+            viewModel.deletePlace()
             deleteDialogIsShowing = false
             navController.popBackStack()
         }

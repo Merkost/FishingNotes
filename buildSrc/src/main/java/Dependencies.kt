@@ -22,11 +22,14 @@ object Libs {
         //KTX for the Maps SDK for Android library
         // KTX for the Maps SDK for Android Utility Library
         //"com.google.android.libraries.maps:maps:3.1.0-beta"
-        const val maps = "com.google.maps.android:maps-compose:2.11.0"
+        const val mapsCompose = "com.google.maps.android:maps-compose:2.11.0"
+        const val mapsUtilsCompose = "com.google.maps.android:maps-compose-utils:2.11.2"
+        const val mapsPlayServices = "com.google.android.gms:play-services-maps:18.1.0"
+
+
         const val mapsKtx = "com.google.maps.android:maps-ktx:3.4.0"
         const val mapUtilsKtx = "com.google.maps.android:maps-utils-ktx:3.4.0"
 
-        const val mapsPlayServices = "com.google.android.gms:play-services-maps:18.1.0"
 
         //Google maps distance between two latlng /*0.4.4*/
         const val mapUtils = "com.google.maps.android:android-maps-utils:2.3.0"
