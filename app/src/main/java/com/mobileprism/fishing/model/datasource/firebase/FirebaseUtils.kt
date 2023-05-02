@@ -86,11 +86,11 @@ private fun startFirebaseLogin(
                 firebaseAuth.signInWithCredential(credential)
                     .addOnCompleteListener(context as Activity) { completedTask ->
                         when {
-                            task.isSuccessful -> {
+                            completedTask.isSuccessful -> {
                                 // Sign in success, update UI with the signed-in user's information
                                 onComplete(account, completedTask.result.user)
                             }
-                            else -> { onError(task.exception) }
+                            else -> { onError(completedTask.exception) }
                         }
                     }.addOnFailureListener(context as Activity) { completedTask ->
                         onError(completedTask.cause as Exception?)
