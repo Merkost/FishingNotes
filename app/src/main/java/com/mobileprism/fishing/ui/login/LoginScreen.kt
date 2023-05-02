@@ -31,8 +31,8 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.MainActivity
 import com.mobileprism.fishing.ui.custom.FishingOutlinedTextField
 import com.mobileprism.fishing.ui.custom.FishingPasswordTextField
-import com.mobileprism.fishing.ui.home.views.FishingButtonFilled
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
+import com.mobileprism.fishing.ui.home.views.FishingButtonFilled
 import com.mobileprism.fishing.ui.home.views.HeaderText
 import com.mobileprism.fishing.ui.home.views.SecondaryTextSmall
 import com.mobileprism.fishing.ui.viewmodels.login.LoginViewModel
@@ -58,13 +58,16 @@ fun LoginScreen(upPress: () -> Unit, toHomeScreen: () -> Unit, forgotPassword: (
             is FishingViewState.Success -> {
                 toHomeScreen()
             }
+
             is FishingViewState.Error -> {
                 context.showError(state.fishingError)
             }
+
             is FishingViewState.Loading -> {
                 focusManager.clearFocus()
                 localSoftwareKeyboardController?.hide()
             }
+
             else -> {}
         }
         /*if (uiState.isLoggedIn) {
@@ -108,6 +111,21 @@ fun LoginScreen(upPress: () -> Unit, toHomeScreen: () -> Unit, forgotPassword: (
                         .weight(6.5f), color = MaterialTheme.colors.primary
                 ) {}
                 Box(modifier = Modifier.weight(4f))
+            }
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                SecondaryTextSmall(
+                    text = "Forgot your password?",
+                    modifier = Modifier.clickable { forgotPassword() })
             }
         }
 
@@ -261,6 +279,7 @@ fun LoginScreen(upPress: () -> Unit, toHomeScreen: () -> Unit, forgotPassword: (
                                             onClick = viewModel::cancelLogin
                                         )
                                     }
+
                                     else -> {
                                         Spacer(modifier = Modifier.size(4.dp))
                                     }
@@ -271,15 +290,6 @@ fun LoginScreen(upPress: () -> Unit, toHomeScreen: () -> Unit, forgotPassword: (
                                 enabled = uiState !is FishingViewState.Loading,
                                 onClick = viewModel::signInUser
                             )
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            SecondaryTextSmall(
-                                text = "Forgot your password?",
-                                modifier = Modifier.clickable { forgotPassword() })
                         }
                     }
                 }

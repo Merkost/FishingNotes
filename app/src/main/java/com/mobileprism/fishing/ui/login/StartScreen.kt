@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.ui.login
 
 import android.widget.Toast
+import androidx.activity.result.IntentSenderRequest
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
@@ -145,8 +146,10 @@ fun StartScreen(
                         onClick = {
                             /*// FIXME: Improve this
                             onStartGoogleLogin()*/
+                            context.getGoogleLoginAuth().addOnSuccessListener {
+                                startForResult.launch(IntentSenderRequest.Builder(it.pendingIntent).build())
+                            }
 
-                            startForResult.launch(context.getGoogleLoginAuth().signInIntent)
                         }
                     )
 
