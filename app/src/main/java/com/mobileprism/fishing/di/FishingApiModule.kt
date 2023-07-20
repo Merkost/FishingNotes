@@ -1,8 +1,8 @@
 package com.mobileprism.fishing.di
 
-import com.mobileprism.fishing.model.api.AuthApiService
-import com.mobileprism.fishing.model.api.FishApiService
-import com.mobileprism.fishing.model.api.RestoreApiService
+import com.mobileprism.fishing.model.api.fishing.AuthApiService
+import com.mobileprism.fishing.model.api.fishing.FishApiService
+import com.mobileprism.fishing.model.api.fishing.RestoreApiService
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit

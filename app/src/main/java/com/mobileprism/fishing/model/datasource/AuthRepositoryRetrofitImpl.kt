@@ -4,11 +4,9 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.mobileprism.fishing.domain.entity.auth.EmailPassword
 import com.mobileprism.fishing.domain.entity.auth.UsernamePassword
 import com.mobileprism.fishing.domain.repository.AuthRepository
-import com.mobileprism.fishing.model.api.AuthApiService
-import com.mobileprism.fishing.model.api.GoogleAuthRequest
-import com.mobileprism.fishing.model.entity.user.UserResponse
+import com.mobileprism.fishing.model.api.fishing.AuthApiService
+import com.mobileprism.fishing.model.api.fishing.GoogleAuthRequest
 import com.mobileprism.fishing.model.utils.fishingSafeApiCall
-import com.mobileprism.fishing.model.utils.safeApiCall
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow

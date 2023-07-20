@@ -26,6 +26,7 @@ import com.mobileprism.fishing.ui.home.addHomeGraph
 import com.mobileprism.fishing.ui.home.catch.UserCatchScreen
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchMasterScreen
 import com.mobileprism.fishing.ui.home.place.UserPlaceScreen
+import com.mobileprism.fishing.ui.home.profile.EditProfile
 import com.mobileprism.fishing.ui.home.settings.AboutApp
 import com.mobileprism.fishing.ui.home.settings.SettingsScreen
 import com.mobileprism.fishing.ui.home.weather.WeatherDaily
@@ -140,8 +141,8 @@ private fun NavGraphBuilder.NavGraph(
 
     composable(
         route = MainDestinations.EDIT_PROFILE,
-    ) { /*EditProfile(upPress)*/
-        // TODO: Fix editProfile screen
+    ) {
+        EditProfile(upPress)
     }
 
     composable(

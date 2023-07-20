@@ -1,4 +1,3 @@
-/*
 package com.mobileprism.fishing.ui.home.profile
 
 import android.annotation.SuppressLint
@@ -32,7 +31,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.entity.common.User
+import com.mobileprism.fishing.model.entity.user.UserData
 import com.mobileprism.fishing.ui.custom.DefaultDialog
 import com.mobileprism.fishing.ui.custom.ModalLoadingDialog
 import com.mobileprism.fishing.ui.home.settings.GrayText
@@ -63,7 +62,6 @@ fun EditProfile(onBack: () -> Unit) {
     )
 
 
-    */
 /*var datePickerShown by remember { mutableStateOf(false) }
     if (datePickerShown) {
         DatePickerDialog(context,
@@ -71,7 +69,7 @@ fun EditProfile(onBack: () -> Unit) {
                 .apply { this.add(Calendar.YEAR, -18) }.timeInMillis,
             maxDate = Calendar.getInstance().apply { this.add(Calendar.YEAR, -18) }.timeInMillis,
             onDismiss = { datePickerShown = false }, onDateChange = viewModel::birthdaySelected)
-    }*//*
+    }*/
 
 
     LaunchedEffect(uiState) {
@@ -105,7 +103,8 @@ fun EditProfile(onBack: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .padding(it),
             verticalArrangement = Arrangement.SpaceBetween.also { Arrangement.spacedBy(12.dp) }
         ) {
             Column(
@@ -120,13 +119,12 @@ fun EditProfile(onBack: () -> Unit) {
                 )
 
 
-                */
-/*EditProfileTextFieldWithHeader(
+                EditProfileTextFieldWithHeader(
                     modifier = Modifier.fillMaxWidth(),
-                    value = currentUser.displayName,
+                    value = currentUser.firstName ?: "",
                     onValueChange = viewModel::onNameChange,
                     hintText = stringResource(id = R.string.name_hint)
-                )*//*
+                )
 
 
                 EditProfileTextFieldWithHeader(
@@ -155,36 +153,36 @@ fun EditProfile(onBack: () -> Unit) {
                     readOnly = true,
                 )
 
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    GrayText(text = stringResource(id = R.string.birthday_hint))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
-                        verticalAlignment = Alignment.Bottom
-                    ) {
-                        Icon(
-                            Icons.Default.EditCalendar,
-                            Icons.Default.EditCalendar.name
-                        )
-                        if (currentUser.birthDate == 0L) {
-                            Text(
-                                modifier = Modifier.clickable {
-                                    datePickerShown = true
-                                },
-                                text = stringResource(id = R.string.birthday_set),
-                                color = MaterialTheme.customColors.secondaryTextColor
-                            )
-                        } else {
-                            Text(
-                                modifier = Modifier.clickable {
-                                    datePickerShown = true
-                                },
-                                text = currentUser.birthDate.toDate(),
-                                fontSize = 16.sp
-                            )
-                        }
-                    }
-                }
+//                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+//                    GrayText(text = stringResource(id = R.string.birthday_hint))
+//                    Row(
+//                        modifier = Modifier.fillMaxWidth(),
+//                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
+//                        verticalAlignment = Alignment.Bottom
+//                    ) {
+//                        Icon(
+//                            Icons.Default.EditCalendar,
+//                            Icons.Default.EditCalendar.name
+//                        )
+//                        if (currentUser.birthDate == 0L) {
+//                            Text(
+//                                modifier = Modifier.clickable {
+//                                    datePickerShown = true
+//                                },
+//                                text = stringResource(id = R.string.birthday_set),
+//                                color = MaterialTheme.customColors.secondaryTextColor
+//                            )
+//                        } else {
+//                            Text(
+//                                modifier = Modifier.clickable {
+//                                    datePickerShown = true
+//                                },
+//                                text = currentUser.birthDate.toDate(),
+//                                fontSize = 16.sp
+//                            )
+//                        }
+//                    }
+//                }
             }
 
 
@@ -203,10 +201,10 @@ fun EditProfile(onBack: () -> Unit) {
 }
 
 @Composable
-fun EditUserPhoto(modifier: Modifier = Modifier, currentUser: User, hintText: String) {
+fun EditUserPhoto(modifier: Modifier = Modifier, currentUser: UserData, hintText: String) {
     Column(modifier = Modifier, verticalArrangement = Arrangement.spacedBy(12.dp),) {
         GrayText(text = hintText)
-        UserImage(modifier = modifier, user = currentUser, imgSize = 150.dp, icon = Icons.Default.Edit, onIconClick = {})
+        UserImage(modifier = modifier, photoUrl = "currentUser", imgSize = 150.dp, icon = Icons.Default.Edit, onIconClick = {})
     }
 }
 
@@ -280,4 +278,4 @@ fun EditProfileTopAppBar(
             }
         }
     }
-}*/
+}

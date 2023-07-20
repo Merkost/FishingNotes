@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.model.api
+package com.mobileprism.fishing.model.api.fishing
 
 import com.mobileprism.fishing.domain.entity.auth.restore.RestoreRemoteConfirm
 import com.mobileprism.fishing.domain.entity.auth.restore.RestoreRemoteFind

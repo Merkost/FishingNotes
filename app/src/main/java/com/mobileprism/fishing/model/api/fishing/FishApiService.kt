@@ -1,4 +1,4 @@
-package com.mobileprism.fishing.model.api
+package com.mobileprism.fishing.model.api.fishing
 
 import com.mobileprism.fishing.model.entity.FishResponse
 import retrofit2.http.GET
