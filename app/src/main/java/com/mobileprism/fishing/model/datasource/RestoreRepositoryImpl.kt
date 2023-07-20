@@ -1,20 +1,12 @@
 package com.mobileprism.fishing.model.datasource
 
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.mobileprism.fishing.domain.entity.auth.EmailPassword
-import com.mobileprism.fishing.domain.entity.auth.UsernamePassword
 import com.mobileprism.fishing.domain.entity.auth.restore.RestoreRemoteConfirm
 import com.mobileprism.fishing.domain.entity.auth.restore.RestoreRemoteFind
 import com.mobileprism.fishing.domain.entity.auth.restore.RestoreRemoteReset
-import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.domain.repository.RestoreRepository
-import com.mobileprism.fishing.model.api.AuthApiService
-import com.mobileprism.fishing.model.api.GoogleAuthRequest
-import com.mobileprism.fishing.model.api.RestoreApiService
-import com.mobileprism.fishing.model.entity.FishingResponse
-import com.mobileprism.fishing.model.entity.user.UserResponse
+import com.mobileprism.fishing.model.api.fishing.RestoreApiService
 import com.mobileprism.fishing.model.utils.fishingSafeApiCall
-import com.mobileprism.fishing.model.utils.safeApiCall
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow

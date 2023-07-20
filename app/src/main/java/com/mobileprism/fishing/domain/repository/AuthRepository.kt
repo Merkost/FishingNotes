@@ -2,7 +2,7 @@ package com.mobileprism.fishing.domain.repository
 
 import com.mobileprism.fishing.domain.entity.auth.EmailPassword
 import com.mobileprism.fishing.domain.entity.auth.UsernamePassword
-import com.mobileprism.fishing.model.api.GoogleAuthRequest
+import com.mobileprism.fishing.model.api.fishing.GoogleAuthRequest
 import com.mobileprism.fishing.model.entity.user.UserResponse
 import com.mobileprism.fishing.model.utils.ResultWrapper
 import kotlinx.coroutines.flow.Flow

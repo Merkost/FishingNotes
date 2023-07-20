@@ -5,7 +5,7 @@ import com.mobileprism.fishing.domain.entity.auth.UsernamePassword
 import com.mobileprism.fishing.domain.entity.common.FishingFirebaseUser
 import com.mobileprism.fishing.domain.repository.AuthManager
 import com.mobileprism.fishing.domain.repository.AuthRepository
-import com.mobileprism.fishing.model.api.GoogleAuthRequest
+import com.mobileprism.fishing.model.api.fishing.GoogleAuthRequest
 import com.mobileprism.fishing.model.datastore.UserDatastore
 import com.mobileprism.fishing.model.entity.user.UserData
 import com.mobileprism.fishing.model.entity.user.UserResponse

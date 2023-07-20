@@ -3,17 +3,14 @@ package com.mobileprism.fishing.model.datasource.fake
 import com.mobileprism.fishing.domain.entity.auth.EmailPassword
 import com.mobileprism.fishing.domain.entity.auth.UsernamePassword
 import com.mobileprism.fishing.domain.repository.AuthRepository
-import com.mobileprism.fishing.model.api.GoogleAuthRequest
+import com.mobileprism.fishing.model.api.fishing.GoogleAuthRequest
 import com.mobileprism.fishing.model.entity.user.UserData
 import com.mobileprism.fishing.model.entity.user.UserResponse
-import com.mobileprism.fishing.model.utils.ResultWrapper
 import com.mobileprism.fishing.model.utils.fishingSafeApiCall
-import com.mobileprism.fishing.model.utils.safeApiCall
 import com.mobileprism.fishing.utils.Constants
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.Response
 
