@@ -1,11 +1,22 @@
 package com.mobileprism.fishing.ui.home.weather
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.BottomSheetScaffold
+import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ScrollableTabRow
+import androidx.compose.material.Tab
+import androidx.compose.material.TabRowDefaults
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -14,7 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.pager.*
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.PagerState
+import com.google.accompanist.pager.pagerTabIndicatorOffset
+import com.google.accompanist.pager.rememberPagerState
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.weather.Daily
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
@@ -25,9 +40,7 @@ import com.mobileprism.fishing.utils.time.toDayOfWeekAndDate
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
-@ExperimentalAnimationApi
-@ExperimentalMaterialApi
-@ExperimentalPagerApi
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun WeatherDaily(
     upPress: () -> Unit,
@@ -51,10 +64,11 @@ fun WeatherDaily(
         sheetPeekHeight = 0.dp
     ) {
         AnimatedVisibility(visible = data != null) {
-            Column(modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween) {
-                Column(
-                ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
                     WeatherDaysTabs(forecast = data!!.dailyForecast, pagerState = pagerState)
                     WeatherTabsContent(forecast = data.dailyForecast, pagerState = pagerState)
                 }
@@ -63,8 +77,7 @@ fun WeatherDaily(
     }
 }
 
-@ExperimentalPagerApi
-@ExperimentalMaterialApi
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun WeatherDaysTabs(forecast: List<Daily>, pagerState: PagerState) {
     val scope = rememberCoroutineScope()
@@ -97,7 +110,6 @@ fun WeatherDaysTabs(forecast: List<Daily>, pagerState: PagerState) {
     }
 }
 
-@ExperimentalPagerApi
 @Composable
 fun WeatherTabsContent(
     modifier: Modifier = Modifier,

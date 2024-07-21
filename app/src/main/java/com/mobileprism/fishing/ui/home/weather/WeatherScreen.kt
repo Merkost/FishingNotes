@@ -63,11 +63,7 @@ import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import kotlin.math.min
 
-@ExperimentalCoroutinesApi
-@ExperimentalAnimationApi
-@ExperimentalMaterialApi
-@ExperimentalPagerApi
-@ExperimentalPermissionsApi
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun WeatherScreen(
     modifier: Modifier = Modifier,

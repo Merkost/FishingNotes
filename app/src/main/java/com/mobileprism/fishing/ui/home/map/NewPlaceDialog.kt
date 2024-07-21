@@ -39,8 +39,7 @@ import com.mobileprism.fishing.ui.utils.ColorPicker
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import org.koin.androidx.compose.getViewModel
 
-@ExperimentalAnimationApi
-@ExperimentalComposeUiApi
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun NewPlaceDialog(
     dialogState: Boolean,

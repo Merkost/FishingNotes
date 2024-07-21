@@ -71,8 +71,6 @@ import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-@ExperimentalComposeUiApi
-@ExperimentalAnimationApi
 @Composable
 fun ItemPhoto(
     photo: Uri,
@@ -117,7 +115,7 @@ fun ItemPhoto(
             } else {
                 AsyncImageContent()
             }
-        }*/// FIXME:  
+        }*/// FIXME:
         if (deleteEnabled) {
             Surface(
                 color = Color.LightGray.copy(alpha = 0.5f),
@@ -143,9 +141,6 @@ fun ItemPhoto(
     }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
-@ExperimentalAnimationApi
-@ExperimentalComposeUiApi
 @Composable
 fun PhotosView(
     modifier: Modifier = Modifier,
@@ -234,9 +229,6 @@ fun PhotosView(
     }
 }
 
-@OptIn(
-    androidx.compose.foundation.ExperimentalFoundationApi::class
-)
 @Composable
 fun NewCatchPhotoView(
     modifier: Modifier = Modifier,
@@ -364,8 +356,6 @@ fun FullSizePhotoView(
     }
 }
 
-@ExperimentalAnimationApi
-@ExperimentalComposeUiApi
 @Composable
 fun ItemCatchPhotoView(
     modifier: Modifier = Modifier,
@@ -399,8 +389,6 @@ fun ItemCatchPhotoView(
 }
 
 
-@ExperimentalComposeUiApi
-@ExperimentalAnimationApi
 @Composable
 fun FullScreenPhoto(photo: MutableState<Uri?>) {
 

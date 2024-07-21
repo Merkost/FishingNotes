@@ -33,8 +33,6 @@ import com.mobileprism.fishing.utils.time.toDateTextMonth
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
-@ExperimentalFoundationApi
-@ExperimentalAnimationApi
 @Composable
 fun UserCatchesScreen(
     navController: NavController,
@@ -56,9 +54,7 @@ fun UserCatchesScreen(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
-@ExperimentalFoundationApi
-@ExperimentalAnimationApi
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun UserCatches(
     modifier: Modifier = Modifier,

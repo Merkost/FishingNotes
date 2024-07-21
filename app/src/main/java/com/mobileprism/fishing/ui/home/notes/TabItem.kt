@@ -10,20 +10,15 @@ typealias ComposableFun = @Composable (navController: NavController) -> Unit
 
 sealed class TabItem(var icon: Int, var titleRes: Int, var screen: ComposableFun) {
 
-    @ExperimentalAnimationApi
     object Places :
         TabItem(R.drawable.ic_baseline_location_on_24, R.string.places, { navController ->
             UserPlacesScreen(navController = navController)
         })
 
-    @ExperimentalFoundationApi
-    @ExperimentalAnimationApi
     object Catches : TabItem(R.drawable.ic_fish, R.string.catches, { navController ->
         UserCatchesScreen(navController = navController)
     })
 
-    @ExperimentalFoundationApi
-    @ExperimentalAnimationApi
     object PlaceCatches : TabItem(R.drawable.ic_fish, R.string.catches, { _ -> })
 
     @ExperimentalFoundationApi

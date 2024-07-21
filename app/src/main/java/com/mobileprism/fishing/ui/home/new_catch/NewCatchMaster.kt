@@ -1,7 +1,6 @@
 package com.mobileprism.fishing.ui.home.new_catch
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -9,7 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
@@ -21,7 +19,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import com.google.accompanist.pager.*
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.home.SnackbarManager
@@ -36,11 +33,6 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.viewModel
 import org.koin.core.parameter.parametersOf
 
-@ExperimentalPermissionsApi
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
-@ExperimentalComposeUiApi
-@ExperimentalPagerApi
 @Composable
 fun NewCatchMasterScreen(
     receivedPlace: UserMapMarker?,
@@ -211,7 +203,6 @@ fun NewCatchMasterScreen(
 }
 
 
-@ExperimentalPagerApi
 @Composable
 fun NewCatchPager(
     modifier: Modifier = Modifier,
@@ -247,7 +238,6 @@ fun NewCatchPager(
     }
 }
 
-@ExperimentalPagerApi
 @Composable
 fun NewCatchButtons(
     modifier: Modifier = Modifier,
@@ -354,7 +344,6 @@ private fun handlePagerNextClick(
 
 }
 
-@ExperimentalComposeUiApi
 @Composable
 fun CancelNewCatchDialog(
     onDismiss: () -> Unit,

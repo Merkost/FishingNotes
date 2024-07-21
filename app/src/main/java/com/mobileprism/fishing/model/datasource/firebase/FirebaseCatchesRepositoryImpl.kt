@@ -36,7 +36,6 @@ class FirebaseCatchesRepositoryImpl(
         awaitClose { }
     }
 
-    @ExperimentalCoroutinesApi
     private suspend fun getUserCatchesStateListener(scope: ProducerScope<ContentStateOld<UserCatch>>)
     : OnSuccessListener<in QuerySnapshot> =
         OnSuccessListener<QuerySnapshot> { task ->
@@ -47,7 +46,6 @@ class FirebaseCatchesRepositoryImpl(
             }
         }
 
-    @ExperimentalCoroutinesApi
     private fun getCatchesStateFromDoc(docs: List<DocumentSnapshot>) = callbackFlow {
         docs.forEach { doc ->
             doc.reference.collection(CATCHES_COLLECTION)
@@ -57,7 +55,7 @@ class FirebaseCatchesRepositoryImpl(
                         val result = ContentStateOld<UserCatch>()
 
                         for (dc in snapshots.documentChanges) {
-                            val userCatch = dc.document.toObject<UserCatch>()
+                            val userCatch = dc.document.toObject(UserCatch::class.java)
                             when (dc.type) {
                                 DocumentChange.Type.ADDED -> {
                                     result.added.add(userCatch)

@@ -59,14 +59,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import java.util.Locale
 
-@OptIn(ExperimentalComposeUiApi::class)
-@ExperimentalCoroutinesApi
-@ExperimentalPermissionsApi
-@ExperimentalAnimationApi
-@ExperimentalPagerApi
-@ExperimentalCoilApi
-@ExperimentalMaterialApi
-@InternalCoroutinesApi
+
 fun NavGraphBuilder.addHomeGraph(
     navController: NavController,
     modifier: Modifier = Modifier,
@@ -368,7 +361,7 @@ private fun FishingNotesBottomNavPreview() {
     FishingNotesTheme {
         FishingNotesBottomBar(
             modifier = Modifier,
-            tabs = HomeSections.values(),
+            tabs = HomeSections.entries.toTypedArray(),
             currentRoute = "home/map",
             navigateToRoute = { }
         )

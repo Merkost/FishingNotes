@@ -126,7 +126,7 @@ fun MapModalBottomSheet(
     }
 }
 
-@ExperimentalPermissionsApi
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun MyLocationButton(
     modifier: Modifier = Modifier,
@@ -491,7 +491,6 @@ fun FishLoading(modifier: Modifier) {
     )
 }
 
-@ExperimentalAnimationApi
 @Composable
 fun PlaceTileView(
     modifier: Modifier,

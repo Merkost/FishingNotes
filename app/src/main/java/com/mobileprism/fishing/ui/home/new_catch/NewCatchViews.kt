@@ -245,7 +245,6 @@ fun PickWindDirDialog(onDirectionSelected: (Float) -> Unit, onDismiss: () -> Uni
     )
 }
 
-@ExperimentalComposeUiApi
 @Composable
 fun NewCatchNoPlaceDialog(
     navController: NavController
@@ -287,7 +286,6 @@ private fun onAddNewPlaceClick(navController: NavController) {
     navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${addNewPlace}")
 }
 
-@ExperimentalComposeUiApi
 @Composable
 fun NewCatchPlaceSelectView(
     modifier: Modifier = Modifier,
