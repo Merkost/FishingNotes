@@ -34,7 +34,6 @@ import com.mobileprism.fishing.ui.viewmodels.UserPlacesViewModel
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 
-@ExperimentalAnimationApi
 @Composable
 fun UserPlacesScreen(
     navController: NavController,
@@ -66,7 +65,6 @@ fun UserPlacesScreen(
 }
 
 
-@ExperimentalAnimationApi
 @Composable
 fun UserPlaces(
     modifier: Modifier = Modifier,
@@ -77,7 +75,7 @@ fun UserPlaces(
     navigateToNewPlace: () -> Unit
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(4.dp)
     ) {

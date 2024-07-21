@@ -31,9 +31,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
+@OptIn(ExperimentalMaterialApi::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
 @Composable
 fun LoginScreen(navController: NavController) {
 

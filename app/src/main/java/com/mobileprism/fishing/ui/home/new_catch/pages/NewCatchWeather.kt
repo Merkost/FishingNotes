@@ -23,7 +23,7 @@ import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.utils.network.ConnectionState
 import com.mobileprism.fishing.utils.network.observeConnectivityAsFlow
 
-@ExperimentalComposeUiApi
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavController) {
 

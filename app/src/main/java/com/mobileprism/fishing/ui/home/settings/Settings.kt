@@ -46,8 +46,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
-@OptIn(ExperimentalPermissionsApi::class)
-@ExperimentalComposeUiApi
 @Composable
 fun SettingsScreen(backPress: () -> Unit, navController: NavController) {
 
@@ -149,8 +147,7 @@ fun WeatherSettings(weatherPreferencesImpl: WeatherPreferences) {
     )
 }
 
-@ExperimentalPermissionsApi
-@ExperimentalComposeUiApi
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun MainAppSettings(userPreferences: UserPreferences) {
     val context = LocalContext.current

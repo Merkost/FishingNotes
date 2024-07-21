@@ -42,10 +42,6 @@ import com.mobileprism.fishing.utils.time.toDateTextMonth
 import kotlinx.coroutines.InternalCoroutinesApi
 import org.koin.androidx.compose.getViewModel
 
-@ExperimentalAnimationApi
-@InternalCoroutinesApi
-@ExperimentalMaterialApi
-@ExperimentalCoilApi
 @Composable
 fun Profile(
     navController: NavController,

@@ -303,8 +303,6 @@ fun BestCatchView(
     }
 }
 
-@ExperimentalMaterialApi
-@ExperimentalAnimationApi
 @Composable
 fun FavoritePlaceView(
     modifier: Modifier = Modifier,

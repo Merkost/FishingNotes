@@ -83,11 +83,6 @@ class MainActivity : ComponentActivity() {
         const val UPDATE_REQUEST_CODE = 984165687
     }
 
-    @OptIn(
-        ExperimentalComposeUiApi::class, ExperimentalPermissionsApi::class,
-        ExperimentalAnimationApi::class, InternalCoroutinesApi::class,
-        ExperimentalPagerApi::class, ExperimentalMaterialApi::class
-    )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val viewModel: MainViewModel = getViewModel()
@@ -239,24 +234,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @ExperimentalAnimationApi
-    @ExperimentalPermissionsApi
-    @ExperimentalPagerApi
-    @ExperimentalComposeUiApi
-    @ExperimentalMaterialApi
-    @InternalCoroutinesApi
     @Composable
     private fun DistributionScreen(user: User?) {
         if (user != null) FishingNotesApp()
         else Navigation()
     }
 
-    @OptIn(ExperimentalComposeUiApi::class)
-    @InternalCoroutinesApi
-    @ExperimentalMaterialApi
-    @ExperimentalPagerApi
-    @ExperimentalAnimationApi
-    @ExperimentalPermissionsApi
     @Composable
     fun Navigation() {
         val navController = rememberNavController()
@@ -327,7 +310,6 @@ class MainActivity : ComponentActivity() {
 
     private fun handleError(error: Exception?) {
         error?.let {
-
             val bundle = bundleOf()
             bundle.putString(FirebaseAnalytics.Param.SCORE, error.message)
             Firebase.analytics.logEvent("signin_error", bundle)

@@ -26,8 +26,6 @@ import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.network.ConnectionState
 import com.mobileprism.fishing.utils.network.observeConnectivityAsFlow
 
-@ExperimentalComposeUiApi
-@ExperimentalAnimationApi
 @Composable
 fun NewCatchPhotos(viewModel: NewCatchMasterViewModel) {
 

@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
@@ -35,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.core.net.toUri
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.ui.home.new_catch.FishAmountAndWeightView
@@ -60,9 +58,7 @@ sealed class BottomSheetCatchScreen() {
     object EditWayOfFishingScreen : BottomSheetCatchScreen()
 }
 
-@ExperimentalPermissionsApi
-@ExperimentalAnimationApi
-@ExperimentalComposeUiApi
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CatchModalBottomSheetContent(
     currentScreen: BottomSheetCatchScreen,
@@ -85,7 +81,6 @@ fun CatchModalBottomSheetContent(
                 onSaveNote = { note -> viewModel.updateNote(note) },
                 onCloseDialog = onCloseBottomSheet
             )
-
         }
 
         BottomSheetCatchScreen.EditPhotosScreen -> {
@@ -115,7 +110,6 @@ fun CatchModalBottomSheetContent(
     }
 }
 
-@ExperimentalComposeUiApi
 @Composable
 fun FishTypeAmountAndWeightDialog(
     viewModel: UserCatchViewModel,
@@ -201,7 +195,6 @@ fun FishTypeAmountAndWeightDialog(
 
 }
 
-@ExperimentalComposeUiApi
 @Composable
 fun EditWayOfFishingDialog(
     viewModel: UserCatchViewModel,
@@ -409,9 +402,6 @@ fun EditNoteDialog(
 
 }
 
-@ExperimentalAnimationApi
-@ExperimentalPermissionsApi
-@ExperimentalComposeUiApi
 @Composable
 fun AddPhotoDialog(
     photos: List<Uri>,

@@ -61,11 +61,7 @@ import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
 import org.koin.core.parameter.parametersOf
 
-@ExperimentalComposeUiApi
-@ExperimentalAnimationApi
-@ExperimentalCoroutinesApi
-@ExperimentalMaterialApi
-@ExperimentalPermissionsApi
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MapScreen(
     modifier: Modifier = Modifier,
@@ -271,10 +267,8 @@ fun onMapSettingsClicked(
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @SuppressLint("PotentialBehaviorOverride", "MissingPermission")
-@ExperimentalAnimationApi
-@ExperimentalCoroutinesApi
-@ExperimentalPermissionsApi
 @Composable
 fun MapLayout(
     modifier: Modifier = Modifier,

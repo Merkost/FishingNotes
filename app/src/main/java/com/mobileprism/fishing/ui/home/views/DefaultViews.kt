@@ -28,7 +28,6 @@ import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.utils.time.toDate
 
-@ExperimentalComposeUiApi
 @Composable
 fun DefaultNoteView(
     modifier: Modifier = Modifier,

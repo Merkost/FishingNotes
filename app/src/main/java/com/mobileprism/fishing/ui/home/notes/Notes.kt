@@ -34,10 +34,7 @@ enum class BottomSheetScreen {
     Filter,
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-@ExperimentalMaterialApi
-@ExperimentalPagerApi
-@ExperimentalAnimationApi
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun Notes(
     modifier: Modifier = Modifier,
@@ -113,7 +110,6 @@ fun Notes(
     }
 }
 
-@ExperimentalPagerApi
 @Composable
 fun NotesAppBar(
     pagerState: PagerState,
@@ -142,7 +138,6 @@ fun NotesAppBar(
     )
 }
 
-@ExperimentalPagerApi
 @Composable
 fun NotesModalBottomSheet(
     pagerState: PagerState,
@@ -223,8 +218,7 @@ fun CatchesSort(
     }
 }
 
-@ExperimentalPagerApi
-@ExperimentalMaterialApi
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
     val scope = rememberCoroutineScope()
@@ -263,7 +257,6 @@ fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
     }
 }
 
-@ExperimentalPagerApi
 @Composable
 fun TabsContent(tabs: List<TabItem>, pagerState: PagerState, navController: NavController) {
     HorizontalPager(
