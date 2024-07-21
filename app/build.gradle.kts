@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.kotlinParcelize)
+    alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.googleServices)
     alias(libs.plugins.firebaseCrashlytics)
@@ -60,9 +61,12 @@ android {
 
 dependencies {
     // Settings
-    implementation("com.github.alorma:compose-settings-ui:0.7.2")
+    implementation("com.github.alorma:compose-settings-ui:0.11.0")
 
-    implementation("androidx.work:work-runtime-ktx:2.7.1")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+
+    implementation("androidx.activity:activity-ktx:1.9.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.3")
 
     // Compressor
     implementation("id.zelory:compressor:3.0.1")

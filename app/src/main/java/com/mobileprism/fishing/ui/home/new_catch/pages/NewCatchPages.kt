@@ -10,27 +10,27 @@ typealias NewCatchScreenItem = @Composable (viewModel: NewCatchMasterViewModel, 
 
 sealed class NewCatchPage(var screen: NewCatchScreenItem) {
     @ExperimentalComposeUiApi
-    class NewCatchPlacePage() : NewCatchPage(screen = { viewModel, navController ->
+    class NewCatchPlacePage : NewCatchPage(screen = { viewModel, navController ->
         NewCatchPlace(viewModel, navController)
     })
 
-    class NewCatchFishInfoPage() : NewCatchPage(screen = { viewModel, navController ->
+    class NewCatchFishInfoPage : NewCatchPage(screen = { viewModel, navController ->
         NewCatchFishInfo(viewModel, navController)
     })
 
-    class NewCatchWayOfFishingPage() : NewCatchPage(screen = { viewModel, navController ->
+    class NewCatchWayOfFishingPage : NewCatchPage(screen = { viewModel, navController ->
         NewCatchNote(viewModel, navController)
     })
 
     @ExperimentalComposeUiApi
-    class NewCatchWeatherPage() : NewCatchPage(screen = { viewModel, navController ->
+    class NewCatchWeatherPage: NewCatchPage(screen = { viewModel, navController ->
         NewCatchWeather(viewModel, navController)
     })
 
     @ExperimentalAnimationApi
     @ExperimentalComposeUiApi
-    class NewCatchPhotosPage() : NewCatchPage(screen = { viewModel, navController ->
-        NewCatchPhotos(viewModel, navController)
+    class NewCatchPhotosPage : NewCatchPage(screen = { viewModel, _ ->
+        NewCatchPhotos(viewModel)
     })
 }
 

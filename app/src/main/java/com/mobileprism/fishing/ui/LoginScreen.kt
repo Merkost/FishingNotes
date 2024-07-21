@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.*
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -30,6 +31,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @ExperimentalMaterialApi
 @ExperimentalAnimationApi
 @Composable
@@ -102,7 +104,7 @@ fun LoginScreen(navController: NavController) {
     ) {
         ConstraintLayout(
             modifier = Modifier
-                .fillMaxSize().padding(it)
+                .fillMaxSize()
         ) {
             val (card, lottieSuccess, cardColumn) = createRefs()
 

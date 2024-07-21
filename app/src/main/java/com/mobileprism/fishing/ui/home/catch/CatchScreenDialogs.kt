@@ -1,20 +1,29 @@
 package com.mobileprism.fishing.ui.home.catch
 
-import android.Manifest
 import android.net.Uri
-import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -27,16 +36,21 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.core.net.toUri
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionState
-import com.google.accompanist.permissions.rememberPermissionState
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.ui.home.new_catch.FishAmountAndWeightView
-import com.mobileprism.fishing.ui.home.views.*
+import com.mobileprism.fishing.ui.home.views.DefaultButton
+import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
+import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
+import com.mobileprism.fishing.ui.home.views.ItemPhoto
+import com.mobileprism.fishing.ui.home.views.MaxCounterView
+import com.mobileprism.fishing.ui.home.views.NoContentView
+import com.mobileprism.fishing.ui.home.views.PrimaryText
+import com.mobileprism.fishing.ui.home.views.SimpleOutlinedTextField
 import com.mobileprism.fishing.ui.viewmodels.UserCatchViewModel
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
 import com.mobileprism.fishing.utils.showToast
-import java.util.*
+import java.util.Date
 
 
 sealed class BottomSheetCatchScreen() {
@@ -79,6 +93,7 @@ fun CatchModalBottomSheetContent(
                 photos = viewModel.catch.collectAsState().value.downloadPhotoLinks.map { it.toUri() },
                 onSavePhotosClick = { newPhotos ->
                     viewModel.updateCatchPhotos(newPhotos)
+                    // FIXME: Add ads
 //                    if (newPhotos.find { !it.toString().startsWith("http") } != null) {
 //                        showInterstitialAd(
 //                            context = context,
@@ -404,15 +419,10 @@ fun AddPhotoDialog(
     onCloseBottomSheet: () -> Unit
 ) {
     val context = LocalContext.current
-
     val tempDialogPhotosState = remember { mutableStateListOf<Uri>() }
 
-    val permissionState = rememberPermissionState(Manifest.permission.READ_EXTERNAL_STORAGE)
-
-    val addPhotoState = rememberSaveable { mutableStateOf(false) }
-
-    val choosePhotoLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { value ->
+    val pickMedia =
+        rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { value ->
             if ((value.size + tempDialogPhotosState.size) > MAX_PHOTOS) {
                 showToast(context, context.getString(R.string.max_photos_allowed))
             }
@@ -516,30 +526,11 @@ fun AddPhotoDialog(
             },
             icon = painterResource(id = R.drawable.ic_baseline_add_photo_alternate_24),
             text = stringResource(id = R.string.add),
-            onClick = { addPhotoState.value = true }
+            onClick = {
+                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            }
         )
 
-    }
-
-    if (addPhotoState.value) {
-        LaunchedEffect(addPhotoState) {
-            permissionState.launchPermissionRequest()
-        }
-        addPhoto(permissionState, addPhotoState, choosePhotoLauncher)
-    }
-}
-
-@ExperimentalPermissionsApi
-fun addPhoto(
-    permissionState: PermissionState,
-    addPhotoState: MutableState<Boolean>,
-    choosePhotoLauncher: ManagedActivityResultLauncher<Array<String>, List<Uri>>
-) {
-    when {
-        permissionState.hasPermission -> {
-            choosePhotoLauncher.launch(arrayOf("image/*"))
-            addPhotoState.value = false
-        }
     }
 }
 
