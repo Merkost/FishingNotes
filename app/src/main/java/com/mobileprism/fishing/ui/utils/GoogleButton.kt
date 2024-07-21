@@ -19,6 +19,7 @@ import com.mobileprism.fishing.R
 
 @ExperimentalMaterialApi
 @Composable
+// TODO: Use google button
 fun GoogleButton(
     modifier: Modifier = Modifier,
     text: String = "Sign Up with Google",
@@ -31,14 +32,10 @@ fun GoogleButton(
     onClicked: () -> Unit
 ) {
     var clicked by remember { mutableStateOf(false) }
-
-
-    Card(onClick = { clicked = !clicked },
+    
+    Card(
+        onClick = { clicked = !clicked },
         shape = RoundedCornerShape(20.dp), elevation = 10.dp,
-        onClickLabel = stringResource(
-            R.string.google_login
-        ),
-        //border = BorderStroke(width = 1.dp, color = borderColor),
         backgroundColor = backgroundColor)
      {
         Row(

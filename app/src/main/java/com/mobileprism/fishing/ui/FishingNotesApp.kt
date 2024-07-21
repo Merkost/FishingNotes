@@ -1,12 +1,19 @@
 package com.mobileprism.fishing.ui
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
-import androidx.compose.material.swipeable
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -16,20 +23,24 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import coil.annotation.ExperimentalCoilApi
-import com.google.accompanist.insets.ProvideWindowInsets
-import com.google.accompanist.insets.systemBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
-import com.mobileprism.fishing.ui.home.*
+import com.mobileprism.fishing.ui.home.AppSnackbar
+import com.mobileprism.fishing.ui.home.FishingNotesBottomBar
+import com.mobileprism.fishing.ui.home.HomeSections
+import com.mobileprism.fishing.ui.home.SettingsScreen
+import com.mobileprism.fishing.ui.home.addHomeGraph
 import com.mobileprism.fishing.ui.home.catch.UserCatchScreen
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchMasterScreen
 import com.mobileprism.fishing.ui.home.place.UserPlaceScreen
 import com.mobileprism.fishing.ui.home.profile.EditProfile
 import com.mobileprism.fishing.ui.home.settings.AboutApp
 import com.mobileprism.fishing.ui.home.weather.WeatherDaily
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 
+@OptIn(ExperimentalCoilApi::class)
 @ExperimentalComposeUiApi
 @ExperimentalPermissionsApi
 @ExperimentalAnimationApi
@@ -38,51 +49,55 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @InternalCoroutinesApi
 @Composable
 fun FishingNotesApp() {
-    ProvideWindowInsets {
-        val appStateHolder = rememberAppStateHolder()
+    val appStateHolder = rememberAppStateHolder()
 
-        Scaffold(
-            bottomBar = {
-                if (appStateHolder.shouldShowBottomBar) {
-                    FishingNotesBottomBar(
-                        tabs = appStateHolder.bottomBarTabs,
-                        currentRoute = appStateHolder.currentRoute!!,
-                        navigateToRoute = appStateHolder::navigateToBottomBarRoute
-                    )
-                }
-            },
-            snackbarHost = {
-                SnackbarHost(
-                    hostState = it,
-                    modifier = Modifier.systemBarsPadding(),
-                    snackbar = { snackbarData -> AppSnackbar(snackbarData) }
+//        val statusBarPadding = remember(appStateHolder.currentRoute) {
+//            mutableStateOf(
+//                if (appStateHolder.currentRoute == HomeSections.MAP.route) Modifier
+//                else Modifier.padding()
+//            )
+//        }
+
+    Scaffold(
+        bottomBar = {
+            if (appStateHolder.shouldShowBottomBar) {
+                FishingNotesBottomBar(
+                    modifier = Modifier,
+                    tabs = appStateHolder.bottomBarTabs,
+                    currentRoute = appStateHolder.currentRoute!!,
+                    navigateToRoute = appStateHolder::navigateToBottomBarRoute
                 )
-            },
-            scaffoldState = appStateHolder.scaffoldState,
-            /*modifier = if (appStateHolder.currentRoute == HomeSections.MAP.route)
-                Modifier.statusBarsHeight()
-            else Modifier*/
-        ) { innerPaddingModifier ->
-            Column() {
-
-                //Spacer(modifier = Modifier.statusBarsHeight())
-                NavHost(
+            }
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = it,
+                modifier = Modifier.systemBarsPadding(),
+                snackbar = { snackbarData -> AppSnackbar(snackbarData) }
+            )
+        },
+        scaffoldState = appStateHolder.scaffoldState,
+    ) { innerPaddingModifier ->
+        Column {
+            Surface(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colors.primary) {
+                Box(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars))
+            }
+            NavHost(
+                navController = appStateHolder.navController,
+                startDestination = MainDestinations.HOME_ROUTE,
+                modifier =
+                Modifier.padding(innerPaddingModifier)
+            ) {
+                NavGraph(
                     navController = appStateHolder.navController,
-                    startDestination = MainDestinations.HOME_ROUTE,
-                    modifier = /*if (appStateHolder.currentRoute != HomeSections.MAP.route)*/
-                    Modifier.padding(innerPaddingModifier) /*else Modifier*/
-                ) {
-                    NavGraph(
-                        navController = appStateHolder.navController,
-                        upPress = appStateHolder::upPress,
-                    )
-                }
-
+                    upPress = appStateHolder::upPress,
+                )
             }
         }
     }
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @ExperimentalComposeUiApi
 @ExperimentalPermissionsApi
 @ExperimentalCoilApi
