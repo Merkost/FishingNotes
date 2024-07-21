@@ -33,8 +33,7 @@ android {
             )
         }
         getByName("debug") {
-            ext["enableCrashlytics"] = false
-
+            applicationIdSuffix = ".debug"
         }
     }
 
