@@ -90,13 +90,8 @@ class MainActivity : ComponentActivity() {
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
-
         val viewModel: MainViewModel = getViewModel()
-
         val userStateFlow = viewModel.mutableStateFlow
-
         val userPreferences: UserPreferences = get()
         val appTheme = mutableStateOf<AppThemeValues?>(null)
 
@@ -104,48 +99,48 @@ class MainActivity : ComponentActivity() {
             userPreferences.appTheme.collect { appTheme.value = it }
         }
 
-        installSplashScreen().apply {
-            setKeepOnScreenCondition {
-                userStateFlow.value is BaseViewState.Loading
-                        && appTheme.value == null
-            }
-            setOnExitAnimationListener { splashScreenViewProvider ->
-                // Get icon instance and start a fade out animation
-                if (Build.VERSION.SDK_INT >= 31) {
-                    splashScreenViewProvider.view
-                        .animate()
-                        .setDuration(splashFadeDurationMillis.toLong())
-                        .alpha(0f)
-                        .start()
-                }
+//        installSplashScreen().apply {
+//            setKeepOnScreenCondition {
+//                userStateFlow.value is BaseViewState.Loading
+//                        && appTheme.value == null
+//            }
+//            setOnExitAnimationListener { splashScreenViewProvider ->
+//                // Get icon instance and start a fade out animation
+//                if (Build.VERSION.SDK_INT >= 31) {
+//                    splashScreenViewProvider.view
+//                        .animate()
+//                        .setDuration(splashFadeDurationMillis.toLong())
+//                        .alpha(0f)
+//                        .start()
+//                }
+//
+//                splashScreenViewProvider.iconView
+//                    .animate()
+//                    .setDuration(splashFadeDurationMillis.toLong())
+//                    .alpha(0f)
+//                    /*.scaleX(50f)
+//                    .scaleY(50f)*/
+//                    .withEndAction {
+//                        splashScreenViewProvider.remove()
+//                        if (Build.VERSION.SDK_INT < 31) {
+//                            setContent {
+//                                FishingNotesTheme(appTheme.value) {
+//                                    DistributionScreen(viewModel.user)
+//                                }
+//                            }
+//                        }
+//                    }
+//                    .start()
+//            }
+//        }
 
-                splashScreenViewProvider.iconView
-                    .animate()
-                    .setDuration(splashFadeDurationMillis.toLong())
-                    .alpha(0f)
-                    /*.scaleX(50f)
-                    .scaleY(50f)*/
-                    .withEndAction {
-                        splashScreenViewProvider.remove()
-                        if (Build.VERSION.SDK_INT < 31) {
-                            setContent {
-                                FishingNotesTheme(appTheme.value) {
-                                    DistributionScreen(viewModel.user)
-                                }
-                            }
-                        }
-                    }
-                    .start()
-            }
-        }
-
-        if (Build.VERSION.SDK_INT >= 31) {
+//        if (Build.VERSION.SDK_INT >= 31) {
             setContent {
                 FishingNotesTheme(appTheme.value) {
                     DistributionScreen(viewModel.user)
                 }
             }
-        }
+//        }
 
         MobileAds.initialize(this) {}
 
@@ -225,6 +220,7 @@ class MainActivity : ComponentActivity() {
         )
     }
 
+    @Deprecated("This method has been deprecated in favor of using the Activity Result API\n      which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n      contracts for common intents available in\n      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n      testing, and allow receiving results in separate, testable classes independent from your\n      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n      with the appropriate {@link ActivityResultContract} and handling the result in the\n      {@link ActivityResultCallback#onActivityResult(Object) callback}.")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == UPDATE_REQUEST_CODE) {
@@ -255,10 +251,6 @@ class MainActivity : ComponentActivity() {
         else Navigation()
     }
 
-    //light тема
-    //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
-
     @OptIn(ExperimentalComposeUiApi::class)
     @InternalCoroutinesApi
     @ExperimentalMaterialApi
@@ -268,6 +260,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun Navigation() {
         val navController = rememberNavController()
+
         NavHost(
             navController = navController,
             startDestination = "login_screen"

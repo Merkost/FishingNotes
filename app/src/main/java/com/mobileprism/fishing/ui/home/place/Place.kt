@@ -126,7 +126,7 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
                     ) { note ->
                         viewModel.currentNote.value = note
                         coroutineScope.launch {
-                            modalBottomSheetState.animateTo(ModalBottomSheetValue.HalfExpanded)
+                            modalBottomSheetState.show()
                         }
                     }
 

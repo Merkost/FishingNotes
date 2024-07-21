@@ -11,7 +11,7 @@ import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
 import com.mobileprism.fishing.domain.repository.PhotoStorage
 import com.mobileprism.fishing.utils.getNewPhotoId
-import getPathFromURI
+import fileFromContentUri
 import id.zelory.compressor.Compressor
 import id.zelory.compressor.constraint.format
 import id.zelory.compressor.constraint.quality
@@ -56,10 +56,8 @@ class FirebaseCloudPhotoStorage(
         images.forEach { uri ->
             val riversRef = storageRef.child("markerImages/${getNewPhotoId()}")
 
-            val realPath = getPathFromURI(context, uri)
-            val realFile: File
+            val realFile: File = fileFromContentUri(context, uri)
             try {
-                realFile = File(realPath)
 
                 val compressedImageFile = Compressor.compress(context, realFile) {
                     quality(10)
@@ -86,39 +84,6 @@ class FirebaseCloudPhotoStorage(
             } catch (e: Exception) {
                 e.fillInStackTrace()
             }
-
-            /*val stream = context.contentResolver.openInputStream(uri)
-
-            stream?.let {
-                val file = createTempFile("123", "123")
-                file.writeBytes(it.readBytes())
-
-                val compressedImageFile = Compressor.compress(context, file) {
-                    quality(40)
-                    format(Bitmap.CompressFormat.JPEG)
-                }
-
-                val uploadTask = riversRef.putFile(compressedImageFile.toUri())
-                uploadTasks.add(uploadTask)
-
-                val callback = uploadTask.continueWithTask { task ->
-                    if (!task.isSuccessful) {
-                        task.exception?.let {
-                            throw it
-                        }
-                    }
-                    riversRef.downloadUrl
-                }
-
-                callback.addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        val downloadUri = task.result
-                        trySend(downloadUri.toString())
-                    }
-                }
-
-                file.delete()
-            }*/
         }
         awaitClose { uploadTasks.onEach { cancel() } }
     }

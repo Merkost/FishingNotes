@@ -7,10 +7,17 @@ import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.os.Build
+import android.webkit.MimeTypeMap
 import androidx.loader.content.CursorLoader
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 
 
 @SuppressLint("ObsoleteSdkInt")
+@Deprecated("Use fileFromContentUri instead", replaceWith = ReplaceWith("fileFromContentUri(context, uri)"))
 fun getPathFromURI(context: Context, uri: Uri): String {
     var realPath = ""
     // SDK < API11
@@ -57,4 +64,44 @@ fun getPathFromURI(context: Context, uri: Uri): String {
         }
     }
     return realPath
+}
+
+
+fun fileFromContentUri(context: Context, contentUri: Uri): File {
+    // Preparing Temp file name
+    val fileExtension = getFileExtension(context, contentUri)
+    val fileName = "temp_file" + if (fileExtension != null) ".$fileExtension" else ""
+
+    // Creating Temp file
+    val tempFile = File(context.cacheDir, fileName)
+    tempFile.createNewFile()
+
+    try {
+        val oStream = FileOutputStream(tempFile)
+        val inputStream = context.contentResolver.openInputStream(contentUri)
+
+        inputStream?.let {
+            copy(inputStream, oStream)
+        }
+
+        oStream.flush()
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+
+    return tempFile
+}
+
+private fun getFileExtension(context: Context, uri: Uri): String? {
+    val fileType: String? = context.contentResolver.getType(uri)
+    return MimeTypeMap.getSingleton().getExtensionFromMimeType(fileType)
+}
+
+@Throws(IOException::class)
+private fun copy(source: InputStream, target: OutputStream) {
+    val buf = ByteArray(8192)
+    var length: Int
+    while (source.read(buf).also { length = it } > 0) {
+        target.write(buf, 0, length)
+    }
 }
