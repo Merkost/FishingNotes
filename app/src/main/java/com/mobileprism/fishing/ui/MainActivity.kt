@@ -4,8 +4,11 @@ import android.content.Intent
 import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
+import android.util.TypedValue
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -15,6 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.os.bundleOf
@@ -58,6 +63,7 @@ import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 import java.util.*
 
+
 class MainActivity : ComponentActivity() {
 
     private val logger: Logger by inject()
@@ -84,6 +90,9 @@ class MainActivity : ComponentActivity() {
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+
         val viewModel: MainViewModel = getViewModel()
 
         val userStateFlow = viewModel.mutableStateFlow
@@ -92,9 +101,7 @@ class MainActivity : ComponentActivity() {
         val appTheme = mutableStateOf<AppThemeValues?>(null)
 
         lifecycleScope.launchWhenStarted {
-            userPreferences.appTheme.collect {
-                appTheme.value = it
-            }
+            userPreferences.appTheme.collect { appTheme.value = it }
         }
 
         installSplashScreen().apply {
@@ -139,8 +146,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
-
 
         MobileAds.initialize(this) {}
 
@@ -249,9 +254,6 @@ class MainActivity : ComponentActivity() {
         if (user != null) FishingNotesApp()
         else Navigation()
     }
-
-    // This app draws behind the system bars, so we want to handle fitting system windows
-    // WindowCompat.setDecorFitsSystemWindows(window, false)
 
     //light тема
     //AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);

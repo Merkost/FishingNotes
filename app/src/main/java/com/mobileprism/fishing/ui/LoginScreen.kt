@@ -20,7 +20,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
-import com.google.accompanist.insets.systemBarsPadding
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.AppSnackbar
 import com.mobileprism.fishing.ui.home.SnackbarManager
@@ -103,7 +102,7 @@ fun LoginScreen(navController: NavController) {
     ) {
         ConstraintLayout(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxSize().padding(it)
         ) {
             val (card, lottieSuccess, cardColumn) = createRefs()
 
@@ -236,9 +235,6 @@ fun LoginScreen(navController: NavController) {
                         //Google button
                         Card(
                             shape = RoundedCornerShape(20.dp), elevation = 10.dp,
-                            onClickLabel = stringResource(
-                                R.string.google_login
-                            ),
                             onClick = { googleLoading = true; (context as MainActivity).startGoogleLogin() },
                         ) {
                             Row(
@@ -255,7 +251,7 @@ fun LoginScreen(navController: NavController) {
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Image(
-                                    painterResource(R.drawable.googleg_standard_color_18),
+                                    painterResource(R.drawable.ic_google_logo),
                                     stringResource(R.string.google_login),
                                     modifier = Modifier.size(25.dp)
                                 )

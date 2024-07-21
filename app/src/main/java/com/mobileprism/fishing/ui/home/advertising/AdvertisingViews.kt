@@ -43,21 +43,22 @@ fun AdaptiveBannerAdvertView(modifier: Modifier = Modifier, adId: String) {
             text = "Advert Here",
         )
     } else {
-        AndroidView(
-            modifier = modifier
-                .fillMaxWidth()
-                .wrapContentHeight(),
-            factory = { context ->
-                AdView(context).apply {
-                    adSize = AdSize
-                        .getCurrentOrientationAnchoredAdaptiveBannerAdSize(
-                            context, configuration.screenWidthDp
-                        )
-                    adUnitId = adId
-                    loadAd(AdRequest.Builder().build())
-                }
-            }
-        )
+        // FIXME: Fix the ads
+//        AndroidView(
+//            modifier = modifier
+//                .fillMaxWidth()
+//                .wrapContentHeight(),
+//            factory = { context ->
+//                AdView(context).apply {
+//                    adSize = AdSize
+//                        .getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+//                            context, configuration.screenWidthDp
+//                        )
+//                    adUnitId = adId
+//                    loadAd(AdRequest.Builder().build())
+//                }
+//            }
+//        )
     }
 }
 
@@ -82,24 +83,27 @@ fun BannerAdvertView(modifier: Modifier = Modifier, adId: String, padding: Dp) {
             text = "Advert Here",
         )
     } else {
-        BoxWithConstraints(modifier = modifier
+        BoxWithConstraints(
+            modifier = modifier
             .fillMaxWidth()) {
             val configuration = LocalConfiguration.current
 
-            AndroidView(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
-                factory = { context ->
-                    AdView(context).apply {
-                        adSize = AdSize
-                            .getCurrentOrientationAnchoredAdaptiveBannerAdSize(context,
-                                configuration.screenWidthDp-padding.value.toInt()*2)
-                        adUnitId = adId
-                        loadAd(AdRequest.Builder().build())
-                    }
-                }
-            )
+            // FIXME: Fix the ads
+
+//            AndroidView(
+//                modifier = modifier
+//                    .fillMaxWidth()
+//                    .wrapContentHeight(),
+//                factory = { context ->
+//                    AdView(context).apply {
+//                        adSize = AdSize
+//                            .getCurrentOrientationAnchoredAdaptiveBannerAdSize(context,
+//                                configuration.screenWidthDp-padding.value.toInt()*2)
+//                        adUnitId = adId
+//                        loadAd(AdRequest.Builder().build())
+//                    }
+//                }
+//            )
         }
     }
 }

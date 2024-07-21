@@ -1,5 +1,7 @@
 package com.mobileprism.fishing.ui.theme
 
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
@@ -7,12 +9,16 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import com.mobileprism.fishing.model.datastore.UserPreferences
+import com.mobileprism.fishing.ui.MainActivity
+import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import org.koin.androidx.compose.get
 
 private val DarkColorPalette = darkColors(
@@ -78,6 +84,7 @@ fun FishingNotesTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable() () -> Unit
 ) {
+    val activity = (LocalContext.current as MainActivity)
     val userPreferences: UserPreferences = get()
     val appTheme = userPreferences.appTheme.collectAsState(initialAppTheme)
 
@@ -85,18 +92,18 @@ fun FishingNotesTheme(
 
     val customColors = if (darkTheme) darkCustomColors() else lightCustomColors()
 
-    val systemUiController = rememberSystemUiController()
+    val barColor = Color.White.toArgb()
     SideEffect {
         if (darkTheme) {
-            systemUiController.apply {
-                setSystemBarsColor(color = colors.primary)
-                //setStatusBarColor(color = colors.primaryVariant)
-            }
+            activity.enableEdgeToEdge(
+                statusBarStyle = SystemBarStyle.light(barColor, barColor,),
+                navigationBarStyle = SystemBarStyle.light(barColor, barColor,),
+            )
         } else {
-            systemUiController.apply {
-                setSystemBarsColor(color = colors.primary)
-                //setStatusBarColor(color = colors.primary)
-            }
+            activity.enableEdgeToEdge(
+                statusBarStyle = SystemBarStyle.dark(barColor),
+                navigationBarStyle = SystemBarStyle.dark(barColor),
+            )
         }
     }
 
@@ -113,9 +120,11 @@ fun FishingNotesTheme(
 }
 
 fun chooseTheme(appTheme: AppThemeValues?, darkTheme: Boolean): Colors {
-    return when(appTheme) {
+    return when (appTheme) {
         AppThemeValues.Blue -> if (darkTheme) BlueDarkColorPalette else BlueLightColorPalette
         AppThemeValues.Green -> if (darkTheme) GreenDarkColorPalette else GreenLightColorPalette
-        else -> { InitColorPalette }
+        else -> {
+            InitColorPalette
+        }
     }
 }

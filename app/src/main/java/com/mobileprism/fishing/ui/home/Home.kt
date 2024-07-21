@@ -45,7 +45,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import coil.annotation.ExperimentalCoilApi
-import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
@@ -58,6 +57,7 @@ import com.mobileprism.fishing.ui.home.weather.WeatherScreen
 import com.mobileprism.fishing.ui.theme.FishingNotesTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
+import java.util.Locale
 
 @OptIn(ExperimentalComposeUiApi::class)
 @ExperimentalCoroutinesApi
@@ -79,7 +79,6 @@ fun NavGraphBuilder.addHomeGraph(
         val addPlace = requireNotNull(from.arguments).getBoolean(Arguments.MAP_NEW_PLACE, false)
         val place: UserMapMarker? = from.arguments?.getParcelable(Arguments.PLACE)
         from.arguments?.clear()
-        //from.arguments?.getBoolean(Arguments.MAP_NEW_PLACE)!!
         MapScreen(modifier, navController, addPlace, place, upPress)
     }
     composable(HomeSections.NOTES.route) {
@@ -113,6 +112,7 @@ enum class HomeSections(
 
 @Composable
 fun FishingNotesBottomBar(
+    modifier: Modifier,
     tabs: Array<HomeSections>,
     currentRoute: String,
     navigateToRoute: (String) -> Unit,
@@ -124,6 +124,7 @@ fun FishingNotesBottomBar(
     val darkTheme = isSystemInDarkTheme()
 
     Surface(
+        modifier = modifier,
         color = MaterialTheme.colors.surface,
         contentColor = MaterialTheme.colors.onSurface,
         elevation = 8.dp
@@ -134,11 +135,11 @@ fun FishingNotesBottomBar(
             dampingRatio = 0.8f
         )
         FishingNotesBottomNavLayout(
+            modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars),
             selectedIndex = currentSection.ordinal,
             itemCount = routes.size,
             indicator = { FishingNotesBottomNavIndicator() },
             animSpec = springSpec,
-            modifier = Modifier.navigationBarsPadding(start = false, end = false)
         ) {
             tabs.forEach { section ->
                 val selected = section == currentSection
@@ -160,11 +161,7 @@ fun FishingNotesBottomBar(
                     },
                     text = {
                         Text(
-                            text = stringResource(section.title).uppercase(
-                                ConfigurationCompat.getLocales(
-                                    LocalConfiguration.current
-                                ).get(0)
-                            ),
+                            text = stringResource(section.title).uppercase(Locale.getDefault()),
                             color = tint,
                             style = MaterialTheme.typography.button,
                             maxLines = 1
@@ -370,6 +367,7 @@ private val BottomNavigationItemPadding = Modifier.padding(horizontal = 16.dp, v
 private fun FishingNotesBottomNavPreview() {
     FishingNotesTheme {
         FishingNotesBottomBar(
+            modifier = Modifier,
             tabs = HomeSections.values(),
             currentRoute = "home/map",
             navigateToRoute = { }

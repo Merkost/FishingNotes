@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.mobileprism.fishing">
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -7,7 +8,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -33,17 +35,21 @@
             android:value="@string/admob_app_id"/>
         <meta-data
             android:name="firebase_performance_logcat_enabled"
-            android:value="@string/is_release_boolean" />
+            android:value="@bool/is_release_boolean" />
         <meta-data
             android:name="firebase_crashlytics_collection_enabled"
-            android:value="@string/is_release_boolean" />
+            android:value="@bool/is_release_boolean" />
+        <property
+            android:name="android.adservices.AD_SERVICES_CONFIG"
+            android:resource="@xml/gma_ad_services_config"
+            tools:replace="android:resource" />
 
         <activity android:hardwareAccelerated="true"
             android:name="com.mobileprism.fishing.ui.MainActivity"
+            android:theme="@style/Theme.Fishing.Figma"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

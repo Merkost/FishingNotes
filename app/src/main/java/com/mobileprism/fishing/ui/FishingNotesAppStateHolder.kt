@@ -152,13 +152,14 @@ class AppStateHolder(
 }
 
 fun NavController.navigate(route: String, vararg args: Pair<String, Parcelable>) {
+    val navController = this
     navigate(route) {
-        if (HomeSections.values().map { it.route }.contains(route)) {
+        if (HomeSections.entries.map { it.route }.contains(route)) {
             launchSingleTop = true
             restoreState = true
             // Pop up backstack to the first destination and save state. This makes going back
             // to the start destination when pressing back in any other bottom tab.
-            popUpTo(findStartDestination(this@navigate.graph).id) {
+            popUpTo(findStartDestination(navController.graph).id) {
                 saveState = true
             }
         }
@@ -184,7 +185,7 @@ inline fun <reified T : Parcelable> NavBackStackEntry.requiredArg(key: String): 
  * This is used to de-duplicate navigation events.
  */
 private fun NavBackStackEntry.lifecycleIsResumed() =
-    this.lifecycle.currentState == Lifecycle.State.RESUMED
+    this.getLifecycle().currentState == Lifecycle.State.RESUMED
 
 private val NavGraph.startDestination: NavDestination?
     get() = findNode(startDestinationId)
