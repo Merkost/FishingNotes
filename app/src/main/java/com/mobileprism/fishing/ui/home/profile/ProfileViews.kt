@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -215,56 +214,45 @@ fun ProfileItemsTitleView(
     title: String,
     subtitle: String
 ) {
-    Box(
-        contentAlignment = Alignment.Center,
+    Surface(
         modifier = modifier
-            .wrapContentHeight()
-            .fillMaxWidth()
+            .wrapContentSize(),
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.customColors.backgroundSecondaryColor
     ) {
-        Surface(
+        Row(
             modifier = Modifier
                 .wrapContentSize()
-                .padding(top = 8.dp, bottom = 4.dp),
-            shape = RoundedCornerShape(24.dp),
-            color = MaterialTheme.customColors.backgroundSecondaryColor
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier
-                    .wrapContentSize()
-                    .padding(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
 
-                Icon(
-                    modifier = Modifier
-                        .size(24.dp),
-                    painter = icon,
-                    contentDescription = null,
-                    tint = primaryTextColor
+            Icon(
+                modifier = Modifier
+                    .size(24.dp),
+                painter = icon,
+                contentDescription = null,
+                tint = primaryTextColor
+            )
+
+            Column(
+                modifier = Modifier.padding(8.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                PrimaryText(
+                    modifier = Modifier,
+                    text = title
                 )
 
-                Column(
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    PrimaryText(
-                        modifier = Modifier,
-                        text = title
-                    )
-
-                    SecondaryTextSmall(
-                        modifier = Modifier,
-                        text = subtitle
-                    )
-                }
-
-
+                SecondaryTextSmall(
+                    modifier = Modifier.padding(bottom = 4.dp),
+                    text = subtitle
+                )
             }
         }
     }
-
 }
 
 @ExperimentalMaterialApi
@@ -318,10 +306,8 @@ fun FavoritePlaceView(
 
         ProfileItemsTitleView(
             title = stringResource(id = R.string.favorite_place),
-            subtitle = favoritePlace?.dateOfCreation?.toDateTextMonth()
-                ?: stringResource(R.string.not_avalable),
+            subtitle = favoritePlace?.title.orEmpty(),
             icon = painterResource(id = R.drawable.ic_baseline_star_24)
-
         )
 
         if (favoritePlace != null) {

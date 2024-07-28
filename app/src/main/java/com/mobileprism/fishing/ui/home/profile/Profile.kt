@@ -57,7 +57,7 @@ fun Profile(
         backgroundColor = MaterialTheme.colors.primary
     ) {
         ConstraintLayout(
-            modifier = modifier.fillMaxSize()
+            modifier = modifier.fillMaxSize().padding(it)
         ) {
             val (image, card, editButton) = createRefs()
 
@@ -97,7 +97,7 @@ fun Profile(
                     .zIndex(1f),
                 shape = AbsoluteRoundedCornerShape(25.dp, 25.dp),
                 elevation = 8.dp,
-                backgroundColor = MaterialTheme.colors.surface
+                backgroundColor = MaterialTheme.colors.background
             ) {
                 ConstraintLayout(
                     modifier = Modifier.fillMaxSize(),
