@@ -3,6 +3,9 @@ package com.mobileprism.fishing.ui.home.notes
 import androidx.compose.animation.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Sort
@@ -15,7 +18,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import com.google.accompanist.pager.*
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.datastore.NotesPreferences
 import com.mobileprism.fishing.ui.Arguments
@@ -34,7 +38,7 @@ enum class BottomSheetScreen {
     Filter,
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun Notes(
     modifier: Modifier = Modifier,
@@ -44,7 +48,7 @@ fun Notes(
     val coroutineScope = rememberCoroutineScope()
     val notesPreferences: NotesPreferences = get()
     val tabs = remember { listOf(TabItem.Places, TabItem.Catches) }
-    val pagerState = rememberPagerState(0)
+    val pagerState = rememberPagerState(0) { tabs.size }
 
     val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     var bottomSheetScreen by remember { mutableStateOf(BottomSheetScreen.Sort) }
@@ -93,6 +97,7 @@ fun Notes(
             AnimatedVisibility(
                 fabState.value == MultiFabState.EXPANDED,
                 modifier = Modifier
+                    .padding(it)
                     .zIndex(4f)
                     .fillMaxSize(),
                 enter = fadeIn(),
@@ -102,7 +107,7 @@ fun Notes(
                     fabState.value = MultiFabState.COLLAPSED
                 }) { }
             }
-            Column() {
+            Column {
                 Tabs(tabs = tabs, pagerState = pagerState)
                 TabsContent(tabs = tabs, pagerState = pagerState, navController)
             }
@@ -110,6 +115,7 @@ fun Notes(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NotesAppBar(
     pagerState: PagerState,
@@ -138,6 +144,7 @@ fun NotesAppBar(
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NotesModalBottomSheet(
     pagerState: PagerState,
@@ -218,7 +225,7 @@ fun CatchesSort(
     }
 }
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
     val scope = rememberCoroutineScope()
@@ -257,10 +264,11 @@ fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TabsContent(tabs: List<TabItem>, pagerState: PagerState, navController: NavController) {
     HorizontalPager(
-        state = pagerState, count = tabs.size
+        state = pagerState
     ) { page ->
         tabs[page].screen(navController)
     }
