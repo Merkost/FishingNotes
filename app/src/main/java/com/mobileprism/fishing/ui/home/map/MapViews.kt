@@ -1,20 +1,66 @@
 package com.mobileprism.fishing.ui.home.map
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.BottomSheetScaffold
+import androidx.compose.material.BottomSheetScaffoldState
+import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.IconToggleButton
+import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.LocalContentColor
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.GpsOff
+import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -30,7 +76,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.airbnb.lottie.compose.*
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieClipSpec
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieAnimatable
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
 import com.alorma.compose.settings.ui.SettingsCheckbox
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -38,20 +90,19 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.placeholder.shimmer
-import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.model.datastore.UserPreferences
+import com.mobileprism.fishing.ui.MainActivity
 import com.mobileprism.fishing.ui.home.SettingsHeader
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.views.DefaultDialog
 import com.mobileprism.fishing.ui.theme.RedGoogleChrome
 import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
 import com.mobileprism.fishing.ui.theme.supportTextColor
-import com.mobileprism.fishing.viewmodels.MapViewModel
-import com.mobileprism.fishing.model.datastore.UserPreferences
-import com.mobileprism.fishing.ui.MainActivity
 import com.mobileprism.fishing.utils.location.LocationManager
+import com.mobileprism.fishing.viewmodels.MapViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
@@ -65,8 +116,7 @@ fun MapScaffold(
     fab: @Composable() (() -> Unit)?,
     bottomSheet: @Composable() (ColumnScope.() -> Unit),
     content: @Composable (PaddingValues) -> Unit,
-
-    ) {
+) {
 
     val dp = animateDpAsState(
         when (mapUiState) {
@@ -80,7 +130,7 @@ fun MapScaffold(
         scaffoldState = scaffoldState,
         sheetBackgroundColor = MaterialTheme.colors.surface.copy(0f),
         sheetElevation = 0.dp,
-        sheetShape = RectangleShape/*RoundedCornerShape(30.dp)*/,
+        sheetShape = RectangleShape,
         sheetPeekHeight = dp.value,
         floatingActionButton = fab,
         sheetContent = bottomSheet,
@@ -154,6 +204,7 @@ fun MyLocationButton(
             !shouldShowPermissions || !permissionsState.allPermissionsGranted -> {
                 RedGoogleChrome
             }
+
             else -> {
                 LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
             }
@@ -176,6 +227,7 @@ fun MyLocationButton(
                             onClick()
                         }
                     }
+
                     false -> {
                         locationDialogIsShowing = true
                     }
@@ -579,12 +631,15 @@ fun SetPlaceNameResultListener(geocoderResult: GeocoderResult, setPlaceName: (St
                 is GeocoderResult.Success -> {
                     setPlaceName(it.placeName)
                 }
+
                 GeocoderResult.NoNamePlace -> {
                     setPlaceName(context.getString(R.string.unnamed_place))
                 }
+
                 GeocoderResult.Failed -> {
                     setPlaceName(context.getString(R.string.cant_recognize_place))
                 }
+
                 GeocoderResult.InProgress -> {
                     setPlaceName("")
                 }

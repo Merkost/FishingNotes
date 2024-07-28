@@ -2,7 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Figma application theme. -->
-    <style name="Theme.Fishing.FigmaNight" parent="Theme.Fishing.Figma">
+    <style name="Theme.Fishing.FigmaNight">
         <!-- Primary brand color. -->
         <item name="android:statusBarColor" >@color/fui_transparent</item>
         <item name="android:navigationBarColor">@color/fui_transparent</item>

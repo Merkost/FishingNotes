@@ -94,60 +94,50 @@ class MainActivity : ComponentActivity() {
             userPreferences.appTheme.collect { appTheme.value = it }
         }
 
-//        installSplashScreen().apply {
-//            setKeepOnScreenCondition {
-//                userStateFlow.value is BaseViewState.Loading
-//                        && appTheme.value == null
-//            }
-//            setOnExitAnimationListener { splashScreenViewProvider ->
-//                // Get icon instance and start a fade out animation
-//                if (Build.VERSION.SDK_INT >= 31) {
-//                    splashScreenViewProvider.view
-//                        .animate()
-//                        .setDuration(splashFadeDurationMillis.toLong())
-//                        .alpha(0f)
-//                        .start()
-//                }
-//
-//                splashScreenViewProvider.iconView
-//                    .animate()
-//                    .setDuration(splashFadeDurationMillis.toLong())
-//                    .alpha(0f)
-//                    /*.scaleX(50f)
-//                    .scaleY(50f)*/
-//                    .withEndAction {
-//                        splashScreenViewProvider.remove()
-//                        if (Build.VERSION.SDK_INT < 31) {
-//                            setContent {
-//                                FishingNotesTheme(appTheme.value) {
-//                                    DistributionScreen(viewModel.user)
-//                                }
-//                            }
-//                        }
-//                    }
-//                    .start()
-//            }
-//        }
+        installSplashScreen().apply {
+            setKeepOnScreenCondition {
+                userStateFlow.value is BaseViewState.Loading
+                        && appTheme.value == null
+            }
+            setOnExitAnimationListener { splashScreenViewProvider ->
+                // Get icon instance and start a fade out animation
+                if (Build.VERSION.SDK_INT >= 31) {
+                    splashScreenViewProvider.view
+                        .animate()
+                        .setDuration(splashFadeDurationMillis.toLong())
+                        .alpha(0f)
+                        .start()
+                }
 
-//        if (Build.VERSION.SDK_INT >= 31) {
+                splashScreenViewProvider.iconView
+                    .animate()
+                    .setDuration(splashFadeDurationMillis.toLong())
+                    .alpha(0f)
+                    /*.scaleX(50f)
+                    .scaleY(50f)*/
+                    .withEndAction {
+                        splashScreenViewProvider.remove()
+                        if (Build.VERSION.SDK_INT < 31) {
+                            setContent {
+                                FishingNotesTheme(appTheme.value) {
+                                    DistributionScreen(viewModel.user)
+                                }
+                            }
+                        }
+                    }
+                    .start()
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= 31) {
             setContent {
                 FishingNotesTheme(appTheme.value) {
                     DistributionScreen(viewModel.user)
                 }
             }
-//        }
+        }
 
-        MobileAds.initialize(this) {}
-
-        /*
-            Kostya's Pixel XL = 7254B9BDD30F1D2EACA4C4EAD6B31F2C
-            Oleg = F70916713215C0BC73564CDFEC4D3ECB
-
-        */
-        val testDeviceIds =
-            Arrays.asList("7254B9BDD30F1D2EACA4C4EAD6B31F2C", "F70916713215C0BC73564CDFEC4D3ECB")
-        val configuration = RequestConfiguration.Builder().setTestDeviceIds(testDeviceIds).build()
-        MobileAds.setRequestConfiguration(configuration)
+        MobileAds.initialize(this)
         setAppMuted(true)
 
         checkForUpdates()

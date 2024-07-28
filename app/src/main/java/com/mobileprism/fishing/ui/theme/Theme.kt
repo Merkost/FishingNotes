@@ -1,6 +1,6 @@
 package com.mobileprism.fishing.ui.theme
 
-import androidx.activity.SystemBarStyle
+import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
@@ -10,11 +10,8 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.MainActivity
@@ -92,19 +89,9 @@ fun FishingNotesTheme(
 
     val customColors = if (darkTheme) darkCustomColors() else lightCustomColors()
 
-    val barColor = Color.White.toArgb()
-    SideEffect {
-        if (darkTheme) {
-            activity.enableEdgeToEdge(
-                statusBarStyle = SystemBarStyle.light(barColor, barColor,),
-                navigationBarStyle = SystemBarStyle.light(barColor, barColor,),
-            )
-        } else {
-            activity.enableEdgeToEdge(
-                statusBarStyle = SystemBarStyle.dark(barColor),
-                navigationBarStyle = SystemBarStyle.dark(barColor),
-            )
-        }
+    DisposableEffect(appTheme.value) {
+        activity.enableEdgeToEdge()
+        onDispose { }
     }
 
     CompositionLocalProvider(
@@ -120,6 +107,7 @@ fun FishingNotesTheme(
 }
 
 fun chooseTheme(appTheme: AppThemeValues?, darkTheme: Boolean): Colors {
+    Log.e("AppTheme", "chooseTheme: $appTheme")
     return when (appTheme) {
         AppThemeValues.Blue -> if (darkTheme) BlueDarkColorPalette else BlueLightColorPalette
         AppThemeValues.Green -> if (darkTheme) GreenDarkColorPalette else GreenLightColorPalette
