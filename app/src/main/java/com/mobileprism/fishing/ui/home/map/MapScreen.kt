@@ -2,20 +2,54 @@ package com.mobileprism.fishing.ui.home.map
 
 import android.annotation.SuppressLint
 import android.widget.Toast
-import androidx.compose.animation.*
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.FloatingActionButtonDefaults
+import androidx.compose.material.FloatingActionButtonElevation
+import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.ProvideTextStyle
+import androidx.compose.material.Surface
+import androidx.compose.material.contentColorFor
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -54,12 +88,10 @@ import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.get
 import org.koin.androidx.compose.getViewModel
-import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -98,6 +130,7 @@ fun MapScreen(
     )
 
     ModalBottomSheetLayout(
+        modifier = modifier,
         sheetState = modalBottomSheetState,
         sheetShape = Constants.modalBottomSheetCorners,
         sheetContent = {
@@ -117,6 +150,7 @@ fun MapScreen(
                                 newPlaceDialog = true
                                 viewModel.resetMapUiState()
                             }
+
                             MapUiState.BottomSheetInfoMode -> {
                                 onAddNewCatchClick(navController, viewModel)
                             }
@@ -130,7 +164,7 @@ fun MapScreen(
                 MarkerInfoDialog(
                     navController = navController,
                     onMarkerIconClicked = viewModel::onMarkerClicked
-                ) { coroutineScope.launch { scaffoldState.bottomSheetState.collapse() } }
+                )
             }
         ) {
             ConstraintLayout(modifier = Modifier.fillMaxSize()) {
@@ -459,37 +493,7 @@ fun MapFab(
 ) {
     val state by viewModel.mapUiState.collectAsState()
     val useFastFabAdd by userSettings.useFabFastAdd.collectAsState(false)
-    val fabImg = remember { mutableStateOf(R.drawable.ic_baseline_add_location_24) }
-
     val context = LocalContext.current
-
-    val paddingBottom = animateDpAsState(
-        when (state) {
-            MapUiState.NormalMode -> {
-                defaultFabBottomPadding
-            }
-            MapUiState.BottomSheetInfoMode -> {
-                34.dp
-            }
-            MapUiState.PlaceSelectMode -> {
-                defaultFabBottomPadding
-            }
-        }
-    )
-
-    val paddingTop = animateDpAsState(
-        when (state) {
-            MapUiState.NormalMode -> {
-                0.dp
-            }
-            MapUiState.BottomSheetInfoMode -> {
-                26.dp
-            }
-            MapUiState.PlaceSelectMode -> {
-                0.dp
-            }
-        }
-    )
 
     val adding_place = stringResource(R.string.adding_place_on_current_location)
     val permissions_required = stringResource(R.string.location_permissions_required)
@@ -502,7 +506,7 @@ fun MapFab(
         FishingFab(
             modifier = Modifier
                 .animateContentSize()
-                .padding(bottom = paddingBottom.value, top = paddingTop.value),
+                .padding(bottom = defaultFabBottomPadding),
             onClick = onClick,
             onLongPress = {
                 if (state == MapUiState.NormalMode && useFastFabAdd) {

@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.dp
 object Constants {
 
     const val TIME_TO_EXIT = 2000L
-    val defaultFabBottomPadding: Dp = 128.dp
+    val defaultFabBottomPadding: Dp = 16.dp
 
     val bottomBannerPadding: Dp = 80.dp
 

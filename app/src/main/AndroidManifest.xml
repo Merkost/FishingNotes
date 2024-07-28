@@ -37,7 +37,6 @@
 
         <activity android:hardwareAccelerated="true"
             android:name="com.mobileprism.fishing.ui.MainActivity"
-            android:theme="@style/Theme.Fishing.Figma"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -76,8 +76,7 @@ fun FishingNotesApp() {
             NavHost(
                 navController = appStateHolder.navController,
                 startDestination = MainDestinations.HOME_ROUTE,
-                modifier =
-                Modifier.padding(innerPaddingModifier)
+                modifier = Modifier.padding(innerPaddingModifier)
             ) {
                 NavGraph(
                     navController = appStateHolder.navController,

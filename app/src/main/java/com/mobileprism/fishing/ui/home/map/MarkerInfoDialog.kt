@@ -45,7 +45,6 @@ fun MarkerInfoDialog(
     modifier: Modifier = Modifier,
     navController: NavController,
     onMarkerIconClicked: (UserMapMarker) -> Unit,
-    onBottomSheetClose: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -101,10 +100,6 @@ fun MarkerInfoDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(150.dp)
-                    /*.noRippleClickable(
-                        onClick = onDescriptionClick,
-                        enabled = scaffoldState.bottomSheetState.isCollapsed
-                    )*/
                 ) {
                     val (locationIcon, title, area, distanceTo,
                         fish, divider, weather) = createRefs()
@@ -297,7 +292,7 @@ fun MarkerInfoDialog(
                 }
             }
         }
-    } ?: onBottomSheetClose()
+    }
 }
 
 fun onMarkerClicked(marker: UserMapMarker, navController: NavController) {
