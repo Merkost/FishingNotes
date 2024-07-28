@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--  Ads DEBUG -->
+    <!--  Ads RELEASE -->
     <string name="new_catch_admob_banner_id"
         templateMergeStrategy="preserve"
         translatable="false">
@@ -25,16 +25,5 @@
         templateMergeStrategy="preserve"
         translatable="false">
         ca-app-pub-7533982644023097/3075023072</string>
-
-
-    <!--Ad format	Sample ad unit ID
-    App Open	ca-app-pub-3940256099942544/3419835294
-    Banner	ca-app-pub-3940256099942544/6300978111
-    Interstitial	ca-app-pub-3940256099942544/1033173712
-    Interstitial Video	ca-app-pub-3940256099942544/8691691433
-    Rewarded	ca-app-pub-3940256099942544/5224354917
-    Rewarded Interstitial	ca-app-pub-3940256099942544/5354046379
-    Native Advanced	ca-app-pub-3940256099942544/2247696110
-    Native Advanced Video	ca-app-pub-3940256099942544/1044960115-->
 
 </resources>
