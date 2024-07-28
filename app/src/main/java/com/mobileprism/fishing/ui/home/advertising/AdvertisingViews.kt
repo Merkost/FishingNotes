@@ -1,20 +1,19 @@
 package com.mobileprism.fishing.ui.home.advertising
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.ads.AdRequest
@@ -63,14 +62,16 @@ fun AdaptiveBannerAdvertView(modifier: Modifier = Modifier, adId: String) {
 }
 
 @Composable
-fun BannerAdvertView(modifier: Modifier = Modifier, adId: String, padding: Dp) {
+fun BannerAdvertView(modifier: Modifier = Modifier, adId: String) {
     val isInEditMode = LocalInspectionMode.current
-    val localContext = LocalContext.current
 
-    var size by remember { mutableStateOf(IntSize.Zero) }
+    val screenWidthDp = LocalConfiguration.current.screenWidthDp
 
-    val connectionState by localContext.observeConnectivityAsFlow()
-        .collectAsState(initial = localContext.currentConnectivityState)
+    val screenWidthPx = with(
+        LocalDensity.current
+    ) {
+        screenWidthDp.dp.toPx()
+    }
 
     if (isInEditMode) {
         Text(
@@ -83,27 +84,36 @@ fun BannerAdvertView(modifier: Modifier = Modifier, adId: String, padding: Dp) {
             text = "Advert Here",
         )
     } else {
-        BoxWithConstraints(
+        AndroidView(
+            modifier = modifier.fillMaxWidth(),
+            factory = { context ->
+                AdView(context).apply {
+                    setAdSize(AdSize.FULL_BANNER)
+                    adUnitId = adId
+                    loadAd(AdRequest.Builder().build())
+                }
+            }
+        )
+        /*BoxWithConstraints(
             modifier = modifier
             .fillMaxWidth()) {
             val configuration = LocalConfiguration.current
 
             // FIXME: Fix the ads
 
-//            AndroidView(
-//                modifier = modifier
-//                    .fillMaxWidth()
-//                    .wrapContentHeight(),
-//                factory = { context ->
-//                    AdView(context).apply {
-//                        adSize = AdSize
-//                            .getCurrentOrientationAnchoredAdaptiveBannerAdSize(context,
-//                                configuration.screenWidthDp-padding.value.toInt()*2)
-//                        adUnitId = adId
-//                        loadAd(AdRequest.Builder().build())
-//                    }
-//                }
-//            )
-        }
+            AndroidView(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(),
+                factory = { context ->
+                    AdView(context).apply {
+                        adSize = AdSize
+                            .getCurrentOrientationAnchoredAdaptiveBannerAdSize(context,
+                                configuration.screenWidthDp-padding.value.toInt()*2)
+                        adUnitId = adId
+                        loadAd(AdRequest.Builder().build())
+                    }
+                }
+            )*/
     }
 }
