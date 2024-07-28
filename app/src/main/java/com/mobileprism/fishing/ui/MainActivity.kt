@@ -4,39 +4,30 @@ import android.content.Intent
 import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
-import android.util.TypedValue
+import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SnackbarDuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.os.bundleOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialResponse
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.MobileAds.setAppMuted
-import com.google.android.gms.ads.RequestConfiguration
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
@@ -57,11 +48,9 @@ import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.Logger
 import com.mobileprism.fishing.viewmodels.MainViewModel
-import kotlinx.coroutines.InternalCoroutinesApi
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.getViewModel
-import java.util.*
 
 
 class MainActivity : ComponentActivity() {
@@ -70,17 +59,15 @@ class MainActivity : ComponentActivity() {
     private val appUpdateManager: AppUpdateManager = get()
     private val auth: FirebaseAuth = get()
 
-    private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
-    private lateinit var googleSignInClient: GoogleSignInClient
 
-    private val registeredActivity =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            onActivityResult(result)
-        }
+    private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
 
     companion object {
         const val splashFadeDurationMillis = 300
         const val UPDATE_REQUEST_CODE = 984165687
+
+        val TAG = MainActivity::class.java.simpleName
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -176,25 +163,30 @@ class MainActivity : ComponentActivity() {
                     val totalBytesToDownload = state.totalBytesToDownload()
                     // Show update progress bar.
                 }
+
                 InstallStatus.DOWNLOADED -> {
                     popupSnackbarForCompleteUpdate()
                 }
+
                 InstallStatus.INSTALLED -> {
                     SnackbarManager.showMessage(R.string.update_installed)
                     removeInstallStateUpdateListener()
                 }
+
                 InstallStatus.CANCELED -> {
                     SnackbarManager.showMessage(R.string.update_canceled)
                 }
+
                 InstallStatus.FAILED -> {
                     SnackbarManager.showMessage(R.string.update_failed)
                 }
+
                 else -> {}
             }
         }
 
     private fun removeInstallStateUpdateListener() {
-       appUpdateManager.unregisterListener(installStateUpdatedListener)
+        appUpdateManager.unregisterListener(installStateUpdatedListener)
     }
 
     private fun popupSnackbarForCompleteUpdate() {
@@ -213,9 +205,11 @@ class MainActivity : ComponentActivity() {
                 RESULT_CANCELED -> {
                     SnackbarManager.showMessage(R.string.update_canceled)
                 }
+
                 RESULT_OK -> {
                     SnackbarManager.showMessage(R.string.update_downloading)
                 }
+
                 else -> {
                     SnackbarManager.showMessage(R.string.update_failed)
                     checkForUpdates()
@@ -248,36 +242,51 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun startGoogleLogin() {
-        // Configure GOOGLE sign-in to request the user's ID, email address, and basic
-        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
-            .requestEmail()
+    suspend fun startGoogleLogin() {
+        val credentialManager = CredentialManager.create(this)
+        val signInWithGoogleOption: GetSignInWithGoogleOption =
+            GetSignInWithGoogleOption.Builder(
+                getString(R.string.default_web_client_id)
+            ).build()
+
+        val request = androidx.credentials.GetCredentialRequest.Builder()
+            .addCredentialOption(signInWithGoogleOption)
             .build()
-        // Build a GoogleSignInClient with the options specified by gso.
-        googleSignInClient = GoogleSignIn.getClient(this, gso)
-        val signInIntent: Intent = googleSignInClient.signInIntent
-        registeredActivity.launch(signInIntent)
+
+        try {
+            val result = credentialManager.getCredential(
+                request = request,
+                context = this,
+            )
+            handleSignIn(result)
+        } catch (e: GetCredentialException) {
+            handleError(e)
+        }
+
     }
 
-    private fun onActivityResult(result: ActivityResult) {
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        val exception = task.exception
-        when {
-            task.isSuccessful -> {
-                try {
-                    // Google Sign In was successful, authenticate with Firebase
-                    val account = task.getResult(ApiException::class.java)
-                    firebaseAuthWithGoogle(account.idToken!!)
-                } catch (e: ApiException) {
-                    // Google Sign In failed, update UI appropriately
-                    handleError(e)
+    private fun handleSignIn(result: GetCredentialResponse) {
+        when (val credential = result.credential) {
+            is CustomCredential -> {
+                if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                    try {
+                        // Use googleIdTokenCredential and extract id to validate and
+                        // authenticate on your server.
+                        val googleIdTokenCredential = GoogleIdTokenCredential
+                            .createFrom(credential.data)
+                        firebaseAuthWithGoogle(googleIdTokenCredential.idToken)
+                    } catch (e: GoogleIdTokenParsingException) {
+                        Log.e(TAG, "Received an invalid google id token response", e)
+                    }
+                } else {
+                    handleError(Exception("Unexpected type of credential"))
+                    Log.e(TAG, "Unexpected type of credential")
                 }
             }
+
             else -> {
-                handleError(exception)
+                handleError(Exception("Unexpected type of credential"))
+                Log.e(TAG, "Unexpected type of credential")
             }
         }
     }
@@ -291,6 +300,7 @@ class MainActivity : ComponentActivity() {
                     task.isSuccessful -> {
                         // Sign in success, update UI with the signed-in user's information
                     }
+
                     else -> {
                         handleError(task.exception)
                     }

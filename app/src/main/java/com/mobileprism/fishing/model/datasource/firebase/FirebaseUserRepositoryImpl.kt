@@ -55,13 +55,8 @@ class FirebaseUserRepositoryImpl(
         get() = flow { userDatastore.getUser.first() }
 
     override suspend fun logoutCurrentUser() = callbackFlow {
-        AuthUI.getInstance().signOut(context).addOnCompleteListener {
-            if (it.isSuccessful) {
-                Firebase.analytics.logEvent("logout", null)
-                reloadRepositories()
-                trySend(true)
-            } else trySend(false)
-        }
+        FirebaseAuth.getInstance().signOut()
+        send(true)
         awaitClose {}
     }
 

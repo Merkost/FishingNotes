@@ -236,7 +236,12 @@ fun LoginScreen(navController: NavController) {
                         //Google button
                         Card(
                             shape = RoundedCornerShape(20.dp), elevation = 10.dp,
-                            onClick = { googleLoading = true; (context as MainActivity).startGoogleLogin() },
+                            onClick = {
+                                googleLoading = true;
+                                coroutineScope.launch {
+                                    (context as MainActivity).startGoogleLogin()
+                                }
+                                      },
                         ) {
                             Row(
                                 modifier = Modifier

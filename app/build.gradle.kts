@@ -73,6 +73,10 @@ dependencies {
 
     // coreLibraryDesugaring(libs.jdkDesugar)
 
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+
     implementation(platform(libs.firebase.platform))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
@@ -93,7 +97,7 @@ dependencies {
     implementation(libs.playServices.maps)
     implementation(libs.playServices.location)
     implementation(libs.playServices.ads)
-    implementation(libs.playServices.core)
+    implementation(libs.playServices.update)
     implementation(libs.playServices.billing)
 
     implementation(libs.androidX.coreKtx)
