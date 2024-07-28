@@ -1,16 +1,14 @@
 package com.mobileprism.fishing.ui.home.advertising
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.style.TextAlign
@@ -19,101 +17,34 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
-import com.mobileprism.fishing.utils.network.currentConnectivityState
-import com.mobileprism.fishing.utils.network.observeConnectivityAsFlow
 
 @Composable
-fun AdaptiveBannerAdvertView(modifier: Modifier = Modifier, adId: String) {
-    val configuration = LocalConfiguration.current
+fun BannerAdvertView(
+    modifier: Modifier = Modifier,
+    adId: String,
+    adSize: AdSize = AdSize.FULL_BANNER
+) {
     val isInEditMode = LocalInspectionMode.current
-    val localContext = LocalContext.current
-
-    val connectionState by localContext.observeConnectivityAsFlow()
-        .collectAsState(initial = localContext.currentConnectivityState)
-
-    if (isInEditMode) {
-        Text(
-            modifier = modifier
-                .fillMaxWidth()
-                .background(Color.Red)
-                .padding(horizontal = 2.dp, vertical = 6.dp),
-            textAlign = TextAlign.Center,
-            color = Color.White,
-            text = "Advert Here",
-        )
-    } else {
-        // FIXME: Fix the ads
-//        AndroidView(
-//            modifier = modifier
-//                .fillMaxWidth()
-//                .wrapContentHeight(),
-//            factory = { context ->
-//                AdView(context).apply {
-//                    adSize = AdSize
-//                        .getCurrentOrientationAnchoredAdaptiveBannerAdSize(
-//                            context, configuration.screenWidthDp
-//                        )
-//                    adUnitId = adId
-//                    loadAd(AdRequest.Builder().build())
-//                }
-//            }
-//        )
-    }
-}
-
-@Composable
-fun BannerAdvertView(modifier: Modifier = Modifier, adId: String) {
-    val isInEditMode = LocalInspectionMode.current
-
-    val screenWidthDp = LocalConfiguration.current.screenWidthDp
-
-    val screenWidthPx = with(
-        LocalDensity.current
-    ) {
-        screenWidthDp.dp.toPx()
-    }
-
-    if (isInEditMode) {
-        Text(
-            modifier = modifier
-                .fillMaxWidth()
-                .background(Color.Red)
-                .padding(horizontal = 2.dp, vertical = 6.dp),
-            textAlign = TextAlign.Center,
-            color = Color.White,
-            text = "Advert Here",
-        )
-    } else {
-        AndroidView(
-            modifier = modifier.fillMaxWidth(),
-            factory = { context ->
-                AdView(context).apply {
-                    setAdSize(AdSize.FULL_BANNER)
-                    adUnitId = adId
-                    loadAd(AdRequest.Builder().build())
-                }
-            }
-        )
-        /*BoxWithConstraints(
-            modifier = modifier
-            .fillMaxWidth()) {
-            val configuration = LocalConfiguration.current
-
-            // FIXME: Fix the ads
-
-            AndroidView(
+    Row(modifier = modifier.fillMaxWidth()) {
+        if (isInEditMode) {
+            Text(
                 modifier = modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
+                    .background(Color.Red)
+                    .padding(horizontal = 2.dp, vertical = 6.dp),
+                textAlign = TextAlign.Center,
+                color = Color.White,
+                text = "Advert Here",
+            )
+        } else {
+            AndroidView(
                 factory = { context ->
                     AdView(context).apply {
-                        adSize = AdSize
-                            .getCurrentOrientationAnchoredAdaptiveBannerAdSize(context,
-                                configuration.screenWidthDp-padding.value.toInt()*2)
+                        setAdSize(adSize)
                         adUnitId = adId
                         loadAd(AdRequest.Builder().build())
                     }
                 }
-            )*/
+            )
+        }
     }
 }

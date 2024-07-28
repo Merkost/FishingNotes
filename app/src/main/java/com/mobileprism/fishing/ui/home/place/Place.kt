@@ -2,9 +2,30 @@ package com.mobileprism.fishing.ui.home.place
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.BottomSheetScaffold
+import androidx.compose.material.BottomSheetState
+import androidx.compose.material.BottomSheetValue
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -18,7 +39,7 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
-import com.mobileprism.fishing.ui.home.advertising.AdaptiveBannerAdvertView
+import com.mobileprism.fishing.ui.home.advertising.BannerAdvertView
 import com.mobileprism.fishing.ui.home.notes.TabItem
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.viewmodels.UserPlaceViewModel
@@ -42,7 +63,8 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
         viewModel.markerVisibility.value = place.visible
         onDispose { }
     }
-    val scaffoldState = rememberBottomSheetScaffoldState()
+    val scaffoldState =
+        rememberBottomSheetScaffoldState(BottomSheetState(BottomSheetValue.Expanded))
     val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
 
     val coroutineScope = rememberCoroutineScope()
@@ -76,11 +98,13 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
                 PlaceTopBar(backPress, viewModel) { deleteDialogIsShowing = true }
             },
             sheetContent = {
-                AdaptiveBannerAdvertView(adId = stringResource(R.string.place_admob_banner_id))
+                BannerAdvertView(
+                    modifier = Modifier.navigationBarsPadding(),
+                    adId = stringResource(R.string.place_admob_banner_id)
+                )
             },
             sheetShape = RectangleShape,
             sheetGesturesEnabled = false,
-            sheetPeekHeight = 0.dp
         ) {
             marker?.let { userPlace ->
 
@@ -100,8 +124,10 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
                         place = userPlace,
                         catchesAmount = userCatches.size,
                     ) {
-                        navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
-                            Arguments.PLACE to userPlace)
+                        navController.navigate(
+                            "${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
+                            Arguments.PLACE to userPlace
+                        )
                     }
 
                     PlaceButtonsView(
@@ -131,7 +157,6 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
                     }
 
                     Spacer(modifier = Modifier.size(bottomBannerPadding))
-
                 }
             }
         }

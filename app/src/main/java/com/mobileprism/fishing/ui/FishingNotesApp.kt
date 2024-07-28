@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.ui
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -9,34 +8,29 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import coil.annotation.ExperimentalCoilApi
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.home.AppSnackbar
 import com.mobileprism.fishing.ui.home.FishingNotesBottomBar
 import com.mobileprism.fishing.ui.home.HomeSections
 import com.mobileprism.fishing.ui.home.SettingsScreen
 import com.mobileprism.fishing.ui.home.addHomeGraph
-import com.mobileprism.fishing.ui.home.catch.UserCatchScreen
+import com.mobileprism.fishing.ui.home.catch.CatchInfoScreen
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchMasterScreen
 import com.mobileprism.fishing.ui.home.place.UserPlaceScreen
 import com.mobileprism.fishing.ui.home.profile.EditProfile
 import com.mobileprism.fishing.ui.home.settings.AboutApp
-import com.mobileprism.fishing.ui.home.weather.WeatherDaily
+import com.mobileprism.fishing.ui.home.weather.WeatherDailyScreen
 
 @Composable
 fun FishingNotesApp() {
@@ -130,7 +124,7 @@ private fun NavGraphBuilder.NavGraph(
 
     composable(
         route = MainDestinations.CATCH_ROUTE,
-    ) { UserCatchScreen(navController, it.requiredArg(Arguments.CATCH)) }
+    ) { CatchInfoScreen(navController, it.requiredArg(Arguments.CATCH)) }
 
     composable(
         route = MainDestinations.EDIT_PROFILE,
@@ -139,7 +133,7 @@ private fun NavGraphBuilder.NavGraph(
     composable(
         route = MainDestinations.DAILY_WEATHER_ROUTE,
     ) {
-        WeatherDaily(
+        WeatherDailyScreen(
             upPress = { navController.popBackStack() },
             data = it.requiredArg(Arguments.WEATHER_DATA)
         )

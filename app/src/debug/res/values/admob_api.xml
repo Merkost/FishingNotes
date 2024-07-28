@@ -4,27 +4,27 @@
     <string name="new_catch_admob_banner_id"
         templateMergeStrategy="preserve"
         translatable="false">
-        ca-app-pub-3940256099942544/6300978111</string>
+        ca-app-pub-7533982644023097/8053787513</string>
 
     <string name="new_catch_loading_admob_fullscreen_id"
         templateMergeStrategy="preserve"
         translatable="false">
-        ca-app-pub-3940256099942544/8691691433</string>
+        ca-app-pub-7533982644023097/5571357730</string>
 
     <string name="weather_daily_admob_banner_id"
         templateMergeStrategy="preserve"
         translatable="false">
-        ca-app-pub-3940256099942544/6300978111</string>
+        ca-app-pub-7533982644023097/3200345266</string>
 
     <string name="place_admob_banner_id"
         templateMergeStrategy="preserve"
         translatable="false">
-        ca-app-pub-3940256099942544/6300978111</string>
+        ca-app-pub-7533982644023097/9079357903</string>
 
     <string name="catch_admob_banner_id"
         templateMergeStrategy="preserve"
         translatable="false">
-        ca-app-pub-3940256099942544/6300978111</string>
+        ca-app-pub-7533982644023097/3075023072</string>
 
 
     <!--Ad format	Sample ad unit ID
