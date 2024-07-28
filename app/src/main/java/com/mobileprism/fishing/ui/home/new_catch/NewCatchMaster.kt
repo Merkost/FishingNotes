@@ -22,11 +22,13 @@ import com.google.accompanist.pager.*
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.home.advertising.BannerAdvertView
 import com.mobileprism.fishing.ui.home.new_catch.pages.NewCatchPage
 import com.mobileprism.fishing.ui.home.place.LottieWarning
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
 import com.mobileprism.fishing.ui.viewstates.NewCatchViewState
+import com.mobileprism.fishing.utils.Ads
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -132,10 +134,6 @@ fun NewCatchMasterScreen(
 
     val skipAvailable by viewModel.skipAvailable.collectAsState()
 
-    /*ModalBottomSheetLayout(sheetState = modalBottomSheetState,
-        sheetContent = {
-            WeatherTypesSheet()
-        }) {*/
     Scaffold(
         topBar = {
             DefaultAppBar(
@@ -157,8 +155,8 @@ fun NewCatchMasterScreen(
             )
         }
     ) {
-        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (pager, buttons) = createRefs()
+        ConstraintLayout(modifier = Modifier.fillMaxSize().padding(it)) {
+            val (pager, buttons, advertisement) = createRefs()
 
             NewCatchPager(
                 modifier = Modifier.constrainAs(pager) {
@@ -177,7 +175,7 @@ fun NewCatchMasterScreen(
 
             NewCatchButtons(
                 modifier = Modifier.constrainAs(buttons) {
-                    bottom.linkTo(parent.bottom)
+                    bottom.linkTo(advertisement.top)
                     absoluteLeft.linkTo(parent.absoluteLeft)
                     absoluteRight.linkTo(parent.absoluteRight)
                 },
@@ -197,6 +195,15 @@ fun NewCatchMasterScreen(
                         pagerState.animateScrollToPage(pagerState.currentPage - 1)
                     }
                 },
+            )
+
+            BannerAdvertView(
+                modifier = Modifier.constrainAs(advertisement) {
+                    bottom.linkTo(parent.bottom)
+                    absoluteLeft.linkTo(parent.absoluteLeft)
+                    absoluteRight.linkTo(parent.absoluteRight)
+                }.navigationBarsPadding(),
+                adId = Ads.NEW_CATCH_BANNER,
             )
         }
     }
