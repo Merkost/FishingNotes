@@ -43,6 +43,7 @@ import androidx.compose.ui.input.pointer.changedToDownIgnoreConsumed
 import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -55,6 +56,7 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.advertising.BannerAdvertView
+import com.mobileprism.fishing.ui.home.advertising.showInterstitialAd
 import com.mobileprism.fishing.ui.home.new_catch.pages.NewCatchPage
 import com.mobileprism.fishing.ui.home.place.LottieWarning
 import com.mobileprism.fishing.ui.home.views.DefaultAppBar
@@ -125,13 +127,11 @@ fun NewCatchMasterScreen(
     val loadingDialogState = remember { mutableStateOf(false) }
     val isAdLoaded = remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
+
     val onFinish = {
         if (viewModel.photos.value.size <= MAX_PHOTOS) {
             viewModel.saveNewCatch()
-            /*showInterstitialAd(
-                context = context,
-                onAdLoaded = { isAdLoaded.value = true }
-            )*/
         } else {
             SnackbarManager.showMessage(R.string.max_photos_allowed)
         }
@@ -146,16 +146,16 @@ fun NewCatchMasterScreen(
                 NewCatchViewState.Complete -> {
                     loadingDialogState.value = false
                     SnackbarManager.showMessage(R.string.catch_added_successfully)
-                    upPress()
+                    showInterstitialAd(
+                        context = context,
+                        onAdLoaded = {
+                            upPress()
+                        }
+                    )
                 }
 
                 NewCatchViewState.SavingNewCatch -> {
                     loadingDialogState.value = true
-                    // TODO: Insert fullscreen AD after new catch
-//                    showInterstitialAd(
-//                        context = context,
-//                        onAdLoaded = { isAdLoaded.value = true }
-//                    )
                 }
 
                 is NewCatchViewState.Error -> {
@@ -196,9 +196,11 @@ fun NewCatchMasterScreen(
             )
         }
     ) {
-        ConstraintLayout(modifier = Modifier
-            .fillMaxSize()
-            .padding(it)) {
+        ConstraintLayout(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+        ) {
             val (pager, buttons, advertisement) = createRefs()
 
             NewCatchPager(

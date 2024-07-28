@@ -22,7 +22,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.core.net.toUri
 import androidx.navigation.NavController
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.common.Progress
 import com.mobileprism.fishing.domain.entity.content.UserCatch
@@ -33,6 +32,7 @@ import com.mobileprism.fishing.model.mappers.getMoonIconByPhase
 import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
+import com.mobileprism.fishing.ui.home.advertising.BannerAdvertView
 import com.mobileprism.fishing.ui.home.notes.ItemUserPlace
 import com.mobileprism.fishing.ui.home.place.LottieWarning
 import com.mobileprism.fishing.ui.home.views.*
@@ -42,6 +42,7 @@ import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.viewmodels.UserCatchViewModel
 import com.mobileprism.fishing.utils.Constants
+import com.mobileprism.fishing.utils.Constants.bottomBannerPadding
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toTime
 import kotlinx.coroutines.launch
@@ -51,7 +52,7 @@ import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun UserCatchScreen(navController: NavController, catch: UserCatch) {
+fun CatchInfoScreen(navController: NavController, catch: UserCatch) {
     val coroutineScope = rememberCoroutineScope()
 
     val viewModel: UserCatchViewModel by viewModel { parametersOf(catch) }
@@ -110,7 +111,14 @@ fun UserCatchScreen(navController: NavController, catch: UserCatch) {
             }
         }
     ) {
-        Scaffold(
+        BottomSheetScaffold (
+            scaffoldState = rememberBottomSheetScaffoldState(BottomSheetState(BottomSheetValue.Expanded)),
+            sheetContent = {
+                BannerAdvertView(
+                    modifier = Modifier.navigationBarsPadding(),
+                    adId = stringResource(R.string.catch_admob_banner_id)
+                )
+            },
             topBar = {
                 CatchTopBar(
                     navController = navController,
@@ -157,7 +165,6 @@ fun CatchTopBar(navController: NavController, catch: UserCatch, onDeleteCatch: (
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun DeleteCatchDialog(
     catch: UserCatch,
@@ -248,6 +255,8 @@ fun CatchContent(
         CatchWeatherView(
             catch = catchState
         )
+
+        Spacer(modifier = Modifier.size(bottomBannerPadding))
     }
 
 }

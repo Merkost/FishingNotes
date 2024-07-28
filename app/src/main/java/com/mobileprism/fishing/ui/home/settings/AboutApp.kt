@@ -77,10 +77,9 @@ fun AboutApp(upPress: () -> Unit) {
     Scaffold(
         topBar = { AboutAppAppBar(upPress) },
         modifier = Modifier.fillMaxSize()
-    )
-    {
+    ) {
         Column(
-            modifier = Modifier
+            modifier = Modifier.padding(it)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState(0)),
             verticalArrangement = Arrangement.Center,
@@ -154,14 +153,14 @@ fun AboutApp(upPress: () -> Unit) {
                     Row(
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(4.dp)
+                        modifier = Modifier.padding(4.dp).padding(8.dp)
                     ) {
-                        Image(
-                            painterResource(R.drawable.russia), "",
-                            modifier = Modifier
-                                .size(50.dp)
-                                .padding(8.dp)
-                        )
+//                        Image(
+//                            painterResource(R.drawable.russia), "",
+//                            modifier = Modifier
+//                                .size(50.dp)
+//                                .padding(8.dp)
+//                        )
                         Text(stringResource(id = R.string.made_in_russia))
                     }
                 }
