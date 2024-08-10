@@ -1,16 +1,40 @@
 package com.mobileprism.fishing.ui.home.new_catch
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -27,7 +51,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavController
-import com.airbnb.lottie.compose.*
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
@@ -48,7 +76,7 @@ import com.mobileprism.fishing.utils.time.toDate
 import com.mobileprism.fishing.utils.time.toTime
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.Date
 
 
 @Composable
@@ -318,6 +346,7 @@ fun NewCatchPlaceSelectView(
             when (state) {
                 is NewCatchPlacesState.NotReceived -> {
                 }
+
                 is NewCatchPlacesState.Received -> {
                     if (state.locations.isEmpty()) {
 //                        NewCatchNoPlaceDialog(navController)
@@ -380,8 +409,7 @@ fun NewCatchPlaceSelectView(
                     .fillMaxWidth()
                     .onFocusChanged {
                         isDropMenuOpen = it.isFocused
-                    }
-,
+                    },
                 label = { Text(text = stringResource(R.string.place)) },
                 trailingIcon = {
                     if (textFieldValue.isNotEmpty()) {
@@ -542,12 +570,9 @@ fun FishAmountAndWeightViewItem(
             OutlinedTextField(
                 value = amountState.toString(),
                 onValueChange = {
-                    if (it.isEmpty()) onAmountChange(it.toInt())
-                    else {
-                        when (it.toIntOrNull()) {
-                            null -> onAmountChange(amountState) //old value
-                            else -> onAmountChange(it.toInt())   //new value
-                        }
+                    when (it.toIntOrNull()) {
+                        null -> onAmountChange(amountState)
+                        else -> onAmountChange(it.toInt())
                     }
                 },
                 isError = amountState.toString().isEmpty(),
@@ -602,13 +627,11 @@ fun FishAmountAndWeightViewItem(
             OutlinedTextField(
                 value = weightState.toString(),
                 onValueChange = {
-                    if (it.isEmpty()) onWeightChange(it.toDouble())
-                    else {
-                        when (it.toDoubleOrNull()) {
-                            null -> onWeightChange(weightState) //old value
-                            else -> onWeightChange(it.toDouble())   //new value
-                        }
+                    when (it.toDoubleOrNull()) {
+                        null -> onWeightChange(weightState)
+                        else -> onWeightChange(it.toDouble())
                     }
+
                 },
                 label = { Text(text = stringResource(R.string.weight)) },
                 trailingIcon = {
