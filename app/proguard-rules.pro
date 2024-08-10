@@ -22,3 +22,8 @@
 
 -keep class com.google.android.libraries.maps.** { *; }
 -keep class com.mobileprism.fishing.** { *; }
+
+-if class androidx.credentials.CredentialManager
+-keep class androidx.credentials.playservices.** {
+  *;
+}

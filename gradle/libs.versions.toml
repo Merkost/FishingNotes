@@ -1,9 +1,9 @@
 [versions]
-credentials = "1.2.2"
+credentials = "1.5.0-alpha04"
 googleId = "1.1.1"
 
 kotlin = "2.0.0"
-ksp = "2.0.0-1.0.21"
+ksp = "2.0.0-1.0.24"
 
 androidApplication = "8.5.1"
 googleServices = "4.4.2"
@@ -24,6 +24,7 @@ playServicesBilling = "7.0.0"
 playServicesUpdate = "2.1.0"
 playServicesMaps = "19.0.0"
 playServicesLocation = "21.3.0"
+playServicesAuth = "21.2.0"
 coroutines = "1.8.1"
 androidXCoreKtx = "1.13.1"
 androidXSplashScreen = "1.0.1"
@@ -69,6 +70,7 @@ playServices-billing = { group = "com.android.billingclient", name = "billing-kt
 playServices-update = { group = "com.google.android.play", name = "app-update-ktx", version.ref = "playServicesUpdate" }
 playServices-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 playServices-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+playServices-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
 
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version.ref = "kotlin" }
 
