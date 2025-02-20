@@ -46,7 +46,7 @@ import com.mobileprism.fishing.ui.viewmodels.UserPlaceViewModel
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.bottomBannerPadding
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.viewModel
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(
     ExperimentalFoundationApi::class, ExperimentalMaterialApi::class,
@@ -55,7 +55,7 @@ import org.koin.androidx.compose.viewModel
 @Composable
 fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: UserMapMarker) {
 
-    val viewModel: UserPlaceViewModel by viewModel()
+    val viewModel: UserPlaceViewModel = koinViewModel()
     LaunchedEffect(place) {
         viewModel.setMarker(place)
     }

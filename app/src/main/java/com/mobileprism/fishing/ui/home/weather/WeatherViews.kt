@@ -37,7 +37,7 @@ import com.mobileprism.fishing.ui.home.views.SecondaryText
 import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import com.mobileprism.fishing.utils.time.calculateDaylightTime
 import com.mobileprism.fishing.utils.time.toTime
-import org.koin.androidx.compose.get
+import org.koin.compose.koinInject
 
 @Composable
 fun PrimaryWeatherItemView(
@@ -356,7 +356,7 @@ fun SunriseSunsetView(
     sunset: Long,
 ) {
 
-    val preferences: UserPreferences = get()
+    val preferences: UserPreferences = koinInject()
     val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
 
     ConstraintLayout(

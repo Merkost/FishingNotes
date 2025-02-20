@@ -31,7 +31,7 @@ import com.mobileprism.fishing.ui.utils.enums.CatchesSortValues
 import com.mobileprism.fishing.ui.utils.enums.PlacesSortValues
 import com.mobileprism.fishing.utils.Constants.modalBottomSheetCorners
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.get
+import org.koin.compose.koinInject
 
 enum class BottomSheetScreen {
     Sort,
@@ -46,7 +46,7 @@ fun Notes(
     upPress: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val notesPreferences: NotesPreferences = get()
+    val notesPreferences: NotesPreferences = koinInject()
     val tabs = remember { listOf(TabItem.Places, TabItem.Catches) }
     val pagerState = rememberPagerState(0) { tabs.size }
 

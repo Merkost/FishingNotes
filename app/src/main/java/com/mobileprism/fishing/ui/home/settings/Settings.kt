@@ -44,13 +44,13 @@ import com.mobileprism.fishing.ui.utils.ColorPicker
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.get
+import org.koin.compose.koinInject
 
 @Composable
 fun SettingsScreen(backPress: () -> Unit, navController: NavController) {
 
-    val userPreferences: UserPreferences = get()
-    val weatherPreferencesImpl: WeatherPreferences = get()
+    val userPreferences: UserPreferences = koinInject()
+    val weatherPreferencesImpl: WeatherPreferences = koinInject()
 
     Scaffold(
         topBar = { SettingsTopAppBar(backPress) },

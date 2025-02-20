@@ -30,14 +30,14 @@ import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.utils.enums.CatchesSortValues
 import com.mobileprism.fishing.ui.viewmodels.UserCatchesViewModel
 import com.mobileprism.fishing.utils.time.toDateTextMonth
-import org.koin.androidx.compose.get
-import org.koin.androidx.compose.getViewModel
+import org.koin.compose.koinInject
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun UserCatchesScreen(
     navController: NavController,
-    viewModel: UserCatchesViewModel = getViewModel(),
-    notesPreferences: NotesPreferences = get()
+    viewModel: UserCatchesViewModel = koinViewModel(),
+    notesPreferences: NotesPreferences = koinInject()
 ) {
     val uiState = viewModel.uiState.collectAsState()
     val catchesSortValue by notesPreferences.getCatchesSortValue.collectAsState(CatchesSortValues.Default)

@@ -104,8 +104,8 @@ import com.mobileprism.fishing.ui.theme.supportTextColor
 import com.mobileprism.fishing.utils.location.LocationManager
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.get
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @ExperimentalMaterialApi
 @Composable
@@ -184,7 +184,7 @@ fun MyLocationButton(
     onClick: () -> Unit,
 ) {
     val context = LocalContext.current
-    val locationManager: LocationManager = get()
+    val locationManager: LocationManager = koinInject()
     var locationDialogIsShowing by remember { mutableStateOf(false) }
     val shouldShowPermissions by userPreferences.shouldShowLocationPermission.collectAsState(false)
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
@@ -548,7 +548,7 @@ fun PlaceTileView(
     modifier: Modifier,
 ) {
     val context = LocalContext.current
-    val viewModel: MapViewModel = getViewModel()
+    val viewModel: MapViewModel = koinViewModel()
     val placeTileViewNameState by viewModel.placeTileViewNameState.collectAsState()
 
     val selectedPlace = remember { mutableStateOf("") }

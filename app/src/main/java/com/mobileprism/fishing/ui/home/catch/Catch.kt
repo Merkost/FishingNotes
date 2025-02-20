@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.core.net.toUri
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.common.Progress
@@ -46,8 +47,8 @@ import com.mobileprism.fishing.utils.Constants.bottomBannerPadding
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toTime
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.get
-import org.koin.androidx.compose.viewModel
+import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -55,7 +56,7 @@ import org.koin.core.parameter.parametersOf
 fun CatchInfoScreen(navController: NavController, catch: UserCatch) {
     val coroutineScope = rememberCoroutineScope()
 
-    val viewModel: UserCatchViewModel by viewModel { parametersOf(catch) }
+    val viewModel: UserCatchViewModel = koinViewModel(parameters = { parametersOf(catch) })
 
     val loadingState by viewModel.loadingState.collectAsState()
     val loadingDialogState = remember { mutableStateOf(false) }
@@ -137,7 +138,7 @@ fun CatchInfoScreen(navController: NavController, catch: UserCatch) {
 
 @Composable
 fun CatchTopBar(navController: NavController, catch: UserCatch, onDeleteCatch: () -> Unit) {
-    val userPreferences: UserPreferences = get()
+    val userPreferences: UserPreferences = koinInject()
     val is12hTime by userPreferences.use12hTimeFormat.collectAsState(initial = false)
 
     var menuOpened by remember { mutableStateOf(false) }
@@ -412,7 +413,7 @@ fun CatchWeatherView(
     catch: UserCatch
 ) {
 
-    val weatherPrefs: WeatherPreferences = get()
+    val weatherPrefs: WeatherPreferences = koinInject()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
     val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
     val windSpeedUnit by weatherPrefs.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)

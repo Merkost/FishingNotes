@@ -35,8 +35,8 @@ import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.viewmodels.MapViewModel
-import org.koin.androidx.compose.get
-import org.koin.androidx.compose.getViewModel
+import org.koin.compose.koinInject
+import org.koin.androidx.compose.koinViewModel
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -48,9 +48,9 @@ fun MarkerInfoDialog(
 ) {
     val context = LocalContext.current
 
-    val viewModel: MapViewModel = getViewModel()
+    val viewModel: MapViewModel = koinViewModel()
     val receivedMarker by viewModel.currentMarker.collectAsState()
-    val weatherPreferences: WeatherPreferences = get()
+    val weatherPreferences: WeatherPreferences = koinInject()
 
     val windUnit by weatherPreferences.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
     var address by remember { mutableStateOf("") }

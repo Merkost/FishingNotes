@@ -40,7 +40,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.koin.androidx.compose.get
+import org.koin.compose.koinInject
 import org.koin.core.parameter.parametersOf
 
 private val purchaseUpdateListener = PurchasesUpdatedListener { billingResult, purchases ->
@@ -58,7 +58,7 @@ private val purchaseUpdateListener = PurchasesUpdatedListener { billingResult, p
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AboutApp(upPress: () -> Unit) {
-    val billingClient: BillingClient = get(parameters = { parametersOf(purchaseUpdateListener) })
+    val billingClient: BillingClient = koinInject(parameters = { parametersOf(purchaseUpdateListener) })
 
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current

@@ -71,7 +71,7 @@ import com.mobileprism.fishing.ui.viewmodels.UserViewModel
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @ExperimentalCoilApi
 @Composable
@@ -152,12 +152,11 @@ fun ProfileAppBar(navController: NavController) {
     if (dialogOnLogout.value) LogoutDialog(dialogOnLogout, navController)
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @InternalCoroutinesApi
 @Composable
 fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavController) {
     val scope = rememberCoroutineScope()
-    val viewModel = getViewModel<UserViewModel>()
+    val viewModel = koinViewModel<UserViewModel>()
     val context = LocalContext.current
 
     DefaultDialog(

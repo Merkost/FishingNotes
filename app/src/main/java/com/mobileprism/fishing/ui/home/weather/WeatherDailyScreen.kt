@@ -38,7 +38,7 @@ import com.mobileprism.fishing.ui.home.views.DefaultAppBar
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.time.toDayOfWeekAndDate
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.get
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -128,7 +128,7 @@ fun DailyWeatherScreen(
     modifier: Modifier = Modifier,
     forecast: Daily
 ) {
-    val weatherPrefs: WeatherPreferences = get()
+    val weatherPrefs: WeatherPreferences = koinInject()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
     val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
     val windSpeedUnit by weatherPrefs.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)

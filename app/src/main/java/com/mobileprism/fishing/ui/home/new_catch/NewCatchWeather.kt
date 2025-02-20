@@ -34,7 +34,7 @@ import com.mobileprism.fishing.ui.home.new_catch.weather.*
 import com.mobileprism.fishing.ui.home.views.WeatherIconItem
 import com.mobileprism.fishing.ui.utils.enums.StringOperation
 import com.mobileprism.fishing.ui.utils.toDoubleExOrNull
-import org.koin.androidx.compose.get
+import org.koin.compose.koinInject
 
 @Composable
 fun WeatherTypesSheet(onWeatherSelected: (SelectedWeather) -> Unit) {
@@ -187,7 +187,7 @@ fun NewCatchTemperatureView(
     onError: (Boolean) -> Unit
 ) {
 
-    val weatherSettings: WeatherPreferences = get()
+    val weatherSettings: WeatherPreferences = koinInject()
     val temperatureUnit by weatherSettings.getTemperatureUnit.collectAsState(TemperatureValues.C)
 
     OutlinedTextField(
@@ -222,7 +222,7 @@ fun NewCatchPressureView(
     onPressureChange: (String) -> Unit,
     onError: (Boolean) -> Unit
 ) {
-    val weatherSettings: WeatherPreferences = get()
+    val weatherSettings: WeatherPreferences = koinInject()
     val pressureUnit by weatherSettings.getPressureUnit.collectAsState(PressureValues.mmHg)
 
     OutlinedTextField(
@@ -261,7 +261,7 @@ fun NewCatchWindView(
     onWindDirChange: (Float) -> Unit,
     onError: (Boolean) -> Unit
 ) {
-    val weatherSettings: WeatherPreferences = get()
+    val weatherSettings: WeatherPreferences = koinInject()
     val windSpeedUnit by weatherSettings.getWindSpeedUnit.collectAsState(WindSpeedValues.kmph)
 
     var windDirDialogState by remember { mutableStateOf(false) }

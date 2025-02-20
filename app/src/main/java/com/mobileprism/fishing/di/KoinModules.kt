@@ -37,7 +37,7 @@ val appModule = module {
     single<FirebaseAnalytics> { Firebase.analytics }
     single<BillingClient> { params ->
         BillingClient.newBuilder(androidContext())
-            .setListener(params.get())
+            .setListener(get())
             .enablePendingPurchases()
             .build()
     }

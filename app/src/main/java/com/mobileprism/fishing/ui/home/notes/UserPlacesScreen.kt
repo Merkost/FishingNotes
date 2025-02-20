@@ -31,14 +31,14 @@ import com.mobileprism.fishing.ui.home.views.NoContentView
 import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.utils.enums.PlacesSortValues
 import com.mobileprism.fishing.ui.viewmodels.UserPlacesViewModel
-import org.koin.androidx.compose.get
-import org.koin.androidx.compose.getViewModel
+import org.koin.compose.koinInject
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun UserPlacesScreen(
     navController: NavController,
-    viewModel: UserPlacesViewModel = getViewModel(),
-    notesPreferences: NotesPreferences = get()
+    viewModel: UserPlacesViewModel = koinViewModel(),
+    notesPreferences: NotesPreferences = koinInject()
 ) {
     val uiState = viewModel.uiState.collectAsState()
     val placesSortValue by notesPreferences.getPlacesSortValue.collectAsState(PlacesSortValues.Default)
