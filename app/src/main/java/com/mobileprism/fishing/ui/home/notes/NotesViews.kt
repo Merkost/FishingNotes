@@ -28,7 +28,7 @@ import com.mobileprism.fishing.ui.theme.cardColor
 import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toTime
-import org.koin.androidx.compose.get
+import org.koin.compose.koinInject
 
 /**
  * @param[childModifier] This is a modifier which is used in all child views
@@ -154,7 +154,7 @@ fun CatchItemView(
     onClick: (UserCatch) -> Unit,
 
     ) {
-    val preferences: UserPreferences = get()
+    val preferences: UserPreferences = koinInject()
     val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
 
     DefaultCardClickable(

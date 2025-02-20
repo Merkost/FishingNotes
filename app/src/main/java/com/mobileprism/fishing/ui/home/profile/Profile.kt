@@ -40,14 +40,15 @@ import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.viewmodels.UserViewModel
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import kotlinx.coroutines.InternalCoroutinesApi
-import org.koin.androidx.compose.getViewModel
+import org.koin.android.compat.ScopeCompat.getViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun Profile(
     navController: NavController,
     modifier: Modifier = Modifier
 ) {
-    val viewModel = getViewModel<UserViewModel>()
+    val viewModel = koinViewModel<UserViewModel>()
     val user by viewModel.currentUser.collectAsState()
     val imgSize: Dp = remember { 120.dp }
 

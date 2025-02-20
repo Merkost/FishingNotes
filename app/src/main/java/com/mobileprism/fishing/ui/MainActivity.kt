@@ -50,15 +50,17 @@ import com.mobileprism.fishing.utils.Logger
 import com.mobileprism.fishing.viewmodels.MainViewModel
 import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
+import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.getViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.compose.koinInject
 
 
 class MainActivity : ComponentActivity() {
 
     private val logger: Logger by inject()
-    private val appUpdateManager: AppUpdateManager = get()
-    private val auth: FirebaseAuth = get()
-
+    private val appUpdateManager: AppUpdateManager by inject()
+    private val auth: FirebaseAuth by inject()
 
     private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
 
@@ -72,9 +74,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val viewModel: MainViewModel = getViewModel()
+        val viewModel: MainViewModel by viewModel()
         val userStateFlow = viewModel.mutableStateFlow
-        val userPreferences: UserPreferences = get()
+        val userPreferences: UserPreferences by inject()
         val appTheme = mutableStateOf<AppThemeValues?>(null)
 
         lifecycleScope.launchWhenStarted {

@@ -32,6 +32,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
         getByName("debug") {
             applicationIdSuffix = ".debug"
@@ -99,6 +100,7 @@ dependencies {
     implementation(libs.playServices.ads)
     implementation(libs.playServices.update)
     implementation(libs.playServices.billing)
+    implementation(libs.playServices.auth)
 
     implementation(libs.androidX.coreKtx)
     implementation(libs.androidX.splashScreen)

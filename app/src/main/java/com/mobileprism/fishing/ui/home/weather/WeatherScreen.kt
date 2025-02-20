@@ -59,8 +59,8 @@ import com.mobileprism.fishing.utils.time.toDayOfWeek
 import com.mobileprism.fishing.utils.time.toDayOfWeekAndDate
 import com.mobileprism.fishing.utils.time.toTime
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.koin.androidx.compose.get
-import org.koin.androidx.compose.getViewModel
+import org.koin.compose.koinInject
+import org.koin.androidx.compose.koinViewModel
 import kotlin.math.min
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -69,7 +69,7 @@ fun WeatherScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     place: UserMapMarker? = null,
-    viewModel: WeatherViewModel = getViewModel(),
+    viewModel: WeatherViewModel = koinViewModel(),
     upPress: () -> Unit,
 ) {
     viewModel.setSelectedPlace(place)
@@ -77,7 +77,7 @@ fun WeatherScreen(
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
 
     val selectedPlace by viewModel.selectedPlace.collectAsState()
-    val locationManager: LocationManager = get()
+    val locationManager: LocationManager = koinInject()
 
     LaunchedEffect(permissionsState.allPermissionsGranted) {
         checkLocationPermissions(context)
@@ -195,7 +195,7 @@ fun MainWeatherScreen(
     navigateToDaily: (Int) -> Unit,
 
     ) {
-    val weatherPrefs: WeatherPreferences = get()
+    val weatherPrefs: WeatherPreferences = koinInject()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
     val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
     val windSpeedUnit by weatherPrefs.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
@@ -288,7 +288,7 @@ fun HourlyWeather(
     windSpeedUnit: WindSpeedValues,
     forecastHourly: List<Hourly>,
 ) {
-    val preferences: UserPreferences = get()
+    val preferences: UserPreferences = koinInject()
     val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
 
     LazyRow(

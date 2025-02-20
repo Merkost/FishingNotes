@@ -29,7 +29,7 @@ import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.showErrorToast
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.get
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterialApi::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -42,7 +42,7 @@ fun LoginScreen(navController: NavController) {
     var googleLoading by remember { mutableStateOf(false) }
     var showLottie by remember { mutableStateOf(false) }
 
-    val loginViewModel: LoginViewModel = get()
+    val loginViewModel: LoginViewModel = koinInject()
     val context = LocalContext.current
     val uiState by loginViewModel.uiState.collectAsState()
     val errorString = stringResource(R.string.signin_error)

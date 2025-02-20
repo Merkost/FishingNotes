@@ -69,7 +69,7 @@ import com.mobileprism.fishing.ui.viewstates.NewCatchViewState
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.viewModel
+import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import kotlin.math.absoluteValue
 import kotlin.math.sign
@@ -81,7 +81,7 @@ fun NewCatchMasterScreen(
     navController: NavController,
     upPress: () -> Unit,
 ) {
-    val viewModel: NewCatchMasterViewModel by viewModel {
+    val viewModel: NewCatchMasterViewModel = koinViewModel(parameters = {
         parametersOf(
             if (receivedPlace != null) {
                 ReceivedPlaceState.Received(receivedPlace)
@@ -89,7 +89,7 @@ fun NewCatchMasterScreen(
                 ReceivedPlaceState.NotReceived
             }
         )
-    }
+    })
 
     val coroutineScope = rememberCoroutineScope()
 

@@ -37,7 +37,7 @@ import com.mobileprism.fishing.ui.theme.Shapes
 import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
 import com.mobileprism.fishing.ui.utils.ColorPicker
 import com.mobileprism.fishing.viewmodels.MapViewModel
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -48,7 +48,7 @@ fun NewPlaceDialog(
     if (dialogState) {
         Dialog(onDismissRequest = { onDismiss() }) {
             val context = LocalContext.current
-            val viewModel: MapViewModel = getViewModel()
+            val viewModel: MapViewModel = koinViewModel()
             val currentCameraPosition by viewModel.currentCameraPosition.collectAsState()
             val uiState by viewModel.addNewMarkerState.collectAsState()
 

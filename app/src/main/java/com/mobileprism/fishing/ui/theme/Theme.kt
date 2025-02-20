@@ -16,7 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.MainActivity
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
-import org.koin.androidx.compose.get
+import org.koin.compose.koinInject
 
 private val DarkColorPalette = darkColors(
     primary = Purple200,
@@ -82,7 +82,7 @@ fun FishingNotesTheme(
     content: @Composable() () -> Unit
 ) {
     val activity = (LocalContext.current as MainActivity)
-    val userPreferences: UserPreferences = get()
+    val userPreferences: UserPreferences = koinInject()
     val appTheme = userPreferences.appTheme.collectAsState(initialAppTheme)
 
     val colors = chooseTheme(appTheme.value, darkTheme)

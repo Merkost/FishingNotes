@@ -37,7 +37,7 @@ import com.mobileprism.fishing.ui.utils.showError
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.time.toDate
 import com.mobileprism.fishing.viewmodels.EditProfileViewModel
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 import java.util.*
 
 
@@ -45,7 +45,7 @@ import java.util.*
 @Composable
 fun EditProfile(onBack: () -> Unit) {
     val context = LocalContext.current
-    val viewModel: EditProfileViewModel = getViewModel()
+    val viewModel: EditProfileViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsState()
     val currentUser by viewModel.currentUser.collectAsState()
     val isChanged by viewModel.isChanged.collectAsState()

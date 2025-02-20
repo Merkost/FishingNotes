@@ -90,8 +90,8 @@ import com.mobileprism.fishing.viewmodels.MapViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.get
-import org.koin.androidx.compose.getViewModel
+import org.koin.compose.koinInject
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -103,7 +103,7 @@ fun MapScreen(
     upPress: () -> Unit,
 ) {
 
-    val viewModel: MapViewModel = getViewModel()
+    val viewModel: MapViewModel = koinViewModel()
     SideEffect {
         viewModel.setPlace(place)
         viewModel.setAddingPlace(addPlaceOnStart)
@@ -113,7 +113,7 @@ fun MapScreen(
     val mapUiState by viewModel.mapUiState.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
-    val userPreferences: UserPreferences = get()
+    val userPreferences: UserPreferences = koinInject()
     val useZoomButtons by userPreferences.useMapZoomButons.collectAsState(false)
 
     val scaffoldState = rememberBottomSheetScaffoldState()
@@ -307,9 +307,9 @@ fun onMapSettingsClicked(
 fun MapLayout(
     modifier: Modifier = Modifier,
 ) {
-    val viewModel: MapViewModel = getViewModel()
+    val viewModel: MapViewModel = koinViewModel()
     val map = rememberMapViewWithLifecycle()
-    val userPreferences: UserPreferences = get()
+    val userPreferences: UserPreferences = koinInject()
     val coroutineScope = rememberCoroutineScope()
     val darkTheme = isSystemInDarkTheme()
 
