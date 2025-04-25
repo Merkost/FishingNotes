@@ -1,55 +1,55 @@
 [versions]
-credentials = "1.5.0-rc01"
+credentials = "1.5.0"
 googleId = "1.1.1"
 
-kotlin = "2.0.0"
-ksp = "2.0.0-1.0.24"
+kotlin = "2.1.20"
+kotlinxSerializationJson = "1.8.1"
+ksp = "2.1.20-1.0.32"
 
-androidApplication = "8.5.2"
+androidApplication = "8.9.2"
 googleServices = "4.4.2"
 secretsGradlePlugin = "2.0.1"
 firebaseCrashlytics = "3.0.3"
 firebasePerf = "1.4.2"
 
-compose-bom = "2024.06.00"
-accompanist = "0.34.0"
-accompanistPermissions = "0.24.1-alpha"
+compose-bom = "2025.04.01"
+accompanist = "0.36.0"
+accompanistPermissions = "0.37.2"
 
 googleMaps = "3.1.0-beta"
-mapsKtx = "3.4.0"
-mapsUtilsKtx = "3.4.0"
-mapsUtils = "2.3.0"
-playServicesAds = "23.6.0"
+mapsKtx = "5.2.0"
+mapsUtilsKtx = "5.2.0"
+mapsUtils = "3.13.0"
+playServicesAds = "24.2.0"
 playServicesBilling = "7.1.1"
 playServicesUpdate = "2.1.0"
-playServicesMaps = "19.0.0"
+playServicesMaps = "19.2.0"
 playServicesLocation = "21.3.0"
 playServicesAuth = "21.3.0"
-coroutines = "1.10.1"
-androidXCoreKtx = "1.15.0"
+coroutines = "1.10.2"
+androidXCoreKtx = "1.16.0"
 androidXSplashScreen = "1.0.1"
-activityCompose = "1.10.0"
+activityCompose = "1.10.1"
 lifecycleViewModelCompose = "2.8.7"
-navigationCompose = "2.8.7"
-constraintLayoutCompose = "1.1.0"
-datastorePreferences = "1.1.2"
-koin = "4.0.2"
+navigationCompose = "2.8.9"
+constraintLayoutCompose = "1.1.1"
+datastorePreferences = "1.1.4"
+koin = "4.0.4"
 androidXTest = "1.6.2"
 androidXTestExtJunit = "1.2.1"
 espressoCore = "3.6.1"
-firebaseBom = "33.9.0"
-firebaseFirestore = "25.1.2"
-firebaseUiAuth = "8.0.2"
-firebaseCoroutines = "1.10.1"
+firebaseBom = "33.13.0"
+firebaseFirestore = "25.1.4"
+firebaseUiAuth = "9.0.0"
+firebaseCoroutines = "1.10.2"
 junit = "4.13.2"
 coilCompose = "2.7.0"
 retrofit = "2.11.0"
 retrofitCoroutinesAdapter = "0.9.2"
-okhttpLoggingInterceptor = "5.0.0-alpha.12"
-foundationLayoutAndroid = "1.7.8"
+okhttpLoggingInterceptor = "5.0.0-alpha.14"
+foundationLayoutAndroid = "1.8.0"
 
 [libraries]
-accompanist-flowlayouts = { group = "com.google.accompanist", name = "accompanist-flowlayout", version.ref = "accompanist" }
 accompanist-pager = { group = "com.google.accompanist", name = "accompanist-pager", version.ref = "accompanist" }
 accompanist-pagerIndicators = { group = "com.google.accompanist", name = "accompanist-pager-indicators", version.ref = "accompanist" }
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -60,9 +60,9 @@ androidx-credentials = { module = "androidx.credentials:credentials", version.re
 androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleId" }
 
-googleMaps = { group = "com.google.android.libraries.maps", name = "maps", version.ref = "googleMaps" }
 googleMaps-mapsKtx = { group = "com.google.maps.android", name = "maps-ktx", version.ref = "mapsKtx" }
 googleMaps-mapUtilsKtx = { group = "com.google.maps.android", name = "maps-utils-ktx", version.ref = "mapsUtilsKtx" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 mapsUtils = { group = "com.google.maps.android", name = "android-maps-utils", version.ref = "mapsUtils" }
 
 playServices-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "playServicesAds" }
@@ -90,7 +90,7 @@ compose-runtime = { group = "androidx.compose.runtime", name = "runtime"}
 compose-material = { group = "androidx.compose.material", name = "material"}
 compose-animation = { group = "androidx.compose.animation", name = "animation"}
 compose-theme = { group = "com.google.android.material", name = "compose-theme-adapter", version = "1.2.1" }
-compose-lottie = { group = "com.airbnb.android", name = "lottie-compose", version = "5.0.3" }
+compose-lottie = { group = "com.airbnb.android", name = "lottie-compose", version = "6.6.6" }
 compose-tooling = { group = "androidx.compose.ui", name = "ui-tooling"}
 compose-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended"}
 compose-uiTest = { group = "androidx.compose.ui", name = "ui-test-junit4"}
@@ -113,7 +113,7 @@ androidX-testRules = { group = "androidx.test", name = "rules", version.ref = "a
 androidX-testExtJunit = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "androidXTestExtJunit" }
 espressoCore = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 
-firebase-platform = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth-ktx" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }

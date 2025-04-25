@@ -3,8 +3,10 @@ package com.mobileprism.fishing.domain.entity.content
 import android.os.Parcelable
 import com.mobileprism.fishing.domain.entity.common.Note
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 @Parcelize
+@Serializable
 data class UserCatch(
     val id: String = "",
     val userId: String = "",
@@ -19,7 +21,6 @@ data class UserCatch(
     val fishingLure: String = "",
     val userMarkerId: String = "",
     val placeTitle: String = "",
-    @JvmField
     val isPublic: Boolean = false,
     val downloadPhotoLinks: List<String> = listOf(),
     val weatherPrimary: String = "",

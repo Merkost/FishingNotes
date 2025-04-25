@@ -3,8 +3,10 @@ package com.mobileprism.fishing.domain.entity.weather
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 @Parcelize
+@Serializable
 class Daily(
     @field:SerializedName("dt") val date: Long = 0,
     @field:SerializedName("sunrise") val sunrise: Long = 0,
@@ -20,6 +22,7 @@ class Daily(
     @field:SerializedName("clouds") val clouds: Int = 0,
 ) : Parcelable
 
+@Serializable
 @Parcelize
 class Temperature(
     @field:SerializedName("day") val day: Float = 0f,

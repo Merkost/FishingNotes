@@ -148,10 +148,7 @@ fun navigateToDailyWeatherScreen(
         selectedDay = index,
         dailyForecast = forecastDaily
     )
-    navController.navigate(
-        MainDestinations.DAILY_WEATHER_ROUTE,
-        Arguments.WEATHER_DATA to argument
-    )
+    navController.navigate(MainDestinations.DailyWeather(argument))
 }
 
 fun navigateToAddNewPlace(navController: NavController) {

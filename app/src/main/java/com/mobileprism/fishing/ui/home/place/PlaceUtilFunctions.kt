@@ -69,7 +69,3 @@ fun onShareClicked(
     val shareIntent = Intent.createChooser(sendIntent, null)
     context.startActivity(shareIntent)
 }
-
-fun onCatchItemClick(catch: UserCatch, navController: NavController) {
-    navController.navigate(MainDestinations.CATCH_ROUTE, Arguments.CATCH to catch)
-}

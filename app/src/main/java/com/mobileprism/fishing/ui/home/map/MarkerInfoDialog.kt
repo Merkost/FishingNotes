@@ -6,10 +6,30 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.Card
+import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -22,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
@@ -36,19 +57,18 @@ import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import org.koin.compose.koinInject
-import org.koin.androidx.compose.koinViewModel
 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MarkerInfoDialog(
-    modifier: Modifier = Modifier,
+    viewModel: MapViewModel,
     navController: NavController,
     onMarkerIconClicked: (UserMapMarker) -> Unit,
 ) {
     val context = LocalContext.current
 
-    val viewModel: MapViewModel = koinViewModel()
+    val windRotation by viewModel.windIconRotation.collectAsStateWithLifecycle()
     val receivedMarker by viewModel.currentMarker.collectAsState()
     val weatherPreferences: WeatherPreferences = koinInject()
 
@@ -66,7 +86,7 @@ fun MarkerInfoDialog(
     val distance: String? by remember { mutableStateOf(rawDistance?.let { context.convertDistance(it) }) }
 
     val fishActivity: Int? by remember { viewModel.fishActivity }
-    val currentWeather: CurrentWeatherFree? by remember { viewModel.currentWeather }
+    val currentWeather: CurrentWeatherFree? by viewModel.currentWeather.collectAsStateWithLifecycle()
 
 
     receivedMarker?.let { notNullMarker ->
@@ -129,7 +149,15 @@ fun MarkerInfoDialog(
                         modifier = Modifier
                             .constrainAs(title) {
                                 top.linkTo(locationIcon.top)
-                                linkTo(locationIcon.end, verticalFabLine, 0.dp, 0.dp, 0.dp, 0.dp, 0f)
+                                linkTo(
+                                    locationIcon.end,
+                                    verticalFabLine,
+                                    0.dp,
+                                    0.dp,
+                                    0.dp,
+                                    0.dp,
+                                    0f
+                                )
                                 bottom.linkTo(locationIcon.bottom)
                                 width = Dimension.fillToConstraints
                             },
@@ -277,7 +305,7 @@ fun MarkerInfoDialog(
                         IconButton(onClick = { onWeatherIconClicked(marker, navController) }) {
                             Icon(
                                 painterResource(R.drawable.ic_baseline_navigation_24), "",
-                                modifier = Modifier.rotate(viewModel.windIconRotation),
+                                modifier = Modifier.rotate(windRotation),
                                 tint = if (currentWeather == null) Color.LightGray else MaterialTheme.colors.primaryVariant
                             )
                         }
@@ -297,10 +325,7 @@ fun MarkerInfoDialog(
 
 fun onMarkerClicked(marker: UserMapMarker, navController: NavController) {
     if (marker.id != Constants.CURRENT_PLACE_ITEM_ID) {
-        navController.navigate(
-            MainDestinations.PLACE_ROUTE,
-            Arguments.PLACE to marker
-        )
+        navController.navigate(MainDestinations.Place(marker))
     } else {
         // TODO: Нельзя перейти на экран места
     }

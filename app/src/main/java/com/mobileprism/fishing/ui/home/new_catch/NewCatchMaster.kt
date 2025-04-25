@@ -169,7 +169,7 @@ fun NewCatchMasterScreen(
     }
 
     ModalLoadingDialog(
-        dialogSate = loadingDialogState,
+        dialogState = loadingDialogState,
         text = stringResource(id = R.string.saving_new_catch)
     )
 

@@ -58,7 +58,9 @@ fun Profile(
         backgroundColor = MaterialTheme.colors.primary
     ) {
         ConstraintLayout(
-            modifier = modifier.fillMaxSize().padding(it)
+            modifier = modifier
+                .fillMaxSize()
+                .padding(it)
         ) {
             val (image, card, editButton) = createRefs()
 
@@ -137,8 +139,7 @@ fun Profile(
                         favoritePlace = favoritePlace,
                         userPlaceClicked = {
                             navController.navigate(
-                                MainDestinations.PLACE_ROUTE,
-                                Arguments.PLACE to it
+                                MainDestinations.Place(it),
                             )
                         },
                         navigateToMap = {

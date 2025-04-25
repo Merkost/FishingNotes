@@ -50,7 +50,7 @@ fun UserPlacesScreen(
             placesState = uiState,
             places = placesSortValue.sort(places),
             userPlaceClicked = { userMarker ->
-                onPlaceItemClick(userMarker, navController)
+                navController.navigate(MainDestinations.Place(userMarker))
             },
             navigateToMap = {
                 navController.navigate(
@@ -129,11 +129,4 @@ fun UserPlaces(
         }
 
     }
-}
-
-private fun onPlaceItemClick(place: UserMapMarker, navController: NavController) {
-    navController.navigate(
-        MainDestinations.PLACE_ROUTE,
-        Arguments.PLACE to place
-    )
 }

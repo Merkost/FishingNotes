@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -21,7 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.FloatingActionButtonDefaults
 import androidx.compose.material.FloatingActionButtonElevation
 import androidx.compose.material.Icon
@@ -33,11 +33,8 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.ProvideTextStyle
 import androidx.compose.material.Surface
 import androidx.compose.material.contentColorFor
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -66,7 +63,6 @@ import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
@@ -90,8 +86,8 @@ import com.mobileprism.fishing.viewmodels.MapViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -162,6 +158,7 @@ fun MapScreen(
             },
             bottomSheet = {
                 MarkerInfoDialog(
+                    viewModel = viewModel,
                     navController = navController,
                     onMarkerIconClicked = viewModel::onMarkerClicked
                 )
@@ -183,11 +180,12 @@ fun MapScreen(
                     }) { mapLayersSelection = true }
 
                 if (mapLayersSelection)
-                    Surface(modifier = Modifier
-                        .fillMaxSize()
-                        .alpha(0f)
-                        .zIndex(4f)
-                        .clickable { mapLayersSelection = false }) {}
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .alpha(0f)
+                            .zIndex(4f)
+                            .clickable { mapLayersSelection = false }) {}
                 AnimatedVisibility(
                     mapLayersSelection,
                     enter = expandIn(
@@ -230,7 +228,8 @@ fun MapScreen(
                     modifier = modifier.constrainAs(mapCompassButton) {
                         top.linkTo(mapMyLocationButton.bottom, 16.dp)
                         absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-                    }, mapBearing = viewModel.mapBearing.collectAsState(),
+                    },
+                    mapBearing = viewModel.mapBearing.collectAsState(),
                     onClick = viewModel::resetMapBearing
                 )
 
@@ -262,7 +261,8 @@ fun MapScreen(
                     )
                 }
 
-                AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode,
+                AnimatedVisibility(
+                    mapUiState == MapUiState.PlaceSelectMode,
                     enter = fadeIn(), exit = fadeOut(),
                     modifier = Modifier.constrainAs(pointer) {
                         top.linkTo(parent.top)
@@ -270,7 +270,8 @@ fun MapScreen(
                         centerHorizontallyTo(parent)
                     }) { PointerIcon(viewModel.placeTileViewNameState.collectAsState().value.pointerState) }
 
-                AnimatedVisibility(mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection,
+                AnimatedVisibility(
+                    mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection,
                     enter = fadeIn(animationSpec = tween(300)),
                     exit = fadeOut(animationSpec = tween(300)),
                     modifier = Modifier.constrainAs(addMarkerFragment) {
@@ -319,8 +320,9 @@ fun MapLayout(
     val markers by viewModel.mapMarkers.collectAsState()
 
     val markersToShow by remember(markers, showHiddenPlaces) {
-        mutableStateOf(if (showHiddenPlaces) markers
-        else markers.filter { it.visible })
+        mutableStateOf(
+            if (showHiddenPlaces) markers
+            else markers.filter { it.visible })
     }
 
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
@@ -445,42 +447,41 @@ fun LocationPermissionDialog(
     userPreferences: UserPreferences,
     onCloseCallback: () -> Unit = { },
 ) {
-    val context = LocalContext.current
     var isDialogOpen by remember { mutableStateOf(true) }
     val coroutineScope = rememberCoroutineScope()
 
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
-    PermissionsRequired(
-        multiplePermissionsState = permissionsState,
-        permissionsNotGrantedContent = {
-            if (isDialogOpen) {
-                GrantLocationPermissionsDialog(
-                    onDismiss = {
-                        isDialogOpen = false
-                        onCloseCallback()
-                    },
-                    onNegativeClick = {
-                        isDialogOpen = false
-                        onCloseCallback()
-                    },
-                    onPositiveClick = {
-                        isDialogOpen = false
-                        permissionsState.launchMultiplePermissionRequest()
-                        onCloseCallback()
-                    },
-                    onDontAskClick = {
-                        isDialogOpen = false
-                        SnackbarManager.showMessage(R.string.location_dont_ask)
-                        coroutineScope.launch {
-                            userPreferences.saveLocationPermissionStatus(false)
-                        }
-                        onCloseCallback()
-                    }
-                )
+    if (isDialogOpen) {
+        GrantLocationPermissionsDialog(
+            onDismiss = {
+                isDialogOpen = false
+                onCloseCallback()
+            },
+            onNegativeClick = {
+                isDialogOpen = false
+                onCloseCallback()
+            },
+            onPositiveClick = {
+                isDialogOpen = false
+                if (permissionsState.shouldShowRationale) {
+                    SnackbarManager.showMessage(R.string.location_permission_denied)
+                    onCloseCallback()
+                } else {
+                    permissionsState.launchMultiplePermissionRequest()
+                }
+                permissionsState.launchMultiplePermissionRequest()
+                onCloseCallback()
+            },
+            onDontAskClick = {
+                isDialogOpen = false
+                SnackbarManager.showMessage(R.string.location_dont_ask)
+                coroutineScope.launch {
+                    userPreferences.saveLocationPermissionStatus(false)
+                }
+                onCloseCallback()
             }
-        },
-        permissionsNotAvailableContent = { onCloseCallback(); SnackbarManager.showMessage(R.string.location_permission_denied) })
-    { checkLocationPermissions(context); }
+        )
+    }
 }
 
 @ExperimentalMaterialApi
@@ -565,12 +566,13 @@ fun FishingFab(
     ) {
         CompositionLocalProvider(LocalContentAlpha provides contentColor.alpha) {
             ProvideTextStyle(MaterialTheme.typography.button) {
+                val ripple = LocalIndication.current
                 Box(
                     modifier = Modifier
                         .defaultMinSize(minWidth = FabSize, minHeight = FabSize)
                         .combinedClickable(
                             interactionSource = interactionSource,
-                            indication = rememberRipple(),
+                            indication = ripple,
                             enabled = true,
                             role = Role.Button,
                             onClick = onClick,
@@ -598,8 +600,4 @@ private fun onAddNewCatchClick(navController: NavController, viewModel: MapViewM
         }
 
     }
-}
-
-private fun onMarkerDetailsClick(navController: NavController, marker: UserMapMarker) {
-    navController.navigate(MainDestinations.PLACE_ROUTE, Arguments.PLACE to marker)
 }
