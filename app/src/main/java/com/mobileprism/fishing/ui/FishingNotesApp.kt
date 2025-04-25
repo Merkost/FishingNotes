@@ -19,6 +19,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import androidx.navigation.toRoute
+import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.home.AppSnackbar
 import com.mobileprism.fishing.ui.home.FishingNotesBottomBar
@@ -30,7 +32,10 @@ import com.mobileprism.fishing.ui.home.new_catch.NewCatchMasterScreen
 import com.mobileprism.fishing.ui.home.place.UserPlaceScreen
 import com.mobileprism.fishing.ui.home.profile.EditProfile
 import com.mobileprism.fishing.ui.home.settings.AboutApp
+import com.mobileprism.fishing.ui.home.weather.DailyWeatherData
 import com.mobileprism.fishing.ui.home.weather.WeatherDailyScreen
+import com.mobileprism.fishing.utils.serializableType
+import kotlin.reflect.typeOf
 
 @Composable
 fun FishingNotesApp() {
@@ -118,24 +123,31 @@ private fun NavGraphBuilder.NavGraph(
         }
     }
 
-    composable(
-        route = MainDestinations.PLACE_ROUTE,
-    ) { UserPlaceScreen(upPress, navController, it.requiredArg(Arguments.PLACE)) }
+    composable<MainDestinations.Place>(
+        typeMap = mapOf(typeOf<UserMapMarker>() to serializableType<UserMapMarker>()),
+    ) {
+        val place = it.toRoute<MainDestinations.Place>()
+        UserPlaceScreen(upPress, navController, place.marker)
+    }
 
-    composable(
-        route = MainDestinations.CATCH_ROUTE,
-    ) { CatchInfoScreen(navController, it.requiredArg(Arguments.CATCH)) }
+    composable<MainDestinations.Catch>(
+        typeMap = mapOf(typeOf<UserCatch>() to serializableType<UserCatch>()),
+    ) {
+        val catch = it.toRoute<MainDestinations.Catch>()
+        CatchInfoScreen(navController, catch.catch)
+    }
 
     composable(
         route = MainDestinations.EDIT_PROFILE,
     ) { EditProfile(upPress) }
 
-    composable(
-        route = MainDestinations.DAILY_WEATHER_ROUTE,
+    composable<MainDestinations.DailyWeather>(
+        typeMap = mapOf(typeOf<DailyWeatherData>() to serializableType<DailyWeatherData>()),
     ) {
+        val data = it.toRoute<MainDestinations.DailyWeather>()
         WeatherDailyScreen(
             upPress = { navController.popBackStack() },
-            data = it.requiredArg(Arguments.WEATHER_DATA)
+            data = data.data
         )
     }
 

@@ -3,6 +3,7 @@ package com.mobileprism.fishing.ui.home.new_catch
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -56,9 +57,6 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
-import com.google.accompanist.flowlayout.FlowMainAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.Arguments
@@ -259,8 +257,8 @@ fun PickWindDirDialog(onDirectionSelected: (Float) -> Unit, onDismiss: () -> Uni
         content = {
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                mainAxisAlignment = FlowMainAxisAlignment.Center,
-                crossAxisAlignment = FlowCrossAxisAlignment.Center,
+                horizontalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.Center
             ) {
                 (0..7).forEach {
                     WindIconItem(

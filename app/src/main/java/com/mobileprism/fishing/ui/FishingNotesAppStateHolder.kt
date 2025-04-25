@@ -13,10 +13,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.mobileprism.fishing.domain.entity.content.UserCatch
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.home.HomeSections
 import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.home.weather.DailyWeatherData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 
 /**
  * Destinations used in the [FishingNotesApp].
@@ -30,25 +34,29 @@ object MainDestinations {
     const val ABOUT_APP = "about_app"
 
     const val NEW_CATCH_ROUTE = "new_catch"
-    const val PLACE_ROUTE = "place"
 
-    const val CATCH_ROUTE = "catch"
-    const val DAILY_WEATHER_ROUTE = "daily_weather"
+    @Serializable
+    data class Place(val marker: UserMapMarker)
+
+    @Serializable
+    data class Catch(val catch: UserCatch)
+
+    @Serializable
+    data class DailyWeather(val data: DailyWeatherData)
+
+    @Serializable
+    data class Map(
+        val isAddingNewPlace: Boolean,
+        val place: UserMapMarker? = null
+    )
 
     const val MAP_ROUTE = "map"
     const val WEATHER_ROUTE = "weather"
-
-    const val NOTES_ROUTE = "notes"
-    const val NOTES_TO_NEW_CATCH_ROUTE = "${HOME_ROUTE}/${NOTES_ROUTE}/${NEW_CATCH_ROUTE}"
-    const val NOTES_TO_PLACE_ROUTE = "${HOME_ROUTE}/${NOTES_ROUTE}/${PLACE_ROUTE}"
-
 }
 
 object Arguments {
     const val PLACE = "place_arg"
-    const val CATCH = "catch_arg"
     const val WEATHER_DATA = "daily_weather_data_arg"
-    const val WEATHER_INDEX = "daily_weather_index_arg"
     const val MAP_NEW_PLACE = "map_new_place_arg"
 }
 

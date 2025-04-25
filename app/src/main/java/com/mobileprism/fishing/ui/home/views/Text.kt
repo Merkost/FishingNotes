@@ -95,8 +95,7 @@ fun PrimaryText(
 ) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.h4,
-        fontSize = 18.sp,
+        style = MaterialTheme.typography.h6,
         fontWeight = fontWeight,
         textAlign = textAlign,
         color = textColor,
@@ -118,8 +117,7 @@ fun PrimaryTextSmall(
 ) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.h4,
-        fontSize = 14.sp,
+        style = MaterialTheme.typography.body2,
         fontWeight = fontWeight,
         textAlign = textAlign,
         maxLines = maxLines,

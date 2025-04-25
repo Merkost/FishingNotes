@@ -3,8 +3,10 @@ package com.mobileprism.fishing.domain.entity.weather
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 @Parcelize
+@Serializable
 class Weather(
     @field:SerializedName("id") val id: Int = 0,
     @field:SerializedName("main") val main: String = "",

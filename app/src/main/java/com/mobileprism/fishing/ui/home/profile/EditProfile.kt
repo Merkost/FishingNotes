@@ -76,7 +76,7 @@ fun EditProfile(onBack: () -> Unit) {
     }
 
     if (uiState is BaseViewState.Loading) ModalLoadingDialog(
-        dialogSate = mutableStateOf(true),
+        dialogState = mutableStateOf(true),
         text = context.getString(R.string.loading)
     )
 

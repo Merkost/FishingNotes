@@ -98,12 +98,11 @@ class MapViewModel(
     val currentMarkerRawDistance = _currentMarkerRawDistance.asStateFlow()
 
     val fishActivity: MutableState<Int?> = mutableStateOf(null)
-    val currentWeather: MutableState<CurrentWeatherFree?> = mutableStateOf(null)
+    val currentWeather: MutableStateFlow<CurrentWeatherFree?> = MutableStateFlow(null)
 
-    val windIconRotation: Float
-        get() = currentWeather.value?.wind_degrees?.minus(_currentCameraPosition.value.third)
-            ?: _currentCameraPosition.value.third
-
+    val windIconRotation = currentWeather.combine(_currentCameraPosition) { weather, camera ->
+        weather?.wind_degrees?.minus(camera.third) ?: camera.third
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), 0f)
 
     fun setCameraMoveState(newState: CameraMoveState) {
         _cameraMoveState.value = newState
@@ -264,11 +263,9 @@ class MapViewModel(
         _currentMarker.value = null
     }
 
-    @OptIn(ExperimentalPermissionsApi::class)
     fun onMyLocationClick() {
         viewModelScope.launch {
-            val result = locationManager.getCurrentLocationFlow().singleOrNull()
-            when (result) {
+            when (val result = locationManager.getCurrentLocationFlow().singleOrNull()) {
                 is LocationState.LocationGranted -> {
                     _lastKnownLocation.value = result.location
                     setNewCameraLocation(result.location)

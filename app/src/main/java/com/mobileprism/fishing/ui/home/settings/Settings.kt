@@ -1,15 +1,36 @@
 package com.mobileprism.fishing.ui.home
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.ColorLens
+import androidx.compose.material.icons.filled.Compress
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LocationCity
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Thermostat
+import androidx.compose.material.icons.filled.ZoomIn
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -20,23 +41,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
 import com.alorma.compose.settings.ui.SettingsCheckbox
 import com.alorma.compose.settings.ui.SettingsMenuLink
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionsRequired
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.ui.MainDestinations
-import com.mobileprism.fishing.ui.home.map.GrantLocationPermissionsDialog
 import com.mobileprism.fishing.ui.home.map.LocationPermissionDialog
-import com.mobileprism.fishing.ui.home.map.checkLocationPermissions
 import com.mobileprism.fishing.ui.home.map.locationPermissionsList
-import com.mobileprism.fishing.ui.home.views.*
+import com.mobileprism.fishing.ui.home.views.DefaultAppBar
+import com.mobileprism.fishing.ui.home.views.DefaultDialog
+import com.mobileprism.fishing.ui.home.views.ItemsSelection
 import com.mobileprism.fishing.ui.home.weather.PressureValues
 import com.mobileprism.fishing.ui.home.weather.TemperatureValues
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
@@ -55,9 +74,12 @@ fun SettingsScreen(backPress: () -> Unit, navController: NavController) {
     Scaffold(
         topBar = { SettingsTopAppBar(backPress) },
         modifier = Modifier.fillMaxSize()
-    )
-    {
-        Column(modifier = Modifier.verticalScroll(rememberScrollState(0))) {
+    ) {
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState(0))
+                .padding(it)
+        ) {
             MainAppSettings(userPreferences)
             WeatherSettings(weatherPreferencesImpl)
             AboutSettings(navController)
@@ -428,26 +450,6 @@ fun GetWindSpeedUnit(
             }
         }
     }
-}
-
-@ExperimentalComposeUiApi
-@Composable
-@OptIn(ExperimentalPermissionsApi::class)
-fun GetLocationPermission(closeDialog: () -> Unit) {
-    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
-    val context = LocalContext.current
-    PermissionsRequired(
-        multiplePermissionsState = permissionsState,
-        permissionsNotGrantedContent = {
-            GrantLocationPermissionsDialog(
-                onDismiss = closeDialog,
-                onNegativeClick = closeDialog,
-                onPositiveClick = closeDialog,
-                onDontAskClick = closeDialog
-            )
-        },
-        permissionsNotAvailableContent = { SnackbarManager.showMessage(R.string.location_permission_denied) })
-    { checkLocationPermissions(context) }
 }
 
 @Composable

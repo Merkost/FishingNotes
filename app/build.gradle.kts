@@ -61,24 +61,23 @@ android {
 }
 
 dependencies {
-    // Settings
+    implementation(platform(libs.compose.bom))
+    implementation(platform(libs.firebase.bom))
+
+
     implementation("com.github.alorma:compose-settings-ui:0.11.0")
-
     implementation("androidx.work:work-runtime-ktx:2.9.0")
-
     implementation("androidx.activity:activity-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.3")
 
-    // Compressor
     implementation("id.zelory:compressor:3.0.1")
 
-    // coreLibraryDesugaring(libs.jdkDesugar)
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
 
-    implementation(platform(libs.firebase.platform))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.performance)
@@ -127,7 +126,6 @@ dependencies {
     implementation(libs.koin.workManager)
     implementation(libs.koin.compose)
 
-    implementation(libs.accompanist.flowlayouts)
     implementation(libs.accompanist.pager)
     implementation(libs.accompanist.pagerIndicators)
     implementation(libs.accompanist.permissions)

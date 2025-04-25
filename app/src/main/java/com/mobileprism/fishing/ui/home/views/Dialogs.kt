@@ -36,15 +36,8 @@ fun DefaultDialog(
     positiveButtonText: String = stringResource(id = R.string.yes),
     onPositiveClick: (() -> Unit)? = null,
     onDismiss: () -> Unit,
-    content: @Composable() (() -> Unit)? = null
+    content: @Composable (() -> Unit)? = null
 ) {
-
-    val textBias = when(textAlign) {
-        TextAlign.Start -> 0f
-        TextAlign.End -> 1f
-        else -> 0.5f
-    }
-
     Dialog(onDismissRequest = onDismiss) {
         DefaultCard(
             modifier = Modifier
@@ -52,103 +45,78 @@ fun DefaultDialog(
                 .wrapContentHeight()
                 .animateContentSize()
         ) {
-            ConstraintLayout(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(bottom = 2.dp)
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                horizontalAlignment = when (textAlign) {
+                    TextAlign.Start -> Alignment.Start
+                    TextAlign.End -> Alignment.End
+                    else -> Alignment.CenterHorizontally
+                }
             ) {
-                val (title, subtitle, mainContent, neutralButton, negativeButton, positiveButton, buttonSpacer) = createRefs()
-
                 primaryText?.let {
                     PrimaryText(
-                        modifier = Modifier.constrainAs(title) {
-                            top.linkTo(parent.top, 16.dp)
-                            linkTo(parent.absoluteLeft, parent.absoluteRight, 16.dp, 16.dp, bias = textBias)
-                            width = Dimension.fillToConstraints
-                        },
-                        textAlign = textAlign,
-                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.fillMaxWidth(),
                         text = primaryText,
+                        textAlign = textAlign,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
 
                 if (secondaryText != null) {
                     PrimaryTextSmall(
-                        modifier = Modifier.constrainAs(subtitle) {
-                            top.linkTo(title.bottom, 2.dp)
-                            linkTo(start = parent.absoluteLeft, end = parent.absoluteRight, 16.dp, 16.dp, bias = 0.5f)
-                            width = Dimension.fillToConstraints
-                        },
-                        textAlign = textAlign,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 2.dp),
                         text = secondaryText,
+                        textAlign = textAlign,
                     )
                 } else {
-                    Spacer(modifier = Modifier
-                        .size(0.dp)
-                        .constrainAs(subtitle) {
-                            top.linkTo(title.bottom, 2.dp)
-                            absoluteLeft.linkTo(title.absoluteLeft)
-                        })
+                    Spacer(modifier = Modifier.height(2.dp))
                 }
+
+                Spacer(modifier = Modifier.height(14.dp))
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .wrapContentHeight()
-                        .constrainAs(mainContent) {
-                            top.linkTo(subtitle.bottom, 14.dp)
-                            absoluteLeft.linkTo(parent.absoluteLeft)
-                            absoluteRight.linkTo(parent.absoluteRight)
-                            width = Dimension.fillToConstraints
-                        },
+                        .wrapContentHeight(),
                     contentAlignment = Alignment.Center
                 ) {
                     content?.invoke()
                 }
 
-                onNeutralClick?.let{
-                    DefaultButtonSecondaryLight(
-                        modifier = Modifier.constrainAs(neutralButton) {
-                            top.linkTo(mainContent.bottom, 16.dp)
-                            absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
-                        },
-                        text = neutralButtonText,
-                        onClick = onNeutralClick,
-                    )
-                }
+                Spacer(modifier = Modifier.height(16.dp))
 
-                onPositiveClick?.let{
-                    DefaultButtonFilled(
-                        modifier = Modifier.constrainAs(positiveButton) {
-                            top.linkTo(mainContent.bottom, 16.dp)
-                            bottom.linkTo(parent.bottom)
-                            absoluteRight.linkTo(parent.absoluteRight, 8.dp)
-                        },
-                        text = positiveButtonText,
-                        onClick = onPositiveClick,
-                    )
-                } ?: run {
-                    Spacer(
-                        modifier = Modifier
-                            .size(0.dp)
-                            .constrainAs(positiveButton) {
-                                top.linkTo(mainContent.bottom, 16.dp)
-                                bottom.linkTo(parent.bottom)
-                                absoluteRight.linkTo(parent.absoluteRight, 8.dp)
-                            },
-                    )
-                }
-
-                onNegativeClick?.let {
-                    DefaultButton(
-                        modifier = Modifier.constrainAs(negativeButton) {
-                            top.linkTo(mainContent.bottom, 16.dp)
-                            absoluteRight.linkTo(positiveButton.absoluteLeft, 8.dp)
-                        },
-                        text = negativeButtonText,
-                        onClick = onNegativeClick,
-                    )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        onNeutralClick?.let {
+                            DefaultButtonSecondaryLight(
+                                text = neutralButtonText,
+                                onClick = onNeutralClick
+                            )
+                        }
+                        onNegativeClick?.let {
+                            DefaultButton(
+                                text = negativeButtonText,
+                                onClick = onNegativeClick
+                            )
+                        }
+                    }
+                    onPositiveClick?.let {
+                        DefaultButtonFilled(
+                            text = positiveButtonText,
+                            onClick = onPositiveClick
+                        )
+                    }
                 }
             }
         }
@@ -181,10 +149,10 @@ fun LoadingDialog() {
 
 @Composable
 fun ModalLoadingDialog(
-    dialogSate: MutableState<Boolean>,
+    dialogState: MutableState<Boolean>,
     text: String
 ) {
-    if (dialogSate.value) {
+    if (dialogState.value) {
         Dialog(
             onDismissRequest = { },
             properties = DialogProperties(

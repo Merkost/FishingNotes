@@ -190,7 +190,6 @@ fun MyLocationButton(
     val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
 
     if (locationDialogIsShowing) {
-
         if (shouldShowPermissions) {
             LocationPermissionDialog(userPreferences = userPreferences) {
                 checkLocationPermissions(context)
@@ -223,9 +222,7 @@ fun MyLocationButton(
                 when (permissionsState.allPermissionsGranted) {
                     true -> {
                         locationManager.checkGPSEnabled(context as MainActivity)
-                        {
-                            onClick()
-                        }
+                        { onClick() }
                     }
 
                     false -> {
@@ -261,9 +258,10 @@ fun CompassButton(
             shape = CircleShape,
             modifier = Modifier.size(40.dp)
         ) {
-            IconButton(modifier = Modifier
-                .padding(8.dp)
-                .fillMaxSize(),
+            IconButton(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxSize(),
                 onClick = { onClick() }) {
                 Icon(
                     painterResource(
@@ -293,9 +291,10 @@ fun MapZoomInButton(
         shape = CircleShape,
         modifier = modifier.size(40.dp)
     ) {
-        IconButton(modifier = Modifier
-            .padding(8.dp)
-            .fillMaxSize(),
+        IconButton(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxSize(),
             onClick = { onClick() }) {
             Icon(
                 Icons.Default.Add,
@@ -316,9 +315,10 @@ fun MapZoomOutButton(
         shape = CircleShape,
         modifier = modifier.size(40.dp)
     ) {
-        IconButton(modifier = Modifier
-            .padding(8.dp)
-            .fillMaxSize(),
+        IconButton(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxSize(),
             onClick = { onClick() }) {
             Icon(
                 Icons.Default.Remove,

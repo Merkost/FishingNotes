@@ -5,8 +5,10 @@ import androidx.compose.ui.graphics.Color
 import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.domain.entity.common.Note
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 @Parcelize
+@Serializable
 class UserMapMarker(
     val id: String = "",
     val userId: String = "",

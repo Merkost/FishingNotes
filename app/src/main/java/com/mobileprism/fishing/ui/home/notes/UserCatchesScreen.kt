@@ -47,7 +47,7 @@ fun UserCatchesScreen(
         UserCatches(
             catchesState = uiState,
             catches = catchesSortValue.sort(catches),
-            userCatchClicked = { catch -> onCatchItemClick(catch, navController) },
+            userCatchClicked = { catch -> navController.navigate(MainDestinations.Catch(catch)) },
             sortValue = catchesSortValue,
             navigateToNewCatch = { navController.navigate(MainDestinations.NEW_CATCH_ROUTE) }
         )
@@ -173,6 +173,3 @@ fun getDatesList(catches: List<UserCatch>): List<String> {
     return dates
 }
 
-private fun onCatchItemClick(catch: UserCatch, navController: NavController) {
-    navController.navigate(MainDestinations.CATCH_ROUTE, Arguments.CATCH to catch)
-}

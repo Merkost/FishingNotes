@@ -92,7 +92,7 @@ fun CatchInfoScreen(navController: NavController, catch: UserCatch) {
     }
 
     ModalLoadingDialog(
-        dialogSate = loadingDialogState,
+        dialogState = loadingDialogState,
         text = stringResource(R.string.saving_photos)
     )
 
@@ -113,7 +113,9 @@ fun CatchInfoScreen(navController: NavController, catch: UserCatch) {
         }
     ) {
         BottomSheetScaffold (
-            scaffoldState = rememberBottomSheetScaffoldState(BottomSheetState(BottomSheetValue.Expanded)),
+            scaffoldState = rememberBottomSheetScaffoldState(
+                rememberBottomSheetState(BottomSheetValue.Expanded)
+            ),
             sheetContent = {
                 BannerAdvertView(
                     modifier = Modifier.navigationBarsPadding(),
@@ -231,7 +233,7 @@ fun CatchContent(
             ItemUserPlace(
                 place = place,
                 userPlaceClicked = {
-                    onPlaceItemClick(place = it, navController = navController)
+                    navController.navigate(MainDestinations.Place(it))
                 },
                 navigateToMap = {
                     navController.navigate(
@@ -588,17 +590,3 @@ fun CatchWeatherView(
         }
     }
 }
-
-private fun onPlaceItemClick(place: UserMapMarker, navController: NavController) {
-    navController.navigate(
-        MainDestinations.PLACE_ROUTE,
-        Arguments.PLACE to place
-    )
-}
-
-
-
-
-
-
-
