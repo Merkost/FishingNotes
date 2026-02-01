@@ -9,11 +9,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.SnackbarDuration
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.os.bundleOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
@@ -33,27 +33,23 @@ import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.SnackbarAction
 import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
+import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
 import com.mobileprism.fishing.ui.theme.FishingNotesTheme
+import com.mobileprism.fishing.ui.utils.LocalAnalytics
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.Logger
 import com.mobileprism.fishing.viewmodels.MainViewModel
-import org.koin.android.ext.android.get
 import org.koin.android.ext.android.inject
-import org.koin.androidx.compose.koinViewModel
-import org.koin.androidx.viewmodel.ext.android.getViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.compose.koinInject
 
 
 class MainActivity : ComponentActivity() {
@@ -61,6 +57,7 @@ class MainActivity : ComponentActivity() {
     private val logger: Logger by inject()
     private val appUpdateManager: AppUpdateManager by inject()
     private val auth: FirebaseAuth by inject()
+    private val analyticsTracker: AnalyticsTracker by inject()
 
     private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
 
@@ -108,8 +105,10 @@ class MainActivity : ComponentActivity() {
                         splashScreenViewProvider.remove()
                         if (Build.VERSION.SDK_INT < 31) {
                             setContent {
-                                FishingNotesTheme(appTheme.value) {
-                                    DistributionScreen(viewModel.user)
+                                CompositionLocalProvider(LocalAnalytics provides analyticsTracker) {
+                                    FishingNotesTheme(appTheme.value) {
+                                        DistributionScreen(viewModel.user)
+                                    }
                                 }
                             }
                         }
@@ -120,8 +119,10 @@ class MainActivity : ComponentActivity() {
 
         if (Build.VERSION.SDK_INT >= 31) {
             setContent {
-                FishingNotesTheme(appTheme.value) {
-                    DistributionScreen(viewModel.user)
+                CompositionLocalProvider(LocalAnalytics provides analyticsTracker) {
+                    FishingNotesTheme(appTheme.value) {
+                        DistributionScreen(viewModel.user)
+                    }
                 }
             }
         }
@@ -312,15 +313,10 @@ class MainActivity : ComponentActivity() {
 
     private fun handleError(error: Exception?) {
         error?.let {
-            val bundle = bundleOf()
-            bundle.putString(FirebaseAnalytics.Param.SCORE, error.message)
-            Firebase.analytics.logEvent("signin_error", bundle)
-
-            //Toast.makeText(this,  error.message, Toast.LENGTH_LONG).show()
+            analyticsTracker.logEvent(AnalyticsEvent.SignInError(error.message))
             logger.log(error.message)
         }
         SnackbarManager.showMessage(R.string.google_login_failed)
-
     }
 
     override fun onStop() {

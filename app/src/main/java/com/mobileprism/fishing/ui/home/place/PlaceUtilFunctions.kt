@@ -4,14 +4,11 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Bundle
 import android.widget.Toast
 import androidx.navigation.NavController
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.ktx.Firebase
-import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
+import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
 import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.navigate
@@ -21,10 +18,8 @@ fun newCatchClicked(navController: NavController, place: UserMapMarker) {
         navController.navigate(MainDestinations.NEW_CATCH_ROUTE, Arguments.PLACE to place)
 }
 
-fun onRouteClicked(context: Context, marker: UserMapMarker) {
-    val bundle = Bundle()
-    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "marker")
-    Firebase.analytics.logEvent("navigate", bundle)
+fun onRouteClicked(context: Context, marker: UserMapMarker, analyticsTracker: AnalyticsTracker) {
+    analyticsTracker.logEvent(AnalyticsEvent.Navigate(contentType = "marker"))
 
     val uri = String.format(
         Locale.ENGLISH,
@@ -51,11 +46,10 @@ fun onRouteClicked(context: Context, marker: UserMapMarker) {
 
 fun onShareClicked(
     context: Context,
-    marker: UserMapMarker
+    marker: UserMapMarker,
+    analyticsTracker: AnalyticsTracker
 ) {
-    val bundle = Bundle()
-    bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "marker")
-    Firebase.analytics.logEvent(FirebaseAnalytics.Event.SHARE, bundle)
+    analyticsTracker.logEvent(AnalyticsEvent.Share(contentType = "marker"))
 
     val text =
         "${marker.title}\nhttps://www.google.com/maps/search/?api=1&query=${marker.latitude}" +

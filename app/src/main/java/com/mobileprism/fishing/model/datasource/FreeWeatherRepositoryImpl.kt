@@ -1,7 +1,8 @@
 package com.mobileprism.fishing.model.datasource
 
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
+import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
 import com.mobileprism.fishing.domain.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.domain.repository.app.FreeWeatherRepository
 import com.mobileprism.fishing.model.api.FreeWeatherApiService
@@ -16,7 +17,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class FreeWeatherRepositoryImpl(
-    private val firebaseAnalytics: FirebaseAnalytics,
+    private val analyticsTracker: AnalyticsTracker,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : FreeWeatherRepository {
 
@@ -59,7 +60,7 @@ class FreeWeatherRepositoryImpl(
         lon: Double
     ): Flow<Result<CurrentWeatherFree>> = flow {
         emit(safeApiCall(dispatcher) {
-            firebaseAnalytics.logEvent("get_free_weather", null)
+            analyticsTracker.logEvent(AnalyticsEvent.GetFreeWeather)
             getService().getFreeWeather(latitude = lat, longitude = lon)
         })
     }

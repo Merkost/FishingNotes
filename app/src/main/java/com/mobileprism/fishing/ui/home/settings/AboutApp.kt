@@ -178,27 +178,27 @@ fun onBillingStart(
 ) =
     object : BillingClientStateListener {
         override fun onBillingSetupFinished(billingResult: BillingResult) {
-            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                // The BillingClient is ready. You can query purchases here.
-                coroutineScope.launch {
-                    querySkuDetails(billingClient) {
-                        val products = it.skuDetailsList
-                        products?.let {
-                            if (products.isEmpty()) {
-                                SnackbarManager.showMessage(R.string.payment_no_content)
-                            } else {
-                                val flowParams = BillingFlowParams.newBuilder()
-                                    .setSkuDetails(products.first())
-                                    .build()
-                                val responseCode = billingClient
-                                    .launchBillingFlow(context as MainActivity, flowParams)
-                                    .responseCode
-                                checkResponseCode(responseCode, context)
-                            }
-                        }
-                    }
-                }
-            }
+//            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+//                // The BillingClient is ready. You can query purchases here.
+//                coroutineScope.launch {
+//                    querySkuDetails(billingClient) {
+//                        val products = it.skuDetailsList
+//                        products?.let {
+//                            if (products.isEmpty()) {
+//                                SnackbarManager.showMessage(R.string.payment_no_content)
+//                            } else {
+//                                val flowParams = BillingFlowParams.newBuilder()
+//                                    .setSkuDetails(products.first())
+//                                    .build()
+//                                val responseCode = billingClient
+//                                    .launchBillingFlow(context as MainActivity, flowParams)
+//                                    .responseCode
+//                                checkResponseCode(responseCode, context)
+//                            }
+//                        }
+//                    }
+//                }
+//            }
         }
 
         override fun onBillingServiceDisconnected() {
@@ -208,20 +208,6 @@ fun onBillingStart(
         }
     }
 
-
-suspend fun querySkuDetails(billingClient: BillingClient, onReady: (SkuDetailsResult) -> Unit) {
-    val skuList = ArrayList<String>()
-    skuList.add("donation")
-    val params = SkuDetailsParams.newBuilder()
-    params.setSkusList(skuList).setType(BillingClient.SkuType.INAPP)
-
-    // leverage querySkuDetails Kotlin extension function
-    val skuDetailsResult = withContext(Dispatchers.IO) {
-        billingClient.querySkuDetails(params.build())
-    }
-    onReady(skuDetailsResult)
-    // Process the result.
-}
 
 private fun checkResponseCode(responseCode: Int, context: Context) {
     when (responseCode) {

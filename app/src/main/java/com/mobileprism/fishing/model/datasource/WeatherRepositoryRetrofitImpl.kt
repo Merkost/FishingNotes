@@ -1,8 +1,9 @@
 package com.mobileprism.fishing.model.datasource
 
 import androidx.core.os.LocaleListCompat
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
+import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
 import com.mobileprism.fishing.domain.entity.weather.WeatherForecast
 import com.mobileprism.fishing.domain.repository.app.WeatherRepository
 import com.mobileprism.fishing.model.api.WeatherApiService
@@ -16,7 +17,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class WeatherRepositoryRetrofitImpl(
-    private val firebaseAnalytics: FirebaseAnalytics,
+    private val analyticsTracker: AnalyticsTracker,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : WeatherRepository {
 
@@ -47,7 +48,7 @@ class WeatherRepositoryRetrofitImpl(
     override suspend fun getWeather(lat: Double, lon: Double)
     : Flow<Result<WeatherForecast>> = flow {
         emit(safeApiCall(dispatcher) {
-            firebaseAnalytics.logEvent("get_weather", null)
+            analyticsTracker.logEvent(AnalyticsEvent.GetWeather)
             getService().getWeather(
                 latitude = lat, longitude = lon,
                 lang = locale

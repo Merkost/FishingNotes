@@ -90,9 +90,9 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.placeholder.shimmer
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.ktx.Firebase
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
+import com.mobileprism.fishing.ui.utils.LocalAnalytics
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.MainActivity
 import com.mobileprism.fishing.ui.home.SettingsHeader
@@ -353,9 +353,10 @@ fun LayersView(
     onCloseMapSelection: () -> Unit
 ) {
     val context = LocalContext.current
+    val analyticsTracker = LocalAnalytics.current
 
     DisposableEffect(context) {
-        Firebase.analytics.logEvent("map_layers", null)
+        analyticsTracker.logEvent(AnalyticsEvent.MapLayers)
         onDispose {}
     }
 
