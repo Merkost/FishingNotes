@@ -1,7 +1,8 @@
 package com.mobileprism.fishing.model.datasource
 
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
+import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
 import com.mobileprism.fishing.domain.entity.solunar.Solunar
 import com.mobileprism.fishing.domain.repository.app.SolunarRepository
 import com.mobileprism.fishing.model.api.SolunarApiService
@@ -17,7 +18,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 
 class SolunarRetrofitRepositoryImpl(
-    private val firebaseAnalytics: FirebaseAnalytics,
+    private val analyticsTracker: AnalyticsTracker,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : SolunarRepository {
 
@@ -51,7 +52,7 @@ class SolunarRetrofitRepositoryImpl(
     override fun getSolunar(latitude: Double, longitude: Double, date: String, timeZone: Int): Flow<Result<Solunar>> =
         flow {
 
-            firebaseAnalytics.logEvent("get_solunar", null)
+            analyticsTracker.logEvent(AnalyticsEvent.GetSolunar)
 
             emit(safeApiCall(dispatcher) {
 

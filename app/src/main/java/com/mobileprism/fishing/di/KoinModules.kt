@@ -4,12 +4,14 @@ import android.content.Context
 import android.location.Geocoder
 import android.os.Build
 import com.android.billingclient.api.BillingClient
+import com.android.billingclient.api.PendingPurchasesParams
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.Firebase
+import com.google.firebase.analytics.analytics
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.ktx.Firebase
+import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
+import com.mobileprism.fishing.model.datasource.firebase.FirebaseAnalyticsTracker
 import com.mobileprism.fishing.model.datastore.*
 import com.mobileprism.fishing.model.datastore.impl.NotesPreferencesImpl
 import com.mobileprism.fishing.model.datastore.impl.UserDatastoreImpl
@@ -34,11 +36,13 @@ val appModule = module {
     single<AppUpdateManager> { AppUpdateManagerFactory.create(androidContext()) }
     single<FirebaseAuth> { FirebaseAuth.getInstance() }
     single { SnackbarManager }
-    single<FirebaseAnalytics> { Firebase.analytics }
+    single<AnalyticsTracker> { FirebaseAnalyticsTracker(Firebase.analytics) }
     single<BillingClient> { params ->
         BillingClient.newBuilder(androidContext())
             .setListener(get())
-            .enablePendingPurchases()
+            .enablePendingPurchases(
+                PendingPurchasesParams.newBuilder().build()
+            )
             .build()
     }
     single<LocationManager> { LocationManagerImpl(get()) }

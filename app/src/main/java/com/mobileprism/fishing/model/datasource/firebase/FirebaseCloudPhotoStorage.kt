@@ -3,12 +3,12 @@ package com.mobileprism.fishing.model.datasource.firebase
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Bundle
 import androidx.core.net.toUri
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.Firebase
 import com.google.firebase.storage.UploadTask
-import com.google.firebase.storage.ktx.storage
+import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
+import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
+import com.google.firebase.storage.storage
 import com.mobileprism.fishing.domain.repository.PhotoStorage
 import com.mobileprism.fishing.utils.getNewPhotoId
 import fileFromContentUri
@@ -24,7 +24,7 @@ import java.io.File
 
 
 class FirebaseCloudPhotoStorage(
-    private val firebaseAnalytics: FirebaseAnalytics,
+    private val analyticsTracker: AnalyticsTracker,
     private val context: Context) : PhotoStorage {
 
     private val storage = Firebase.storage
@@ -42,9 +42,7 @@ class FirebaseCloudPhotoStorage(
                 }
         }
 
-        val bundle = Bundle()
-        bundle.putString(FirebaseAnalytics.Param.SCORE, downloadLinks.size.toString())
-        firebaseAnalytics.logEvent("upload_photos", bundle)
+        analyticsTracker.logEvent(AnalyticsEvent.UploadPhotos(downloadLinks.size))
 
         return downloadLinks
     }

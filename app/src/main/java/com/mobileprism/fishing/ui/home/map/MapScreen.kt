@@ -68,9 +68,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.ktx.Firebase
 import com.google.maps.android.ktx.awaitMap
+import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
+import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
+import com.mobileprism.fishing.ui.utils.LocalAnalytics
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.datastore.UserPreferences
@@ -109,6 +110,7 @@ fun MapScreen(
     val mapUiState by viewModel.mapUiState.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
+    val analyticsTracker = LocalAnalytics.current
     val userPreferences: UserPreferences = koinInject()
     val useZoomButtons by userPreferences.useMapZoomButons.collectAsState(false)
 
@@ -213,7 +215,7 @@ fun MapScreen(
                     modifier = Modifier.constrainAs(mapSettingsButton) {
                         top.linkTo(mapLayersButton.bottom, 16.dp)
                         absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                    }) { onMapSettingsClicked(coroutineScope, modalBottomSheetState) }
+                    }) { onMapSettingsClicked(coroutineScope, modalBottomSheetState, analyticsTracker) }
 
                 MyLocationButton(
                     modifier = modifier.constrainAs(mapMyLocationButton) {
@@ -294,10 +296,11 @@ fun MapScreen(
 @OptIn(ExperimentalMaterialApi::class)
 fun onMapSettingsClicked(
     coroutineScope: CoroutineScope,
-    modalBottomSheetState: ModalBottomSheetState
+    modalBottomSheetState: ModalBottomSheetState,
+    analyticsTracker: AnalyticsTracker
 ) {
     coroutineScope.launch {
-        Firebase.analytics.logEvent("map_settings", null)
+        analyticsTracker.logEvent(AnalyticsEvent.MapSettings)
         modalBottomSheetState.show()
     }
 }
@@ -586,7 +589,7 @@ fun FishingFab(
     }
 }
 
-private val FabSize = 56.dp
+val FabSize = 56.dp
 
 private fun onAddNewCatchClick(navController: NavController, viewModel: MapViewModel) {
     viewModel.currentMarker.value?.let {
@@ -598,6 +601,5 @@ private fun onAddNewCatchClick(navController: NavController, viewModel: MapViewM
         } else {
             // TODO: Нельзя добавить улов на текущее местоположение
         }
-
     }
 }

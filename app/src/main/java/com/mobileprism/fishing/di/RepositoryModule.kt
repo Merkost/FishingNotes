@@ -21,7 +21,7 @@ val userRepositoryModule = module {
         FirebaseUserRepositoryImpl(
             userDatastore = get(),
             dbCollections = get(),
-            firebaseAnalytics = get(),
+            analyticsTracker = get(),
             context = androidContext()
         )
     }
@@ -33,26 +33,26 @@ val repositoryModule = module {
     single<CatchesRepository> {
         FirebaseCatchesRepositoryImpl(
             dbCollections = get(),
-            firebaseAnalytics = get(),
+            analyticsTracker = get(),
             connectionManager = get()
         )
     }
     single<MarkersRepository> {
         FirebaseMarkersRepositoryImpl(
             dbCollections = get(),
-            firebaseAnalytics = get(),
+            analyticsTracker = get(),
             context = androidContext()
         )
     }
-    single<SolunarRepository> { SolunarRetrofitRepositoryImpl(firebaseAnalytics = get()) }
+    single<SolunarRepository> { SolunarRetrofitRepositoryImpl(analyticsTracker = get()) }
     single<PhotoStorage> {
         FirebaseCloudPhotoStorage(
-            firebaseAnalytics = get(),
+            analyticsTracker = get(),
             context = androidContext()
         )
     }
-    single<WeatherRepository> { WeatherRepositoryRetrofitImpl(firebaseAnalytics = get()) }
-    single<FreeWeatherRepository> { FreeWeatherRepositoryImpl(firebaseAnalytics = get()) }
+    single<WeatherRepository> { WeatherRepositoryRetrofitImpl(analyticsTracker = get()) }
+    single<FreeWeatherRepository> { FreeWeatherRepositoryImpl(analyticsTracker = get()) }
     single<OfflineRepository> { FirebaseOfflineRepositoryImpl(dbCollections = get()) }
 }
 

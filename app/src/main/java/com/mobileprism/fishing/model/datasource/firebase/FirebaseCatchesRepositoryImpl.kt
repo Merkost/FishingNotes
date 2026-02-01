@@ -4,9 +4,9 @@ import android.net.Uri
 import android.util.Log
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.firestore.*
-import com.google.firebase.firestore.ktx.toObject
+import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
+import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
 import com.mobileprism.fishing.domain.entity.common.ContentStateOld
 import com.mobileprism.fishing.domain.entity.common.Progress
 import com.mobileprism.fishing.domain.entity.content.UserCatch
@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 
 class FirebaseCatchesRepositoryImpl(
     private val dbCollections: RepositoryCollections,
-    private val firebaseAnalytics: FirebaseAnalytics,
+    private val analyticsTracker: AnalyticsTracker,
     private val connectionManager: ConnectionManager
 ) : CatchesRepository {
 
@@ -162,7 +162,7 @@ class FirebaseCatchesRepositoryImpl(
                     scope.trySend(Result.failure(it.exception!!))
                 }
                 if (it.isSuccessful) {
-                    firebaseAnalytics.logEvent("new_catch", null)
+                    analyticsTracker.logEvent(AnalyticsEvent.NewCatch)
                     scope.trySend(Result.success(null))
                     incrementNumOfCatches(markerId)
                 }
@@ -175,7 +175,7 @@ class FirebaseCatchesRepositoryImpl(
         scope: ProducerScope<Result<Nothing?>>
     ) {
         dbCollections.getUserCatchesCollection(markerId).document(newCatch.id).set(newCatch)
-        firebaseAnalytics.logEvent("new_catch_offline", null)
+        analyticsTracker.logEvent(AnalyticsEvent.NewCatchOffline)
         scope.trySend(Result.success(null))
         incrementNumOfCatches(markerId)
     }

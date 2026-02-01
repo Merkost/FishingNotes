@@ -1,7 +1,7 @@
 package com.mobileprism.fishing.utils
 
 import android.net.Uri
-import androidx.core.bundle.Bundle
+import android.os.Bundle
 import androidx.navigation.NavType
 import kotlinx.serialization.json.Json
 

@@ -1,19 +1,17 @@
 package com.mobileprism.fishing.model.datasource.firebase
 
 import android.content.Context
-import android.os.Bundle
 import android.util.Log
-import com.firebase.ui.auth.AuthUI
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.Firebase
+import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
+import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.EventListener
 import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.toObject
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.toObject
 import com.mobileprism.fishing.di.repositoryModule
 import com.mobileprism.fishing.domain.entity.common.Progress
 import com.mobileprism.fishing.domain.entity.common.User
@@ -23,6 +21,7 @@ import com.mobileprism.fishing.model.datastore.UserDatastore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import org.koin.core.context.GlobalContext.loadKoinModules
 import org.koin.core.context.GlobalContext.unloadKoinModules
@@ -33,7 +32,7 @@ import kotlin.coroutines.suspendCoroutine
 class FirebaseUserRepositoryImpl(
     private val userDatastore: UserDatastore,
     private val dbCollections: RepositoryCollections,
-    private val firebaseAnalytics: FirebaseAnalytics,
+    private val analyticsTracker: AnalyticsTracker,
     private val context: Context,
 ) : UserRepository {
 
@@ -92,9 +91,7 @@ class FirebaseUserRepositoryImpl(
 
         if (userFromDatabase != null && userFromDatabase.registerDate != 0L) {
 
-            val bundle = Bundle()
-            bundle.putString(FirebaseAnalytics.Param.METHOD, "Google")
-            firebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN, bundle)
+            analyticsTracker.logEvent(AnalyticsEvent.Login(method = "Google"))
 
 
             userDatastore.saveUser(userFromDatabase)
@@ -103,9 +100,7 @@ class FirebaseUserRepositoryImpl(
             dbCollections.getUsersCollection().document(user.uid).set(user)
                 .addOnCompleteListener {
 
-                    val bundle = Bundle()
-                    bundle.putString(FirebaseAnalytics.Param.METHOD, "Google")
-                    firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)
+                    analyticsTracker.logEvent(AnalyticsEvent.SignUp(method = "Google"))
 
                     runBlocking {
                         userDatastore.saveUser(user)
@@ -155,13 +150,13 @@ class FirebaseUserRepositoryImpl(
         }
 
     suspend fun getCurrentUserFromDatabase(userId: String) =
-        suspendCoroutine<Result<User>> { continuation ->
-            dbCollections.getUsersCollection().document(userId).get().addOnCompleteListener {
-                val user = it.result.toObject<User>()
+        suspendCancellableCoroutine<Result<User>> { continuation ->
+            dbCollections.getUsersCollection().document(userId).get().addOnCompleteListener { userRequest ->
+                val user = userRequest.result.toObject<User>()
                 user?.let { continuation.resume(Result.success(it)) } ?: kotlin.run {
                     continuation.resume(
                         Result.failure(
-                            it.exception ?: Throwable()
+                            userRequest.exception ?: Throwable()
                         )
                     )
                 }

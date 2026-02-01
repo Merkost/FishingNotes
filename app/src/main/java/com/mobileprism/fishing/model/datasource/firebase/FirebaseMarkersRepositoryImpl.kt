@@ -2,9 +2,9 @@ package com.mobileprism.fishing.model.datasource.firebase
 
 import android.content.Context
 import android.util.Log
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.firestore.*
-import com.google.firebase.firestore.ktx.toObject
+import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
+import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
 import com.mobileprism.fishing.domain.entity.common.ContentState
 import com.mobileprism.fishing.domain.entity.common.LiteProgress
 import com.mobileprism.fishing.domain.entity.common.Note
@@ -24,7 +24,7 @@ import kotlin.coroutines.suspendCoroutine
 
 class FirebaseMarkersRepositoryImpl(
     private val dbCollections: RepositoryCollections,
-    private val firebaseAnalytics: FirebaseAnalytics,
+    private val analyticsTracker: AnalyticsTracker,
     private val context: Context
 ) : MarkersRepository {
 
@@ -143,7 +143,7 @@ class FirebaseMarkersRepositoryImpl(
                 }
 
                 if (it.isSuccessful) {
-                    firebaseAnalytics.logEvent("add_marker_note", null)
+                    analyticsTracker.logEvent(AnalyticsEvent.AddMarkerNote)
                     trySend(Result.success(Unit))
                 }
             }
@@ -159,7 +159,7 @@ class FirebaseMarkersRepositoryImpl(
                     trySend(Result.failure(exp))
                 }
                 if (it.isSuccessful) {
-                    firebaseAnalytics.logEvent("edit_marker_note", null)
+                    analyticsTracker.logEvent(AnalyticsEvent.EditMarkerNote)
                     trySend(Result.success(Unit))
                 }
             }
@@ -182,7 +182,7 @@ class FirebaseMarkersRepositoryImpl(
                     }
 
                     if (it.isSuccessful) {
-                        firebaseAnalytics.logEvent("add_marker_note", null)
+                        analyticsTracker.logEvent(AnalyticsEvent.AddMarkerNote)
                         flow.tryEmit(BaseViewState.Success(currentNotes + newNote))
                     }
                 }
@@ -197,7 +197,7 @@ class FirebaseMarkersRepositoryImpl(
                         flow.tryEmit(BaseViewState.Error(exp))
                     }
                     if (it.isSuccessful) {
-                        firebaseAnalytics.logEvent("edit_marker_note", null)
+                        analyticsTracker.logEvent(AnalyticsEvent.EditMarkerNote)
                         flow.tryEmit(BaseViewState.Success(newNotes))
                     }
                 }
@@ -236,7 +236,7 @@ class FirebaseMarkersRepositoryImpl(
         val task = documentRef.update("visible", changeTo)
         task.addOnCompleteListener {
             if (it.isSuccessful) {
-                firebaseAnalytics.logEvent("marker_visibility_change", null)
+                analyticsTracker.logEvent(AnalyticsEvent.MarkerVisibilityChange)
                 flow.tryEmit(LiteProgress.Complete)
             }
             if (it.isCanceled || it.exception != null) {
@@ -311,7 +311,7 @@ class FirebaseMarkersRepositoryImpl(
         val task = dbCollections.getUserMapMarkersCollection().document(newMarker.id).set(newMarker)
         task.addOnCompleteListener {
             if (it.isSuccessful) {
-                firebaseAnalytics.logEvent("new_marker", null)
+                analyticsTracker.logEvent(AnalyticsEvent.NewMarker)
                 continuation.resume(Result.success(Unit))
             }
             if (it.isCanceled || it.exception != null) {
@@ -340,7 +340,7 @@ class FirebaseMarkersRepositoryImpl(
         val task = documentRef.set(userMapMarker)
         task.addOnCompleteListener {
             if (it.isSuccessful) {
-                firebaseAnalytics.logEvent("new_marker", null)
+                analyticsTracker.logEvent(AnalyticsEvent.NewMarker)
                 trySend(userMapMarker.id)
             }
             //todo: Если ошибка?
@@ -361,7 +361,7 @@ class FirebaseMarkersRepositoryImpl(
         dbCollections.getUserMapMarkersCollection().document(userMapMarker.id).delete()
             .addOnCompleteListener {
                 if (it.isSuccessful) {
-                    firebaseAnalytics.logEvent("delete_marker", null)
+                    analyticsTracker.logEvent(AnalyticsEvent.DeleteMarker)
                 }
             }
     }

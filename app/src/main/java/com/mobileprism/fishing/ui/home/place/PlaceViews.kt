@@ -326,8 +326,7 @@ fun PlaceButtonsView(
     viewModel: UserPlaceViewModel
 ) {
     val context = LocalContext.current
-
-
+    val analyticsTracker = com.mobileprism.fishing.ui.utils.LocalAnalytics.current
 
     Row(
         modifier = modifier.horizontalScroll(rememberScrollState()),
@@ -345,13 +344,13 @@ fun PlaceButtonsView(
         DefaultButtonOutlined(
             text = stringResource(id = R.string.navigate),
             icon = painterResource(id = R.drawable.ic_baseline_navigation_24),
-            onClick = { onRouteClicked(context, place) }
+            onClick = { onRouteClicked(context, place, analyticsTracker) }
         )
 
         DefaultButtonOutlined(
             text = stringResource(id = R.string.share),
             icon = painterResource(id = R.drawable.ic_baseline_share_24),
-            onClick = { onShareClicked(context, place) }
+            onClick = { onShareClicked(context, place, analyticsTracker) }
         )
 
         /*DefaultButtonOutlined(
