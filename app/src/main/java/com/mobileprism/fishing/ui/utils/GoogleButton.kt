@@ -22,8 +22,8 @@ import com.mobileprism.fishing.R
 // TODO: Use google button
 fun GoogleButton(
     modifier: Modifier = Modifier,
-    text: String = "Sign Up with Google",
-    loadingText: String = "Creating Account...",
+    text: String? = null,
+    loadingText: String? = null,
     icon: Int = R.drawable.ic_google_logo,
     shape: Shape = CircleShape,
     borderColor: Color = Color.LightGray,
@@ -31,6 +31,8 @@ fun GoogleButton(
     progressIndicatorColor: Color = MaterialTheme.colors.primary,
     onClicked: () -> Unit
 ) {
+    val resolvedText = text ?: stringResource(id = R.string.sign_up_with_google)
+    val resolvedLoadingText = loadingText ?: stringResource(id = R.string.creating_account)
     var clicked by remember { mutableStateOf(false) }
     
     Card(
@@ -57,11 +59,11 @@ fun GoogleButton(
         ) {
             Icon(
                 painter = painterResource(id = icon),
-                contentDescription = "Google Button",
+                contentDescription = stringResource(id = R.string.google_button),
                 tint = Color.Unspecified
             )
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = if (clicked) loadingText else text)
+            Text(text = if (clicked) resolvedLoadingText else resolvedText)
             if (clicked) {
                 Spacer(modifier = Modifier.width(16.dp))
                 CircularProgressIndicator(

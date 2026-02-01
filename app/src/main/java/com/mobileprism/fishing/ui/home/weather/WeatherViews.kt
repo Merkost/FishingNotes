@@ -173,7 +173,7 @@ fun WeatherDropdownMenu(
                             }
                         ),
                         tint = MaterialTheme.colors.secondary,
-                        contentDescription = "Location icon",
+                        contentDescription = stringResource(id = R.string.location_icon),
                         modifier = Modifier.padding(2.dp)
                     )
                     Text(

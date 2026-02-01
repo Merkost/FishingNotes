@@ -276,7 +276,7 @@ fun ItemCounter(
             painter = painterResource(id = icon),
             contentDescription = null,
         )
-        SupportText(text = " x $count")
+        SupportText(text = stringResource(id = R.string.item_count_format, count.toInt()))
     }
 
 }

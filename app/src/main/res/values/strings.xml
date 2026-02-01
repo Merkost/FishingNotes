@@ -371,5 +371,14 @@
     <string name="email_hint">E-mail</string>
     <string name="username">Имя пользователя</string>
 
+    <string name="something_went_wrong">Something went wrong!</string>
+    <string name="add_places_catches_for_stats">Add places and catches to see statistics!</string>
+    <string name="sign_up_with_google">Sign Up with Google</string>
+    <string name="creating_account">Creating Account…</string>
+    <string name="app_icon">App icon</string>
+    <string name="location_icon">Location icon</string>
+    <string name="google_button">Google Button</string>
+    <string name="item_count_format" translatable="false"> x %d</string>
+    <string name="advert_here">Advert Here</string>
 
 </resources>
