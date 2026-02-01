@@ -185,7 +185,7 @@ fun NoPlacesStats() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceAround
     ) {
-        SecondaryText(text = "Добавьте места и уловы чтобы увидеть статистику!")
+        SecondaryText(text = stringResource(id = R.string.add_places_catches_for_stats))
         LottieMyStats(modifier = Modifier.fillMaxWidth())
     }
 

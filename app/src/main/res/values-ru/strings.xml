@@ -369,4 +369,13 @@
     <string name="email_hint">E-mail</string>
     <string name="username">Имя пользователя</string>
 
+    <string name="something_went_wrong">Что-то пошло не так!</string>
+    <string name="add_places_catches_for_stats">Добавьте места и уловы чтобы увидеть статистику!</string>
+    <string name="sign_up_with_google">Зарегистрироваться через Google</string>
+    <string name="creating_account">Создание аккаунта…</string>
+    <string name="app_icon">Иконка приложения</string>
+    <string name="location_icon">Иконка местоположения</string>
+    <string name="google_button">Кнопка Google</string>
+    <string name="advert_here">Реклама</string>
+
 </resources>

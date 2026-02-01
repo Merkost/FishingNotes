@@ -194,7 +194,7 @@ fun ErrorView(modifier: Modifier = Modifier) {
             modifier = Modifier.size(48.dp),
             painter = painterResource(id = R.drawable.ic_error), contentDescription = null
         )
-        SupportText(text = "Something went wrong!")
+        SupportText(text = stringResource(id = R.string.something_went_wrong))
     }
 }
 

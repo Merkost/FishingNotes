@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "WebSearch",
-      "Bash(java -jar gradle/wrapper/gradle-wrapper.jar wrapper:*)"
+      "Bash(java -jar gradle/wrapper/gradle-wrapper.jar wrapper:*)",
+      "Bash(find:*)"
     ]
   }
 }

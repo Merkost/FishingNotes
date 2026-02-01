@@ -94,7 +94,7 @@ fun AboutApp(upPress: () -> Unit) {
             ) {
                 Image(
                     painter = painterResource(R.drawable.ic_launcher),
-                    contentDescription = "appIcon",
+                    contentDescription = stringResource(id = R.string.app_icon),
                     modifier = Modifier.size(150.dp)
                 )
                 PrimaryText(text = stringResource(id = R.string.app_name))

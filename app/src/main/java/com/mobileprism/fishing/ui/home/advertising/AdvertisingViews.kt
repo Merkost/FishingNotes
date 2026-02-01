@@ -11,9 +11,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.mobileprism.fishing.R
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
@@ -33,7 +35,7 @@ fun BannerAdvertView(
                     .padding(horizontal = 2.dp, vertical = 6.dp),
                 textAlign = TextAlign.Center,
                 color = Color.White,
-                text = "Advert Here",
+                text = stringResource(id = R.string.advert_here),
             )
         } else {
             AndroidView(

@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.navigation.NavController
+import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
 import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
@@ -37,7 +38,7 @@ fun onRouteClicked(context: Context, marker: UserMapMarker, analyticsTracker: An
             val unrestrictedIntent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
             context.startActivity(unrestrictedIntent)
         } catch (e: ActivityNotFoundException) {
-            Toast.makeText(context, "Please install a maps application", Toast.LENGTH_LONG)
+            Toast.makeText(context, context.getString(R.string.install_maps_app), Toast.LENGTH_LONG)
                 .show()
         }
     }
