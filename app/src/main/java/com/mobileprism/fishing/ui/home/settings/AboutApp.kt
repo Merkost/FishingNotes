@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.Savings
@@ -55,7 +55,7 @@ private val purchaseUpdateListener = PurchasesUpdatedListener { billingResult, p
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutApp(upPress: () -> Unit) {
     val billingClient: BillingClient = koinInject(parameters = { parametersOf(purchaseUpdateListener) })

@@ -1,11 +1,8 @@
 package com.mobileprism.fishing.ui.home.weather
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,12 +16,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+
 import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.airbnb.lottie.compose.*
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.Daily
 import com.mobileprism.fishing.domain.entity.weather.Temperature
 import com.mobileprism.fishing.domain.entity.weather.Weather
@@ -34,7 +30,6 @@ import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.ui.home.views.BigText
 import com.mobileprism.fishing.ui.home.views.PrimaryText
 import com.mobileprism.fishing.ui.home.views.SecondaryText
-import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import com.mobileprism.fishing.utils.time.calculateDaylightTime
 import com.mobileprism.fishing.utils.time.toTime
 import org.koin.compose.koinInject
@@ -44,7 +39,7 @@ fun PrimaryWeatherItemView(
     modifier: Modifier = Modifier,
     childModifier: Modifier = Modifier,
     temperature: Float,
-    textTint: Color = MaterialTheme.colors.primaryVariant,
+    textTint: Color = MaterialTheme.colorScheme.tertiary,
     iconTint: Color = Color.Unspecified,
     temperatureUnit: TemperatureValues,
     weather: Weather
@@ -102,92 +97,6 @@ fun PrimaryWeatherItemView(
 }
 
 @Composable
-fun WeatherPlaceSelectItem(
-    modifier: Modifier = Modifier,
-    selectedPlace: UserMapMarker,
-    userPlaces: List<UserMapMarker>,
-    onItemClick: (UserMapMarker) -> Unit
-) {
-    val isExpanded = remember { mutableStateOf(false) }
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable {
-                isExpanded.value = !isExpanded.value
-            },
-        contentAlignment = Alignment.Center
-    ) {
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            WeatherAppBarText(
-                text = selectedPlace.title,
-                textColor = Color.White
-            )
-            Icon(imageVector = Icons.Filled.ArrowDropDown, "", tint = Color.White)
-            WeatherDropdownMenu(
-                userPlaces = userPlaces,
-                isExpanded = isExpanded,
-                onItemClick = onItemClick
-            )
-        }
-    }
-}
-
-@Composable
-fun WeatherDropdownMenu(
-    userPlaces: List<UserMapMarker>,
-    isExpanded: MutableState<Boolean>,
-    onItemClick: (UserMapMarker) -> Unit
-) {
-
-    DropdownMenu(
-        modifier = Modifier.requiredWidthIn(250.dp, 300.dp),
-        expanded = isExpanded.value,
-        onDismissRequest = {
-            isExpanded.value = !isExpanded.value
-        }) {
-        userPlaces.forEachIndexed { index, userMapMarker ->
-            DropdownMenuItem(onClick = {
-                onItemClick(userMapMarker)
-                isExpanded.value = !isExpanded.value
-            }) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(
-                        12.dp,
-                        Alignment.Start
-                    ),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        painter = painterResource(
-                            id =
-                            if (userMapMarker.id == CURRENT_PLACE_ITEM_ID) {
-                                R.drawable.ic_baseline_my_location_24
-                            } else {
-                                R.drawable.ic_baseline_location_on_24
-                            }
-                        ),
-                        tint = MaterialTheme.colors.secondary,
-                        contentDescription = stringResource(id = R.string.location_icon),
-                        modifier = Modifier.padding(2.dp)
-                    )
-                    Text(
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        text = userMapMarker.title
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun WeatherAppBarText(
     modifier: Modifier = Modifier,
     textColor: Color,
@@ -195,7 +104,7 @@ fun WeatherAppBarText(
 ) {
     Text(
         modifier = modifier.padding(horizontal = 4.dp),
-        style = MaterialTheme.typography.h6,
+        style = MaterialTheme.typography.titleLarge,
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
         color = textColor,
@@ -208,7 +117,7 @@ fun WeatherAppBarText(
 
 @Composable
 fun WeatherLocationIconButton(
-    color: Color = MaterialTheme.colors.onSurface,
+    color: Color = MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit,
 ) {
     IconButton(onClick = onClick) {
@@ -226,13 +135,13 @@ fun WeatherLocationIconButton(
 @Composable
 fun WeatherHeaderText(
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colors.onSurface,
+    color: Color = MaterialTheme.colorScheme.onSurface,
     text: String
 ) {
     Text(
         modifier = modifier,
         text = text,
-        style = MaterialTheme.typography.body1,
+        style = MaterialTheme.typography.bodyLarge,
         color = color
     )
 }
@@ -241,13 +150,13 @@ fun WeatherHeaderText(
 fun WeatherPrimaryText(
     modifier: Modifier = Modifier,
     text: String,
-    textColor: Color = MaterialTheme.colors.onSurface
+    textColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
     Text(
         modifier = modifier,
         text = text,
         color = textColor,
-        fontSize = 20.sp
+        style = MaterialTheme.typography.titleLarge
     )
 }
 
@@ -499,7 +408,7 @@ fun DailyWeatherValuesView(
                 },
             painter = painterResource(id = R.drawable.ic_gauge),
             contentDescription = stringResource(id = R.string.pressure),
-            colorFilter = ColorFilter.tint(color = MaterialTheme.colors.primaryVariant)
+            colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.tertiary)
         )
         PrimaryText(
             modifier = Modifier.constrainAs(pressValue) {
@@ -556,7 +465,7 @@ fun DailyWeatherValuesView(
                 },
             painter = painterResource(id = R.drawable.ic_baseline_opacity_24),
             contentDescription = stringResource(id = R.string.humidity),
-            colorFilter = ColorFilter.tint(color = MaterialTheme.colors.primaryVariant)
+            colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.tertiary)
         )
         PrimaryText(
             modifier = Modifier.constrainAs(humidValue) {

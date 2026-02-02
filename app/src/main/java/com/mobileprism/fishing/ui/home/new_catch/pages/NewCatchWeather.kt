@@ -1,10 +1,10 @@
 package com.mobileprism.fishing.ui.home.new_catch.pages
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -111,7 +111,7 @@ fun NewCatchWeather(viewModel: NewCatchMasterViewModel, navController: NavContro
                         else -> painterResource(id = R.drawable.ic_baseline_refresh_24)
                     },
                     contentDescription = null,
-                    tint = MaterialTheme.colors.primaryVariant
+                    tint = MaterialTheme.colorScheme.tertiary
                 )
             }
         }

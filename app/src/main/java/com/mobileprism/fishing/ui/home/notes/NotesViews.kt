@@ -2,10 +2,9 @@ package com.mobileprism.fishing.ui.home.notes
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,6 +23,7 @@ import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.views.*
+import com.mobileprism.fishing.ui.theme.LocalColors
 import com.mobileprism.fishing.ui.theme.cardColor
 import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.utils.time.toDateTextMonth
@@ -51,16 +51,17 @@ fun ItemUserPlace(
             modifier = Modifier
                 .wrapContentHeight()
                 .fillMaxWidth()
+                .padding(12.dp)
         ) {
             val (icon, title, amount, date, navigateButton) = createRefs()
 
             Icon(
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(36.dp)
                     .constrainAs(icon) {
                         top.linkTo(title.top)
                         bottom.linkTo(date.bottom)
-                        absoluteLeft.linkTo(parent.absoluteLeft, 8.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
                     },
                 painter = painterResource(R.drawable.ic_baseline_location_on_24),
                 contentDescription = stringResource(R.string.place),
@@ -72,7 +73,7 @@ fun ItemUserPlace(
                     .constrainAs(title) {
                         absoluteLeft.linkTo(icon.absoluteRight, 8.dp)
                         absoluteRight.linkTo(navigateButton.absoluteLeft, 8.dp)
-                        top.linkTo(parent.top, 16.dp)
+                        top.linkTo(parent.top)
                         width = Dimension.fillToConstraints
                     }
                     .then(childModifier),
@@ -83,12 +84,12 @@ fun ItemUserPlace(
                 modifier = Modifier.constrainAs(navigateButton) {
                     top.linkTo(title.top)
                     bottom.linkTo(date.bottom)
-                    absoluteRight.linkTo(parent.absoluteRight, 8.dp)
+                    absoluteRight.linkTo(parent.absoluteRight)
                 },
                 childModifier = childModifier,
                 icon = painterResource(id = R.drawable.ic_place_on_map),
-                tint = if (!place.visible) MaterialTheme.customColors.secondaryTextColor
-                        else MaterialTheme.colors.onSurface,
+                tint = if (!place.visible) LocalColors.current.secondaryTextColor
+                        else MaterialTheme.colorScheme.onSurface,
                 onClick = { navigateToMap() }
             )
 
@@ -96,7 +97,7 @@ fun ItemUserPlace(
                 modifier = Modifier
                     .constrainAs(date) {
                         top.linkTo(title.bottom, 4.dp)
-                        bottom.linkTo(parent.bottom, 16.dp)
+                        bottom.linkTo(parent.bottom)
                         absoluteLeft.linkTo(title.absoluteLeft)
                     }
                     .then(childModifier),
@@ -112,7 +113,7 @@ fun ItemUserPlace(
                 },
                 count = place.catchesCount,
                 icon = R.drawable.ic_fishing,
-                tint = MaterialTheme.colors.primaryVariant.copy(0.25f)
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
             )
         }
     }
@@ -134,7 +135,7 @@ fun ItemDate(text: String) {
             SecondaryTextColored(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                 text = text,
-                color = Color.White
+                color = MaterialTheme.colorScheme.inverseOnSurface
             )
         }
     }
@@ -144,7 +145,6 @@ fun ItemDate(text: String) {
  * @param[childModifier] This is a modifier which is used in all child views
  * in order to show placeholder loading
  */
-@ExperimentalMaterialApi
 @Composable
 fun CatchItemView(
     modifier: Modifier = Modifier,
@@ -163,7 +163,7 @@ fun CatchItemView(
     ) {
         ConstraintLayout(
             modifier = Modifier
-                .padding(8.dp)
+                .padding(12.dp)
                 .fillMaxWidth()
         ) {
             val (fishType, amount, weight, placeIcon, place, time, photosCount) = createRefs()
@@ -214,7 +214,7 @@ fun CatchItemView(
                         },
                     painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
                     contentDescription = stringResource(id = R.string.location),
-                    tint = MaterialTheme.colors.secondaryVariant
+                    tint = MaterialTheme.colorScheme.outline
                 )
 
                 SecondaryText(
@@ -230,7 +230,7 @@ fun CatchItemView(
                     text = catch.placeTitle,
                     textAlign = TextAlign.Start,
                     maxLines = 1,
-                    textColor = Color.Gray
+                    textColor = androidx.compose.material3.MaterialTheme.colorScheme.outline
                 )
             }
 
@@ -255,7 +255,7 @@ fun CatchItemView(
                     .then(childModifier),
                 count = catch.downloadPhotoLinks.size,
                 icon = R.drawable.ic_baseline_photo_24,
-                tint = MaterialTheme.colors.primaryVariant.copy(0.25f)
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
             )
 
         }
@@ -267,7 +267,7 @@ fun ItemCounter(
     modifier: Modifier = Modifier,
     count: Number,
     icon: Int,
-    tint: Color = MaterialTheme.customColors.secondaryIconColor
+    tint: Color = LocalColors.current.secondaryIconColor
 ) {
     Row(modifier = modifier) {
         Icon(

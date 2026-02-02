@@ -18,13 +18,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
@@ -169,7 +166,7 @@ fun NewCatchMasterScreen(
     }
 
     ModalLoadingDialog(
-        dialogState = loadingDialogState,
+        visible = loadingDialogState.value,
         text = stringResource(id = R.string.saving_new_catch)
     )
 
@@ -323,7 +320,7 @@ fun NewCatchButtons(
                 absoluteLeft.linkTo(parent.absoluteLeft)
                 absoluteRight.linkTo(parent.absoluteRight)
             },
-            activeColor = MaterialTheme.colors.primaryVariant,
+            activeColor = MaterialTheme.colorScheme.tertiary,
             pagerState = pagerState
         )
 
@@ -368,8 +365,8 @@ fun MyHorizontalPagerIndicator(
     pageCount: Int = pagerState.pageCount,
     modifier: Modifier = Modifier,
     pageIndexMapping: (Int) -> Int = { it },
-    activeColor: Color = LocalContentColor.current.copy(alpha = LocalContentAlpha.current),
-    inactiveColor: Color = activeColor.copy(ContentAlpha.disabled),
+    activeColor: Color = MaterialTheme.colorScheme.onSurface,
+    inactiveColor: Color = activeColor.copy(alpha = 0.38f),
     indicatorWidth: Dp = 8.dp,
     indicatorHeight: Dp = indicatorWidth,
     spacing: Dp = indicatorWidth,

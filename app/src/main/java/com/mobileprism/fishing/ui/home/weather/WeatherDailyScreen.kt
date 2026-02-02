@@ -14,14 +14,15 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.ScrollableTabRow
-import androidx.compose.material.Tab
-import androidx.compose.material.TabRowDefaults
-import androidx.compose.material.Text
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,7 +30,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.weather.Daily
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
@@ -40,7 +40,7 @@ import com.mobileprism.fishing.utils.time.toDayOfWeekAndDate
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun WeatherDailyScreen(
     upPress: () -> Unit,
@@ -81,12 +81,12 @@ fun WeatherDaysTabs(forecast: List<Daily>, pagerState: PagerState) {
     val scope = rememberCoroutineScope()
     ScrollableTabRow(
         selectedTabIndex = pagerState.currentPage,
-        backgroundColor = MaterialTheme.colors.surface,
-        contentColor = MaterialTheme.colors.primary,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.primary,
         indicator = { tabPositions ->
-            TabRowDefaults.Indicator(
-                color = MaterialTheme.colors.onSurface,
-                modifier = Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
+            TabRowDefaults.SecondaryIndicator(
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage])
             )
         }) {
         forecast.forEachIndexed { index, weather ->
@@ -100,7 +100,7 @@ fun WeatherDaysTabs(forecast: List<Daily>, pagerState: PagerState) {
                 text = {
                     Text(
                         text = weather.date.toDayOfWeekAndDate(),
-                        color = MaterialTheme.colors.primary
+                        color = MaterialTheme.colorScheme.primary
                     )
                 },
             )
@@ -150,7 +150,7 @@ fun DailyWeatherScreen(
             temperatureUnit = temperatureUnit
         )
 
-        Divider(
+        HorizontalDivider(
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -163,7 +163,7 @@ fun DailyWeatherScreen(
             moonPhase = forecast.moonPhase
         )
 
-        Divider(
+        HorizontalDivider(
             modifier = Modifier.fillMaxWidth()
         )
 

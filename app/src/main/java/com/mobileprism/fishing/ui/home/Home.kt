@@ -9,11 +9,10 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Menu
@@ -39,25 +38,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
-import androidx.core.os.ConfigurationCompat
+import android.annotation.SuppressLint
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
-import coil.annotation.ExperimentalCoilApi
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import androidx.navigation.toRoute
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
-import com.mobileprism.fishing.ui.Arguments
+import com.mobileprism.fishing.ui.HomeTabs
+import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.map.MapScreen
 import com.mobileprism.fishing.ui.home.notes.Notes
 import com.mobileprism.fishing.ui.home.profile.Profile
 import com.mobileprism.fishing.ui.home.weather.WeatherScreen
 import com.mobileprism.fishing.ui.theme.FishingNotesTheme
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
-import java.util.Locale
+import com.mobileprism.fishing.utils.serializableType
+import kotlin.reflect.typeOf
 
 
 fun NavGraphBuilder.addHomeGraph(
@@ -65,62 +63,51 @@ fun NavGraphBuilder.addHomeGraph(
     modifier: Modifier = Modifier,
     upPress: () -> Unit,
 ) {
-    composable(
-        HomeSections.MAP.route,
-        arguments = listOf(navArgument(Arguments.MAP_NEW_PLACE) { defaultValue = false })
+    composable<MainDestinations.Map>(
+        typeMap = mapOf(typeOf<UserMapMarker?>() to serializableType<UserMapMarker>(isNullableAllowed = true)),
     ) { from ->
-        val addPlace = requireNotNull(from.arguments).getBoolean(Arguments.MAP_NEW_PLACE, false)
-        val place: UserMapMarker? = from.arguments?.getParcelable(Arguments.PLACE)
-        from.arguments?.clear()
-        MapScreen(modifier, navController, addPlace, place, upPress)
+        val route = from.toRoute<MainDestinations.Map>()
+        MapScreen(modifier, navController, route.isAddingNewPlace, route.place, upPress)
     }
-    composable(HomeSections.NOTES.route) {
+    composable<HomeTabs.NotesTab> {
         Notes(modifier, navController, upPress)
     }
-    composable(HomeSections.WEATHER.route) { from ->
-        val place: UserMapMarker? = from.arguments?.getParcelable(Arguments.PLACE)
-        from.arguments?.clear()
-        WeatherScreen(modifier, navController, place)
+    composable<HomeTabs.WeatherTab>(
+        typeMap = mapOf(typeOf<UserMapMarker?>() to serializableType<UserMapMarker>(isNullableAllowed = true)),
+    ) { from ->
+        val route = from.toRoute<HomeTabs.WeatherTab>()
+        WeatherScreen(modifier, navController, route.place)
         { navController.popBackStack() }
     }
-    composable(HomeSections.PROFILE.route) {
+    composable<HomeTabs.ProfileTab> {
         Profile(navController, modifier)
     }
 }
 
+@SuppressLint("RestrictedApi")
 enum class HomeSections(
     @StringRes val title: Int,
     val icon: ImageVector,
-    val route: String
+    val hasRoute: (NavDestination) -> Boolean,
 ) {
-    MAP(
-        R.string.map,
-        Icons.Outlined.Map,
-        "home/map?${Arguments.MAP_NEW_PLACE}={${Arguments.MAP_NEW_PLACE}}"
-    ),
-    NOTES(R.string.notes, Icons.Outlined.Menu, "home/notes"),
-    WEATHER(R.string.weather, Icons.Outlined.WbSunny, "home/weather"),
-    PROFILE(R.string.profile, Icons.Outlined.Person, "home/profile")
+    MAP(R.string.map, Icons.Outlined.Map, { it.hasRoute<MainDestinations.Map>() }),
+    NOTES(R.string.notes, Icons.Outlined.Menu, { it.hasRoute<HomeTabs.NotesTab>() }),
+    WEATHER(R.string.weather, Icons.Outlined.WbSunny, { it.hasRoute<HomeTabs.WeatherTab>() }),
+    PROFILE(R.string.profile, Icons.Outlined.Person, { it.hasRoute<HomeTabs.ProfileTab>() })
 }
 
 @Composable
 fun FishingNotesBottomBar(
     modifier: Modifier,
     tabs: Array<HomeSections>,
-    currentRoute: String,
-    navigateToRoute: (String) -> Unit,
-//    color: Color = Theme.colors.iconPrimary,
-//    contentColor: Color = Theme.colors.iconInteractive
+    currentSection: HomeSections,
+    navigateToRoute: (HomeSections) -> Unit,
 ) {
-    val routes = remember { tabs.map { it.route } }
-    val currentSection = tabs.first { it.route == currentRoute }
-    val darkTheme = isSystemInDarkTheme()
-
     Surface(
         modifier = modifier,
-        color = MaterialTheme.colors.surface,
-        contentColor = MaterialTheme.colors.onSurface,
-        elevation = 8.dp
+        color = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        shadowElevation = 8.dp
     ) {
         val springSpec = SpringSpec<Float>(
             // Determined experimentally
@@ -128,9 +115,9 @@ fun FishingNotesBottomBar(
             dampingRatio = 0.8f
         )
         FishingNotesBottomNavLayout(
-            modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars),
+            modifier = Modifier.navigationBarsPadding(),
             selectedIndex = currentSection.ordinal,
-            itemCount = routes.size,
+            itemCount = tabs.size,
             indicator = { FishingNotesBottomNavIndicator() },
             animSpec = springSpec,
         ) {
@@ -138,9 +125,9 @@ fun FishingNotesBottomBar(
                 val selected = section == currentSection
                 val tint by animateColorAsState(
                     if (selected) {
-                        MaterialTheme.colors.onSurface
+                        MaterialTheme.colorScheme.primary
                     } else {
-                        if (darkTheme) Color.LightGray else Color.Black
+                        MaterialTheme.colorScheme.onSurfaceVariant
                     }
                 )
 
@@ -154,14 +141,14 @@ fun FishingNotesBottomBar(
                     },
                     text = {
                         Text(
-                            text = stringResource(section.title).uppercase(Locale.getDefault()),
+                            text = stringResource(section.title).uppercase(java.util.Locale.getDefault()),
                             color = tint,
-                            style = MaterialTheme.typography.button,
+                            style = MaterialTheme.typography.labelLarge,
                             maxLines = 1
                         )
                     },
                     selected = selected,
-                    onSelected = { navigateToRoute(section.route) },
+                    onSelected = { navigateToRoute(section) },
                     animSpec = springSpec,
                     modifier = BottomNavigationItemPadding
                         .clip(BottomNavIndicatorShape)
@@ -338,7 +325,7 @@ private fun MeasureScope.placeTextAndIcon(
 @Composable
 private fun FishingNotesBottomNavIndicator(
     strokeWidth: Dp = 1.dp,
-    color: Color = Color.Black,
+    color: Color = MaterialTheme.colorScheme.primary,
     shape: Shape = BottomNavIndicatorShape
 ) {
     Spacer(
@@ -362,7 +349,7 @@ private fun FishingNotesBottomNavPreview() {
         FishingNotesBottomBar(
             modifier = Modifier,
             tabs = HomeSections.entries.toTypedArray(),
-            currentRoute = "home/map",
+            currentSection = HomeSections.MAP,
             navigateToRoute = { }
         )
     }

@@ -1,11 +1,10 @@
 package com.mobileprism.fishing.ui.home.notes
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Scaffold
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -18,17 +17,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.material.fade
+import com.google.accompanist.placeholder.material3.fade
 import com.google.accompanist.placeholder.placeholder
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.datastore.NotesPreferences
-import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.NoContentView
-import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.utils.enums.PlacesSortValues
 import com.mobileprism.fishing.ui.viewmodels.UserPlacesViewModel
 import org.koin.compose.koinInject
@@ -43,7 +40,7 @@ fun UserPlacesScreen(
     val uiState = viewModel.uiState.collectAsState()
     val placesSortValue by notesPreferences.getPlacesSortValue.collectAsState(PlacesSortValues.Default)
 
-    Scaffold(backgroundColor = Color.Transparent) {
+    Scaffold(containerColor = Color.Transparent) {
         val places: List<UserMapMarker> by viewModel.currentContent.collectAsState()
 
         UserPlaces(
@@ -54,12 +51,11 @@ fun UserPlacesScreen(
             },
             navigateToMap = {
                 navController.navigate(
-                    "${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
-                    Arguments.PLACE to it
+                    MainDestinations.Map(isAddingNewPlace = false, place = it)
                 )
             },
         navigateToNewPlace = {
-            navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${true}")
+            navController.navigate(MainDestinations.Map(isAddingNewPlace = true))
         })
     }
 }
@@ -85,7 +81,7 @@ fun UserPlaces(
                     ItemUserPlace(
                         childModifier = Modifier.placeholder(
                             true,
-                            color = Color.Gray,
+                            color = androidx.compose.material3.MaterialTheme.colorScheme.outlineVariant,
                             shape = CircleShape,
                             highlight = PlaceholderHighlight.fade()
                         ),

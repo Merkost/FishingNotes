@@ -8,7 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,8 +17,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 import com.mobileprism.fishing.R
@@ -31,13 +29,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun LoginScreen(navController: NavController) {
 
     val coroutineScope = rememberCoroutineScope()
-    val scaffoldState = rememberScaffoldState()
+    val snackbarHostState = remember { SnackbarHostState() }
     var visible by remember { mutableStateOf(false) }
     var googleLoading by remember { mutableStateOf(false) }
     var showLottie by remember { mutableStateOf(false) }
@@ -58,18 +56,19 @@ fun LoginScreen(navController: NavController) {
                     visible = false
                     delay((MainActivity.splashFadeDurationMillis * 2).toLong())
 
-                    navController.navigate(MainDestinations.HOME_ROUTE) {
+                    navController.navigate(HomeGraph) {
                         popUpTo(0) {
                             inclusive = true
                         }
                     }
                 }
             }
+
             is BaseViewState.Loading -> {}
             is BaseViewState.Error -> {
                 showErrorToast(context, state.error?.message)
                 googleLoading = false
-                scaffoldState.snackbarHostState.showSnackbar(errorString)
+                snackbarHostState.showSnackbar(errorString)
             }
         }
     }
@@ -81,10 +80,7 @@ fun LoginScreen(navController: NavController) {
                     val message = currentMessages[0]
                     val text = resources.getText(message.messageId)
                     googleLoading = false
-                    // Display the snackbar on the screen. `showSnackbar` is a function
-                    // that suspends until the snackbar disappears from the screen
-                    scaffoldState.snackbarHostState.showSnackbar(text.toString())
-                    // Once the snackbar is gone or dismissed, notify the SnackbarManager
+                    snackbarHostState.showSnackbar(text.toString())
                     SnackbarManager.setMessageShown(message.id)
                 }
             }
@@ -92,42 +88,34 @@ fun LoginScreen(navController: NavController) {
     }
 
     Scaffold(
-        scaffoldState = scaffoldState,
         snackbarHost = {
             SnackbarHost(
-                hostState = it,
+                hostState = snackbarHostState,
                 modifier = Modifier.systemBarsPadding(),
                 snackbar = { snackbarData -> AppSnackbar(snackbarData) }
             )
         },
-    ) {
-        ConstraintLayout(
+    ) { paddingValues ->
+        Box(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(paddingValues),
+            contentAlignment = Alignment.Center
         ) {
-            val (card, lottieSuccess, cardColumn) = createRefs()
-
+            // Background: colored top portion + transparent bottom
             AnimatedVisibility(
                 visible = visible,
                 enter = slideInVertically(
-                    initialOffsetY = {
-                        // Slide in from top
-                        -it
-                    },
+                    initialOffsetY = { -it },
                     animationSpec = tween(
                         durationMillis = MainActivity.splashFadeDurationMillis * 4,
-
                         easing = CubicBezierEasing(0f, 0f, 0f, 1f)
                     )
                 ),
                 exit = slideOutVertically(
-                    targetOffsetY = {
-                        // Slide to top
-                        -it
-                    },
+                    targetOffsetY = { -it },
                     animationSpec = tween(
                         durationMillis = MainActivity.splashFadeDurationMillis * 2,
-                        //delayMillis = MainActivity.splashFadeDurationMillis / 2,
                         easing = CubicBezierEasing(0f, 0f, 0f, 1f)
                     )
                 )
@@ -136,152 +124,117 @@ fun LoginScreen(navController: NavController) {
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .weight(6.5f), color = MaterialTheme.colors.primary
+                            .weight(6.5f), color = MaterialTheme.colorScheme.primary
                     ) {}
                     Box(modifier = Modifier.weight(4f))
                 }
             }
 
+            // Card: slides in from bottom, centered vertically
             AnimatedVisibility(
                 visible = visible,
                 enter = slideInVertically(
-                    initialOffsetY = {
-                        // Slide in from top
-                        2 * it
-                    },
+                    initialOffsetY = { 2 * it },
                     animationSpec = tween(
                         durationMillis = MainActivity.splashFadeDurationMillis * 4,
-                        //delayMillis = MainActivity.splashFadeDurationMillis / 2,
-                        //easing = CubicBezierEasing(0f, 0f, 0f, 1f)
                     )
                 ),
                 exit = slideOutVertically(
-                    targetOffsetY = {
-                        // Slide in from top
-                        2 * it
-                    },
+                    targetOffsetY = { 2 * it },
                     animationSpec = tween(
                         durationMillis = MainActivity.splashFadeDurationMillis * 2,
-                        //easing = CubicBezierEasing(0f, 0f, 0f, 1f)
                     )
                 ),
-                modifier = Modifier.constrainAs(card) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                }) {
+            ) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(450.dp)
                         .padding(30.dp),
-                    elevation = 10.dp,
+                    elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
                     shape = RoundedCornerShape(30.dp)
                 ) {
-
-                    //LottieSuccess
-                    AnimatedVisibility(
-                        visible = showLottie,
-                        modifier = Modifier.constrainAs(lottieSuccess) {
-                            top.linkTo(parent.top)
-                            bottom.linkTo(parent.bottom)
-                            absoluteLeft.linkTo(parent.absoluteLeft)
-                            absoluteRight.linkTo(parent.absoluteRight)
-                            width = Dimension.fillToConstraints
-                            height = Dimension.wrapContent
-                        }) {
-                        LottieSuccess() {
-                            //navController.navigate(MainDestinations.HOME_ROUTE)
-                        }
-                    }
-
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .constrainAs(cardColumn) {
-                                top.linkTo(card.top)
-                                bottom.linkTo(card.bottom)
-                                absoluteLeft.linkTo(card.absoluteLeft)
-                                absoluteRight.linkTo(card.absoluteRight)
-                            }
-                            .fillMaxWidth()
-                            .animateContentSize(
-                                animationSpec = tween(
-                                    durationMillis = 300,
-                                    easing = LinearOutSlowInEasing
-                                )
-                            )
-                    ) {
-                        //AppIcon
-                        Image(
-                            painterResource(R.drawable.ic_launcher), stringResource(R.string.icon),
-                            modifier = Modifier
-                                .padding(30.dp)
-                                .size(140.dp)
-                        )
-
-                        //Title
-                        Text(
-                            stringResource(R.string.login_title),
-                            style = MaterialTheme.typography.h5,
-                            //color = Color.DarkGray
-                        )
-
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(30.dp)
-                        )
-
-                        //Google button
-                        Card(
-                            shape = RoundedCornerShape(20.dp), elevation = 10.dp,
-                            onClick = {
-                                googleLoading = true;
-                                coroutineScope.launch {
-                                    (context as MainActivity).startGoogleLogin()
-                                }
-                                      },
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        // Lottie success overlay
+                        androidx.compose.animation.AnimatedVisibility(
+                            visible = showLottie,
+                            modifier = Modifier.fillMaxSize()
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .padding(10.dp)
-                                    .padding(end = 2.dp)
-                                    .animateContentSize(
-                                        animationSpec = tween(
-                                            durationMillis = 300,
-                                            easing = LinearOutSlowInEasing
-                                        )
-                                    ),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Image(
-                                    painterResource(R.drawable.ic_google_logo),
-                                    stringResource(R.string.google_login),
-                                    modifier = Modifier.size(25.dp)
-                                )
-                                Text(
-                                    text = if (googleLoading) stringResource(R.string.signing_in)
-                                    else stringResource(R.string.sign_with_google)
-                                )
-                                if (googleLoading) {
-                                    //Spacer(modifier = Modifier.width(16.dp))
-                                    CircularProgressIndicator(
-                                        modifier = Modifier
-                                            .height(16.dp)
-                                            .width(16.dp),
-                                        strokeWidth = 2.dp,
-                                        color = MaterialTheme.colors.primary
+                            LottieSuccess() {}
+                        }
+
+                        // Login content
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .animateContentSize(
+                                    animationSpec = tween(
+                                        durationMillis = 300,
+                                        easing = LinearOutSlowInEasing
                                     )
+                                )
+                        ) {
+                            Image(
+                                painterResource(R.drawable.ic_launcher), stringResource(R.string.icon),
+                                modifier = Modifier
+                                    .padding(30.dp)
+                                    .size(140.dp)
+                            )
+
+                            Text(
+                                stringResource(R.string.login_title),
+                                style = MaterialTheme.typography.headlineSmall,
+                            )
+
+                            Spacer(modifier = Modifier.height(30.dp))
+
+                            Card(
+                                shape = RoundedCornerShape(20.dp),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+                                onClick = {
+                                    googleLoading = true;
+                                    coroutineScope.launch {
+                                        (context as MainActivity).startGoogleLogin()
+                                    }
+                                },
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .padding(10.dp)
+                                        .padding(end = 2.dp)
+                                        .animateContentSize(
+                                            animationSpec = tween(
+                                                durationMillis = 300,
+                                                easing = LinearOutSlowInEasing
+                                            )
+                                        ),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Image(
+                                        painterResource(R.drawable.ic_google_logo),
+                                        stringResource(R.string.google_login),
+                                        modifier = Modifier.size(25.dp)
+                                    )
+                                    Text(
+                                        text = if (googleLoading) stringResource(R.string.signing_in)
+                                        else stringResource(R.string.sign_with_google)
+                                    )
+                                    if (googleLoading) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier
+                                                .height(16.dp)
+                                                .width(16.dp),
+                                            strokeWidth = 2.dp,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
                                 }
                             }
+                            Spacer(modifier = Modifier.height(30.dp))
                         }
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(30.dp)
-                        )
                     }
                 }
             }
@@ -301,7 +254,7 @@ fun LottieSuccess(modifier: Modifier = Modifier, onFinished: () -> Unit) {
     )
     LottieAnimation(
         composition,
-        progress,
+        progress = { progress },
         modifier = modifier,
         contentScale = ContentScale.Crop
     )

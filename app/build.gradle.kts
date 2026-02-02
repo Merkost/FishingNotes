@@ -69,7 +69,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
 
 
-    implementation("com.github.alorma:compose-settings-ui:0.11.0")
+
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation("androidx.activity:activity-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.3")
@@ -118,11 +118,10 @@ dependencies {
     implementation(libs.compose.layout)
     implementation(libs.compose.ui)
     implementation(libs.compose.uiUtil)
-    implementation(libs.compose.material)
+    implementation(libs.compose.material3)
     implementation(libs.compose.animation)
     implementation(libs.compose.iconsExtended)
     implementation(libs.compose.tooling)
-    implementation(libs.compose.theme)
     implementation(libs.compose.lottie)
 
     implementation(libs.koin.main)
@@ -133,7 +132,7 @@ dependencies {
     implementation(libs.accompanist.pager)
     implementation(libs.accompanist.pagerIndicators)
     implementation(libs.accompanist.permissions)
-    implementation(libs.accompanist.appCompatTheme)
+
     implementation(libs.accompanist.placeholder)
 
     implementation(libs.coil.compose)

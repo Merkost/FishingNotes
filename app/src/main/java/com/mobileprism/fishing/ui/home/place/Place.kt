@@ -9,14 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.BottomSheetScaffold
-import androidx.compose.material.BottomSheetValue
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberBottomSheetScaffoldState
-import androidx.compose.material.rememberBottomSheetState
-import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -24,7 +23,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -37,19 +35,16 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
-import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.advertising.BannerAdvertView
 import com.mobileprism.fishing.ui.home.notes.TabItem
-import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.viewmodels.UserPlaceViewModel
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.bottomBannerPadding
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(
-    ExperimentalFoundationApi::class, ExperimentalMaterialApi::class,
+    ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class,
     ExperimentalAnimationApi::class, ExperimentalPagerApi::class, ExperimentalComposeUiApi::class
 )
 @Composable
@@ -65,13 +60,13 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
     }
     val scaffoldState =
         rememberBottomSheetScaffoldState(
-            rememberBottomSheetState(
-                BottomSheetValue.Expanded
+            rememberStandardBottomSheetState(
+                SheetValue.Expanded
             )
         )
-    val modalBottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val modalBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showModalSheet by remember { mutableStateOf(false) }
 
-    val coroutineScope = rememberCoroutineScope()
     val marker by viewModel.marker.collectAsState()
     val notes by viewModel.markerNotes.collectAsState()
 
@@ -86,17 +81,19 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
         }
     }
 
-    ModalBottomSheetLayout(
-        sheetState = modalBottomSheetState,
-        sheetShape = Constants.modalBottomSheetCorners,
-        sheetContent = {
+    if (showModalSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showModalSheet = false },
+            sheetState = modalBottomSheetState,
+            shape = Constants.modalBottomSheetCorners,
+        ) {
             NoteModalBottomSheet(viewModel = viewModel) {
-                coroutineScope.launch {
-                    modalBottomSheetState.hide()
-                }
+                showModalSheet = false
             }
-        }) {
-        BottomSheetScaffold(
+        }
+    }
+
+    BottomSheetScaffold(
             scaffoldState = scaffoldState,
             topBar = {
                 PlaceTopBar(backPress, viewModel) { deleteDialogIsShowing = true }
@@ -108,7 +105,7 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
                 )
             },
             sheetShape = RectangleShape,
-            sheetGesturesEnabled = false,
+            sheetSwipeEnabled = false,
         ) {
             marker?.let { userPlace ->
 
@@ -129,8 +126,7 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
                         catchesAmount = userCatches.size,
                     ) {
                         navController.navigate(
-                            "${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
-                            Arguments.PLACE to userPlace
+                            MainDestinations.Map(isAddingNewPlace = false, place = userPlace)
                         )
                     }
 
@@ -155,16 +151,11 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
                         onNewCatchClick = { newCatchClicked(navController, place) }
                     ) { note ->
                         viewModel.currentNote.value = note
-                        coroutineScope.launch {
-                            modalBottomSheetState.show()
-                        }
+                        showModalSheet = true
                     }
 
                     Spacer(modifier = Modifier.size(bottomBannerPadding))
                 }
             }
         }
-    }
 }
-
-

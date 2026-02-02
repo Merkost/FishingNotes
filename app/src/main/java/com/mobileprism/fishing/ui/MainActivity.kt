@@ -5,9 +5,10 @@ import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.Window
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material.SnackbarDuration
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
@@ -15,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialResponse
@@ -71,6 +73,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.enableEdgeToEdge(window)
+
         val viewModel: MainViewModel by viewModel()
         val userStateFlow = viewModel.mutableStateFlow
         val userPreferences: UserPreferences by inject()
@@ -233,13 +237,12 @@ class MainActivity : ComponentActivity() {
 
         NavHost(
             navController = navController,
-            startDestination = "login_screen"
+            startDestination = LoginRoute
         ) {
-            composable("login_screen") {
+            composable<LoginRoute> {
                 LoginScreen(navController = navController)
             }
-            // Main Screen
-            composable(MainDestinations.HOME_ROUTE) {
+            composable<HomeGraph> {
                 FishingNotesApp()
             }
         }

@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.*
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.MoreVert
@@ -29,7 +31,6 @@ import com.airbnb.lottie.compose.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
-import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.domain.entity.content.UserCatch
@@ -38,8 +39,6 @@ import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.catch.EditNoteDialog
 import com.mobileprism.fishing.ui.home.notes.*
 import com.mobileprism.fishing.ui.home.views.*
-import com.mobileprism.fishing.ui.theme.primaryTextColor
-import com.mobileprism.fishing.ui.theme.supportTextColor
 import com.mobileprism.fishing.ui.viewmodels.UserPlaceViewModel
 import com.mobileprism.fishing.utils.Constants.bottomBannerPadding
 import com.mobileprism.fishing.utils.time.toDateTextMonth
@@ -112,7 +111,7 @@ fun PlaceTitleView(
             },
             count = catchesAmount,
             icon = R.drawable.ic_fishing,
-            tint = MaterialTheme.colors.primaryVariant
+            tint = MaterialTheme.colorScheme.tertiary
         )
     }
 }
@@ -128,12 +127,12 @@ fun PlaceTabsView(
     TabRow(
         modifier = modifier,
         selectedTabIndex = pagerState.currentPage,
-        backgroundColor = MaterialTheme.colors.surface,
-        contentColor = primaryTextColor,
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
         indicator = { tabPositions ->
-            TabRowDefaults.Indicator(
-                color = MaterialTheme.colors.onSurface,
-                modifier = Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
+            TabRowDefaults.SecondaryIndicator(
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage])
             )
         }) {
         tabs.forEachIndexed { index, tab ->
@@ -141,13 +140,13 @@ fun PlaceTabsView(
                 icon = {
                     Icon(
                         painter = painterResource(id = tab.icon), contentDescription = "",
-                        tint = MaterialTheme.colors.primaryVariant
+                        tint = MaterialTheme.colorScheme.tertiary
                     )
                 },
                 text = {
                     Text(
                         stringResource(tab.titleRes),
-                        color = MaterialTheme.colors.onSurface
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 },
                 selected = pagerState.currentPage == index,
@@ -162,7 +161,7 @@ fun PlaceTabsView(
 }
 
 @ExperimentalComposeUiApi
-@ExperimentalMaterialApi
+@ExperimentalMaterial3Api
 @ExperimentalAnimationApi
 @ExperimentalFoundationApi
 @ExperimentalPagerApi
@@ -220,7 +219,7 @@ fun NoteModalBottomSheet(
 }
 
 @ExperimentalComposeUiApi
-@ExperimentalMaterialApi
+@ExperimentalMaterial3Api
 @Composable
 fun PlaceNotes(
     notes: List<Note>?,
@@ -257,7 +256,8 @@ fun PlaceNotes(
     }
 }
 
-@ExperimentalMaterialApi
+@OptIn(ExperimentalMaterialApi::class)
+@ExperimentalMaterial3Api
 @ExperimentalFoundationApi
 @ExperimentalAnimationApi
 @Composable
@@ -422,9 +422,9 @@ fun PlaceTopBar(
 
     val color = animateColorAsState(
         targetValue = if (isVisible!!) {
-            MaterialTheme.colors.onPrimary
+            MaterialTheme.colorScheme.onPrimary
         } else {
-            supportTextColor
+            MaterialTheme.colorScheme.onSurfaceVariant
         },
         animationSpec = tween(800)
     )
@@ -448,16 +448,10 @@ fun PlaceTopBar(
                 Icon(Icons.Outlined.MoreVert, Icons.Outlined.MoreVert.name)
             }
             DropdownMenu(expanded = menuOpened, onDismissRequest = { menuOpened = false }) {
-                DropdownMenuItem(onClick = { menuOpened = false; onDelete() }) {
-                    Row(
-                        //modifier = Modifier.padding(4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        //horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(text = stringResource(id = R.string.delete), maxLines = 1)
-                        //Icon(Icons.Default.Delete,  Icons.Default.Delete.name)
-                    }
-                }
+                DropdownMenuItem(
+                    text = { Text(text = stringResource(id = R.string.delete), maxLines = 1) },
+                    onClick = { menuOpened = false; onDelete() }
+                )
             }
 
         }

@@ -12,7 +12,10 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" >@color/fui_transparent</item>
         <item name="android:navigationBarColor">@color/fui_transparent</item>
-        <!-- Customize your theme here. -->
+        <!-- Ensure no ActionBar -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
     <!-- Base application theme. -->
@@ -26,6 +29,9 @@
         <item name="windowSplashScreenAnimatedIcon" >@drawable/icon_splashscreen</item>
         <item name="android:windowSplashScreenBrandingImage" tools:targetApi="s">@drawable/ic_fish</item>
         <item name="postSplashScreenTheme">@style/Theme.AnimatedSplashScreen</item>
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
 <!--    <style name="MainActionBar" parent="Theme.Fishing.Figma">-->

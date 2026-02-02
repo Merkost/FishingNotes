@@ -377,5 +377,17 @@
     <string name="location_icon">Иконка местоположения</string>
     <string name="google_button">Кнопка Google</string>
     <string name="advert_here">Реклама</string>
+    <string name="search_places">Поиск мест</string>
+    <string name="select_place">Выберите место</string>
+    <string name="no_places_found">Места не найдены</string>
+
+    <string name="theme_dynamic">Динамическая</string>
+    <string name="theme_blue">Синяя</string>
+    <string name="theme_green">Зелёная</string>
+
+    <string name="dark_mode">Тёмная тема</string>
+    <string name="dark_mode_system">Как в системе</string>
+    <string name="dark_mode_light">Светлая</string>
+    <string name="dark_mode_dark">Тёмная</string>
 
 </resources>

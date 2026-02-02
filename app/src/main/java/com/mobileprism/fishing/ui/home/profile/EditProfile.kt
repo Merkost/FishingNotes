@@ -1,38 +1,22 @@
 package com.mobileprism.fishing.ui.home.profile
 
-import android.annotation.SuppressLint
-import android.widget.Space
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.mobileprism.fishing.R
-import com.mobileprism.fishing.domain.entity.common.User
-import com.mobileprism.fishing.ui.home.GrayText
 import com.mobileprism.fishing.ui.home.views.*
-import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.ui.utils.showError
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.time.toDate
@@ -40,8 +24,7 @@ import com.mobileprism.fishing.viewmodels.EditProfileViewModel
 import org.koin.androidx.compose.koinViewModel
 import java.util.*
 
-
-@SuppressLint("UnrememberedMutableState")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfile(onBack: () -> Unit) {
     val context = LocalContext.current
@@ -56,7 +39,6 @@ fun EditProfile(onBack: () -> Unit) {
         onDismiss = { resetDialog = false },
         onReset = viewModel::resetChanges
     )
-
 
     var datePickerShown by remember { mutableStateOf(false) }
     if (datePickerShown) {
@@ -75,134 +57,113 @@ fun EditProfile(onBack: () -> Unit) {
         }
     }
 
-    if (uiState is BaseViewState.Loading) ModalLoadingDialog(
-        dialogState = mutableStateOf(true),
+    val isLoading = uiState is BaseViewState.Loading
+    if (isLoading) ModalLoadingDialog(
+        visible = true,
         text = context.getString(R.string.loading)
     )
 
-
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         topBar = {
-            val elevation by animateDpAsState(targetValue = if (scrollState.value > 0) 4.dp else 0.dp)
             EditProfileTopAppBar(
-                elevation,
                 isChanged = isChanged,
                 onReset = { resetDialog = true },
                 onBack = onBack
             )
         },
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.SpaceBetween.also { Arrangement.spacedBy(12.dp) }
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(18.dp),
-            ) {
-
-                Spacer(modifier = Modifier.size(16.dp))
-                EditUserPhoto(
-                    modifier = Modifier.fillMaxWidth(),
-                    currentUser = currentUser,
-                    hintText = stringResource(id = R.string.user_photo)
-                )
-
-
-                EditProfileTextFieldWithHeader(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = currentUser.displayName,
-                    onValueChange = viewModel::onNameChange,
-                    hintText = stringResource(id = R.string.name_hint)
-                )
-
-                EditProfileTextFieldWithHeader(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = currentUser.login,
-                    onValueChange = viewModel::onLoginChange,
-                    hintText = stringResource(id = R.string.username),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Email,
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(onDone = {}),
-                )
-
-                EditProfileTextFieldWithHeader(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = currentUser.email,
-                    onValueChange = {},
-                    hintText = stringResource(id = R.string.email_hint),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Email,
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(onDone = {}),
-                    icon = Icons.Default.Email,
-                    readOnly = true,
-                )
-
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    GrayText(text = stringResource(id = R.string.birthday_hint))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
-                        verticalAlignment = Alignment.Bottom
+        bottomBar = {
+            AnimatedVisibility(visible = isChanged) {
+                Surface(tonalElevation = 3.dp) {
+                    Button(
+                        onClick = viewModel::updateProfile,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                            .navigationBarsPadding(),
+                        enabled = !isLoading,
                     ) {
-                        Icon(
-                            Icons.Default.EditCalendar,
-                            Icons.Default.EditCalendar.name
-                        )
-                        if (currentUser.birthDate == 0L) {
-                            Text(
-                                modifier = Modifier.clickable {
-                                    datePickerShown = true
-                                },
-                                text = stringResource(id = R.string.birthday_set),
-                                color = MaterialTheme.customColors.secondaryTextColor
-                            )
-                        } else {
-                            Text(
-                                modifier = Modifier.clickable {
-                                    datePickerShown = true
-                                },
-                                text = currentUser.birthDate.toDate(),
-                                fontSize = 16.sp
-                            )
-                        }
+                        Text(text = stringResource(id = R.string.save))
                     }
                 }
             }
+        },
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(scrollState)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            // Profile photo
+            UserImage(
+                modifier = Modifier.fillMaxWidth(),
+                user = currentUser,
+                imgSize = 120.dp,
+                icon = Icons.Default.Edit,
+                onIconClick = {}
+            )
 
+            // Name
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = currentUser.displayName,
+                onValueChange = viewModel::onNameChange,
+                label = { Text(stringResource(id = R.string.name_hint)) },
+                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                singleLine = true,
+            )
 
-            AnimatedVisibility(visible = isChanged) {
-                DefaultButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(30.dp),
-                    text = stringResource(id = R.string.save),
-                    enabled = true,
-                    onClick = viewModel::updateProfile
-                )
-            }
+            // Username
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = currentUser.login,
+                onValueChange = viewModel::onLoginChange,
+                label = { Text(stringResource(id = R.string.username)) },
+                leadingIcon = { Icon(Icons.Default.AlternateEmail, contentDescription = null) },
+                singleLine = true,
+            )
+
+            // Email (read-only)
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = currentUser.email,
+                onValueChange = {},
+                label = { Text(stringResource(id = R.string.email_hint)) },
+                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+                readOnly = true,
+                singleLine = true,
+            )
+
+            // Birthday
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { datePickerShown = true },
+                value = if (currentUser.birthDate != 0L) currentUser.birthDate.toDate() else "",
+                onValueChange = {},
+                label = { Text(stringResource(id = R.string.birthday_hint)) },
+                leadingIcon = { Icon(Icons.Default.EditCalendar, contentDescription = null) },
+                placeholder = { Text(stringResource(id = R.string.birthday_set)) },
+                readOnly = true,
+                enabled = false,
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
+                singleLine = true,
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
-@Composable
-fun EditUserPhoto(modifier: Modifier = Modifier, currentUser: User, hintText: String) {
-    Column(modifier = Modifier, verticalArrangement = Arrangement.spacedBy(12.dp),) {
-        GrayText(text = hintText)
-        UserImage(modifier = modifier, user = currentUser, imgSize = 150.dp, icon = Icons.Default.Edit, onIconClick = {})
-    }
-}
-
-
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ResetDialog(onDismiss: () -> Unit, onReset: () -> Unit) {
     DefaultDialog(
@@ -217,44 +178,7 @@ fun ResetDialog(onDismiss: () -> Unit, onReset: () -> Unit) {
 }
 
 @Composable
-fun EditProfileTextFieldWithHeader(
-    modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit,
-    hintText: String,
-    readOnly: Boolean = false,
-    keyboardOptions: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-    keyboardActions: KeyboardActions = KeyboardActions.Default,
-    icon: ImageVector? = null,
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        GrayText(text = hintText)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            icon?.let { Icon(icon, icon.name) }
-            BasicTextField(modifier = modifier, value = value,
-                onValueChange = onValueChange,
-                textStyle = TextStyle(
-                    color = MaterialTheme.colors.onSurface,
-                    fontSize = 16.sp
-                ),
-                readOnly = readOnly,
-                keyboardOptions = keyboardOptions,
-                keyboardActions = keyboardActions,
-                cursorBrush = SolidColor(MaterialTheme.colors.onSurface),
-                decorationBox = {
-                    Column {
-                        it()
-                        if (!readOnly) Divider(modifier = Modifier.fillMaxWidth())
-                    }
-                })
-        }
-    }
-
-}
-
-@Composable
 fun EditProfileTopAppBar(
-    elevation: Dp,
     isChanged: Boolean,
     onReset: () -> Unit,
     onBack: () -> Unit
@@ -262,12 +186,11 @@ fun EditProfileTopAppBar(
     DefaultAppBar(
         title = stringResource(id = R.string.profile_edit),
         onNavClick = onBack,
-        backgroundColor = MaterialTheme.colors.surface,
-        elevation = elevation
+        backgroundColor = MaterialTheme.colorScheme.surface,
     ) {
         AnimatedVisibility(isChanged) {
             IconButton(onClick = onReset) {
-                Icon(Icons.Default.RestartAlt, Icons.Default.RestartAlt.name)
+                Icon(Icons.Default.RestartAlt, contentDescription = stringResource(R.string.reset_dialog))
             }
         }
     }

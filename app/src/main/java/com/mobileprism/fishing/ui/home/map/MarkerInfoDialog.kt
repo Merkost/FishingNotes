@@ -17,12 +17,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -48,23 +49,23 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
-import com.mobileprism.fishing.ui.Arguments
+import com.mobileprism.fishing.ui.HomeTabs
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.views.PrimaryText
 import com.mobileprism.fishing.ui.home.views.SubtitleText
 import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
-import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import org.koin.compose.koinInject
 
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MarkerInfoDialog(
     viewModel: MapViewModel,
     navController: NavController,
     onMarkerIconClicked: (UserMapMarker) -> Unit,
+    onAddCatch: (UserMapMarker) -> Unit = {},
 ) {
     val context = LocalContext.current
 
@@ -102,8 +103,8 @@ fun MarkerInfoDialog(
     receivedMarker?.let { marker ->
         Card(
             shape = RoundedCornerShape(cornersDp),
-            elevation = elevationDp,
-            backgroundColor = MaterialTheme.colors.surface,
+            elevation = CardDefaults.cardElevation(defaultElevation = elevationDp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             modifier = Modifier
                 .zIndex(1.0f)
                 .fillMaxWidth()
@@ -123,6 +124,7 @@ fun MarkerInfoDialog(
                 ) {
                     val (locationIcon, title, area, distanceTo,
                         fish, divider, weather) = createRefs()
+                    val addCatchButton = createRef()
 
                     val horizontalLine = createGuidelineFromAbsoluteLeft(0.5f)
                     val verticalFabLine = createGuidelineFromAbsoluteRight(60.dp)
@@ -151,7 +153,7 @@ fun MarkerInfoDialog(
                                 top.linkTo(locationIcon.top)
                                 linkTo(
                                     locationIcon.end,
-                                    verticalFabLine,
+                                    addCatchButton.start,
                                     0.dp,
                                     0.dp,
                                     0.dp,
@@ -167,6 +169,22 @@ fun MarkerInfoDialog(
                         } + "",
                         maxLines = 2,
                     )
+
+                    if (marker.id != Constants.CURRENT_PLACE_ITEM_ID) {
+                        IconButton(
+                            modifier = Modifier.constrainAs(addCatchButton) {
+                                top.linkTo(parent.top, 4.dp)
+                                absoluteRight.linkTo(parent.absoluteRight, 4.dp)
+                            },
+                            onClick = { onAddCatch(marker) }
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_add_catch),
+                                contentDescription = stringResource(R.string.add_new_catch),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
 
                     // TODO: Баг с наездом текста на дистанцию
                     //Area name
@@ -256,7 +274,7 @@ fun MarkerInfoDialog(
                             modifier = Modifier
                                 .size(45.dp)
                                 .padding(6.dp),
-                            tint = if (fishActivity == null) Color.LightGray else MaterialTheme.colors.primary
+                            tint = if (fishActivity == null) MaterialTheme.colorScheme.outlineVariant else MaterialTheme.colorScheme.primary
                         )
                         SubtitleText(
                             text = if (fishActivity != null) fishActivity.toString() + "%" else "",
@@ -264,7 +282,7 @@ fun MarkerInfoDialog(
                     }
 
                     //Divider
-                    Divider(
+                    HorizontalDivider(
                         modifier = Modifier
                             .constrainAs(divider) {
                                 top.linkTo(area.bottom, 4.dp)
@@ -273,7 +291,7 @@ fun MarkerInfoDialog(
                             }
                             .height(20.dp)
                             .width(1.dp),
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.outline,
                     )
 
                     //Weather
@@ -306,7 +324,7 @@ fun MarkerInfoDialog(
                             Icon(
                                 painterResource(R.drawable.ic_baseline_navigation_24), "",
                                 modifier = Modifier.rotate(windRotation),
-                                tint = if (currentWeather == null) Color.LightGray else MaterialTheme.colors.primaryVariant
+                                tint = if (currentWeather == null) MaterialTheme.colorScheme.outlineVariant else MaterialTheme.colorScheme.tertiary
                             )
                         }
 
@@ -334,8 +352,7 @@ fun onMarkerClicked(marker: UserMapMarker, navController: NavController) {
 
 fun onWeatherIconClicked(marker: UserMapMarker, navController: NavController) {
     navController.navigate(
-        "${MainDestinations.HOME_ROUTE}/${MainDestinations.WEATHER_ROUTE}",
-        Arguments.PLACE to marker
+        HomeTabs.WeatherTab(place = marker)
     )
 }
 

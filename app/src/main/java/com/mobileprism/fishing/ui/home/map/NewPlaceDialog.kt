@@ -1,12 +1,12 @@
 package com.mobileprism.fishing.ui.home.map
 
-import androidx.compose.animation.*
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
@@ -32,6 +32,8 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.raw.RawMapMarker
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.UiState
+import com.mobileprism.fishing.ui.home.views.DefaultButton
+import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
 import com.mobileprism.fishing.ui.home.views.MyCard
 import com.mobileprism.fishing.ui.theme.Shapes
 import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
@@ -86,7 +88,7 @@ fun NewPlaceDialog(
 
                     Text(
                         text = stringResource(R.string.new_place),
-                        style = MaterialTheme.typography.h6,
+                        style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.constrainAs(name) {
                             top.linkTo(parent.top, 8.dp)
                             absoluteLeft.linkTo(parent.absoluteLeft, 4.dp)
@@ -111,8 +113,8 @@ fun NewPlaceDialog(
                             onNext = { textField2.requestFocus() }
                         ),
                         trailingIcon = {
-                            AnimatedVisibility(
-                                titleValue.value.isNotEmpty(),
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = titleValue.value.isNotEmpty(),
                                 enter = fadeIn(),
                                 exit = fadeOut()
                             ) {
@@ -194,65 +196,42 @@ fun NewPlaceDialog(
                         )
                     }
 
-                    OutlinedButton(modifier = Modifier.constrainAs(cancelButton) {
-                        absoluteRight.linkTo(saveButton.absoluteLeft, 8.dp)
-                        top.linkTo(saveButton.top)
-                        bottom.linkTo(saveButton.bottom)
-                    },
-                        shape = RoundedCornerShape(24.dp), onClick = {
+                    DefaultButton(
+                        modifier = Modifier.constrainAs(cancelButton) {
+                            absoluteRight.linkTo(saveButton.absoluteLeft, 8.dp)
+                            top.linkTo(saveButton.top)
+                            bottom.linkTo(saveButton.bottom)
+                        },
+                        text = stringResource(id = R.string.cancel),
+                        onClick = {
                             viewModel.cancelAddNewMarker()
                             onDismiss()
-                        }) {
-                        Row(
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                stringResource(id = R.string.cancel),
-                                style = MaterialTheme.typography.button
-                            )
                         }
-                    }
+                    )
 
-                    Button(modifier = Modifier.constrainAs(saveButton) {
-                        absoluteRight.linkTo(parent.absoluteRight, 8.dp)
-                        top.linkTo(locationIcon.bottom, 14.dp)
-                        bottom.linkTo(parent.bottom, 14.dp)
-                    }, shape = RoundedCornerShape(24.dp), onClick = {
-                        viewModel.addNewMarker(
-                            RawMapMarker(
-                                title = when (titleValue.value.isEmpty()) {
-                                    true -> context.resources.getString(R.string.no_name_place)
-                                    false -> titleValue.value
-                                },
-                                description = descriptionValue.value,
-                                latitude = currentCameraPosition.first.latitude,
-                                longitude = currentCameraPosition.first.longitude,
-                                markerColor = markerColor.value
+                    DefaultButtonFilled(
+                        modifier = Modifier.constrainAs(saveButton) {
+                            absoluteRight.linkTo(parent.absoluteRight, 8.dp)
+                            top.linkTo(locationIcon.bottom, 14.dp)
+                            bottom.linkTo(parent.bottom, 14.dp)
+                        },
+                        text = stringResource(id = R.string.save),
+                        enabled = uiState !is UiState.InProgress,
+                        onClick = {
+                            viewModel.addNewMarker(
+                                RawMapMarker(
+                                    title = when (titleValue.value.isEmpty()) {
+                                        true -> context.resources.getString(R.string.no_name_place)
+                                        false -> titleValue.value
+                                    },
+                                    description = descriptionValue.value,
+                                    latitude = currentCameraPosition.first.latitude,
+                                    longitude = currentCameraPosition.first.longitude,
+                                    markerColor = markerColor.value
+                                )
                             )
-                        )
-                    }, enabled = uiState !is UiState.InProgress
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(
-                                6.dp,
-                                Alignment.CenterHorizontally
-                            ),
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.animateContentSize()
-                        ) {
-                            Text(
-                                stringResource(id = R.string.save),
-                                style = MaterialTheme.typography.button
-                            )
-                            AnimatedVisibility(
-                                visible = uiState is UiState.InProgress,
-                                modifier = Modifier.size(18.dp)
-                            ) {
-                                CircularProgressIndicator(color = Color.White)
-                            }
                         }
-                    }
+                    )
                     DisposableEffect(Unit) {
                         textField1.requestFocus()
                         onDispose { }

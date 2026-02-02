@@ -6,9 +6,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.Daily
-import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
-import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.utils.enums.StringOperation
 import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
 import java.text.DecimalFormat
@@ -31,6 +29,10 @@ fun getPressureList(
     pressureUnit: PressureValues
 ): List<Int> {
     return forecast.map { /*pressureUnit.getPressureInt(it.pressure)*/it.pressure.toInt() }
+}
+
+fun getPrecipitationList(forecast: List<Daily>): List<Int> {
+    return forecast.map { (it.probabilityOfPrecipitation * 100).toInt() }
 }
 
 fun getBounds(list: List<Int>): Pair<Int, Int> {
@@ -152,5 +154,5 @@ fun navigateToDailyWeatherScreen(
 }
 
 fun navigateToAddNewPlace(navController: NavController) {
-    navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${true}")
+    navController.navigate(MainDestinations.Map(isAddingNewPlace = true))
 }

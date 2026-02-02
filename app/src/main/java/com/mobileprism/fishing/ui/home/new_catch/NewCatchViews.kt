@@ -13,14 +13,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -59,7 +59,6 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
-import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.new_catch.weather.SelectedWeather
@@ -160,7 +159,7 @@ fun FishAmountAndWeightView(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_minus),
-                        tint = MaterialTheme.colors.primary,
+                        tint = MaterialTheme.colorScheme.primary,
                         contentDescription = ""
                     )
                 }
@@ -177,7 +176,7 @@ fun FishAmountAndWeightView(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_plus),
-                        tint = MaterialTheme.colors.primary,
+                        tint = MaterialTheme.colorScheme.primary,
                         contentDescription = ""
                     )
                 }
@@ -222,7 +221,7 @@ fun FishAmountAndWeightView(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_minus),
-                        tint = MaterialTheme.colors.primary,
+                        tint = MaterialTheme.colorScheme.primary,
                         contentDescription = ""
                     )
                 }
@@ -240,7 +239,7 @@ fun FishAmountAndWeightView(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_plus),
-                        tint = MaterialTheme.colors.primary,
+                        tint = MaterialTheme.colorScheme.primary,
                         contentDescription = ""
                     )
                 }
@@ -308,8 +307,7 @@ fun LottieNoPlaces(modifier: Modifier) {
 }
 
 private fun onAddNewPlaceClick(navController: NavController) {
-    val addNewPlace = true
-    navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${addNewPlace}")
+    navController.navigate(MainDestinations.Map(isAddingNewPlace = true))
 }
 
 @Composable
@@ -386,7 +384,7 @@ fun NewCatchPlaceSelectView(
                         Icon(
                             imageVector = Icons.Default.Lock,
                             contentDescription = stringResource(R.string.locked),
-                            tint = MaterialTheme.colors.primary,
+                            tint = MaterialTheme.colorScheme.primary,
                         )
                     }
                 }
@@ -420,7 +418,7 @@ fun NewCatchPlaceSelectView(
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = Icons.Default.Close.name,
-                                tint = MaterialTheme.colors.primary
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
 
@@ -434,7 +432,7 @@ fun NewCatchPlaceSelectView(
                                 modifier = Modifier.rotate(arrowRotation),
                                 imageVector = Icons.Default.KeyboardArrowDown,
                                 contentDescription = Icons.Default.KeyboardArrowDown.name,
-                                tint = MaterialTheme.colors.primary
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
@@ -460,21 +458,23 @@ fun NewCatchPlaceSelectView(
         ) {
             filteredList.forEach { suggestion ->
                 DropdownMenuItem(
+                    text = {
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = Icons.Default.LocationOn.name,
+                                tint = Color(suggestion.markerColor)
+                            )
+                            Text(text = suggestion.title)
+                        }
+                    },
                     onClick = {
                         textFieldValue = suggestion.title
                         onNewPlaceSelected(suggestion)
                         keyboard?.hide()
                         isDropMenuOpen = false
-                    }) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = Icons.Default.LocationOn.name,
-                            tint = Color(suggestion.markerColor)
-                        )
-                        Text(text = suggestion.title)
                     }
-                }
+                )
             }
         }
     }
@@ -527,7 +527,7 @@ fun DateAndTimeItem(
                 }) {
                     Icon(
                         painter = painterResource(R.drawable.ic_baseline_event_24),
-                        tint = MaterialTheme.colors.primary,
+                        tint = MaterialTheme.colorScheme.primary,
                         contentDescription = stringResource(R.string.date)
                     )
                 }
@@ -546,7 +546,7 @@ fun DateAndTimeItem(
                 }) {
                     Icon(
                         painter = painterResource(R.drawable.ic_baseline_access_time_24),
-                        tint = MaterialTheme.colors.primary,
+                        tint = MaterialTheme.colorScheme.primary,
                         contentDescription = stringResource(R.string.time)
                     )
                 }
@@ -598,7 +598,7 @@ fun FishAmountAndWeightViewItem(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_minus),
-                        tint = MaterialTheme.colors.primary,
+                        tint = MaterialTheme.colorScheme.primary,
                         contentDescription = ""
                     )
                 }
@@ -614,7 +614,7 @@ fun FishAmountAndWeightViewItem(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_plus),
-                        tint = MaterialTheme.colors.primary,
+                        tint = MaterialTheme.colorScheme.primary,
                         contentDescription = ""
                     )
                 }
@@ -656,7 +656,7 @@ fun FishAmountAndWeightViewItem(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_minus),
-                        tint = MaterialTheme.colors.primary,
+                        tint = MaterialTheme.colorScheme.primary,
                         contentDescription = ""
                     )
                 }
@@ -676,7 +676,7 @@ fun FishAmountAndWeightViewItem(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_plus),
-                        tint = MaterialTheme.colors.primary,
+                        tint = MaterialTheme.colorScheme.primary,
                         contentDescription = ""
                     )
                 }
