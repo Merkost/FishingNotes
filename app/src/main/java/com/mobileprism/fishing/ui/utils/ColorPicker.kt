@@ -8,9 +8,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.contentColorFor
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.contentColorFor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
@@ -78,7 +78,7 @@ fun ColorItem(
                         .background(color)
                         .border(
                             width = 1.dp,
-                            color = MaterialTheme.colors.onSurface,
+                            color = MaterialTheme.colorScheme.onSurface,
                             shape = CircleShape
                         )
                 } else {
@@ -107,12 +107,12 @@ fun ColorItem(
                         .background(if (isSystemInDarkTheme()) whiteAlpha20 else blackAlpha20)
                 )
             }
-            // Color null indicator
+            // Color null indicator (Dynamic theme)
             Icon(
                 painterResource(R.drawable.ic_color_off_24dp),
                 contentDescription = Icons.Default.Clear.name,
                 modifier = Modifier.align(Alignment.Center),
-                tint = contentColorFor(MaterialTheme.colors.surface)
+                tint = contentColorFor(MaterialTheme.colorScheme.surface)
             )
         }
     }

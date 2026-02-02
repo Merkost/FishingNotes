@@ -1,7 +1,7 @@
 package com.mobileprism.fishing.ui.home
 
 import androidx.annotation.StringRes
-import androidx.compose.material.SnackbarDuration
+import androidx.compose.material3.SnackbarDuration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

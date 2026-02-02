@@ -11,12 +11,16 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
+import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -33,7 +37,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.material.shimmer
+import com.google.accompanist.placeholder.material3.shimmer
 import com.google.accompanist.placeholder.placeholder
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
@@ -43,15 +47,14 @@ import com.mobileprism.fishing.domain.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.model.mappers.getWeatherIconByName
-import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.map.LocationState
 import com.mobileprism.fishing.ui.home.map.checkLocationPermissions
 import com.mobileprism.fishing.ui.home.map.locationPermissionsList
 import com.mobileprism.fishing.ui.home.views.*
-import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.ui.viewmodels.WeatherViewModel
+import com.mobileprism.fishing.utils.Constants.modalBottomSheetCorners
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.utils.location.LocationManager
 import com.mobileprism.fishing.utils.time.toDateTextMonth
@@ -61,9 +64,10 @@ import com.mobileprism.fishing.utils.time.toTime
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.compose.koinInject
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.ui.graphics.drawscope.Stroke
 import kotlin.math.min
 
-@OptIn(ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun WeatherScreen(
     modifier: Modifier = Modifier,
@@ -79,6 +83,9 @@ fun WeatherScreen(
     val selectedPlace by viewModel.selectedPlace.collectAsState()
     val locationManager: LocationManager = koinInject()
 
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showBottomSheet by remember { mutableStateOf(false) }
+
     LaunchedEffect(permissionsState.allPermissionsGranted) {
         checkLocationPermissions(context)
         if (permissionsState.allPermissionsGranted) {
@@ -93,76 +100,126 @@ fun WeatherScreen(
 
     val scrollState = rememberScrollState()
     val weatherUiState by viewModel.weatherState.collectAsState()
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            val elevation =
-                animateDpAsState(targetValue = if (scrollState.value > 0) 4.dp else 0.dp)
-            if (checkLocationPermissions(context) && viewModel.markersList.isNotEmpty()) {
-                viewModel.setSelectedPlace(viewModel.markersList.first())
-            }
 
-            TopAppBar(
-                elevation = elevation.value,
-                backgroundColor = MaterialTheme.colors.primary,
-                title = {
-                    selectedPlace?.let {
-
-                        WeatherLocationIconButton(color = Color.White) {
-                            //if (it.id != CURRENT_PLACE_ITEM_ID) {
-                                navController.navigate(
-                                    "${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
-                                    Arguments.PLACE to it
-                                )
-                            //}
-                        }
-
-                        WeatherPlaceSelectItem(
-                            selectedPlace = it,
-                            userPlaces = viewModel.markersList,
-                            onItemClick = viewModel::setSelectedPlace
-                        )
-                    }
-
-                    if (selectedPlace == null) {
-                        Text(text = stringResource(id = R.string.weather))
-                    }
-                }
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = bottomSheetState,
+            shape = modalBottomSheetCorners,
+        ) {
+            WeatherPlacePickerSheetContent(
+                places = viewModel.markersList,
+                selectedPlace = selectedPlace,
+                onPlaceSelected = { place ->
+                    viewModel.setSelectedPlace(place)
+                    showBottomSheet = false
+                },
             )
         }
-    ) {
+    }
 
-        if (!permissionsState.allPermissionsGranted && viewModel.markersList.isEmpty()) {
-            WeatherNoPlaces(Modifier.fillMaxSize()) { navigateToAddNewPlace(navController) }
-        } else {
-            Crossfade(targetState = weatherUiState) {
-                when (it) {
-                    is BaseViewState.Loading -> {
-                        MainWeatherScreen(childModifier = Modifier.placeholder(
-                            true,
-                            color = Color.LightGray,
-                            shape = CircleShape,
-                            highlight = PlaceholderHighlight.shimmer()
-                        ), WeatherForecast(), scrollState, navigateToDaily = {})
-                    }
-                    is BaseViewState.Success -> {
-                        MainWeatherScreen(childModifier = Modifier, it.data, scrollState)
-                        { index ->
-                            navigateToDailyWeatherScreen(
-                                navController = navController,
-                                index = index,
-                                forecastDaily = it.data.daily
-                            )
+    Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                val elevation =
+                    animateDpAsState(targetValue = if (scrollState.value > 0) 4.dp else 0.dp)
+                if (checkLocationPermissions(context) && viewModel.markersList.isNotEmpty()) {
+                    viewModel.setSelectedPlace(viewModel.markersList.first())
+                }
+
+                TopAppBar(
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                        actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
+                    title = {
+                        selectedPlace?.let {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                WeatherLocationIconButton(color = MaterialTheme.colorScheme.onPrimary) {
+                                    navController.navigate(
+                                        MainDestinations.Map(isAddingNewPlace = false, place = it)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.weight(1f))
+
+                                Row(
+                                    modifier = Modifier
+                                        .clip(CircleShape)
+                                        .clickable {
+                                            showBottomSheet = true
+                                        }
+                                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    WeatherAppBarText(
+                                        text = it.title,
+                                        textColor = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                    Icon(
+                                        imageVector = Icons.Filled.ArrowDropDown,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
+
+                        if (selectedPlace == null) {
+                            Text(text = stringResource(id = R.string.weather))
                         }
                     }
-                    is BaseViewState.Error -> {
-                        NoInternetView(Modifier.fillMaxWidth())
+                )
+            }
+        ) { innerPadding ->
+
+            if (!permissionsState.allPermissionsGranted && viewModel.markersList.isEmpty()) {
+                WeatherNoPlaces(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                ) { navigateToAddNewPlace(navController) }
+            } else {
+                Crossfade(
+                    targetState = weatherUiState,
+                    modifier = Modifier.padding(innerPadding)
+                ) {
+                    when (it) {
+                        is BaseViewState.Loading -> {
+                            MainWeatherScreen(childModifier = Modifier.placeholder(
+                                true,
+                                color = MaterialTheme.colorScheme.outlineVariant,
+                                shape = CircleShape,
+                                highlight = PlaceholderHighlight.shimmer()
+                            ), WeatherForecast(), scrollState, navigateToDaily = {})
+                        }
+                        is BaseViewState.Success -> {
+                            MainWeatherScreen(childModifier = Modifier, it.data, scrollState)
+                            { index ->
+                                navigateToDailyWeatherScreen(
+                                    navController = navController,
+                                    index = index,
+                                    forecastDaily = it.data.daily
+                                )
+                            }
+                        }
+                        is BaseViewState.Error -> {
+                            NoInternetView(Modifier.fillMaxWidth())
+                        }
                     }
                 }
             }
         }
     }
-}
 
 @Composable
 fun WeatherNoPlaces(modifier: Modifier = Modifier, onAddNewPlace: () -> Unit) {
@@ -219,6 +276,10 @@ fun MainWeatherScreen(
                 forecast = forecast.daily,
                 pressureUnit = pressureUnit,
             )
+            PrecipitationChartItem(
+                childModifier = childModifier,
+                forecast = forecast.daily,
+            )
         }
 
         forecast.daily.forEachIndexed { index, daily ->
@@ -247,7 +308,7 @@ fun CurrentWeather(
         modifier = modifier
             .fillMaxWidth()
             .height(350.dp),
-        color = MaterialTheme.colors.primary
+        color = MaterialTheme.colorScheme.primary
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -259,8 +320,8 @@ fun CurrentWeather(
                 childModifier = childModifier,
                 temperature = forecast.hourly.first().temperature,
                 weather = forecast.hourly.first().weather.first(),
-                textTint = Color.White,
-                iconTint = Color.White,
+                textTint = MaterialTheme.colorScheme.onPrimary,
+                iconTint = MaterialTheme.colorScheme.onPrimary,
                 temperatureUnit = temperatureUnit
             )
 
@@ -318,7 +379,7 @@ fun HourlyWeatherItem(
     forecast: Hourly,
     temperatureUnit: TemperatureValues,
     windSpeedUnit: WindSpeedValues,
-    color: Color = Color.White,
+    color: Color = MaterialTheme.colorScheme.onPrimary,
     timeTitle: String
 ) {
     Column(
@@ -402,7 +463,7 @@ fun DailyWeatherItem(
             },
             text = forecast.date.toDayOfWeek()
         )
-        Divider(
+        HorizontalDivider(
             modifier = Modifier.constrainAs(divider) {
                 absoluteLeft.linkTo(parent.absoluteLeft)
                 absoluteRight.linkTo(parent.absoluteRight)
@@ -492,7 +553,7 @@ fun PressureChartItem(
             receivedWeather = forecast,
             pressureUnit = pressureUnit,
         )
-        Divider()
+        HorizontalDivider()
     }
 }
 
@@ -501,7 +562,7 @@ fun PressureChart(
     modifier: Modifier = Modifier,
     childModifier: Modifier = Modifier,
     pressureUnit: PressureValues,
-    textColor: Color = MaterialTheme.colors.onSurface,
+    textColor: Color = MaterialTheme.colorScheme.onSurface,
     receivedWeather: List<Daily>
 ) {
     val weather: List<Daily> by remember {
@@ -524,7 +585,7 @@ fun PressureChart(
 
     }
 
-    val color = MaterialTheme.colors.primaryVariant
+    val color = MaterialTheme.colorScheme.tertiary
 
 
     Canvas(modifier = modifier.padding(start = 32.dp, end = 32.dp, bottom = 14.dp, top = 32.dp)) {
@@ -581,12 +642,115 @@ fun PressureChart(
 }
 
 @Composable
+fun PrecipitationChartItem(
+    modifier: Modifier = Modifier,
+    childModifier: Modifier = Modifier,
+    forecast: List<Daily>,
+) {
+    Column(
+        modifier = modifier
+    ) {
+        WeatherHeaderText(
+            modifier = Modifier
+                .padding(8.dp)
+                .then(childModifier),
+            text = stringResource(id = R.string.precipitation) + ", " + stringResource(id = R.string.percent)
+        )
+        PrecipitationChart(
+            Modifier
+                .horizontalScroll(rememberScrollState())
+                .width(500.dp)
+                .height(120.dp)
+                .padding(top = 16.dp),
+            childModifier = childModifier,
+            receivedWeather = forecast,
+        )
+        HorizontalDivider()
+    }
+}
+
+@Composable
+fun PrecipitationChart(
+    modifier: Modifier = Modifier,
+    childModifier: Modifier = Modifier,
+    textColor: Color = MaterialTheme.colorScheme.onSurface,
+    receivedWeather: List<Daily>
+) {
+    val weather: List<Daily> by remember {
+        mutableStateOf(receivedWeather)
+    }
+
+    val x = remember { Animatable(0f) }
+    val yValues = remember(weather) { mutableStateOf(getPrecipitationList(weather)) }
+    val xTarget = (yValues.value.size - 1).toFloat()
+    LaunchedEffect(weather) {
+        x.animateTo(
+            targetValue = xTarget,
+            animationSpec = tween(
+                durationMillis = 100,
+                easing = CubicBezierEasing(0f, 0f, 0f, 1f)
+            ),
+        )
+    }
+
+    val barColor = MaterialTheme.colorScheme.secondary
+
+    Canvas(modifier = modifier.padding(start = 32.dp, end = 32.dp, bottom = 14.dp, top = 32.dp)) {
+        val slotCount = yValues.value.size
+        if (slotCount == 0) return@Canvas
+        val slotWidth = size.width / slotCount
+        val barWidth = slotWidth * 0.5f
+        val maxBarHeight = size.height - 52f
+
+        val paint = Paint()
+        paint.textAlign = Paint.Align.CENTER
+        paint.textSize = 36.sp.value
+        paint.typeface = Typeface.DEFAULT_BOLD
+        paint.color = textColor.hashCode()
+
+        (0..min(yValues.value.size - 1, x.value.toInt())).forEach { index ->
+            val centerX = index * slotWidth + slotWidth / 2f
+            val value = yValues.value[index]
+            val barHeight = (value / 100f) * maxBarHeight
+
+            val barLeft = centerX - barWidth / 2f
+            val barTop = size.height - 52f - barHeight
+            val barBottom = size.height - 52f
+
+            if (barHeight > 0f) {
+                drawRect(
+                    color = barColor.copy(alpha = 0.6f),
+                    topLeft = Offset(barLeft, barTop),
+                    size = androidx.compose.ui.geometry.Size(barWidth, barHeight)
+                )
+                drawRect(
+                    color = barColor,
+                    topLeft = Offset(barLeft, barTop),
+                    size = androidx.compose.ui.geometry.Size(barWidth, barHeight),
+                    style = Stroke(2f)
+                )
+            }
+
+            drawContext.canvas.nativeCanvas.drawText(
+                "${value}%",
+                centerX, barTop - 12f, paint
+            )
+
+            drawContext.canvas.nativeCanvas.drawText(
+                weather[index].date.toDayOfWeekAndDate(),
+                centerX, size.height, paint
+            )
+        }
+    }
+}
+
+@Composable
 fun CurrentWeatherValuesView(
     modifier: Modifier = Modifier,
     childModifier: Modifier = Modifier,
     pressureUnit: PressureValues,
-    iconColor: Color = Color.White,
-    textColor: Color = Color.White,
+    iconColor: Color = MaterialTheme.colorScheme.onPrimary,
+    textColor: Color = MaterialTheme.colorScheme.onPrimary,
     forecast: Hourly
 ) {
     ConstraintLayout(

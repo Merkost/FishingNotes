@@ -6,7 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,7 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.R
 
-@ExperimentalMaterialApi
+@ExperimentalMaterial3Api
 @Composable
 // TODO: Use google button
 fun GoogleButton(
@@ -27,8 +27,8 @@ fun GoogleButton(
     icon: Int = R.drawable.ic_google_logo,
     shape: Shape = CircleShape,
     borderColor: Color = Color.LightGray,
-    backgroundColor: Color = MaterialTheme.colors.surface,
-    progressIndicatorColor: Color = MaterialTheme.colors.primary,
+    backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    progressIndicatorColor: Color = MaterialTheme.colorScheme.primary,
     onClicked: () -> Unit
 ) {
     val resolvedText = text ?: stringResource(id = R.string.sign_up_with_google)
@@ -37,8 +37,8 @@ fun GoogleButton(
     
     Card(
         onClick = { clicked = !clicked },
-        shape = RoundedCornerShape(20.dp), elevation = 10.dp,
-        backgroundColor = backgroundColor)
+        shape = RoundedCornerShape(20.dp), elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor))
      {
         Row(
             modifier = Modifier
@@ -79,7 +79,7 @@ fun GoogleButton(
     }
 }
 
-/*@ExperimentalMaterialApi
+/*@ExperimentalMaterial3Api
 @Composable
 @Preview
 private fun GoogleButtonPreview() {

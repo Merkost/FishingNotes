@@ -5,7 +5,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Place
@@ -29,14 +29,12 @@ import androidx.navigation.NavController
 import coil.annotation.ExperimentalCoilApi
 import com.airbnb.lottie.compose.*
 import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.material.placeholder
+import com.google.accompanist.placeholder.material3.placeholder
 import com.google.accompanist.placeholder.shimmer
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.common.User
-import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.views.SecondaryText
-import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.viewmodels.UserViewModel
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -55,7 +53,7 @@ fun Profile(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = { ProfileAppBar(navController) },
-        backgroundColor = MaterialTheme.colors.primary
+        containerColor = MaterialTheme.colorScheme.primary
     ) {
         ConstraintLayout(
             modifier = modifier
@@ -85,7 +83,7 @@ fun Profile(
                 imgSize = imgSize,
                 icon = Icons.Default.Edit,
                 borderStroke = imageBorderStroke) {
-                navController.navigate(MainDestinations.EDIT_PROFILE)
+                navController.navigate(MainDestinations.EditProfile)
             }
 
             Card(
@@ -99,8 +97,8 @@ fun Profile(
                     .fillMaxSize()
                     .zIndex(1f),
                 shape = AbsoluteRoundedCornerShape(25.dp, 25.dp),
-                elevation = 8.dp,
-                backgroundColor = MaterialTheme.colors.background
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 ConstraintLayout(
                     modifier = Modifier.fillMaxSize(),
@@ -144,8 +142,7 @@ fun Profile(
                         },
                         navigateToMap = {
                             navController.navigate(
-                                "${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}",
-                                Arguments.PLACE to it
+                                MainDestinations.Map(isAddingNewPlace = false, place = it)
                             )
                         }
                     )
@@ -213,7 +210,7 @@ fun UserText(user: User?, modifier: Modifier) {
             text = when (user.displayName.isEmpty()) {
                 true -> stringResource(R.string.anonymous)
                 false -> user.displayName
-            }, style = MaterialTheme.typography.h6,
+            }, style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center
         )
     }
@@ -231,11 +228,11 @@ fun PlacesNumber(modifier: Modifier = Modifier, userPlacesNum: Int?) {
                 .size(25.dp)
                 .placeholder(
                     visible = userPlacesNum == null,
-                    color = Color.LightGray,
+                    color = MaterialTheme.colorScheme.outlineVariant,
                     // optional, defaults to RectangleShape
                     shape = CircleShape,
                     highlight = PlaceholderHighlight.shimmer(
-                        highlightColor = Color.White,
+                        highlightColor = MaterialTheme.colorScheme.surface,
                     )
                 ),
         )
@@ -258,11 +255,11 @@ fun CatchesNumber(modifier: Modifier = Modifier, userCatchesNum: Int?) {
                 .size(25.dp)
                 .placeholder(
                     visible = userCatchesNum == null,
-                    color = Color.LightGray,
+                    color = MaterialTheme.colorScheme.outlineVariant,
                     // optional, defaults to RectangleShape
                     shape = CircleShape,
                     highlight = PlaceholderHighlight.shimmer(
-                        highlightColor = Color.White,
+                        highlightColor = MaterialTheme.colorScheme.surface,
                     )
                 )
         )
@@ -275,7 +272,7 @@ fun CatchesNumber(modifier: Modifier = Modifier, userCatchesNum: Int?) {
 
 /*@ExperimentalAnimationApi
 @ExperimentalCoilApi
-@ExperimentalMaterialApi
+@ExperimentalMaterial3Api
 @InternalCoroutinesApi
 @Preview("default")
 @Preview("dark theme", uiMode = Configuration.UI_MODE_NIGHT_YES)

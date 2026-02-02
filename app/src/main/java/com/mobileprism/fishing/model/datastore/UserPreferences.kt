@@ -7,6 +7,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.ui.home.map.DEFAULT_ZOOM
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
+import com.mobileprism.fishing.ui.utils.enums.DarkModeValues
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -28,6 +29,7 @@ class UserPreferences(private val context: Context) {
         val FAB_FAST_ADD = booleanPreferencesKey("fab_fast_add")
         val MAP_ZOOM_BUTTONS_KEY = booleanPreferencesKey("map_zoom_buttons")
         val APP_THEME_KEY = stringPreferencesKey("app_theme")
+        val DARK_MODE_KEY = stringPreferencesKey("dark_mode")
     }
 
     //get the saved value
@@ -52,6 +54,15 @@ class UserPreferences(private val context: Context) {
         }.catch { e ->
             if (e is IllegalArgumentException) {
                 emit(AppThemeValues.Blue)
+            }
+        }
+
+    val darkMode: Flow<DarkModeValues> = context.dataStore.data
+        .map { preferences ->
+            DarkModeValues.valueOf(preferences[DARK_MODE_KEY] ?: DarkModeValues.System.name)
+        }.catch { e ->
+            if (e is IllegalArgumentException) {
+                emit(DarkModeValues.System)
             }
         }
 
@@ -99,6 +110,12 @@ class UserPreferences(private val context: Context) {
     suspend fun saveAppTheme(appTheme: AppThemeValues) {
         context.dataStore.edit { preferences ->
             preferences[APP_THEME_KEY] = appTheme.name
+        }
+    }
+
+    suspend fun saveDarkMode(darkMode: DarkModeValues) {
+        context.dataStore.edit { preferences ->
+            preferences[DARK_MODE_KEY] = darkMode.name
         }
     }
 

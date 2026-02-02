@@ -3,9 +3,9 @@ package com.mobileprism.fishing.ui.home.views
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.runtime.Composable
@@ -20,21 +20,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.theme.customColors
-import com.mobileprism.fishing.ui.theme.secondaryTextColor
 
 @Composable
 fun BigText(
     modifier: Modifier = Modifier,
     text: String,
     textAlign: TextAlign = TextAlign.Start,
-    textColor: Color = MaterialTheme.colors.onSurface
+    textColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.h3,
+        style = MaterialTheme.typography.displaySmall,
         textAlign = textAlign,
         color = textColor,
         text = text
@@ -46,11 +44,11 @@ fun HeaderText(
     modifier: Modifier = Modifier,
     text: String,
     textAlign: TextAlign = TextAlign.Start,
-    textColor: Color = MaterialTheme.colors.onSurface
+    textColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.h5,
+        style = MaterialTheme.typography.headlineSmall,
         textAlign = textAlign,
         color = textColor,
         text = text
@@ -75,7 +73,7 @@ fun SubtitleText(
 
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.subtitle1,
+        style = MaterialTheme.typography.titleMedium,
         color = textColor,
         text = text,
         textAlign = textAlign,
@@ -90,12 +88,12 @@ fun PrimaryText(
     fontWeight: FontWeight? = null,
     textAlign: TextAlign? = null,
     text: String,
-    textColor: Color = MaterialTheme.colors.onSurface,
+    textColor: Color = MaterialTheme.colorScheme.onSurface,
     maxLines: Int = Int.MAX_VALUE
 ) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.h6,
+        style = MaterialTheme.typography.titleLarge,
         fontWeight = fontWeight,
         textAlign = textAlign,
         color = textColor,
@@ -113,11 +111,11 @@ fun PrimaryTextSmall(
     textAlign: TextAlign? = null,
     text: String,
     maxLines: Int = Int.MAX_VALUE,
-    textColor: Color = MaterialTheme.colors.onSurface
+    textColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
     Text(
         modifier = modifier,
-        style = MaterialTheme.typography.body2,
+        style = MaterialTheme.typography.bodyMedium,
         fontWeight = fontWeight,
         textAlign = textAlign,
         maxLines = maxLines,
@@ -165,8 +163,7 @@ fun SecondaryText(
     Text(
         textAlign = textAlign,
         modifier = modifier,
-        style = MaterialTheme.typography.body1,
-        fontSize = 18.sp,
+        style = MaterialTheme.typography.bodyLarge,
         color = textColor,
         text = text,
         maxLines = maxLines
@@ -183,7 +180,7 @@ fun SecondaryTextLight(
     SecondaryText(
         textAlign = textAlign,
         modifier = modifier,
-        textColor = secondaryTextColor,
+        textColor = textColor,
         text = text,
         maxLines = maxLines
     )
@@ -199,8 +196,7 @@ fun SecondaryTextSmall(
     Text(
         textAlign = textAlign,
         modifier = modifier,
-        style = MaterialTheme.typography.body1,
-        fontSize = 14.sp,
+        style = MaterialTheme.typography.bodyMedium,
         color = textColor,
         text = text,
         maxLines = maxLines,
@@ -211,7 +207,7 @@ fun SecondaryTextSmall(
 @Composable
 fun SupportText(
     modifier: Modifier = Modifier, text: String,
-    style: TextStyle = MaterialTheme.typography.body1,
+    style: TextStyle = MaterialTheme.typography.bodyMedium,
     maxLines: Int = Int.MAX_VALUE
 ) {
     Text(

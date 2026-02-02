@@ -2,7 +2,7 @@ package com.mobileprism.fishing.ui.home.views
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DefaultAppBar(
     modifier: Modifier = Modifier,
@@ -22,10 +23,12 @@ fun DefaultAppBar(
     title: String,
     subtitle: String? = null,
     elevation: Dp = 4.dp,
-    backgroundColor: Color = MaterialTheme.colors.primary,
-    actions: @Composable() (RowScope.() -> Unit) = {}
+    backgroundColor: Color = MaterialTheme.colorScheme.primary,
+    actions: @Composable (RowScope.() -> Unit) = {}
 
 ) {
+    val contentColor = contentColorFor(backgroundColor)
+
     var navBack: @Composable (() -> Unit)? = null
     if (onNavClick != null) {
         navBack = {
@@ -46,15 +49,19 @@ fun DefaultAppBar(
                 if (subtitle != null) {
                     SecondaryTextSmall(
                         text = subtitle,
-                        textColor = MaterialTheme.colors.onPrimary
+                        textColor = contentColor.copy(alpha = 0.8f)
                     )
                 }
             }
         },
-        navigationIcon = navBack,
-        elevation = elevation,
+        navigationIcon = navBack ?: {},
         actions = actions,
-        backgroundColor = backgroundColor
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = backgroundColor,
+            titleContentColor = contentColor,
+            navigationIconContentColor = contentColor,
+            actionIconContentColor = contentColor,
+        )
     )
 
 }

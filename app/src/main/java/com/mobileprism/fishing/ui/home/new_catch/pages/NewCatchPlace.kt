@@ -5,10 +5,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Info
@@ -29,8 +29,8 @@ import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import com.mobileprism.fishing.R
+import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
-import com.mobileprism.fishing.ui.home.HomeSections
 import com.mobileprism.fishing.ui.home.new_catch.DateAndTimeItem
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchNoPlaceDialog
 import com.mobileprism.fishing.ui.home.new_catch.NewCatchPlaceSelectView
@@ -87,7 +87,7 @@ fun NewCatchPlace(viewModel: NewCatchMasterViewModel, navController: NavControll
             },
             icon = painterResource(id = R.drawable.ic_baseline_map_24),
             text = stringResource(R.string.select_on_map),
-            onClick = { navController.navigate(HomeSections.MAP.route) }
+            onClick = { navController.navigate(MainDestinations.Map(isAddingNewPlace = false)) }
         )
 
         IconButton(modifier = Modifier.constrainAs(buttonInfo) {
@@ -97,7 +97,7 @@ fun NewCatchPlace(viewModel: NewCatchMasterViewModel, navController: NavControll
             Icon(
                 Icons.Default.Info,
                 contentDescription = Icons.Default.Info.name,
-                tint = MaterialTheme.colors.primaryVariant
+                tint = MaterialTheme.colorScheme.tertiary
             )
         }
 

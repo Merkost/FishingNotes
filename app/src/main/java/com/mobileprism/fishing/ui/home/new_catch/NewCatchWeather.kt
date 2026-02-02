@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
@@ -198,7 +198,7 @@ fun NewCatchTemperatureView(
             Icon(
                 painter = painterResource(id = R.drawable.ic_thermometer),
                 contentDescription = "",
-                tint = MaterialTheme.colors.primary
+                tint = MaterialTheme.colorScheme.primary
             )
         },
         trailingIcon = { Text(text = stringResource(temperatureUnit.stringRes)) },
@@ -233,7 +233,7 @@ fun NewCatchPressureView(
             Icon(
                 painter = painterResource(id = R.drawable.ic_gauge),
                 contentDescription = "",
-                tint = MaterialTheme.colors.primary
+                tint = MaterialTheme.colorScheme.primary
             )
         },
         trailingIcon = { Text(text = stringResource(pressureUnit.stringRes)) },
@@ -286,7 +286,7 @@ fun NewCatchWindView(
                     modifier = Modifier.rotate(windDeg.toFloat()),
                     painter = painterResource(id = R.drawable.ic_baseline_navigation_24),
                     contentDescription = "",
-                    tint = MaterialTheme.colors.primary,
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             }
 
@@ -318,7 +318,7 @@ fun NewCatchMoonView(
                     id = getMoonIconByPhase(moonPhase)
                 ),
                 contentDescription = "",
-                tint = MaterialTheme.colors.primary
+                tint = MaterialTheme.colorScheme.primary
             )
         },
         onValueChange = { },

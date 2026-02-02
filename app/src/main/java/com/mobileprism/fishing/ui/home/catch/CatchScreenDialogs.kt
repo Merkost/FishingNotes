@@ -5,16 +5,19 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
@@ -31,8 +34,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.core.net.toUri
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.common.Note
@@ -128,69 +129,47 @@ fun FishTypeAmountAndWeightDialog(
         }
     }
 
-    ConstraintLayout(
+    Column(
         modifier = Modifier
-            .padding(16.dp)
             .fillMaxWidth()
-            .fillMaxHeight(),
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-
-        val (title, fish, amountAndWeight, saveButton, cancelButton) = createRefs()
-
-        PrimaryText(
-            modifier = Modifier.constrainAs(title) {
-                top.linkTo(parent.top)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-            },
-            text = stringResource(id = R.string.user_catch)
-        )
+        PrimaryText(text = stringResource(id = R.string.user_catch))
 
         SimpleOutlinedTextField(
-            modifier = Modifier.constrainAs(fish) {
-                top.linkTo(title.bottom, 16.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
-                width = Dimension.fillToConstraints
-            },
+            modifier = Modifier.fillMaxWidth(),
             textState = fishType,
             label = stringResource(id = R.string.fish_species)
         )
 
         FishAmountAndWeightView(
-            modifier = Modifier.constrainAs(amountAndWeight) {
-                top.linkTo(fish.bottom, 8.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
-                width = Dimension.fillToConstraints
-            },
+            modifier = Modifier.fillMaxWidth(),
             amountState = fishAmount,
             weightState = fishWeight
         )
 
-        DefaultButtonFilled(
-            modifier = Modifier.constrainAs(saveButton) {
-                top.linkTo(amountAndWeight.bottom, 16.dp)
-                absoluteRight.linkTo(parent.absoluteRight)
-            },
-            text = stringResource(id = R.string.save),
-            onClick = {
-                viewModel.updateCatchInfo(
-                    fishType = fishType.value,
-                    fishAmount = fishAmount.value.toInt(),
-                    fishWeight = fishWeight.value.toDouble()
-                )
-                onCloseBottomSheet()
-            }
-        )
-
-        DefaultButton(
-            modifier = Modifier.constrainAs(cancelButton) {
-                top.linkTo(saveButton.top)
-                bottom.linkTo(saveButton.bottom)
-                absoluteRight.linkTo(saveButton.absoluteLeft, 8.dp)
-            },
-            text = stringResource(id = R.string.cancel)
-        ) { onCloseBottomSheet() }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            DefaultButton(
+                text = stringResource(id = R.string.cancel)
+            ) { onCloseBottomSheet() }
+            Spacer(modifier = Modifier.width(8.dp))
+            DefaultButtonFilled(
+                text = stringResource(id = R.string.save),
+                onClick = {
+                    viewModel.updateCatchInfo(
+                        fishType = fishType.value,
+                        fishAmount = fishAmount.value.toInt(),
+                        fishWeight = fishWeight.value.toDouble()
+                    )
+                    onCloseBottomSheet()
+                }
+            )
+        }
     }
 
 }
@@ -212,83 +191,56 @@ fun EditWayOfFishingDialog(
         }
     }
 
-    ConstraintLayout(
+    Column(
         modifier = Modifier
-            .padding(16.dp)
             .fillMaxWidth()
-            .fillMaxHeight()
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        val (title, rodField, baitField, lureField, saveButton, cancelButton) = createRefs()
-
-        PrimaryText(
-            modifier = Modifier.constrainAs(title) {
-                top.linkTo(parent.top)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-            },
-            text = stringResource(id = R.string.way_of_fishing)
-        )
+        PrimaryText(text = stringResource(id = R.string.way_of_fishing))
 
         SimpleOutlinedTextField(
-            modifier = Modifier.constrainAs(rodField) {
-                top.linkTo(title.bottom, 16.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
-                width = Dimension.fillToConstraints
-            },
+            modifier = Modifier.fillMaxWidth(),
             textState = rod,
             label = stringResource(id = R.string.fish_rod),
             singleLine = false
         )
 
         SimpleOutlinedTextField(
-            modifier = Modifier.constrainAs(baitField) {
-                top.linkTo(rodField.bottom, 8.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
-                width = Dimension.fillToConstraints
-            },
+            modifier = Modifier.fillMaxWidth(),
             textState = bait,
             label = stringResource(id = R.string.bait),
             singleLine = false
         )
 
         SimpleOutlinedTextField(
-            modifier = Modifier.constrainAs(lureField) {
-                top.linkTo(baitField.bottom, 8.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
-                width = Dimension.fillToConstraints
-            },
+            modifier = Modifier.fillMaxWidth(),
             textState = lure,
             label = stringResource(id = R.string.lure),
             singleLine = false
         )
 
-        DefaultButtonFilled(
-            modifier = Modifier.constrainAs(saveButton) {
-                top.linkTo(lureField.bottom, 16.dp)
-                absoluteRight.linkTo(parent.absoluteRight)
-            },
-            text = stringResource(id = R.string.save),
-            onClick = {
-                viewModel.updateWayOfFishing(
-                    fishingRodType = rod.value,
-                    fishingLure = lure.value,
-                    fishingBait = bait.value
-                )
-                onCloseBottomSheet()
-            }
-        )
-
-        DefaultButton(
-            modifier = Modifier.constrainAs(cancelButton) {
-                top.linkTo(saveButton.top)
-                bottom.linkTo(saveButton.bottom)
-                absoluteRight.linkTo(saveButton.absoluteLeft, 8.dp)
-            },
-            text = stringResource(id = R.string.cancel)
-        ) { onCloseBottomSheet() }
-
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            DefaultButton(
+                text = stringResource(id = R.string.cancel)
+            ) { onCloseBottomSheet() }
+            Spacer(modifier = Modifier.width(8.dp))
+            DefaultButtonFilled(
+                text = stringResource(id = R.string.save),
+                onClick = {
+                    viewModel.updateWayOfFishing(
+                        fishingRodType = rod.value,
+                        fishingLure = lure.value,
+                        fishingBait = bait.value
+                    )
+                    onCloseBottomSheet()
+                }
+            )
+        }
     }
 }
 
@@ -319,85 +271,66 @@ fun EditNoteDialog(
         noteDateCreated.value = note.dateCreated
     }
 
-    ConstraintLayout(
+    Column(
         modifier = Modifier
-            .padding(16.dp)
             .fillMaxWidth()
-            .fillMaxHeight()
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        val (title, editNote, saveButton, cancelButton, deleteButton) = createRefs()
-
         PrimaryText(
-            modifier = Modifier.constrainAs(title) {
-                top.linkTo(parent.top)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-            },
             text = if (noteId.value.isEmpty()) stringResource(id = R.string.new_note)
             else stringResource(id = R.string.edit_note)
         )
 
         SimpleOutlinedTextField(
-            modifier = Modifier.constrainAs(editNote) {
-                top.linkTo(title.bottom, 16.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-                absoluteRight.linkTo(parent.absoluteRight)
-                width = Dimension.fillToConstraints
-            },
+            modifier = Modifier.fillMaxWidth(),
             textState = noteDescriptionState,
             label = stringResource(id = R.string.note),
             singleLine = false
         )
 
-        DefaultButtonFilled(
-            modifier = Modifier.constrainAs(saveButton) {
-                top.linkTo(editNote.bottom, 16.dp)
-                absoluteRight.linkTo(parent.absoluteRight)
-            },
-            text = stringResource(id = R.string.save),
-            onClick = {
-                onSaveNote(
-                    Note(
-                        id = noteId.value,
-                        title = noteTitle.value,
-                        description = noteDescriptionState.value,
-                        dateCreated = Date().time
-                    )
-                )
-                onClose()
-            }
-        )
-
-        DefaultButton(
-            modifier = Modifier.constrainAs(cancelButton) {
-                top.linkTo(saveButton.top)
-                bottom.linkTo(saveButton.bottom)
-                absoluteRight.linkTo(saveButton.absoluteLeft, 8.dp)
-            },
-            text = stringResource(id = R.string.cancel)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            onClose()
-        }
-
-        if (deleteOption) {
-            IconButton(modifier = Modifier.constrainAs(deleteButton) {
-                top.linkTo(saveButton.top)
-                bottom.linkTo(saveButton.bottom)
-                absoluteLeft.linkTo(parent.absoluteLeft)
-            }, onClick = {
-                onDeleteNote(
-                    Note(
-                        noteId.value,
-                        noteTitle.value,
-                        noteDescriptionState.value,
-                        noteDateCreated.value
+            if (deleteOption) {
+                IconButton(onClick = {
+                    onDeleteNote(
+                        Note(
+                            noteId.value,
+                            noteTitle.value,
+                            noteDescriptionState.value,
+                            noteDateCreated.value
+                        )
                     )
-                )
-                onClose()
-            }) {
-                Icon(Icons.Default.Delete, "Delete note")
+                    onClose()
+                }) {
+                    Icon(Icons.Default.Delete, "Delete note")
+                }
+                Spacer(modifier = Modifier.weight(1f))
             }
+            DefaultButton(
+                text = stringResource(id = R.string.cancel)
+            ) {
+                onClose()
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            DefaultButtonFilled(
+                text = stringResource(id = R.string.save),
+                onClick = {
+                    onSaveNote(
+                        Note(
+                            id = noteId.value,
+                            title = noteTitle.value,
+                            description = noteDescriptionState.value,
+                            dateCreated = Date().time
+                        )
+                    )
+                    onClose()
+                }
+            )
         }
-
     }
 
 }
@@ -424,41 +357,31 @@ fun AddPhotoDialog(
         tempDialogPhotosState.addAll(photos)
     }
 
-    ConstraintLayout(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        val (title, counter, content, addButton, saveButton, cancelButton) = createRefs()
-
-        PrimaryText(
-            modifier = Modifier.constrainAs(title) {
-                top.linkTo(parent.top, 16.dp)
-                absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-            },
-            text = stringResource(id = R.string.photos)
-        )
-
-        MaxCounterView(
-            modifier = Modifier.constrainAs(counter) {
-                top.linkTo(title.bottom, 8.dp)
-                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-            },
-            count = tempDialogPhotosState.size,
-            maxCount = MAX_PHOTOS,
-            icon = painterResource(id = R.drawable.ic_baseline_photo_24)
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            PrimaryText(text = stringResource(id = R.string.photos))
+            MaxCounterView(
+                count = tempDialogPhotosState.size,
+                maxCount = MAX_PHOTOS,
+                icon = painterResource(id = R.drawable.ic_baseline_photo_24)
+            )
+        }
 
         LazyRow(
             modifier = Modifier
-                .defaultMinSize(minHeight = 150.dp)
-                .constrainAs(content) {
-                    top.linkTo(counter.bottom, 8.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                    absoluteRight.linkTo(parent.absoluteRight)
-                    width = Dimension.fillToConstraints
-                },
-            contentPadding = PaddingValues(vertical = 4.dp, horizontal = 16.dp),
+                .defaultMinSize(minHeight = 120.dp)
+                .fillMaxWidth(),
+            contentPadding = PaddingValues(vertical = 4.dp, horizontal = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
@@ -481,46 +404,35 @@ fun AddPhotoDialog(
             }
         }
 
-        DefaultButtonFilled(
-            modifier = Modifier.constrainAs(saveButton) {
-                top.linkTo(content.bottom, 16.dp)
-                bottom.linkTo(parent.bottom, 32.dp)
-                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-            },
-            text = stringResource(id = R.string.save),
-            onClick = {
-                if (tempDialogPhotosState.size > MAX_PHOTOS) {
-                    showToast(context, context.getString(R.string.max_photos_allowed))
-                } else {
-                    onSavePhotosClick(tempDialogPhotosState)
-                    onCloseBottomSheet()
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            DefaultButtonOutlined(
+                icon = painterResource(id = R.drawable.ic_baseline_add_photo_alternate_24),
+                text = stringResource(id = R.string.add),
+                onClick = {
+                    pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 }
-            }
-        )
-
-        DefaultButton(
-            modifier = Modifier.constrainAs(cancelButton) {
-                top.linkTo(saveButton.top)
-                bottom.linkTo(saveButton.bottom)
-                absoluteRight.linkTo(saveButton.absoluteLeft, 8.dp)
-            },
-            text = stringResource(id = R.string.cancel),
-            onClick = onCloseBottomSheet
-        )
-
-        DefaultButtonOutlined(
-            modifier = Modifier.constrainAs(addButton) {
-                top.linkTo(saveButton.top)
-                bottom.linkTo(saveButton.bottom)
-                absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-            },
-            icon = painterResource(id = R.drawable.ic_baseline_add_photo_alternate_24),
-            text = stringResource(id = R.string.add),
-            onClick = {
-                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-            }
-        )
-
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            DefaultButton(
+                text = stringResource(id = R.string.cancel),
+                onClick = onCloseBottomSheet
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            DefaultButtonFilled(
+                text = stringResource(id = R.string.save),
+                onClick = {
+                    if (tempDialogPhotosState.size > MAX_PHOTOS) {
+                        showToast(context, context.getString(R.string.max_photos_allowed))
+                    } else {
+                        onSavePhotosClick(tempDialogPhotosState)
+                        onCloseBottomSheet()
+                    }
+                }
+            )
+        }
     }
 }
 

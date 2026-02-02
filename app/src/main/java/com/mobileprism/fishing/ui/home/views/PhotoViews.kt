@@ -31,10 +31,10 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
@@ -118,7 +118,7 @@ fun ItemPhoto(
         }*/// FIXME:
         if (deleteEnabled) {
             Surface(
-                color = Color.LightGray.copy(alpha = 0.5f),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
                 modifier = Modifier
                     .size(32.dp)
                     .align(Alignment.TopEnd)
@@ -127,7 +127,7 @@ fun ItemPhoto(
             ) {
                 Icon(
                     Icons.Default.Close,
-                    tint = Color.White,
+                    tint = MaterialTheme.colorScheme.onSurface,
                     contentDescription = stringResource(R.string.delete_photo),
                     modifier = Modifier
                         .fillMaxSize()
@@ -164,14 +164,14 @@ fun PhotosView(
         MaxCounterView(
             modifier = Modifier
                 .align(Alignment.End)
-                .padding(8.dp),
+                .padding(4.dp),
             count = tempPhotosState.size,
             maxCount = MAX_PHOTOS,
             icon = painterResource(id = R.drawable.ic_baseline_photo_24)
         )
         Row(
             modifier = Modifier
-                .padding(vertical = 16.dp, horizontal = 8.dp)
+                .padding(vertical = 8.dp, horizontal = 4.dp)
                 .fillMaxWidth()
                 .wrapContentHeight(),
             verticalAlignment = Alignment.CenterVertically,
@@ -333,7 +333,7 @@ fun FullSizePhotoView(
         )
         if (deleteEnabled) {
             Surface(
-                color = Color.LightGray.copy(alpha = 0.5f),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
                 modifier = Modifier
                     .size(32.dp)
                     .align(Alignment.TopEnd)
@@ -342,7 +342,7 @@ fun FullSizePhotoView(
             ) {
                 Icon(
                     Icons.Default.Close,
-                    tint = MaterialTheme.colors.onPrimary,
+                    tint = MaterialTheme.colorScheme.onSurface,
                     contentDescription = stringResource(R.string.delete_photo),
                     modifier = Modifier
                         .fillMaxSize()
@@ -400,7 +400,7 @@ fun FullScreenPhoto(photo: MutableState<Uri?>) {
     val offsetY = remember { Animatable(0f) }
     val alpha = 0.8f - abs(offsetY.value).div(600)
     val backgroundColor = animateColorAsState(
-        targetValue = Color.Black.copy(if (alpha < 0) 0f else alpha)
+        targetValue = MaterialTheme.colorScheme.scrim.copy(if (alpha < 0) 0f else alpha)
     )
 
     Dialog(

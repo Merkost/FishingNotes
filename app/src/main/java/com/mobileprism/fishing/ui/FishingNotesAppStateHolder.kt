@@ -1,15 +1,12 @@
 package com.mobileprism.fishing.ui
 
 import android.content.res.Resources
-import android.os.Parcelable
-import androidx.compose.material.ScaffoldState
-import androidx.compose.material.SnackbarResult
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.lifecycle.Lifecycle
 import androidx.navigation.*
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -22,18 +19,31 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
+@Serializable
+data object HomeGraph
+
+@Serializable
+data object LoginRoute
+
 /**
  * Destinations used in the [FishingNotesApp].
  */
 object MainDestinations {
 
-    const val EDIT_PROFILE = "edit_profile"
-    const val LOGIN_ROUTE = "login"
-    const val HOME_ROUTE = "home"
-    const val SETTINGS = "settings"
-    const val ABOUT_APP = "about_app"
+    @Serializable
+    data object Login
 
-    const val NEW_CATCH_ROUTE = "new_catch"
+    @Serializable
+    data object Settings
+
+    @Serializable
+    data object AboutApp
+
+    @Serializable
+    data object EditProfile
+
+    @Serializable
+    data class NewCatch(val place: UserMapMarker? = null)
 
     @Serializable
     data class Place(val marker: UserMapMarker)
@@ -46,18 +56,20 @@ object MainDestinations {
 
     @Serializable
     data class Map(
-        val isAddingNewPlace: Boolean,
+        val isAddingNewPlace: Boolean = false,
         val place: UserMapMarker? = null
     )
-
-    const val MAP_ROUTE = "map"
-    const val WEATHER_ROUTE = "weather"
 }
 
-object Arguments {
-    const val PLACE = "place_arg"
-    const val WEATHER_DATA = "daily_weather_data_arg"
-    const val MAP_NEW_PLACE = "map_new_place_arg"
+object HomeTabs {
+    @Serializable
+    data object NotesTab
+
+    @Serializable
+    data class WeatherTab(val place: UserMapMarker? = null)
+
+    @Serializable
+    data object ProfileTab
 }
 
 /**
@@ -65,14 +77,14 @@ object Arguments {
  */
 @Composable
 fun rememberAppStateHolder(
-    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     navController: NavHostController = rememberNavController(),
     snackbarManager: SnackbarManager = SnackbarManager,
     resources: Resources = resources(),
     coroutineScope: CoroutineScope = rememberCoroutineScope()
 ) =
-    remember(scaffoldState, navController, snackbarManager, resources, coroutineScope) {
-        AppStateHolder(scaffoldState, navController, snackbarManager, resources, coroutineScope)
+    remember(snackbarHostState, navController, snackbarManager, resources, coroutineScope) {
+        AppStateHolder(snackbarHostState, navController, snackbarManager, resources, coroutineScope)
     }
 
 /**
@@ -80,7 +92,7 @@ fun rememberAppStateHolder(
  */
 @Stable
 class AppStateHolder(
-    val scaffoldState: ScaffoldState,
+    val snackbarHostState: SnackbarHostState,
     val navController: NavHostController,
     private val snackbarManager: SnackbarManager,
     private val resources: Resources,
@@ -100,7 +112,7 @@ class AppStateHolder(
                     // that suspends until the snackbar disappears from the screen
                     snackbarAction?.let {
                         val actionText = resources.getText(snackbarAction.textId)
-                        val result = scaffoldState.snackbarHostState.showSnackbar(
+                        val result = snackbarHostState.showSnackbar(
                             message = text.toString(),
                             actionLabel = actionText.toString().uppercase(),
                             duration = message.duration
@@ -110,7 +122,7 @@ class AppStateHolder(
                             SnackbarResult.Dismissed -> {}
                         }
                     } ?: run {
-                        scaffoldState.snackbarHostState.showSnackbar(text.toString())
+                        snackbarHostState.showSnackbar(text.toString())
                     }
 
                     // Once the snackbar is gone or dismissed, notify the SnackbarManager
@@ -124,28 +136,42 @@ class AppStateHolder(
     // BottomBar state source of truth
     // ----------------------------------------------------------
 
-    val bottomBarTabs = HomeSections.values()
-    private val bottomBarRoutes = bottomBarTabs.map { it.route }
+    val bottomBarTabs = HomeSections.entries.toTypedArray()
 
     // Reading this attribute will cause recompositions when the bottom bar needs shown, or not.
     // Not all routes need to show the bottom bar.
     val shouldShowBottomBar: Boolean
-        @Composable get() = navController
-            .currentBackStackEntryAsState().value?.destination?.route in bottomBarRoutes
+        @Composable get() {
+            val destination = navController.currentBackStackEntryAsState().value?.destination
+            return destination != null && HomeSections.entries.any { section ->
+                section.hasRoute(destination)
+            }
+        }
 
     // ----------------------------------------------------------
     // Navigation state source of truth
     // ----------------------------------------------------------
 
-    val currentRoute: String?
-        get() = navController.currentDestination?.route
+    fun currentSection(): HomeSections? {
+        val destination = navController.currentDestination ?: return null
+        return HomeSections.entries.firstOrNull { section ->
+            section.hasRoute(destination)
+        }
+    }
 
     fun upPress() {
         navController.navigateUp()
     }
 
-    fun navigateToBottomBarRoute(route: String) {
-        if (route != currentRoute) {
+    fun navigateToBottomBarRoute(section: HomeSections) {
+        val currentSection = currentSection()
+        if (section != currentSection) {
+            val route: Any = when (section) {
+                HomeSections.MAP -> MainDestinations.Map()
+                HomeSections.NOTES -> HomeTabs.NotesTab
+                HomeSections.WEATHER -> HomeTabs.WeatherTab()
+                HomeSections.PROFILE -> HomeTabs.ProfileTab
+            }
             navController.navigate(route) {
                 launchSingleTop = true
                 restoreState = true
@@ -159,42 +185,11 @@ class AppStateHolder(
     }
 }
 
-fun NavController.navigate(route: String, vararg args: Pair<String, Parcelable>) {
-    val navController = this
-    navigate(route) {
-        if (HomeSections.entries.map { it.route }.contains(route)) {
-            launchSingleTop = true
-            restoreState = true
-            // Pop up backstack to the first destination and save state. This makes going back
-            // to the start destination when pressing back in any other bottom tab.
-            popUpTo(findStartDestination(navController.graph).id) {
-                saveState = true
-            }
-        }
-    }
-
-
-    requireNotNull(currentBackStackEntry?.arguments).apply {
-        args.forEach { (key: String, arg: Parcelable) ->
-            putParcelable(key, arg)
-        }
-    }
-}
-
-inline fun <reified T : Parcelable> NavBackStackEntry.requiredArg(key: String): T {
-    return requireNotNull(arguments) { "arguments bundle is null" }.run {
-        requireNotNull(getParcelable(key)) { "argument for $key is null" }
-    }
-}
-
-private val NavGraph.startDestination: NavDestination?
-    get() = findNode(startDestinationId)
-
 /**
  * Copied from similar function in NavigationUI.kt
  *
  * https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:navigation/navigation-ui/src/main/java/androidx/navigation/ui/NavigationUI.kt
  */
 private tailrec fun findStartDestination(graph: NavDestination): NavDestination {
-    return if (graph is NavGraph) findStartDestination(graph.startDestination!!) else graph
+    return if (graph is NavGraph) findStartDestination(graph.findNode(graph.startDestinationId)!!) else graph
 }

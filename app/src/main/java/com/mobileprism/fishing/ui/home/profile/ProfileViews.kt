@@ -15,12 +15,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Settings
@@ -66,7 +68,6 @@ import com.mobileprism.fishing.ui.home.views.NoContentView
 import com.mobileprism.fishing.ui.home.views.PrimaryText
 import com.mobileprism.fishing.ui.home.views.SecondaryTextSmall
 import com.mobileprism.fishing.ui.theme.customColors
-import com.mobileprism.fishing.ui.theme.primaryTextColor
 import com.mobileprism.fishing.ui.viewmodels.UserViewModel
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -99,7 +100,7 @@ fun UserImage(
                         .zIndex(3f)
                         .size(34.dp),
                     shape = shape,
-                    elevation = 12.dp
+                    elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
                 ) {
                     IconButton(modifier = Modifier, onClick = onIconClick) {
                         Icon(icon, icon.name)
@@ -121,7 +122,7 @@ fun UserImage(
                 modifier = Modifier
                     .size(imgSize)
                     .clip(shape)
-                    .border(borderStroke ?: BorderStroke(0.dp, Color.White.copy(0f)), shape)
+                    .border(borderStroke ?: BorderStroke(0.dp, Color.Transparent), shape)
             )
         }
     }
@@ -142,7 +143,7 @@ fun ProfileAppBar(navController: NavController) {
                 )
             }
             IconButton(onClick = {
-                navController.navigate(MainDestinations.SETTINGS)
+                navController.navigate(MainDestinations.Settings)
             }) {
                 Icon(Icons.Default.Settings, stringResource(R.string.settings))
             }
@@ -171,7 +172,7 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
                     if (isLogout) {
                         dialogOnLogout.value = false
 
-                        navController.navigate(MainDestinations.LOGIN_ROUTE) {
+                        navController.navigate(MainDestinations.Login) {
                             popUpTo(0) {
                                 inclusive = true
                             }
@@ -232,7 +233,7 @@ fun ProfileItemsTitleView(
                     .size(24.dp),
                 painter = icon,
                 contentDescription = null,
-                tint = primaryTextColor
+                tint = MaterialTheme.colorScheme.onSurface
             )
 
             Column(
@@ -254,7 +255,8 @@ fun ProfileItemsTitleView(
     }
 }
 
-@ExperimentalMaterialApi
+@OptIn(ExperimentalMaterialApi::class)
+@ExperimentalMaterial3Api
 @ExperimentalAnimationApi
 @Composable
 fun BestCatchView(

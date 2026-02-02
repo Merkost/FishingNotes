@@ -8,7 +8,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
@@ -55,7 +55,7 @@ fun FabWithMenu(
         }) {
             Icon(
                 modifier = Modifier.rotate(rotation.value),
-                tint = MaterialTheme.colors.onPrimary,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
                 painter = painterResource(id = R.drawable.ic_baseline_plus),
                 contentDescription = ""
             )
@@ -73,16 +73,16 @@ fun FabMenuItem(item: FabMenuItem, modifier: Modifier = Modifier, size: Dp) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.clip(RoundedCornerShape(8.dp))
         ) {
-            Text(item.text, color = Color.White)
+            Text(item.text, color = MaterialTheme.colorScheme.inverseOnSurface)
 
             Box(modifier = Modifier.size(FabSize).padding((FabSize - size) / 2)) {
                 FloatingActionButton(
-                    backgroundColor = MaterialTheme.colors.primary,
+                    containerColor = MaterialTheme.colorScheme.primary,
                     modifier = modifier.size(size),
                     onClick = item.onClick
                 ) {
                     Icon(
-                        tint = MaterialTheme.colors.onPrimary,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         painter = painterResource(id = item.icon),
                         contentDescription = ""
                     )

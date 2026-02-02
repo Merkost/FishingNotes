@@ -11,7 +11,7 @@
 
 
     <style name="Theme.AnimatedSplashScreen" parent="Theme.Fishing.FigmaNight">
-        <item name="colorPrimary">@color/dark_gray</item>-->
+        <item name="colorPrimary">@color/dark_gray</item>
         <item name="colorOnPrimary">@color/dark_gray</item>
 <!--        <item name="android:statusBarColor" tools:targetApi="l">@color/primaryFigmaDarkColor</item>&ndash;&gt;-->
     </style>
@@ -20,6 +20,9 @@
         <item name="windowSplashScreenBackground">@color/dark_gray</item>
         <item name="windowSplashScreenAnimatedIcon" >@drawable/icon_splashscreen</item>
         <item name="postSplashScreenTheme">@style/Theme.AnimatedSplashScreen</item>
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
     </style>
 
 </resources>

@@ -1,12 +1,13 @@
 package com.mobileprism.fishing.ui.home.notes
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Scaffold
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -18,15 +19,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.accompanist.placeholder.PlaceholderHighlight
+import com.google.accompanist.placeholder.material3.fade
+import com.google.accompanist.placeholder.placeholder
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.model.datastore.NotesPreferences
-import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.NoContentView
-import com.mobileprism.fishing.ui.navigate
 import com.mobileprism.fishing.ui.utils.enums.CatchesSortValues
 import com.mobileprism.fishing.ui.viewmodels.UserCatchesViewModel
 import com.mobileprism.fishing.utils.time.toDateTextMonth
@@ -42,19 +44,19 @@ fun UserCatchesScreen(
     val uiState = viewModel.uiState.collectAsState()
     val catchesSortValue by notesPreferences.getCatchesSortValue.collectAsState(CatchesSortValues.Default)
 
-    Scaffold(backgroundColor = Color.Transparent) {
+    Scaffold(containerColor = Color.Transparent) {
         val catches by viewModel.currentContent.collectAsState()
         UserCatches(
             catchesState = uiState,
             catches = catchesSortValue.sort(catches),
             userCatchClicked = { catch -> navController.navigate(MainDestinations.Catch(catch)) },
             sortValue = catchesSortValue,
-            navigateToNewCatch = { navController.navigate(MainDestinations.NEW_CATCH_ROUTE) }
+            navigateToNewCatch = { navController.navigate(MainDestinations.NewCatch()) }
         )
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun UserCatches(
     modifier: Modifier = Modifier,
@@ -128,6 +130,20 @@ fun UserCatches(
                     }
                 }
             }
+            UiState.InProgress -> {
+                items(3) {
+                    CatchItemView(
+                        childModifier = Modifier.placeholder(
+                            true,
+                            color = MaterialTheme.colorScheme.outlineVariant,
+                            shape = CircleShape,
+                            highlight = PlaceholderHighlight.fade()
+                        ),
+                        catch = UserCatch(),
+                        onClick = {}
+                    )
+                }
+            }
             else -> {
                 item {
                     NoContentView(
@@ -144,18 +160,6 @@ fun UserCatches(
                         )
                     }
                 }
-                /*items(3) {
-                    CatchItemView(
-                        childModifier = Modifier.placeholder(
-                            true,
-                            color = Color.Gray,
-                            shape = CircleShape,
-                            highlight = PlaceholderHighlight.fade()
-                        ),
-                        catch = UserCatch(),
-                        onClick = userCatchClicked
-                    )
-                }*/
             }
 
         }
@@ -172,4 +176,3 @@ fun getDatesList(catches: List<UserCatch>): List<String> {
     }
     return dates
 }
-

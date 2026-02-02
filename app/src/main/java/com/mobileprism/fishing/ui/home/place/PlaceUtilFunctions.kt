@@ -10,13 +10,11 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
 import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
-import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
-import com.mobileprism.fishing.ui.navigate
 import java.util.*
 
 fun newCatchClicked(navController: NavController, place: UserMapMarker) {
-        navController.navigate(MainDestinations.NEW_CATCH_ROUTE, Arguments.PLACE to place)
+        navController.navigate(MainDestinations.NewCatch(place = place))
 }
 
 fun onRouteClicked(context: Context, marker: UserMapMarker, analyticsTracker: AnalyticsTracker) {

@@ -3,9 +3,9 @@ package com.mobileprism.fishing.ui.home.views
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -50,8 +50,8 @@ fun DefaultNoteView(
 
             SubtitleWithIcon(
                 modifier = Modifier.constrainAs(subtitle) {
-                    top.linkTo(parent.top, 16.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
+                    top.linkTo(parent.top, 12.dp)
+                    absoluteLeft.linkTo(parent.absoluteLeft, 12.dp)
                 },
                 icon = R.drawable.ic_baseline_sticky_note_2_24,
                 text = stringResource(id = R.string.note)
@@ -60,11 +60,11 @@ fun DefaultNoteView(
             if (note.description.isEmpty()) {
                 NoContentView(
                     modifier = Modifier
-                        .padding(bottom = 16.dp)
+                        .padding(bottom = 12.dp)
                         .constrainAs(text) {
                             top.linkTo(subtitle.bottom, 8.dp)
                             absoluteLeft.linkTo(subtitle.absoluteLeft)
-                            absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+                            absoluteRight.linkTo(parent.absoluteRight, 12.dp)
                             width = Dimension.fillToConstraints
                         },
                     text = stringResource(id = R.string.no_description),
@@ -74,9 +74,9 @@ fun DefaultNoteView(
                 SimpleUnderlineTextField(
                     modifier = Modifier.constrainAs(text) {
                         top.linkTo(subtitle.bottom, 8.dp)
-                        bottom.linkTo(parent.bottom, 16.dp)
-                        absoluteLeft.linkTo(parent.absoluteLeft, 16.dp)
-                        absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+                        bottom.linkTo(parent.bottom, 12.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft, 12.dp)
+                        absoluteRight.linkTo(parent.absoluteRight, 12.dp)
                         width = Dimension.fillToConstraints
                     },
                     singleLine = false,
@@ -86,7 +86,7 @@ fun DefaultNoteView(
                 SupportText(modifier = Modifier.constrainAs(noteDate) {
                     top.linkTo(text.bottom, 4.dp)
                     bottom.linkTo(parent.bottom, 4.dp)
-                    absoluteRight.linkTo(parent.absoluteRight, 16.dp)
+                    absoluteRight.linkTo(parent.absoluteRight, 12.dp)
                 }, text = note.dateCreated.toDate())
             }
         }
@@ -140,7 +140,7 @@ fun WeatherIconItem(
 
 @Composable
 fun WindIconItem(
-    iconTint: Color = MaterialTheme.colors.primaryVariant,
+    iconTint: Color = MaterialTheme.colorScheme.tertiary,
     rotation: Float,
     onIconSelected: () -> Unit
 ) {

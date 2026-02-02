@@ -6,27 +6,21 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material3.*
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.*
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.pagerTabIndicatorOffset
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.datastore.NotesPreferences
-import com.mobileprism.fishing.ui.Arguments
 import com.mobileprism.fishing.ui.MainDestinations
-import com.mobileprism.fishing.ui.home.SettingsHeader
 import com.mobileprism.fishing.ui.home.views.*
-import com.mobileprism.fishing.ui.theme.primaryTextColor
 import com.mobileprism.fishing.ui.utils.enums.CatchesSortValues
 import com.mobileprism.fishing.ui.utils.enums.PlacesSortValues
 import com.mobileprism.fishing.utils.Constants.modalBottomSheetCorners
@@ -38,79 +32,85 @@ enum class BottomSheetScreen {
     Filter,
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun Notes(
     modifier: Modifier = Modifier,
     navController: NavController,
     upPress: () -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val notesPreferences: NotesPreferences = koinInject()
     val tabs = remember { listOf(TabItem.Places, TabItem.Catches) }
     val pagerState = rememberPagerState(0) { tabs.size }
 
-    val bottomState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showBottomSheet by remember { mutableStateOf(false) }
     var bottomSheetScreen by remember { mutableStateOf(BottomSheetScreen.Sort) }
-    val shouldShowBlur = remember { mutableStateOf(false) }
 
     val fabState = remember { mutableStateOf(MultiFabState.COLLAPSED) }
 
-    ModalBottomSheetLayout(
-        sheetState = bottomState,
-        sheetShape = modalBottomSheetCorners,
-        sheetContent = {
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = bottomSheetState,
+            shape = modalBottomSheetCorners,
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ) {
             NotesModalBottomSheet(
                 pagerState = pagerState,
                 bottomSheetScreen = bottomSheetScreen,
                 notesPreferences = notesPreferences,
             )
-        }) {
-        Scaffold(
-            topBar = {
-                NotesAppBar(pagerState) { newSheetState ->
-                    bottomSheetScreen = newSheetState
-                    coroutineScope.launch { bottomState.show() }
-                }
-            },
-            floatingActionButton = {
-                FabWithMenu(
-                    modifier = Modifier
-                        .padding(bottom = 20.dp)
-                        .zIndex(5f),
-                    fabState = fabState,
-                    items = listOf(
-                        FabMenuItem(
-                            icon = R.drawable.ic_add_catch,
-                            text = stringResource(R.string.add_new_catch),
-                            onClick = { onAddNewCatchClick(navController) }
-                        ),
-                        FabMenuItem(
-                            icon = R.drawable.ic_baseline_add_location_24,
-                            text = stringResource(R.string.new_place),
-                            onClick = { onAddNewPlaceClick(navController) }
-                        )
+        }
+    }
+
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        topBar = {
+            NotesAppBar(pagerState) { newSheetState ->
+                bottomSheetScreen = newSheetState
+                showBottomSheet = true
+            }
+        },
+        floatingActionButton = {
+            FabWithMenu(
+                modifier = Modifier
+                    .padding(bottom = 20.dp)
+                    .zIndex(5f),
+                fabState = fabState,
+                items = listOf(
+                    FabMenuItem(
+                        icon = R.drawable.ic_add_catch,
+                        text = stringResource(R.string.add_new_catch),
+                        onClick = { onAddNewCatchClick(navController) }
+                    ),
+                    FabMenuItem(
+                        icon = R.drawable.ic_baseline_add_location_24,
+                        text = stringResource(R.string.new_place),
+                        onClick = { onAddNewPlaceClick(navController) }
                     )
                 )
-            },
+            )
+        },
+    ) { innerPadding ->
+        AnimatedVisibility(
+            fabState.value == MultiFabState.EXPANDED,
+            modifier = Modifier
+                .padding(innerPadding)
+                .zIndex(4f)
+                .fillMaxSize(),
+            enter = fadeIn(),
+            exit = fadeOut()
         ) {
-            AnimatedVisibility(
-                fabState.value == MultiFabState.EXPANDED,
-                modifier = Modifier
-                    .padding(it)
-                    .zIndex(4f)
-                    .fillMaxSize(),
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                Surface(color = Color.Black.copy(0.6f), onClick = {
-                    fabState.value = MultiFabState.COLLAPSED
-                }) { }
-            }
-            Column {
-                Tabs(tabs = tabs, pagerState = pagerState)
-                TabsContent(tabs = tabs, pagerState = pagerState, navController)
-            }
+            Surface(color = MaterialTheme.colorScheme.scrim.copy(0.6f), onClick = {
+                fabState.value = MultiFabState.COLLAPSED
+            }) { }
+        }
+        Column(modifier = Modifier.padding(innerPadding)) {
+            Tabs(tabs = tabs, pagerState = pagerState)
+            TabsContent(tabs = tabs, pagerState = pagerState, navController)
         }
     }
 }
@@ -207,13 +207,12 @@ fun PlacesSort(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CatchesSort(
     currentSort: State<CatchesSortValues>,
     onSelectedValue: (catchesSort: CatchesSortValues) -> Unit
 ) {
-    val radioOptions = CatchesSortValues.values().asList()
+    val radioOptions = CatchesSortValues.entries
 
     Column {
         SettingsHeader(stringResource(R.string.sort))
@@ -229,28 +228,30 @@ fun CatchesSort(
 @Composable
 fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
     val scope = rememberCoroutineScope()
+    val colorScheme = MaterialTheme.colorScheme
+
     TabRow(
         selectedTabIndex = pagerState.currentPage,
-        backgroundColor = MaterialTheme.colors.surface,
-        contentColor = primaryTextColor,
+        containerColor = colorScheme.primary,
+        contentColor = colorScheme.onPrimary,
         indicator = { tabPositions ->
-            TabRowDefaults.Indicator(
-                color = MaterialTheme.colors.onSurface,
-                modifier = Modifier.pagerTabIndicatorOffset(pagerState, tabPositions)
+            TabRowDefaults.SecondaryIndicator(
+                color = colorScheme.onPrimary,
+                modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage])
             )
         }) {
         tabs.forEachIndexed { index, tab ->
-            LeadingIconTab(
+            Tab(
                 icon = {
                     Icon(
                         painter = painterResource(id = tab.icon), contentDescription = "",
-                        tint = MaterialTheme.colors.primaryVariant
+                        tint = colorScheme.onPrimary
                     )
                 },
                 text = {
                     Text(
                         stringResource(tab.titleRes),
-                        color = MaterialTheme.colors.onSurface
+                        color = colorScheme.onPrimary
                     )
                 },
                 selected = pagerState.currentPage == index,
@@ -276,15 +277,9 @@ fun TabsContent(tabs: List<TabItem>, pagerState: PagerState, navController: NavC
 
 
 private fun onAddNewCatchClick(navController: NavController) {
-    navController.navigate(MainDestinations.NEW_CATCH_ROUTE)
+    navController.navigate(MainDestinations.NewCatch())
 }
 
 private fun onAddNewPlaceClick(navController: NavController) {
-    val addNewPlace = true
-    navController.navigate("${MainDestinations.HOME_ROUTE}/${MainDestinations.MAP_ROUTE}?${Arguments.MAP_NEW_PLACE}=${addNewPlace}")
+    navController.navigate(MainDestinations.Map(isAddingNewPlace = true))
 }
-
-
-
-
-

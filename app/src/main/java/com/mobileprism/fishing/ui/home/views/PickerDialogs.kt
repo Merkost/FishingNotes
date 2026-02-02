@@ -4,8 +4,11 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
@@ -50,10 +53,10 @@ fun DatePickerDialog(
 }
 
 @Composable
-fun WhiteCardWrapper(content: @Composable () -> Unit) {
+fun WhiteCardWrapper(content: @Composable ColumnScope.() -> Unit) {
     Card(
-        elevation = 4.dp, shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.padding(8.dp), backgroundColor = Color.White,
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp), shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.padding(8.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         content = content
     )
 }

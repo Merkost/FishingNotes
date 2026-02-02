@@ -380,5 +380,17 @@
     <string name="google_button">Google Button</string>
     <string name="item_count_format" translatable="false"> x %d</string>
     <string name="advert_here">Advert Here</string>
+    <string name="search_places">Search places</string>
+    <string name="select_place">Select place</string>
+    <string name="no_places_found">No places found</string>
+
+    <string name="theme_dynamic">Dynamic</string>
+    <string name="theme_blue">Blue</string>
+    <string name="theme_green">Green</string>
+
+    <string name="dark_mode">Dark mode</string>
+    <string name="dark_mode_system">System default</string>
+    <string name="dark_mode_light">Light</string>
+    <string name="dark_mode_dark">Dark</string>
 
 </resources>

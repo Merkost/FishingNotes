@@ -4,11 +4,13 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,6 +19,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,17 +35,15 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.BottomSheetScaffold
-import androidx.compose.material.BottomSheetScaffoldState
-import androidx.compose.material.Card
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.IconToggleButton
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -69,6 +70,9 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -83,60 +87,109 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieAnimatable
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.alorma.compose.settings.storage.base.rememberBooleanSettingState
-import com.alorma.compose.settings.ui.SettingsCheckbox
+import com.mobileprism.fishing.ui.home.views.SettingsCheckbox
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.material.placeholder
 import com.google.accompanist.placeholder.shimmer
+import com.google.accompanist.placeholder.material3.placeholder
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
 import com.mobileprism.fishing.ui.utils.LocalAnalytics
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.MainActivity
-import com.mobileprism.fishing.ui.home.SettingsHeader
+import com.mobileprism.fishing.ui.home.views.SettingsHeader
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.views.DefaultDialog
 import com.mobileprism.fishing.ui.theme.RedGoogleChrome
 import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
-import com.mobileprism.fishing.ui.theme.supportTextColor
 import com.mobileprism.fishing.utils.location.LocationManager
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
-@ExperimentalMaterialApi
+@ExperimentalMaterial3Api
 @Composable
 fun MapScaffold(
     mapUiState: MapUiState,
     modifier: Modifier = Modifier,
-    scaffoldState: BottomSheetScaffoldState,
-    fab: @Composable() (() -> Unit)?,
-    bottomSheet: @Composable() (ColumnScope.() -> Unit),
-    content: @Composable (PaddingValues) -> Unit,
+    onDismissCard: () -> Unit = {},
+    fab: @Composable (() -> Unit)?,
+    bottomCard: @Composable () -> Unit,
+    content: @Composable () -> Unit,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val offsetY = remember { Animatable(0f) }
+    val dismissThresholdPx = with(LocalDensity.current) { 80.dp.toPx() }
 
-    val dp = animateDpAsState(
-        when (mapUiState) {
-            is MapUiState.BottomSheetInfoMode -> 168.dp
-            else -> 0.dp
+    // Reset offset when card becomes visible
+    LaunchedEffect(mapUiState) {
+        if (mapUiState is MapUiState.BottomSheetInfoMode) {
+            offsetY.snapTo(0f)
         }
-    )
+    }
 
-    BottomSheetScaffold(
-        modifier = modifier.fillMaxSize(),
-        scaffoldState = scaffoldState,
-        sheetBackgroundColor = MaterialTheme.colors.surface.copy(0f),
-        sheetElevation = 0.dp,
-        sheetShape = RectangleShape,
-        sheetPeekHeight = dp.value,
-        floatingActionButton = fab,
-        sheetContent = bottomSheet,
-        sheetGesturesEnabled = true,
-        content = content
-    )
+    Box(modifier = modifier.fillMaxSize()) {
+        content()
+
+        // Bottom card slides in from the bottom, swipeable to dismiss
+        androidx.compose.animation.AnimatedVisibility(
+            visible = mapUiState is MapUiState.BottomSheetInfoMode,
+            modifier = Modifier.align(Alignment.BottomCenter),
+            enter = androidx.compose.animation.slideInVertically(
+                initialOffsetY = { it },
+                animationSpec = tween(300)
+            ) + fadeIn(animationSpec = tween(300)),
+            exit = androidx.compose.animation.slideOutVertically(
+                targetOffsetY = { it },
+                animationSpec = tween(300)
+            ) + fadeOut(animationSpec = tween(300)),
+        ) {
+            Column(
+                modifier = Modifier
+                    .offset { IntOffset(0, offsetY.value.toInt().coerceAtLeast(0)) }
+                    .pointerInput(Unit) {
+                        detectVerticalDragGestures(
+                            onDragEnd = {
+                                if (offsetY.value > dismissThresholdPx) {
+                                    onDismissCard()
+                                } else {
+                                    coroutineScope.launch {
+                                        offsetY.animateTo(0f, animationSpec = tween(200))
+                                    }
+                                }
+                            },
+                            onDragCancel = {
+                                coroutineScope.launch {
+                                    offsetY.animateTo(0f, animationSpec = tween(200))
+                                }
+                            },
+                            onVerticalDrag = { change, dragAmount ->
+                                change.consume()
+                                coroutineScope.launch {
+                                    offsetY.snapTo(offsetY.value + dragAmount)
+                                }
+                            }
+                        )
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                BottomSheetLine(modifier = Modifier.padding(bottom = 4.dp))
+                bottomCard()
+            }
+        }
+
+        fab?.let { fabContent ->
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+            ) {
+                fabContent()
+            }
+        }
+    }
 }
 
 @Composable
@@ -148,9 +201,9 @@ fun MapModalBottomSheet(
 
     val color = animateColorAsState(
         targetValue = if (showHiddenPlaces) {
-            MaterialTheme.colors.onSurface
+            MaterialTheme.colorScheme.onSurface
         } else {
-            supportTextColor
+            MaterialTheme.colorScheme.onSurfaceVariant
         },
         animationSpec = tween(800)
     )
@@ -169,9 +222,7 @@ fun MapModalBottomSheet(
             onCheckedChange = { newValue ->
                 coroutineScope.launch { mapPreferences.saveMapHiddenPlaces(newValue) }
             },
-            state = if (showHiddenPlaces) rememberBooleanSettingState(true) else rememberBooleanSettingState(
-                false
-            )
+            checked = showHiddenPlaces
         )
     }
 }
@@ -205,7 +256,7 @@ fun MyLocationButton(
             }
 
             else -> {
-                LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+                MaterialTheme.colorScheme.onSurface
             }
         }
     )
@@ -379,10 +430,11 @@ fun LayersView(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(stringResource(R.string.map_type))
-                Card(shape = CircleShape, modifier = Modifier.size(20.dp)) {
-                    IconButton(onClick = onCloseMapSelection) {
-                        Icon(Icons.Default.Close, stringResource(R.string.close))
-                    }
+                IconButton(
+                    onClick = onCloseMapSelection,
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(Icons.Default.Close, stringResource(R.string.close))
                 }
             }
             Row(
@@ -390,21 +442,21 @@ fun LayersView(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 MapLayerItem(
-                    mapType,
+                    currentMapType = mapType.value,
                     layer = MapTypes.roadmap,
                     painter = painterResource(R.drawable.ic_map_default),
                     name = stringResource(R.string.roadmap),
                     onLayerSelected = onLayerSelected
                 )
                 MapLayerItem(
-                    mapType,
+                    currentMapType = mapType.value,
                     layer = MapTypes.hybrid,
                     painter = painterResource(R.drawable.ic_map_satellite),
                     name = stringResource(R.string.satellite),
                     onLayerSelected = onLayerSelected
                 )
                 MapLayerItem(
-                    mapType,
+                    currentMapType = mapType.value,
                     layer = MapTypes.terrain,
                     painter = painterResource(R.drawable.ic_map_terrain),
                     name = stringResource(R.string.terrain),
@@ -417,39 +469,48 @@ fun LayersView(
 
 @Composable
 fun MapLayerItem(
-    mapType: State<Int>,
+    currentMapType: Int,
     layer: Int,
     painter: Painter,
     name: String,
     onLayerSelected: (Int) -> Unit
 ) {
+    val isSelected = currentMapType == layer
     val animatedColor by animateColorAsState(
-        if (mapType.value == layer) MaterialTheme.colors.primary else Color.White,
+        if (isSelected) MaterialTheme.colorScheme.primary
+        else MaterialTheme.colorScheme.outlineVariant,
         animationSpec = tween(300)
     )
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(70.dp)) {
-        IconToggleButton(
-            onCheckedChange = { if (it) onLayerSelected(layer) },
-            checked = mapType.value == layer,
-            modifier = if (mapType.value == layer) Modifier
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(70.dp)
+    ) {
+        Surface(
+            modifier = Modifier
                 .size(70.dp)
                 .border(
-                    width = 2.dp,
+                    width = if (isSelected) 2.dp else 1.dp,
                     color = animatedColor,
-                    shape = RoundedCornerShape(15.dp)
-                ) else Modifier
-                .size(70.dp)
-                .padding(0.dp)
+                    shape = RoundedCornerShape(12.dp)
+                ),
+            shape = RoundedCornerShape(12.dp),
+            onClick = { onLayerSelected(layer) }
         ) {
             Image(
-                painter, layer.toString(),
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxSize(),
+                painter = painter,
+                contentDescription = name,
+                modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
         }
-        Text(text = name, fontSize = 12.sp, overflow = TextOverflow.Ellipsis, maxLines = 1)
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = name,
+            fontSize = 12.sp,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1
+        )
     }
 }
 
@@ -548,7 +609,7 @@ fun FishLoading(modifier: Modifier) {
 fun PlaceTileView(
     modifier: Modifier,
 ) {
-    val context = LocalContext.current
+    LocalContext.current
     val viewModel: MapViewModel = koinViewModel()
     val placeTileViewNameState by viewModel.placeTileViewNameState.collectAsState()
 
@@ -566,19 +627,19 @@ fun PlaceTileView(
     val shimmerModifier = if (selectedPlace.value.isNotBlank()) Modifier else
         Modifier.placeholder(
             visible = true,
-            color = Color.LightGray,
+            color = MaterialTheme.colorScheme.outlineVariant,
             shape = CircleShape,
             highlight = PlaceholderHighlight.shimmer(
-                highlightColor = Color.White,
+                highlightColor = MaterialTheme.colorScheme.surface,
             ),
         )
     val pointerIconColor by animateColorAsState(
         if (selectedPlace.value.isNotBlank()) secondaryFigmaColor
-        else Color.LightGray
+        else MaterialTheme.colorScheme.outlineVariant
     )
     val textColor by animateColorAsState(
-        if (selectedPlace.value.isNotBlank()) MaterialTheme.colors.onSurface
-        else Color.LightGray
+        if (selectedPlace.value.isNotBlank()) MaterialTheme.colorScheme.onSurface
+        else MaterialTheme.colorScheme.outlineVariant
     )
 
 
@@ -705,7 +766,7 @@ fun BottomSheetLine(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .size(width = 25.dp, height = 3.dp)
                 .clip(CircleShape)
-                .background(Color.Gray)
+                .background(MaterialTheme.colorScheme.outlineVariant)
         )
     }
 }

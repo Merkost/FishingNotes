@@ -1,9 +1,9 @@
 package com.mobileprism.fishing.ui.home
 
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Snackbar
-import androidx.compose.material.SnackbarData
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarData
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,19 +17,15 @@ fun AppSnackbar(
     modifier: Modifier = Modifier,
     actionOnNewLine: Boolean = false,
     shape: Shape = CircleShape,
-    backgroundColor: Color = MaterialTheme.colors.surface,
-    contentColor: Color = MaterialTheme.colors.onSurface,
-    //actionColor: Color = JetsnackTheme.colors.brand,
-    elevation: Dp = 6.dp
+    containerColor: Color = MaterialTheme.colorScheme.surface,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
     Snackbar(
         snackbarData = snackbarData,
         modifier = modifier,
         actionOnNewLine = actionOnNewLine,
         shape = shape,
-        backgroundColor = backgroundColor,
+        containerColor = containerColor,
         contentColor = contentColor,
-        //actionColor = actionColor,
-        elevation = elevation
     )
 }
