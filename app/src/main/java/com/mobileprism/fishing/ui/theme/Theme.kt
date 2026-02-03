@@ -2,6 +2,7 @@ package com.mobileprism.fishing.ui.theme
 
 import android.os.Build
 import android.util.Log
+import androidx.activity.compose.LocalActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
@@ -28,7 +29,7 @@ fun FishingNotesTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val activity = (LocalContext.current as MainActivity)
+    val activity = (LocalActivity.current as MainActivity)
     val userPreferences: UserPreferences = koinInject()
     val appTheme = userPreferences.appTheme.collectAsState(initialAppTheme)
     val darkModePreference = userPreferences.darkMode.collectAsState(DarkModeValues.System)

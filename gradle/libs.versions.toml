@@ -88,9 +88,9 @@ compose-layout = { group = "androidx.compose.foundation", name = "foundation-lay
 compose-ui = { group = "androidx.compose.ui", name = "ui"}
 compose-uiUtil = { group = "androidx.compose.ui", name = "ui-util"}
 compose-runtime = { group = "androidx.compose.runtime", name = "runtime"}
-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 compose-animation = { group = "androidx.compose.animation", name = "animation"}
-compose-lottie = { group = "com.airbnb.android", name = "lottie-compose", version = "6.6.6" }
+compose-lottie = { group = "com.airbnb.android", name = "lottie-compose", version = "6.7.1" }
 compose-tooling = { group = "androidx.compose.ui", name = "ui-tooling"}
 compose-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended"}
 compose-uiTest = { group = "androidx.compose.ui", name = "ui-test-junit4"}
