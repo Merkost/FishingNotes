@@ -27,9 +27,9 @@ android {
     signingConfigs {
         create("release") {
             storeFile = rootProject.file("fishing.jks")
-            storePassword = keystoreProperties.getProperty("KEYSTORE_PASSWORD", "")
-            keyAlias = keystoreProperties.getProperty("KEY_ALIAS", "")
-            keyPassword = keystoreProperties.getProperty("KEY_PASSWORD", "")
+//            storePassword = keystoreProperties.getProperty("KEYSTORE_PASSWORD", "")
+//            keyAlias = keystoreProperties.getProperty("KEY_ALIAS", "")
+//            keyPassword = keystoreProperties.getProperty("KEY_PASSWORD", "")
         }
     }
 
@@ -70,7 +70,6 @@ android {
     }
 
     composeCompiler {
-        enableStrongSkippingMode = true
         reportsDestination = layout.buildDirectory.dir("compose_compiler")
     }
 
