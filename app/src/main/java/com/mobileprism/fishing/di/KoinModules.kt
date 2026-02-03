@@ -62,7 +62,6 @@ val mainModule = module {
     viewModel { LoginViewModel(repository = get()) }
     viewModel {
         MapViewModel(
-            getUserPlacesUseCase = get(),
             getUserPlacesListUseCase = get(),
             addNewPlaceUseCase = get(),
             getFreeWeatherUseCase = get(),

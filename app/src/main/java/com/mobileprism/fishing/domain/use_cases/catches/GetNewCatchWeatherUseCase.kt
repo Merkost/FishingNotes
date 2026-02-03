@@ -90,15 +90,15 @@ class GetNewCatchWeatherUseCase(
         )
 
     private fun checkWeatherDownloadNeed(place: UserMapMarker?, newCatchDate: Long): Boolean {
-        if (lastLoadedWeather == null) return true
+        val weather = lastLoadedWeather ?: return true
 
         val lastLoadedWeatherPlace = UserMapMarker(
-            latitude = lastLoadedWeather!!.latitude.toDouble(),
-            longitude = lastLoadedWeather!!.longitude.toDouble()
+            latitude = weather.latitude.toDouble(),
+            longitude = weather.longitude.toDouble()
         )
         return place?.let { currentPlace ->
             isLocationsTooFar(currentPlace, lastLoadedWeatherPlace)
-                    || !isDateInList(lastLoadedWeather!!.hourly, newCatchDate)
+                    || !isDateInList(weather.hourly, newCatchDate)
         } ?: false
     }
 }

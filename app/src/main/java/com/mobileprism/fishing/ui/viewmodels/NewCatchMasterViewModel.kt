@@ -3,7 +3,6 @@ package com.mobileprism.fishing.ui.viewmodels
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.NewCatchWeatherData
 import com.mobileprism.fishing.domain.use_cases.catches.GetNewCatchWeatherUseCase
@@ -39,7 +38,7 @@ class NewCatchMasterViewModel(
     )
     val placeAndTimeState = _placeAndTimeState.asStateFlow()
 
-    private val _fishAndWeightState = MutableStateFlow(FishAndWeightState(fish = if (BuildConfig.DEBUG) "Fish" else ""))
+    private val _fishAndWeightState = MutableStateFlow(FishAndWeightState())
     val fishAndWeightSate = _fishAndWeightState.asStateFlow()
 
     private val _catchInfoState = MutableStateFlow(CatchInfoState())

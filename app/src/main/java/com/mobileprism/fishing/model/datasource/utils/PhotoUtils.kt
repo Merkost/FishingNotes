@@ -86,7 +86,7 @@ fun fileFromContentUri(context: Context, contentUri: Uri): File {
 
         oStream.flush()
     } catch (e: Exception) {
-        e.printStackTrace()
+        com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e)
     }
 
     return tempFile

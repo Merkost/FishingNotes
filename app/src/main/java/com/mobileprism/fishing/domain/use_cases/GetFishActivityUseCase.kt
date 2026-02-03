@@ -26,9 +26,7 @@ class GetFishActivityUseCase(private val solunarRepository: SolunarRepository) {
                 onSuccess = {
                     emit(it.hourlyRating[hour])
                 },
-                onFailure = {
-                    // TODO: emit error
-                }
+                onFailure = { throw it }
             )
 
     }

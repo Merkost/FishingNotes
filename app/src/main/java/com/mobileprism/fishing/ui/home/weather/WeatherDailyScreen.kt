@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.ui.home.weather
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -46,10 +45,11 @@ fun WeatherDailyScreen(
     upPress: () -> Unit,
     data: DailyWeatherData?
 ) {
+    if (data == null) return
 
     val pagerState =
-        androidx.compose.foundation.pager.rememberPagerState(initialPage = data?.selectedDay ?: 0) {
-            data!!.dailyForecast.size
+        androidx.compose.foundation.pager.rememberPagerState(initialPage = data.selectedDay) {
+            data.dailyForecast.size
         }
 
     Scaffold(
@@ -60,17 +60,15 @@ fun WeatherDailyScreen(
             )
         },
     ) {
-        AnimatedVisibility(visible = data != null) {
-            Column(
-                modifier = Modifier.padding(it).fillMaxSize().navigationBarsPadding(),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(modifier = Modifier.weight(1f, false)) {
-                    WeatherDaysTabs(forecast = data!!.dailyForecast, pagerState = pagerState)
-                    WeatherTabsContent(forecast = data.dailyForecast, pagerState = pagerState)
-                }
-                BannerAdvertView(adId = stringResource(R.string.weather_daily_admob_banner_id))
+        Column(
+            modifier = Modifier.padding(it).fillMaxSize().navigationBarsPadding(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f, false)) {
+                WeatherDaysTabs(forecast = data.dailyForecast, pagerState = pagerState)
+                WeatherTabsContent(forecast = data.dailyForecast, pagerState = pagerState)
             }
+            BannerAdvertView(adId = stringResource(R.string.weather_daily_admob_banner_id))
         }
     }
 }
