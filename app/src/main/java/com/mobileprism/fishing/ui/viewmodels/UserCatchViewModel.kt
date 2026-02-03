@@ -11,6 +11,8 @@ import com.mobileprism.fishing.domain.use_cases.catches.DeleteUserCatchUseCase
 import com.mobileprism.fishing.domain.use_cases.places.GetMapMarkerByIdUseCase
 import com.mobileprism.fishing.domain.use_cases.SubscribeOnUserCatchStateUseCase
 import com.mobileprism.fishing.domain.use_cases.catches.UpdateUserCatchUseCase
+import com.mobileprism.fishing.R
+import com.mobileprism.fishing.ui.home.SnackbarManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -89,7 +91,7 @@ class UserCatchViewModel(
                     _mapMarker.value = it
                     subscribeOnCatchChanges()
                 },
-                onFailure = { }
+                onFailure = { SnackbarManager.showMessage(R.string.error_occured) }
             )
 
         }

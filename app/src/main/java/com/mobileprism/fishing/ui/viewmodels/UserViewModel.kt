@@ -66,19 +66,10 @@ class UserViewModel(
     }
 
     private fun getUserCatches() = viewModelScope.launch {
-        // TODO: fix
         getUserCatchUseCase().collect {
             _currentCatches.value = it
             _bestCatch.value = findBestCatch(it)
         }
-
-        /*val list = repository.getAllUserCatchesList().single()
-        list.!ifEmpty {
-
-        } ?: run {
-            _currentCatches.value = list
-        }
-        */
     }
 
     suspend fun logoutCurrentUser() = viewModelScope.run {

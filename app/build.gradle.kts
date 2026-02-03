@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -15,6 +16,22 @@ plugins {
 
 android {
     compileSdk = 36
+
+    val keystorePropertiesFile = rootProject.file("local.properties")
+    val keystoreProperties = Properties().apply {
+        if (keystorePropertiesFile.exists()) {
+            load(keystorePropertiesFile.inputStream())
+        }
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = rootProject.file("fishing.jks")
+            storePassword = keystoreProperties.getProperty("KEYSTORE_PASSWORD", "")
+            keyAlias = keystoreProperties.getProperty("KEY_ALIAS", "")
+            keyPassword = keystoreProperties.getProperty("KEY_PASSWORD", "")
+        }
+    }
 
     defaultConfig {
         namespace = "com.mobileprism.fishing"
@@ -34,7 +51,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
         getByName("debug") {
             applicationIdSuffix = ".debug"

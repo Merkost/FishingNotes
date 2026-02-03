@@ -47,8 +47,9 @@ class FirebaseCatchesRepositoryImpl(
         }
 
     private fun getCatchesStateFromDoc(docs: List<DocumentSnapshot>) = callbackFlow {
+        val listenerRegistrations = mutableListOf<ListenerRegistration>()
         docs.forEach { doc ->
-            doc.reference.collection(CATCHES_COLLECTION)
+            val registration = doc.reference.collection(CATCHES_COLLECTION)
                 .addSnapshotListener { snapshots, _ ->
                     if (snapshots != null) {
 
@@ -72,8 +73,9 @@ class FirebaseCatchesRepositoryImpl(
                         trySend(result)
                     }
                 }
+            listenerRegistrations.add(registration)
         }
-        awaitClose { }
+        awaitClose { listenerRegistrations.forEach { it.remove() } }
     }
 
     override fun getAllUserCatchesList() = channelFlow {
@@ -201,7 +203,14 @@ class FirebaseCatchesRepositoryImpl(
         catchId: String,
         newPhotos: List<Uri>
     ): StateFlow<Progress> {
-        TODO("Not yet implemented")
+        val flow = MutableStateFlow<Progress>(Progress.Loading(0))
+
+        val photosResult = newPhotos.map { it.toString() }
+        dbCollections.getUserCatchesCollection(markerId).document(catchId)
+            .update("downloadPhotoLinks", photosResult)
+            .addOnCompleteListener { flow.tryEmit(Progress.Complete) }
+
+        return flow
     }
 
     override fun subscribeOnUserCatchState(markerId: String, catchId: String) =
@@ -209,9 +218,14 @@ class FirebaseCatchesRepositoryImpl(
 
             val listener =
                 dbCollections.getUserCatchesCollection(markerId).whereEqualTo("id", catchId)
-                    .addSnapshotListener { snapshots, _ ->
+                    .addSnapshotListener { snapshots, error ->
+                        if (error != null) {
+                            Log.d("Fishing", "Catch state snapshot listener", error)
+                            return@addSnapshotListener
+                        }
+                        if (snapshots == null) return@addSnapshotListener
 
-                        for (dc in snapshots!!.documentChanges) {
+                        for (dc in snapshots.documentChanges) {
                             when (dc.type) {
                                 DocumentChange.Type.MODIFIED -> {
                                     trySend(dc.document.toObject())

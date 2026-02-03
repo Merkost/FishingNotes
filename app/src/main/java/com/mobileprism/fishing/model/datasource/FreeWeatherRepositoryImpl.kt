@@ -18,41 +18,39 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class FreeWeatherRepositoryImpl(
     private val analyticsTracker: AnalyticsTracker,
+    private val rapidApiKey: String,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : FreeWeatherRepository {
 
     companion object {
         private const val FREE_WEATHER_URL = "https://weather-by-api-ninjas.p.rapidapi.com/"
+    }
 
-        private fun getService(): FreeWeatherApiService {
-            return createRetrofit().create(FreeWeatherApiService::class.java)
-        }
+    private fun getService(): FreeWeatherApiService {
+        return createRetrofit().create(FreeWeatherApiService::class.java)
+    }
 
-        private fun createRetrofit(): Retrofit {
-            return Retrofit.Builder()
-                .baseUrl(FREE_WEATHER_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(CoroutineCallAdapterFactory())
-                .client(createOkHttpClient())
-                .build()
-        }
+    private fun createRetrofit(): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(FREE_WEATHER_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(CoroutineCallAdapterFactory())
+            .client(createOkHttpClient())
+            .build()
+    }
 
-        private fun createOkHttpClient(): OkHttpClient {
-            val httpClient = OkHttpClient.Builder()
-            val interceptor = HttpLoggingInterceptor()
-            interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
-            httpClient.interceptors().add(interceptor)
-            httpClient.addInterceptor { chain ->
-                val builder = chain.request().newBuilder()
-                builder.header("x-rapidapi-host", "weather-by-api-ninjas.p.rapidapi.com")
-                builder.header(
-                    "x-rapidapi-key",
-                    "00952e723emshfbe5254b88d96a6p1c8539jsn92c8c9ef59a1"
-                )
-                return@addInterceptor chain.proceed(builder.build())
-            }
-            return httpClient.build()
+    private fun createOkHttpClient(): OkHttpClient {
+        val httpClient = OkHttpClient.Builder()
+        val interceptor = HttpLoggingInterceptor()
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+        httpClient.interceptors().add(interceptor)
+        httpClient.addInterceptor { chain ->
+            val builder = chain.request().newBuilder()
+            builder.header("x-rapidapi-host", "weather-by-api-ninjas.p.rapidapi.com")
+            builder.header("x-rapidapi-key", rapidApiKey)
+            return@addInterceptor chain.proceed(builder.build())
         }
+        return httpClient.build()
     }
 
     override suspend fun getCurrentWeatherFree(

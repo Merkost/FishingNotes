@@ -421,7 +421,7 @@ fun PlaceTopBar(
     var menuOpened by remember { mutableStateOf(false) }
 
     val color = animateColorAsState(
-        targetValue = if (isVisible!!) {
+        targetValue = if (isVisible == true) {
             MaterialTheme.colorScheme.onPrimary
         } else {
             MaterialTheme.colorScheme.onSurfaceVariant
@@ -434,7 +434,7 @@ fun PlaceTopBar(
         title = stringResource(id = R.string.place),
         onNavClick = backPress,
         actions = {
-            IconToggleButton(checked = isVisible!!,
+            IconToggleButton(checked = isVisible ?: true,
                 onCheckedChange = {
                     viewModel.changeVisibility(it)
                 }) {

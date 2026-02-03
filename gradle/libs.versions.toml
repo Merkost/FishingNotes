@@ -12,7 +12,7 @@ secretsGradlePlugin = "2.0.1"
 firebaseCrashlytics = "3.0.6"
 firebasePerf = "2.0.2"
 
-material3 = "1.5.0-alpha11"
+material3 = "1.5.0-alpha13"
 compose-bom = "2026.01.01"
 accompanist = "0.36.0"
 accompanistPermissions = "0.37.3"
@@ -88,7 +88,7 @@ compose-layout = { group = "androidx.compose.foundation", name = "foundation-lay
 compose-ui = { group = "androidx.compose.ui", name = "ui"}
 compose-uiUtil = { group = "androidx.compose.ui", name = "ui-util"}
 compose-runtime = { group = "androidx.compose.runtime", name = "runtime"}
-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 compose-animation = { group = "androidx.compose.animation", name = "animation"}
 compose-lottie = { group = "com.airbnb.android", name = "lottie-compose", version = "6.6.6" }
 compose-tooling = { group = "androidx.compose.ui", name = "ui-tooling"}

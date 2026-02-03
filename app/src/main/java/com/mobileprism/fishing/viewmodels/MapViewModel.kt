@@ -16,7 +16,6 @@ import com.mobileprism.fishing.domain.repository.app.MarkersRepository
 import com.mobileprism.fishing.domain.use_cases.*
 import com.mobileprism.fishing.domain.use_cases.places.AddNewPlaceUseCase
 import com.mobileprism.fishing.domain.use_cases.places.GetUserPlacesListUseCase
-import com.mobileprism.fishing.domain.use_cases.places.GetUserPlacesUseCase
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.UiState
@@ -27,7 +26,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 class MapViewModel(
-    private val getUserPlacesUseCase: GetUserPlacesUseCase,
     private val getUserPlacesListUseCase: GetUserPlacesListUseCase,
     private val addNewPlaceUseCase: AddNewPlaceUseCase,
     private val getFreeWeatherUseCase: GetFreeWeatherUseCase,
@@ -118,32 +116,6 @@ class MapViewModel(
             }
         }
     }
-
-    /*private fun loadUserPlaces() {
-        viewModelScope.launch {
-            getUserPlacesUseCase.invoke().collect {
-                it.fold(
-                    onAdded = { place ->
-                        var currentList = mutableListOf<UserMapMarker>()
-                        currentList = _mapMarkers.value
-                        currentList.add(place as UserMapMarker)
-                        _mapMarkers.emit(currentList)
-                    },
-                    onModified = { place ->
-                        val oldOne = _mapMarkers.value.find { it.id == (place as UserMapMarker).id}
-                        _mapMarkers.value.remove(oldOne)
-                        _mapMarkers.value.add(place as UserMapMarker)
-                    },
-                    onDeleted = { place ->
-                        val placeToDelete = place as UserMapMarker
-                        if (placeToDelete == currentMarker.value) _currentMarker.value = null
-                        _mapMarkers.value.remove(place as UserMapMarker)
-                    }
-                )
-            }
-        }
-    }*/
-
 
     private var addNewMarkerJob: Job? = null
     fun cancelAddNewMarker() {

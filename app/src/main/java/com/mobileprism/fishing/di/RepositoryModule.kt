@@ -52,7 +52,7 @@ val repositoryModule = module {
         )
     }
     single<WeatherRepository> { WeatherRepositoryRetrofitImpl(analyticsTracker = get()) }
-    single<FreeWeatherRepository> { FreeWeatherRepositoryImpl(analyticsTracker = get()) }
+    single<FreeWeatherRepository> { FreeWeatherRepositoryImpl(analyticsTracker = get(), rapidApiKey = BuildConfig.RAPIDAPI_KEY) }
     single<OfflineRepository> { FirebaseOfflineRepositoryImpl(dbCollections = get()) }
 }
 

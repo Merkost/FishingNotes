@@ -79,7 +79,6 @@ class FirebaseUserRepositoryImpl(
                 registerDate = Date().time
             )
         }
-        //TODO("change name")
     }
 
     override suspend fun addNewUser(user: User): StateFlow<Progress> {

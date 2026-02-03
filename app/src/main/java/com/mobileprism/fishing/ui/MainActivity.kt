@@ -1,13 +1,13 @@
 package com.mobileprism.fishing.ui
 
-import android.content.Intent
+import android.app.Activity
 import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.Window
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -31,6 +31,7 @@ import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
@@ -63,9 +64,25 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
 
+    private val updateResultLauncher = registerForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        when (result.resultCode) {
+            Activity.RESULT_CANCELED -> {
+                SnackbarManager.showMessage(R.string.update_canceled)
+            }
+            Activity.RESULT_OK -> {
+                SnackbarManager.showMessage(R.string.update_downloading)
+            }
+            else -> {
+                SnackbarManager.showMessage(R.string.update_failed)
+                checkForUpdates()
+            }
+        }
+    }
+
     companion object {
         const val splashFadeDurationMillis = 300
-        const val UPDATE_REQUEST_CODE = 984165687
 
         val TAG = MainActivity::class.java.simpleName
 
@@ -150,8 +167,9 @@ class MainActivity : ComponentActivity() {
                 appUpdateManager.registerListener(installStateUpdatedListener)
 
                 appUpdateManager.startUpdateFlowForResult(
-                    appUpdateInfo, AppUpdateType.FLEXIBLE,
-                    this, UPDATE_REQUEST_CODE
+                    appUpdateInfo,
+                    updateResultLauncher,
+                    AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build()
                 )
             } else if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
                 popupSnackbarForCompleteUpdate()
@@ -202,27 +220,6 @@ class MainActivity : ComponentActivity() {
             SnackbarAction(R.string.reload_app) { appUpdateManager.completeUpdate() },
             duration = SnackbarDuration.Indefinite
         )
-    }
-
-    @Deprecated("This method has been deprecated in favor of using the Activity Result API\n      which brings increased type safety via an {@link ActivityResultContract} and the prebuilt\n      contracts for common intents available in\n      {@link androidx.activity.result.contract.ActivityResultContracts}, provides hooks for\n      testing, and allow receiving results in separate, testable classes independent from your\n      activity. Use\n      {@link #registerForActivityResult(ActivityResultContract, ActivityResultCallback)}\n      with the appropriate {@link ActivityResultContract} and handling the result in the\n      {@link ActivityResultCallback#onActivityResult(Object) callback}.")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == UPDATE_REQUEST_CODE) {
-            when (resultCode) {
-                RESULT_CANCELED -> {
-                    SnackbarManager.showMessage(R.string.update_canceled)
-                }
-
-                RESULT_OK -> {
-                    SnackbarManager.showMessage(R.string.update_downloading)
-                }
-
-                else -> {
-                    SnackbarManager.showMessage(R.string.update_failed)
-                    checkForUpdates()
-                }
-            }
-        }
     }
 
     @Composable

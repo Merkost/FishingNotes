@@ -14,9 +14,7 @@ class GetFreeWeatherUseCase(private val freeWeatherRepository: FreeWeatherReposi
             onSuccess = {
                 emit(it)
             },
-            onFailure = {
-                // TODO: emit error
-            }
+            onFailure = { throw it }
         )
     }
 }
