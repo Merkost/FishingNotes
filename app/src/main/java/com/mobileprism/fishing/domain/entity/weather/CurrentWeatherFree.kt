@@ -1,5 +1,10 @@
 package com.mobileprism.fishing.domain.entity.weather
 
+import androidx.compose.runtime.Immutable
+import kotlinx.serialization.Serializable
+
+@Immutable
+@Serializable
 data class CurrentWeatherFree(
     val cloud_pct: Int,
     val feels_like: Int,

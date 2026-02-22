@@ -19,6 +19,10 @@ sealed class TabItem(var icon: Int, var titleRes: Int, var screen: ComposableFun
         UserCatchesScreen(navController = navController)
     })
 
+    object Statistics : TabItem(R.drawable.ic_statistics, R.string.statistics, { _ ->
+        StatisticsScreen()
+    })
+
     object PlaceCatches : TabItem(R.drawable.ic_fish, R.string.catches, { _ -> })
 
     @ExperimentalFoundationApi

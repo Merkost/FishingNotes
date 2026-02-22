@@ -19,19 +19,26 @@ class SaveNewCatchUseCase(
     private val weatherPreferences: WeatherPreferences
 ) {
 
-    operator fun invoke(data: NewUserCatchData) = channelFlow {
+    operator fun invoke(
+        data: NewUserCatchData,
+        onPhotoProgress: ((uploaded: Int, total: Int) -> Unit)? = null
+    ) = channelFlow {
+        try {
+            val photos = savePhotos(data.photos, onPhotoProgress)
+            val userCatch = createUserCatch(
+                placeAndTimeState = data.placeAndTimeState,
+                fishAndWeightState = data.fishAndWeightState,
+                catchInfoState = data.catchInfoState,
+                weather = mapWeatherValues(data.catchWeatherState),
+                photos = photos
+            )
 
-        val userCatch = createUserCatch(
-            placeAndTimeState = data.placeAndTimeState,
-            fishAndWeightState = data.fishAndWeightState,
-            catchInfoState = data.catchInfoState,
-            weather = mapWeatherValues(data.catchWeatherState),
-            photos = savePhotos(data.photos)
-        )
-
-        data.placeAndTimeState.place?.let { it ->
-            catchesRepository.addNewCatch(markerId = it.id, newCatch = userCatch)
-                .collect { trySend(it) }
+            data.placeAndTimeState.place?.let { place ->
+                catchesRepository.addNewCatch(markerId = place.id, newCatch = userCatch)
+                    .collect { trySend(it) }
+            }
+        } catch (e: Exception) {
+            trySend(Result.failure(e))
         }
     }
 

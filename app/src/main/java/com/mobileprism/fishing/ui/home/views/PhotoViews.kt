@@ -8,6 +8,8 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Arrangement
@@ -40,7 +42,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +53,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -61,15 +64,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.SubcomposeAsyncImage
+import coil.request.ImageRequest
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
 import com.mobileprism.fishing.utils.network.ConnectionState
 import com.mobileprism.fishing.utils.network.currentConnectivityState
-import com.mobileprism.fishing.utils.network.observeConnectivityAsFlow
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
+
+private val NoOpUri: (Uri) -> Unit = {}
 
 @Composable
 fun ItemPhoto(
@@ -78,6 +83,7 @@ fun ItemPhoto(
     deletedPhoto: (Uri) -> Unit,
     deleteEnabled: Boolean = true
 ) {
+    val context = LocalContext.current
 
     val fullScreenPhoto = remember {
         mutableStateOf<Uri?>(null)
@@ -90,7 +96,10 @@ fun ItemPhoto(
     ) {
 
         SubcomposeAsyncImage(
-            model = photo,
+            model = ImageRequest.Builder(context)
+                .data(photo)
+                .size(300)
+                .build(),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxWidth()
@@ -148,8 +157,7 @@ fun PhotosView(
     onEditClick: () -> Unit
 ) {
     val context = LocalContext.current
-    val connectionState by context.observeConnectivityAsFlow()
-        .collectAsState(initial = context.currentConnectivityState)
+    val connectionState = remember { context.currentConnectivityState }
 
     val tempPhotosState = remember { mutableStateListOf<Uri>() }
 
@@ -236,8 +244,7 @@ fun NewCatchPhotoView(
     onDelete: (Uri) -> Unit,
 ) {
     val context = LocalContext.current
-    val connectionState by context.observeConnectivityAsFlow()
-        .collectAsState(initial = context.currentConnectivityState)
+    val connectionState = remember { context.currentConnectivityState }
 
     val tempPhotosState = remember { mutableStateListOf<Uri>() }
 
@@ -267,7 +274,7 @@ fun NewCatchPhotoView(
                         FullSizePhotoView(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
                             photo = it,
-                            clickedPhoto = {},
+                            clickedPhoto = NoOpUri,
                             deletedPhoto = { photo -> onDelete(photo) }
                         )
                     }
@@ -310,7 +317,11 @@ fun FullSizePhotoView(
     ) {
 
         SubcomposeAsyncImage(
-            model = photo,
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(photo)
+                .size(600)
+                .crossfade(true)
+                .build(),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize()
@@ -361,12 +372,16 @@ fun ItemCatchPhotoView(
     modifier: Modifier = Modifier,
     photo: Uri
 ) {
+    val context = LocalContext.current
     val fullScreenPhoto = remember {
         mutableStateOf<Uri?>(null)
     }
 
     SubcomposeAsyncImage(
-        model = photo,
+        model = ImageRequest.Builder(context)
+            .data(photo)
+            .size(300)
+            .build(),
         contentDescription = null,
         modifier = modifier
             .size(150.dp)
@@ -392,13 +407,14 @@ fun ItemCatchPhotoView(
 @Composable
 fun FullScreenPhoto(photo: MutableState<Uri?>) {
 
-    // TODO: add rotation and zoom
-    /*val scale = remember { mutableStateOf(1f) }
-    val rotationState = remember { mutableStateOf(1f) }*/
+    val scale = remember { mutableStateOf(1f) }
+    val rotationState = remember { mutableStateOf(0f) }
+    val offsetX = remember { mutableStateOf(0f) }
+    val offsetY = remember { mutableStateOf(0f) }
 
     val coroutineScope = rememberCoroutineScope()
-    val offsetY = remember { Animatable(0f) }
-    val alpha = 0.8f - abs(offsetY.value).div(600)
+    val dismissOffsetY = remember { Animatable(0f) }
+    val alpha = 0.8f - abs(dismissOffsetY.value).div(600)
     val backgroundColor = animateColorAsState(
         targetValue = MaterialTheme.colorScheme.scrim.copy(if (alpha < 0) 0f else alpha)
     )
@@ -414,7 +430,10 @@ fun FullScreenPhoto(photo: MutableState<Uri?>) {
                 .fillMaxSize(), color = backgroundColor.value
         ) {
             SubcomposeAsyncImage(
-                model = photo.value,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(photo.value)
+                    .crossfade(true)
+                    .build(),
                 filterQuality = FilterQuality.High,
                 loading = {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -422,36 +441,75 @@ fun FullScreenPhoto(photo: MutableState<Uri?>) {
                 modifier = Modifier
                     .fillMaxSize()
                     .offset {
-                        IntOffset(0, offsetY.value.roundToInt())
+                        IntOffset(
+                            offsetX.value.roundToInt(),
+                            (offsetY.value + dismissOffsetY.value).roundToInt()
+                        )
                     }
-                    .draggable(
-                        state = rememberDraggableState { delta ->
-                            coroutineScope.launch {
-                                offsetY.snapTo(offsetY.value + delta)
-                            }
-                        },
-                        orientation = Orientation.Vertical,
-                        onDragStarted = {
-
-                        },
-                        onDragStopped = {
-
-                            if (offsetY.value >= 400f || offsetY.value <= -400f) photo.value =
-                                null else
-                                coroutineScope.launch {
-                                    offsetY.animateTo(
-                                        targetValue = 0f,
-                                        animationSpec = tween(
-                                            durationMillis = 400,
-                                            delayMillis = 0
-                                        )
-                                    )
-                                }
-                        }
+                    .graphicsLayer(
+                        scaleX = scale.value,
+                        scaleY = scale.value,
+                        rotationZ = rotationState.value
                     )
-                    .clickable {
-                        photo.value = null
-                    },
+                    .pointerInput(Unit) {
+                        detectTransformGestures { _, pan, zoom, rotation ->
+                            scale.value = (scale.value * zoom).coerceIn(0.5f, 5f)
+                            rotationState.value += rotation
+                            if (scale.value > 1f) {
+                                offsetX.value += pan.x
+                                offsetY.value += pan.y
+                            } else {
+                                coroutineScope.launch {
+                                    dismissOffsetY.snapTo(dismissOffsetY.value + pan.y)
+                                }
+                            }
+                        }
+                    }
+                    .pointerInput(Unit) {
+                        detectTapGestures(
+                            onDoubleTap = {
+                                scale.value = 1f
+                                rotationState.value = 0f
+                                offsetX.value = 0f
+                                offsetY.value = 0f
+                                coroutineScope.launch {
+                                    dismissOffsetY.snapTo(0f)
+                                }
+                            },
+                            onTap = {
+                                if (scale.value <= 1f) {
+                                    photo.value = null
+                                }
+                            }
+                        )
+                    }
+                    .then(
+                        if (scale.value <= 1f) {
+                            Modifier.draggable(
+                                state = rememberDraggableState { delta ->
+                                    coroutineScope.launch {
+                                        dismissOffsetY.snapTo(dismissOffsetY.value + delta)
+                                    }
+                                },
+                                orientation = Orientation.Vertical,
+                                onDragStopped = {
+                                    if (abs(dismissOffsetY.value) >= 400f) {
+                                        photo.value = null
+                                    } else {
+                                        coroutineScope.launch {
+                                            dismissOffsetY.animateTo(
+                                                targetValue = 0f,
+                                                animationSpec = tween(
+                                                    durationMillis = 400,
+                                                    delayMillis = 0
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                            )
+                        } else Modifier
+                    ),
                 contentDescription = stringResource(id = R.string.catch_photo)
             )
         }

@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.ui.viewmodels
 
 import android.net.Uri
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import com.mobileprism.fishing.utils.ValidationUtils
 import java.util.*
 
 class NewCatchMasterViewModel(
@@ -53,6 +55,9 @@ class NewCatchMasterViewModel(
     private val _photos = MutableStateFlow<List<Uri>>(listOf())
     val photos = _photos.asStateFlow()
 
+    private val _uploadProgress = MutableStateFlow<PhotoUploadProgress?>(null)
+    val uploadProgress = _uploadProgress.asStateFlow()
+
     private val _skipAvailable: MutableStateFlow<Boolean> =
         MutableStateFlow(placeAndTimeState.value.place != null && fishAndWeightSate.value.fish.isNotBlank())
     val skipAvailable = _skipAvailable.asStateFlow()
@@ -67,7 +72,8 @@ class NewCatchMasterViewModel(
     }
 
     fun setDate(date: Long) {
-        _placeAndTimeState.value = _placeAndTimeState.value.copy(date = date)
+        val clampedDate = ValidationUtils.clampDate(date)
+        _placeAndTimeState.value = _placeAndTimeState.value.copy(date = clampedDate)
         _catchWeatherState.value = CatchWeatherState(isDownloadAvailable = true)
     }
 
@@ -77,11 +83,13 @@ class NewCatchMasterViewModel(
     }
 
     fun setFishAmount(amount: Int) {
-        _fishAndWeightState.value = _fishAndWeightState.value.copy(fishAmount = amount)
+        val clamped = amount.coerceIn(ValidationUtils.MIN_FISH_AMOUNT, ValidationUtils.MAX_FISH_AMOUNT)
+        _fishAndWeightState.value = _fishAndWeightState.value.copy(fishAmount = clamped)
     }
 
     fun setFishWeight(weight: Double) {
-        _fishAndWeightState.value = _fishAndWeightState.value.copy(fishWeight = weight)
+        val clamped = weight.coerceIn(ValidationUtils.MIN_FISH_WEIGHT_KG, ValidationUtils.MAX_FISH_WEIGHT_KG)
+        _fishAndWeightState.value = _fishAndWeightState.value.copy(fishWeight = clamped)
     }
 
     fun setNote(note: String) {
@@ -185,16 +193,21 @@ class NewCatchMasterViewModel(
 
     fun saveNewCatch() {
         _uiState.value = NewCatchViewState.SavingNewCatch
+        _uploadProgress.value = null
 
         viewModelScope.launch(Dispatchers.IO) {
             placeAndTimeState.value.place?.let {
                 val newCatch = createNewCatchData()
-                saveNewCatchUseCase(newCatch).collect { progress ->
+                saveNewCatchUseCase(newCatch) { uploaded, total ->
+                    _uploadProgress.value = PhotoUploadProgress(uploaded, total)
+                }.collect { progress ->
                     progress.fold(
                         onSuccess = {
+                            _uploadProgress.value = null
                             _uiState.value = NewCatchViewState.Complete
                         },
                         onFailure = {
+                            _uploadProgress.value = null
                             _uiState.value = NewCatchViewState.Error(it)
                         }
                     )
@@ -223,6 +236,7 @@ class NewCatchMasterViewModel(
     )
 }
 
+@Immutable
 data class CatchPlaceAndTimeState(
     val place: UserMapMarker? = null,
     val date: Long = Date().time,
@@ -231,6 +245,7 @@ data class CatchPlaceAndTimeState(
     val isInputCorrect: Boolean = (place != null),
 )
 
+@Immutable
 data class FishAndWeightState(
     val fish: String = "",
     val fishAmount: Int = 0,
@@ -238,6 +253,7 @@ data class FishAndWeightState(
     val isInputCorrect: Boolean = (fish != "")
 )
 
+@Immutable
 data class CatchInfoState(
     val rod: String = "",
     val bait: String = "",
@@ -245,6 +261,7 @@ data class CatchInfoState(
     val note: String = ""
 )
 
+@Immutable
 data class CatchWeatherState(
     val primary: String = "",
     val icon: String = "01",
@@ -265,4 +282,10 @@ data class NewUserCatchData(
     val catchInfoState: CatchInfoState,
     val catchWeatherState: CatchWeatherState,
     val photos: List<Uri>
+)
+
+@Immutable
+data class PhotoUploadProgress(
+    val uploaded: Int,
+    val total: Int
 )

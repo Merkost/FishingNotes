@@ -79,7 +79,7 @@
     <string name="plus">+</string>
     <string name="minus">-</string>
     <string name="delete_photo">Delete photo</string>
-    <string name="add_photo_permission">Для загрузки фотографий приложению необходим доступ к памяти телефона</string>
+    <string name="add_photo_permission">To upload photos, the app needs access to device storage</string>
     <string name="deny">Deny</string>
     <string name="provide">Provide</string>
     <string name="click_on_icon_to_change">Click on the icon to change!</string>
@@ -297,11 +297,11 @@
     <string name="choose_wind_direction">Choose wind direction</string>
     <string name="download_weather">Download weather</string>
     <string name="skip">Skip</string>
-    <string name="new_catch_skip_tutor">Заполните местоположение и вид рыбы для пропуска остальных полей</string>
-    <string name="cancel_new_catch_dialog">Отменить добавление нового улова?</string>
-    <string name="sure_cancel_new_catch_dialog">Все введенные данные будут потеряны</string>
+    <string name="new_catch_skip_tutor">Fill in location and fish species to skip the remaining fields</string>
+    <string name="cancel_new_catch_dialog">Cancel adding a new catch?</string>
+    <string name="sure_cancel_new_catch_dialog">All entered data will be lost</string>
     <string name="network_error_message">Can\'t connect to the server!</string>
-    <string name="new_catch_place_on_map_tutorial">Выберите место на карте и нажмите кнопку добавления нового улова</string>
+    <string name="new_catch_place_on_map_tutorial">Select a place on the map and tap the add new catch button</string>
     <string name="thunderstorm_with_light_rain">Thunderstorm with light rain</string>
     <string name="thunderstorm_with_rain">Thunderstorm with rain</string>
     <string name="thunderstorm_with_heavy_rain">Thunderstorm with heavy rain</string>
@@ -362,14 +362,14 @@
     <string name="light_shower_sleet">Light shower sleet</string>
     <string name="shower_sleet">Shower sleet</string>
     <string name="pressure_hpa">hPa</string>
-    <string name="reset_dialog">Сбросить изменения</string>
-    <string name="reset_dialog_secondary">Вы уверены, что хотите отменить все внесённые изменения?</string>
-    <string name="profile_edit">Редактирование профиля</string>
-    <string name="birthday_hint">Дата рождения</string>
-    <string name="birthday_set">Указать дату рождения</string>
-    <string name="name_hint">Имя</string>
+    <string name="reset_dialog">Discard changes</string>
+    <string name="reset_dialog_secondary">Are you sure you want to discard all changes?</string>
+    <string name="profile_edit">Edit profile</string>
+    <string name="birthday_hint">Date of birth</string>
+    <string name="birthday_set">Set date of birth</string>
+    <string name="name_hint">Name</string>
     <string name="email_hint">E-mail</string>
-    <string name="username">Имя пользователя</string>
+    <string name="username">Username</string>
 
     <string name="something_went_wrong">Something went wrong!</string>
     <string name="add_places_catches_for_stats">Add places and catches to see statistics!</string>
@@ -392,5 +392,43 @@
     <string name="dark_mode_system">System default</string>
     <string name="dark_mode_light">Light</string>
     <string name="dark_mode_dark">Dark</string>
+
+    <!-- Validation -->
+    <string name="weight_out_of_range">Weight must be between 0 and 500 kg</string>
+    <string name="amount_out_of_range">Amount must be between 0 and 9999</string>
+    <string name="place_name_too_long">Place name must be %d characters or less</string>
+    <string name="invalid_coordinates">Invalid coordinates</string>
+    <string name="char_counter">%1$d/%2$d</string>
+
+    <!-- Photo -->
+    <string name="gallery">Gallery</string>
+    <string name="camera">Camera</string>
+    <string name="uploading_photo_progress">Uploading photo %1$d/%2$d…</string>
+
+    <!-- Sync -->
+    <string name="sync_pending">Syncing…</string>
+    <string name="sync_error">Sync error</string>
+    <string name="sync_conflict">Sync conflict</string>
+    <string name="pending_upload">Pending upload</string>
+    <string name="keep_my_version">Keep my version</string>
+    <string name="use_server_version">Use server version</string>
+    <string name="sync_conflict_title">Sync conflict</string>
+    <string name="sync_conflict_message">This item was modified on another device. Choose which version to keep.</string>
+    <string name="offline_maps_info">To download offline maps, use the Google Maps app to save the areas you need. These cached maps will be available to all apps on your device.</string>
+
+    <!-- Statistics -->
+    <string name="statistics">Statistics</string>
+    <string name="total_catches">Total Catches</string>
+    <string name="total_weight">Total Weight</string>
+    <string name="average_weight">Average Weight</string>
+    <string name="heaviest_catch">Heaviest Catch</string>
+    <string name="species_count">Species</string>
+    <string name="most_caught">Most Caught</string>
+    <string name="catches_over_time">Catches Over Time</string>
+    <string name="top_species">Top Species</string>
+    <string name="weather_conditions">By Weather</string>
+    <string name="temperature_range">By Temperature</string>
+    <string name="moon_phase_stats">By Moon Phase</string>
+    <string name="no_data">Not enough data</string>
 
 </resources>

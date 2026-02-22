@@ -11,14 +11,16 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
 class FreeWeatherRepositoryImpl(
     private val analyticsTracker: AnalyticsTracker,
     private val rapidApiKey: String,
+    okHttpClient: OkHttpClient,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : FreeWeatherRepository {
 
@@ -26,31 +28,26 @@ class FreeWeatherRepositoryImpl(
         private const val FREE_WEATHER_URL = "https://weather-by-api-ninjas.p.rapidapi.com/"
     }
 
-    private fun getService(): FreeWeatherApiService {
-        return createRetrofit().create(FreeWeatherApiService::class.java)
-    }
+    private val json = Json { ignoreUnknownKeys = true }
 
-    private fun createRetrofit(): Retrofit {
-        return Retrofit.Builder()
-            .baseUrl(FREE_WEATHER_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(CoroutineCallAdapterFactory())
-            .client(createOkHttpClient())
+    private val service: FreeWeatherApiService by lazy {
+        val client = okHttpClient.newBuilder()
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .header("x-rapidapi-host", "weather-by-api-ninjas.p.rapidapi.com")
+                    .header("x-rapidapi-key", rapidApiKey)
+                    .build()
+                chain.proceed(request)
+            }
             .build()
-    }
 
-    private fun createOkHttpClient(): OkHttpClient {
-        val httpClient = OkHttpClient.Builder()
-        val interceptor = HttpLoggingInterceptor()
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
-        httpClient.interceptors().add(interceptor)
-        httpClient.addInterceptor { chain ->
-            val builder = chain.request().newBuilder()
-            builder.header("x-rapidapi-host", "weather-by-api-ninjas.p.rapidapi.com")
-            builder.header("x-rapidapi-key", rapidApiKey)
-            return@addInterceptor chain.proceed(builder.build())
-        }
-        return httpClient.build()
+        Retrofit.Builder()
+            .baseUrl(FREE_WEATHER_URL)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .addCallAdapterFactory(CoroutineCallAdapterFactory())
+            .client(client)
+            .build()
+            .create(FreeWeatherApiService::class.java)
     }
 
     override suspend fun getCurrentWeatherFree(
@@ -59,7 +56,7 @@ class FreeWeatherRepositoryImpl(
     ): Flow<Result<CurrentWeatherFree>> = flow {
         emit(safeApiCall(dispatcher) {
             analyticsTracker.logEvent(AnalyticsEvent.GetFreeWeather)
-            getService().getFreeWeather(latitude = lat, longitude = lon)
+            service.getFreeWeather(latitude = lat, longitude = lon)
         })
     }
 

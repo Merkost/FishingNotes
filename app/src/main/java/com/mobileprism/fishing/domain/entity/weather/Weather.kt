@@ -1,15 +1,17 @@
 package com.mobileprism.fishing.domain.entity.weather
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
+import androidx.compose.runtime.Immutable
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@Immutable
 @Parcelize
 @Serializable
-class Weather(
-    @field:SerializedName("id") val id: Int = 0,
-    @field:SerializedName("main") val main: String = "",
-    @field:SerializedName("description") val description: String = "Rainy",
-    @field:SerializedName("icon") val icon: String = ""
+data class Weather(
+    @SerialName("id") val id: Int = 0,
+    @SerialName("main") val main: String = "",
+    @SerialName("description") val description: String = "Rainy",
+    @SerialName("icon") val icon: String = ""
 ) : Parcelable

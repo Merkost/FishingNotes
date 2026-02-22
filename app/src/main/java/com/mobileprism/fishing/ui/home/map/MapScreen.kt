@@ -166,7 +166,8 @@ fun MapScreen(
                         navController.navigate(
                             MainDestinations.NewCatch(place = marker)
                         )
-                    }
+                    },
+                    onSaveCurrentPlace = { newPlaceDialog = true },
                 )
             }
         ) {

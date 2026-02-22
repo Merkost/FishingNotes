@@ -58,7 +58,7 @@ val settingsModule = module {
 }
 
 val mainModule = module {
-    viewModel { MainViewModel(repository = get()) }
+    viewModel { MainViewModel(repository = get(), syncStatusManager = get()) }
     viewModel { LoginViewModel(repository = get()) }
     viewModel {
         MapViewModel(
@@ -107,8 +107,9 @@ val mainModule = module {
             deleteUserMarkerNoteUseCase = get()
         )
     }
-    viewModel { UserCatchesViewModel(userCatchesUseCase = get()) }
+    viewModel { UserCatchesViewModel(userCatchesUseCase = get(), repository = get()) }
     viewModel { UserPlacesViewModel(repository = get()) }
+    viewModel { StatisticsViewModel(getStatisticsUseCase = get()) }
     viewModel { parameters ->
         NewCatchMasterViewModel(
             placeState = parameters.get(),

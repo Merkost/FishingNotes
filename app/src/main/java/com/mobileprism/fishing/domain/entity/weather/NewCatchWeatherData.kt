@@ -1,5 +1,8 @@
 package com.mobileprism.fishing.domain.entity.weather
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class NewCatchWeatherData(
     val lat: Double = 0.0,
     val lng: Double = 0.0,

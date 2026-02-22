@@ -67,6 +67,7 @@ import com.mobileprism.fishing.ui.home.views.DefaultDialog
 import com.mobileprism.fishing.ui.home.views.TimePickerDialog
 import com.mobileprism.fishing.ui.home.views.WindIconItem
 import com.mobileprism.fishing.utils.Constants.WIND_ROTATION
+import com.mobileprism.fishing.utils.ValidationUtils
 import com.mobileprism.fishing.utils.roundTo
 import com.mobileprism.fishing.utils.time.TimeConstants
 import com.mobileprism.fishing.utils.time.toDate
@@ -123,6 +124,11 @@ fun FishAmountAndWeightView(
     amountState: MutableState<String>,
     weightState: MutableState<String>
 ) {
+    val currentAmount = amountState.value.toIntOrNull()
+    val currentWeight = weightState.value.toDoubleOrNull()
+    val isAmountError = currentAmount != null && !ValidationUtils.isAmountValid(currentAmount)
+    val isWeightError = currentWeight != null && !ValidationUtils.isWeightValid(currentWeight)
+
     Row(modifier = modifier) {
         Column(Modifier.weight(1F)) {
             OutlinedTextField(
@@ -130,13 +136,18 @@ fun FishAmountAndWeightView(
                 onValueChange = {
                     if (it.isEmpty()) amountState.value = it
                     else {
-                        amountState.value = when (it.toIntOrNull()) {
-                            null -> amountState.value //old value
-                            else -> it   //new value
+                        val parsed = it.toIntOrNull()
+                        when {
+                            parsed == null -> {} // keep old value
+                            parsed > ValidationUtils.MAX_FISH_AMOUNT -> amountState.value = ValidationUtils.MAX_FISH_AMOUNT.toString()
+                            else -> amountState.value = it
                         }
                     }
                 },
-                isError = amountState.value.isEmpty(),
+                isError = amountState.value.isEmpty() || isAmountError,
+                supportingText = if (isAmountError) {
+                    { Text(stringResource(R.string.amount_out_of_range)) }
+                } else null,
                 label = { Text(text = stringResource(R.string.amount)) },
                 trailingIcon = { Text(stringResource(R.string.pc)) },
                 modifier = Modifier.fillMaxWidth(),
@@ -150,8 +161,9 @@ fun FishAmountAndWeightView(
             Row(Modifier.fillMaxWidth()) {
                 OutlinedButton(
                     onClick = {
-                        if (amountState.value.toInt() >= 1 && amountState.value.isNotBlank())
-                            amountState.value = ((amountState.value.toInt() - 1).toString())
+                        val current = amountState.value.toIntOrNull() ?: 0
+                        if (current >= 1)
+                            amountState.value = (current - 1).toString()
                     },
                     Modifier
                         .weight(1F)
@@ -166,11 +178,12 @@ fun FishAmountAndWeightView(
                 Spacer(modifier = Modifier.size(6.dp))
                 OutlinedButton(
                     onClick = {
-                        if (amountState.value.isEmpty()) amountState.value = 1.toString()
-                        else amountState.value =
-                            ((amountState.value.toInt() + 1).toString())
+                        val current = amountState.value.toIntOrNull() ?: 0
+                        if (current < ValidationUtils.MAX_FISH_AMOUNT)
+                            amountState.value = (current + 1).toString()
                     },
-                    Modifier
+                    enabled = (amountState.value.toIntOrNull() ?: 0) < ValidationUtils.MAX_FISH_AMOUNT,
+                    modifier = Modifier
                         .weight(1F)
                         .align(Alignment.CenterVertically)
                 ) {
@@ -190,12 +203,18 @@ fun FishAmountAndWeightView(
                 onValueChange = {
                     if (it.isEmpty()) weightState.value = it
                     else {
-                        weightState.value = when (it.toDoubleOrNull()) {
-                            null -> weightState.value //old value
-                            else -> it   //new value
+                        val parsed = it.toDoubleOrNull()
+                        when {
+                            parsed == null -> {} // keep old value
+                            parsed > ValidationUtils.MAX_FISH_WEIGHT_KG -> weightState.value = ValidationUtils.MAX_FISH_WEIGHT_KG.toInt().toString()
+                            else -> weightState.value = it
                         }
                     }
                 },
+                isError = isWeightError,
+                supportingText = if (isWeightError) {
+                    { Text(stringResource(R.string.weight_out_of_range)) }
+                } else null,
                 label = { Text(text = stringResource(R.string.weight)) },
                 trailingIcon = {
                     Text(stringResource(R.string.kg))
@@ -211,9 +230,9 @@ fun FishAmountAndWeightView(
             Row(Modifier.fillMaxWidth()) {
                 OutlinedButton(
                     onClick = {
-                        if (weightState.value.toDouble() >= 0.1 && weightState.value.isNotBlank())
-                            weightState.value =
-                                ((weightState.value.toDouble() - 0.1).roundTo(1).toString())
+                        val current = weightState.value.toDoubleOrNull() ?: 0.0
+                        if (current >= 0.1)
+                            weightState.value = (current - 0.1).roundTo(1).toString()
                     },
                     Modifier
                         .weight(1F)
@@ -228,12 +247,12 @@ fun FishAmountAndWeightView(
                 Spacer(modifier = Modifier.size(6.dp))
                 OutlinedButton(
                     onClick = {
-                        if (weightState.value.isEmpty()) weightState.value =
-                            0.1f.roundTo(1).toString()
-                        else weightState.value =
-                            ((weightState.value.toDouble() + 0.1).roundTo(1).toString())
+                        val current = weightState.value.toDoubleOrNull() ?: 0.0
+                        if (current < ValidationUtils.MAX_FISH_WEIGHT_KG)
+                            weightState.value = (current + 0.1).roundTo(1).toString()
                     },
-                    Modifier
+                    enabled = (weightState.value.toDoubleOrNull() ?: 0.0) < ValidationUtils.MAX_FISH_WEIGHT_KG,
+                    modifier = Modifier
                         .weight(1F)
                         .align(Alignment.CenterVertically)
                 ) {
@@ -490,19 +509,23 @@ fun DateAndTimeItem(
     var timeSetState by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
+    val clampedOnDateChange: (Long) -> Unit = { newDate ->
+        onDateChange(ValidationUtils.clampDate(newDate))
+    }
+
     if (dateSetState) {
         DatePickerDialog(
             context = context,
             initialDate = dateTime,
             minDate = Date().time - (TimeConstants.MILLISECONDS_IN_DAY * 5),
-            onDateChange = onDateChange
+            onDateChange = clampedOnDateChange
         ) {
             dateSetState = false
         }
     }
 
     if (timeSetState) {
-        TimePickerDialog(context = context, initialTime = dateTime, onTimeChange = onDateChange) {
+        TimePickerDialog(context = context, initialTime = dateTime, onTimeChange = clampedOnDateChange) {
             timeSetState = false
         }
     }
@@ -563,17 +586,25 @@ fun FishAmountAndWeightViewItem(
     onAmountChange: (Int) -> Unit,
     onWeightChange: (Double) -> Unit
 ) {
+    val isAmountError = !ValidationUtils.isAmountValid(amountState)
+    val isWeightError = !ValidationUtils.isWeightValid(weightState)
+
     Row(modifier = modifier) {
         Column(Modifier.weight(1F)) {
             OutlinedTextField(
                 value = amountState.toString(),
                 onValueChange = {
-                    when (it.toIntOrNull()) {
-                        null -> onAmountChange(amountState)
-                        else -> onAmountChange(it.toInt())
+                    val parsed = it.toIntOrNull()
+                    when {
+                        parsed == null -> onAmountChange(amountState)
+                        parsed > ValidationUtils.MAX_FISH_AMOUNT -> onAmountChange(ValidationUtils.MAX_FISH_AMOUNT)
+                        else -> onAmountChange(parsed)
                     }
                 },
-                isError = amountState.toString().isEmpty(),
+                isError = isAmountError,
+                supportingText = if (isAmountError) {
+                    { Text(stringResource(R.string.amount_out_of_range)) }
+                } else null,
                 label = { Text(text = stringResource(R.string.amount)) },
                 trailingIcon = { Text(stringResource(R.string.pc)) },
                 modifier = Modifier.fillMaxWidth(),
@@ -587,10 +618,9 @@ fun FishAmountAndWeightViewItem(
             Row(Modifier.fillMaxWidth()) {
                 OutlinedButton(
                     onClick = {
-                        if (amountState >= 1 && amountState.toString().isNotBlank()) {
+                        if (amountState >= 1) {
                             onAmountChange(amountState - 1)
                         }
-
                     },
                     Modifier
                         .weight(1F)
@@ -605,10 +635,12 @@ fun FishAmountAndWeightViewItem(
                 Spacer(modifier = Modifier.size(6.dp))
                 OutlinedButton(
                     onClick = {
-                        if (amountState.toString().isEmpty()) onAmountChange(1)
-                        else onAmountChange((amountState + 1))
+                        if (amountState < ValidationUtils.MAX_FISH_AMOUNT) {
+                            onAmountChange(amountState + 1)
+                        }
                     },
-                    Modifier
+                    enabled = amountState < ValidationUtils.MAX_FISH_AMOUNT,
+                    modifier = Modifier
                         .weight(1F)
                         .align(Alignment.CenterVertically)
                 ) {
@@ -625,12 +657,17 @@ fun FishAmountAndWeightViewItem(
             OutlinedTextField(
                 value = weightState.toString(),
                 onValueChange = {
-                    when (it.toDoubleOrNull()) {
-                        null -> onWeightChange(weightState)
-                        else -> onWeightChange(it.toDouble())
+                    val parsed = it.toDoubleOrNull()
+                    when {
+                        parsed == null -> onWeightChange(weightState)
+                        parsed > ValidationUtils.MAX_FISH_WEIGHT_KG -> onWeightChange(ValidationUtils.MAX_FISH_WEIGHT_KG)
+                        else -> onWeightChange(parsed)
                     }
-
                 },
+                isError = isWeightError,
+                supportingText = if (isWeightError) {
+                    { Text(stringResource(R.string.weight_out_of_range)) }
+                } else null,
                 label = { Text(text = stringResource(R.string.weight)) },
                 trailingIcon = {
                     Text(stringResource(R.string.kg))
@@ -646,7 +683,7 @@ fun FishAmountAndWeightViewItem(
             Row(Modifier.fillMaxWidth()) {
                 OutlinedButton(
                     onClick = {
-                        if (weightState >= 0.1 && weightState.toString().isNotBlank()) {
+                        if (weightState >= 0.1) {
                             onWeightChange((weightState - 0.1).roundTo(1))
                         }
                     },
@@ -663,14 +700,12 @@ fun FishAmountAndWeightViewItem(
                 Spacer(modifier = Modifier.size(6.dp))
                 OutlinedButton(
                     onClick = {
-                        if (weightState.toString().isEmpty()) onWeightChange(
-                            0.1.roundTo(1)
-                        )
-                        else onWeightChange(
-                            (weightState + 0.1).roundTo(1)
-                        )
+                        if (weightState < ValidationUtils.MAX_FISH_WEIGHT_KG) {
+                            onWeightChange((weightState + 0.1).roundTo(1))
+                        }
                     },
-                    Modifier
+                    enabled = weightState < ValidationUtils.MAX_FISH_WEIGHT_KG,
+                    modifier = Modifier
                         .weight(1F)
                         .align(Alignment.CenterVertically)
                 ) {

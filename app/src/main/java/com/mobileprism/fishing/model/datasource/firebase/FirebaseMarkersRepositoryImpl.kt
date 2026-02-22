@@ -2,6 +2,9 @@ package com.mobileprism.fishing.model.datasource.firebase
 
 import android.content.Context
 import android.util.Log
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.google.firebase.firestore.*
 import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
 import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
@@ -266,7 +269,7 @@ class FirebaseMarkersRepositoryImpl(
     private fun getMarkersSnapshotListener(scope: ProducerScope<ContentState<MapMarker>>) =
         EventListener<QuerySnapshot> { snapshots, error ->
             if (error != null) {
-                Log.d("Fishing", "Marker snapshot listener", error)
+                Log.e("Fishing", "Marker snapshot listener", error)
                 return@EventListener
             }
             snapshots?.let { snapshot ->
@@ -295,7 +298,7 @@ class FirebaseMarkersRepositoryImpl(
     private fun getMarkersListSnapshotListener(scope: ProducerScope<List<UserMapMarker>>) =
         EventListener<QuerySnapshot> { snapshots, error ->
             if (error != null) {
-                Log.d("Fishing", "Marker snapshot listener", error)
+                Log.e("Fishing", "Marker snapshot listener", error)
                 return@EventListener
             }
 
@@ -356,6 +359,16 @@ class FirebaseMarkersRepositoryImpl(
 //        progressFlow: MutableStateFlow<Progress>
 //    ) =
 //        cloudPhotoStorage.uploadPhotos(photos, progressFlow)
+
+    override fun getAllUserMarkersListPaged(
+        sortField: String,
+        sortDirection: Query.Direction
+    ): Flow<PagingData<UserMapMarker>> = Pager(
+        config = PagingConfig(pageSize = 20, enablePlaceholders = false),
+        pagingSourceFactory = {
+            MarkersPagingSource(dbCollections.getUserMapMarkersCollection(), sortField, sortDirection)
+        }
+    ).flow
 
     override suspend fun deleteMarker(userMapMarker: UserMapMarker) {
         dbCollections.getUserMapMarkersCollection().document(userMapMarker.id).delete()

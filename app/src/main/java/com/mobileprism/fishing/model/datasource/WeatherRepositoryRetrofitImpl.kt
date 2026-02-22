@@ -12,12 +12,16 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
 class WeatherRepositoryRetrofitImpl(
     private val analyticsTracker: AnalyticsTracker,
+    private val openWeatherKey: String,
+    private val okHttpClient: OkHttpClient,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : WeatherRepository {
 
@@ -25,33 +29,28 @@ class WeatherRepositoryRetrofitImpl(
 
     companion object {
         private const val BASE_WEATHER_URL = "https://api.openweathermap.org/data/3.0/"
-        private const val FREE_WEATHER_URL = "https://weather-by-api-ninjas.p.rapidapi.com/"
+    }
 
-        private fun getService(): WeatherApiService {
-            return createRetrofit().create(WeatherApiService::class.java)
-        }
+    private val json = Json { ignoreUnknownKeys = true }
 
-        private fun createRetrofit(): Retrofit {
-            return Retrofit.Builder()
-                .baseUrl(BASE_WEATHER_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(CoroutineCallAdapterFactory())
-                .client(createOkHttpClient())
-                .build()
-        }
-
-        private fun createOkHttpClient(): OkHttpClient {
-            return OkHttpClient.Builder().build()
-        }
+    private val service: WeatherApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_WEATHER_URL)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .addCallAdapterFactory(CoroutineCallAdapterFactory())
+            .client(okHttpClient)
+            .build()
+            .create(WeatherApiService::class.java)
     }
 
     override suspend fun getWeather(lat: Double, lon: Double)
     : Flow<Result<WeatherForecast>> = flow {
         emit(safeApiCall(dispatcher) {
             analyticsTracker.logEvent(AnalyticsEvent.GetWeather)
-            getService().getWeather(
+            service.getWeather(
                 latitude = lat, longitude = lon,
-                lang = locale
+                lang = locale,
+                appid = openWeatherKey
             )
         })
 
@@ -60,9 +59,10 @@ class WeatherRepositoryRetrofitImpl(
     override suspend fun getHistoricalWeather(lat: Double, lon: Double, date: Long)
     : Flow<Result<WeatherForecast>> = flow {
         emit(safeApiCall(dispatcher) {
-            getService().getHistoricalWeather(
+            service.getHistoricalWeather(
                 latitude = lat, longitude = lon, dt = date,
-                lang = locale
+                lang = locale,
+                appid = openWeatherKey
             )
         })
     }

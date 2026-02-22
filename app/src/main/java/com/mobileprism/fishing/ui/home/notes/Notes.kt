@@ -40,7 +40,7 @@ fun Notes(
     upPress: () -> Unit,
 ) {
     val notesPreferences: NotesPreferences = koinInject()
-    val tabs = remember { listOf(TabItem.Places, TabItem.Catches) }
+    val tabs = remember { listOf(TabItem.Places, TabItem.Catches, TabItem.Statistics) }
     val pagerState = rememberPagerState(0) { tabs.size }
 
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -126,11 +126,13 @@ fun NotesAppBar(
         title = stringResource(id = R.string.notes),
         actions = {
             Row {
-                IconButton(onClick = {
-                    if (!pagerState.isScrollInProgress) {
-                        openModalBottomSheet(BottomSheetScreen.Sort)
-                    }
-                }) { Icon(Icons.Default.Sort, Icons.Default.Sort.name) }
+                if (pagerState.currentPage < 2) {
+                    IconButton(onClick = {
+                        if (!pagerState.isScrollInProgress) {
+                            openModalBottomSheet(BottomSheetScreen.Sort)
+                        }
+                    }) { Icon(Icons.Default.Sort, Icons.Default.Sort.name) }
+                }
 
                 //TODO: Add filters
                 /*IconButton(onClick = {

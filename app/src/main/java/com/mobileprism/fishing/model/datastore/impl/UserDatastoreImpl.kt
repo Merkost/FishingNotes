@@ -7,11 +7,12 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.google.gson.Gson
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.model.datastore.UserDatastore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class UserDatastoreImpl(private val context: Context): UserDatastore {
 
@@ -25,12 +26,12 @@ class UserDatastoreImpl(private val context: Context): UserDatastore {
     //get the saved value
     override val getUser: Flow<User> = context.dataStore.data
         .map { preferences ->
-            Gson().fromJson(preferences[USER_KEY], User::class.java) ?: User()
+            preferences[USER_KEY]?.let { Json.decodeFromString<User>(it) } ?: User()
         }
 
     override suspend fun saveUser(user: User) {
         context.dataStore.edit { preferences ->
-            preferences[USER_KEY] = Gson().toJson(user)
+            preferences[USER_KEY] = Json.encodeToString(user)
         }
     }
 

@@ -1,6 +1,11 @@
 {
   "permissions": {
     "allow": [
+      "Read",
+      "Edit",
+      "Write",
+      "Bash",
+      "WebFetch",
       "WebSearch",
       "Bash(java -jar gradle/wrapper/gradle-wrapper.jar wrapper:*)",
       "Bash(find:*)",
@@ -25,7 +30,8 @@
       "Bash(ls:*)",
       "Bash(./gradlew compileDebugKotlin:*)",
       "Bash(git -C /Users/merkost/AndroidStudioProjects/FishingNotes log --oneline -10)",
-      "Bash(bash:*)"
+      "Bash(bash:*)",
+      "Bash(tail:*)"
     ]
   }
 }

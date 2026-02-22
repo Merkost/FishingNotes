@@ -51,6 +51,8 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import androidx.compose.material3.SnackbarDuration
+import com.mobileprism.fishing.ui.home.SnackbarAction
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.advertising.BannerAdvertView
 import com.mobileprism.fishing.ui.home.advertising.showInterstitialAd
@@ -157,17 +159,35 @@ fun NewCatchMasterScreen(
 
                 is NewCatchViewState.Error -> {
                     loadingDialogState.value = false
-                    SnackbarManager.showMessage(R.string.error_occured)
-                    upPress()
+                    SnackbarManager.showMessage(
+                        messageTextId = R.string.error_occured,
+                        snackbarAction = SnackbarAction(
+                            textId = R.string.retry,
+                            action = { viewModel.saveNewCatch() }
+                        ),
+                        duration = SnackbarDuration.Long
+                    )
                 }
             }
         }
 
     }
 
+    val uploadProgress by viewModel.uploadProgress.collectAsState()
+
+    val loadingText = when {
+        uploadProgress != null -> stringResource(
+            R.string.uploading_photo_progress,
+            uploadProgress!!.uploaded,
+            uploadProgress!!.total
+        )
+        else -> stringResource(id = R.string.saving_new_catch)
+    }
+
     ModalLoadingDialog(
         visible = loadingDialogState.value,
-        text = stringResource(id = R.string.saving_new_catch)
+        text = loadingText,
+        progress = uploadProgress?.let { it.uploaded.toFloat() / it.total }
     )
 
     val skipAvailable by viewModel.skipAvailable.collectAsState()

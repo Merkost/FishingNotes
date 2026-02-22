@@ -390,4 +390,42 @@
     <string name="dark_mode_light">Светлая</string>
     <string name="dark_mode_dark">Тёмная</string>
 
+    <!-- Validation -->
+    <string name="weight_out_of_range">Вес должен быть от 0 до 500 кг</string>
+    <string name="amount_out_of_range">Количество должно быть от 0 до 9999</string>
+    <string name="place_name_too_long">Название места должно содержать не более %d символов</string>
+    <string name="invalid_coordinates">Недопустимые координаты</string>
+    <string name="char_counter">%1$d/%2$d</string>
+
+    <!-- Photo -->
+    <string name="gallery">Галерея</string>
+    <string name="camera">Камера</string>
+    <string name="uploading_photo_progress">Загрузка фото %1$d/%2$d…</string>
+
+    <!-- Sync -->
+    <string name="sync_pending">Синхронизация…</string>
+    <string name="sync_error">Ошибка синхронизации</string>
+    <string name="sync_conflict">Конфликт синхронизации</string>
+    <string name="pending_upload">Ожидание загрузки</string>
+    <string name="keep_my_version">Оставить мою версию</string>
+    <string name="use_server_version">Использовать версию сервера</string>
+    <string name="sync_conflict_title">Конфликт синхронизации</string>
+    <string name="sync_conflict_message">Этот элемент был изменён на другом устройстве. Выберите, какую версию сохранить.</string>
+    <string name="offline_maps_info">Для загрузки офлайн-карт используйте приложение Google Карты, чтобы сохранить нужные области. Кэшированные карты будут доступны всем приложениям на вашем устройстве.</string>
+
+    <!-- Statistics -->
+    <string name="statistics">Статистика</string>
+    <string name="total_catches">Всего уловов</string>
+    <string name="total_weight">Общий вес</string>
+    <string name="average_weight">Средний вес</string>
+    <string name="heaviest_catch">Самый тяжёлый</string>
+    <string name="species_count">Виды рыб</string>
+    <string name="most_caught">Чаще всего</string>
+    <string name="catches_over_time">Уловы по месяцам</string>
+    <string name="top_species">Популярные виды</string>
+    <string name="weather_conditions">По погоде</string>
+    <string name="temperature_range">По температуре</string>
+    <string name="moon_phase_stats">По фазе луны</string>
+    <string name="no_data">Недостаточно данных</string>
+
 </resources>

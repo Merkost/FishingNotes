@@ -1,10 +1,12 @@
 package com.mobileprism.fishing.domain.entity.content
 
 import android.os.Parcelable
+import androidx.compose.runtime.Immutable
 import com.mobileprism.fishing.domain.entity.common.Note
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
+@Immutable
 @Parcelize
 @Serializable
 data class UserCatch(
@@ -29,5 +31,6 @@ data class UserCatch(
     val weatherWindSpeed: Float = 0.0f,
     val weatherWindDeg: Int = 0,
     val weatherPressure: Int = 0,
-    val weatherMoonPhase: Float = 0.0f
+    val weatherMoonPhase: Float = 0.0f,
+    val lastModified: Long = 0
 ): Parcelable, Content

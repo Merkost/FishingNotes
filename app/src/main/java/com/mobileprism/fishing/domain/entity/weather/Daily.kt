@@ -1,34 +1,37 @@
 package com.mobileprism.fishing.domain.entity.weather
 
 import android.os.Parcelable
-import com.google.gson.annotations.SerializedName
+import androidx.compose.runtime.Immutable
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@Immutable
 @Parcelize
 @Serializable
-class Daily(
-    @field:SerializedName("dt") val date: Long = 0,
-    @field:SerializedName("sunrise") val sunrise: Long = 0,
-    @field:SerializedName("sunset") val sunset: Long = 0,
-    @field:SerializedName("moon_phase") val moonPhase: Float = 0f,
-    @field:SerializedName("pressure") val pressure: Int = 0,
-    @field:SerializedName("humidity") val humidity: Int = 0,
-    @field:SerializedName("wind_speed") val windSpeed: Float = 0f,
-    @field:SerializedName("wind_deg") val windDeg: Int = 0,
-    @field:SerializedName("weather") val weather: List<Weather> = listOf(Weather()),
-    @field:SerializedName("temp") val temperature: Temperature = Temperature(),
-    @field:SerializedName("pop") val probabilityOfPrecipitation: Float = 0f,
-    @field:SerializedName("clouds") val clouds: Int = 0,
+data class Daily(
+    @SerialName("dt") val date: Long = 0,
+    @SerialName("sunrise") val sunrise: Long = 0,
+    @SerialName("sunset") val sunset: Long = 0,
+    @SerialName("moon_phase") val moonPhase: Float = 0f,
+    @SerialName("pressure") val pressure: Int = 0,
+    @SerialName("humidity") val humidity: Int = 0,
+    @SerialName("wind_speed") val windSpeed: Float = 0f,
+    @SerialName("wind_deg") val windDeg: Int = 0,
+    @SerialName("weather") val weather: List<Weather> = listOf(Weather()),
+    @SerialName("temp") val temperature: Temperature = Temperature(),
+    @SerialName("pop") val probabilityOfPrecipitation: Float = 0f,
+    @SerialName("clouds") val clouds: Int = 0,
 ) : Parcelable
 
+@Immutable
 @Serializable
 @Parcelize
-class Temperature(
-    @field:SerializedName("day") val day: Float = 0f,
-    @field:SerializedName("min") val min: Float = 0f,
-    @field:SerializedName("max") val max: Float = 0f,
-    @field:SerializedName("night") val night: Float = 0f,
-    @field:SerializedName("eve") val evening: Float = 0f,
-    @field:SerializedName("morn") val morning: Float = 0f,
+data class Temperature(
+    @SerialName("day") val day: Float = 0f,
+    @SerialName("min") val min: Float = 0f,
+    @SerialName("max") val max: Float = 0f,
+    @SerialName("night") val night: Float = 0f,
+    @SerialName("eve") val evening: Float = 0f,
+    @SerialName("morn") val morning: Float = 0f,
 ) : Parcelable

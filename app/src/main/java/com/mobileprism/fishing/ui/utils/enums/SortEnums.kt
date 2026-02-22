@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.ui.utils.enums
 
 import androidx.annotation.StringRes
+import com.google.firebase.firestore.Query
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
@@ -23,6 +24,16 @@ enum class PlacesSortValues(@StringRes override val stringRes: Int) : StringOper
             CatchesDesc -> { list.sortedByDescending { it.catchesCount } }
         }
     }
+
+    fun toFirestoreOrder(): Pair<String, Query.Direction> {
+        return when (this) {
+            Default, TimeDesc -> "dateOfCreation" to Query.Direction.DESCENDING
+            TimeAsc -> "dateOfCreation" to Query.Direction.ASCENDING
+            NameAsc -> "title" to Query.Direction.ASCENDING
+            NameDesc -> "title" to Query.Direction.DESCENDING
+            CatchesDesc -> "catchesCount" to Query.Direction.DESCENDING
+        }
+    }
 }
 
 enum class CatchesSortValues(override val stringRes: Int) : StringOperation {
@@ -41,6 +52,16 @@ enum class CatchesSortValues(override val stringRes: Int) : StringOperation {
             NameAsc -> { list.sortedBy { it.fishType } }
             NameDesc -> { list.sortedByDescending { it.fishType } }
             FishDesc -> { list.sortedByDescending { it.fishAmount } }
+        }
+    }
+
+    fun toFirestoreOrder(): Pair<String, Query.Direction> {
+        return when (this) {
+            Default, TimeDesc -> "date" to Query.Direction.DESCENDING
+            TimeAsc -> "date" to Query.Direction.ASCENDING
+            NameAsc -> "fishType" to Query.Direction.ASCENDING
+            NameDesc -> "fishType" to Query.Direction.DESCENDING
+            FishDesc -> "fishAmount" to Query.Direction.DESCENDING
         }
     }
 }

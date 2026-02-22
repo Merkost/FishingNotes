@@ -21,6 +21,7 @@ import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.map.*
 import com.mobileprism.fishing.utils.Constants
+import com.mobileprism.fishing.utils.ValidationUtils
 import com.mobileprism.fishing.utils.location.LocationManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -124,6 +125,11 @@ class MapViewModel(
     }
 
     fun addNewMarker(newMarker: RawMapMarker) {
+        if (!ValidationUtils.isCoordinateValid(newMarker.latitude, newMarker.longitude)) {
+            SnackbarManager.showMessage(R.string.invalid_coordinates)
+            _addNewMarkerState.value = UiState.Error
+            return
+        }
         _addNewMarkerState.value = UiState.InProgress
         addNewMarkerJob = viewModelScope.launch {
             addNewPlaceUseCase.invoke(newMarker).single().fold(
@@ -184,11 +190,12 @@ class MapViewModel(
 
     fun quickAddPlace(name: String) {
         if (mapUiState.value is MapUiState.NormalMode) {
+            val trimmedName = name.trim().take(ValidationUtils.MAX_PLACE_NAME_LENGTH)
             viewModelScope.launch {
                 _lastKnownLocation.value?.let {
                     addNewMarker(
                         RawMapMarker(
-                            name,
+                            trimmedName.ifEmpty { "No name place" },
                             latitude = it.latitude,
                             longitude = it.longitude,
                         )

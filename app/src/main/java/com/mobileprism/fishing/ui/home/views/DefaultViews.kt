@@ -162,7 +162,10 @@ fun WindIconItem(
 }
 
 @Composable
-fun NoInternetView(modifier: Modifier = Modifier) {
+fun NoInternetView(
+    modifier: Modifier = Modifier,
+    onRetry: (() -> Unit)? = null
+) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.error))
     val progress by animateLottieCompositionAsState(
         composition,
@@ -180,6 +183,13 @@ fun NoInternetView(modifier: Modifier = Modifier) {
             modifier = modifier
         )
         SupportText(text = stringResource(id = R.string.network_error_message))
+        if (onRetry != null) {
+            androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(16.dp))
+            DefaultButtonOutlined(
+                text = stringResource(id = R.string.retry),
+                onClick = onRetry
+            )
+        }
     }
 }
 
