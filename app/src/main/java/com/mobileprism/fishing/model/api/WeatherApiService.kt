@@ -13,7 +13,7 @@ interface WeatherApiService {
         @Query("units") units: String? = "metric",
         @Query("exclude") exclude: String? = "minutely,current,alerts",
         @Query("lang") lang: String? = "en",
-        @Query("appid") appid: String = "0ccbc45859e28cf41fcdc072e2c0ebf8"
+        @Query("appid") appid: String
     ): WeatherForecast
 
     @GET("onecall/timemachine")
@@ -23,7 +23,7 @@ interface WeatherApiService {
         @Query("dt") dt: Long,
         @Query("units") units: String? = "metric",
         @Query("lang") lang: String? = "en",
-        @Query("appid") appid: String = "0ccbc45859e28cf41fcdc072e2c0ebf8"
+        @Query("appid") appid: String
     ): WeatherForecast
 }
 

@@ -132,7 +132,7 @@ class FirebaseUserRepositoryImpl(
     private fun getUserSnapshotListener(): EventListener<DocumentSnapshot> =
         EventListener { snapshot, error ->
             if (error != null) {
-                Log.d("Fishing", "User snapshot listener", error)
+                Log.e("Fishing", "User snapshot listener", error)
                 return@EventListener
             }
             if (snapshot != null && snapshot.exists()) {

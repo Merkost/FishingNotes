@@ -61,6 +61,32 @@ class WeatherViewModel(
         }
     }
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
+    fun retry() {
+        selectedPlace.value?.let { getWeather(it.latitude, it.longitude) }
+    }
+
+    fun refresh() {
+        _isRefreshing.value = true
+        selectedPlace.value?.let {
+            viewModelScope.launch(Dispatchers.IO) {
+                weatherRepository.getWeather(it.latitude, it.longitude).collect { result ->
+                    result.fold(
+                        onSuccess = { forecast ->
+                            _weatherState.value = BaseViewState.Success(forecast)
+                        },
+                        onFailure = { error ->
+                            _weatherState.value = BaseViewState.Error(error)
+                        }
+                    )
+                    _isRefreshing.value = false
+                }
+            }
+        } ?: run { _isRefreshing.value = false }
+    }
+
     fun setSelectedPlace(place: UserMapMarker?) {
         place?.let {
             if (selectedPlace.value != place) {

@@ -32,13 +32,17 @@ class FirebaseCloudPhotoStorage(
 
     override suspend fun uploadPhotos(
         photos: List<Uri>,
+        onProgress: ((uploaded: Int, total: Int) -> Unit)?
     ): List<String> {
         val downloadLinks = mutableListOf<String>()
         if (photos.isNotEmpty()) {
+            var uploaded = 0
             savePhotosToDb(photos, context)
                 .take(photos.size)
                 .collect { downloadLink ->
                     downloadLinks.add(downloadLink)
+                    uploaded++
+                    onProgress?.invoke(uploaded, photos.size)
                 }
         }
 

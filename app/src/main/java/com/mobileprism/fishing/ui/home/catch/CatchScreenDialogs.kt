@@ -4,6 +4,8 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
+import java.io.File
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -352,6 +354,21 @@ fun AddPhotoDialog(
             tempDialogPhotosState.addAll(value)
         }
 
+    val cameraPhotoUri = remember { mutableStateOf<Uri?>(null) }
+
+    val takePicture =
+        rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+            if (success) {
+                cameraPhotoUri.value?.let { uri ->
+                    if ((1 + tempDialogPhotosState.size) > MAX_PHOTOS) {
+                        showToast(context, context.getString(R.string.max_photos_allowed))
+                    } else {
+                        tempDialogPhotosState.add(uri)
+                    }
+                }
+            }
+        }
+
     LaunchedEffect(key1 = photos) {
         tempDialogPhotosState.clear()
         tempDialogPhotosState.addAll(photos)
@@ -410,9 +427,24 @@ fun AddPhotoDialog(
         ) {
             DefaultButtonOutlined(
                 icon = painterResource(id = R.drawable.ic_baseline_add_photo_alternate_24),
-                text = stringResource(id = R.string.add),
+                text = stringResource(id = R.string.gallery),
                 onClick = {
                     pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                }
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            DefaultButtonOutlined(
+                icon = painterResource(id = R.drawable.ic_baseline_photo_camera_24),
+                text = stringResource(id = R.string.camera),
+                onClick = {
+                    val photoFile = File.createTempFile("catch_photo_", ".jpg", context.cacheDir)
+                    val uri = FileProvider.getUriForFile(
+                        context,
+                        "${context.packageName}.fileprovider",
+                        photoFile
+                    )
+                    cameraPhotoUri.value = uri
+                    takePicture.launch(uri)
                 }
             )
             Spacer(modifier = Modifier.weight(1f))

@@ -1,5 +1,7 @@
 package com.mobileprism.fishing.domain.repository.app
 
+import androidx.paging.PagingData
+import com.google.firebase.firestore.Query
 import com.mobileprism.fishing.domain.entity.common.ContentState
 import com.mobileprism.fishing.domain.entity.common.LiteProgress
 import com.mobileprism.fishing.domain.entity.common.Note
@@ -22,5 +24,8 @@ interface MarkersRepository {
     suspend fun deleteMarker(userMapMarker: UserMapMarker)
     suspend fun addNewMarker(newMarker: UserMapMarker): Result<Unit>
 
-
+    fun getAllUserMarkersListPaged(
+        sortField: String = "dateOfCreation",
+        sortDirection: Query.Direction = Query.Direction.DESCENDING
+    ): Flow<PagingData<UserMapMarker>>
 }

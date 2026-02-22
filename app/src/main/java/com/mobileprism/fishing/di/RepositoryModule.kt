@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.di
 
+import androidx.room.Room
 import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.domain.repository.PhotoStorage
 import com.mobileprism.fishing.domain.repository.UserRepository
@@ -9,10 +10,17 @@ import com.mobileprism.fishing.model.datasource.FreeWeatherRepositoryImpl
 import com.mobileprism.fishing.model.datasource.SolunarRetrofitRepositoryImpl
 import com.mobileprism.fishing.model.datasource.WeatherRepositoryRetrofitImpl
 import com.mobileprism.fishing.model.datasource.firebase.*
+import com.mobileprism.fishing.model.datasource.local.CachedWeatherRepository
+import com.mobileprism.fishing.model.datasource.local.FishingDatabase
+import com.mobileprism.fishing.model.datasource.local.SyncAwareCatchesRepository
+import com.mobileprism.fishing.model.datasource.local.SyncAwareMarkersRepository
+import com.mobileprism.fishing.model.datasource.local.sync.SyncScheduler
+import com.mobileprism.fishing.model.datasource.local.sync.SyncStatusManager
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import java.util.concurrent.TimeUnit
 
@@ -30,46 +38,93 @@ val userRepositoryModule = module {
 val repositoryModule = module {
     single { RepositoryCollections() }
 
-    single<CatchesRepository> {
+    single<OkHttpClient> { createOkHttpClient() }
+
+    // Room Database
+    single {
+        Room.databaseBuilder(
+            androidContext(),
+            FishingDatabase::class.java,
+            "fishing_database"
+        ).build()
+    }
+
+    // DAOs
+    single { get<FishingDatabase>().catchDao() }
+    single { get<FishingDatabase>().markerDao() }
+    single { get<FishingDatabase>().pendingOperationDao() }
+    single { get<FishingDatabase>().weatherCacheDao() }
+
+    // Sync infrastructure
+    single { SyncScheduler(androidContext()) }
+    single { SyncStatusManager(pendingOpsDao = get(), connectionManager = get()) }
+
+    // Firebase implementations (named)
+    single<CatchesRepository>(named("firebase")) {
         FirebaseCatchesRepositoryImpl(
             dbCollections = get(),
             analyticsTracker = get(),
             connectionManager = get()
         )
     }
-    single<MarkersRepository> {
+    single<MarkersRepository>(named("firebase")) {
         FirebaseMarkersRepositoryImpl(
             dbCollections = get(),
             analyticsTracker = get(),
             context = androidContext()
         )
     }
-    single<SolunarRepository> { SolunarRetrofitRepositoryImpl(analyticsTracker = get()) }
+    single<WeatherRepository>(named("remote")) {
+        WeatherRepositoryRetrofitImpl(
+            analyticsTracker = get(),
+            openWeatherKey = BuildConfig.OPENWEATHER_KEY,
+            okHttpClient = get()
+        )
+    }
+
+    // SyncAware wrappers (default bindings)
+    single<CatchesRepository> {
+        SyncAwareCatchesRepository(
+            firebaseRepo = get(named("firebase")),
+            catchDao = get(),
+            pendingOpsDao = get(),
+            connectionManager = get(),
+            syncScheduler = get()
+        )
+    }
+    single<MarkersRepository> {
+        SyncAwareMarkersRepository(
+            firebaseRepo = get(named("firebase")),
+            markerDao = get(),
+            pendingOpsDao = get(),
+            connectionManager = get(),
+            syncScheduler = get()
+        )
+    }
+    single<WeatherRepository> {
+        CachedWeatherRepository(
+            remoteRepo = get(named("remote")),
+            weatherCacheDao = get(),
+            connectionManager = get()
+        )
+    }
+
+    single<SolunarRepository> { SolunarRetrofitRepositoryImpl(analyticsTracker = get(), okHttpClient = get()) }
     single<PhotoStorage> {
         FirebaseCloudPhotoStorage(
             analyticsTracker = get(),
             context = androidContext()
         )
     }
-    single<WeatherRepository> { WeatherRepositoryRetrofitImpl(analyticsTracker = get()) }
-    single<FreeWeatherRepository> { FreeWeatherRepositoryImpl(analyticsTracker = get(), rapidApiKey = BuildConfig.RAPIDAPI_KEY) }
+    single<FreeWeatherRepository> { FreeWeatherRepositoryImpl(analyticsTracker = get(), rapidApiKey = BuildConfig.RAPIDAPI_KEY, okHttpClient = get()) }
     single<OfflineRepository> { FirebaseOfflineRepositoryImpl(dbCollections = get()) }
 }
 
-fun createLoggingInterceptor(): HttpLoggingInterceptor {
-    return HttpLoggingInterceptor().setLevel(
+private fun createOkHttpClient(): OkHttpClient {
+    val loggingInterceptor = HttpLoggingInterceptor().setLevel(
         if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
         else HttpLoggingInterceptor.Level.NONE
     )
-}
-
-/**
- * Create a OkHttpClient which is used to send HTTP requests and read their responses.
- * @loggingInterceptor logging interceptor
- */
-private fun createOkHttpClient(
-    loggingInterceptor: HttpLoggingInterceptor,
-): OkHttpClient {
     return OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
         .connectTimeout(10, TimeUnit.SECONDS)

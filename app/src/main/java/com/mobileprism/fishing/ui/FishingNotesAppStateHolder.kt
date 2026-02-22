@@ -190,6 +190,10 @@ class AppStateHolder(
  *
  * https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:navigation/navigation-ui/src/main/java/androidx/navigation/ui/NavigationUI.kt
  */
-private tailrec fun findStartDestination(graph: NavDestination): NavDestination {
-    return if (graph is NavGraph) findStartDestination(graph.findNode(graph.startDestinationId)!!) else graph
+private fun findStartDestination(graph: NavDestination): NavDestination {
+    var current = graph
+    while (current is NavGraph) {
+        current = current.findNode(current.startDestinationId) ?: return current
+    }
+    return current
 }

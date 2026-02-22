@@ -37,6 +37,7 @@ import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
 import com.mobileprism.fishing.ui.home.views.MyCard
 import com.mobileprism.fishing.ui.theme.Shapes
 import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
+import com.mobileprism.fishing.utils.ValidationUtils
 import com.mobileprism.fishing.ui.utils.ColorPicker
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -62,6 +63,7 @@ fun NewPlaceDialog(
                         SnackbarManager.showMessage(R.string.add_place_success)
                     }
                     UiState.Error -> {
+                        viewModel.resetAddNewMarkerState()
                         SnackbarManager.showMessage(R.string.add_new_place_error)
                     }
                     else -> {}
@@ -101,9 +103,22 @@ fun NewPlaceDialog(
 
                     OutlinedTextField(
                         value = titleValue.value,
-                        onValueChange = { titleValue.value = it },
+                        onValueChange = {
+                            if (it.length <= ValidationUtils.MAX_PLACE_NAME_LENGTH) {
+                                titleValue.value = it
+                            }
+                        },
                         label = { Text(text = stringResource(R.string.title)) },
                         singleLine = true,
+                        supportingText = {
+                            Text(
+                                stringResource(
+                                    R.string.char_counter,
+                                    titleValue.value.length,
+                                    ValidationUtils.MAX_PLACE_NAME_LENGTH
+                                )
+                            )
+                        },
                         visualTransformation = VisualTransformation.None,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Text,
@@ -218,11 +233,12 @@ fun NewPlaceDialog(
                         text = stringResource(id = R.string.save),
                         enabled = uiState !is UiState.InProgress,
                         onClick = {
+                            val trimmedTitle = titleValue.value.trim()
                             viewModel.addNewMarker(
                                 RawMapMarker(
-                                    title = when (titleValue.value.isEmpty()) {
+                                    title = when (trimmedTitle.isEmpty()) {
                                         true -> context.resources.getString(R.string.no_name_place)
-                                        false -> titleValue.value
+                                        false -> trimmedTitle
                                     },
                                     description = descriptionValue.value,
                                     latitude = currentCameraPosition.first.latitude,

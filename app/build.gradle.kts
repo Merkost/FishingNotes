@@ -27,9 +27,9 @@ android {
     signingConfigs {
         create("release") {
             storeFile = rootProject.file("fishing.jks")
-//            storePassword = keystoreProperties.getProperty("KEYSTORE_PASSWORD", "")
-//            keyAlias = keystoreProperties.getProperty("KEY_ALIAS", "")
-//            keyPassword = keystoreProperties.getProperty("KEY_PASSWORD", "")
+            storePassword = keystoreProperties.getProperty("KEYSTORE_PASSWORD", "")
+            keyAlias = keystoreProperties.getProperty("KEY_ALIAS", "")
+            keyPassword = keystoreProperties.getProperty("KEY_PASSWORD", "")
         }
     }
 
@@ -69,6 +69,10 @@ android {
         }
     }
 
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
+
     composeCompiler {
         reportsDestination = layout.buildDirectory.dir("compose_compiler")
     }
@@ -78,6 +82,10 @@ android {
         compose = true
         buildConfig = true
     }
+}
+
+secrets {
+    propertiesFileName = "secrets.properties"
 }
 
 dependencies {
@@ -92,6 +100,7 @@ dependencies {
 
     implementation("id.zelory:compressor:3.0.1")
 
+    implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.androidx.credentials)
@@ -129,6 +138,10 @@ dependencies {
     implementation(libs.constraintLayout.compose)
     implementation(libs.datastorePreferences)
 
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+
     implementation(libs.compose.runtime)
     implementation(libs.compose.foundation)
     implementation(libs.compose.layout)
@@ -153,6 +166,10 @@ dependencies {
 
     implementation(libs.coil.compose)
     implementation(libs.foundation.layout.android)
+    implementation(libs.vico.compose.m3)
+
+    implementation(libs.paging.runtime)
+    implementation(libs.paging.compose)
 
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.androidX.testCore)
@@ -165,7 +182,7 @@ dependencies {
 
     // Retrofit
     implementation(libs.retrofit)
-    implementation(libs.retrofitConverterGson)
+    implementation(libs.retrofitConverterKotlinxSerialization)
     implementation(libs.retrofitCoroutinesAdapter)
     implementation(libs.okhttpLoggingInterceptor)
 

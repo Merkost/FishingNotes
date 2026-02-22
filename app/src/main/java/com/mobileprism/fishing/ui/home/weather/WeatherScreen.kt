@@ -62,6 +62,7 @@ import com.mobileprism.fishing.utils.time.toDayOfWeek
 import com.mobileprism.fishing.utils.time.toDayOfWeekAndDate
 import com.mobileprism.fishing.utils.time.toTime
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import org.koin.compose.koinInject
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -100,6 +101,7 @@ fun WeatherScreen(
 
     val scrollState = rememberScrollState()
     val weatherUiState by viewModel.weatherState.collectAsState()
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
 
     if (showBottomSheet) {
         ModalBottomSheet(
@@ -203,17 +205,28 @@ fun WeatherScreen(
                             ), WeatherForecast(), scrollState, navigateToDaily = {})
                         }
                         is BaseViewState.Success -> {
-                            MainWeatherScreen(childModifier = Modifier, it.data, scrollState)
-                            { index ->
-                                navigateToDailyWeatherScreen(
-                                    navController = navController,
-                                    index = index,
-                                    forecastDaily = it.data.daily
-                                )
+                            PullToRefreshBox(
+                                isRefreshing = isRefreshing,
+                                onRefresh = { viewModel.refresh() }
+                            ) {
+                                MainWeatherScreen(
+                                    childModifier = Modifier,
+                                    it.data,
+                                    scrollState
+                                ) { index ->
+                                    navigateToDailyWeatherScreen(
+                                        navController = navController,
+                                        index = index,
+                                        forecastDaily = it.data.daily
+                                    )
+                                }
                             }
                         }
                         is BaseViewState.Error -> {
-                            NoInternetView(Modifier.fillMaxWidth())
+                            NoInternetView(
+                                modifier = Modifier.fillMaxWidth(),
+                                onRetry = { viewModel.retry() }
+                            )
                         }
                     }
                 }

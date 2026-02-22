@@ -1,5 +1,10 @@
 package com.mobileprism.fishing.domain.entity.solunar
 
+import androidx.compose.runtime.Immutable
+import kotlinx.serialization.Serializable
+
+@Immutable
+@Serializable
 data class Solunar(
     val dayRating: Int,
     val hourlyRating: HourlyRating = HourlyRating(),

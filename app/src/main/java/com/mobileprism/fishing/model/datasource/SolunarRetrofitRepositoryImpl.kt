@@ -11,42 +11,32 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-
+import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
 class SolunarRetrofitRepositoryImpl(
     private val analyticsTracker: AnalyticsTracker,
+    okHttpClient: OkHttpClient,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : SolunarRepository {
 
     companion object {
-
         private const val BASE_SOLUNAR_URL = "https://api.solunar.org/"
+    }
 
-        private fun getService(): SolunarApiService {
-            return createRetrofit().create(SolunarApiService::class.java)
-        }
+    private val json = Json { ignoreUnknownKeys = true }
 
-        private fun createRetrofit(): Retrofit {
-            return Retrofit.Builder()
-                .baseUrl(BASE_SOLUNAR_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(CoroutineCallAdapterFactory())
-                .client(createOkHttpClient())
-                .build()
-        }
-
-        private fun createOkHttpClient(): OkHttpClient {
-            val httpClient = OkHttpClient.Builder()
-            val interceptor = HttpLoggingInterceptor()
-            interceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
-            httpClient.interceptors().add(interceptor)
-
-            return httpClient.build()
-        }
+    private val service: SolunarApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_SOLUNAR_URL)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .addCallAdapterFactory(CoroutineCallAdapterFactory())
+            .client(okHttpClient)
+            .build()
+            .create(SolunarApiService::class.java)
     }
 
     override fun getSolunar(latitude: Double, longitude: Double, date: String, timeZone: Int): Flow<Result<Solunar>> =
@@ -56,7 +46,7 @@ class SolunarRetrofitRepositoryImpl(
 
             emit(safeApiCall(dispatcher) {
 
-                getService().getSolunar(latitude = latitude, longitude = longitude, date = date, tz = timeZone)
+                service.getSolunar(latitude = latitude, longitude = longitude, date = date, tz = timeZone)
 
             })
 

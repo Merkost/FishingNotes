@@ -66,6 +66,7 @@ fun MarkerInfoDialog(
     navController: NavController,
     onMarkerIconClicked: (UserMapMarker) -> Unit,
     onAddCatch: (UserMapMarker) -> Unit = {},
+    onSaveCurrentPlace: () -> Unit = {},
 ) {
     val context = LocalContext.current
 
@@ -110,7 +111,7 @@ fun MarkerInfoDialog(
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .padding(paddingDp),
-            onClick = { onMarkerClicked(marker, navController) }
+            onClick = { onMarkerClicked(marker, navController, onSaveCurrentPlace) }
         ) {
             AnimatedVisibility(
                 true,
@@ -186,14 +187,13 @@ fun MarkerInfoDialog(
                         }
                     }
 
-                    // TODO: Баг с наездом текста на дистанцию
                     //Area name
                     SubtitleText(
                         modifier = Modifier
                             .constrainAs(area) {
                                 top.linkTo(title.bottom, 4.dp)
-                                linkTo(title.start, title.end, 0.dp, 32.dp, 0.dp, 32.dp, 0f)
-
+                                linkTo(title.start, distanceTo.start, 0.dp, 8.dp, 0.dp, 8.dp, 0f)
+                                width = Dimension.fillToConstraints
                             }
                             .animateContentSize(
                                 animationSpec = tween(
@@ -211,16 +211,7 @@ fun MarkerInfoDialog(
                             .constrainAs(distanceTo) {
                                 top.linkTo(area.top)
                                 bottom.linkTo(area.bottom)
-                                linkTo(
-                                    area.absoluteRight,
-                                    parent.absoluteRight,
-                                    8.dp,
-                                    16.dp,
-                                    8.dp,
-                                    16.dp,
-                                    1f
-                                )
-
+                                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
                             }
                             .animateContentSize(
                                 animationSpec = tween(
@@ -341,13 +332,12 @@ fun MarkerInfoDialog(
     }
 }
 
-fun onMarkerClicked(marker: UserMapMarker, navController: NavController) {
+fun onMarkerClicked(marker: UserMapMarker, navController: NavController, onSaveCurrentPlace: () -> Unit) {
     if (marker.id != Constants.CURRENT_PLACE_ITEM_ID) {
         navController.navigate(MainDestinations.Place(marker))
     } else {
-        // TODO: Нельзя перейти на экран места
+        onSaveCurrentPlace()
     }
-
 }
 
 fun onWeatherIconClicked(marker: UserMapMarker, navController: NavController) {

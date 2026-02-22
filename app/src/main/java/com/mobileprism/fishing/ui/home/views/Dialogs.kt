@@ -5,6 +5,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -111,7 +112,8 @@ fun DefaultDialog(
 @Composable
 fun ModalLoadingDialog(
     visible: Boolean,
-    text: String
+    text: String,
+    progress: Float? = null
 ) {
     if (visible) {
         Dialog(
@@ -139,6 +141,14 @@ fun ModalLoadingDialog(
                         text = text,
                         textColor = MaterialTheme.colorScheme.onSurface
                     )
+                    if (progress != null) {
+                        LinearProgressIndicator(
+                            progress = { progress },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 4.dp),
+                        )
+                    }
                 }
             }
         }

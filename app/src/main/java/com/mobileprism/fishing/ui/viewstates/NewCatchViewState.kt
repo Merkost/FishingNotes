@@ -1,5 +1,8 @@
 package com.mobileprism.fishing.ui.viewstates
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 sealed class NewCatchViewState {
     object Editing : NewCatchViewState()
     object SavingNewCatch : NewCatchViewState()
