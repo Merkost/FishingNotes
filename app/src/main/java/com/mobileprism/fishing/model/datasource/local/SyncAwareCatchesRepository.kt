@@ -57,9 +57,13 @@ class SyncAwareCatchesRepository(
     override fun getAllUserCatchesList(): Flow<List<UserCatch>> {
         // Primary source is Firebase snapshot listeners; cache results to Room as side effect
         return firebaseRepo.getAllUserCatchesList().map { catches ->
-            // Cache to Room as side effect
+            // Cache to Room as side effect — ignore FK failures when marker isn't cached yet
             catches.forEach { catch ->
-                catchDao.insert(catch.toEntity(SyncStatus.SYNCED))
+                try {
+                    catchDao.insert(catch.toEntity(SyncStatus.SYNCED))
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to cache catch ${catch.id} locally: ${e.message}")
+                }
             }
             catches
         }
@@ -160,7 +164,11 @@ class SyncAwareCatchesRepository(
     override fun addNewCatch(markerId: String, newCatch: UserCatch): Flow<Result<Nothing?>> {
         return channelFlow {
             // Save locally immediately
-            catchDao.insert(newCatch.toEntity(SyncStatus.PENDING_CREATE))
+            try {
+                catchDao.insert(newCatch.toEntity(SyncStatus.PENDING_CREATE))
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to cache new catch locally: ${e.message}")
+            }
 
             val isOnline = connectionManager.getConnectionState() is ConnectionState.Available
             if (isOnline) {

@@ -93,8 +93,8 @@ class GetNewCatchWeatherUseCase(
         val weather = lastLoadedWeather ?: return true
 
         val lastLoadedWeatherPlace = UserMapMarker(
-            latitude = weather.latitude.toDouble(),
-            longitude = weather.longitude.toDouble()
+            latitude = weather.latitude,
+            longitude = weather.longitude
         )
         return place?.let { currentPlace ->
             isLocationsTooFar(currentPlace, lastLoadedWeatherPlace)
