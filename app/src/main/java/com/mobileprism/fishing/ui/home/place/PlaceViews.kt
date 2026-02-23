@@ -209,10 +209,11 @@ fun NoteModalBottomSheet(
     viewModel: UserPlaceViewModel,
     onCloseBottomSheet: () -> Unit,
 ) {
+    val currentNote by viewModel.currentNote.collectAsState()
     EditNoteDialog(
-        note = viewModel.currentNote.value ?: Note(),
+        note = currentNote ?: Note(),
         onSaveNote = viewModel::updateMarkerNotes,
-        deleteOption = (viewModel.currentNote.value ?: Note()).id.isNotEmpty(),
+        deleteOption = (currentNote ?: Note()).id.isNotEmpty(),
         onDeleteNote = viewModel::deleteMarkerNote,
         onCloseDialog = onCloseBottomSheet
     )
@@ -416,7 +417,7 @@ fun PlaceTopBar(
     onDelete: () -> Unit,
     ) {
 
-    val isVisible by remember { viewModel.markerVisibility }
+    val isVisible by viewModel.markerVisibility.collectAsState()
 
     var menuOpened by remember { mutableStateOf(false) }
 

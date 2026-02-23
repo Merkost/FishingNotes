@@ -9,6 +9,7 @@ import com.mobileprism.fishing.model.datasource.local.sync.SyncStatusManager
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -17,36 +18,23 @@ class MainViewModel(
     private val repository: UserRepository,
     private val syncStatusManager: SyncStatusManager
 ) : ViewModel() {
-
-    init {
-        loadCurrentUser()
-    }
+    init { loadCurrentUser() }
 
     val syncState: StateFlow<SyncState> = syncStatusManager.globalSyncState
 
-    val userState: MutableStateFlow<User?> = MutableStateFlow(null)
-    var user: User? = null
-
-    val mutableStateFlow: MutableStateFlow<BaseViewState<User>> =
-        MutableStateFlow(BaseViewState.Loading(null))
+    private val _userState = MutableStateFlow<BaseViewState<User>>(BaseViewState.Loading(null))
+    val userState: StateFlow<BaseViewState<User>> = _userState.asStateFlow()
 
     private fun loadCurrentUser() {
         viewModelScope.launch {
             repository.currentUser
-                .catch { error -> handleError(error) }
-                .collectLatest { user -> user?.let { onSuccess(user) } }
+                .catch { error -> _userState.value = BaseViewState.Error(error) }
+                .collectLatest { user ->
+                    user?.let {
+                        repository.setUserListener(it)
+                        _userState.value = BaseViewState.Success(it)
+                    }
+                }
         }
-    }
-
-    private fun onSuccess(user: User) {
-        this.user = user
-        viewModelScope.launch {
-            repository.setUserListener(user)
-        }
-        mutableStateFlow.value = BaseViewState.Success(user)
-    }
-
-    private fun handleError(error: Throwable) {
-        mutableStateFlow.value = BaseViewState.Error(error)
     }
 }

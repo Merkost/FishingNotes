@@ -102,6 +102,7 @@ fun WeatherScreen(
     val scrollState = rememberScrollState()
     val weatherUiState by viewModel.weatherState.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
+    val markers by viewModel.markersList.collectAsState()
 
     if (showBottomSheet) {
         ModalBottomSheet(
@@ -110,7 +111,7 @@ fun WeatherScreen(
             shape = modalBottomSheetCorners,
         ) {
             WeatherPlacePickerSheetContent(
-                places = viewModel.markersList,
+                places = markers,
                 selectedPlace = selectedPlace,
                 onPlaceSelected = { place ->
                     viewModel.setSelectedPlace(place)
@@ -125,8 +126,8 @@ fun WeatherScreen(
             topBar = {
                 val elevation =
                     animateDpAsState(targetValue = if (scrollState.value > 0) 4.dp else 0.dp)
-                if (checkLocationPermissions(context) && viewModel.markersList.isNotEmpty()) {
-                    viewModel.setSelectedPlace(viewModel.markersList.first())
+                if (checkLocationPermissions(context) && markers.isNotEmpty()) {
+                    viewModel.setSelectedPlace(markers.first())
                 }
 
                 TopAppBar(
@@ -184,7 +185,7 @@ fun WeatherScreen(
             }
         ) { innerPadding ->
 
-            if (!permissionsState.allPermissionsGranted && viewModel.markersList.isEmpty()) {
+            if (!permissionsState.allPermissionsGranted && markers.isEmpty()) {
                 WeatherNoPlaces(
                     Modifier
                         .fillMaxSize()

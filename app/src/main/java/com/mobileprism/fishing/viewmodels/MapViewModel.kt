@@ -315,7 +315,7 @@ class MapViewModel(
     }
 
     fun getPlaceTileViewName() {
-        placeTileNameJob = viewModelScope.launch(Dispatchers.Default) {
+        placeTileNameJob = viewModelScope.launch(Dispatchers.IO) {
             _cameraMoveState.collectLatest {
                 when (it) {
                     CameraMoveState.MoveStart -> {
@@ -343,7 +343,7 @@ class MapViewModel(
     }
 
     private fun getPlaceNameForMarkerDetails(latitude: Double, longitude: Double) {
-        viewModelScope.launch(Dispatchers.Default) {
+        viewModelScope.launch(Dispatchers.IO) {
             getPlaceNameUseCase.invoke(latitude, longitude).collect { result ->
                 _currentMarkerAddressState.value = result
             }

@@ -9,6 +9,7 @@ import com.mobileprism.fishing.domain.use_cases.catches.GetUserCatchesUseCase
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.utils.enums.CatchesSortValues
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -62,19 +63,23 @@ class UserCatchesViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing = _isRefreshing.asStateFlow()
 
+    private var refreshJob: Job? = null
+
     fun refresh() {
+        refreshJob?.cancel()
         _isRefreshing.value = true
-        viewModelScope.launch {
-            userCatchesUseCase.invoke()
-                .catch {
-                    Log.e("UserCatchesVM", "Failed to refresh catches", it)
-                    _isRefreshing.value = false
-                }
-                .collectLatest {
-                    _currentContent.emit(it)
-                    _uiState.value = UiState.Success
-                    _isRefreshing.value = false
-                }
+        refreshJob = viewModelScope.launch {
+            try {
+                userCatchesUseCase.invoke()
+                    .collectLatest {
+                        _currentContent.emit(it)
+                        _uiState.value = UiState.Success
+                    }
+            } catch (e: Exception) {
+                Log.e("UserCatchesVM", "Failed to refresh catches", e)
+            } finally {
+                _isRefreshing.value = false
+            }
         }
     }
 

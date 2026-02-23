@@ -55,7 +55,7 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
         viewModel.setMarker(place)
     }
     DisposableEffect(Unit) {
-        viewModel.markerVisibility.value = place.visible
+        viewModel.setMarkerVisibility(place.visible)
         onDispose { }
     }
     val scaffoldState =
@@ -150,7 +150,7 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
                         notes = notes,
                         onNewCatchClick = { newCatchClicked(navController, place) }
                     ) { note ->
-                        viewModel.currentNote.value = note
+                        viewModel.setCurrentNote(note)
                         showModalSheet = true
                     }
 
