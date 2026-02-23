@@ -4,12 +4,20 @@ import androidx.room.Room
 import com.mobileprism.fishing.BuildConfig
 import com.mobileprism.fishing.domain.repository.PhotoStorage
 import com.mobileprism.fishing.domain.repository.UserRepository
-import com.mobileprism.fishing.domain.repository.app.*
+import com.mobileprism.fishing.domain.repository.app.FreeWeatherRepository
+import com.mobileprism.fishing.domain.repository.app.MarkersRepository
+import com.mobileprism.fishing.domain.repository.app.OfflineRepository
+import com.mobileprism.fishing.domain.repository.app.SolunarRepository
+import com.mobileprism.fishing.domain.repository.app.WeatherRepository
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.model.datasource.FreeWeatherRepositoryImpl
 import com.mobileprism.fishing.model.datasource.SolunarRetrofitRepositoryImpl
 import com.mobileprism.fishing.model.datasource.WeatherRepositoryRetrofitImpl
-import com.mobileprism.fishing.model.datasource.firebase.*
+import com.mobileprism.fishing.model.datasource.firebase.FirebaseCatchesRepositoryImpl
+import com.mobileprism.fishing.model.datasource.firebase.FirebaseCloudPhotoStorage
+import com.mobileprism.fishing.model.datasource.firebase.FirebaseMarkersRepositoryImpl
+import com.mobileprism.fishing.model.datasource.firebase.FirebaseOfflineRepositoryImpl
+import com.mobileprism.fishing.model.datasource.firebase.FirebaseUserRepositoryImpl
 import com.mobileprism.fishing.model.datasource.local.CachedWeatherRepository
 import com.mobileprism.fishing.model.datasource.local.FishingDatabase
 import com.mobileprism.fishing.model.datasource.local.SyncAwareCatchesRepository
@@ -22,6 +30,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import org.koin.dsl.onClose
 import java.io.Closeable
 import java.util.concurrent.TimeUnit
 
@@ -48,8 +57,8 @@ val repositoryModule = module {
             FishingDatabase::class.java,
             "fishing_database"
         )
-        .fallbackToDestructiveMigration()
-        .build()
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     // DAOs
@@ -60,7 +69,9 @@ val repositoryModule = module {
 
     // Sync infrastructure
     single { SyncScheduler(androidContext()) }
-    single { SyncStatusManager(pendingOpsDao = get(), connectionManager = get()) } onClose { (it as? Closeable)?.close() }
+    single {
+        SyncStatusManager(pendingOpsDao = get(), connectionManager = get())
+    } onClose { (it as? Closeable)?.close() }
 
     // Firebase implementations (named)
     single<CatchesRepository>(named("firebase")) {
@@ -112,14 +123,25 @@ val repositoryModule = module {
         )
     }
 
-    single<SolunarRepository> { SolunarRetrofitRepositoryImpl(analyticsTracker = get(), okHttpClient = get()) }
+    single<SolunarRepository> {
+        SolunarRetrofitRepositoryImpl(
+            analyticsTracker = get(),
+            okHttpClient = get()
+        )
+    }
     single<PhotoStorage> {
         FirebaseCloudPhotoStorage(
             analyticsTracker = get(),
             context = androidContext()
         )
     }
-    single<FreeWeatherRepository> { FreeWeatherRepositoryImpl(analyticsTracker = get(), rapidApiKey = BuildConfig.RAPIDAPI_KEY, okHttpClient = get()) }
+    single<FreeWeatherRepository> {
+        FreeWeatherRepositoryImpl(
+            analyticsTracker = get(),
+            rapidApiKey = BuildConfig.RAPIDAPI_KEY,
+            okHttpClient = get()
+        )
+    }
     single<OfflineRepository> { FirebaseOfflineRepositoryImpl(dbCollections = get()) }
 }
 
