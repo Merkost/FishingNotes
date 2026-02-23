@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.ui.viewmodels
 
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
@@ -12,6 +11,7 @@ import com.mobileprism.fishing.utils.isLocationsTooFar
 import com.mobileprism.fishing.utils.location.LocationManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -28,18 +28,18 @@ class WeatherViewModel(
     private val _selectedPlace = MutableStateFlow<UserMapMarker?>(null)
     val selectedPlace = _selectedPlace.asStateFlow()
 
-    val markersList = mutableStateListOf<UserMapMarker>()
+    private val _markersList = MutableStateFlow<List<UserMapMarker>>(emptyList())
+    val markersList: StateFlow<List<UserMapMarker>> = _markersList.asStateFlow()
 
     init {
         getAllMarkers()
     }
 
     private fun getAllMarkers() {
-        if (markersList.isEmpty()) {
+        if (_markersList.value.isEmpty()) {
             viewModelScope.launch(Dispatchers.IO) {
                 repository.getAllUserMarkersList().collect {
-                    markersList.clear()
-                    markersList.addAll(it as List<UserMapMarker>)
+                    _markersList.value = it.filterIsInstance<UserMapMarker>()
                 }
             }
         }
@@ -98,19 +98,22 @@ class WeatherViewModel(
     }
 
     fun locationGranted(newLocation: UserMapMarker) {
-        val oldLocation = markersList.find { it.id == newLocation.id }
+        val currentList = _markersList.value
+        val oldLocation = currentList.find { it.id == newLocation.id }
 
+        val updatedList = currentList.toMutableList()
         if (oldLocation != null) {
             if (isLocationsTooFar(oldLocation, newLocation)) {
-                markersList.remove(oldLocation)
-                markersList.add(index = 0, element = newLocation)
+                updatedList.remove(oldLocation)
+                updatedList.add(index = 0, element = newLocation)
             }
         } else {
-            markersList.add(index = 0, element = newLocation)
+            updatedList.add(index = 0, element = newLocation)
         }
+        _markersList.value = updatedList
 
         if (selectedPlace.value == null) {
-            setSelectedPlace(markersList.first())
+            setSelectedPlace(_markersList.value.first())
         }
     }
 

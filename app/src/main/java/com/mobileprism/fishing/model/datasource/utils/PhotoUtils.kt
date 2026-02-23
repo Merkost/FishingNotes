@@ -19,14 +19,12 @@ fun fileFromContentUri(context: Context, contentUri: Uri): File {
     tempFile.createNewFile()
 
     try {
-        val oStream = FileOutputStream(tempFile)
-        val inputStream = context.contentResolver.openInputStream(contentUri)
-
-        inputStream?.let {
-            copy(inputStream, oStream)
+        context.contentResolver.openInputStream(contentUri)?.use { inputStream ->
+            FileOutputStream(tempFile).use { oStream ->
+                copy(inputStream, oStream)
+                oStream.flush()
+            }
         }
-
-        oStream.flush()
     } catch (e: Exception) {
         com.google.firebase.crashlytics.FirebaseCrashlytics.getInstance().recordException(e)
     }

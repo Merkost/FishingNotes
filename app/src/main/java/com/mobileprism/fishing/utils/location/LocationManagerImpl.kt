@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.IntentSender
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.runtime.mutableStateOf
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.android.gms.common.api.ResolvableApiException
@@ -17,10 +16,8 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.map.LocationState
 import com.mobileprism.fishing.ui.home.map.checkLocationPermissions
-import com.mobileprism.fishing.utils.isCoordinatesFar
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
 
 class LocationManagerImpl(private val context: Context) : LocationManager {
@@ -36,31 +33,21 @@ class LocationManagerImpl(private val context: Context) : LocationManager {
 
     @SuppressLint("MissingPermission")
     @ExperimentalPermissionsApi
-    fun getCurrentLocation(
+    suspend fun getCurrentLocation(
         context: Context,
         permissionsState: MultiplePermissionsState,
-    ) = runBlocking {
-
+    ): LatLng {
         checkLocationPermissions(context)
-
-        val result = mutableStateOf(LatLng(0.0, 0.0))
-
         if (permissionsState.allPermissionsGranted) {
-            val locationResult = fusedLocationProviderClient.lastLocation
-            locationResult.addOnSuccessListener { task ->
-
-                try {
-                    result.value = LatLng(task.latitude, task.longitude)
-
-                } catch (e: Exception) {
-                    Log.d("MAP", "Unable to get location")
-                    Toast.makeText(context, R.string.cant_get_current_location, Toast.LENGTH_SHORT)
-                        .show()
-                }
-
+            return try {
+                val location = fusedLocationProviderClient.lastLocation.await()
+                LatLng(location.latitude, location.longitude)
+            } catch (e: Exception) {
+                Log.d("MAP", "Unable to get location")
+                LatLng(0.0, 0.0)
             }
         }
-        result
+        return LatLng(0.0, 0.0)
     }
 
     @SuppressLint("MissingPermission")

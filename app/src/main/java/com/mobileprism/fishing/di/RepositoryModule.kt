@@ -22,6 +22,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
+import java.io.Closeable
 import java.util.concurrent.TimeUnit
 
 val userRepositoryModule = module {
@@ -46,7 +47,9 @@ val repositoryModule = module {
             androidContext(),
             FishingDatabase::class.java,
             "fishing_database"
-        ).build()
+        )
+        .fallbackToDestructiveMigration()
+        .build()
     }
 
     // DAOs
@@ -57,7 +60,7 @@ val repositoryModule = module {
 
     // Sync infrastructure
     single { SyncScheduler(androidContext()) }
-    single { SyncStatusManager(pendingOpsDao = get(), connectionManager = get()) }
+    single { SyncStatusManager(pendingOpsDao = get(), connectionManager = get()) } onClose { (it as? Closeable)?.close() }
 
     // Firebase implementations (named)
     single<CatchesRepository>(named("firebase")) {
@@ -91,7 +94,7 @@ val repositoryModule = module {
             connectionManager = get(),
             syncScheduler = get()
         )
-    }
+    } onClose { (it as? Closeable)?.close() }
     single<MarkersRepository> {
         SyncAwareMarkersRepository(
             firebaseRepo = get(named("firebase")),
@@ -100,7 +103,7 @@ val repositoryModule = module {
             connectionManager = get(),
             syncScheduler = get()
         )
-    }
+    } onClose { (it as? Closeable)?.close() }
     single<WeatherRepository> {
         CachedWeatherRepository(
             remoteRepo = get(named("remote")),

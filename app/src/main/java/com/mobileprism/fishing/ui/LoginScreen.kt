@@ -73,7 +73,7 @@ fun LoginScreen(navController: NavController) {
         }
     }
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         coroutineScope.launch {
             SnackbarManager.messages.collect { currentMessages ->
                 if (currentMessages.isNotEmpty()) {
@@ -238,7 +238,7 @@ fun LoginScreen(navController: NavController) {
                     }
                 }
             }
-            LaunchedEffect(this) { visible = true }
+            LaunchedEffect(Unit) { visible = true }
         }
     }
 }

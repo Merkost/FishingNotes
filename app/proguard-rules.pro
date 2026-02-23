@@ -21,7 +21,23 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class com.google.android.libraries.maps.** { *; }
--keep class com.mobileprism.fishing.** { *; }
+# Keep serialization models (used by kotlinx.serialization)
+-keep class com.mobileprism.fishing.domain.entity.** { *; }
+-keep class com.mobileprism.fishing.model.api.** { *; }
+-keep class com.mobileprism.fishing.model.datasource.api.** { *; }
+-keep class com.mobileprism.fishing.model.datasource.local.entity.** { *; }
+
+# Keep Firebase model classes
+-keep class com.mobileprism.fishing.domain.entity.common.User { *; }
+
+# Kotlinx serialization
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt
+-keepclassmembers @kotlinx.serialization.Serializable class ** {
+    *** Companion;
+    *** serializer(...);
+    kotlinx.serialization.KSerializer serializer(...);
+}
 
 -if class androidx.credentials.CredentialManager
 -keep class androidx.credentials.playservices.** {

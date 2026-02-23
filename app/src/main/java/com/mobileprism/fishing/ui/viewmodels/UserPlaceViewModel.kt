@@ -1,7 +1,5 @@
 package com.mobileprism.fishing.ui.viewmodels
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.R
@@ -17,6 +15,7 @@ import com.mobileprism.fishing.ui.home.SnackbarManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class UserPlaceViewModel(
@@ -27,7 +26,8 @@ class UserPlaceViewModel(
 
 ) : ViewModel() {
 
-    var markerVisibility: MutableState<Boolean?> = mutableStateOf(true)
+    private val _markerVisibility = MutableStateFlow<Boolean?>(true)
+    val markerVisibility: StateFlow<Boolean?> = _markerVisibility.asStateFlow()
 
     private val _marker: MutableStateFlow<UserMapMarker?> = MutableStateFlow(null)
     val marker: StateFlow<UserMapMarker?>
@@ -37,7 +37,8 @@ class UserPlaceViewModel(
     val markerNotes: StateFlow<List<Note>>
         get() = _markerNotes
 
-    val currentNote: MutableState<Note?> = mutableStateOf(null)
+    private val _currentNote = MutableStateFlow<Note?>(null)
+    val currentNote: StateFlow<Note?> = _currentNote.asStateFlow()
 
 
     fun getCatchesByMarkerId(markerId: String): Flow<List<UserCatch>> {
@@ -57,7 +58,7 @@ class UserPlaceViewModel(
     fun changeVisibility(newIsVisible: Boolean) {
         viewModelScope.launch {
             _marker.value?.let {
-                markerVisibility.value = newIsVisible
+                _markerVisibility.value = newIsVisible
                 markersRepo.changeMarkerVisibility(it, changeTo = newIsVisible).collect {
                     when (it) {
                         is LiteProgress.Loading -> {}
@@ -65,7 +66,7 @@ class UserPlaceViewModel(
                             SnackbarManager.showMessage(R.string.marker_visibility_change_success)
                         }
                         is LiteProgress.Error -> {
-                            markerVisibility.value = !newIsVisible
+                            _markerVisibility.value = !newIsVisible
                             SnackbarManager.showMessage(R.string.marker_visibility_change_error)
                         }
                     }
@@ -119,10 +120,18 @@ class UserPlaceViewModel(
         }
     }
 
+    fun setCurrentNote(note: Note?) {
+        _currentNote.value = note
+    }
+
+    fun setMarkerVisibility(visible: Boolean?) {
+        _markerVisibility.value = visible
+    }
+
     fun setMarker(m: UserMapMarker) {
         _marker.value = m
         _markerNotes.value = m.notes
-        markerVisibility.value = m.visible
+        _markerVisibility.value = m.visible
     }
 
 }

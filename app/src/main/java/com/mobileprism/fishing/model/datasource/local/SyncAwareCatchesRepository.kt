@@ -24,10 +24,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.cancel
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import java.io.Closeable
 
 class SyncAwareCatchesRepository(
     private val firebaseRepo: CatchesRepository,
@@ -35,7 +37,7 @@ class SyncAwareCatchesRepository(
     private val pendingOpsDao: PendingOperationDao,
     private val connectionManager: ConnectionManager,
     private val syncScheduler: SyncScheduler,
-) : CatchesRepository {
+) : CatchesRepository, Closeable {
 
     companion object {
         private const val TAG = "SyncAwareCatches"
@@ -213,6 +215,8 @@ class SyncAwareCatchesRepository(
     ): Flow<PagingData<UserCatch>> {
         return firebaseRepo.getAllUserCatchesPaged(sortField, sortDirection)
     }
+
+    override fun close() { scope.cancel() }
 
     private fun mapToJsonObject(map: Map<String, Any>): JsonObject {
         return JsonObject(map.mapValues { (_, v) ->

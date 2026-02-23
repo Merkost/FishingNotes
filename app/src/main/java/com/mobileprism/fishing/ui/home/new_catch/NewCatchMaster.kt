@@ -178,8 +178,8 @@ fun NewCatchMasterScreen(
     val loadingText = when {
         uploadProgress != null -> stringResource(
             R.string.uploading_photo_progress,
-            uploadProgress!!.uploaded,
-            uploadProgress!!.total
+            uploadProgress.uploaded,
+            uploadProgress.total
         )
         else -> stringResource(id = R.string.saving_new_catch)
     }
@@ -187,7 +187,7 @@ fun NewCatchMasterScreen(
     ModalLoadingDialog(
         visible = loadingDialogState.value,
         text = loadingText,
-        progress = uploadProgress?.let { it.uploaded.toFloat() / it.total }
+        progress = uploadProgress?.takeIf { it.total > 0 }?.let { it.uploaded.toFloat() / it.total }
     )
 
     val skipAvailable by viewModel.skipAvailable.collectAsState()

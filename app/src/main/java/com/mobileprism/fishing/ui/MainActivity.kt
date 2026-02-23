@@ -93,7 +93,7 @@ class MainActivity : ComponentActivity() {
         WindowCompat.enableEdgeToEdge(window)
 
         val viewModel: MainViewModel by viewModel()
-        val userStateFlow = viewModel.mutableStateFlow
+        val userStateFlow = viewModel.userState
         val userPreferences: UserPreferences by inject()
         val appTheme = mutableStateOf<AppThemeValues?>(null)
 
@@ -128,7 +128,7 @@ class MainActivity : ComponentActivity() {
                             setContent {
                                 CompositionLocalProvider(LocalAnalytics provides analyticsTracker) {
                                     FishingNotesTheme(appTheme.value) {
-                                        DistributionScreen(viewModel.user)
+                                        DistributionScreen((viewModel.userState.value as? BaseViewState.Success)?.data)
                                     }
                                 }
                             }
@@ -142,7 +142,7 @@ class MainActivity : ComponentActivity() {
             setContent {
                 CompositionLocalProvider(LocalAnalytics provides analyticsTracker) {
                     FishingNotesTheme(appTheme.value) {
-                        DistributionScreen(viewModel.user)
+                        DistributionScreen((viewModel.userState.value as? BaseViewState.Success)?.data)
                     }
                 }
             }

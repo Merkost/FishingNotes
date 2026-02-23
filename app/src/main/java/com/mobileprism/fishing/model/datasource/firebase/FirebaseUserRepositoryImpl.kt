@@ -18,9 +18,12 @@ import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.datastore.UserDatastore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.tasks.await
 import org.koin.core.context.GlobalContext.loadKoinModules
@@ -37,13 +40,12 @@ class FirebaseUserRepositoryImpl(
 ) : UserRepository {
 
     private val fireBaseAuth = FirebaseAuth.getInstance()
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override val currentUser: Flow<User?>
         get() = callbackFlow {
             val authListener = FirebaseAuth.AuthStateListener {
-                runBlocking {
-                    send(it.currentUser?.run { mapFirebaseUserToUser(this) })
-                }
+                trySend(it.currentUser?.run { mapFirebaseUserToUser(this) })
             }
 
             fireBaseAuth.addAuthStateListener(authListener)
@@ -101,7 +103,7 @@ class FirebaseUserRepositoryImpl(
 
                     analyticsTracker.logEvent(AnalyticsEvent.SignUp(method = "Google"))
 
-                    runBlocking {
+                    scope.launch {
                         userDatastore.saveUser(user)
                     }
                     flow.tryEmit(Progress.Complete)
@@ -138,7 +140,7 @@ class FirebaseUserRepositoryImpl(
             if (snapshot != null && snapshot.exists()) {
                 Log.d("Fishing", "Current data: ${snapshot.data}")
                 snapshot.toObject(User::class.java)?.let { userToUpdate ->
-                    runBlocking {
+                    scope.launch {
                         userDatastore.saveUser(userToUpdate)
                     }
                 }

@@ -20,11 +20,13 @@ import com.mobileprism.fishing.utils.network.ConnectionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.io.Closeable
 
 class SyncAwareMarkersRepository(
     private val firebaseRepo: MarkersRepository,
@@ -32,7 +34,7 @@ class SyncAwareMarkersRepository(
     private val pendingOpsDao: PendingOperationDao,
     private val connectionManager: ConnectionManager,
     private val syncScheduler: SyncScheduler,
-) : MarkersRepository {
+) : MarkersRepository, Closeable {
 
     companion object {
         private const val TAG = "SyncAwareMarkers"
@@ -117,6 +119,8 @@ class SyncAwareMarkersRepository(
             syncScheduler.scheduleSync()
         }
     }
+
+    override fun close() { scope.cancel() }
 
     override suspend fun addNewMarker(newMarker: UserMapMarker): Result<Unit> {
         // Save locally immediately
