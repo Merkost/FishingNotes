@@ -13,7 +13,7 @@ import com.mobileprism.fishing.domain.entity.common.LiteProgress
 import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.domain.entity.content.MapMarker
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
-import com.mobileprism.fishing.domain.repository.app.MarkersRepository
+import com.mobileprism.fishing.domain.repository.app.MarkersRepositoryPaged
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
@@ -29,7 +29,7 @@ class FirebaseMarkersRepositoryImpl(
     private val dbCollections: RepositoryCollections,
     private val analyticsTracker: AnalyticsTracker,
     private val context: Context
-) : MarkersRepository {
+) : MarkersRepositoryPaged {
 
     override fun getAllUserMarkers() = channelFlow {
         val listeners = mutableListOf<ListenerRegistration>()

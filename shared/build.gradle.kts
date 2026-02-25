@@ -15,6 +15,7 @@ plugins {
     alias(libs.plugins.kotlinParcelize)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
     alias(libs.plugins.buildkonfig)
 }
 
@@ -27,7 +28,16 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            // Empty for now — future shared code dependencies go here
+            implementation(compose.runtime)                    // @Immutable
+            implementation(libs.coroutines.core)               // Flow, coroutines
+            implementation(libs.kotlinx.serialization.json)    // @Serializable
+            implementation(libs.kotlinx.datetime)              // Clock, Instant
+            implementation(libs.koin.core)                     // Koin DI
+            implementation(libs.room.runtime)                   // Room KMP
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.ktor.client.logging)
         }
 
         androidMain.dependencies {
@@ -73,9 +83,6 @@ kotlin {
             implementation(libs.constraintLayout.compose)
             implementation(libs.datastorePreferences)
 
-            implementation(libs.room.runtime)
-            implementation(libs.room.ktx)
-
             implementation(libs.compose.foundation)
             implementation(libs.compose.layout)
             implementation(libs.compose.ui)
@@ -99,10 +106,7 @@ kotlin {
             implementation(libs.paging.runtime)
             implementation(libs.paging.compose)
 
-            implementation(libs.retrofit)
-            implementation(libs.retrofitConverterKotlinxSerialization)
-            implementation(libs.retrofitCoroutinesAdapter)
-            implementation(libs.okhttpLoggingInterceptor)
+            implementation(libs.ktor.client.okhttp)
         }
     }
 }
@@ -121,10 +125,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    ksp {
-        arg("room.schemaLocation", "$projectDir/schemas")
-    }
-
     composeCompiler {
         reportsDestination = layout.buildDirectory.dir("compose_compiler")
     }
@@ -132,6 +132,10 @@ android {
     buildFeatures {
         compose = true
     }
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {

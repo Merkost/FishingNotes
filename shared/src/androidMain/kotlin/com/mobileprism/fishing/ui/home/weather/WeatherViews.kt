@@ -22,6 +22,9 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.airbnb.lottie.compose.*
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.weather.Daily
+import com.mobileprism.fishing.domain.entity.weather.PressureValues
+import com.mobileprism.fishing.domain.entity.weather.TemperatureValues
+import com.mobileprism.fishing.domain.entity.weather.WindSpeedValues
 import com.mobileprism.fishing.domain.entity.weather.Temperature
 import com.mobileprism.fishing.domain.entity.weather.Weather
 import com.mobileprism.fishing.model.datastore.UserPreferences

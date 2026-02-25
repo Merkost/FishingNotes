@@ -23,6 +23,24 @@ fun <T> ItemsSelection(
     currentOption: State<T?>,
     onSelectedItem: (T) -> Unit,
 ) where T : StringOperation {
+    ItemsSelection(
+        modifier = modifier,
+        radioOptions = radioOptions,
+        currentOption = currentOption,
+        labelProvider = { stringResource(it.stringRes) },
+        onSelectedItem = onSelectedItem,
+    )
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun <T> ItemsSelection(
+    modifier: Modifier = Modifier,
+    radioOptions: List<T>,
+    currentOption: State<T?>,
+    labelProvider: @Composable (T) -> String,
+    onSelectedItem: (T) -> Unit,
+) {
 
     val (selectedOption, onOptionSelected) = remember {
         mutableStateOf(currentOption.value)
@@ -59,7 +77,7 @@ fun <T> ItemsSelection(
                     }
                 )
                 Text(
-                    text = stringResource(option.stringRes),
+                    text = labelProvider(option),
                     modifier = Modifier.padding(start = 16.dp)
                 )
             }

@@ -31,6 +31,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.weather.Daily
+import com.mobileprism.fishing.domain.entity.weather.PressureValues
+import com.mobileprism.fishing.domain.entity.weather.TemperatureValues
+import com.mobileprism.fishing.domain.entity.weather.WindSpeedValues
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.ui.home.advertising.BannerAdvertView
 import com.mobileprism.fishing.ui.home.views.DefaultAppBar

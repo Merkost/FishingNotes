@@ -6,7 +6,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
-import com.mobileprism.fishing.domain.repository.app.MarkersRepository
+import com.mobileprism.fishing.domain.repository.app.MarkersRepositoryPaged
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.model.datasource.local.dao.CatchDao
 import com.mobileprism.fishing.model.datasource.local.dao.MarkerDao
@@ -33,7 +33,7 @@ class SyncWorker(
 ) : CoroutineWorker(appContext, workerParams), KoinComponent {
 
     private val catchesRepo: CatchesRepository by inject(named("firebase"))
-    private val markersRepo: MarkersRepository by inject(named("firebase"))
+    private val markersRepo: MarkersRepositoryPaged by inject(named("firebase"))
     private val pendingOpsDao: PendingOperationDao by inject()
     private val catchDao: CatchDao by inject()
     private val markerDao: MarkerDao by inject()

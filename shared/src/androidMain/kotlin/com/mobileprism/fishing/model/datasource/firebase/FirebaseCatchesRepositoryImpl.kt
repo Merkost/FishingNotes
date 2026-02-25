@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.model.datasource.firebase
 
-import android.net.Uri
 import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -161,13 +160,12 @@ class FirebaseCatchesRepositoryImpl(
     override suspend fun updateUserCatchPhotos(
         markerId: String,
         catchId: String,
-        newPhotos: List<Uri>
+        newPhotos: List<String>
     ): StateFlow<Progress> {
         val flow = MutableStateFlow<Progress>(Progress.Loading(0))
 
-        val photosResult = newPhotos.map { it.toString() }
         dbCollections.getUserCatchesCollection(markerId).document(catchId)
-            .update("downloadPhotoLinks", photosResult)
+            .update("downloadPhotoLinks", newPhotos)
             .addOnCompleteListener { flow.tryEmit(Progress.Complete) }
 
         return flow

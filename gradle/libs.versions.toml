@@ -50,9 +50,7 @@ firebaseCoroutines = "1.10.2"
 junit = "4.13.2"
 coilCompose = "2.7.0"
 paging = "3.3.6"
-retrofit = "3.0.0"
-retrofitCoroutinesAdapter = "0.9.2"
-okhttpLoggingInterceptor = "5.3.2"
+ktor = "3.1.1"
 foundationLayoutAndroid = "1.10.2"
 vico = "2.1.2"
 workRuntimeKtx = "2.9.0"
@@ -118,6 +116,7 @@ koin-main = { group = "io.insert-koin", name = "koin-android", version.ref = "ko
 koin-java = { group = "io.insert-koin", name = "koin-android-compat", version.ref = "koin" }
 koin-workManager = { group = "io.insert-koin", name = "koin-androidx-workmanager", version.ref = "koin" }
 koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
+koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
 
 androidX-testCore = { group = "androidx.test", name = "core", version.ref = "androidXTest" }
 androidX-testRunner = { group = "androidx.test", name = "runner", version.ref = "androidXTest" }
@@ -142,10 +141,11 @@ coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coi
 paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
 
-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-retrofitConverterKotlinxSerialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
-retrofitCoroutinesAdapter = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlin-coroutines-adapter", version.ref = "retrofitCoroutinesAdapter" }
-okhttpLoggingInterceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttpLoggingInterceptor" }
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
+ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundationLayoutAndroid" }
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
 work-runtimeKtx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
@@ -167,3 +167,4 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "jetbrainsCompose" }
 androidLibrary = { id = "com.android.library", version.ref = "androidLibrary" }
 buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig" }
+room = { id = "androidx.room", version.ref = "room" }

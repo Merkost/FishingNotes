@@ -7,12 +7,31 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.Daily
 import com.mobileprism.fishing.ui.MainDestinations
-import com.mobileprism.fishing.ui.utils.enums.StringOperation
+import com.mobileprism.fishing.domain.entity.weather.PressureValues
+import com.mobileprism.fishing.domain.entity.weather.TemperatureValues
+import com.mobileprism.fishing.domain.entity.weather.WindSpeedValues
 import com.mobileprism.fishing.utils.Constants.CURRENT_PLACE_ITEM_ID
-import java.text.DecimalFormat
 
-object WindFormat {
-    val df = DecimalFormat("#.#")
+val PressureValues.stringRes: Int get() = when (this) {
+    PressureValues.Pa -> R.string.pressure_pa
+    PressureValues.Bar -> R.string.pressure_bar
+    PressureValues.mmHg -> R.string.pressure_mm
+    PressureValues.Psi -> R.string.pressure_psi
+    PressureValues.Hpa -> R.string.pressure_hpa
+}
+
+val TemperatureValues.stringRes: Int get() = when (this) {
+    TemperatureValues.C -> R.string.celsius
+    TemperatureValues.F -> R.string.fahrenheit
+    TemperatureValues.K -> R.string.kelvin
+}
+
+val WindSpeedValues.stringRes: Int get() = when (this) {
+    WindSpeedValues.metersps -> R.string.wind_mps
+    WindSpeedValues.milesph -> R.string.wind_mph
+    WindSpeedValues.knots -> R.string.wind_knots
+    WindSpeedValues.ftps -> R.string.wind_ftps
+    WindSpeedValues.kmph -> R.string.wind_kmph
 }
 
 fun createCurrentPlaceItem(latLng: LatLng, context: Context): UserMapMarker {
@@ -50,96 +69,6 @@ data class Point(
     val y: Float
 )
 
-enum class PressureValues(override val stringRes: Int) : StringOperation {
-    Pa(R.string.pressure_pa),
-    Bar(R.string.pressure_bar),
-    mmHg(R.string.pressure_mm),
-    Psi(R.string.pressure_psi),
-    Hpa(R.string.pressure_hpa);
-
-    fun getPressureFromHpa(hPa: Int): String {
-        return when (this) {
-            Pa -> (hPa * 100).toString()
-            Bar -> (hPa / 1000).toString()
-            mmHg -> (hPa * 0.75006375541921).toInt().toString()
-            Psi -> String.format("%.5g", (hPa * 0.0145037738f))
-            Hpa -> hPa.toString()
-        }
-    }
-
-    fun getPressureFromMmhg(mmHg: Int): String {
-        return when (this) {
-            Pa -> (mmHg * 133.322).toString()
-            Bar -> (mmHg * 0.00133322f).toString()
-            PressureValues.mmHg -> mmHg.toString()
-            Psi -> String.format("%.5g", (mmHg * 0.0193368f))
-            Hpa -> (mmHg * 1.33).toString()
-        }
-    }
-
-    fun getPressureMmhg(value: Double): Int {
-        return when (this) {
-            Pa -> (value * 0.0075006156130264f).toInt()
-            Bar -> (value * 750.06168f).toInt()
-            mmHg -> value.toInt()
-            Psi -> (value * 51.71484f).toInt()
-            Hpa -> (value * 1.33f).toInt()
-        }
-    }
-}
-
-enum class TemperatureValues(override val stringRes: Int) : StringOperation {
-    C(R.string.celsius),
-    F(R.string.fahrenheit),
-    K(R.string.kelvin);
-
-    fun getTemperature(temperature: Float): String {
-        return when (this) {
-            C -> temperature.toInt().toString()
-            F -> (temperature * 9f / 5f + 32).toInt().toString()
-            K -> (temperature + 273.15).toInt().toString()
-        }
-    }
-
-    fun getDefaultTemperature(temperature: Double): Int {
-        return when (this) {
-            C -> temperature.toInt()
-            F -> ((temperature - 32) * (5 / 9)).toInt()
-            K -> (temperature - 273.15).toInt()
-        }
-    }
-}
-
-enum class WindSpeedValues(override val stringRes: Int) : StringOperation {
-    metersps(R.string.wind_mps),
-    milesph(R.string.wind_mph),
-    knots(R.string.wind_knots),
-    ftps(R.string.wind_ftps),
-    kmph(R.string.wind_kmph);
-
-    fun getWindSpeed(windSpeed: Double): String {
-        return WindFormat.df.format(
-            when (this) {
-                metersps -> windSpeed
-                knots -> (windSpeed * 1.9438444924574)
-                milesph -> (windSpeed * 2.2369362920544)
-                ftps -> (windSpeed * 3.28084)
-                kmph -> (windSpeed * 3.6)
-            }
-        )
-    }
-
-    fun getDefaultWindSpeed(windSpeed: Double): String {
-        return (when (this) {
-            metersps -> windSpeed
-            knots -> (windSpeed * 1.9438444924574)
-            milesph -> (windSpeed * 2.2369362920544)
-            ftps -> (windSpeed * 3.28084)
-            kmph -> (windSpeed * 3.6)
-        }).toInt().toString()
-    }
-
-}
 
 fun navigateToDailyWeatherScreen(
     navController: NavController,

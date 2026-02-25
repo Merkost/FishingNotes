@@ -7,9 +7,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
-import com.mobileprism.fishing.ui.home.weather.PressureValues
-import com.mobileprism.fishing.ui.home.weather.TemperatureValues
-import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
+import com.mobileprism.fishing.domain.entity.weather.PressureValues
+import com.mobileprism.fishing.domain.entity.weather.TemperatureValues
+import com.mobileprism.fishing.domain.entity.weather.WindSpeedValues
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map

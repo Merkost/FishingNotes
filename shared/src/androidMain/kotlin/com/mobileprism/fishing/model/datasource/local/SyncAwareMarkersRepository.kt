@@ -8,7 +8,7 @@ import com.mobileprism.fishing.domain.entity.common.LiteProgress
 import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.domain.entity.content.MapMarker
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
-import com.mobileprism.fishing.domain.repository.app.MarkersRepository
+import com.mobileprism.fishing.domain.repository.app.MarkersRepositoryPaged
 import com.mobileprism.fishing.model.datasource.local.dao.MarkerDao
 import com.mobileprism.fishing.model.datasource.local.dao.PendingOperationDao
 import com.mobileprism.fishing.model.datasource.local.entity.PendingOperationEntity
@@ -29,12 +29,12 @@ import kotlinx.serialization.json.Json
 import java.io.Closeable
 
 class SyncAwareMarkersRepository(
-    private val firebaseRepo: MarkersRepository,
+    private val firebaseRepo: MarkersRepositoryPaged,
     private val markerDao: MarkerDao,
     private val pendingOpsDao: PendingOperationDao,
     private val connectionManager: ConnectionManager,
     private val syncScheduler: SyncScheduler,
-) : MarkersRepository, Closeable {
+) : MarkersRepositoryPaged, Closeable {
 
     companion object {
         private const val TAG = "SyncAwareMarkers"
