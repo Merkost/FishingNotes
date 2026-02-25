@@ -277,13 +277,13 @@ This is the largest phase (~85 files). Proceed screen-by-screen.
 | Phase | Scope | Est. files | Status |
 |-------|-------|-----------|--------|
 | ~~0-5~~ | ~~Domain layer~~ | ~~49~~ | ~~Done~~ |
-| ~~6~~ | ~~Datastore interfaces~~ | ~~4~~ | ~~Mostly done (NotesPreferences remaining)~~ |
-| ~~7~~ | ~~Auth abstraction~~ | ~~4~~ | ~~Done (AuthRepository + FirebaseAuthRepository in commonMain)~~ |
-| ~~8~~ | ~~Model utilities~~ | ~~3~~ | ~~Mostly done (SafeApiCall, RepositoryCollections in commonMain)~~ |
+| ~~6~~ | ~~Datastore interfaces~~ | ~~4~~ | ~~Done~~ |
+| ~~7~~ | ~~Auth abstraction~~ | ~~4~~ | ~~Done~~ |
+| ~~8~~ | ~~Model utilities~~ | ~~3~~ | ~~Done~~ |
 | ~~9~~ | ~~Retrofit → Ktor~~ | ~~6~~ | ~~Done~~ |
 | ~~10~~ | ~~Room → Room KMP~~ | ~~12~~ | ~~Done~~ |
 | ~~11~~ | ~~Firebase → gitlive~~ | ~~8~~ | ~~Done~~ |
-| **12** | **ViewModels → commonMain** | **12-15** | **Next** |
-| 13 | UI Composables → CMP | 85+ | Pending |
+| ~~12~~ | ~~ViewModels → commonMain (Tier 1+2)~~ | ~~22~~ | ~~Done (4 VMs migrated, 8 remain for Phase 13)~~ |
+| **13** | **UI Composables → CMP** | **85+** | **Next** |
 
-**Current focus**: Phase 12 (includes cleanup of remaining Phase 6/8 items)
+**Current focus**: Phase 13 — UI layer migration
