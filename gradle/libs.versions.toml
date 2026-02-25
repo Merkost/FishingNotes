@@ -44,6 +44,7 @@ androidXTest = "1.7.0"
 androidXTestExtJunit = "1.3.0"
 espressoCore = "3.7.0"
 firebaseBom = "34.8.0"
+firebaseGitlive = "2.1.0"
 firebaseFirestore = "26.1.0"
 firebaseUiAuth = "9.1.1"
 firebaseCoroutines = "1.10.2"
@@ -133,6 +134,10 @@ firebase-storage = { group = "com.google.firebase", name = "firebase-storage" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 firebase-authUi = { group = "com.firebaseui", name = "firebase-ui-auth", version.ref = "firebaseUiAuth" }
 firebase-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "firebaseCoroutines" }
+
+firebase-gitlive-auth = { group = "dev.gitlive", name = "firebase-auth", version.ref = "firebaseGitlive" }
+firebase-gitlive-firestore = { group = "dev.gitlive", name = "firebase-firestore", version.ref = "firebaseGitlive" }
+firebase-gitlive-storage = { group = "dev.gitlive", name = "firebase-storage", version.ref = "firebaseGitlive" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 

@@ -1,9 +1,10 @@
 package com.mobileprism.fishing.model.datasource.firebase
 
-import com.google.firebase.auth.FirebaseAuth
+import dev.gitlive.firebase.Firebase
+import dev.gitlive.firebase.auth.auth
 import com.mobileprism.fishing.domain.repository.AuthRepository
 
 class FirebaseAuthRepository : AuthRepository {
     override fun getCurrentUserId(): String =
-        FirebaseAuth.getInstance().currentUser?.uid ?: "Anonymous"
+        Firebase.auth.currentUser?.uid ?: "Anonymous"
 }
