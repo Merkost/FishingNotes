@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.model.datasource.local.sync
 
 import com.mobileprism.fishing.domain.entity.common.SyncState
+import com.mobileprism.fishing.domain.repository.SyncStatusProvider
 import com.mobileprism.fishing.model.datasource.local.dao.PendingOperationDao
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionState
@@ -19,11 +20,11 @@ import java.io.Closeable
 class SyncStatusManager(
     private val pendingOpsDao: PendingOperationDao,
     private val connectionManager: ConnectionManager
-) : Closeable {
+) : SyncStatusProvider, Closeable {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val _globalSyncState = MutableStateFlow<SyncState>(SyncState.Synced)
-    val globalSyncState: StateFlow<SyncState> = _globalSyncState.asStateFlow()
+    override val globalSyncState: StateFlow<SyncState> = _globalSyncState.asStateFlow()
 
     val pendingCount: Flow<Int> = pendingOpsDao.observeCount()
 

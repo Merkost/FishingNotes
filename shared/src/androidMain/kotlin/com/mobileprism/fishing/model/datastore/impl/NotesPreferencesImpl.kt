@@ -7,8 +7,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.mobileprism.fishing.model.datastore.NotesPreferences
-import com.mobileprism.fishing.ui.utils.enums.CatchesSortValues
-import com.mobileprism.fishing.ui.utils.enums.PlacesSortValues
+import com.mobileprism.fishing.domain.entity.common.CatchesSortValues
+import com.mobileprism.fishing.domain.entity.common.PlacesSortValues
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map

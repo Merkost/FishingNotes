@@ -13,8 +13,6 @@ import com.mobileprism.fishing.ui.home.profile.findBestCatch
 import com.mobileprism.fishing.ui.home.profile.findFavoritePlace
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class UserViewModel(
@@ -45,10 +43,6 @@ class UserViewModel(
         getUserPlaces()
     }
 
-    /*private val _uiState = MutableStateFlow<BaseViewState>(BaseViewState.Success(null))
-    val uiState: StateFlow<BaseViewState>
-        get() = _uiState*/
-
     private fun getCurrentUser() = viewModelScope.launch {
         userDatastore.getUser.collect {
             _currentUser.value = it
@@ -75,7 +69,4 @@ class UserViewModel(
     suspend fun logoutCurrentUser() = viewModelScope.run {
         userRepository.logoutCurrentUser()
     }
-
 }
-
-

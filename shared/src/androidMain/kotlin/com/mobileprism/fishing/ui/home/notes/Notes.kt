@@ -21,8 +21,9 @@ import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.datastore.NotesPreferences
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.views.*
-import com.mobileprism.fishing.ui.utils.enums.CatchesSortValues
-import com.mobileprism.fishing.ui.utils.enums.PlacesSortValues
+import com.mobileprism.fishing.domain.entity.common.CatchesSortValues
+import com.mobileprism.fishing.domain.entity.common.PlacesSortValues
+import com.mobileprism.fishing.ui.utils.enums.stringRes
 import com.mobileprism.fishing.utils.Constants.modalBottomSheetCorners
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -197,13 +198,14 @@ fun PlacesSort(
     currentSort: State<PlacesSortValues>,
     onSelectedValue: (placesSore: PlacesSortValues) -> Unit
 ) {
-    val radioOptions = PlacesSortValues.values().asList()
+    val radioOptions = PlacesSortValues.entries
 
     Column {
         SettingsHeader(stringResource(R.string.sort))
         ItemsSelection(
             radioOptions = radioOptions,
             currentOption = currentSort,
+            labelProvider = { stringResource(it.stringRes) },
             onSelectedItem = onSelectedValue
         )
     }
@@ -221,6 +223,7 @@ fun CatchesSort(
         ItemsSelection(
             radioOptions = radioOptions,
             currentOption = currentSort,
+            labelProvider = { stringResource(it.stringRes) },
             onSelectedItem = onSelectedValue
         )
     }

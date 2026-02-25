@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.domain.entity.common.SyncState
 import com.mobileprism.fishing.domain.entity.common.User
+import com.mobileprism.fishing.domain.repository.SyncStatusProvider
 import com.mobileprism.fishing.domain.repository.UserRepository
-import com.mobileprism.fishing.model.datasource.local.sync.SyncStatusManager
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,11 +16,11 @@ import kotlinx.coroutines.launch
 
 class MainViewModel(
     private val repository: UserRepository,
-    private val syncStatusManager: SyncStatusManager
+    private val syncStatusProvider: SyncStatusProvider
 ) : ViewModel() {
     init { loadCurrentUser() }
 
-    val syncState: StateFlow<SyncState> = syncStatusManager.globalSyncState
+    val syncState: StateFlow<SyncState> = syncStatusProvider.globalSyncState
 
     private val _userState = MutableStateFlow<BaseViewState<User>>(BaseViewState.Loading(null))
     val userState: StateFlow<BaseViewState<User>> = _userState.asStateFlow()

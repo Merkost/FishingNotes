@@ -1,7 +1,7 @@
 package com.mobileprism.fishing.model.datastore
 
-import com.mobileprism.fishing.ui.utils.enums.CatchesSortValues
-import com.mobileprism.fishing.ui.utils.enums.PlacesSortValues
+import com.mobileprism.fishing.domain.entity.common.CatchesSortValues
+import com.mobileprism.fishing.domain.entity.common.PlacesSortValues
 import kotlinx.coroutines.flow.Flow
 
 interface NotesPreferences {

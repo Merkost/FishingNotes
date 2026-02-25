@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.ui.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.domain.entity.statistics.CatchStatistics
@@ -33,7 +32,7 @@ class StatisticsViewModel(
         viewModelScope.launch {
             getStatisticsUseCase()
                 .catch { e ->
-                    Log.e("StatisticsVM", "Failed to load statistics", e)
+                    println("StatisticsVM: Failed to load statistics: ${e.message}")
                     _statisticsState.value = BaseViewState.Error(e)
                 }
                 .collectLatest { stats ->
@@ -48,7 +47,7 @@ class StatisticsViewModel(
         viewModelScope.launch {
             getStatisticsUseCase()
                 .catch { e ->
-                    Log.e("StatisticsVM", "Failed to refresh statistics", e)
+                    println("StatisticsVM: Failed to refresh statistics: ${e.message}")
                     _isRefreshing.value = false
                 }
                 .collectLatest { stats ->
