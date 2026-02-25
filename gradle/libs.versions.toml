@@ -8,6 +8,9 @@ kotlinxSerializationJson = "1.10.0"
 ksp = "2.3.5"
 
 androidApplication = "8.13.2"
+androidLibrary = "8.13.2"
+jetbrainsCompose = "1.7.3"
+buildkonfig = "0.17.1"
 googleServices = "4.4.4"
 secretsGradlePlugin = "2.0.1"
 firebaseCrashlytics = "3.0.6"
@@ -53,6 +56,8 @@ retrofitCoroutinesAdapter = "0.9.2"
 okhttpLoggingInterceptor = "5.3.2"
 foundationLayoutAndroid = "1.10.2"
 vico = "2.1.2"
+workRuntimeKtx = "2.9.0"
+compressor = "3.0.1"
 
 [libraries]
 accompanist-pager = { group = "com.google.accompanist", name = "accompanist-pager", version.ref = "accompanist" }
@@ -102,6 +107,7 @@ compose-uiTest = { group = "androidx.compose.ui", name = "ui-test-junit4"}
 
 
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+lifecycle-runtimeKtx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleViewModelCompose" }
 viewModel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewModelCompose" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 constraintLayout-compose = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version.ref = "constraintLayoutCompose" }
@@ -145,6 +151,8 @@ retrofitCoroutinesAdapter = { group = "com.jakewharton.retrofit", name = "retrof
 okhttpLoggingInterceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttpLoggingInterceptor" }
 foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundationLayoutAndroid" }
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
+work-runtimeKtx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
+compressor = { group = "id.zelory", name = "compressor", version.ref = "compressor" }
 
 
 [plugins]
@@ -158,3 +166,7 @@ googleServices = { id = "com.google.gms.google-services", version.ref = "googleS
 secretsGradlePlugin = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
 firebaseCrashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlytics" }
 firebasePerf = { id = "com.google.firebase.firebase-perf", version.ref = "firebasePerf" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "jetbrainsCompose" }
+androidLibrary = { id = "com.android.library", version.ref = "androidLibrary" }
+buildkonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildkonfig" }
