@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
+import com.mmk.kmpauth.google.GoogleButtonUiContainer
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.ui.home.AppSnackbar
 import com.mobileprism.fishing.ui.home.SnackbarManager
@@ -34,7 +35,6 @@ import org.koin.compose.koinInject
 @Composable
 fun LoginScreen(navController: NavController) {
 
-    val googleLoginHandler = LocalGoogleLoginHandler.current
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     var visible by remember { mutableStateOf(false) }
@@ -191,46 +191,56 @@ fun LoginScreen(navController: NavController) {
 
                             Spacer(modifier = Modifier.height(30.dp))
 
-                            Card(
-                                shape = RoundedCornerShape(20.dp),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
-                                onClick = {
-                                    googleLoading = true;
-                                    coroutineScope.launch {
-                                        googleLoginHandler.startGoogleLogin()
+                            GoogleButtonUiContainer(
+                                onGoogleSignInResult = { googleUser ->
+                                    val idToken = googleUser?.idToken
+                                    if (idToken != null) {
+                                        loginViewModel.firebaseSignInWithGoogle(idToken)
+                                    } else {
+                                        googleLoading = false
+                                        loginViewModel.onGoogleSignInFailed()
                                     }
-                                },
+                                }
                             ) {
-                                Row(
-                                    modifier = Modifier
-                                        .padding(10.dp)
-                                        .padding(end = 2.dp)
-                                        .animateContentSize(
-                                            animationSpec = tween(
-                                                durationMillis = 300,
-                                                easing = LinearOutSlowInEasing
-                                            )
-                                        ),
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
+                                Card(
+                                    shape = RoundedCornerShape(20.dp),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+                                    onClick = {
+                                        googleLoading = true
+                                        this@GoogleButtonUiContainer.onClick()
+                                    },
                                 ) {
-                                    Image(
-                                        painterResource(R.drawable.ic_google_logo),
-                                        stringResource(R.string.google_login),
-                                        modifier = Modifier.size(25.dp)
-                                    )
-                                    Text(
-                                        text = if (googleLoading) stringResource(R.string.signing_in)
-                                        else stringResource(R.string.sign_with_google)
-                                    )
-                                    if (googleLoading) {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier
-                                                .height(16.dp)
-                                                .width(16.dp),
-                                            strokeWidth = 2.dp,
-                                            color = MaterialTheme.colorScheme.primary
+                                    Row(
+                                        modifier = Modifier
+                                            .padding(10.dp)
+                                            .padding(end = 2.dp)
+                                            .animateContentSize(
+                                                animationSpec = tween(
+                                                    durationMillis = 300,
+                                                    easing = LinearOutSlowInEasing
+                                                )
+                                            ),
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Image(
+                                            painterResource(R.drawable.ic_google_logo),
+                                            stringResource(R.string.google_login),
+                                            modifier = Modifier.size(25.dp)
                                         )
+                                        Text(
+                                            text = if (googleLoading) stringResource(R.string.signing_in)
+                                            else stringResource(R.string.sign_with_google)
+                                        )
+                                        if (googleLoading) {
+                                            CircularProgressIndicator(
+                                                modifier = Modifier
+                                                    .height(16.dp)
+                                                    .width(16.dp),
+                                                strokeWidth = 2.dp,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
                                     }
                                 }
                             }

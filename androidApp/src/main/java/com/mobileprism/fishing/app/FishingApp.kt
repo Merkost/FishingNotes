@@ -7,6 +7,8 @@ import coil.Coil
 import coil.ImageLoader
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
+import com.mmk.kmpauth.google.GoogleAuthCredentials
+import com.mmk.kmpauth.google.GoogleAuthProvider
 import com.mobileprism.fishing.BuildKonfig
 import com.mobileprism.fishing.di.*
 import com.mobileprism.fishing.model.datasource.local.sync.SyncScheduler
@@ -22,6 +24,8 @@ class FishingApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        GoogleAuthProvider.create(GoogleAuthCredentials(serverId = BuildKonfig.GOOGLE_WEB_CLIENT_ID))
 
         Coil.setImageLoader(
             ImageLoader.Builder(this)

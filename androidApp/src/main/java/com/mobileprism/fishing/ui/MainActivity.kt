@@ -3,7 +3,6 @@ package com.mobileprism.fishing.ui
 import android.app.Activity
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -13,39 +12,28 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import androidx.credentials.CredentialManager
-import androidx.credentials.CustomCredential
-import androidx.credentials.GetCredentialResponse
-import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.MobileAds.setAppMuted
-import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.SnackbarAction
 import com.mobileprism.fishing.ui.home.SnackbarManager
-import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
 import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
 import com.mobileprism.fishing.ui.theme.FishingNotesTheme
 import com.mobileprism.fishing.ui.utils.LocalAnalytics
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
-import com.mobileprism.fishing.utils.Logger
 import com.mobileprism.fishing.viewmodels.MainViewModel
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -53,9 +41,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
 
-    private val logger: Logger by inject()
     private val appUpdateManager: AppUpdateManager by inject()
-    private val auth: FirebaseAuth by inject()
     private val analyticsTracker: AnalyticsTracker by inject()
 
     private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
@@ -123,7 +109,6 @@ class MainActivity : ComponentActivity() {
                         if (Build.VERSION.SDK_INT < 31) {
                             setContent {
                                 CompositionLocalProvider(
-                                    LocalGoogleLoginHandler provides GoogleLoginHandler { startGoogleLogin() },
                                     LocalAnalytics provides analyticsTracker
                                 ) {
                                     FishingNotesTheme(appTheme.value) {
@@ -140,7 +125,6 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= 31) {
             setContent {
                 CompositionLocalProvider(
-                    LocalGoogleLoginHandler provides GoogleLoginHandler { startGoogleLogin() },
                     LocalAnalytics provides analyticsTracker
                 ) {
                     FishingNotesTheme(appTheme.value) {
@@ -245,80 +229,6 @@ class MainActivity : ComponentActivity() {
                 FishingNotesApp()
             }
         }
-    }
-
-    suspend fun startGoogleLogin() {
-        val credentialManager = CredentialManager.create(this)
-        val signInWithGoogleOption: GetSignInWithGoogleOption =
-            GetSignInWithGoogleOption.Builder(
-                getString(com.mobileprism.fishing.android.R.string.default_web_client_id)
-            ).build()
-
-        val request = androidx.credentials.GetCredentialRequest.Builder()
-            .addCredentialOption(signInWithGoogleOption)
-            .build()
-
-        try {
-            val result = credentialManager.getCredential(
-                request = request,
-                context = this,
-            )
-            handleSignIn(result)
-        } catch (e: GetCredentialException) {
-            handleError(e)
-        }
-
-    }
-
-    private fun handleSignIn(result: GetCredentialResponse) {
-        when (val credential = result.credential) {
-            is CustomCredential -> {
-                if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                    try {
-                        // Use googleIdTokenCredential and extract id to validate and
-                        // authenticate on your server.
-                        val googleIdTokenCredential = GoogleIdTokenCredential
-                            .createFrom(credential.data)
-                        firebaseAuthWithGoogle(googleIdTokenCredential.idToken)
-                    } catch (e: GoogleIdTokenParsingException) {
-                        Log.e(TAG, "Received an invalid google id token response", e)
-                    }
-                } else {
-                    handleError(Exception("Unexpected type of credential"))
-                    Log.e(TAG, "Unexpected type of credential")
-                }
-            }
-
-            else -> {
-                handleError(Exception("Unexpected type of credential"))
-                Log.e(TAG, "Unexpected type of credential")
-            }
-        }
-    }
-
-    private fun firebaseAuthWithGoogle(idToken: String) {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-
-        auth.signInWithCredential(credential)
-            .addOnCompleteListener(this) { task ->
-                when {
-                    task.isSuccessful -> {
-                        // Sign in success, update UI with the signed-in user's information
-                    }
-
-                    else -> {
-                        handleError(task.exception)
-                    }
-                }
-            }
-    }
-
-    private fun handleError(error: Exception?) {
-        error?.let {
-            analyticsTracker.logEvent(AnalyticsEvent.SignInError(error.message))
-            logger.log(error.message)
-        }
-        SnackbarManager.showMessage(R.string.google_login_failed)
     }
 
     override fun onStop() {
