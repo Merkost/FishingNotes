@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import kotlinx.datetime.Clock
 
 @Entity(
     tableName = "catches",
@@ -44,5 +45,5 @@ data class CatchEntity(
     val weatherPressure: Int = 0,
     val weatherMoonPhase: Float = 0.0f,
     val syncStatus: Int = SyncStatus.SYNCED,
-    val lastModified: Long = System.currentTimeMillis()
+    val lastModified: Long = Clock.System.now().toEpochMilliseconds()
 )
