@@ -3,6 +3,7 @@ package com.mobileprism.fishing.model.datasource.local.entity
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import kotlinx.datetime.Clock
 
 @Entity(
     tableName = "markers",
@@ -22,5 +23,5 @@ data class MarkerEntity(
     val public: Boolean = false,
     val notes: String = "[]",
     val syncStatus: Int = SyncStatus.SYNCED,
-    val lastModified: Long = System.currentTimeMillis()
+    val lastModified: Long = Clock.System.now().toEpochMilliseconds()
 )

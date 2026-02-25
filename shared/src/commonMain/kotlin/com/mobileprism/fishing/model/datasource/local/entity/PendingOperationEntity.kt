@@ -3,6 +3,7 @@ package com.mobileprism.fishing.model.datasource.local.entity
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import kotlinx.datetime.Clock
 
 @Entity(
     tableName = "pending_operations",
@@ -15,7 +16,7 @@ data class PendingOperationEntity(
     val operationType: String,
     val parentId: String = "",
     val payload: String = "",
-    val createdAt: Long = System.currentTimeMillis(),
+    val createdAt: Long = Clock.System.now().toEpochMilliseconds(),
     val retryCount: Int = 0,
     val lastError: String? = null
 )
