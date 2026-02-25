@@ -22,6 +22,18 @@ import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.utils.enums.DarkModeValues
 import org.koin.compose.koinInject
 
+@Composable
+actual fun FishingNotesTheme(
+    darkTheme: Boolean,
+    content: @Composable () -> Unit
+) {
+    FishingNotesTheme(
+        initialAppTheme = null,
+        darkTheme = darkTheme,
+        content = content
+    )
+}
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun FishingNotesTheme(
@@ -66,7 +78,7 @@ fun FishingNotesTheme(
  * Returns the effective dark theme state, respecting the user's dark mode preference.
  */
 @Composable
-fun isAppInDarkTheme(): Boolean {
+actual fun isAppInDarkTheme(): Boolean {
     val userPreferences: UserPreferences = koinInject()
     val darkModePreference = userPreferences.darkMode.collectAsState(DarkModeValues.System)
     val systemDarkTheme = isSystemInDarkTheme()

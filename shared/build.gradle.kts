@@ -29,6 +29,11 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(compose.runtime)                    // @Immutable
+            implementation(compose.foundation)                 // CMP foundation
+            implementation(compose.material3)                  // CMP Material3
+            implementation(compose.ui)                         // CMP UI
+            implementation(compose.materialIconsExtended)      // CMP Material Icons
+            implementation(compose.components.resources)       // CMP resource system (Res.string, Res.drawable)
             implementation(libs.coroutines.core)               // Flow, coroutines
             implementation(libs.kotlinx.serialization.json)    // @Serializable
             implementation(libs.kotlinx.datetime)              // Clock, Instant
@@ -42,6 +47,8 @@ kotlin {
             implementation(libs.firebase.gitlive.firestore)
             implementation(libs.firebase.gitlive.storage)
             implementation(libs.lifecycle.viewmodel)             // KMP ViewModel
+            implementation(libs.navigation.compose)              // KMP Navigation
+            implementation(libs.viewModel.compose)               // KMP ViewModel Compose
         }
 
         androidMain.dependencies {
@@ -52,7 +59,6 @@ kotlin {
             api(libs.androidX.splashScreen)
             api(libs.activity.compose)
             api(libs.lifecycle.runtimeKtx)
-            api(libs.navigation.compose)
             api(libs.compose.runtime)
             api(libs.compose.material3)
             api(libs.koin.main)
@@ -83,7 +89,6 @@ kotlin {
             implementation(libs.playServices.billing)
             implementation(libs.playServices.auth)
 
-            implementation(libs.viewModel.compose)
             implementation(libs.constraintLayout.compose)
             implementation(libs.datastorePreferences)
 

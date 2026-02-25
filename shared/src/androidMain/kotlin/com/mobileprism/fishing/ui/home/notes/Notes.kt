@@ -19,6 +19,9 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.model.datastore.NotesPreferences
+import fishing_notes.shared.generated.resources.Res
+import fishing_notes.shared.generated.resources.ic_add_catch
+import fishing_notes.shared.generated.resources.ic_baseline_add_location_24
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.domain.entity.common.CatchesSortValues
@@ -83,12 +86,12 @@ fun Notes(
                 fabState = fabState,
                 items = listOf(
                     FabMenuItem(
-                        icon = R.drawable.ic_add_catch,
+                        icon = Res.drawable.ic_add_catch,
                         text = stringResource(R.string.add_new_catch),
                         onClick = { onAddNewCatchClick(navController) }
                     ),
                     FabMenuItem(
-                        icon = R.drawable.ic_baseline_add_location_24,
+                        icon = Res.drawable.ic_baseline_add_location_24,
                         text = stringResource(R.string.new_place),
                         onClick = { onAddNewPlaceClick(navController) }
                     )
