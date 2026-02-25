@@ -35,7 +35,7 @@ import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.ErrorView
 import com.mobileprism.fishing.ui.home.views.NoContentView
-import com.mobileprism.fishing.ui.utils.enums.CatchesSortValues
+import com.mobileprism.fishing.domain.entity.common.CatchesSortValues
 import com.mobileprism.fishing.ui.viewmodels.UserCatchesViewModel
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import org.koin.compose.koinInject

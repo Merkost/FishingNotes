@@ -30,7 +30,7 @@ import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.ErrorView
 import com.mobileprism.fishing.ui.home.views.NoContentView
-import com.mobileprism.fishing.ui.utils.enums.PlacesSortValues
+import com.mobileprism.fishing.domain.entity.common.PlacesSortValues
 import com.mobileprism.fishing.ui.viewmodels.UserPlacesViewModel
 import org.koin.compose.koinInject
 import org.koin.androidx.compose.koinViewModel

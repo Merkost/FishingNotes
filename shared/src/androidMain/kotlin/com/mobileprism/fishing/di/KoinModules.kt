@@ -10,8 +10,10 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.analytics
 import com.google.firebase.auth.FirebaseAuth
+import com.mobileprism.fishing.domain.repository.SyncStatusProvider
 import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseAnalyticsTracker
+import com.mobileprism.fishing.model.datasource.local.sync.SyncStatusManager
 import com.mobileprism.fishing.model.datastore.*
 import com.mobileprism.fishing.model.datastore.impl.NotesPreferencesImpl
 import com.mobileprism.fishing.model.datastore.impl.UserDatastoreImpl
@@ -23,8 +25,6 @@ import com.mobileprism.fishing.utils.location.LocationManager
 import com.mobileprism.fishing.utils.location.LocationManagerImpl
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionManagerImpl
-import com.mobileprism.fishing.viewmodels.EditProfileViewModel
-import com.mobileprism.fishing.viewmodels.MainViewModel
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -46,6 +46,7 @@ val appModule = module {
             .build()
     }
     single<LocationManager> { LocationManagerImpl(get()) }
+    single<SyncStatusProvider> { get<SyncStatusManager>() }
 }
 
 val settingsModule = module {
@@ -58,7 +59,6 @@ val settingsModule = module {
 }
 
 val mainModule = module {
-    viewModel { MainViewModel(repository = get(), syncStatusManager = get()) }
     viewModel { LoginViewModel(
         repository = get(),
         firebaseAuth = get(),
@@ -75,18 +75,6 @@ val mainModule = module {
             locationManager = get(),
             getPlaceNameUseCase = get()
         )
-    }
-
-    viewModel {
-        UserViewModel(
-            userRepository = get(),
-            repository = get(),
-            getUserCatchUseCase = get(),
-            userDatastore = get()
-        )
-    }
-    viewModel {
-        EditProfileViewModel(userDatastore = get(), userRepository = get())
     }
     viewModel { parameters ->
         UserCatchViewModel(
@@ -114,7 +102,6 @@ val mainModule = module {
     }
     viewModel { UserCatchesViewModel(userCatchesUseCase = get(), repository = get()) }
     viewModel { UserPlacesViewModel(repository = get()) }
-    viewModel { StatisticsViewModel(getStatisticsUseCase = get()) }
     viewModel { parameters ->
         NewCatchMasterViewModel(
             placeState = parameters.get(),

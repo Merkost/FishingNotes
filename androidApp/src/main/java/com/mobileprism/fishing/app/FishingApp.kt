@@ -53,7 +53,8 @@ class FishingApp : Application() {
                 mainModule,
                 repositoryModule,
                 settingsModule,
-                useCasesModule
+                useCasesModule,
+                commonViewModelsModule
             )
         }
 

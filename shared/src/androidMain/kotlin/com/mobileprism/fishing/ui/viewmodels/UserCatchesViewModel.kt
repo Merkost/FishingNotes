@@ -8,7 +8,8 @@ import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.use_cases.catches.GetUserCatchesUseCase
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.ui.home.UiState
-import com.mobileprism.fishing.ui.utils.enums.CatchesSortValues
+import com.mobileprism.fishing.domain.entity.common.CatchesSortValues
+import com.mobileprism.fishing.ui.utils.enums.toFirestoreOrder
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

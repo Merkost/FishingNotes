@@ -41,6 +41,7 @@ kotlin {
             implementation(libs.firebase.gitlive.auth)
             implementation(libs.firebase.gitlive.firestore)
             implementation(libs.firebase.gitlive.storage)
+            implementation(libs.lifecycle.viewmodel)             // KMP ViewModel
         }
 
         androidMain.dependencies {

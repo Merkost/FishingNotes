@@ -7,7 +7,8 @@ import androidx.paging.cachedIn
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.repository.app.MarkersRepositoryPaged
 import com.mobileprism.fishing.ui.home.UiState
-import com.mobileprism.fishing.ui.utils.enums.PlacesSortValues
+import com.mobileprism.fishing.domain.entity.common.PlacesSortValues
+import com.mobileprism.fishing.ui.utils.enums.toFirestoreOrder
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
