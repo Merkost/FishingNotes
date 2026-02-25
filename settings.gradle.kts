@@ -14,4 +14,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Fishing"
-include(":app")
+include(":shared")
+include(":androidApp")
