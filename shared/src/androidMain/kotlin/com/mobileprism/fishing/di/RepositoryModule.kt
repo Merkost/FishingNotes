@@ -17,8 +17,10 @@ import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.model.datasource.FreeWeatherRepositoryKtorImpl
 import com.mobileprism.fishing.model.datasource.SolunarRepositoryKtorImpl
 import com.mobileprism.fishing.model.datasource.WeatherRepositoryKtorImpl
+import com.mobileprism.fishing.model.datasource.firebase.FirebaseCatchesPagedRepository
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseCatchesRepositoryImpl
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseCloudPhotoStorage
+import com.mobileprism.fishing.model.datasource.firebase.FirebaseMarkersPagedRepository
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseMarkersRepositoryImpl
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseOfflineRepositoryImpl
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseUserRepositoryImpl
@@ -35,20 +37,18 @@ import org.koin.dsl.module
 import org.koin.dsl.onClose
 import java.io.Closeable
 
-val userRepositoryModule = module {
+val repositoryModule = networkModule + module {
+    single<AuthRepository> { FirebaseAuthRepository() }
+    single { RepositoryCollections(authRepository = get()) }
+
+    // User repository (no Android Context needed)
     single<UserRepository> {
         FirebaseUserRepositoryImpl(
             userDatastore = get(),
             dbCollections = get(),
-            analyticsTracker = get(),
-            context = androidContext()
+            analyticsTracker = get()
         )
     }
-}
-
-val repositoryModule = networkModule + module {
-    single<AuthRepository> { FirebaseAuthRepository() }
-    single { RepositoryCollections() }
 
     // Room Database
     single {
@@ -73,19 +73,29 @@ val repositoryModule = networkModule + module {
         SyncStatusManager(pendingOpsDao = get(), connectionManager = get())
     } onClose { (it as? Closeable)?.close() }
 
-    // Firebase implementations (named)
+    // Core Firebase implementations (commonMain)
+    single { FirebaseCatchesRepositoryImpl(
+        dbCollections = get(),
+        analyticsTracker = get(),
+        connectionManager = get(),
+        authRepository = get()
+    ) }
+    single { FirebaseMarkersRepositoryImpl(
+        dbCollections = get(),
+        analyticsTracker = get()
+    ) }
+
+    // Paged wrappers (androidMain, named bindings)
     single<CatchesRepository>(named("firebase")) {
-        FirebaseCatchesRepositoryImpl(
-            dbCollections = get(),
-            analyticsTracker = get(),
-            connectionManager = get()
+        FirebaseCatchesPagedRepository(
+            coreRepo = get(),
+            authRepository = get()
         )
     }
     single<MarkersRepositoryPaged>(named("firebase")) {
-        FirebaseMarkersRepositoryImpl(
-            dbCollections = get(),
-            analyticsTracker = get(),
-            context = androidContext()
+        FirebaseMarkersPagedRepository(
+            coreRepo = get(),
+            authRepository = get()
         )
     }
     single<WeatherRepository>(named("remote")) {

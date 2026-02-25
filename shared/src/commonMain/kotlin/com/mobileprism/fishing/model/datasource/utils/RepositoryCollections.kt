@@ -1,22 +1,23 @@
 package com.mobileprism.fishing.model.datasource.utils
 
-import com.google.firebase.Firebase
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.google.firebase.firestore.firestore
+import dev.gitlive.firebase.Firebase
+import dev.gitlive.firebase.firestore.CollectionReference
+import dev.gitlive.firebase.firestore.FirebaseFirestore
+import dev.gitlive.firebase.firestore.firestore
+import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.model.datasource.utils.RepositoryConstants.CATCHES_COLLECTION
 import com.mobileprism.fishing.model.datasource.utils.RepositoryConstants.MARKERS_COLLECTION
 import com.mobileprism.fishing.model.datasource.utils.RepositoryConstants.USERS_COLLECTION
-import com.mobileprism.fishing.utils.getCurrentUserId
 
-class RepositoryCollections(val db: FirebaseFirestore = Firebase.firestore) {
+class RepositoryCollections(
+    val db: FirebaseFirestore = Firebase.firestore,
+    private val authRepository: AuthRepository
+) {
 
     init {
-        val settings = FirebaseFirestoreSettings.Builder()
-            .setPersistenceEnabled(true)
-            .build()
-        db.firestoreSettings = settings
+        db.settings = dev.gitlive.firebase.firestore.firestoreSettings {
+            isPersistenceEnabled = true
+        }
     }
 
     fun getUsersCollection(): CollectionReference {
@@ -24,12 +25,12 @@ class RepositoryCollections(val db: FirebaseFirestore = Firebase.firestore) {
     }
 
     fun getUserMapMarkersCollection(): CollectionReference {
-        return db.collection(USERS_COLLECTION).document(getCurrentUserId())
+        return db.collection(USERS_COLLECTION).document(authRepository.getCurrentUserId())
             .collection(MARKERS_COLLECTION)
     }
 
     fun getUserCatchesCollection(usermarkerId: String): CollectionReference {
-        return db.collection(USERS_COLLECTION).document(getCurrentUserId())
+        return db.collection(USERS_COLLECTION).document(authRepository.getCurrentUserId())
             .collection(MARKERS_COLLECTION).document(usermarkerId)
             .collection(CATCHES_COLLECTION)
     }
@@ -42,6 +43,4 @@ class RepositoryCollections(val db: FirebaseFirestore = Firebase.firestore) {
         return db.collection(MARKERS_COLLECTION).document(usermarkerId)
             .collection(CATCHES_COLLECTION)
     }
-
 }
-
