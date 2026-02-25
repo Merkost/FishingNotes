@@ -59,7 +59,12 @@ val settingsModule = module {
 
 val mainModule = module {
     viewModel { MainViewModel(repository = get(), syncStatusManager = get()) }
-    viewModel { LoginViewModel(repository = get()) }
+    viewModel { LoginViewModel(
+        repository = get(),
+        firebaseAuth = get(),
+        analyticsTracker = get(),
+        logger = get()
+    ) }
     viewModel {
         MapViewModel(
             getUserPlacesListUseCase = get(),

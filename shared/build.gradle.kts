@@ -44,10 +44,8 @@ kotlin {
             api(libs.koin.main)
             api(libs.koin.workManager)
             api(libs.coil.compose)
-            api(libs.androidx.credentials)
-            api(libs.androidx.credentials.play.services.auth)
-            api(libs.googleid)
             api(libs.firebase.auth)
+            implementation(libs.kmpauth.google)
             api(libs.playServices.ads)
             api(libs.playServices.update)
 
@@ -188,6 +186,8 @@ buildkonfig {
             localProperties.getProperty("RAPIDAPI_KEY", ""))
         buildConfigField(FieldSpec.Type.STRING, "MAPS_API_KEY",
             localProperties.getProperty("MAPS_API_KEY", ""))
+        buildConfigField(FieldSpec.Type.STRING, "GOOGLE_WEB_CLIENT_ID",
+            localProperties.getProperty("GOOGLE_WEB_CLIENT_ID", ""))
         buildConfigField(FieldSpec.Type.BOOLEAN, "DEBUG", "true")
     }
 

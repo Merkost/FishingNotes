@@ -1,6 +1,5 @@
 [versions]
-credentials = "1.5.0"
-googleId = "1.2.0"
+kmpauth = "2.3.1"
 
 kotlin = "2.3.20-RC"
 kotlinxDatetime = "0.6.2"
@@ -66,9 +65,7 @@ accompanist-permissions = { group = "com.google.accompanist", name = "accompanis
 accompanist-appCompatTheme = { group = "com.google.accompanist", name = "accompanist-appcompat-theme", version.ref = "accompanist" }
 accompanist-placeholder = { group = "com.google.accompanist", name = "accompanist-placeholder-material3", version.ref = "accompanist" }
 
-androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
-androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
-googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleId" }
+kmpauth-google = { module = "io.github.mirzemehdi:kmpauth-google", version.ref = "kmpauth" }
 
 googleMaps-mapsKtx = { group = "com.google.maps.android", name = "maps-ktx", version.ref = "mapsKtx" }
 googleMaps-mapUtilsKtx = { group = "com.google.maps.android", name = "maps-utils-ktx", version.ref = "mapsUtilsKtx" }
