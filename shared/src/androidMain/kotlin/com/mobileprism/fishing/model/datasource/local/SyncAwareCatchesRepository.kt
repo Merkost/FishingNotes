@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.model.datasource.local
 
-import android.net.Uri
 import android.util.Log
 import androidx.paging.PagingData
 import com.google.firebase.firestore.Query
@@ -121,7 +120,7 @@ class SyncAwareCatchesRepository(
     override suspend fun updateUserCatchPhotos(
         markerId: String,
         catchId: String,
-        newPhotos: List<Uri>
+        newPhotos: List<String>
     ): StateFlow<Progress> {
         // Photo uploads require network, delegate directly
         return firebaseRepo.updateUserCatchPhotos(markerId, catchId, newPhotos)

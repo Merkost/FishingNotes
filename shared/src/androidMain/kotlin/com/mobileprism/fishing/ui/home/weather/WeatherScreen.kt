@@ -42,6 +42,9 @@ import com.google.accompanist.placeholder.placeholder
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.Daily
+import com.mobileprism.fishing.domain.entity.weather.PressureValues
+import com.mobileprism.fishing.domain.entity.weather.TemperatureValues
+import com.mobileprism.fishing.domain.entity.weather.WindSpeedValues
 import com.mobileprism.fishing.domain.entity.weather.Hourly
 import com.mobileprism.fishing.domain.entity.weather.WeatherForecast
 import com.mobileprism.fishing.model.datastore.UserPreferences

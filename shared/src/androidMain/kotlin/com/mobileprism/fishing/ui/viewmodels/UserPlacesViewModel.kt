@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
-import com.mobileprism.fishing.domain.repository.app.MarkersRepository
+import com.mobileprism.fishing.domain.repository.app.MarkersRepositoryPaged
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.utils.enums.PlacesSortValues
 import kotlinx.coroutines.flow.Flow
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import android.util.Log
 
-class UserPlacesViewModel(private val repository: MarkersRepository) : ViewModel() {
+class UserPlacesViewModel(private val repository: MarkersRepositoryPaged) : ViewModel() {
 
     private val _currentContent = MutableStateFlow<List<UserMapMarker>>(listOf())
     val currentContent: StateFlow<List<UserMapMarker>>

@@ -34,9 +34,10 @@ import com.mobileprism.fishing.ui.home.advertising.BannerAdvertView
 import com.mobileprism.fishing.ui.home.notes.ItemUserPlace
 import com.mobileprism.fishing.ui.home.place.LottieWarning
 import com.mobileprism.fishing.ui.home.views.*
-import com.mobileprism.fishing.ui.home.weather.PressureValues
-import com.mobileprism.fishing.ui.home.weather.TemperatureValues
-import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
+import com.mobileprism.fishing.domain.entity.weather.PressureValues
+import com.mobileprism.fishing.domain.entity.weather.TemperatureValues
+import com.mobileprism.fishing.domain.entity.weather.WindSpeedValues
+import com.mobileprism.fishing.ui.home.weather.stringRes
 import com.mobileprism.fishing.ui.viewmodels.UserCatchViewModel
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.time.toDateTextMonth

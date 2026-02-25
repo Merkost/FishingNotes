@@ -53,7 +53,8 @@ import com.mobileprism.fishing.ui.HomeTabs
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.views.PrimaryText
 import com.mobileprism.fishing.ui.home.views.SubtitleText
-import com.mobileprism.fishing.ui.home.weather.WindSpeedValues
+import com.mobileprism.fishing.domain.entity.weather.WindSpeedValues
+import com.mobileprism.fishing.ui.home.weather.stringRes
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import org.koin.compose.koinInject

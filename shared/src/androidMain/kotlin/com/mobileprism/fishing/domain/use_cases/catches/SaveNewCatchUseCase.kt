@@ -2,11 +2,11 @@ package com.mobileprism.fishing.domain.use_cases.catches
 
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.raw.NewCatchWeather
+import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.domain.use_cases.SavePhotosUseCase
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.ui.viewmodels.*
-import com.mobileprism.fishing.utils.getCurrentUserId
 import com.mobileprism.fishing.utils.getNewCatchId
 import com.mobileprism.fishing.utils.toStandardNumber
 import kotlinx.coroutines.flow.channelFlow
@@ -16,7 +16,8 @@ import kotlinx.coroutines.flow.take
 class SaveNewCatchUseCase(
     private val catchesRepository: CatchesRepository,
     private val savePhotos: SavePhotosUseCase,
-    private val weatherPreferences: WeatherPreferences
+    private val weatherPreferences: WeatherPreferences,
+    private val authRepository: AuthRepository
 ) {
 
     operator fun invoke(
@@ -24,7 +25,7 @@ class SaveNewCatchUseCase(
         onPhotoProgress: ((uploaded: Int, total: Int) -> Unit)? = null
     ) = channelFlow {
         try {
-            val photos = savePhotos(data.photos, onPhotoProgress)
+            val photos = savePhotos(data.photos.map { it.toString() }, onPhotoProgress)
             val userCatch = createUserCatch(
                 placeAndTimeState = data.placeAndTimeState,
                 fishAndWeightState = data.fishAndWeightState,
@@ -72,7 +73,7 @@ class SaveNewCatchUseCase(
         photos: List<String>
     ) = UserCatch(
         id = getNewCatchId(),
-        userId = getCurrentUserId(),
+        userId = authRepository.getCurrentUserId(),
         description = catchInfoState.note,
         date = placeAndTimeState.date,
         fishType = fishAndWeightState.fish,
