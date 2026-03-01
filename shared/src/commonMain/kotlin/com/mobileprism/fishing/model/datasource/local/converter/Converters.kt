@@ -9,7 +9,7 @@ class Converters {
 
     @TypeConverter
     fun fromStringList(value: String): List<String> {
-        return Json.decodeFromString<List<String>>(value)
+        return try { Json.decodeFromString<List<String>>(value) } catch (_: Exception) { emptyList() }
     }
 
     @TypeConverter
@@ -19,7 +19,7 @@ class Converters {
 
     @TypeConverter
     fun fromNoteList(value: String): List<Note> {
-        return Json.decodeFromString<List<Note>>(value)
+        return try { Json.decodeFromString<List<Note>>(value) } catch (_: Exception) { emptyList() }
     }
 
     @TypeConverter

@@ -27,7 +27,12 @@ class SaveUserMarkerNoteUseCase(private val markersRepository: MarkersRepository
         currentNotes: List<Note>
     ) {
         val newNotes = currentNotes.toMutableList().apply {
-            set(indexOf(find { it.id == note.id }), note)
+            val index = indexOfFirst { it.id == note.id }
+            if (index != -1) {
+                set(index, note)
+            } else {
+                add(note)
+            }
         }
         markersRepository.updateNotes(markerId, newNotes).collect {
             it.fold(

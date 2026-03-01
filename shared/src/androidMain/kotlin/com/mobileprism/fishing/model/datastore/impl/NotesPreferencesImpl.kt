@@ -27,16 +27,12 @@ class NotesPreferencesImpl(private val context: Context): NotesPreferences {
     override val getPlacesSortValue: Flow<PlacesSortValues> = context.dataStore.data
         .map { preferences ->
             PlacesSortValues.valueOf(preferences[PLACES_SORT_KEY] ?: PlacesSortValues.TimeAsc.name)
-        }.catch { e ->
-            if (e is IllegalArgumentException) { emit(PlacesSortValues.TimeAsc) }
-        }
+        }.catch { emit(PlacesSortValues.TimeAsc) }
 
     override val getCatchesSortValue: Flow<CatchesSortValues> = context.dataStore.data
         .map { preferences ->
             CatchesSortValues.valueOf(preferences[CATCHES_SORT_KEY] ?: CatchesSortValues.TimeAsc.name)
-        }.catch { e ->
-            if (e is IllegalArgumentException) { emit(CatchesSortValues.TimeAsc) }
-        }
+        }.catch { emit(CatchesSortValues.TimeAsc) }
 
     //save values
     override suspend fun savePlacesSortValue(placesSortValue: PlacesSortValues) {

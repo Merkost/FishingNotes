@@ -112,15 +112,25 @@ class SyncWorker(
                         else -> primitive.content
                     } as Any
                 }
-                catchesRepo.updateUserCatch(op.parentId, op.entityId, data)
-                catchDao.updateSyncStatus(op.entityId, SyncStatus.SYNCED)
-                true
+                try {
+                    catchesRepo.updateUserCatch(op.parentId, op.entityId, data)
+                    catchDao.updateSyncStatus(op.entityId, SyncStatus.SYNCED)
+                    true
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to update catch ${op.entityId}", e)
+                    false
+                }
             }
             "delete" -> {
-                val catch = json.decodeFromString<UserCatch>(op.payload)
-                catchesRepo.deleteCatch(catch)
-                catchDao.deleteByCatchId(op.entityId)
-                true
+                try {
+                    val catch = json.decodeFromString<UserCatch>(op.payload)
+                    catchesRepo.deleteCatch(catch)
+                    catchDao.deleteByCatchId(op.entityId)
+                    true
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to delete catch ${op.entityId}", e)
+                    false
+                }
             }
             else -> false
         }
@@ -137,10 +147,15 @@ class SyncWorker(
                 result.isSuccess
             }
             "delete" -> {
-                val marker = json.decodeFromString<UserMapMarker>(op.payload)
-                markersRepo.deleteMarker(marker)
-                markerDao.deleteByMarkerId(op.entityId)
-                true
+                try {
+                    val marker = json.decodeFromString<UserMapMarker>(op.payload)
+                    markersRepo.deleteMarker(marker)
+                    markerDao.deleteByMarkerId(op.entityId)
+                    true
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to delete marker ${op.entityId}", e)
+                    false
+                }
             }
             else -> false
         }

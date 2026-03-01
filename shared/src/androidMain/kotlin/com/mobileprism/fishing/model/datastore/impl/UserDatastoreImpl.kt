@@ -26,7 +26,9 @@ class UserDatastoreImpl(private val context: Context): UserDatastore {
     //get the saved value
     override val getUser: Flow<User> = context.dataStore.data
         .map { preferences ->
-            preferences[USER_KEY]?.let { Json.decodeFromString<User>(it) } ?: User()
+            preferences[USER_KEY]?.let {
+                try { Json.decodeFromString<User>(it) } catch (_: Exception) { User() }
+            } ?: User()
         }
 
     override suspend fun saveUser(user: User) {

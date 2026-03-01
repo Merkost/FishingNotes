@@ -92,13 +92,9 @@ class FirebaseCatchesRepositoryImpl(
     }
 
     override suspend fun deleteCatch(userCatch: UserCatch) {
-        try {
-            dbCollections.getUserCatchesCollection(userCatch.userMarkerId).document(userCatch.id)
-                .delete()
-            decrementNumOfCatches(userCatch.userMarkerId)
-        } catch (e: Exception) {
-            println("Fishing: deleteCatch failed: ${e.message}")
-        }
+        dbCollections.getUserCatchesCollection(userCatch.userMarkerId).document(userCatch.id)
+            .delete()
+        decrementNumOfCatches(userCatch.userMarkerId)
     }
 
     override suspend fun updateUserCatch(
@@ -122,8 +118,7 @@ class FirebaseCatchesRepositoryImpl(
                 .update("downloadPhotoLinks" to newPhotos)
             flow.tryEmit(Progress.Complete)
         } catch (e: Exception) {
-            println("Fishing: updateUserCatchPhotos failed: ${e.message}")
-            flow.tryEmit(Progress.Complete)
+            flow.tryEmit(Progress.Error(e))
         }
 
         return flow

@@ -65,13 +65,11 @@ class FirebaseUserRepositoryImpl(
                     userDatastore.saveUser(user)
                     flow.tryEmit(Progress.Complete)
                 } catch (e: Exception) {
-                    println("Fishing: Failed to set new user: ${e.message}")
-                    flow.tryEmit(Progress.Complete)
+                    flow.tryEmit(Progress.Error(e))
                 }
             }
         } catch (e: Exception) {
-            println("Fishing: addNewUser failed: ${e.message}")
-            flow.tryEmit(Progress.Complete)
+            flow.tryEmit(Progress.Error(e))
         }
 
         return flow

@@ -28,13 +28,17 @@ class FirebaseMarkersRepositoryImpl(
             .snapshots
             .collect { snapshot ->
                 for (dc in snapshot.documentChanges) {
-                    val mapMarker = dc.document.data<UserMapMarker>()
-                    val state = when (dc.type) {
-                        ChangeType.ADDED -> ContentState.ADDED<MapMarker>(mapMarker)
-                        ChangeType.MODIFIED -> ContentState.MODIFIED<MapMarker>(mapMarker)
-                        ChangeType.REMOVED -> ContentState.DELETED<MapMarker>(mapMarker)
+                    try {
+                        val mapMarker = dc.document.data<UserMapMarker>()
+                        val state = when (dc.type) {
+                            ChangeType.ADDED -> ContentState.ADDED<MapMarker>(mapMarker)
+                            ChangeType.MODIFIED -> ContentState.MODIFIED<MapMarker>(mapMarker)
+                            ChangeType.REMOVED -> ContentState.DELETED<MapMarker>(mapMarker)
+                        }
+                        send(state)
+                    } catch (_: Exception) {
+                        // Skip corrupt document
                     }
-                    send(state)
                 }
             }
     }
@@ -114,11 +118,7 @@ class FirebaseMarkersRepositoryImpl(
     }
 
     override suspend fun deleteMarker(userMapMarker: UserMapMarker) {
-        try {
-            dbCollections.getUserMapMarkersCollection().document(userMapMarker.id).delete()
-            analyticsTracker.logEvent(AnalyticsEvent.DeleteMarker)
-        } catch (e: Exception) {
-            println("Fishing: deleteMarker failed: ${e.message}")
-        }
+        dbCollections.getUserMapMarkersCollection().document(userMapMarker.id).delete()
+        analyticsTracker.logEvent(AnalyticsEvent.DeleteMarker)
     }
 }

@@ -42,7 +42,7 @@ fun UserCatch.toEntity(syncStatus: Int = SyncStatus.SYNCED): CatchEntity {
 }
 
 fun CatchEntity.toDomain(): UserCatch {
-    val photos: List<String> = Json.decodeFromString(downloadPhotoLinks)
+    val photos: List<String> = try { Json.decodeFromString(downloadPhotoLinks) } catch (_: Exception) { emptyList() }
 
     return UserCatch(
         id = id,
@@ -96,7 +96,7 @@ fun UserMapMarker.toEntity(syncStatus: Int = SyncStatus.SYNCED): MarkerEntity {
 }
 
 fun MarkerEntity.toDomain(): UserMapMarker {
-    val notesList: List<Note> = Json.decodeFromString(notes)
+    val notesList: List<Note> = try { Json.decodeFromString(notes) } catch (_: Exception) { emptyList() }
 
     return UserMapMarker(
         id = id,

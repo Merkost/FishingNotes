@@ -50,7 +50,7 @@ class UserPlacesViewModel(private val repository: MarkersRepositoryPaged) : View
                     _uiState.value = UiState.Error
                 }
                 .collect { userPlaces ->
-                    _currentContent.value = userPlaces as List<UserMapMarker>
+                    _currentContent.value = userPlaces.filterIsInstance<UserMapMarker>()
                     _uiState.value = UiState.Success
                 }
         }
@@ -68,7 +68,7 @@ class UserPlacesViewModel(private val repository: MarkersRepositoryPaged) : View
                     _isRefreshing.value = false
                 }
                 .collect { userPlaces ->
-                    _currentContent.value = userPlaces as List<UserMapMarker>
+                    _currentContent.value = userPlaces.filterIsInstance<UserMapMarker>()
                     _uiState.value = UiState.Success
                     _isRefreshing.value = false
                 }

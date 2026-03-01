@@ -31,7 +31,7 @@ inline fun <R, T> ContentState<T>.fold(
     }
     return when (this) {
         is ContentState.ADDED -> onAdded(item)
-        is ContentState.DELETED -> onAdded(item)
-        is ContentState.MODIFIED -> onAdded(item)
+        is ContentState.DELETED -> onDeleted(item)
+        is ContentState.MODIFIED -> onModified(item)
     }
 }
