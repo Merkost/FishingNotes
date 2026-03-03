@@ -10,18 +10,11 @@ class GetUserCatchesUseCase(val repository: CatchesRepositoryRead) {
         val currentCatches: MutableList<UserCatch> = mutableListOf()
 
         repository.getAllUserCatchesState().collect { contentState ->
-
-            contentState.modified.forEach { newCatch ->
-                currentCatches.removeAll { oldCatch ->
-                    newCatch.id == oldCatch.id
-                }
-            }
-
-            currentCatches.apply {
-                addAll(contentState.added)
-                removeAll(contentState.deleted)
-                addAll(contentState.modified)
-            }
+            val modifiedIds = contentState.modified.map { it.id }.toSet()
+            val deletedIds = contentState.deleted.map { it.id }.toSet()
+            currentCatches.removeAll { it.id in modifiedIds || it.id in deletedIds }
+            currentCatches.addAll(contentState.added)
+            currentCatches.addAll(contentState.modified)
 
             emit(currentCatches)
         }

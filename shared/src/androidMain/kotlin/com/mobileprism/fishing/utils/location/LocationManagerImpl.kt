@@ -6,17 +6,16 @@ import android.content.Context
 import android.content.IntentSender
 import android.util.Log
 import android.widget.Toast
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
 import com.mobileprism.fishing.R
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.map.LocationState
 import com.mobileprism.fishing.ui.home.map.checkLocationPermissions
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.tasks.await
 
@@ -27,31 +26,7 @@ class LocationManagerImpl(private val context: Context) : LocationManager {
     private val manager =
         context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
 
-    companion object {
-        val lastCoordinates = MutableStateFlow(LatLng(0.0, 0.0))
-    }
-
     @SuppressLint("MissingPermission")
-    @ExperimentalPermissionsApi
-    suspend fun getCurrentLocation(
-        context: Context,
-        permissionsState: MultiplePermissionsState,
-    ): LatLng {
-        checkLocationPermissions(context)
-        if (permissionsState.allPermissionsGranted) {
-            return try {
-                val location = fusedLocationProviderClient.lastLocation.await()
-                LatLng(location.latitude, location.longitude)
-            } catch (e: Exception) {
-                Log.d("MAP", "Unable to get location")
-                LatLng(0.0, 0.0)
-            }
-        }
-        return LatLng(0.0, 0.0)
-    }
-
-    @SuppressLint("MissingPermission")
-    @OptIn(ExperimentalPermissionsApi::class)
     override fun getCurrentLocationFlow(): Flow<LocationState> = flow {
         val locationPermissionsGiven = checkLocationPermissions(context).not()
         when {
@@ -63,10 +38,7 @@ class LocationManagerImpl(private val context: Context) : LocationManager {
                 val locationResult = fusedLocationProviderClient.lastLocation.await()
                 try {
                     val newCoordinates = LatLng(locationResult.latitude, locationResult.longitude)
-                        //if (isCoordinatesFar(lastCoordinates.value, newCoordinates)) {
-                        emit(LocationState.LocationGranted(newCoordinates))
-                        lastCoordinates.value = newCoordinates
-                        //}
+                    emit(LocationState.LocationGranted(newCoordinates))
                 } catch (e: Exception) {
                     Log.d("MAP", "GPS is off")
                     Toast.makeText(
@@ -82,7 +54,7 @@ class LocationManagerImpl(private val context: Context) : LocationManager {
 
     override fun checkGPSEnabled(activity: Activity, onGpsEnabled: () -> Unit) {
         if (manager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER).not()) {
-            SnackbarManager.showMessage(R.string.gps_is_off)
+            SnackbarManager.showMessage(Res.string.gps_is_off)
             turnOnGPS(activity, onGpsEnabled)
         } else onGpsEnabled()
     }

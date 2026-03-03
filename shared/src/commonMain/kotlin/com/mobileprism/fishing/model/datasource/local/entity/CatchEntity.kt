@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 @Entity(
     tableName = "catches",
@@ -16,7 +16,7 @@ import kotlinx.datetime.Clock
             onDelete = ForeignKey.CASCADE
         )
     ],
-    indices = [Index("userMarkerId"), Index("userId")]
+    indices = [Index("userMarkerId"), Index("userId"), Index("userId", "date")]
 )
 data class CatchEntity(
     @PrimaryKey val id: String,

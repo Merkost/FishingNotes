@@ -270,9 +270,4 @@ val GreenDarkColorScheme = darkColorScheme(
     inversePrimary = GreenDarkInversePrimary,
 )
 
-val InitColorScheme = darkColorScheme(
-    primary = Color.Transparent,
-    tertiary = Color.Transparent,
-    secondary = Color.Transparent,
-    secondaryContainer = Color.Transparent,
-)
+val InitColorScheme = BlueLightColorScheme

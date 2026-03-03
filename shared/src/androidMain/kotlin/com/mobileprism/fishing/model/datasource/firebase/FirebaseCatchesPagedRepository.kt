@@ -3,7 +3,9 @@ package com.mobileprism.fishing.model.datasource.firebase
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.google.firebase.Firebase
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.firestore
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
@@ -25,7 +27,7 @@ class FirebaseCatchesPagedRepository(
         config = PagingConfig(pageSize = 20, enablePlaceholders = false),
         pagingSourceFactory = {
             CatchesPagingSource(
-                com.google.firebase.Firebase.firestore,
+                Firebase.firestore,
                 authRepository.getCurrentUserId(),
                 sortField,
                 sortDirection

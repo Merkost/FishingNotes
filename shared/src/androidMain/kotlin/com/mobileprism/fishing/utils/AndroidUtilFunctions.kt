@@ -4,6 +4,8 @@ import android.content.Context
 import android.widget.Toast
 import com.google.android.gms.maps.model.LatLng
 import com.mobileprism.fishing.R
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.ui.home.map.DEFAULT_ZOOM
 import kotlin.math.pow
 import kotlin.math.sqrt

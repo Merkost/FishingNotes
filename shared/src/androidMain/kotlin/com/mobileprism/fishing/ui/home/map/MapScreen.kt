@@ -55,15 +55,13 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
@@ -73,18 +71,22 @@ import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
 import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
 import com.mobileprism.fishing.ui.utils.LocalAnalytics
 import com.mobileprism.fishing.R
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.*
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
-import com.mobileprism.fishing.model.datastore.UserPreferences
+import com.mobileprism.fishing.model.datastore.UserPreferencesImpl
 import android.app.Activity
 import com.mobileprism.fishing.ui.MainDestinations
-import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
+import com.mobileprism.fishing.ui.utils.rememberLocationPermissionGranted
+import com.mobileprism.fishing.ui.utils.rememberPermissionsController
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -110,7 +112,7 @@ fun MapScreen(
 
     val coroutineScope = rememberCoroutineScope()
     val analyticsTracker = LocalAnalytics.current
-    val userPreferences: UserPreferences = koinInject()
+    val userPreferences: UserPreferencesImpl = koinInject()
     val useZoomButtons by userPreferences.useMapZoomButons.collectAsState(false)
 
     val modalBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -193,7 +195,7 @@ fun MapScreen(
 private fun MapControls(
     mapUiState: MapUiState,
     viewModel: MapViewModel,
-    userPreferences: UserPreferences,
+    userPreferences: UserPreferencesImpl,
     useZoomButtons: Boolean,
     mapLayersSelection: Boolean,
     onMapLayersSelectionChanged: (Boolean) -> Unit,
@@ -311,7 +313,6 @@ private fun MapControls(
 }
 
 
-@OptIn(ExperimentalPermissionsApi::class)
 @SuppressLint("PotentialBehaviorOverride", "MissingPermission")
 @Composable
 fun MapLayout(
@@ -319,7 +320,7 @@ fun MapLayout(
 ) {
     val viewModel: MapViewModel = koinViewModel()
     val map = rememberMapViewWithLifecycle()
-    val userPreferences: UserPreferences = koinInject()
+    val userPreferences: UserPreferencesImpl = koinInject()
     val coroutineScope = rememberCoroutineScope()
     val darkTheme = isAppInDarkTheme()
 
@@ -334,7 +335,8 @@ fun MapLayout(
             else markers.filter { it.visible })
     }
 
-    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
+    val permissionsController = rememberPermissionsController()
+    val locationPermissionGranted by rememberLocationPermissionGranted(permissionsController)
     var isMapVisible by remember { mutableStateOf(false) }
 
     AnimatedVisibility(
@@ -351,21 +353,10 @@ fun MapLayout(
                 val googleMap = mapView.awaitMap()
 
                 //Map styles: https://mapstyle.withgoogle.com
-                if (darkTheme) {
-                    googleMap.setMapStyle(
-                        MapStyleOptions.loadRawResourceStyle(
-                            context,
-                            R.raw.map_style_fishing_night
-                        )
-                    )
-                } else {
-                    googleMap.setMapStyle(
-                        MapStyleOptions.loadRawResourceStyle(
-                            context,
-                            R.raw.map_style_fishing
-                        )
-                    )
-                }
+                @OptIn(ExperimentalResourceApi::class)
+                val styleFileName = if (darkTheme) "map_style_fishing_night" else "map_style_fishing"
+                val styleJson = Res.readBytes("files/$styleFileName.json").decodeToString()
+                googleMap.setMapStyle(MapStyleOptions(styleJson))
 
                 googleMap.clear()
                 markersToShow.forEach {
@@ -417,10 +408,10 @@ fun MapLayout(
         }
     }
 
-    LaunchedEffect(map, permissionsState.allPermissionsGranted) {
+    LaunchedEffect(map, locationPermissionGranted) {
         val googleMap = map.awaitMap()
         checkLocationPermissions(context)
-        googleMap.isMyLocationEnabled = permissionsState.allPermissionsGranted
+        googleMap.isMyLocationEnabled = locationPermissionGranted
     }
 
     LaunchedEffect(Unit) {
@@ -448,56 +439,11 @@ fun MapLayout(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
-@ExperimentalPermissionsApi
-@Composable
-fun LocationPermissionDialog(
-    modifier: Modifier = Modifier,
-    userPreferences: UserPreferences,
-    onCloseCallback: () -> Unit = { },
-) {
-    var isDialogOpen by remember { mutableStateOf(true) }
-    val coroutineScope = rememberCoroutineScope()
-
-    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
-    if (isDialogOpen) {
-        GrantLocationPermissionsDialog(
-            onDismiss = {
-                isDialogOpen = false
-                onCloseCallback()
-            },
-            onNegativeClick = {
-                isDialogOpen = false
-                onCloseCallback()
-            },
-            onPositiveClick = {
-                isDialogOpen = false
-                if (permissionsState.shouldShowRationale) {
-                    SnackbarManager.showMessage(R.string.location_permission_denied)
-                    onCloseCallback()
-                } else {
-                    permissionsState.launchMultiplePermissionRequest()
-                }
-                permissionsState.launchMultiplePermissionRequest()
-                onCloseCallback()
-            },
-            onDontAskClick = {
-                isDialogOpen = false
-                SnackbarManager.showMessage(R.string.location_dont_ask)
-                coroutineScope.launch {
-                    userPreferences.saveLocationPermissionStatus(false)
-                }
-                onCloseCallback()
-            }
-        )
-    }
-}
-
 @ExperimentalMaterial3Api
 @Composable
 fun MapFab(
     viewModel: MapViewModel,
-    userSettings: UserPreferences,
+    userSettings: UserPreferencesImpl,
     onLongPress: () -> Unit,
     onClick: () -> Unit,
 ) {
@@ -505,8 +451,8 @@ fun MapFab(
     val useFastFabAdd by userSettings.useFabFastAdd.collectAsState(false)
     val context = LocalContext.current
 
-    val adding_place = stringResource(R.string.adding_place_on_current_location)
-    val permissions_required = stringResource(R.string.location_permissions_required)
+    val adding_place = stringResource(Res.string.adding_place_on_current_location)
+    val permissions_required = stringResource(Res.string.location_permissions_required)
     AnimatedVisibility(
         visible = state !is MapUiState.BottomSheetInfoMode,
         exit = fadeOut(),
@@ -530,15 +476,15 @@ fun MapFab(
         ) {
             AnimatedVisibility(state is MapUiState.NormalMode) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_baseline_add_location_24),
-                    contentDescription = stringResource(R.string.new_place),
+                    painter = painterResource(Res.drawable.ic_baseline_add_location_24),
+                    contentDescription = stringResource(Res.string.new_place),
                     tint = MaterialTheme.colorScheme.onSecondary,
                 )
             }
             AnimatedVisibility(state is MapUiState.PlaceSelectMode) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_baseline_check_24),
-                    contentDescription = stringResource(R.string.new_place),
+                    painter = painterResource(Res.drawable.ic_baseline_check_24),
+                    contentDescription = stringResource(Res.string.new_place),
                     tint = MaterialTheme.colorScheme.onSecondary,
                 )
             }

@@ -1,7 +1,8 @@
+@file:JvmName("ThemeAndroid")
+
 package com.mobileprism.fishing.ui.theme
 
 import android.os.Build
-import android.util.Log
 import androidx.activity.compose.LocalActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -90,19 +91,9 @@ actual fun isAppInDarkTheme(): Boolean {
 }
 
 @Composable
-fun chooseColorScheme(appTheme: AppThemeValues?, darkTheme: Boolean): ColorScheme {
-    Log.e("AppTheme", "chooseColorScheme: $appTheme")
-    return when (appTheme) {
-        AppThemeValues.Dynamic -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val context = LocalContext.current
-                if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-            } else {
-                if (darkTheme) BlueDarkColorScheme else BlueLightColorScheme
-            }
-        }
-        AppThemeValues.Blue -> if (darkTheme) BlueDarkColorScheme else BlueLightColorScheme
-        AppThemeValues.Green -> if (darkTheme) GreenDarkColorScheme else GreenLightColorScheme
-        else -> InitColorScheme
-    }
+actual fun resolveDynamicColorScheme(darkTheme: Boolean): ColorScheme? {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        val context = LocalContext.current
+        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    } else null
 }

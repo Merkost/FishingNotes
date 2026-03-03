@@ -8,8 +8,10 @@ class DeleteUserCatchUseCase(
     private val catchesRepository: CatchesRepositoryUpdate,
     private val photosRepository: PhotoStorage
 ) {
-    suspend operator fun invoke(catch: UserCatch) {
-        catchesRepository.deleteCatch(catch)
+    suspend operator fun invoke(catch: UserCatch): Result<Unit> {
+        val result = catchesRepository.deleteCatch(catch)
+        if (result.isFailure) return result
         catch.downloadPhotoLinks.forEach { photosRepository.deletePhoto(it) }
+        return Result.success(Unit)
     }
 }

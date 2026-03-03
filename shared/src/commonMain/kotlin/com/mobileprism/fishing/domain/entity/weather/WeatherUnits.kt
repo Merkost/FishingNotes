@@ -17,7 +17,7 @@ enum class PressureValues {
         return when (this) {
             Pa -> (mmHg * 133.322).toString()
             Bar -> (mmHg * 0.00133322f).toString()
-            this.mmHg -> mmHg.toString()
+            PressureValues.mmHg -> mmHg.toString()
             Psi -> (mmHg * 0.0193368f).let { "%.5g".format(it) }
             Hpa -> (mmHg * 1.33).toString()
         }

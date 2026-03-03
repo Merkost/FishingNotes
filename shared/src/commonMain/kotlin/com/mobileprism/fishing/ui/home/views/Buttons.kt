@@ -202,6 +202,7 @@ fun DefaultIconButton(
     modifier: Modifier = Modifier,
     childModifier: Modifier = Modifier,
     icon: Painter,
+    contentDescription: String? = null,
     tint: Color = MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit
 ) {
@@ -212,7 +213,7 @@ fun DefaultIconButton(
         Icon(
             modifier = childModifier.size(24.dp),
             painter = icon,
-            contentDescription = null,
+            contentDescription = contentDescription,
             tint = tint
         )
     }

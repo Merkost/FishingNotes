@@ -1,19 +1,24 @@
 package com.mobileprism.fishing.model.utils
 
-import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
-suspend fun <T> safeApiCall(dispatcher: CoroutineDispatcher, apiCall: suspend () -> T): Result<T> {
+suspend fun <T> safeApiCall(
+    dispatcher: CoroutineDispatcher,
+    retries: Int = 2,
+    apiCall: suspend () -> T
+): Result<T> {
     return withContext(dispatcher) {
-        try {
-            Result.success(apiCall.invoke())
-        } catch (throwable: Throwable) {
-            when (throwable) {
-                is ResponseException -> println("SafeApiCall: HTTP ${throwable.response.status}")
-                else -> println("SafeApiCall: ${throwable.message}")
+        var lastException: Throwable? = null
+        repeat(retries + 1) { attempt ->
+            try {
+                return@withContext Result.success(apiCall.invoke())
+            } catch (e: Throwable) {
+                lastException = e
+                if (attempt < retries) delay(1000L * (attempt + 1))
             }
-            Result.failure(throwable)
         }
+        Result.failure(lastException!!)
     }
 }

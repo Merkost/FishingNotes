@@ -14,16 +14,13 @@ class DeleteUserMarkerNoteUseCase(private val markersRepository: MarkersReposito
         val newNotes = currentNotes.toMutableList().apply {
             remove(noteToDelete)
         }
-        markersRepository.updateNotes(markerId, newNotes).collect {
-            it.fold(
-                onSuccess = {
-                    emit(Result.success(newNotes))
-                },
-                onFailure = {
-                    emit(Result.failure(it))
-                }
-            )
-        }
+        markersRepository.updateNotes(markerId, newNotes).fold(
+            onSuccess = {
+                emit(Result.success(newNotes))
+            },
+            onFailure = {
+                emit(Result.failure(it))
+            }
+        )
     }
 }
-

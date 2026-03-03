@@ -25,11 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.domain.entity.common.SyncState
 import com.mobileprism.fishing.model.datasource.local.entity.SyncStatus
-import fishing_notes.shared.generated.resources.Res
-import fishing_notes.shared.generated.resources.pending_upload
-import fishing_notes.shared.generated.resources.sync_conflict
-import fishing_notes.shared.generated.resources.sync_error
-import fishing_notes.shared.generated.resources.sync_pending
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.pending_upload
+import fishing.shared.generated.resources.sync_conflict
+import fishing.shared.generated.resources.sync_error
+import fishing.shared.generated.resources.sync_pending
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

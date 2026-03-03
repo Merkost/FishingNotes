@@ -1,24 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Figma application theme. -->
-    <style name="Theme.Fishing.FigmaNight">
-        <!-- Primary brand color. -->
-        <item name="android:statusBarColor" >@color/fui_transparent</item>
-        <item name="android:navigationBarColor">@color/fui_transparent</item>
-
+    <!-- Night base theme — minimal, Compose handles all UI theming -->
+    <style name="Theme.Fishing.FigmaNight" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
-
-    <style name="Theme.AnimatedSplashScreen" parent="Theme.Fishing.FigmaNight">
-        <item name="colorPrimary">@color/dark_gray</item>
-        <item name="colorOnPrimary">@color/dark_gray</item>
-<!--        <item name="android:statusBarColor" tools:targetApi="l">@color/primaryFigmaDarkColor</item>&ndash;&gt;-->
-    </style>
+    <style name="Theme.AnimatedSplashScreen" parent="Theme.Fishing.FigmaNight" />
 
     <style name="Theme.AppSplash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/dark_gray</item>
-        <item name="windowSplashScreenAnimatedIcon" >@drawable/icon_splashscreen</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/icon_splashscreen</item>
         <item name="postSplashScreenTheme">@style/Theme.AnimatedSplashScreen</item>
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>

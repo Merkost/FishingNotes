@@ -1,3 +1,5 @@
+@file:JvmName("PlaceUtilFunctionsAndroid")
+
 package com.mobileprism.fishing.ui.home.place
 
 import android.content.ActivityNotFoundException
@@ -5,19 +7,17 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
-import androidx.navigation.NavController
 import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
 import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
-import com.mobileprism.fishing.ui.MainDestinations
-import java.util.*
+import org.koin.core.context.GlobalContext
+import java.util.Locale
 
-fun newCatchClicked(navController: NavController, place: UserMapMarker) {
-        navController.navigate(MainDestinations.NewCatch(place = place))
-}
+private fun getContext(): Context = GlobalContext.get().get()
 
-fun onRouteClicked(context: Context, marker: UserMapMarker, analyticsTracker: AnalyticsTracker) {
+actual fun openMapNavigation(marker: UserMapMarker, analyticsTracker: AnalyticsTracker) {
+    val context = getContext()
     analyticsTracker.logEvent(AnalyticsEvent.Navigate(contentType = "marker"))
 
     val uri = String.format(
@@ -29,11 +29,13 @@ fun onRouteClicked(context: Context, marker: UserMapMarker, analyticsTracker: An
     )
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
     intent.setPackage("com.google.android.apps.maps")
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     try {
         context.startActivity(intent)
     } catch (e: ActivityNotFoundException) {
         try {
             val unrestrictedIntent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
+            unrestrictedIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             context.startActivity(unrestrictedIntent)
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(context, context.getString(R.string.install_maps_app), Toast.LENGTH_LONG)
@@ -42,12 +44,11 @@ fun onRouteClicked(context: Context, marker: UserMapMarker, analyticsTracker: An
     }
 }
 
-
-fun onShareClicked(
-    context: Context,
+actual fun shareMarkerLocation(
     marker: UserMapMarker,
     analyticsTracker: AnalyticsTracker
 ) {
+    val context = getContext()
     analyticsTracker.logEvent(AnalyticsEvent.Share(contentType = "marker"))
 
     val text =
@@ -60,5 +61,6 @@ fun onShareClicked(
     }
 
     val shareIntent = Intent.createChooser(sendIntent, null)
+    shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     context.startActivity(shareIntent)
 }

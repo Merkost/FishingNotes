@@ -28,6 +28,7 @@ fun SimpleOutlinedTextField(
     textState: MutableState<String>,
     label: String,
     singleLine: Boolean = true,
+    isError: Boolean = false,
 ) {
     var text by rememberSaveable { textState }
     OutlinedTextField(
@@ -39,7 +40,8 @@ fun SimpleOutlinedTextField(
             capitalization = KeyboardCapitalization.Sentences,
             imeAction = ImeAction.Next
         ),
-        singleLine = singleLine
+        singleLine = singleLine,
+        isError = isError
     )
 }
 

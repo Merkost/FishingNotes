@@ -30,6 +30,7 @@ class UserPlacesViewModel(private val repository: MarkersRepositoryPaged) : View
 
     private val _sortOrder = MutableStateFlow(PlacesSortValues.Default)
 
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val placesPaged: Flow<PagingData<UserMapMarker>> = _sortOrder
         .flatMapLatest { sort ->
             val (field, dir) = sort.toFirestoreOrder()

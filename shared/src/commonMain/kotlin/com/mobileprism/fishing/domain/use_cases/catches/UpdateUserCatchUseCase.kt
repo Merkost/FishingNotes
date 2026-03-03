@@ -8,8 +8,8 @@ class UpdateUserCatchUseCase(
     private val catchesRepository: CatchesRepositoryUpdate,
     private val savePhotos: SavePhotosUseCase,
 ) {
-    suspend operator fun invoke(newCatch: UserCatch) {
-        catchesRepository.updateUserCatch(
+    suspend operator fun invoke(newCatch: UserCatch): Result<Unit> {
+        return catchesRepository.updateUserCatch(
             markerId = newCatch.userMarkerId,
             catchId = newCatch.id,
             data = mapOf(

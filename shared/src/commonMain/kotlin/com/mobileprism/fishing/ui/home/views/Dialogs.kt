@@ -1,6 +1,5 @@
 package com.mobileprism.fishing.ui.home.views
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -15,9 +14,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import fishing_notes.shared.generated.resources.Res
-import fishing_notes.shared.generated.resources.no
-import fishing_notes.shared.generated.resources.yes
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.no
+import fishing.shared.generated.resources.yes
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -49,8 +48,7 @@ fun DefaultDialog(
         text = {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .animateContentSize(),
+                    .fillMaxWidth(),
                 horizontalAlignment = when (textAlign) {
                     TextAlign.Start -> Alignment.Start
                     TextAlign.End -> Alignment.End

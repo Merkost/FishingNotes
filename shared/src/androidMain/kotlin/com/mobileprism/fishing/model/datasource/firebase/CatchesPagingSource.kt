@@ -15,7 +15,14 @@ class CatchesPagingSource(
     private val sortDirection: Query.Direction
 ) : PagingSource<DocumentSnapshot, UserCatch>() {
 
-    override fun getRefreshKey(state: PagingState<DocumentSnapshot, UserCatch>): DocumentSnapshot? = null
+    override fun getRefreshKey(
+        state: PagingState<DocumentSnapshot, UserCatch>
+    ): DocumentSnapshot? {
+        return state.anchorPosition?.let { position ->
+            state.closestPageToPosition(position)?.prevKey
+                ?: state.closestPageToPosition(position)?.nextKey
+        }
+    }
 
     override suspend fun load(params: LoadParams<DocumentSnapshot>): LoadResult<DocumentSnapshot, UserCatch> {
         return try {

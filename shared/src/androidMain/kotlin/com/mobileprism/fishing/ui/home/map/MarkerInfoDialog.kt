@@ -35,17 +35,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.ui.zIndex
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.mobileprism.fishing.R
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
@@ -69,8 +69,6 @@ fun MarkerInfoDialog(
     onAddCatch: (UserMapMarker) -> Unit = {},
     onSaveCurrentPlace: () -> Unit = {},
 ) {
-    val context = LocalContext.current
-
     val windRotation by viewModel.windIconRotation.collectAsStateWithLifecycle()
     val receivedMarker by viewModel.currentMarker.collectAsState()
     val weatherPreferences: WeatherPreferences = koinInject()
@@ -86,9 +84,13 @@ fun MarkerInfoDialog(
     val rawDistance by viewModel.currentMarkerRawDistance.collectAsState()
     val lastKnownLocation by viewModel.lastKnownLocation.collectAsState()
 
-    val distance: String? by remember { mutableStateOf(rawDistance?.let { context.convertDistance(it) }) }
+    val mLabel = stringResource(Res.string.m)
+    val kmLabel = stringResource(Res.string.km)
+    val distance: String? by remember(rawDistance) {
+        mutableStateOf(rawDistance?.let { convertDistance(it, mLabel, kmLabel) })
+    }
 
-    val fishActivity: Int? by remember { viewModel.fishActivity }
+    val fishActivity by viewModel.fishActivity.collectAsStateWithLifecycle()
     val currentWeather: CurrentWeatherFree? by viewModel.currentWeather.collectAsStateWithLifecycle()
 
 
@@ -119,212 +121,162 @@ fun MarkerInfoDialog(
                 enter = fadeIn(tween(500)),
                 exit = fadeOut(tween(500)),
             ) {
-                ConstraintLayout(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(150.dp)
                 ) {
-                    val (locationIcon, title, area, distanceTo,
-                        fish, divider, weather) = createRefs()
-                    val addCatchButton = createRef()
-
-                    val horizontalLine = createGuidelineFromAbsoluteLeft(0.5f)
-                    val verticalFabLine = createGuidelineFromAbsoluteRight(60.dp)
-
-                    Box(modifier = Modifier
-                        .size(64.dp)
-                        .padding(16.dp)
-                        .constrainAs(locationIcon) {
-                            absoluteLeft.linkTo(parent.absoluteLeft)
-                            top.linkTo(parent.top)
-                        }) {
-                        IconButton(onClick = { onMarkerIconClicked(marker) }) {
-                            Icon(
-                                modifier = Modifier.fillMaxSize(),
-                                painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                                contentDescription = stringResource(id = R.string.marker_icon),
-                                tint = Color(marker.markerColor)
-                            )
-                        }
-
-                    }
-
-                    PrimaryText(
-                        modifier = Modifier
-                            .constrainAs(title) {
-                                top.linkTo(locationIcon.top)
-                                linkTo(
-                                    locationIcon.end,
-                                    addCatchButton.start,
-                                    0.dp,
-                                    0.dp,
-                                    0.dp,
-                                    0.dp,
-                                    0f
-                                )
-                                bottom.linkTo(locationIcon.bottom)
-                                width = Dimension.fillToConstraints
-                            },
-                        text = when {
-                            marker.title.isNotEmpty() -> marker.title
-                            else -> stringResource(R.string.no_name_place)
-                        } + "",
-                        maxLines = 2,
-                    )
-
-                    if (marker.id != Constants.CURRENT_PLACE_ITEM_ID) {
-                        IconButton(
-                            modifier = Modifier.constrainAs(addCatchButton) {
-                                top.linkTo(parent.top, 4.dp)
-                                absoluteRight.linkTo(parent.absoluteRight, 4.dp)
-                            },
-                            onClick = { onAddCatch(marker) }
+                    // Top row: location icon, title, add catch button
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(modifier = Modifier
+                            .size(64.dp)
+                            .padding(16.dp)
                         ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_add_catch),
-                                contentDescription = stringResource(R.string.add_new_catch),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
+                            IconButton(onClick = { onMarkerIconClicked(marker) }) {
+                                Icon(
+                                    modifier = Modifier.fillMaxSize(),
+                                    painter = painterResource(Res.drawable.ic_baseline_location_on_24),
+                                    contentDescription = stringResource(Res.string.marker_icon),
+                                    tint = Color(marker.markerColor)
+                                )
+                            }
+                        }
+
+                        PrimaryText(
+                            modifier = Modifier.weight(1f),
+                            text = when {
+                                marker.title.isNotEmpty() -> marker.title
+                                else -> stringResource(Res.string.no_name_place)
+                            } + "",
+                            maxLines = 2,
+                        )
+
+                        if (marker.id != Constants.CURRENT_PLACE_ITEM_ID) {
+                            IconButton(
+                                modifier = Modifier.padding(top = 4.dp, end = 4.dp),
+                                onClick = { onAddCatch(marker) }
+                            ) {
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_add_catch),
+                                    contentDescription = stringResource(Res.string.add_new_catch),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                     }
 
-                    //Area name
-                    SubtitleText(
-                        modifier = Modifier
-                            .constrainAs(area) {
-                                top.linkTo(title.bottom, 4.dp)
-                                linkTo(title.start, distanceTo.start, 0.dp, 8.dp, 0.dp, 8.dp, 0f)
-                                width = Dimension.fillToConstraints
-                            }
-                            .animateContentSize(
-                                animationSpec = tween(
-                                    durationMillis = 300,
-                                    easing = LinearOutSlowInEasing
-                                )
-                            ),
-                        text = address,
-                        maxLines = 1
-                    )
-
-                    //Distance
+                    // Area name + distance row
                     Row(
                         modifier = Modifier
-                            .constrainAs(distanceTo) {
-                                top.linkTo(area.top)
-                                bottom.linkTo(area.bottom)
-                                absoluteRight.linkTo(parent.absoluteRight, 16.dp)
-                            }
-                            .animateContentSize(
-                                animationSpec = tween(
-                                    durationMillis = 300,
-                                    easing = LinearOutSlowInEasing
-                                )
-                            ),
-                        horizontalArrangement = Arrangement.spacedBy(
-                            6.dp,
-                            Alignment.CenterHorizontally
-                        ),
-                        verticalAlignment = Alignment.CenterVertically,
+                            .fillMaxWidth()
+                            .padding(top = 4.dp, start = 64.dp, end = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         SubtitleText(
+                            modifier = Modifier
+                                .weight(1f)
+                                .animateContentSize(
+                                    animationSpec = tween(
+                                        durationMillis = 300,
+                                        easing = LinearOutSlowInEasing
+                                    )
+                                ),
+                            text = address,
+                            maxLines = 1
+                        )
+
+                        SubtitleText(
+                            modifier = Modifier
+                                .animateContentSize(
+                                    animationSpec = tween(
+                                        durationMillis = 300,
+                                        easing = LinearOutSlowInEasing
+                                    )
+                                )
+                                .padding(start = 8.dp),
                             text = distance ?: "",
                             textAlign = TextAlign.Center,
                         )
                     }
 
-                    //Fish activity
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    // Bottom row: fish activity | divider | weather
                     Row(
                         modifier = Modifier
-                            .constrainAs(fish) {
-                                top.linkTo(area.bottom, 4.dp)
-                                linkTo(
-                                    parent.absoluteLeft,
-                                    horizontalLine,
-                                    0.dp,
-                                    0.dp,
-                                    0.dp,
-                                    0.dp,
-                                    0.5f
-                                )
-                                bottom.linkTo(parent.bottom)
-                            }
-                            .animateContentSize(
-                                animationSpec = tween(
-                                    durationMillis = 300,
-                                    easing = LinearOutSlowInEasing
-                                )
-                            ),
-                        horizontalArrangement = Arrangement.spacedBy(
-                            6.dp,
-                            Alignment.CenterHorizontally
-                        ),
+                            .fillMaxWidth()
+                            .padding(bottom = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
                     ) {
-                        Icon(
-                            painter = painterResource(R.drawable.fish),
-                            contentDescription = stringResource(id = R.string.fish_desc),
+                        // Fish activity
+                        Row(
                             modifier = Modifier
-                                .size(45.dp)
-                                .padding(6.dp),
-                            tint = if (fishActivity == null) MaterialTheme.colorScheme.outlineVariant else MaterialTheme.colorScheme.primary
-                        )
-                        SubtitleText(
-                            text = if (fishActivity != null) fishActivity.toString() + "%" else "",
-                        )
-                    }
-
-                    //Divider
-                    HorizontalDivider(
-                        modifier = Modifier
-                            .constrainAs(divider) {
-                                top.linkTo(area.bottom, 4.dp)
-                                linkTo(horizontalLine, horizontalLine, 0.dp, 0.dp, 0.dp, 0.dp, 0.5f)
-                                bottom.linkTo(parent.bottom)
-                            }
-                            .height(20.dp)
-                            .width(1.dp),
-                        color = MaterialTheme.colorScheme.outline,
-                    )
-
-                    //Weather
-                    Row(
-                        modifier = Modifier
-                            .constrainAs(weather) {
-                                top.linkTo(area.bottom, 4.dp)
-                                linkTo(
-                                    horizontalLine,
-                                    parent.absoluteRight,
-                                    0.dp,
-                                    0.dp,
-                                    0.dp,
-                                    0.dp,
-                                    0.5f
-                                )
-                                bottom.linkTo(parent.bottom)
-                            }
-                            .animateContentSize(
-                                animationSpec =
-                                tween(durationMillis = 300, easing = LinearOutSlowInEasing)
+                                .weight(1f)
+                                .animateContentSize(
+                                    animationSpec = tween(
+                                        durationMillis = 300,
+                                        easing = LinearOutSlowInEasing
+                                    )
+                                ),
+                            horizontalArrangement = Arrangement.spacedBy(
+                                6.dp,
+                                Alignment.CenterHorizontally
                             ),
-                        horizontalArrangement = Arrangement.spacedBy(
-                            6.dp,
-                            Alignment.CenterHorizontally
-                        ),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        IconButton(onClick = { onWeatherIconClicked(marker, navController) }) {
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
                             Icon(
-                                painterResource(R.drawable.ic_baseline_navigation_24), "",
-                                modifier = Modifier.rotate(windRotation),
-                                tint = if (currentWeather == null) MaterialTheme.colorScheme.outlineVariant else MaterialTheme.colorScheme.tertiary
+                                painter = painterResource(Res.drawable.fish),
+                                contentDescription = stringResource(Res.string.fish_desc),
+                                modifier = Modifier
+                                    .size(45.dp)
+                                    .padding(6.dp),
+                                tint = if (fishActivity == null) MaterialTheme.colorScheme.outlineVariant else MaterialTheme.colorScheme.primary
+                            )
+                            SubtitleText(
+                                text = if (fishActivity != null) fishActivity.toString() + "%" else "",
                             )
                         }
 
-                        currentWeather?.let {
-                            SubtitleText(
-                                text = windUnit.getWindSpeed(it.wind_speed) + " " +
-                                        stringResource(windUnit.stringRes)
-                            )
+                        // Divider
+                        HorizontalDivider(
+                            modifier = Modifier
+                                .height(20.dp)
+                                .width(1.dp),
+                            color = MaterialTheme.colorScheme.outline,
+                        )
+
+                        // Weather
+                        Row(
+                            modifier = Modifier
+                                .weight(1f)
+                                .animateContentSize(
+                                    animationSpec =
+                                    tween(durationMillis = 300, easing = LinearOutSlowInEasing)
+                                ),
+                            horizontalArrangement = Arrangement.spacedBy(
+                                6.dp,
+                                Alignment.CenterHorizontally
+                            ),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            IconButton(onClick = { onWeatherIconClicked(marker, navController) }) {
+                                Icon(
+                                    painterResource(Res.drawable.ic_baseline_navigation_24), "",
+                                    modifier = Modifier.rotate(windRotation),
+                                    tint = if (currentWeather == null) MaterialTheme.colorScheme.outlineVariant else MaterialTheme.colorScheme.tertiary
+                                )
+                            }
+
+                            currentWeather?.let {
+                                SubtitleText(
+                                    text = windUnit.getWindSpeed(it.wind_speed) + " " +
+                                            stringResource(windUnit.stringRes)
+                                )
+                            }
                         }
                     }
                 }

@@ -17,8 +17,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import fishing_notes.shared.generated.resources.Res
-import fishing_notes.shared.generated.resources.ic_baseline_plus
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.ic_baseline_plus
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
@@ -28,7 +28,6 @@ fun FabWithMenu(
     items: List<FabMenuItem>,
     fabState: MutableState<MultiFabState>,
     ) {
-    //val toState = remember { mutableStateOf(MultiFabState.COLLAPSED) }
     val transition = updateTransition(targetState = fabState, label = "")
 
     val size = transition.animateDp(label = "") { state ->
@@ -58,7 +57,7 @@ fun FabWithMenu(
                 modifier = Modifier.rotate(rotation.value),
                 tint = MaterialTheme.colorScheme.onPrimaryContainer,
                 painter = painterResource(Res.drawable.ic_baseline_plus),
-                contentDescription = ""
+                contentDescription = "Menu"
             )
         }
     }
@@ -85,7 +84,7 @@ fun FabMenuItem(item: FabMenuItem, modifier: Modifier = Modifier, size: Dp) {
                     Icon(
                         tint = MaterialTheme.colorScheme.onPrimary,
                         painter = painterResource(item.icon),
-                        contentDescription = ""
+                        contentDescription = item.text
                     )
                 }
             }

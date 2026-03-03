@@ -13,8 +13,7 @@ import com.mobileprism.fishing.utils.time.hoursCount
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.single
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 class GetNewCatchWeatherUseCase(
     private val weatherRepository: WeatherRepository,
@@ -25,10 +24,10 @@ class GetNewCatchWeatherUseCase(
     suspend operator fun invoke(place: UserMapMarker?, newCatchDate: Long) =
         flow<Result<NewCatchWeatherData>> {
             if (place == null) {
-                emit(Result.failure(Throwable()))
+                emit(Result.failure(IllegalArgumentException("Place must not be null to fetch weather")))
             } else {
                 if (checkWeatherDownloadNeed(place, newCatchDate)) {
-                    downloadWeather(place, newCatchDate).single().fold(
+                    downloadWeather(place, newCatchDate).fold(
                         onSuccess = {
                             lastLoadedWeather = it
                             emit(Result.success(createCatchWeatherData(place, it, newCatchDate)))
@@ -48,7 +47,7 @@ class GetNewCatchWeatherUseCase(
     private suspend fun downloadWeather(
         place: UserMapMarker,
         newCatchDate: Long
-    ): Flow<Result<WeatherForecast>> {
+    ): Result<WeatherForecast> {
         val now = Clock.System.now().toEpochMilliseconds()
         return if (now.hoursCount() > newCatchDate.hoursCount()) {
             getHistoricalWeather(place, newCatchDate)

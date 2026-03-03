@@ -32,7 +32,6 @@ class StatisticsViewModel(
         viewModelScope.launch {
             getStatisticsUseCase()
                 .catch { e ->
-                    println("StatisticsVM: Failed to load statistics: ${e.message}")
                     _statisticsState.value = BaseViewState.Error(e)
                 }
                 .collectLatest { stats ->
@@ -47,7 +46,6 @@ class StatisticsViewModel(
         viewModelScope.launch {
             getStatisticsUseCase()
                 .catch { e ->
-                    println("StatisticsVM: Failed to refresh statistics: ${e.message}")
                     _isRefreshing.value = false
                 }
                 .collectLatest { stats ->

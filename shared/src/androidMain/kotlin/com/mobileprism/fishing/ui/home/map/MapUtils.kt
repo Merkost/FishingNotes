@@ -12,7 +12,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
@@ -26,6 +26,8 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.ktx.awaitMap
 import com.mobileprism.fishing.R
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.ui.theme.isAppInDarkTheme
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.WeatherForecast
@@ -34,8 +36,7 @@ import com.mobileprism.fishing.utils.Constants.TIME_TO_EXIT
 import com.mobileprism.fishing.utils.showToast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.text.DecimalFormat
-import java.util.*
+import java.util.Locale
 import kotlin.math.max
 import kotlin.math.min
 
@@ -115,11 +116,6 @@ sealed class MapUiState {
 
 const val DEFAULT_ZOOM = 15f
 const val DEFAULT_BEARING = 0f
-
-val locationPermissionsList = listOf(
-    Manifest.permission.ACCESS_FINE_LOCATION,
-    Manifest.permission.ACCESS_COARSE_LOCATION
-)
 
 fun moveCameraToLocation(
     coroutineScope: CoroutineScope,
@@ -259,7 +255,7 @@ fun rememberMapViewWithLifecycle(): MapView {
             context,
             mapOptions
         )
-    }.apply { id = R.id.map }
+    }.apply { id = android.view.View.generateViewId() }
 
 
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -274,16 +270,11 @@ fun rememberMapViewWithLifecycle(): MapView {
     return mapView
 }
 
-object DistanceFormat {
-    val df = DecimalFormat("#.#")
-}
-
 fun Context.convertDistance(distanceInMeters: Double): String {
     return when (distanceInMeters.toInt()) {
-        in 0..999 -> distanceInMeters.toInt().toString() + " ${getString(R.string.m)}"
-        in 1001..9999 -> DistanceFormat.df.format(distanceInMeters / 1000f)
-            .toString() + " ${getString(R.string.km)}"
-        else -> distanceInMeters.div(1000).toInt().toString() + " ${getString(R.string.km)}"
+        in 0..999 -> "${distanceInMeters.toInt()} ${getString(R.string.m)}"
+        in 1000..9999 -> "${"%.1f".format(distanceInMeters / 1000.0)} ${getString(R.string.km)}"
+        else -> "${(distanceInMeters / 1000).toInt()} ${getString(R.string.km)}"
     }
 }
 

@@ -35,6 +35,7 @@ class UserCatchesViewModel(
 
     private val _sortOrder = MutableStateFlow(CatchesSortValues.Default)
 
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     val catchesPaged: Flow<PagingData<UserCatch>> = _sortOrder
         .flatMapLatest { sort ->
             val (field, dir) = sort.toFirestoreOrder()

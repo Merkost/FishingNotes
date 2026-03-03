@@ -3,7 +3,7 @@ package com.mobileprism.fishing.domain.use_cases.notes
 import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.domain.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.mappers.MarkerNoteMapper
-import kotlinx.coroutines.flow.FlowCollector
+import com.mobileprism.fishing.utils.ValidationUtils
 import kotlinx.coroutines.flow.flow
 
 class SaveUserMarkerNoteUseCase(private val markersRepository: MarkersRepository) {
@@ -13,19 +13,22 @@ class SaveUserMarkerNoteUseCase(private val markersRepository: MarkersRepository
         currentNotes: List<Note>,
         note: Note
     ) = flow {
+        if (!ValidationUtils.isNoteValid(note.description)) {
+            emit(Result.failure(IllegalArgumentException("Note description cannot be blank")))
+            return@flow
+        }
         if (note.id.isEmpty()) {
-            saveNewNote(this, markerId, note, currentNotes)
+            emit(saveNewNote(markerId, note, currentNotes))
         } else {
-            editNote(this, markerId, note, currentNotes)
+            emit(editNote(markerId, note, currentNotes))
         }
     }
 
     private suspend fun editNote(
-        flow: FlowCollector<Result<List<Note>>>,
         markerId: String,
         note: Note,
         currentNotes: List<Note>
-    ) {
+    ): Result<List<Note>> {
         val newNotes = currentNotes.toMutableList().apply {
             val index = indexOfFirst { it.id == note.id }
             if (index != -1) {
@@ -34,35 +37,21 @@ class SaveUserMarkerNoteUseCase(private val markersRepository: MarkersRepository
                 add(note)
             }
         }
-        markersRepository.updateNotes(markerId, newNotes).collect {
-            it.fold(
-                onSuccess = {
-                    flow.emit(Result.success(newNotes))
-                },
-                onFailure = {
-                    flow.emit(Result.failure(it))
-                }
-            )
-        }
+        return markersRepository.updateNotes(markerId, newNotes).fold(
+            onSuccess = { Result.success(newNotes) },
+            onFailure = { Result.failure(it) }
+        )
     }
 
     private suspend fun saveNewNote(
-        flow: FlowCollector<Result<List<Note>>>,
         markerId: String,
         note: Note,
         currentNotes: List<Note>
-    ) {
+    ): Result<List<Note>> {
         val newNote = MarkerNoteMapper().mapRawMarkerNote(note)
-        markersRepository.saveNewNote(markerId, newNote).collect {
-            it.fold(
-                onSuccess = {
-                    flow.emit(Result.success(currentNotes + newNote))
-                },
-                onFailure = {
-                    flow.emit(Result.failure(it))
-                }
-            )
-        }
+        return markersRepository.saveNewNote(markerId, newNote).fold(
+            onSuccess = { Result.success(currentNotes + newNote) },
+            onFailure = { Result.failure(it) }
+        )
     }
 }
-

@@ -1,22 +1,21 @@
 package com.mobileprism.fishing.viewmodels
 
 import android.location.Geocoder
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.SphericalUtil
-import com.mobileprism.fishing.R
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.domain.entity.content.latLng
 import com.mobileprism.fishing.domain.entity.raw.RawMapMarker
 import com.mobileprism.fishing.domain.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.domain.repository.app.MarkersRepository
 import com.mobileprism.fishing.domain.use_cases.*
 import com.mobileprism.fishing.domain.use_cases.places.AddNewPlaceUseCase
 import com.mobileprism.fishing.domain.use_cases.places.GetUserPlacesListUseCase
-import com.mobileprism.fishing.model.datastore.UserPreferences
+import com.mobileprism.fishing.model.datastore.UserPreferencesImpl
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.map.*
@@ -32,7 +31,7 @@ class MapViewModel(
     private val getFreeWeatherUseCase: GetFreeWeatherUseCase,
     private val getFishActivityUseCase: GetFishActivityUseCase,
     private val getPlaceNameUseCase: GetPlaceNameUseCase,
-    private val userPreferences: UserPreferences,
+    private val userPreferences: UserPreferencesImpl,
     private val locationManager: LocationManager,
 ) : ViewModel() {
 
@@ -42,9 +41,7 @@ class MapViewModel(
         get() = _mapMarkers
 
     init {
-
         loadUserMarkersList()
-        //loadUserPlaces()
     }
 
     private val initialPlaceSelected = MutableStateFlow(false)
@@ -72,7 +69,7 @@ class MapViewModel(
     private val _lastKnownLocation = MutableStateFlow<LatLng?>(null)
     val lastKnownLocation = _lastKnownLocation.asStateFlow()
 
-    private val lastMapCameraPosition = mutableStateOf<Triple<LatLng, Float, Float>?>(null)
+    private val lastMapCameraPosition = MutableStateFlow<Triple<LatLng, Float, Float>?>(null)
 
     /**
      * A Triple of LatLng, Zoom and Bearing
@@ -96,7 +93,8 @@ class MapViewModel(
     private val _currentMarkerRawDistance = MutableStateFlow<Double?>(null)
     val currentMarkerRawDistance = _currentMarkerRawDistance.asStateFlow()
 
-    val fishActivity: MutableState<Int?> = mutableStateOf(null)
+    private val _fishActivity = MutableStateFlow<Int?>(null)
+    val fishActivity = _fishActivity.asStateFlow()
     val currentWeather: MutableStateFlow<CurrentWeatherFree?> = MutableStateFlow(null)
 
     val windIconRotation = currentWeather.combine(_currentCameraPosition) { weather, camera ->
@@ -126,7 +124,7 @@ class MapViewModel(
 
     fun addNewMarker(newMarker: RawMapMarker) {
         if (!ValidationUtils.isCoordinateValid(newMarker.latitude, newMarker.longitude)) {
-            SnackbarManager.showMessage(R.string.invalid_coordinates)
+            SnackbarManager.showMessage(Res.string.invalid_coordinates)
             _addNewMarkerState.value = UiState.Error
             return
         }
@@ -154,30 +152,10 @@ class MapViewModel(
     fun getFishActivity(latitude: Double, longitude: Double) {
         viewModelScope.launch {
             getFishActivityUseCase.invoke(latitude, longitude).collect {
-                fishActivity.value = it
+                _fishActivity.value = it
             }
         }
     }
-
-    /*fun updateCurrentPlace(markerToUpdate: UserMapMarker) {
-        viewModelScope.launch {
-            repository.getMapMarker(markerToUpdate.id).fold(
-                onSuccess = { updatedMarker ->
-                    updatedMarker.let {
-                        currentMarker.value?.let {
-                            _currentMarker.value = updatedMarker
-                        }
-                        _mapMarkers.value.apply {
-                            remove(markerToUpdate)
-                            add(updatedMarker)
-                        }
-                    }
-
-                },
-                onFailure = { }
-            )
-        }
-    }*/
 
     fun saveLastCameraPosition() {
         viewModelScope.launch {
@@ -195,7 +173,7 @@ class MapViewModel(
                 _lastKnownLocation.value?.let {
                     addNewMarker(
                         RawMapMarker(
-                            trimmedName.ifEmpty { "No name place" },
+                            trimmedName.ifEmpty { name },
                             latitude = it.latitude,
                             longitude = it.longitude,
                         )
@@ -221,14 +199,6 @@ class MapViewModel(
                     currentCameraPosition.value.copy(place.latLng, second = DEFAULT_ZOOM)
             }
         }
-        /*place?.let {
-
-            initialPlaceSelected.value = true
-            _firstCameraPosition.value =
-                currentCameraPosition.value.copy(it.latLng, second = DEFAULT_ZOOM)
-            //setNewCameraLocation(it.latLng)
-
-        } ?: run { initialPlaceSelected.value = false }*/
     }
 
     fun setAddingPlace(addPlaceOnStart: Boolean) {
@@ -250,7 +220,7 @@ class MapViewModel(
                     setNewCameraLocation(result.location)
                 }
                 else -> {
-                    SnackbarManager.showMessage(R.string.cant_get_current_location)
+                    SnackbarManager.showMessage(Res.string.cant_get_current_location)
                 }
             }
         }
@@ -298,12 +268,11 @@ class MapViewModel(
     }
 
     fun setNewMarkerInfo(latitude: Double, longitude: Double) {
-        fishActivity.value = null
+        _fishActivity.value = null
         currentWeather.value = null
         _currentMarkerAddressState.value = GeocoderResult.InProgress
         _currentMarkerRawDistance.value = null
         getPlaceNameForMarkerDetails(latitude, longitude)
-        //getPlaceRawDistance(latitude, longitude)
         getFishActivity(latitude, longitude)
         getCurrentWeather(latitude, longitude)
     }

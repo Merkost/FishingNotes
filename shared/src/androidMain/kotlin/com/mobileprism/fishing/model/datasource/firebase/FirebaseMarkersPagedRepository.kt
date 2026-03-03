@@ -3,7 +3,9 @@ package com.mobileprism.fishing.model.datasource.firebase
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.google.firebase.Firebase
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.firestore
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.domain.repository.app.MarkersRepository
@@ -17,7 +19,7 @@ class FirebaseMarkersPagedRepository(
     private val authRepository: AuthRepository
 ) : MarkersRepositoryPaged, MarkersRepository by coreRepo {
 
-    private val googleDb = com.google.firebase.Firebase.firestore
+    private val googleDb = Firebase.firestore
     private val googleMarkersCollection
         get() = googleDb.collection(USERS_COLLECTION)
             .document(authRepository.getCurrentUserId())

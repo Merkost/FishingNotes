@@ -33,7 +33,7 @@ class FirebaseCloudPhotoStorage(
     override suspend fun uploadPhotos(
         photos: List<String>,
         onProgress: ((uploaded: Int, total: Int) -> Unit)?
-    ): List<String> {
+    ): Result<List<String>> = try {
         val downloadLinks = mutableListOf<String>()
         if (photos.isNotEmpty()) {
             val uris = photos.map { Uri.parse(it) }
@@ -49,10 +49,12 @@ class FirebaseCloudPhotoStorage(
 
         analyticsTracker.logEvent(AnalyticsEvent.UploadPhotos(downloadLinks.size))
 
-        return downloadLinks
+        Result.success(downloadLinks)
+    } catch (e: Exception) {
+        Result.failure(e)
     }
 
-    @ExperimentalCoroutinesApi
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun savePhotosToDb(images: List<Uri>, context: Context) = callbackFlow {
         val uploadTasks = mutableListOf<UploadTask>()
 
@@ -91,8 +93,11 @@ class FirebaseCloudPhotoStorage(
         awaitClose { uploadTasks.onEach { cancel() } }
     }
 
-    override suspend fun deletePhoto(url: String) {
+    override suspend fun deletePhoto(url: String): Result<Unit> = try {
         val desertRef = storage.getReferenceFromUrl(url)
         desertRef.delete()
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Result.failure(e)
     }
 }

@@ -4,22 +4,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import fishing_notes.shared.generated.resources.Res
-import fishing_notes.shared.generated.resources.back
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.back
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DefaultAppBar(
     modifier: Modifier = Modifier,
-    navIcon: ImageVector = Icons.Default.ArrowBack,
+    navIcon: ImageVector = Icons.AutoMirrored.Filled.ArrowBack,
     onNavClick: (() -> Unit)? = null,
     title: String,
     subtitle: String? = null,

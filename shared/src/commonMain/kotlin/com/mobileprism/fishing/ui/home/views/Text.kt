@@ -17,8 +17,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.ui.theme.customColors
-import fishing_notes.shared.generated.resources.Res
-import fishing_notes.shared.generated.resources.place
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.place
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource

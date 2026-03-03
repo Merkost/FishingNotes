@@ -1,0 +1,760 @@
+package com.mobileprism.fishing.ui.home.new_catch
+
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.PopupProperties
+import androidx.navigation.NavController
+import com.mobileprism.fishing.ui.utils.AnimatedResource
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.*
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.ui.MainDestinations
+import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.home.new_catch.weather.SelectedWeather
+import com.mobileprism.fishing.ui.home.views.DatePickerDialog
+import com.mobileprism.fishing.ui.home.views.DefaultDialog
+import com.mobileprism.fishing.ui.home.views.TimePickerDialog
+import com.mobileprism.fishing.ui.home.views.WindIconItem
+import com.mobileprism.fishing.utils.Constants.WIND_ROTATION
+import com.mobileprism.fishing.utils.ValidationUtils
+import com.mobileprism.fishing.utils.roundTo
+import com.mobileprism.fishing.utils.time.TimeConstants
+import com.mobileprism.fishing.utils.time.toDate
+import com.mobileprism.fishing.utils.time.toTime
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+import kotlin.time.Instant
+
+
+@Composable
+fun FishSpecies(
+    modifier: Modifier = Modifier,
+    name: String,
+    onNameChange: (String) -> Unit
+) {
+    Column(
+        modifier = modifier
+    ) {
+        OutlinedTextField(
+            value = name,
+            onValueChange = onNameChange,
+            label = { Text(stringResource(Res.string.fish_species)) },
+            modifier = Modifier.fillMaxWidth(),
+            isError = name.isBlank(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next
+            )
+        )
+        Spacer(modifier = Modifier.size(2.dp))
+        Text(
+            stringResource(Res.string.required), fontSize = 12.sp, modifier = Modifier.align(
+                Alignment.End
+            )
+        )
+    }
+}
+
+@ExperimentalComposeUiApi
+@Composable
+fun PickWeatherIconDialog(onWeatherSelected: (SelectedWeather) -> Unit, onDismiss: () -> Unit) {
+    DefaultDialog(
+        stringResource(Res.string.choose_weather),
+        content = {
+            WeatherTypesSheet() { onWeatherSelected(it) }
+        },
+        onDismiss = onDismiss
+    )
+}
+
+@Composable
+fun FishAmountAndWeightView(
+    modifier: Modifier = Modifier,
+    amountState: MutableState<String>,
+    weightState: MutableState<String>
+) {
+    val currentAmount = amountState.value.toIntOrNull()
+    val currentWeight = weightState.value.toDoubleOrNull()
+    val isAmountError = currentAmount != null && !ValidationUtils.isAmountValid(currentAmount)
+    val isWeightError = currentWeight != null && !ValidationUtils.isWeightValid(currentWeight)
+
+    Row(modifier = modifier) {
+        Column(Modifier.weight(1F)) {
+            OutlinedTextField(
+                value = amountState.value,
+                onValueChange = {
+                    if (it.isEmpty()) amountState.value = it
+                    else {
+                        val parsed = it.toIntOrNull()
+                        when {
+                            parsed == null -> {} // keep old value
+                            parsed > ValidationUtils.MAX_FISH_AMOUNT -> amountState.value = ValidationUtils.MAX_FISH_AMOUNT.toString()
+                            else -> amountState.value = it
+                        }
+                    }
+                },
+                isError = amountState.value.isEmpty() || isAmountError,
+                supportingText = if (isAmountError) {
+                    { Text(stringResource(Res.string.amount_out_of_range)) }
+                } else null,
+                label = { Text(text = stringResource(Res.string.amount)) },
+                trailingIcon = { Text(stringResource(Res.string.pc)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                )
+            )
+            Spacer(modifier = Modifier.size(6.dp))
+            Row(Modifier.fillMaxWidth()) {
+                OutlinedButton(
+                    onClick = {
+                        val current = amountState.value.toIntOrNull() ?: 0
+                        if (current >= 1)
+                            amountState.value = (current - 1).toString()
+                    },
+                    Modifier
+                        .weight(1F)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_baseline_minus),
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = stringResource(Res.string.decrease)
+                    )
+                }
+                Spacer(modifier = Modifier.size(6.dp))
+                OutlinedButton(
+                    onClick = {
+                        val current = amountState.value.toIntOrNull() ?: 0
+                        if (current < ValidationUtils.MAX_FISH_AMOUNT)
+                            amountState.value = (current + 1).toString()
+                    },
+                    enabled = (amountState.value.toIntOrNull() ?: 0) < ValidationUtils.MAX_FISH_AMOUNT,
+                    modifier = Modifier
+                        .weight(1F)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_baseline_plus),
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = stringResource(Res.string.increase)
+                    )
+                }
+            }
+
+        }
+        Spacer(modifier = Modifier.size(6.dp))
+        Column(Modifier.weight(1F)) {
+            OutlinedTextField(
+                value = weightState.value,
+                onValueChange = {
+                    if (it.isEmpty()) weightState.value = it
+                    else {
+                        val parsed = it.toDoubleOrNull()
+                        when {
+                            parsed == null -> {} // keep old value
+                            parsed > ValidationUtils.MAX_FISH_WEIGHT_KG -> weightState.value = ValidationUtils.MAX_FISH_WEIGHT_KG.toInt().toString()
+                            else -> weightState.value = it
+                        }
+                    }
+                },
+                isError = isWeightError,
+                supportingText = if (isWeightError) {
+                    { Text(stringResource(Res.string.weight_out_of_range)) }
+                } else null,
+                label = { Text(text = stringResource(Res.string.weight)) },
+                trailingIcon = {
+                    Text(stringResource(Res.string.kg))
+                },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                )
+            )
+            Spacer(modifier = Modifier.size(6.dp))
+            Row(Modifier.fillMaxWidth()) {
+                OutlinedButton(
+                    onClick = {
+                        val current = weightState.value.toDoubleOrNull() ?: 0.0
+                        if (current >= 0.1)
+                            weightState.value = (current - 0.1).roundTo(1).toString()
+                    },
+                    Modifier
+                        .weight(1F)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_baseline_minus),
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = stringResource(Res.string.decrease)
+                    )
+                }
+                Spacer(modifier = Modifier.size(6.dp))
+                OutlinedButton(
+                    onClick = {
+                        val current = weightState.value.toDoubleOrNull() ?: 0.0
+                        if (current < ValidationUtils.MAX_FISH_WEIGHT_KG)
+                            weightState.value = (current + 0.1).roundTo(1).toString()
+                    },
+                    enabled = (weightState.value.toDoubleOrNull() ?: 0.0) < ValidationUtils.MAX_FISH_WEIGHT_KG,
+                    modifier = Modifier
+                        .weight(1F)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_baseline_plus),
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = stringResource(Res.string.increase)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@ExperimentalComposeUiApi
+@Composable
+fun PickWindDirDialog(onDirectionSelected: (Float) -> Unit, onDismiss: () -> Unit) {
+    DefaultDialog(
+        primaryText = stringResource(Res.string.choose_wind_direction),
+        content = {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.Center
+            ) {
+                (0..7).forEach {
+                    WindIconItem(
+                        rotation = it * WIND_ROTATION,
+                        onIconSelected = { onDirectionSelected(it * WIND_ROTATION) }
+                    )
+                }
+            }
+        }, onDismiss = onDismiss
+    )
+}
+
+@Composable
+fun NewCatchNoPlaceDialog(
+    navController: NavController
+) {
+    DefaultDialog(
+        primaryText = stringResource(Res.string.no_places_added),
+        secondaryText = stringResource(Res.string.add_location_dialog),
+        negativeButtonText = stringResource(Res.string.cancel),
+        onNegativeClick = { navController.popBackStack() },
+        positiveButtonText = stringResource(Res.string.add),
+        onPositiveClick = { onAddNewPlaceClick(navController) },
+        onDismiss = { navController.popBackStack() },
+        content = {
+            LottieNoPlaces(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+            )
+        }
+    )
+}
+
+@Composable
+fun LottieNoPlaces(modifier: Modifier) {
+    AnimatedResource("no_loaction", modifier)
+}
+
+private fun onAddNewPlaceClick(navController: NavController) {
+    navController.navigate(MainDestinations.Map(isAddingNewPlace = true))
+}
+
+@Composable
+fun NewCatchPlaceSelectView(
+    modifier: Modifier = Modifier,
+    marker: UserMapMarker?,
+    markersList: NewCatchPlacesState,
+    isLocationLocked: Boolean,
+    onNewPlaceSelected: (UserMapMarker) -> Unit,
+    onInputError: (Boolean) -> Unit
+) {
+
+    val keyboard = LocalSoftwareKeyboardController.current
+    val coroutineScope = rememberCoroutineScope()
+    var isDropMenuOpen by rememberSaveable { mutableStateOf(false) }
+    val arrowRotation by animateFloatAsState(
+        when (isDropMenuOpen) {
+            true -> 180f
+            else -> 0f
+        }
+    )
+
+    var textFieldValue by rememberSaveable {
+        mutableStateOf(marker?.title ?: "")
+    }
+
+    val suggestions = remember { mutableStateListOf<UserMapMarker>() }
+
+    LaunchedEffect(key1 = markersList) {
+        markersList.let { state ->
+            when (state) {
+                is NewCatchPlacesState.NotReceived -> {
+                }
+
+                is NewCatchPlacesState.Received -> {
+                    if (state.locations.isEmpty()) {
+//                        NewCatchNoPlaceDialog(navController)
+                    } else {
+                        suggestions.apply {
+                            clear()
+                            addAll(state.locations)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    val filteredList by rememberSaveable { mutableStateOf(suggestions.toMutableList()) }
+    if (textFieldValue == "") searchFor("", suggestions, filteredList)
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(horizontal = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+
+        if (isLocationLocked) {
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                readOnly = true,
+                singleLine = true,
+                label = { Text(text = stringResource(Res.string.place)) },
+                value = marker?.title ?: "",
+                onValueChange = { },
+                trailingIcon = {
+                    IconButton(
+                        onClick = { SnackbarManager.showMessage(Res.string.another_place_in_new_catch) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = stringResource(Res.string.locked),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+            )
+        } else {
+            OutlinedTextField(
+                readOnly = false,
+                singleLine = true,
+                value = textFieldValue,
+                onValueChange = {
+                    textFieldValue = it
+                    if (suggestions.isNotEmpty()) {
+                        searchFor(textFieldValue, suggestions, filteredList)
+                        if (!isDropMenuOpen) isDropMenuOpen = true
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged {
+                        isDropMenuOpen = it.isFocused
+                    },
+                label = { Text(text = stringResource(Res.string.place)) },
+                trailingIcon = {
+                    if (textFieldValue.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                textFieldValue = ""
+                                isDropMenuOpen = true
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = Icons.Default.Close.name,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+
+                    } else {
+                        IconButton(
+                            onClick = {
+                                if (!isDropMenuOpen) isDropMenuOpen = true
+                            }
+                        ) {
+                            Icon(
+                                modifier = Modifier.rotate(arrowRotation),
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = Icons.Default.KeyboardArrowDown.name,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                },
+                isError = !isThatPlaceInList(
+                    textFieldValue,
+                    suggestions
+                ).apply { onInputError(this) }
+            )
+        }
+
+        DropdownMenu(
+            modifier = Modifier
+                .wrapContentWidth(),
+            expanded = isDropMenuOpen && suggestions.isNotEmpty(),
+            onDismissRequest = {
+                coroutineScope.launch {
+                    delay(100)
+                    if (isDropMenuOpen) isDropMenuOpen = false
+                }
+            },
+            properties = PopupProperties(focusable = false)
+        ) {
+            filteredList.forEach { suggestion ->
+                DropdownMenuItem(
+                    text = {
+                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = Icons.Default.LocationOn.name,
+                                tint = Color(suggestion.markerColor)
+                            )
+                            Text(text = suggestion.title)
+                        }
+                    },
+                    onClick = {
+                        textFieldValue = suggestion.title
+                        onNewPlaceSelected(suggestion)
+                        keyboard?.hide()
+                        isDropMenuOpen = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DateAndTimeItem(
+    modifier: Modifier = Modifier,
+    dateTime: Long,
+    onDateChange: (Long) -> Unit,
+) {
+    var dateSetState by remember { mutableStateOf(false) }
+    var timeSetState by remember { mutableStateOf(false) }
+
+    val clampedOnDateChange: (Long) -> Unit = { newDate ->
+        onDateChange(ValidationUtils.clampDate(newDate))
+    }
+
+    if (dateSetState) {
+        DatePickerDialog(
+            initialDate = dateTime,
+            minDate = Clock.System.now().toEpochMilliseconds() - (TimeConstants.MILLISECONDS_IN_DAY * 5),
+            onDateChange = clampedOnDateChange,
+            onDismiss = { dateSetState = false },
+        )
+    }
+
+    if (timeSetState) {
+        val localDateTime = Instant.fromEpochMilliseconds(dateTime)
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+        TimePickerDialog(
+            initialHour = localDateTime.hour,
+            initialMinute = localDateTime.minute,
+            onTimeSelected = { hour, minute ->
+                val updated = LocalDateTime(
+                    localDateTime.year, localDateTime.month, localDateTime.day,
+                    hour, minute, localDateTime.second, localDateTime.nanosecond
+                ).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+                clampedOnDateChange(updated)
+            },
+            onDismiss = { timeSetState = false },
+        )
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        OutlinedTextField(
+            value = dateTime.toDate(),
+            onValueChange = {},
+            label = { Text(text = stringResource(Res.string.date)) },
+            readOnly = true,
+            modifier = Modifier
+                .fillMaxWidth(),
+            trailingIcon = {
+                IconButton(onClick = {
+                    dateSetState = true
+                }) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_baseline_event_24),
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = stringResource(Res.string.date)
+                    )
+                }
+
+            })
+        OutlinedTextField(
+            value = dateTime.toTime(),
+            onValueChange = {},
+            label = { Text(text = stringResource(Res.string.time)) },
+            readOnly = true,
+            modifier = Modifier
+                .fillMaxWidth(),
+            trailingIcon = {
+                IconButton(onClick = {
+                    timeSetState = true
+                }) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_baseline_access_time_24),
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = stringResource(Res.string.time)
+                    )
+                }
+
+            })
+    }
+}
+
+@Composable
+fun FishAmountAndWeightViewItem(
+    modifier: Modifier = Modifier,
+    amountState: Int,
+    weightState: Double,
+    onAmountChange: (Int) -> Unit,
+    onWeightChange: (Double) -> Unit
+) {
+    val isAmountError = !ValidationUtils.isAmountValid(amountState)
+    val isWeightError = !ValidationUtils.isWeightValid(weightState)
+
+    Row(modifier = modifier) {
+        Column(Modifier.weight(1F)) {
+            OutlinedTextField(
+                value = amountState.toString(),
+                onValueChange = {
+                    val parsed = it.toIntOrNull()
+                    when {
+                        parsed == null -> onAmountChange(amountState)
+                        parsed > ValidationUtils.MAX_FISH_AMOUNT -> onAmountChange(ValidationUtils.MAX_FISH_AMOUNT)
+                        else -> onAmountChange(parsed)
+                    }
+                },
+                isError = isAmountError,
+                supportingText = if (isAmountError) {
+                    { Text(stringResource(Res.string.amount_out_of_range)) }
+                } else null,
+                label = { Text(text = stringResource(Res.string.amount)) },
+                trailingIcon = { Text(stringResource(Res.string.pc)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                )
+            )
+            Spacer(modifier = Modifier.size(6.dp))
+            Row(Modifier.fillMaxWidth()) {
+                OutlinedButton(
+                    onClick = {
+                        if (amountState >= 1) {
+                            onAmountChange(amountState - 1)
+                        }
+                    },
+                    Modifier
+                        .weight(1F)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_baseline_minus),
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = stringResource(Res.string.decrease)
+                    )
+                }
+                Spacer(modifier = Modifier.size(6.dp))
+                OutlinedButton(
+                    onClick = {
+                        if (amountState < ValidationUtils.MAX_FISH_AMOUNT) {
+                            onAmountChange(amountState + 1)
+                        }
+                    },
+                    enabled = amountState < ValidationUtils.MAX_FISH_AMOUNT,
+                    modifier = Modifier
+                        .weight(1F)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_baseline_plus),
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = stringResource(Res.string.increase)
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.size(6.dp))
+        Column(Modifier.weight(1F)) {
+            OutlinedTextField(
+                value = weightState.toString(),
+                onValueChange = {
+                    val parsed = it.toDoubleOrNull()
+                    when {
+                        parsed == null -> onWeightChange(weightState)
+                        parsed > ValidationUtils.MAX_FISH_WEIGHT_KG -> onWeightChange(ValidationUtils.MAX_FISH_WEIGHT_KG)
+                        else -> onWeightChange(parsed)
+                    }
+                },
+                isError = isWeightError,
+                supportingText = if (isWeightError) {
+                    { Text(stringResource(Res.string.weight_out_of_range)) }
+                } else null,
+                label = { Text(text = stringResource(Res.string.weight)) },
+                trailingIcon = {
+                    Text(stringResource(Res.string.kg))
+                },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                )
+            )
+            Spacer(modifier = Modifier.size(6.dp))
+            Row(Modifier.fillMaxWidth()) {
+                OutlinedButton(
+                    onClick = {
+                        if (weightState >= 0.1) {
+                            onWeightChange((weightState - 0.1).roundTo(1))
+                        }
+                    },
+                    Modifier
+                        .weight(1F)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_baseline_minus),
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = stringResource(Res.string.decrease)
+                    )
+                }
+                Spacer(modifier = Modifier.size(6.dp))
+                OutlinedButton(
+                    onClick = {
+                        if (weightState < ValidationUtils.MAX_FISH_WEIGHT_KG) {
+                            onWeightChange((weightState + 0.1).roundTo(1))
+                        }
+                    },
+                    enabled = weightState < ValidationUtils.MAX_FISH_WEIGHT_KG,
+                    modifier = Modifier
+                        .weight(1F)
+                        .align(Alignment.CenterVertically)
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_baseline_plus),
+                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = stringResource(Res.string.increase)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun WayOfFishingView(
+    modifier: Modifier = Modifier,
+    rodState: String,
+    biteState: String,
+    lureState: String,
+    onRodChange: (String) -> Unit,
+    onBiteChange: (String) -> Unit,
+    onLureChange: (String) -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = rodState,
+            onValueChange = { onRodChange(it) },
+            label = { Text(text = stringResource(Res.string.fish_rod)) }
+        )
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = biteState,
+            onValueChange = { onBiteChange(it) },
+            label = { Text(text = stringResource(Res.string.bait)) }
+        )
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = lureState,
+            onValueChange = { onLureChange(it) },
+            label = { Text(text = stringResource(Res.string.lure)) }
+        )
+    }
+}
+

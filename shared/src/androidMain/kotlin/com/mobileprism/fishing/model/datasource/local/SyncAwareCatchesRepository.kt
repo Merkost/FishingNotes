@@ -4,9 +4,9 @@ import android.util.Log
 import androidx.paging.PagingData
 import com.google.firebase.firestore.Query
 import com.mobileprism.fishing.domain.entity.common.ContentStateOld
-import com.mobileprism.fishing.domain.entity.common.Progress
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
+import androidx.room.withTransaction
 import com.mobileprism.fishing.model.datasource.local.dao.CatchDao
 import com.mobileprism.fishing.model.datasource.local.dao.PendingOperationDao
 import com.mobileprism.fishing.model.datasource.local.entity.PendingOperationEntity
@@ -19,8 +19,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.cancel
@@ -36,6 +34,7 @@ class SyncAwareCatchesRepository(
     private val pendingOpsDao: PendingOperationDao,
     private val connectionManager: ConnectionManager,
     private val syncScheduler: SyncScheduler,
+    private val db: FishingDatabase,
 ) : CatchesRepository, Closeable {
 
     companion object {
@@ -82,28 +81,20 @@ class SyncAwareCatchesRepository(
         return firebaseRepo.subscribeOnUserCatchState(markerId, catchId)
     }
 
-    override suspend fun updateUserCatch(markerId: String, catchId: String, data: Map<String, Any>) {
-        val isOnline = connectionManager.getConnectionState() is ConnectionState.Available
-        if (isOnline) {
-            try {
-                firebaseRepo.updateUserCatch(markerId, catchId, data)
+    override suspend fun updateUserCatch(markerId: String, catchId: String, data: Map<String, Any>): Result<Unit> {
+        try {
+            val result = firebaseRepo.updateUserCatch(markerId, catchId, data)
+            if (result.isSuccess) {
                 catchDao.updateSyncStatus(catchId, SyncStatus.SYNCED)
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to update catch online, queuing", e)
-                catchDao.updateSyncStatus(catchId, SyncStatus.PENDING_UPDATE)
-                pendingOpsDao.insert(
-                    PendingOperationEntity(
-                        entityType = "catch",
-                        entityId = catchId,
-                        operationType = "update",
-                        parentId = markerId,
-                        payload = Json.encodeToString(mapToJsonObject(data))
-                    )
-                )
-                syncScheduler.scheduleSync()
+                return result
             }
-        } else {
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to update catch online, queuing", e)
+        }
+        // Queue for offline sync
+        db.withTransaction {
             catchDao.updateSyncStatus(catchId, SyncStatus.PENDING_UPDATE)
+            pendingOpsDao.deleteByEntity("catch", catchId)
             pendingOpsDao.insert(
                 PendingOperationEntity(
                     entityType = "catch",
@@ -113,42 +104,35 @@ class SyncAwareCatchesRepository(
                     payload = Json.encodeToString(mapToJsonObject(data))
                 )
             )
-            syncScheduler.scheduleSync()
         }
+        syncScheduler.scheduleSync()
+        return Result.success(Unit) // Success from local perspective
     }
 
     override suspend fun updateUserCatchPhotos(
         markerId: String,
         catchId: String,
         newPhotos: List<String>
-    ): StateFlow<Progress> {
+    ): Result<Unit> {
         // Photo uploads require network, delegate directly
         return firebaseRepo.updateUserCatchPhotos(markerId, catchId, newPhotos)
     }
 
-    override suspend fun deleteCatch(userCatch: UserCatch) {
-        val isOnline = connectionManager.getConnectionState() is ConnectionState.Available
-        if (isOnline) {
-            try {
-                firebaseRepo.deleteCatch(userCatch)
+    override suspend fun deleteCatch(userCatch: UserCatch): Result<Unit> {
+        try {
+            val result = firebaseRepo.deleteCatch(userCatch)
+            if (result.isSuccess) {
                 catchDao.deleteByCatchId(userCatch.id)
                 pendingOpsDao.deleteByEntity("catch", userCatch.id)
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to delete catch online, queuing", e)
-                catchDao.updateSyncStatus(userCatch.id, SyncStatus.PENDING_DELETE)
-                pendingOpsDao.insert(
-                    PendingOperationEntity(
-                        entityType = "catch",
-                        entityId = userCatch.id,
-                        operationType = "delete",
-                        parentId = userCatch.userMarkerId,
-                        payload = Json.encodeToString(userCatch)
-                    )
-                )
-                syncScheduler.scheduleSync()
+                return Result.success(Unit)
             }
-        } else {
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to delete catch online, queuing", e)
+        }
+        // Queue for offline sync
+        db.withTransaction {
             catchDao.updateSyncStatus(userCatch.id, SyncStatus.PENDING_DELETE)
+            pendingOpsDao.deleteByEntity("catch", userCatch.id)
             pendingOpsDao.insert(
                 PendingOperationEntity(
                     entityType = "catch",
@@ -158,54 +142,49 @@ class SyncAwareCatchesRepository(
                     payload = Json.encodeToString(userCatch)
                 )
             )
-            syncScheduler.scheduleSync()
         }
+        syncScheduler.scheduleSync()
+        return Result.success(Unit) // Success from local perspective
     }
 
-    override fun addNewCatch(markerId: String, newCatch: UserCatch): Flow<Result<Nothing?>> {
-        return channelFlow {
-            // Save locally immediately
-            try {
-                catchDao.insert(newCatch.toEntity(SyncStatus.PENDING_CREATE))
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to cache new catch locally: ${e.message}")
-            }
-
-            val isOnline = connectionManager.getConnectionState() is ConnectionState.Available
-            if (isOnline) {
-                firebaseRepo.addNewCatch(markerId, newCatch).collect { result ->
-                    result.onSuccess {
-                        catchDao.updateSyncStatus(newCatch.id, SyncStatus.SYNCED)
-                        pendingOpsDao.deleteByEntity("catch", newCatch.id)
-                    }.onFailure {
-                        Log.e(TAG, "Failed to add catch online, queuing", it)
-                        pendingOpsDao.insert(
-                            PendingOperationEntity(
-                                entityType = "catch",
-                                entityId = newCatch.id,
-                                operationType = "create",
-                                parentId = markerId,
-                                payload = Json.encodeToString(newCatch)
-                            )
-                        )
-                        syncScheduler.scheduleSync()
-                    }
-                    send(result)
-                }
-            } else {
-                pendingOpsDao.insert(
-                    PendingOperationEntity(
-                        entityType = "catch",
-                        entityId = newCatch.id,
-                        operationType = "create",
-                        parentId = markerId,
-                        payload = Json.encodeToString(newCatch)
-                    )
-                )
-                syncScheduler.scheduleSync()
-                send(Result.success(null))
-            }
+    override suspend fun addNewCatch(markerId: String, newCatch: UserCatch): Result<Unit> {
+        // Save locally immediately
+        try {
+            catchDao.insert(newCatch.toEntity(SyncStatus.PENDING_CREATE))
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to cache new catch locally: ${e.message}")
         }
+
+        try {
+            val result = firebaseRepo.addNewCatch(markerId, newCatch)
+            result.onSuccess {
+                catchDao.updateSyncStatus(newCatch.id, SyncStatus.SYNCED)
+                pendingOpsDao.deleteByEntity("catch", newCatch.id)
+            }.onFailure {
+                Log.e(TAG, "Failed to add catch online, queuing", it)
+                queueCatchCreate(markerId, newCatch)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception adding catch online, queuing", e)
+            queueCatchCreate(markerId, newCatch)
+        }
+        return Result.success(Unit) // Success from local perspective
+    }
+
+    private suspend fun queueCatchCreate(markerId: String, newCatch: UserCatch) {
+        db.withTransaction {
+            pendingOpsDao.deleteByEntity("catch", newCatch.id)
+            pendingOpsDao.insert(
+                PendingOperationEntity(
+                    entityType = "catch",
+                    entityId = newCatch.id,
+                    operationType = "create",
+                    parentId = markerId,
+                    payload = Json.encodeToString(newCatch)
+                )
+            )
+        }
+        syncScheduler.scheduleSync()
     }
 
     override fun getAllUserCatchesPaged(

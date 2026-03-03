@@ -18,17 +18,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.constraintlayout.compose.ConstraintLayout
-import com.mobileprism.fishing.R
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.entity.raw.RawMapMarker
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.UiState
@@ -40,7 +39,7 @@ import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
 import com.mobileprism.fishing.utils.ValidationUtils
 import com.mobileprism.fishing.ui.utils.ColorPicker
 import com.mobileprism.fishing.viewmodels.MapViewModel
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -50,52 +49,47 @@ fun NewPlaceDialog(
 ) {
     if (dialogState) {
         Dialog(onDismissRequest = { onDismiss() }) {
-            val context = LocalContext.current
             val viewModel: MapViewModel = koinViewModel()
             val currentCameraPosition by viewModel.currentCameraPosition.collectAsState()
             val uiState by viewModel.addNewMarkerState.collectAsState()
+            val noNamePlace = stringResource(Res.string.no_name_place)
 
             LaunchedEffect(uiState) {
                 when (uiState) {
                     UiState.Success -> {
                         onDismiss()
                         viewModel.resetAddNewMarkerState()
-                        SnackbarManager.showMessage(R.string.add_place_success)
+                        SnackbarManager.showMessage(Res.string.add_place_success)
                     }
                     UiState.Error -> {
                         viewModel.resetAddNewMarkerState()
-                        SnackbarManager.showMessage(R.string.add_new_place_error)
+                        SnackbarManager.showMessage(Res.string.add_new_place_error)
                     }
                     else -> {}
                 }
             }
 
             MyCard(shape = Shapes.large, modifier = Modifier.wrapContentHeight().fillMaxWidth()) {
-                ConstraintLayout(
+                Column(
                     modifier = Modifier
                         .wrapContentHeight()
                         .padding(4.dp)
                 ) {
-                    val (progress, name, locationIcon, title, description, saveButton, cancelButton) = createRefs()
-
                     val placeTileViewNameState by viewModel.placeTileViewNameState.collectAsState()
 
                     val titleValue = remember { mutableStateOf("") }
                     val descriptionValue = remember { mutableStateOf("") }
-                    val markerColor = remember { mutableStateOf(Color(0xFFEC407A).hashCode()) }
+                    val markerColor = remember { mutableStateOf(pickerColors[0].value.hashCode()) }
 
                     SetPlaceNameResultListener(placeTileViewNameState.geocoderResult) {
                         titleValue.value = it
                     }
 
                     Text(
-                        text = stringResource(R.string.new_place),
+                        text = stringResource(Res.string.new_place),
                         style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.constrainAs(name) {
-                            top.linkTo(parent.top, 8.dp)
-                            absoluteLeft.linkTo(parent.absoluteLeft, 4.dp)
-                            absoluteRight.linkTo(parent.absoluteRight)
-                        }
+                        modifier = Modifier
+                            .padding(top = 8.dp, start = 4.dp)
                     )
 
                     val (textField1, textField2) = remember { FocusRequester.createRefs() }
@@ -108,12 +102,12 @@ fun NewPlaceDialog(
                                 titleValue.value = it
                             }
                         },
-                        label = { Text(text = stringResource(R.string.title)) },
+                        label = { Text(text = stringResource(Res.string.title)) },
                         singleLine = true,
                         supportingText = {
                             Text(
                                 stringResource(
-                                    R.string.char_counter,
+                                    Res.string.char_counter,
                                     titleValue.value.length,
                                     ValidationUtils.MAX_PLACE_NAME_LENGTH
                                 )
@@ -139,12 +133,8 @@ fun NewPlaceDialog(
                             }
                         },
                         modifier = Modifier
-                            .constrainAs(title) {
-                                top.linkTo(name.bottom, 8.dp)
-                                absoluteLeft.linkTo(parent.absoluteLeft)
-                                absoluteRight.linkTo(parent.absoluteRight)
-                            }
                             .focusRequester(textField1)
+                            .padding(top = 8.dp)
                             .padding(horizontal = 8.dp)
                             .fillMaxWidth()
                     )
@@ -154,7 +144,7 @@ fun NewPlaceDialog(
                         onValueChange = {
                             descriptionValue.value = it
                         },
-                        label = { Text(text = stringResource(R.string.description)) },
+                        label = { Text(text = stringResource(Res.string.description)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Text,
@@ -164,26 +154,20 @@ fun NewPlaceDialog(
                             onDone = { keyboardController?.hide() }
                         ),
                         modifier = Modifier
-                            .constrainAs(description) {
-                                top.linkTo(title.bottom, 2.dp)
-                                absoluteLeft.linkTo(parent.absoluteLeft)
-                                absoluteRight.linkTo(parent.absoluteRight)
-                            }
                             .focusRequester(textField2)
+                            .padding(top = 2.dp)
                             .padding(horizontal = 8.dp)
                             .fillMaxWidth()
                     )
 
                     val (selectedColor, onColorSelected) = remember { mutableStateOf(pickerColors[0]) }
 
-                    Row(modifier = Modifier
-                        .constrainAs(locationIcon) {
-                            top.linkTo(description.bottom, 6.dp)
-                            absoluteLeft.linkTo(parent.absoluteLeft)
-                            absoluteRight.linkTo(parent.absoluteRight)
-                        }
-                        .padding(horizontal = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .padding(top = 6.dp)
+                            .padding(horizontal = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
@@ -193,9 +177,9 @@ fun NewPlaceDialog(
                         )
                         {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                                contentDescription = stringResource(R.string.marker_icon),
-                                tint = selectedColor ?: secondaryFigmaColor,
+                                painter = painterResource(Res.drawable.ic_baseline_location_on_24),
+                                contentDescription = stringResource(Res.string.marker_icon),
+                                tint = selectedColor,
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(top = 2.dp)
@@ -204,50 +188,52 @@ fun NewPlaceDialog(
                         ColorPicker(
                             pickerColors,
                             selectedColor,
-                            (onColorSelected as (Color?) -> Unit).apply {
-                                markerColor.value = selectedColor.value.hashCode()
+                            { color ->
+                                color?.let {
+                                    onColorSelected(it)
+                                    markerColor.value = it.value.hashCode()
+                                }
                             },
                             modifier = Modifier.align(Alignment.CenterVertically)
                         )
                     }
 
-                    DefaultButton(
-                        modifier = Modifier.constrainAs(cancelButton) {
-                            absoluteRight.linkTo(saveButton.absoluteLeft, 8.dp)
-                            top.linkTo(saveButton.top)
-                            bottom.linkTo(saveButton.bottom)
-                        },
-                        text = stringResource(id = R.string.cancel),
-                        onClick = {
-                            viewModel.cancelAddNewMarker()
-                            onDismiss()
-                        }
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 14.dp, bottom = 14.dp, end = 8.dp),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        DefaultButton(
+                            modifier = Modifier.padding(end = 8.dp),
+                            text = stringResource(Res.string.cancel),
+                            onClick = {
+                                viewModel.cancelAddNewMarker()
+                                onDismiss()
+                            }
+                        )
 
-                    DefaultButtonFilled(
-                        modifier = Modifier.constrainAs(saveButton) {
-                            absoluteRight.linkTo(parent.absoluteRight, 8.dp)
-                            top.linkTo(locationIcon.bottom, 14.dp)
-                            bottom.linkTo(parent.bottom, 14.dp)
-                        },
-                        text = stringResource(id = R.string.save),
-                        enabled = uiState !is UiState.InProgress,
-                        onClick = {
-                            val trimmedTitle = titleValue.value.trim()
-                            viewModel.addNewMarker(
-                                RawMapMarker(
-                                    title = when (trimmedTitle.isEmpty()) {
-                                        true -> context.resources.getString(R.string.no_name_place)
-                                        false -> trimmedTitle
-                                    },
-                                    description = descriptionValue.value,
-                                    latitude = currentCameraPosition.first.latitude,
-                                    longitude = currentCameraPosition.first.longitude,
-                                    markerColor = markerColor.value
+                        DefaultButtonFilled(
+                            text = stringResource(Res.string.save),
+                            enabled = uiState !is UiState.InProgress,
+                            onClick = {
+                                val trimmedTitle = titleValue.value.trim()
+                                viewModel.addNewMarker(
+                                    RawMapMarker(
+                                        title = when (trimmedTitle.isEmpty()) {
+                                            true -> noNamePlace
+                                            false -> trimmedTitle
+                                        },
+                                        description = descriptionValue.value,
+                                        latitude = currentCameraPosition.first.latitude,
+                                        longitude = currentCameraPosition.first.longitude,
+                                        markerColor = markerColor.value
+                                    )
                                 )
-                            )
-                        }
-                    )
+                            }
+                        )
+                    }
+
                     DisposableEffect(Unit) {
                         textField1.requestFocus()
                         onDispose { }
@@ -259,12 +245,6 @@ fun NewPlaceDialog(
 }
 
 val pickerColors = listOf(
-    //null,
-    //Color(0xFF000000),
-    //Color(0xFFFFFFFF),
-    //Color(0xFFFAFAFA),
-    //Color(0x80FF4444),
-    //Color(0xFFEF5350),
     Color(0xFFEC407A),
     Color(0xFFAB47BC),
     Color(0xFF7E57C2),

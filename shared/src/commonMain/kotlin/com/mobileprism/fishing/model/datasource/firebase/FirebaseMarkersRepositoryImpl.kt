@@ -1,7 +1,6 @@
 package com.mobileprism.fishing.model.datasource.firebase
 
 import com.mobileprism.fishing.domain.entity.common.ContentState
-import com.mobileprism.fishing.domain.entity.common.LiteProgress
 import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.domain.entity.content.MapMarker
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
@@ -11,21 +10,33 @@ import com.mobileprism.fishing.domain.repository.app.MarkersRepository
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import dev.gitlive.firebase.firestore.ChangeType
 import dev.gitlive.firebase.firestore.FieldValue
+import dev.gitlive.firebase.firestore.QuerySnapshot
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
+import java.io.Closeable
 
 class FirebaseMarkersRepositoryImpl(
     private val dbCollections: RepositoryCollections,
     private val analyticsTracker: AnalyticsTracker
-) : MarkersRepository {
+) : MarkersRepository, Closeable {
 
-    override fun getAllUserMarkers(): Flow<ContentState<MapMarker>> = channelFlow {
+    private val scope = CoroutineScope(SupervisorJob())
+
+    private val markersSnapshotFlow: Flow<QuerySnapshot> by lazy {
         dbCollections.getUserMapMarkersCollection()
             .snapshots
+            .shareIn(scope, SharingStarted.WhileSubscribed(5_000), replay = 1)
+    }
+
+    override fun getAllUserMarkers(): Flow<ContentState<MapMarker>> = channelFlow {
+        markersSnapshotFlow
             .collect { snapshot ->
                 for (dc in snapshot.documentChanges) {
                     try {
@@ -36,62 +47,60 @@ class FirebaseMarkersRepositoryImpl(
                             ChangeType.REMOVED -> ContentState.DELETED<MapMarker>(mapMarker)
                         }
                         send(state)
-                    } catch (_: Exception) {
-                        // Skip corrupt document
-                    }
+                    } catch (_: Exception) { }
                 }
             }
     }
 
     override fun getAllUserMarkersList(): Flow<List<UserMapMarker>> {
-        return dbCollections.getUserMapMarkersCollection()
-            .snapshots
+        return markersSnapshotFlow
             .map { snapshot ->
-                snapshot.documents.map { it.data<UserMapMarker>() }
+                snapshot.documents.mapNotNull { doc ->
+                    try { doc.data<UserMapMarker>() } catch (_: Exception) { null }
+                }
             }
+            .catch { emit(emptyList()) }
     }
 
     override suspend fun saveNewNote(
         markerId: String,
         newNote: Note
-    ): Flow<Result<Unit>> = flow {
-        try {
+    ): Result<Unit> {
+        return try {
             dbCollections.getUserMapMarkersCollection().document(markerId)
-                .update("notes" to FieldValue.arrayUnion(newNote))
+                .updateFields { "notes" to FieldValue.arrayUnion(newNote) }
             analyticsTracker.logEvent(AnalyticsEvent.AddMarkerNote)
-            emit(Result.success(Unit))
+            Result.success(Unit)
         } catch (e: Exception) {
-            emit(Result.failure(e))
+            Result.failure(e)
         }
     }
 
     override suspend fun updateNotes(
         markerId: String, notes: List<Note>
-    ): Flow<Result<Unit>> = flow {
-        try {
+    ): Result<Unit> {
+        return try {
             dbCollections.getUserMapMarkersCollection().document(markerId)
-                .update("notes" to notes)
+                .updateFields { "notes" to notes }
             analyticsTracker.logEvent(AnalyticsEvent.EditMarkerNote)
-            emit(Result.success(Unit))
+            Result.success(Unit)
         } catch (e: Exception) {
-            emit(Result.failure(e))
+            Result.failure(e)
         }
     }
 
     override suspend fun changeMarkerVisibility(
         marker: UserMapMarker,
         changeTo: Boolean
-    ): StateFlow<LiteProgress> {
-        val flow = MutableStateFlow<LiteProgress>(LiteProgress.Loading)
-        try {
+    ): Result<Unit> {
+        return try {
             dbCollections.getUserMapMarkersCollection().document(marker.id)
-                .update("visible" to changeTo)
+                .updateFields { "visible" to changeTo }
             analyticsTracker.logEvent(AnalyticsEvent.MarkerVisibilityChange)
-            flow.tryEmit(LiteProgress.Complete)
+            Result.success(Unit)
         } catch (e: Exception) {
-            flow.tryEmit(LiteProgress.Error(e.cause))
+            Result.failure(e)
         }
-        return flow
     }
 
     override suspend fun getMapMarker(markerId: String): Result<UserMapMarker> {
@@ -117,8 +126,17 @@ class FirebaseMarkersRepositoryImpl(
         }
     }
 
-    override suspend fun deleteMarker(userMapMarker: UserMapMarker) {
-        dbCollections.getUserMapMarkersCollection().document(userMapMarker.id).delete()
-        analyticsTracker.logEvent(AnalyticsEvent.DeleteMarker)
+    override suspend fun deleteMarker(userMapMarker: UserMapMarker): Result<Unit> {
+        return try {
+            dbCollections.getUserMapMarkersCollection().document(userMapMarker.id).delete()
+            analyticsTracker.logEvent(AnalyticsEvent.DeleteMarker)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override fun close() {
+        scope.cancel()
     }
 }

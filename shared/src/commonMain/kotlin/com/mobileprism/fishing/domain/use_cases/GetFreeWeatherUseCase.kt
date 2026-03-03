@@ -2,7 +2,6 @@ package com.mobileprism.fishing.domain.use_cases
 
 import com.mobileprism.fishing.domain.repository.app.FreeWeatherRepository
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.single
 
 class GetFreeWeatherUseCase(private val freeWeatherRepository: FreeWeatherRepository) {
 
@@ -10,7 +9,7 @@ class GetFreeWeatherUseCase(private val freeWeatherRepository: FreeWeatherReposi
         latitude: Double,
         longitude: Double,
     ) = flow {
-        freeWeatherRepository.getCurrentWeatherFree(latitude, longitude).single().fold(
+        freeWeatherRepository.getCurrentWeatherFree(latitude, longitude).fold(
             onSuccess = {
                 emit(it)
             },

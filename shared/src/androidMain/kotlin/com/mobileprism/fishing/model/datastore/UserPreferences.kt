@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
-class UserPreferences(private val context: Context) {
+class UserPreferencesImpl(private val context: Context) : UserPreferences {
 
     // to make sure there's only one instance
     companion object {
@@ -33,7 +33,7 @@ class UserPreferences(private val context: Context) {
     }
 
     //get the saved value
-    val shouldShowLocationPermission: Flow<Boolean> = context.dataStore.data
+    override val shouldShowLocationPermission: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
             preferences[USER_LOCATION_PERMISSION_KEY] ?: true
         }
@@ -43,12 +43,12 @@ class UserPreferences(private val context: Context) {
             preferences[MAP_HIDDEN_PLACES_KEY] ?: true
         }
 
-    val use12hTimeFormat: Flow<Boolean> = context.dataStore.data
+    override val use12hTimeFormat: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
             preferences[TIME_FORMAT_KEY] ?: false
         }
 
-    val appTheme: Flow<AppThemeValues> = context.dataStore.data
+    override val appTheme: Flow<AppThemeValues> = context.dataStore.data
         .map { preferences ->
             AppThemeValues.valueOf(preferences[APP_THEME_KEY] ?: AppThemeValues.Blue.name)
         }.catch { e ->
@@ -57,7 +57,7 @@ class UserPreferences(private val context: Context) {
             }
         }
 
-    val darkMode: Flow<DarkModeValues> = context.dataStore.data
+    override val darkMode: Flow<DarkModeValues> = context.dataStore.data
         .map { preferences ->
             DarkModeValues.valueOf(preferences[DARK_MODE_KEY] ?: DarkModeValues.System.name)
         }.catch { e ->
@@ -66,12 +66,12 @@ class UserPreferences(private val context: Context) {
             }
         }
 
-    val useFabFastAdd: Flow<Boolean> = context.dataStore.data
+    override val useFabFastAdd: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
             preferences[FAB_FAST_ADD] ?: false
         }
 
-    val useMapZoomButons: Flow<Boolean> = context.dataStore.data
+    override val useMapZoomButons: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
             preferences[MAP_ZOOM_BUTTONS_KEY] ?: false
         }
@@ -89,7 +89,7 @@ class UserPreferences(private val context: Context) {
         }
 
     //save values
-    suspend fun saveLocationPermissionStatus(shouldShow: Boolean) {
+    override suspend fun saveLocationPermissionStatus(shouldShow: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[USER_LOCATION_PERMISSION_KEY] = shouldShow
         }
@@ -101,31 +101,31 @@ class UserPreferences(private val context: Context) {
         }
     }
 
-    suspend fun saveTimeFormatStatus(use12hFormat: Boolean) {
+    override suspend fun saveTimeFormatStatus(use12hFormat: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[TIME_FORMAT_KEY] = use12hFormat
         }
     }
 
-    suspend fun saveAppTheme(appTheme: AppThemeValues) {
+    override suspend fun saveAppTheme(appTheme: AppThemeValues) {
         context.dataStore.edit { preferences ->
             preferences[APP_THEME_KEY] = appTheme.name
         }
     }
 
-    suspend fun saveDarkMode(darkMode: DarkModeValues) {
+    override suspend fun saveDarkMode(darkMode: DarkModeValues) {
         context.dataStore.edit { preferences ->
             preferences[DARK_MODE_KEY] = darkMode.name
         }
     }
 
-    suspend fun saveFabFastAdd(fastAdd: Boolean) {
+    override suspend fun saveFabFastAdd(fastAdd: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[FAB_FAST_ADD] = fastAdd
         }
     }
 
-    suspend fun saveMapZoomButtons(useZoomButtons: Boolean) {
+    override suspend fun saveMapZoomButtons(useZoomButtons: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[MAP_ZOOM_BUTTONS_KEY] = useZoomButtons
         }

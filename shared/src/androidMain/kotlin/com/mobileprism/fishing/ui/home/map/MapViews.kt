@@ -1,7 +1,6 @@
 package com.mobileprism.fishing.ui.home.map
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
@@ -63,7 +62,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
@@ -75,38 +73,37 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieClipSpec
 import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieAnimatable
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.mobileprism.fishing.ui.utils.AnimatedResource
+import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.views.SettingsCheckbox
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.shimmer
-import com.google.accompanist.placeholder.material3.placeholder
+import com.mobileprism.fishing.ui.utils.placeholder
 import com.mobileprism.fishing.R
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.*
+import org.jetbrains.compose.resources.ExperimentalResourceApi
 import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
 import com.mobileprism.fishing.ui.utils.LocalAnalytics
-import com.mobileprism.fishing.model.datastore.UserPreferences
+import com.mobileprism.fishing.model.datastore.UserPreferencesImpl
 import android.app.Activity
 import com.mobileprism.fishing.ui.home.views.SettingsHeader
-import com.mobileprism.fishing.ui.home.SnackbarManager
-import com.mobileprism.fishing.ui.home.views.DefaultDialog
 import com.mobileprism.fishing.ui.theme.RedGoogleChrome
 import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
+import com.mobileprism.fishing.ui.utils.rememberLocationPermissionGranted
+import com.mobileprism.fishing.ui.utils.rememberPermissionsController
 import com.mobileprism.fishing.utils.location.LocationManager
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.compose.koinInject
 
 @ExperimentalMaterial3Api
@@ -194,7 +191,7 @@ fun MapScaffold(
 
 @Composable
 fun MapModalBottomSheet(
-    mapPreferences: UserPreferences
+    mapPreferences: UserPreferencesImpl
 ) {
     val coroutineScope = rememberCoroutineScope()
     val showHiddenPlaces by mapPreferences.shouldShowHiddenPlacesOnMap.collectAsState(false)
@@ -209,7 +206,7 @@ fun MapModalBottomSheet(
     )
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        SettingsHeader(stringResource(R.string.settings))
+        SettingsHeader(stringResource(Res.string.settings))
         SettingsCheckbox(
             icon = {
                 Icon(
@@ -217,8 +214,8 @@ fun MapModalBottomSheet(
                     tint = color.value
                 )
             },
-            title = { Text(text = stringResource(R.string.hidden_places)) },
-            subtitle = { Text(text = stringResource(R.string.show_hidden_places)) },
+            title = { Text(text = stringResource(Res.string.hidden_places)) },
+            subtitle = { Text(text = stringResource(Res.string.show_hidden_places)) },
             onCheckedChange = { newValue ->
                 coroutineScope.launch { mapPreferences.saveMapHiddenPlaces(newValue) }
             },
@@ -227,18 +224,18 @@ fun MapModalBottomSheet(
     }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun MyLocationButton(
     modifier: Modifier = Modifier,
-    userPreferences: UserPreferences,
+    userPreferences: UserPreferencesImpl,
     onClick: () -> Unit,
 ) {
     val context = LocalContext.current
     val locationManager: LocationManager = koinInject()
     var locationDialogIsShowing by remember { mutableStateOf(false) }
     val shouldShowPermissions by userPreferences.shouldShowLocationPermission.collectAsState(false)
-    val permissionsState = rememberMultiplePermissionsState(locationPermissionsList)
+    val permissionsController = rememberPermissionsController()
+    val locationPermissionGranted by rememberLocationPermissionGranted(permissionsController)
 
     if (locationDialogIsShowing) {
         if (shouldShowPermissions) {
@@ -246,12 +243,12 @@ fun MyLocationButton(
                 checkLocationPermissions(context)
                 locationDialogIsShowing = false
             }
-        } else SnackbarManager.showMessage(R.string.location_permission_denied)
+        } else SnackbarManager.showMessage(Res.string.location_permission_denied)
     }
 
     val color = animateColorAsState(
         when {
-            !shouldShowPermissions || !permissionsState.allPermissionsGranted -> {
+            !shouldShowPermissions || !locationPermissionGranted -> {
                 RedGoogleChrome
             }
 
@@ -263,14 +260,14 @@ fun MyLocationButton(
 
     Card(
         shape = CircleShape,
-        modifier = modifier.size(40.dp)
+        modifier = modifier.size(48.dp)
     ) {
         IconButton(
             modifier = Modifier
                 .padding(8.dp)
                 .fillMaxSize(),
             onClick = {
-                when (permissionsState.allPermissionsGranted) {
+                when (locationPermissionGranted) {
                     true -> {
                         locationManager.checkGPSEnabled(context as Activity)
                         { onClick() }
@@ -285,7 +282,7 @@ fun MyLocationButton(
             Icon(
                 if (!shouldShowPermissions) Icons.Default.GpsOff
                 else Icons.Default.MyLocation,
-                stringResource(R.string.my_location),
+                stringResource(Res.string.my_location),
                 tint = color.value
             )
         }
@@ -307,7 +304,7 @@ fun CompassButton(
     ) {
         Card(
             shape = CircleShape,
-            modifier = Modifier.size(40.dp)
+            modifier = Modifier.size(48.dp)
         ) {
             IconButton(
                 modifier = Modifier
@@ -318,10 +315,10 @@ fun CompassButton(
                     painterResource(
                         if (mapBearing.value > 356f ||
                             mapBearing.value < 4f
-                        ) R.drawable.north
-                        else R.drawable.gps
+                        ) Res.drawable.north
+                        else Res.drawable.gps
                     ),
-                    stringResource(R.string.compass),
+                    stringResource(Res.string.compass),
                     modifier = Modifier
                         .rotate(1f - mapBearing.value)
                         .fillMaxSize()
@@ -340,7 +337,7 @@ fun MapZoomInButton(
 
     Card(
         shape = CircleShape,
-        modifier = modifier.size(40.dp)
+        modifier = modifier.size(48.dp)
     ) {
         IconButton(
             modifier = Modifier
@@ -364,7 +361,7 @@ fun MapZoomOutButton(
 
     Card(
         shape = CircleShape,
-        modifier = modifier.size(40.dp)
+        modifier = modifier.size(48.dp)
     ) {
         IconButton(
             modifier = Modifier
@@ -384,7 +381,7 @@ fun MapZoomOutButton(
 fun MapLayersButton(modifier: Modifier, onLayersSelectionOpen: () -> Unit) {
     Card(
         shape = CircleShape,
-        modifier = modifier.size(40.dp)
+        modifier = modifier.size(48.dp)
     ) {
         IconButton(
             modifier = Modifier
@@ -392,7 +389,7 @@ fun MapLayersButton(modifier: Modifier, onLayersSelectionOpen: () -> Unit) {
                 .fillMaxSize(),
             onClick = onLayersSelectionOpen
         ) {
-            Icon(painterResource(R.drawable.ic_baseline_layers_24), stringResource(R.string.layers))
+            Icon(painterResource(Res.drawable.ic_baseline_layers_24), stringResource(Res.string.layers))
         }
     }
 }
@@ -429,12 +426,12 @@ fun LayersView(
                     .padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(stringResource(R.string.map_type))
+                Text(stringResource(Res.string.map_type))
                 IconButton(
                     onClick = onCloseMapSelection,
                     modifier = Modifier.size(24.dp)
                 ) {
-                    Icon(Icons.Default.Close, stringResource(R.string.close))
+                    Icon(Icons.Default.Close, stringResource(Res.string.close))
                 }
             }
             Row(
@@ -444,22 +441,22 @@ fun LayersView(
                 MapLayerItem(
                     currentMapType = mapType.value,
                     layer = MapTypes.roadmap,
-                    painter = painterResource(R.drawable.ic_map_default),
-                    name = stringResource(R.string.roadmap),
+                    painter = painterResource(Res.drawable.ic_map_default),
+                    name = stringResource(Res.string.roadmap),
                     onLayerSelected = onLayerSelected
                 )
                 MapLayerItem(
                     currentMapType = mapType.value,
                     layer = MapTypes.hybrid,
-                    painter = painterResource(R.drawable.ic_map_satellite),
-                    name = stringResource(R.string.satellite),
+                    painter = painterResource(Res.drawable.ic_map_satellite),
+                    name = stringResource(Res.string.satellite),
                     onLayerSelected = onLayerSelected
                 )
                 MapLayerItem(
                     currentMapType = mapType.value,
                     layer = MapTypes.terrain,
-                    painter = painterResource(R.drawable.ic_map_terrain),
-                    name = stringResource(R.string.terrain),
+                    painter = painterResource(Res.drawable.ic_map_terrain),
+                    name = stringResource(Res.string.terrain),
                     onLayerSelected = onLayerSelected
                 )
             }
@@ -522,7 +519,7 @@ fun MapSettingsButton(
 
     Card(
         shape = CircleShape,
-        modifier = modifier.size(40.dp)
+        modifier = modifier.size(48.dp)
     ) {
         IconButton(
             modifier = Modifier
@@ -537,6 +534,7 @@ fun MapSettingsButton(
     }
 }
 
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun PointerIcon(
     pointerState: PointerState,
@@ -545,64 +543,64 @@ fun PointerIcon(
     var isFirstTimeCalled by remember { mutableStateOf(false) }
 
     val darkTheme = isSystemInDarkTheme()
-    val composition by rememberLottieComposition(
-        LottieCompositionSpec.RawRes(if (darkTheme) R.raw.marker_night else R.raw.marker)
-    )
-    val lottieAnimatable = rememberLottieAnimatable()
+    val markerResName = if (darkTheme) "marker_night" else "marker"
 
-    val startMinMaxFrame by remember {
-        mutableStateOf(LottieClipSpec.Frame(0, 50))
-    }
-    val finishMinMaxFrame by remember {
-        mutableStateOf(LottieClipSpec.Frame(50, 82))
+    var jsonString by remember(markerResName) { mutableStateOf<String?>(null) }
+    LaunchedEffect(markerResName) {
+        jsonString = Res.readBytes("files/$markerResName.json").decodeToString()
     }
 
-    LaunchedEffect(isFirstTimeCalled) {
-        lottieAnimatable.animate(
-            composition,
-            iteration = 1,
-            continueFromPreviousAnimate = true,
-            clipSpec = startMinMaxFrame,
-        )
-    }
+    jsonString?.let { json ->
+        val composition by rememberLottieComposition(LottieCompositionSpec.JsonString(json))
+        val lottieAnimatable = rememberLottieAnimatable()
 
-    LaunchedEffect(pointerState) {
-        if (pointerState == PointerState.ShowMarker) {
+        val startMinMaxFrame by remember {
+            mutableStateOf(LottieClipSpec.Frame(0, 50))
+        }
+        val finishMinMaxFrame by remember {
+            mutableStateOf(LottieClipSpec.Frame(50, 82))
+        }
+
+        LaunchedEffect(isFirstTimeCalled) {
             lottieAnimatable.animate(
                 composition,
                 iteration = 1,
                 continueFromPreviousAnimate = true,
                 clipSpec = startMinMaxFrame,
             )
-        } else {
-            lottieAnimatable.animate(
-                composition,
-                iteration = 1,
-                continueFromPreviousAnimate = false,
-                clipSpec = finishMinMaxFrame,
-            )
         }
+
+        LaunchedEffect(pointerState) {
+            if (pointerState == PointerState.ShowMarker) {
+                lottieAnimatable.animate(
+                    composition,
+                    iteration = 1,
+                    continueFromPreviousAnimate = true,
+                    clipSpec = startMinMaxFrame,
+                )
+            } else {
+                lottieAnimatable.animate(
+                    composition,
+                    iteration = 1,
+                    continueFromPreviousAnimate = false,
+                    clipSpec = finishMinMaxFrame,
+                )
+            }
+        }
+
+        LottieAnimation(
+            modifier = modifier.size(128.dp),
+            composition = composition,
+            progress = { lottieAnimatable.progress }
+        )
+
+        isFirstTimeCalled = true
     }
-
-    LottieAnimation(
-        modifier = modifier.size(128.dp),
-        composition = composition,
-        progress = lottieAnimatable.progress
-    )
-
-    isFirstTimeCalled = true
-
 }
 
 @Composable
 fun FishLoading(modifier: Modifier) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.fish_loading))
-    val progress by animateLottieCompositionAsState(composition)
-    LottieAnimation(
-        composition,
-        progress,
-        modifier = modifier
-    )
+    AnimatedResource("fish_loading", modifier, iterations = 1)
 }
 
 @Composable
@@ -629,9 +627,6 @@ fun PlaceTileView(
             visible = true,
             color = MaterialTheme.colorScheme.outlineVariant,
             shape = CircleShape,
-            highlight = PlaceholderHighlight.shimmer(
-                highlightColor = MaterialTheme.colorScheme.surface,
-            ),
         )
     val pointerIconColor by animateColorAsState(
         if (selectedPlace.value.isNotBlank()) secondaryFigmaColor
@@ -663,15 +658,15 @@ fun PlaceTileView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_baseline_location_on_24),
-                contentDescription = stringResource(R.string.marker_icon),
+                painter = painterResource(Res.drawable.ic_baseline_location_on_24),
+                contentDescription = stringResource(Res.string.marker_icon),
                 tint = pointerIconColor,
                 modifier = Modifier
                     .size(30.dp)
             )
             Spacer(Modifier.size(4.dp))
             Text(
-                selectedPlace.value.ifEmpty { stringResource(R.string.searching) },
+                selectedPlace.value.ifEmpty { stringResource(Res.string.searching) },
                 overflow = TextOverflow.Ellipsis,
                 color = textColor,
                 modifier = Modifier
@@ -708,50 +703,6 @@ fun SetPlaceNameResultListener(geocoderResult: GeocoderResult, setPlaceName: (St
             }
         }
     }
-}
-
-@ExperimentalComposeUiApi
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-@ExperimentalPermissionsApi
-fun GrantLocationPermissionsDialog(
-    onDismiss: () -> Unit,
-    onPositiveClick: () -> Unit,
-    onNegativeClick: () -> Unit,
-    onDontAskClick: () -> Unit
-) {
-
-    DefaultDialog(
-        primaryText = stringResource(R.string.location_permission_dialog),
-        neutralButtonText = stringResource(id = R.string.dont_ask_again),
-        onNeutralClick = onDontAskClick,
-        negativeButtonText = stringResource(id = R.string.cancel),
-        onNegativeClick = onNegativeClick,
-        positiveButtonText = stringResource(id = R.string.ok_button),
-        onPositiveClick = onPositiveClick,
-        onDismiss = onDismiss,
-        content = {
-            LottieMyLocation(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
-            )
-        }
-    )
-}
-
-@Composable
-fun LottieMyLocation(modifier: Modifier) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.my_location))
-    val progress by animateLottieCompositionAsState(
-        composition,
-        iterations = LottieConstants.IterateForever,
-    )
-    LottieAnimation(
-        composition,
-        progress,
-        modifier = modifier
-    )
 }
 
 @Composable

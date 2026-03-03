@@ -14,11 +14,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import fishing_notes.shared.generated.resources.Res
-import fishing_notes.shared.generated.resources.keep_my_version
-import fishing_notes.shared.generated.resources.sync_conflict_message
-import fishing_notes.shared.generated.resources.sync_conflict_title
-import fishing_notes.shared.generated.resources.use_server_version
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.keep_my_version
+import fishing.shared.generated.resources.sync_conflict_message
+import fishing.shared.generated.resources.sync_conflict_title
+import fishing.shared.generated.resources.use_server_version
 import org.jetbrains.compose.resources.stringResource
 
 @Composable

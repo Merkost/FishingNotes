@@ -17,6 +17,7 @@ fun getNewCatchId() = getRandomString(10)
 fun getNewMarkerId() = getRandomString(15)
 fun getNewPhotoId() = getRandomString(12)
 
+@OptIn(kotlin.uuid.ExperimentalUuidApi::class)
 fun getUUID() = kotlin.uuid.Uuid.random().toString()
 
 fun getRandomString(length: Int): String {

@@ -105,7 +105,6 @@
     <string name="fish_species">Fish species</string>
     <string name="apply">Apply</string>
     <string name="saving">Saving</string>
-    <string name="Cancel">Cancel</string>
     <string name="Try_again">Try again</string>
     <string name="map_deletion">Place deletion</string>
     <string name="map_delete_confirmation">Are you sure you want to delete this point?</string>
@@ -430,5 +429,14 @@
     <string name="temperature_range">By Temperature</string>
     <string name="moon_phase_stats">By Moon Phase</string>
     <string name="no_data">Not enough data</string>
+    <string name="note_description_required">Note description cannot be empty</string>
+    <string name="delete_note_dialog">Delete this note?</string>
+    <string name="sure_delete_note_dialog">This action cannot be undone.</string>
+    <string name="decrease">Decrease</string>
+    <string name="increase">Increase</string>
+    <string name="add_note">Add note</string>
+    <string name="toggle_visibility">Toggle visibility</string>
+    <string name="select_location">Select location</string>
+    <string name="cached_data">Cached data</string>
 
 </resources>

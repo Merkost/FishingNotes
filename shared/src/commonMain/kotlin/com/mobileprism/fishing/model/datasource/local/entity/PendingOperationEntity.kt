@@ -3,7 +3,7 @@ package com.mobileprism.fishing.model.datasource.local.entity
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 @Entity(
     tableName = "pending_operations",

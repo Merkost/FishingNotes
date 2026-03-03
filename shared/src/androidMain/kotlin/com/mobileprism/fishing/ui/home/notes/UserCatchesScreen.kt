@@ -18,16 +18,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.google.accompanist.placeholder.PlaceholderHighlight
-import com.google.accompanist.placeholder.material3.fade
-import com.google.accompanist.placeholder.placeholder
-import com.mobileprism.fishing.R
+import com.mobileprism.fishing.ui.utils.placeholder
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.model.datastore.NotesPreferences
 import com.mobileprism.fishing.ui.MainDestinations
@@ -39,7 +38,7 @@ import com.mobileprism.fishing.domain.entity.common.CatchesSortValues
 import com.mobileprism.fishing.ui.viewmodels.UserCatchesViewModel
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import org.koin.compose.koinInject
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -83,7 +82,6 @@ fun UserCatchesScreen(
                                     true,
                                     color = MaterialTheme.colorScheme.outlineVariant,
                                     shape = CircleShape,
-                                    highlight = PlaceholderHighlight.fade()
                                 ),
                                 catch = UserCatch(),
                                 onClick = {}
@@ -101,7 +99,7 @@ fun UserCatchesScreen(
                             ) {
                                 ErrorView()
                                 DefaultButtonOutlined(
-                                    text = stringResource(R.string.retry),
+                                    text = stringResource(Res.string.retry),
                                     onClick = { lazyPagingItems.refresh() }
                                 )
                             }
@@ -112,8 +110,8 @@ fun UserCatchesScreen(
                             item {
                                 NoContentView(
                                     modifier = Modifier.padding(top = 128.dp),
-                                    text = stringResource(id = R.string.no_cathces_added),
-                                    icon = painterResource(id = R.drawable.ic_fishing)
+                                    text = stringResource(Res.string.no_cathces_added),
+                                    icon = painterResource(Res.drawable.ic_fishing)
                                 )
                                 Spacer(modifier = Modifier.size(16.dp))
                                 Column(
@@ -121,7 +119,7 @@ fun UserCatchesScreen(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     DefaultButtonOutlined(
-                                        text = stringResource(R.string.new_catch_text),
+                                        text = stringResource(Res.string.new_catch_text),
                                         onClick = navigateToNewCatch
                                     )
                                 }
@@ -186,15 +184,4 @@ fun UserCatchesScreen(
             }
         }
     }
-}
-
-fun getDatesList(catches: List<UserCatch>): List<String> {
-    val dates = mutableListOf<String>()
-    catches.forEach { userCatch ->
-        val date = userCatch.date.toDateTextMonth()
-        if (!dates.contains(date)) {
-            dates.add(date)
-        }
-    }
-    return dates
 }

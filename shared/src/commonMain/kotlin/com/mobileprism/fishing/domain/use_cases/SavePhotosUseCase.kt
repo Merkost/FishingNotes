@@ -11,7 +11,7 @@ class SavePhotosUseCase(
         onProgress: ((uploaded: Int, total: Int) -> Unit)? = null
     ): List<String> {
         val newPhotos = photos.filter { !it.startsWith("http") }
-        val newPhotoDownloadLinks = cloudPhotoStorage.uploadPhotos(newPhotos, onProgress)
+        val newPhotoDownloadLinks = cloudPhotoStorage.uploadPhotos(newPhotos, onProgress).getOrThrow()
         val oldPhotos = photos.filter { it.startsWith("http") }
 
         return newPhotoDownloadLinks + oldPhotos

@@ -14,7 +14,10 @@ import com.mobileprism.fishing.model.datasource.local.dao.PendingOperationDao
 import com.mobileprism.fishing.model.datasource.local.dao.WeatherCacheDao
 import com.mobileprism.fishing.model.datasource.local.entity.PendingOperationEntity
 import com.mobileprism.fishing.model.datasource.local.entity.SyncStatus
-import kotlinx.coroutines.flow.first
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -24,8 +27,6 @@ import kotlinx.serialization.json.longOrNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
-import kotlinx.datetime.Clock
-import kotlin.time.Duration.Companion.hours
 
 class SyncWorker(
     appContext: Context,
@@ -61,7 +62,9 @@ class SyncWorker(
 
         for (op in pendingOps) {
             try {
-                val success = processOperation(op)
+                val success = withTimeoutOrNull(30_000L) {
+                    processOperation(op)
+                } ?: false
                 if (success) {
                     pendingOpsDao.delete(op)
                     Log.d(TAG, "Successfully synced: ${op.entityType}/${op.entityId}/${op.operationType}")
@@ -80,6 +83,12 @@ class SyncWorker(
     }
 
     private suspend fun processOperation(op: PendingOperationEntity): Boolean {
+        // Dedup check: verify entity still has expected pending status
+        if (!isOperationStillValid(op)) {
+            Log.d(TAG, "Skipping stale op: ${op.entityType}/${op.entityId}/${op.operationType}")
+            return true // Treat as success — no longer needs processing
+        }
+
         return when (op.entityType) {
             "catch" -> processCatchOperation(op)
             "marker" -> processMarkerOperation(op)
@@ -90,11 +99,27 @@ class SyncWorker(
         }
     }
 
+    private suspend fun isOperationStillValid(op: PendingOperationEntity): Boolean {
+        val expectedStatus = when (op.operationType) {
+            "create" -> SyncStatus.PENDING_CREATE
+            "update" -> SyncStatus.PENDING_UPDATE
+            "delete" -> SyncStatus.PENDING_DELETE
+            else -> return true // Unknown op type — let it proceed
+        }
+        val actualStatus = when (op.entityType) {
+            "catch" -> catchDao.getById(op.entityId).firstOrNull()?.syncStatus
+            "marker" -> markerDao.getById(op.entityId)?.syncStatus
+            else -> return true
+        }
+        // Entity deleted or already synced — skip
+        return actualStatus == expectedStatus
+    }
+
     private suspend fun processCatchOperation(op: PendingOperationEntity): Boolean {
         return when (op.operationType) {
             "create" -> {
                 val catch = json.decodeFromString<UserCatch>(op.payload)
-                val result = catchesRepo.addNewCatch(op.parentId, catch).first()
+                val result = catchesRepo.addNewCatch(op.parentId, catch)
                 if (result.isSuccess) {
                     catchDao.updateSyncStatus(op.entityId, SyncStatus.SYNCED)
                 }
@@ -112,25 +137,19 @@ class SyncWorker(
                         else -> primitive.content
                     } as Any
                 }
-                try {
-                    catchesRepo.updateUserCatch(op.parentId, op.entityId, data)
+                val result = catchesRepo.updateUserCatch(op.parentId, op.entityId, data)
+                if (result.isSuccess) {
                     catchDao.updateSyncStatus(op.entityId, SyncStatus.SYNCED)
-                    true
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to update catch ${op.entityId}", e)
-                    false
                 }
+                result.isSuccess
             }
             "delete" -> {
-                try {
-                    val catch = json.decodeFromString<UserCatch>(op.payload)
-                    catchesRepo.deleteCatch(catch)
+                val catch = json.decodeFromString<UserCatch>(op.payload)
+                val result = catchesRepo.deleteCatch(catch)
+                if (result.isSuccess) {
                     catchDao.deleteByCatchId(op.entityId)
-                    true
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to delete catch ${op.entityId}", e)
-                    false
                 }
+                result.isSuccess
             }
             else -> false
         }
@@ -147,15 +166,12 @@ class SyncWorker(
                 result.isSuccess
             }
             "delete" -> {
-                try {
-                    val marker = json.decodeFromString<UserMapMarker>(op.payload)
-                    markersRepo.deleteMarker(marker)
+                val marker = json.decodeFromString<UserMapMarker>(op.payload)
+                val result = markersRepo.deleteMarker(marker)
+                if (result.isSuccess) {
                     markerDao.deleteByMarkerId(op.entityId)
-                    true
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to delete marker ${op.entityId}", e)
-                    false
                 }
+                result.isSuccess
             }
             else -> false
         }

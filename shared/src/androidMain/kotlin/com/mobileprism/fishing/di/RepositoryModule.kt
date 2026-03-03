@@ -14,6 +14,8 @@ import com.mobileprism.fishing.domain.repository.app.OfflineRepository
 import com.mobileprism.fishing.domain.repository.app.SolunarRepository
 import com.mobileprism.fishing.domain.repository.app.WeatherRepository
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
+import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepositoryRead
+import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepositoryUpdate
 import com.mobileprism.fishing.model.datasource.FreeWeatherRepositoryKtorImpl
 import com.mobileprism.fishing.model.datasource.SolunarRepositoryKtorImpl
 import com.mobileprism.fishing.model.datasource.WeatherRepositoryKtorImpl
@@ -56,9 +58,7 @@ val repositoryModule = networkModule + module {
             androidContext(),
             FishingDatabase::class.java,
             "fishing_database"
-        )
-            .fallbackToDestructiveMigration()
-            .build()
+        ).build()
     }
 
     // DAOs
@@ -79,11 +79,11 @@ val repositoryModule = networkModule + module {
         analyticsTracker = get(),
         connectionManager = get(),
         authRepository = get()
-    ) }
+    ) } onClose { (it as? Closeable)?.close() }
     single { FirebaseMarkersRepositoryImpl(
         dbCollections = get(),
         analyticsTracker = get()
-    ) }
+    ) } onClose { (it as? Closeable)?.close() }
 
     // Paged wrappers (androidMain, named bindings)
     single<CatchesRepository>(named("firebase")) {
@@ -114,7 +114,8 @@ val repositoryModule = networkModule + module {
             catchDao = get(),
             pendingOpsDao = get(),
             connectionManager = get(),
-            syncScheduler = get()
+            syncScheduler = get(),
+            db = get()
         )
     } onClose { (it as? Closeable)?.close() }
     single<MarkersRepositoryPaged> {
@@ -123,11 +124,15 @@ val repositoryModule = networkModule + module {
             markerDao = get(),
             pendingOpsDao = get(),
             connectionManager = get(),
-            syncScheduler = get()
+            syncScheduler = get(),
+            db = get()
         )
     } onClose { (it as? Closeable)?.close() }
     // Also bind as MarkersRepository so consumers that don't need paging can inject the base type
     single<MarkersRepository> { get<MarkersRepositoryPaged>() }
+    // Also bind as base interfaces for consumers that don't need paging
+    single<CatchesRepositoryRead> { get<CatchesRepository>() }
+    single<CatchesRepositoryUpdate> { get<CatchesRepository>() }
     single<WeatherRepository> {
         CachedWeatherRepository(
             remoteRepo = get(named("remote")),

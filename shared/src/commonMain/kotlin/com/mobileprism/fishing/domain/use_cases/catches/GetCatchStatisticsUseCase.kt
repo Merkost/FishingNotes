@@ -7,9 +7,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Instant
 
 class GetCatchStatisticsUseCase(private val repository: CatchesRepositoryRead) {
 
@@ -59,7 +59,7 @@ class GetCatchStatisticsUseCase(private val repository: CatchesRepositoryRead) {
             .groupingBy {
                 val localDate = Instant.fromEpochMilliseconds(it.date)
                     .toLocalDateTime(TimeZone.currentSystemDefault())
-                "${localDate.year}-${localDate.monthNumber.toString().padStart(2, '0')}"
+                "${localDate.year}-${(localDate.month.ordinal + 1).toString().padStart(2, '0')}"
             }
             .eachCount()
             .toSortedMap()

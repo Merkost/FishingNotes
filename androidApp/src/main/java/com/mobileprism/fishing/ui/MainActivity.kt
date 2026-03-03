@@ -3,16 +3,21 @@ package com.mobileprism.fishing.ui
 import android.app.Activity
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -24,7 +29,6 @@ import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
-import com.mobileprism.fishing.R
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.SnackbarAction
@@ -35,11 +39,13 @@ import com.mobileprism.fishing.ui.utils.LocalAnalytics
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import com.mobileprism.fishing.viewmodels.MainViewModel
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.*
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
 
     private val appUpdateManager: AppUpdateManager by inject()
     private val analyticsTracker: AnalyticsTracker by inject()
@@ -51,13 +57,13 @@ class MainActivity : ComponentActivity() {
     ) { result ->
         when (result.resultCode) {
             Activity.RESULT_CANCELED -> {
-                SnackbarManager.showMessage(R.string.update_canceled)
+                SnackbarManager.showMessage(Res.string.update_canceled)
             }
             Activity.RESULT_OK -> {
-                SnackbarManager.showMessage(R.string.update_downloading)
+                SnackbarManager.showMessage(Res.string.update_downloading)
             }
             else -> {
-                SnackbarManager.showMessage(R.string.update_failed)
+                SnackbarManager.showMessage(Res.string.update_failed)
                 checkForUpdates()
             }
         }
@@ -79,14 +85,16 @@ class MainActivity : ComponentActivity() {
         val userPreferences: UserPreferences by inject()
         val appTheme = mutableStateOf<AppThemeValues?>(null)
 
-        lifecycleScope.launchWhenStarted {
-            userPreferences.appTheme.collect { appTheme.value = it }
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                userPreferences.appTheme.collect { appTheme.value = it }
+            }
         }
 
         installSplashScreen().apply {
             setKeepOnScreenCondition {
                 userStateFlow.value is BaseViewState.Loading
-                        && appTheme.value == null
+                        || appTheme.value == null
             }
             setOnExitAnimationListener { splashScreenViewProvider ->
                 // Get icon instance and start a fade out animation
@@ -112,7 +120,7 @@ class MainActivity : ComponentActivity() {
                                     LocalAnalytics provides analyticsTracker
                                 ) {
                                     FishingNotesTheme(appTheme.value) {
-                                        DistributionScreen((viewModel.userState.value as? BaseViewState.Success)?.data)
+                                        DistributionScreen(viewModel)
                                     }
                                 }
                             }
@@ -128,7 +136,7 @@ class MainActivity : ComponentActivity() {
                     LocalAnalytics provides analyticsTracker
                 ) {
                     FishingNotesTheme(appTheme.value) {
-                        DistributionScreen((viewModel.userState.value as? BaseViewState.Success)?.data)
+                        DistributionScreen(viewModel)
                     }
                 }
             }
@@ -161,7 +169,7 @@ class MainActivity : ComponentActivity() {
                 popupSnackbarForCompleteUpdate()
             }
         }.addOnFailureListener {
-            //SnackbarManager.showMessage(R.string.error_occured)
+            //SnackbarManager.showMessage(Res.string.error_occured)
         }
     }
 
@@ -180,16 +188,16 @@ class MainActivity : ComponentActivity() {
                 }
 
                 InstallStatus.INSTALLED -> {
-                    SnackbarManager.showMessage(R.string.update_installed)
+                    SnackbarManager.showMessage(Res.string.update_installed)
                     removeInstallStateUpdateListener()
                 }
 
                 InstallStatus.CANCELED -> {
-                    SnackbarManager.showMessage(R.string.update_canceled)
+                    SnackbarManager.showMessage(Res.string.update_canceled)
                 }
 
                 InstallStatus.FAILED -> {
-                    SnackbarManager.showMessage(R.string.update_failed)
+                    SnackbarManager.showMessage(Res.string.update_failed)
                 }
 
                 else -> {}
@@ -202,16 +210,23 @@ class MainActivity : ComponentActivity() {
 
     private fun popupSnackbarForCompleteUpdate() {
         SnackbarManager.showMessage(
-            R.string.update_ready,
-            SnackbarAction(R.string.reload_app) { appUpdateManager.completeUpdate() },
+            Res.string.update_ready,
+            SnackbarAction(Res.string.reload_app) { appUpdateManager.completeUpdate() },
             duration = SnackbarDuration.Indefinite
         )
     }
 
     @Composable
-    private fun DistributionScreen(user: User?) {
-        if (user != null) FishingNotesApp()
-        else Navigation()
+    private fun DistributionScreen(viewModel: MainViewModel) {
+        val userState by viewModel.userState.collectAsState()
+        when (val state = userState) {
+            is BaseViewState.Loading -> { /* splash screen is still visible */ }
+            is BaseViewState.Success -> {
+                if (state.data != null) FishingNotesApp()
+                else Navigation()
+            }
+            is BaseViewState.Error -> Navigation()
+        }
     }
 
     @Composable

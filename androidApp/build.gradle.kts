@@ -6,6 +6,14 @@ val localProperties = Properties().apply {
     if (file.exists()) load(file.inputStream())
 }
 
+val secretsProperties = Properties().apply {
+    val file = rootProject.file("secrets.properties")
+    if (file.exists()) load(file.inputStream())
+}
+
+fun resolveProperty(key: String, default: String = ""): String =
+    localProperties.getProperty(key) ?: secretsProperties.getProperty(key) ?: default
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.compose.compiler)
@@ -40,7 +48,7 @@ android {
         targetSdk = 36
         versionCode = 16
         versionName = "1.1.3"
-        manifestPlaceholders["MAPS_API_KEY"] = localProperties.getProperty("MAPS_API_KEY", "")
+        manifestPlaceholders["MAPS_API_KEY"] = resolveProperty("MAPS_API_KEY")
     }
 
     buildTypes {

@@ -1,66 +1,20 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Theme.Fishing" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorOnPrimary">@color/colorOnPrimary</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/colorSecondary</item>
-        <item name="colorOnSecondary">@color/text_secondary_color</item>
-        <item name="android:textColorSecondary">@color/text_secondary_color</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor" >@color/fui_transparent</item>
-        <item name="android:navigationBarColor">@color/fui_transparent</item>
-        <!-- Ensure no ActionBar -->
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-        <item name="android:windowNoTitle">true</item>
+    <!-- Base application theme — minimal, Compose handles all UI theming -->
+    <style name="Theme.Fishing" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
-    <!-- Base application theme. -->
-    <style name="Theme.AnimatedSplashScreen" parent="Theme.Fishing">
-        <item name="colorPrimary">@color/white</item>
-        <item name="colorOnPrimary">@color/white</item>
-    </style>
+    <style name="Theme.AnimatedSplashScreen" parent="Theme.Fishing" />
 
     <style name="Theme.AppSplash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/white</item>
-        <item name="windowSplashScreenAnimatedIcon" >@drawable/icon_splashscreen</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/icon_splashscreen</item>
         <item name="android:windowSplashScreenBrandingImage" tools:targetApi="s">@drawable/ic_fish</item>
         <item name="postSplashScreenTheme">@style/Theme.AnimatedSplashScreen</item>
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
-    </style>
-
-<!--    <style name="MainActionBar" parent="Theme.Fishing.Figma">-->
-<!--        <item name="colorOnPrimary">?colorOnPrimary</item>-->
-<!--        <item name="android:textColorSecondary">@color/colorOnPrimary</item>-->
-<!--        <item name="colorSecondary">@color/colorOnPrimary</item>-->
-<!--        <item name="colorOnSecondary">@color/colorOnPrimary</item>-->
-<!--        <item name="colorControlNormal">@color/colorOnPrimary</item>-->
-<!--    </style>-->
-
-    <!-- Figma application theme. -->
-    <style name="Theme.Fishing.Figma" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/primaryFigmaColor</item>
-        <item name="colorPrimaryVariant">@color/primaryFigmaDarkColor</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/secondaryFigmaColor</item>
-        <item name="colorSecondaryVariant">@color/secondaryFigmaDarkColor</item>
-        <item name="colorOnSecondary">@color/white</item>
-        <!-- Text color. -->
-        <item name="android:textColorPrimary">@color/primaryFigmaTextColor</item>
-        <item name="android:textColorSecondary">@color/secondaryFigmaTextColor</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor" >?attr/colorPrimaryVariant</item>
-        <item name="android:navigationBarColor">@color/primaryFigmaColor</item>
-        <!-- Customize your theme here. -->
-        <item name="colorOnBackgroundTint">@color/primaryFigmaBackgroundTint</item>
-        <item name="colorControlNormal">@color/colorOnPrimary</item>
     </style>
 
 </resources>

@@ -1,12 +1,12 @@
 package com.mobileprism.fishing.app
 
 import android.app.Application
-import androidx.work.Configuration
-import androidx.work.WorkManager
-import coil.Coil
-import coil.ImageLoader
-import coil.disk.DiskCache
-import coil.memory.MemoryCache
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
+import coil3.disk.DiskCache
+import coil3.disk.directory
+import coil3.memory.MemoryCache
+import coil3.request.crossfade
 import com.mmk.kmpauth.google.GoogleAuthCredentials
 import com.mmk.kmpauth.google.GoogleAuthProvider
 import com.mobileprism.fishing.BuildKonfig
@@ -20,41 +20,37 @@ import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 
 
-class FishingApp : Application() {
+class FishingApp : Application(), SingletonImageLoader.Factory {
+
+    override fun newImageLoader(context: coil3.PlatformContext): ImageLoader {
+        return ImageLoader.Builder(context)
+            .crossfade(true)
+            .memoryCache {
+                MemoryCache.Builder()
+                    .maxSizePercent(context, 0.15)
+                    .build()
+            }
+            .diskCache {
+                DiskCache.Builder()
+                    .directory(cacheDir.resolve("image_cache"))
+                    .maxSizePercent(0.05)
+                    .build()
+            }
+            .build()
+    }
 
     override fun onCreate() {
         super.onCreate()
 
         GoogleAuthProvider.create(GoogleAuthCredentials(serverId = BuildKonfig.GOOGLE_WEB_CLIENT_ID))
 
-        Coil.setImageLoader(
-            ImageLoader.Builder(this)
-                .crossfade(true)
-                .memoryCache {
-                    MemoryCache.Builder(this)
-                        .maxSizePercent(0.15)
-                        .build()
-                }
-                .diskCache {
-                    DiskCache.Builder()
-                        .directory(cacheDir.resolve("image_cache"))
-                        .maxSizePercent(0.05)
-                        .build()
-                }
-                .build()
-        )
-
         startKoin {
             androidLogger(if (BuildKonfig.DEBUG) Level.ERROR else Level.NONE)
             androidContext(this@FishingApp)
             workManagerFactory()
             modules(
-                appModule,
-                mainModule,
-                repositoryModule,
-                settingsModule,
-                useCasesModule,
-                commonViewModelsModule
+                listOf(appModule, mainModule, settingsModule, commonViewModelsModule)
+                    + repositoryModule + useCasesModule
             )
         }
 

@@ -7,6 +7,11 @@ val localProperties = Properties().apply {
     if (file.exists()) load(file.inputStream())
 }
 
+val secretsProperties = Properties().apply {
+    val file = rootProject.file("secrets.properties")
+    if (file.exists()) load(file.inputStream())
+}
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
@@ -17,6 +22,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
     alias(libs.plugins.buildkonfig)
+    alias(libs.plugins.detekt)
 }
 
 kotlin {
@@ -33,11 +39,12 @@ kotlin {
             implementation(compose.material3)                  // CMP Material3
             implementation(compose.ui)                         // CMP UI
             implementation(compose.materialIconsExtended)      // CMP Material Icons
-            implementation(compose.components.resources)       // CMP resource system (Res.string, Res.drawable)
+            api(compose.components.resources)                   // CMP resource system (Res.string, Res.drawable)
             implementation(libs.coroutines.core)               // Flow, coroutines
             implementation(libs.kotlinx.serialization.json)    // @Serializable
             implementation(libs.kotlinx.datetime)              // Clock, Instant
             implementation(libs.koin.core)                     // Koin DI
+            implementation(libs.koin.compose.viewmodel)          // Koin Compose ViewModel (KMP)
             implementation(libs.room.runtime)                   // Room KMP
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
@@ -47,8 +54,20 @@ kotlin {
             implementation(libs.firebase.gitlive.firestore)
             implementation(libs.firebase.gitlive.storage)
             implementation(libs.lifecycle.viewmodel)             // KMP ViewModel
-            implementation(libs.navigation.compose)              // KMP Navigation
+            api(libs.navigation.compose)                          // KMP Navigation
             implementation(libs.viewModel.compose)               // KMP ViewModel Compose
+            api(libs.coil.compose)                               // Coil 3 KMP image loading
+            api(libs.coil.network.ktor3)                         // Coil 3 Ktor network backend
+            implementation(libs.vico.compose.m3)                   // Vico charts (KMP)
+            api(libs.kmpauth.google)                                 // KMP Google Auth
+        }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.coroutines.test)
+            implementation(libs.mockk)
+            implementation(libs.turbine)
+            implementation(libs.koin.test)
         }
 
         androidMain.dependencies {
@@ -63,9 +82,7 @@ kotlin {
             api(libs.compose.material3)
             api(libs.koin.main)
             api(libs.koin.workManager)
-            api(libs.coil.compose)
-            api(libs.firebase.auth)
-            implementation(libs.kmpauth.google)
+            api(libs.coil.network.okhttp)
             api(libs.playServices.ads)
             api(libs.playServices.update)
 
@@ -77,7 +94,6 @@ kotlin {
             implementation(libs.firebase.analytics)
             implementation(libs.firebase.crashlytics)
             implementation(libs.firebase.performance)
-            implementation(libs.firebase.authUi)
             implementation(libs.firebase.firestore)
             implementation(libs.firebase.storage)
             implementation(libs.firebase.coroutines)
@@ -87,9 +103,6 @@ kotlin {
             implementation(libs.playServices.maps)
             implementation(libs.playServices.location)
             implementation(libs.playServices.billing)
-            implementation(libs.playServices.auth)
-
-            implementation(libs.constraintLayout.compose)
             implementation(libs.datastorePreferences)
 
             implementation(libs.compose.foundation)
@@ -104,13 +117,10 @@ kotlin {
             implementation(libs.koin.java)
             implementation(libs.koin.compose)
 
-            implementation(libs.accompanist.pager)
-            implementation(libs.accompanist.pagerIndicators)
-            implementation(libs.accompanist.permissions)
-            implementation(libs.accompanist.placeholder)
-
+            implementation(libs.moko.permissions)
+            implementation(libs.moko.permissions.compose)
+            implementation(libs.moko.permissions.location)
             implementation(libs.foundation.layout.android)
-            implementation(libs.vico.compose.m3)
 
             implementation(libs.paging.runtime)
             implementation(libs.paging.compose)
@@ -143,6 +153,10 @@ android {
     }
 }
 
+compose.resources {
+    publicResClass = true
+}
+
 room {
     schemaDirectory("$projectDir/schemas")
 }
@@ -163,44 +177,20 @@ dependencies {
     androidTestImplementation(libs.coroutines.test)
     androidTestImplementation(libs.compose.uiTest)
 
-    // Test
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
-    testImplementation("androidx.arch.core:core-testing:2.1.0")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0")
-
-    // Mockito
-    testImplementation("org.mockito:mockito-core:4.4.0")
-    testImplementation("org.mockito:mockito-inline:4.4.0")
-    testImplementation("com.nhaarman:mockito-kotlin:1.6.0") {
-        exclude(group = "org.jetbrains.kotlin")
-        exclude(group = "org.mockito")
-    }
-
-    // Robolectric
-    testImplementation("org.robolectric:robolectric:4.7.3")
-    testImplementation("androidx.test:core:1.4.0")
-    testImplementation("androidx.test:runner:1.4.0")
-    testImplementation("androidx.test.ext:junit:1.1.3")
-    testImplementation("androidx.test.ext:truth:1.4.0")
-    testImplementation("androidx.test.espresso:espresso-core:3.4.0")
-    testImplementation("androidx.test.espresso:espresso-intents:3.4.0")
 }
 
 buildkonfig {
     packageName = "com.mobileprism.fishing"
     this.exposeObjectWithName = "BuildKonfig"
 
+    fun resolveProperty(key: String): String =
+        localProperties.getProperty(key) ?: secretsProperties.getProperty(key) ?: ""
+
     defaultConfigs {
-        buildConfigField(FieldSpec.Type.STRING, "OPENWEATHER_KEY",
-            localProperties.getProperty("OPENWEATHER_KEY", ""))
-        buildConfigField(FieldSpec.Type.STRING, "RAPIDAPI_KEY",
-            localProperties.getProperty("RAPIDAPI_KEY", ""))
-        buildConfigField(FieldSpec.Type.STRING, "MAPS_API_KEY",
-            localProperties.getProperty("MAPS_API_KEY", ""))
-        buildConfigField(FieldSpec.Type.STRING, "GOOGLE_WEB_CLIENT_ID",
-            localProperties.getProperty("GOOGLE_WEB_CLIENT_ID", ""))
+        buildConfigField(FieldSpec.Type.STRING, "OPENWEATHER_KEY", resolveProperty("OPENWEATHER_KEY"))
+        buildConfigField(FieldSpec.Type.STRING, "RAPIDAPI_KEY", resolveProperty("RAPIDAPI_KEY"))
+        buildConfigField(FieldSpec.Type.STRING, "MAPS_API_KEY", resolveProperty("MAPS_API_KEY"))
+        buildConfigField(FieldSpec.Type.STRING, "GOOGLE_WEB_CLIENT_ID", resolveProperty("GOOGLE_WEB_CLIENT_ID"))
         buildConfigField(FieldSpec.Type.BOOLEAN, "DEBUG", "true")
     }
 

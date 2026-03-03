@@ -9,7 +9,6 @@ import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.FirebaseFirestore
 import dev.gitlive.firebase.firestore.firestore
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onCompletion
 
 class FirebaseOfflineRepositoryImpl(
     private val db: FirebaseFirestore = Firebase.firestore,
@@ -17,23 +16,35 @@ class FirebaseOfflineRepositoryImpl(
 ) : OfflineRepository {
 
     override fun getAllUserMarkersList() = flow<List<UserMapMarker>> {
-        db.disableNetwork()
-        val snapshot = dbCollections.getUserMapMarkersCollection().get()
-        val markers = snapshot.documents.map { it.data<UserMapMarker>() }
-        emit(markers)
-    }.onCompletion { db.enableNetwork() }
+        try {
+            db.disableNetwork()
+            val snapshot = dbCollections.getUserMapMarkersCollection().get()
+            val markers = snapshot.documents.mapNotNull { doc ->
+                try { doc.data<UserMapMarker>() } catch (_: Exception) { null }
+            }
+            emit(markers)
+        } finally {
+            try { db.enableNetwork() } catch (_: Exception) { }
+        }
+    }
 
     override fun getAllUserCatchesList() = flow<List<UserCatch>> {
-        db.disableNetwork()
-        val markersSnapshot = dbCollections.getUserMapMarkersCollection().get()
-        val result = mutableListOf<UserCatch>()
+        try {
+            db.disableNetwork()
+            val markersSnapshot = dbCollections.getUserMapMarkersCollection().get()
+            val result = mutableListOf<UserCatch>()
 
-        for (markerDoc in markersSnapshot.documents) {
-            val catchesSnapshot = markerDoc.reference.collection(CATCHES_COLLECTION).get()
-            val catches = catchesSnapshot.documents.map { it.data<UserCatch>() }
-            result.addAll(catches)
+            for (markerDoc in markersSnapshot.documents) {
+                val catchesSnapshot = markerDoc.reference.collection(CATCHES_COLLECTION).get()
+                val catches = catchesSnapshot.documents.mapNotNull { doc ->
+                    try { doc.data<UserCatch>() } catch (_: Exception) { null }
+                }
+                result.addAll(catches)
+            }
+
+            emit(result)
+        } finally {
+            try { db.enableNetwork() } catch (_: Exception) { }
         }
-
-        emit(result)
-    }.onCompletion { db.enableNetwork() }
+    }
 }

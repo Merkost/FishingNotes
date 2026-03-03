@@ -6,7 +6,7 @@ import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.domain.repository.app.MarkersRepository
 import com.mobileprism.fishing.utils.getNewMarkerId
 import kotlinx.coroutines.flow.flow
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 class AddNewPlaceUseCase(
     private val markersRepository: MarkersRepository,

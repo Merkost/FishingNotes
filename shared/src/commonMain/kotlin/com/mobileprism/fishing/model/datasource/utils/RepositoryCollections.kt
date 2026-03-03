@@ -16,7 +16,7 @@ class RepositoryCollections(
 
     init {
         db.settings = dev.gitlive.firebase.firestore.firestoreSettings {
-            isPersistenceEnabled = true
+            cacheSettings = dev.gitlive.firebase.firestore.persistentCacheSettings {  }
         }
     }
 
