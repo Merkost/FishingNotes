@@ -116,7 +116,7 @@
     <string name="catch_description">Catch description</string>
     <string name="note">Note</string>
     <string name="user_catch">Catch</string>
-    <string name="cant_get_current_location">Can\'t get current location</string>
+    <string name="cant_get_current_location">Can't get current location</string>
     <string name="my_location">My location</string>
     <string name="layers">Layers</string>
     <string name="terrain">Relief</string>
@@ -149,7 +149,7 @@
     <string name="mode_place_selecting">You are in place selecting mode!</string>
     <string name="mode_place_selecting_off">Location selection mode is off!</string>
     <string name="mode_place_info">You are in the mode of viewing information about the place!</string>
-    <string name="login_title">Let\'s get it started!</string>
+    <string name="login_title">Let's get it started!</string>
     <string name="google_login">Sign with google</string>
 
     <string name="start_screen_title">Start Screen</string>
@@ -163,12 +163,12 @@
     <string name="back_clicked">Do it again to close the app</string>
     <string name="searching">Searching…</string>
     <string name="unnamed_place">Unnamed place</string>
-    <string name="cant_recognize_place">Couldn\'t determine location</string>
+    <string name="cant_recognize_place">Couldn't determine location</string>
     <string name="current_location">Current location</string>
     <string name="install_maps_app">Please install a maps application</string>
     <string name="choose_place_first">Choose a place first!</string>
     <string name="transparent">Transparent</string>
-    <string name="dont_ask_again">Don\'t ask</string>
+    <string name="dont_ask_again">Don't ask</string>
     <string name="location_dont_ask">The request will no longer be displayed. To give the necessary permissions, go to your device settings</string>
     <string name="location_permission_denied">You have denied access to your location. Grant permissions in your device settings.</string>
     <string name="location_permission_dialog">Allow app to determine your location?</string>
@@ -195,15 +195,15 @@
     <string name="Evening">Evening</string>
     <string name="night">Night</string>
     <string name="daylight_hours">Daylight hours</string>
-    <string name="hours">\h\</string>
-    <string name="minutes">\m\</string>
+    <string name="hours">h</string>
+    <string name="minutes">m</string>
     <string name="choose_temperature_unit">Choose temperature unit</string>
     <string name="temp">Temp.</string>
     <string name="in_8h">8h</string>
     <string name="in_16h">16h</string>
     <string name="no_internet_connection">No Internet connection</string>
     <string name="app_theme">App theme</string>
-    <string name="choose_app_theme">"Choose app theme "</string>
+    <string name="choose_app_theme">Choose app theme</string>
     <string name="no_name_place">No name place</string>
     <string name="select_place_for_weather">Select a place to load weather!</string>
     <string name="no_internet">No internet connection</string>
@@ -214,14 +214,14 @@
     <string name="choose_weather_icon">Choose weather icon:</string>
     <string name="adding_place_on_current_location">Adding place on your location</string>
     <string name="location_permissions_required">Location permissions required</string>
-    <string name="marker_visibility_change_error">Couldn\'t change the visibility of the place!</string>
+    <string name="marker_visibility_change_error">Couldn't change the visibility of the place!</string>
     <string name="marker_visibility_change_success">The visibility of the place has been successfully saved</string>
     <string name="settings_main">Main settings</string>
     <string name="fab_fast_add">Quickly add a point to the map</string>
     <string name="fast_fab_description">Hold down the add location button on the map to quickly save your current location</string>
     <string name="settings_weather">Weather settings</string>
     <string name="settings_about">About the app</string>
-    <string name="current_app_version">"Current version: "</string>
+    <string name="current_app_version">Current version:</string>
     <string name="sort">Sorting</string>
     <string name="default_word">By default</string>
     <string name="time_asc">Time: ascending</string>
@@ -233,7 +233,7 @@
     <string name="no_photos_added">No photos added</string>
     <string name="loading">Loading. Please wait</string>
     <string name="edit_note">Edit note</string>
-    <string name="unable_to_get_location">Can\'t get your location. Make sure that GPS is enabled on the device</string>
+    <string name="unable_to_get_location">Can't get your location. Make sure that GPS is enabled on the device</string>
     <string name="gps_is_off">You need to turn on GPS on your device</string>
     <string name="compass">Compass</string>
     <string name="app_exit_message">Do it again to close the app</string>
@@ -251,7 +251,7 @@
     <string name="catches_desc">Number of catches: descending</string>
     <string name="fish_desc">Number of fish: descending</string>
     <string name="new_catch_text">+ Add new catch</string>
-    <string name="delete_place_dialog">Delete place \"%s\"</string>
+    <string name="delete_place_dialog">Delete place "%1$s"</string>
     <string name="sure_delete_place_dialog">All catches on this place also will be deleted.\nAre you sure?</string>
     <string name="add_location_dialog">Please add location for adding catches</string>
     <string name="register_date">Register date</string>
@@ -259,19 +259,19 @@
     <string name="places_count">Places count</string>
     <string name="best_catch">Best catch</string>
     <string name="favorite_place">Favorite place</string>
-    <string name="place_note_not_saved">Couldn\'t save the note!</string>
-    <string name="delete_catch_dialog">Removing the catch \"%s\"</string>
+    <string name="place_note_not_saved">Couldn't save the note!</string>
+    <string name="delete_catch_dialog">Removing the catch "%1$s"</string>
     <string name="not_avalable">N/A</string>
 
 
     <string name="saving_photos">Saving photos</string>
-    <string name="place_note_not_deleted">Couldn\'t delete the note!</string>
+    <string name="place_note_not_deleted">Couldn't delete the note!</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
     <string name="finish">Finish</string>
     <string name="select_on_map">Select on map</string>
     <string name="location_and_time">Location and time</string>
-    <string name="billing_unavaliable">Couldn\'t connect to billing service</string>
+    <string name="billing_unavaliable">Couldn't connect to billing service</string>
     <string name="thanks_developers">Thank developers</string>
     <string name="max_photos_allowed">3 photos maximum allowed</string>
     <string name="place_select_error">Please select place</string>
@@ -299,7 +299,7 @@
     <string name="new_catch_skip_tutor">Fill in location and fish species to skip the remaining fields</string>
     <string name="cancel_new_catch_dialog">Cancel adding a new catch?</string>
     <string name="sure_cancel_new_catch_dialog">All entered data will be lost</string>
-    <string name="network_error_message">Can\'t connect to the server!</string>
+    <string name="network_error_message">Can't connect to the server!</string>
     <string name="new_catch_place_on_map_tutorial">Select a place on the map and tap the add new catch button</string>
     <string name="thunderstorm_with_light_rain">Thunderstorm with light rain</string>
     <string name="thunderstorm_with_rain">Thunderstorm with rain</string>
@@ -377,7 +377,7 @@
     <string name="app_icon">App icon</string>
     <string name="location_icon">Location icon</string>
     <string name="google_button">Google Button</string>
-    <string name="item_count_format" translatable="false"> x %d</string>
+    <string name="item_count_format" translatable="false"> x %1$d</string>
     <string name="advert_here">Advert Here</string>
     <string name="search_places">Search places</string>
     <string name="select_place">Select place</string>
@@ -395,7 +395,7 @@
     <!-- Validation -->
     <string name="weight_out_of_range">Weight must be between 0 and 500 kg</string>
     <string name="amount_out_of_range">Amount must be between 0 and 9999</string>
-    <string name="place_name_too_long">Place name must be %d characters or less</string>
+    <string name="place_name_too_long">Place name must be %1$d characters or less</string>
     <string name="invalid_coordinates">Invalid coordinates</string>
     <string name="char_counter">%1$d/%2$d</string>
 

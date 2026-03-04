@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.ui.home.notes
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +27,7 @@ import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.theme.LocalColors
 import com.mobileprism.fishing.ui.theme.cardColor
 import com.mobileprism.fishing.ui.theme.customColors
+import com.mobileprism.fishing.ui.utils.placeholder
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toTime
 import org.koin.compose.koinInject
@@ -220,6 +222,158 @@ fun CatchItemView(
                         .padding(end = 8.dp)
                         .then(childModifier),
                     text = catch.date.toTime(is12hTimeFormat)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun PlaceItemSkeleton(modifier: Modifier = Modifier) {
+    val shimmerModifier = Modifier.placeholder(
+        visible = true,
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        shape = RoundedCornerShape(8.dp),
+    )
+
+    DefaultCardClickable(
+        modifier = modifier.padding(bottom = 4.dp),
+        onClick = {}
+    ) {
+        Row(
+            modifier = Modifier
+                .wrapContentHeight()
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .placeholder(
+                        visible = true,
+                        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        shape = CircleShape,
+                    )
+            )
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 8.dp, end = 8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.6f)
+                        .height(18.dp)
+                        .then(shimmerModifier)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .width(80.dp)
+                            .height(14.dp)
+                            .then(shimmerModifier)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Box(
+                        modifier = Modifier
+                            .width(40.dp)
+                            .height(14.dp)
+                            .then(shimmerModifier)
+                    )
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .placeholder(
+                        visible = true,
+                        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        shape = CircleShape,
+                    )
+            )
+        }
+    }
+}
+
+@Composable
+fun CatchItemSkeleton(modifier: Modifier = Modifier) {
+    val shimmerModifier = Modifier.placeholder(
+        visible = true,
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        shape = RoundedCornerShape(8.dp),
+    )
+
+    DefaultCardClickable(
+        modifier = modifier.padding(bottom = 4.dp),
+        onClick = {}
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp, end = 16.dp)
+                        .height(18.dp)
+                        .then(shimmerModifier)
+                )
+                Box(
+                    modifier = Modifier
+                        .width(56.dp)
+                        .height(18.dp)
+                        .padding(end = 8.dp)
+                        .then(shimmerModifier)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+            Box(
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .width(100.dp)
+                    .height(14.dp)
+                    .then(shimmerModifier)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .size(20.dp)
+                        .placeholder(
+                            visible = true,
+                            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                            shape = CircleShape,
+                        )
+                )
+                Box(
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .width(120.dp)
+                        .height(14.dp)
+                        .then(shimmerModifier)
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Box(
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .width(48.dp)
+                        .height(14.dp)
+                        .then(shimmerModifier)
                 )
             }
         }

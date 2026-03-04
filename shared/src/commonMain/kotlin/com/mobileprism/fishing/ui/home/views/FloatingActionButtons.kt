@@ -73,7 +73,18 @@ fun FabMenuItem(item: FabMenuItem, modifier: Modifier = Modifier, size: Dp) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.clip(RoundedCornerShape(8.dp))
         ) {
-            Text(item.text, color = MaterialTheme.colorScheme.inverseOnSurface)
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shadowElevation = 4.dp,
+            ) {
+                Text(
+                    item.text,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
 
             Box(modifier = Modifier.size(FabSize).padding((FabSize - size) / 2)) {
                 FloatingActionButton(

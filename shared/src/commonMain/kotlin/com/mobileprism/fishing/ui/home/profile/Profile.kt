@@ -1,11 +1,8 @@
 package com.mobileprism.fishing.ui.home.profile
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.AbsoluteRoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -18,20 +15,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.mobileprism.fishing.ui.utils.placeholder
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.entity.common.User
-import com.mobileprism.fishing.domain.entity.content.UserCatch
-import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.views.SecondaryText
 import com.mobileprism.fishing.ui.viewmodels.UserViewModel
@@ -50,182 +42,165 @@ fun Profile(
     val catchesState by viewModel.currentCatches.collectAsState()
     val favoritePlace by viewModel.favoritePlace.collectAsState()
     val bestCatch by viewModel.bestCatch.collectAsState()
-    val imgSize: Dp = remember { 120.dp }
-    val avatarOverlap = imgSize / 2
-
-    val imageBorderStroke = remember {
-        BorderStroke(
-            2.dp,
-            Brush.linearGradient(colors = listOf(Color(0xFFED2939), Color(0xFFFFFF66)))
-        )
-    }
+    val imgSize = remember { 100.dp }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        topBar = { ProfileAppBar(navController) },
-        containerColor = MaterialTheme.colorScheme.surface
+        topBar = {
+            ProfileAppBar(
+                navController = navController,
+                backgroundColor = MaterialTheme.colorScheme.surface
+            )
+        },
     ) { paddingValues ->
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(avatarOverlap + 25.dp)
-                    .background(MaterialTheme.colorScheme.primary)
-            )
-
-            Card(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = avatarOverlap),
-                shape = AbsoluteRoundedCornerShape(25.dp, 25.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(top = avatarOverlap + 16.dp, bottom = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    UserText(user, modifier = Modifier)
-
-                    SecondaryText(
-                        modifier = Modifier.padding(top = 2.dp),
-                        text = "${stringResource(Res.string.register_date)}: " +
-                                user.registerDate.toDateTextMonth()
-                    )
-
-                    StatsRow(
-                        modifier = Modifier.padding(top = 24.dp),
-                        catchesCount = catchesState?.size,
-                        placesCount = placesState?.size
-                    )
-
-                    FavoritePlaceView(
-                        modifier = Modifier.padding(top = 24.dp),
-                        favoritePlace = favoritePlace,
-                        userPlaceClicked = {
-                            navController.navigate(MainDestinations.Place(it))
-                        },
-                        navigateToMap = {
-                            navController.navigate(
-                                MainDestinations.Map(isAddingNewPlace = false, place = it)
-                            )
-                        }
-                    )
-
-                    BestCatchView(
-                        modifier = Modifier.padding(top = 16.dp),
-                        bestCatch = bestCatch,
-                        onCatchItemClick = {
-                            navController.navigate(MainDestinations.Catch(it))
-                        }
-                    )
-                }
-            }
+            Spacer(modifier = Modifier.height(24.dp))
 
             UserImage(
-                modifier = Modifier.fillMaxWidth(),
                 user = user,
                 imgSize = imgSize,
                 icon = Icons.Default.Edit,
-                borderStroke = imageBorderStroke
             ) {
                 navController.navigate(MainDestinations.EditProfile)
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            UserNameSection(user)
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            StatsRow(
+                catchesCount = catchesState?.size,
+                placesCount = placesState?.size
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            FavoritePlaceView(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                favoritePlace = favoritePlace,
+                userPlaceClicked = {
+                    navController.navigate(MainDestinations.Place(it))
+                },
+                navigateToMap = {
+                    navController.navigate(
+                        MainDestinations.Map(isAddingNewPlace = false, place = it)
+                    )
+                }
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            BestCatchView(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                bestCatch = bestCatch,
+                onCatchItemClick = {
+                    navController.navigate(MainDestinations.Catch(it))
+                }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
 
 @Composable
-fun StatsRow(
-    modifier: Modifier = Modifier,
+private fun UserNameSection(user: User?) {
+    user?.let {
+        Text(
+            text = if (it.displayName.isEmpty()) stringResource(Res.string.anonymous) else it.displayName,
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        SecondaryText(
+            text = "${stringResource(Res.string.register_date)}: ${it.registerDate.toDateTextMonth()}"
+        )
+    }
+}
+
+@Composable
+private fun StatsRow(
     catchesCount: Int?,
     placesCount: Int?
 ) {
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 32.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        CatchesNumber(
+        StatCard(
             modifier = Modifier.weight(1f),
-            userCatchesNum = catchesCount
-        )
-
-        HorizontalDivider(
-            modifier = Modifier
-                .height(32.dp)
-                .width(1.dp),
-            color = MaterialTheme.colorScheme.outlineVariant
-        )
-
-        PlacesNumber(
-            modifier = Modifier.weight(1f),
-            userPlacesNum = placesCount
-        )
-    }
-}
-
-@Composable
-fun UserText(user: User?, modifier: Modifier) {
-    user?.let {
-        Text(
-            modifier = modifier,
-            text = if (user.displayName.isEmpty()) stringResource(Res.string.anonymous) else user.displayName,
-            style = MaterialTheme.typography.titleLarge,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-@Composable
-fun PlacesNumber(modifier: Modifier = Modifier, userPlacesNum: Int?) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center, modifier = modifier
-    ) {
-        Icon(
-            Icons.Default.Place, stringResource(Res.string.place),
-            modifier = Modifier
-                .size(25.dp)
-                .placeholder(
-                    visible = userPlacesNum == null,
-                    color = MaterialTheme.colorScheme.outlineVariant,
-                    shape = CircleShape,
-                ),
-        )
-        Text(
-            text = userPlacesNum?.toString() ?: "",
-        )
-    }
-}
-
-@Composable
-fun CatchesNumber(modifier: Modifier = Modifier, userCatchesNum: Int?) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center, modifier = modifier
-    ) {
-        Icon(
-            painterResource(Res.drawable.ic_fishing), stringResource(Res.string.place),
-            modifier = Modifier
-                .size(25.dp)
-                .placeholder(
-                    visible = userCatchesNum == null,
-                    color = MaterialTheme.colorScheme.outlineVariant,
-                    shape = CircleShape,
+            count = catchesCount,
+            label = stringResource(Res.string.catches),
+            icon = {
+                Icon(
+                    painterResource(Res.drawable.ic_fishing),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.primary
                 )
+            }
         )
-        Text(
-            text = userCatchesNum?.toString() ?: "",
+        StatCard(
+            modifier = Modifier.weight(1f),
+            count = placesCount,
+            label = stringResource(Res.string.places),
+            icon = {
+                Icon(
+                    Icons.Default.Place,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
         )
+    }
+}
+
+@Composable
+private fun StatCard(
+    modifier: Modifier = Modifier,
+    count: Int?,
+    label: String,
+    icon: @Composable () -> Unit
+) {
+    Surface(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            icon()
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = count?.toString() ?: "-",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier
+                    .placeholder(
+                        visible = count == null,
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                        shape = CircleShape,
+                    )
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }

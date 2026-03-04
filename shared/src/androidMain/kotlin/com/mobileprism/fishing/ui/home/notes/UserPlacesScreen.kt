@@ -2,7 +2,6 @@ package com.mobileprism.fishing.ui.home.notes
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -20,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.mobileprism.fishing.ui.utils.placeholder
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
@@ -74,17 +72,8 @@ fun UserPlacesScreen(
             ) {
                 when (lazyPagingItems.loadState.refresh) {
                     is LoadState.Loading -> {
-                        items(3) {
-                            ItemUserPlace(
-                                childModifier = Modifier.placeholder(
-                                    true,
-                                    color = androidx.compose.material3.MaterialTheme.colorScheme.outlineVariant,
-                                    shape = CircleShape,
-                                ),
-                                place = UserMapMarker(),
-                                userPlaceClicked = {},
-                                navigateToMap = {}
-                            )
+                        items(5) {
+                            PlaceItemSkeleton()
                         }
                     }
                     is LoadState.Error -> {

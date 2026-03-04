@@ -46,7 +46,10 @@ fun DefaultAppBar(
         modifier = modifier,
         title = {
             Column() {
-                Text(text = title)
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleLarge,
+                )
                 if (subtitle != null) {
                     SecondaryTextSmall(
                         text = subtitle,

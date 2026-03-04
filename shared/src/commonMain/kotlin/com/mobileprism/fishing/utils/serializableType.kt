@@ -36,8 +36,10 @@ inline fun <reified T : Any> nonNullSerializableType(
 inline fun <reified T : Any> nullableSerializableType(
     json: Json = Json,
 ) = object : NavType<T?>(isNullableAllowed = true) {
-    override fun get(savedState: SavedState, key: String): T? =
-        savedState.read { getString(key) }.let<String, T>(json::decodeFromString)
+    override fun get(savedState: SavedState, key: String): T? {
+        val value = savedState.read { getString(key) }
+        return if (value == "null") null else json.decodeFromString(value)
+    }
 
     override fun parseValue(value: String): T? {
         return if (value == "null") null else json.decodeFromString(value)

@@ -67,7 +67,7 @@ fun FishingNotesTheme(
     ) {
         MaterialExpressiveTheme(
             colorScheme = colorScheme,
-            typography = Typography,
+            typography = AppTypography(),
             shapes = Shapes,
             motionScheme = MotionScheme.expressive(),
             content = content

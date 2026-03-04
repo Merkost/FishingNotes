@@ -1,38 +1,34 @@
 package com.mobileprism.fishing.ui.home.profile
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -44,7 +40,6 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import coil3.compose.SubcomposeAsyncImage
 import com.mobileprism.fishing.ui.utils.AnimatedResource
@@ -59,9 +54,6 @@ import com.mobileprism.fishing.ui.home.notes.ItemUserPlace
 import com.mobileprism.fishing.ui.home.views.DefaultAppBar
 import com.mobileprism.fishing.ui.home.views.DefaultDialog
 import com.mobileprism.fishing.ui.home.views.NoContentView
-import com.mobileprism.fishing.ui.home.views.PrimaryText
-import com.mobileprism.fishing.ui.home.views.SecondaryTextSmall
-import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.ui.viewmodels.UserViewModel
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import kotlinx.coroutines.launch
@@ -74,32 +66,13 @@ fun UserImage(
     imgSize: Dp,
     shape: Shape = CircleShape,
     icon: ImageVector? = null,
-    borderStroke: BorderStroke? = null,
     onIconClick: () -> Unit
 ) {
-    Row(
+    Box(
         modifier = modifier,
-        horizontalArrangement = Arrangement.Center
+        contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier
-                .padding(20.dp),
-            contentAlignment = Alignment.BottomEnd
-        ) {
-            icon?.let {
-                Card(
-                    modifier = Modifier
-                        .zIndex(3f)
-                        .size(34.dp),
-                    shape = shape,
-                    elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
-                ) {
-                    IconButton(modifier = Modifier, onClick = onIconClick) {
-                        Icon(icon, icon.name)
-                    }
-                }
-            }
-
+        Box(contentAlignment = Alignment.BottomEnd) {
             SubcomposeAsyncImage(
                 model = user.photoUrl,
                 contentDescription = stringResource(Res.string.user_photo),
@@ -114,18 +87,40 @@ fun UserImage(
                 modifier = Modifier
                     .size(imgSize)
                     .clip(shape)
-                    .border(borderStroke ?: BorderStroke(0.dp, Color.Transparent), shape)
+                    .border(
+                        2.dp,
+                        MaterialTheme.colorScheme.outlineVariant,
+                        shape
+                    )
             )
+
+            icon?.let {
+                Card(
+                    modifier = Modifier.size(32.dp),
+                    shape = shape,
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    IconButton(modifier = Modifier, onClick = onIconClick) {
+                        Icon(
+                            icon, icon.name,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-fun ProfileAppBar(navController: NavController) {
-
+fun ProfileAppBar(
+    navController: NavController,
+    backgroundColor: Color = MaterialTheme.colorScheme.primary,
+) {
     val dialogOnLogout = rememberSaveable { mutableStateOf(false) }
     DefaultAppBar(
         title = stringResource(Res.string.profile),
+        backgroundColor = backgroundColor,
         actions = {
             IconButton(onClick = { dialogOnLogout.value = true }) {
                 Icon(
@@ -174,7 +169,6 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
             )
         }
     )
-
 }
 
 @Composable
@@ -183,50 +177,27 @@ fun LottieLogout(modifier: Modifier) {
 }
 
 @Composable
-fun ProfileItemsTitleView(
-    modifier: Modifier = Modifier,
+private fun SectionHeader(
     icon: Painter,
     title: String,
-    subtitle: String
+    modifier: Modifier = Modifier
 ) {
-    Surface(
-        modifier = modifier
-            .wrapContentSize(),
-        shape = RoundedCornerShape(24.dp),
-        color = MaterialTheme.customColors.backgroundSecondaryColor
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .wrapContentSize()
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            Icon(
-                modifier = Modifier
-                    .size(24.dp),
-                painter = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-
-            Column(
-                modifier = Modifier.padding(8.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                PrimaryText(
-                    modifier = Modifier,
-                    text = title
-                )
-
-                SecondaryTextSmall(
-                    modifier = Modifier.padding(bottom = 4.dp),
-                    text = subtitle
-                )
-            }
-        }
+        Icon(
+            modifier = Modifier.size(20.dp),
+            painter = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -240,19 +211,15 @@ fun BestCatchView(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-
-        ProfileItemsTitleView(
-            title = stringResource(Res.string.best_catch),
-            subtitle = bestCatch?.date?.toDateTextMonth() ?: stringResource(Res.string.not_avalable),
-            icon = painterResource(Res.drawable.ic_cup)
+        SectionHeader(
+            icon = painterResource(Res.drawable.ic_cup),
+            title = stringResource(Res.string.best_catch)
         )
 
         if (bestCatch != null) {
             CatchItemView(
-                modifier = Modifier.padding(horizontal = 8.dp),
                 catch = bestCatch,
                 onClick = onCatchItemClick
             )
@@ -262,7 +229,6 @@ fun BestCatchView(
                 icon = painterResource(Res.drawable.ic_fish)
             )
         }
-
     }
 }
 
@@ -275,19 +241,15 @@ fun FavoritePlaceView(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-
-        ProfileItemsTitleView(
-            title = stringResource(Res.string.favorite_place),
-            subtitle = favoritePlace?.title.orEmpty(),
-            icon = painterResource(Res.drawable.ic_baseline_star_24)
+        SectionHeader(
+            icon = painterResource(Res.drawable.ic_baseline_star_24),
+            title = stringResource(Res.string.favorite_place)
         )
 
         if (favoritePlace != null) {
             ItemUserPlace(
-                modifier = Modifier.padding(horizontal = 8.dp),
                 place = favoritePlace,
                 userPlaceClicked = userPlaceClicked,
                 navigateToMap = { navigateToMap(favoritePlace) }
@@ -298,7 +260,5 @@ fun FavoritePlaceView(
                 icon = painterResource(Res.drawable.ic_no_place_on_map)
             )
         }
-
     }
 }
-

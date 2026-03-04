@@ -67,7 +67,11 @@ actual fun rememberBillingLauncher(): (() -> Unit)? {
     val billingClient = remember {
         BillingClient.newBuilder(context)
             .setListener(purchaseUpdateListener)
-            .enablePendingPurchases(PendingPurchasesParams.newBuilder().build())
+            .enablePendingPurchases(
+                PendingPurchasesParams.newBuilder()
+                    .enableOneTimeProducts()
+                    .build()
+            )
             .build()
     }
 
