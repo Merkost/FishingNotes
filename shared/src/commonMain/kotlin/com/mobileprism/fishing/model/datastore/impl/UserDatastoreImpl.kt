@@ -1,12 +1,9 @@
 package com.mobileprism.fishing.model.datastore.impl
 
-import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.model.datastore.UserDatastore
 import kotlinx.coroutines.flow.Flow
@@ -14,17 +11,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
-class UserDatastoreImpl(private val context: Context): UserDatastore {
+class UserDatastoreImpl(private val dataStore: DataStore<Preferences>) : UserDatastore {
 
-    // to make sure there's only one instance
     companion object {
-        private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("appSettings")
-
         private val USER_KEY = stringPreferencesKey("user")
     }
 
-    //get the saved value
-    override val getUser: Flow<User> = context.dataStore.data
+    override val getUser: Flow<User> = dataStore.data
         .map { preferences ->
             preferences[USER_KEY]?.let {
                 try { Json.decodeFromString<User>(it) } catch (_: Exception) { User() }
@@ -32,9 +25,8 @@ class UserDatastoreImpl(private val context: Context): UserDatastore {
         }
 
     override suspend fun saveUser(user: User) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[USER_KEY] = Json.encodeToString(user)
         }
     }
-
 }

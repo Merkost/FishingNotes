@@ -1,10 +1,12 @@
-@file:JvmName("UserPreferencesAndroid")
 package com.mobileprism.fishing.model.datastore
 
-import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.*
-import androidx.datastore.preferences.preferencesDataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.doublePreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import com.mobileprism.fishing.ui.home.map.MapCameraState
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.utils.enums.DarkModeValues
@@ -12,11 +14,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
-class UserPreferencesImpl(private val context: Context) : UserPreferences {
+class UserPreferencesImpl(private val dataStore: DataStore<Preferences>) : UserPreferences {
 
     companion object {
-        private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("userSettings")
-
         val LAST_MAP_LATITUDE = doublePreferencesKey("last_map_camera_latitude")
         val LAST_MAP_LONGITUDE = doublePreferencesKey("last_map_camera_longitude")
         val LAST_MAP_ZOOM = floatPreferencesKey("last_map_camera_zoom")
@@ -31,22 +31,22 @@ class UserPreferencesImpl(private val context: Context) : UserPreferences {
         val DARK_MODE_KEY = stringPreferencesKey("dark_mode")
     }
 
-    override val shouldShowLocationPermission: Flow<Boolean> = context.dataStore.data
+    override val shouldShowLocationPermission: Flow<Boolean> = dataStore.data
         .map { preferences ->
             preferences[USER_LOCATION_PERMISSION_KEY] ?: true
         }
 
-    override val shouldShowHiddenPlacesOnMap: Flow<Boolean> = context.dataStore.data
+    override val shouldShowHiddenPlacesOnMap: Flow<Boolean> = dataStore.data
         .map { preferences ->
             preferences[MAP_HIDDEN_PLACES_KEY] ?: true
         }
 
-    override val use12hTimeFormat: Flow<Boolean> = context.dataStore.data
+    override val use12hTimeFormat: Flow<Boolean> = dataStore.data
         .map { preferences ->
             preferences[TIME_FORMAT_KEY] ?: false
         }
 
-    override val appTheme: Flow<AppThemeValues> = context.dataStore.data
+    override val appTheme: Flow<AppThemeValues> = dataStore.data
         .map { preferences ->
             AppThemeValues.valueOf(preferences[APP_THEME_KEY] ?: AppThemeValues.Blue.name)
         }.catch { e ->
@@ -55,7 +55,7 @@ class UserPreferencesImpl(private val context: Context) : UserPreferences {
             }
         }
 
-    override val darkMode: Flow<DarkModeValues> = context.dataStore.data
+    override val darkMode: Flow<DarkModeValues> = dataStore.data
         .map { preferences ->
             DarkModeValues.valueOf(preferences[DARK_MODE_KEY] ?: DarkModeValues.System.name)
         }.catch { e ->
@@ -64,17 +64,17 @@ class UserPreferencesImpl(private val context: Context) : UserPreferences {
             }
         }
 
-    override val useFabFastAdd: Flow<Boolean> = context.dataStore.data
+    override val useFabFastAdd: Flow<Boolean> = dataStore.data
         .map { preferences ->
             preferences[FAB_FAST_ADD] ?: false
         }
 
-    override val useMapZoomButons: Flow<Boolean> = context.dataStore.data
+    override val useMapZoomButons: Flow<Boolean> = dataStore.data
         .map { preferences ->
             preferences[MAP_ZOOM_BUTTONS_KEY] ?: false
         }
 
-    override val getLastMapCameraLocation: Flow<MapCameraState> = context.dataStore.data
+    override val getLastMapCameraLocation: Flow<MapCameraState> = dataStore.data
         .map { preferences ->
             MapCameraState(
                 latitude = preferences[LAST_MAP_LATITUDE] ?: 0.0,
@@ -85,49 +85,49 @@ class UserPreferencesImpl(private val context: Context) : UserPreferences {
         }
 
     override suspend fun saveLocationPermissionStatus(shouldShow: Boolean) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[USER_LOCATION_PERMISSION_KEY] = shouldShow
         }
     }
 
     override suspend fun saveMapHiddenPlaces(shouldShow: Boolean) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[MAP_HIDDEN_PLACES_KEY] = shouldShow
         }
     }
 
     override suspend fun saveTimeFormatStatus(use12hFormat: Boolean) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[TIME_FORMAT_KEY] = use12hFormat
         }
     }
 
     override suspend fun saveAppTheme(appTheme: AppThemeValues) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[APP_THEME_KEY] = appTheme.name
         }
     }
 
     override suspend fun saveDarkMode(darkMode: DarkModeValues) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[DARK_MODE_KEY] = darkMode.name
         }
     }
 
     override suspend fun saveFabFastAdd(fastAdd: Boolean) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[FAB_FAST_ADD] = fastAdd
         }
     }
 
     override suspend fun saveMapZoomButtons(useZoomButtons: Boolean) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[MAP_ZOOM_BUTTONS_KEY] = useZoomButtons
         }
     }
 
     override suspend fun saveLastMapCameraLocation(cameraState: MapCameraState) {
-        context.dataStore.edit { preferences ->
+        dataStore.edit { preferences ->
             preferences[LAST_MAP_LATITUDE] = cameraState.latitude
             preferences[LAST_MAP_LONGITUDE] = cameraState.longitude
             preferences[LAST_MAP_ZOOM] = cameraState.zoom

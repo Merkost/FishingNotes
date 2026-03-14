@@ -62,8 +62,11 @@ kotlin {
             implementation(libs.kmpMapsCompose.maps)                 // KMP Google Maps Compose
             api(libs.kmpauth.google)                                 // KMP Google Auth
             api(libs.cedar.logging)                                      // Cedar KMP logger
+            implementation(libs.compottie)                                     // Compottie KMP Lottie
+            implementation(libs.compottie.resources)                           // Compottie resources
             implementation(libs.paging.common)                           // Paging KMP
             implementation(libs.paging.compose)                          // Paging Compose KMP
+            implementation(libs.datastore.preferences.core)              // DataStore Preferences KMP
         }
 
         commonTest.dependencies {
@@ -114,7 +117,7 @@ kotlin {
             implementation(libs.compose.animation)
             implementation(libs.compose.iconsExtended)
             implementation(libs.compose.tooling)
-            implementation(libs.compose.lottie)
+
 
             implementation(libs.koin.java)
             implementation(libs.koin.compose)
