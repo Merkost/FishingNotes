@@ -99,7 +99,8 @@ val mainModule = module {
             placeState = parameters.get(),
             getNewCatchWeatherUseCase = get(),
             saveNewCatchUseCase = get(),
-            getUserPlacesListUseCase = get()
+            getUserPlacesListUseCase = get(),
+            getFishSpeciesHistoryUseCase = get()
         )
     }
 }

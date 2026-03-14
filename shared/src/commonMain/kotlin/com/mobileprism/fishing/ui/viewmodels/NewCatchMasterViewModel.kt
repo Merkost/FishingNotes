@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.entity.weather.NewCatchWeatherData
+import com.mobileprism.fishing.domain.use_cases.catches.GetFishSpeciesHistoryUseCase
 import com.mobileprism.fishing.domain.use_cases.catches.GetNewCatchWeatherUseCase
 import com.mobileprism.fishing.domain.use_cases.places.GetUserPlacesListUseCase
 import com.mobileprism.fishing.domain.use_cases.catches.SaveNewCatchUseCase
@@ -14,21 +15,29 @@ import com.mobileprism.fishing.ui.viewstates.NewCatchViewState
 import com.mobileprism.fishing.utils.calcMoonPhase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import com.mobileprism.fishing.utils.ValidationUtils
 import kotlin.time.Clock
+
+enum class DetailSection { WEATHER, GEAR, PHOTOS, NOTE }
 
 class NewCatchMasterViewModel(
     placeState: ReceivedPlaceState,
     private val getNewCatchWeatherUseCase: GetNewCatchWeatherUseCase,
     private val saveNewCatchUseCase: SaveNewCatchUseCase,
-    private val getUserPlacesListUseCase: GetUserPlacesListUseCase
+    private val getUserPlacesListUseCase: GetUserPlacesListUseCase,
+    private val getFishSpeciesHistoryUseCase: GetFishSpeciesHistoryUseCase
 ) : ViewModel() {
 
     init {
         getAllUserMarkersList()
+        loadFishSpeciesHistory()
     }
 
     private val _placeAndTimeState = MutableStateFlow(
@@ -57,9 +66,31 @@ class NewCatchMasterViewModel(
     private val _uploadProgress = MutableStateFlow<PhotoUploadProgress?>(null)
     val uploadProgress = _uploadProgress.asStateFlow()
 
-    private val _skipAvailable: MutableStateFlow<Boolean> =
-        MutableStateFlow(placeAndTimeState.value.place != null && fishAndWeightState.value.fish.isNotBlank())
-    val skipAvailable = _skipAvailable.asStateFlow()
+    val skipAvailable = combine(
+        _placeAndTimeState, _fishAndWeightState
+    ) { place, fish ->
+        place.place != null && fish.fish.isNotBlank()
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    private val _fishSpeciesHistory = MutableStateFlow<List<String>>(emptyList())
+    val fishSpeciesHistory = _fishSpeciesHistory.asStateFlow()
+
+    private val _expandedSections = MutableStateFlow<Set<DetailSection>>(emptySet())
+    val expandedSections = _expandedSections.asStateFlow()
+
+    val essentialsCollapsed = _expandedSections
+        .map { it.isNotEmpty() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    fun toggleSection(section: DetailSection) {
+        _expandedSections.value = _expandedSections.value.toMutableSet().apply {
+            if (contains(section)) remove(section) else add(section)
+        }
+    }
+
+    fun collapseAllSections() {
+        _expandedSections.value = emptySet()
+    }
 
     fun setSelectedPlace(place: UserMapMarker) {
         _placeAndTimeState.value = _placeAndTimeState.value.copy(place = place)
@@ -221,6 +252,15 @@ class NewCatchMasterViewModel(
                 _placeAndTimeState.value = _placeAndTimeState.value.copy(
                     placesListState = NewCatchPlacesState.Received(markers)
                 )
+                return@collect
+            }
+        }
+    }
+
+    private fun loadFishSpeciesHistory() {
+        viewModelScope.launch(Dispatchers.Default) {
+            getFishSpeciesHistoryUseCase().collect { species ->
+                _fishSpeciesHistory.value = species
                 return@collect
             }
         }

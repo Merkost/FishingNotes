@@ -133,6 +133,7 @@
     <string name="moon_phase">Фаза луны</string>
     <string name="wind">Ветер</string>
     <string name="saving_new_catch">Сохраняем улов</string>
+    <string name="auto_filled">Заполнено</string>
     <string name="no_added_photos">Нет добавленных фото</string>
     <string name="main">Основное</string>
     <string name="icon">Иконка</string>

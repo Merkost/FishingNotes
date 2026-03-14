@@ -8,6 +8,7 @@ import com.mobileprism.fishing.domain.use_cases.SavePhotosUseCase
 import com.mobileprism.fishing.domain.use_cases.SubscribeOnUserCatchStateUseCase
 import com.mobileprism.fishing.domain.use_cases.catches.DeleteUserCatchUseCase
 import com.mobileprism.fishing.domain.use_cases.catches.GetCatchStatisticsUseCase
+import com.mobileprism.fishing.domain.use_cases.catches.GetFishSpeciesHistoryUseCase
 import com.mobileprism.fishing.domain.use_cases.catches.GetNewCatchWeatherUseCase
 import com.mobileprism.fishing.domain.use_cases.catches.GetUserCatchesUseCase
 import com.mobileprism.fishing.domain.use_cases.catches.SaveNewCatchUseCase
@@ -30,6 +31,7 @@ val useCasesModule = module {
     factory { GetMapMarkerByIdUseCase(get()) }
     factory { SubscribeOnUserCatchStateUseCase(get()) }
     factory { GetCatchStatisticsUseCase(get()) }
+    factory { GetFishSpeciesHistoryUseCase(get()) }
     factory { GetNewCatchWeatherUseCase(get(), get()) }
     factory { SavePhotosUseCase(get()) }
     factory { UpdateUserCatchUseCase(get(), get()) }
