@@ -32,7 +32,17 @@ fun String.toStandardNumber(): String {
     return this.replace(",", ".")
 }
 
-fun Double.format(digits: Int) = "%.${digits}f".format(this)
+fun Double.format(digits: Int): String {
+    val factor = 10.0.pow(digits)
+    val rounded = kotlin.math.round(this * factor) / factor
+    val intPart = rounded.toLong()
+    val fracPart = kotlin.math.abs(rounded - intPart)
+    val fracString = if (digits > 0) {
+        val raw = kotlin.math.round(fracPart * factor).toLong()
+        "." + raw.toString().padStart(digits, '0')
+    } else ""
+    return "$intPart$fracString"
+}
 
 fun Double.roundTo(numFractionDigits: Int): Double {
     val factor = 10.0.pow(numFractionDigits.toDouble())

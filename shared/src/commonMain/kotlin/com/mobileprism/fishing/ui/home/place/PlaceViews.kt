@@ -263,9 +263,7 @@ fun PlaceCatchesView(
                             userCatch.date.toDateTextMonth() == catchDate
                         }
                         .sortedByDescending { it.date },
-                        key = {
-                            it
-                        }
+                        key = { it.id }
                     ) {
                         CatchItemView(
                             catch = it,
@@ -356,7 +354,7 @@ fun DeletePlaceDialog(
     onPositiveClick: () -> Unit
 ) {
     DefaultDialog(
-        primaryText = String.format(stringResource(Res.string.delete_place_dialog), place.title),
+        primaryText = stringResource(Res.string.delete_place_dialog).replace("%s", place.title).replace("%1\$s", place.title),
         secondaryText = stringResource(Res.string.sure_delete_place_dialog),
         negativeButtonText = stringResource(Res.string.no),
         onNegativeClick = onDismiss,

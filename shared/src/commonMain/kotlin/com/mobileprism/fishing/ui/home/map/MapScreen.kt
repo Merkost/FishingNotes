@@ -173,6 +173,7 @@ fun MapScreen(
                 },
                 newPlaceDialog = newPlaceDialog,
                 onNewPlaceDialogDismiss = { newPlaceDialog = false },
+                place = place,
             )
         }
     }
@@ -189,9 +190,10 @@ private fun MapControls(
     onMapSettingsClicked: () -> Unit,
     newPlaceDialog: Boolean,
     onNewPlaceDialogDismiss: () -> Unit,
+    place: com.mobileprism.fishing.domain.entity.content.UserMapMarker? = null,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        MapLayout(modifier = Modifier.fillMaxSize())
+        MapLayout(modifier = Modifier.fillMaxSize(), place = place)
 
         if (mapLayersSelection) {
             Surface(
@@ -293,6 +295,7 @@ private fun MapControls(
 @Composable
 fun MapLayout(
     modifier: Modifier = Modifier,
+    place: com.mobileprism.fishing.domain.entity.content.UserMapMarker? = null,
 ) {
     val viewModel: MapViewModel = koinViewModel()
     val userPreferences: UserPreferences = koinInject()
@@ -364,6 +367,21 @@ fun MapLayout(
                     )
                 )
             }
+        }
+    }
+
+    LaunchedEffect(place) {
+        place?.let {
+            cameraPositionState.animate(
+                CameraUpdateFactory.newCameraPosition(
+                    CameraPosition(
+                        target = LatLng(it.latitude, it.longitude),
+                        zoom = DEFAULT_ZOOM,
+                        bearing = 0f,
+                        tilt = 0f
+                    )
+                )
+            )
         }
     }
 

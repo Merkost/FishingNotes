@@ -382,6 +382,7 @@
     <string name="search_places">Search places</string>
     <string name="select_place">Select place</string>
     <string name="no_places_found">No places found</string>
+    <string name="saved_places">Saved places</string>
 
     <string name="theme_dynamic">Dynamic</string>
     <string name="theme_blue">Blue</string>

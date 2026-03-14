@@ -15,12 +15,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import java.io.Closeable
 
 class SyncStatusManager(
     private val pendingOpsDao: PendingOperationDao,
     private val connectionManager: ConnectionManager
-) : SyncStatusProvider, Closeable {
+) : SyncStatusProvider, AutoCloseable {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val _globalSyncState = MutableStateFlow<SyncState>(SyncState.Synced)

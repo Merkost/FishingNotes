@@ -12,6 +12,9 @@ import com.google.firebase.Firebase
 import com.google.firebase.analytics.analytics
 import com.mobileprism.fishing.domain.repository.SyncStatusProvider
 import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
+import com.mobileprism.fishing.domain.use_cases.AndroidGeocoder
+import com.mobileprism.fishing.domain.use_cases.PlatformGeocoder
+import com.mobileprism.fishing.domain.use_cases.PlaceNameResolver
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseAnalyticsTracker
 import com.mobileprism.fishing.model.datasource.local.sync.SyncStatusManager
 import com.mobileprism.fishing.model.datastore.*
@@ -25,8 +28,6 @@ import com.mobileprism.fishing.utils.location.LocationManager
 import com.mobileprism.fishing.utils.location.LocationManagerImpl
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionManagerImpl
-import com.mobileprism.fishing.domain.use_cases.GetPlaceNameUseCase
-import com.mobileprism.fishing.domain.use_cases.PlaceNameResolver
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import okio.Path.Companion.toPath
 import org.koin.android.ext.koin.androidContext
@@ -34,13 +35,12 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
-    single<Geocoder> { createGeocoder(androidContext()) }
+    single<PlatformGeocoder> { AndroidGeocoder(createGeocoder(androidContext())) }
     single<AppUpdateManager> { AppUpdateManagerFactory.create(androidContext()) }
     single { SnackbarManager }
     single<AnalyticsTracker> { FirebaseAnalyticsTracker(Firebase.analytics) }
     single { LocationManagerImpl(get()) }
     single<LocationManager> { get<LocationManagerImpl>() }
-    single<PlaceNameResolver> { get<GetPlaceNameUseCase>() }
     single<SyncStatusProvider> { get<SyncStatusManager>() }
 }
 

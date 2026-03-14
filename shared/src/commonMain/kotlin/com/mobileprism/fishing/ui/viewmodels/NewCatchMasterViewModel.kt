@@ -152,7 +152,7 @@ class NewCatchMasterViewModel(
         placeAndTimeState.value.place?.let {
             _catchWeatherState.value = _catchWeatherState.value.copy(isLoading = true)
 
-            viewModelScope.launch(Dispatchers.IO) {
+            viewModelScope.launch(Dispatchers.Default) {
                 getNewCatchWeatherUseCase(
                     placeAndTimeState.value.place,
                     placeAndTimeState.value.date
@@ -194,7 +194,7 @@ class NewCatchMasterViewModel(
         _uiState.value = NewCatchViewState.SavingNewCatch
         _uploadProgress.value = null
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Default) {
             placeAndTimeState.value.place?.let {
                 val newCatch = createNewCatchData()
                 saveNewCatchUseCase(newCatch) { uploaded, total ->
@@ -216,7 +216,7 @@ class NewCatchMasterViewModel(
     }
 
     private fun getAllUserMarkersList() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Default) {
             getUserPlacesListUseCase().collect { markers ->
                 _placeAndTimeState.value = _placeAndTimeState.value.copy(
                     placesListState = NewCatchPlacesState.Received(markers)

@@ -39,7 +39,7 @@ class WeatherViewModel(
 
     private fun getAllMarkers() {
         if (_markersList.value.isEmpty()) {
-            viewModelScope.launch(Dispatchers.IO) {
+            viewModelScope.launch(Dispatchers.Default) {
                 repository.getAllUserMarkersList().collect {
                     _markersList.value = it.filterIsInstance<UserMapMarker>()
                 }
@@ -49,7 +49,7 @@ class WeatherViewModel(
 
     private fun getWeather(latitude: Double, longitude: Double) {
         _weatherState.value = BaseViewState.Loading()
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Default) {
             val result = weatherRepository.getWeatherWithMeta(latitude, longitude)
             result.fold(
                 onSuccess = { weatherResult ->
@@ -73,7 +73,7 @@ class WeatherViewModel(
     fun refresh() {
         _isRefreshing.value = true
         selectedPlace.value?.let {
-            viewModelScope.launch(Dispatchers.IO) {
+            viewModelScope.launch(Dispatchers.Default) {
                 val result = weatherRepository.getWeatherWithMeta(it.latitude, it.longitude)
                 result.fold(
                     onSuccess = { weatherResult ->
@@ -89,6 +89,12 @@ class WeatherViewModel(
         } ?: run { _isRefreshing.value = false }
     }
 
+    fun setInitialPlace(place: UserMapMarker?) {
+        if (_selectedPlace.value == null && place != null) {
+            setSelectedPlace(place)
+        }
+    }
+
     fun setSelectedPlace(place: UserMapMarker?) {
         place?.let {
             if (selectedPlace.value != place) {
@@ -96,7 +102,6 @@ class WeatherViewModel(
                 getWeather(it.latitude, it.longitude)
             }
         }
-
     }
 
     fun locationGranted(newLocation: UserMapMarker) {

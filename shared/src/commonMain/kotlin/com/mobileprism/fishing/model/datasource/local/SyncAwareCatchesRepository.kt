@@ -6,7 +6,6 @@ import com.mobileprism.fishing.domain.entity.common.ContentStateOld
 import com.mobileprism.fishing.domain.entity.common.SortDirection
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
-import androidx.room.withTransaction
 import com.mobileprism.fishing.model.datasource.local.dao.CatchDao
 import com.mobileprism.fishing.model.datasource.local.dao.PendingOperationDao
 import com.mobileprism.fishing.model.datasource.local.entity.PendingOperationEntity
@@ -26,7 +25,6 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import java.io.Closeable
 
 class SyncAwareCatchesRepository(
     private val firebaseRepo: CatchesRepository,
@@ -35,16 +33,15 @@ class SyncAwareCatchesRepository(
     private val connectionManager: ConnectionManager,
     private val syncScheduler: SyncScheduler,
     private val db: FishingDatabase,
-) : CatchesRepository, Closeable {
+) : CatchesRepository, AutoCloseable {
 
     companion object {
         private const val TAG = "SyncAwareCatches"
     }
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     init {
-        // Auto-sync when connectivity restored
         scope.launch {
             connectionManager.getConnectionStateFlow().collect { state ->
                 if (state is ConnectionState.Available) {
@@ -55,9 +52,7 @@ class SyncAwareCatchesRepository(
     }
 
     override fun getAllUserCatchesList(): Flow<List<UserCatch>> {
-        // Primary source is Firebase snapshot listeners; cache results to Room as side effect
         return firebaseRepo.getAllUserCatchesList().map { catches ->
-            // Cache to Room as side effect — ignore FK failures when marker isn't cached yet
             catches.forEach { catch ->
                 try {
                     catchDao.insert(catch.toEntity(SyncStatus.SYNCED))
@@ -91,7 +86,6 @@ class SyncAwareCatchesRepository(
         } catch (e: Exception) {
             Cedar.tag(TAG).e("Failed to update catch online, queuing: ${e.message}")
         }
-        // Queue for offline sync
         db.withTransaction {
             catchDao.updateSyncStatus(catchId, SyncStatus.PENDING_UPDATE)
             pendingOpsDao.deleteByEntity("catch", catchId)
@@ -106,7 +100,7 @@ class SyncAwareCatchesRepository(
             )
         }
         syncScheduler.scheduleSync()
-        return Result.success(Unit) // Success from local perspective
+        return Result.success(Unit)
     }
 
     override suspend fun updateUserCatchPhotos(
@@ -114,7 +108,6 @@ class SyncAwareCatchesRepository(
         catchId: String,
         newPhotos: List<String>
     ): Result<Unit> {
-        // Photo uploads require network, delegate directly
         return firebaseRepo.updateUserCatchPhotos(markerId, catchId, newPhotos)
     }
 
@@ -129,7 +122,6 @@ class SyncAwareCatchesRepository(
         } catch (e: Exception) {
             Cedar.tag(TAG).e("Failed to delete catch online, queuing: ${e.message}")
         }
-        // Queue for offline sync
         db.withTransaction {
             catchDao.updateSyncStatus(userCatch.id, SyncStatus.PENDING_DELETE)
             pendingOpsDao.deleteByEntity("catch", userCatch.id)
@@ -144,11 +136,10 @@ class SyncAwareCatchesRepository(
             )
         }
         syncScheduler.scheduleSync()
-        return Result.success(Unit) // Success from local perspective
+        return Result.success(Unit)
     }
 
     override suspend fun addNewCatch(markerId: String, newCatch: UserCatch): Result<Unit> {
-        // Save locally immediately
         try {
             catchDao.insert(newCatch.toEntity(SyncStatus.PENDING_CREATE))
         } catch (e: Exception) {
@@ -168,7 +159,7 @@ class SyncAwareCatchesRepository(
             Cedar.tag(TAG).e("Exception adding catch online, queuing: ${e.message}")
             queueCatchCreate(markerId, newCatch)
         }
-        return Result.success(Unit) // Success from local perspective
+        return Result.success(Unit)
     }
 
     private suspend fun queueCatchCreate(markerId: String, newCatch: UserCatch) {

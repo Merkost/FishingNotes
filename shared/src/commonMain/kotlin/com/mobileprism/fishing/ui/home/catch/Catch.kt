@@ -164,7 +164,7 @@ fun DeleteCatchDialog(
     onPositiveClick: () -> Unit
 ) {
     DefaultDialog(
-        primaryText = String.format(stringResource(Res.string.delete_catch_dialog), catch.fishType),
+        primaryText = stringResource(Res.string.delete_catch_dialog).replace("%s", catch.fishType).replace("%1\$s", catch.fishType),
         secondaryText = stringResource(Res.string.catch_delete_confirmantion),
         negativeButtonText = stringResource(Res.string.no),
         onNegativeClick = onDismiss,

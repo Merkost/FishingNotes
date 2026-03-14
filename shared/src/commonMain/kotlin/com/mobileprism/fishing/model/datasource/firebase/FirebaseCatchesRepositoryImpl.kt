@@ -25,14 +25,13 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.shareIn
-import java.io.Closeable
 
 class FirebaseCatchesRepositoryImpl(
     private val dbCollections: RepositoryCollections,
     private val analyticsTracker: AnalyticsTracker,
     private val connectionManager: ConnectionManager,
     private val authRepository: AuthRepository
-) : CatchesRepositoryRead, CatchesRepositoryUpdate, Closeable {
+) : CatchesRepositoryRead, CatchesRepositoryUpdate, AutoCloseable {
 
     private val scope = CoroutineScope(SupervisorJob())
 

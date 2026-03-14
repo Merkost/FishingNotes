@@ -17,7 +17,7 @@ class FreeWeatherRepositoryKtorImpl(
     private val analyticsTracker: AnalyticsTracker,
     private val rapidApiKey: String,
     private val httpClient: HttpClient,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
     private val baseUrl: String = DEFAULT_BASE_URL,
 ) : FreeWeatherRepository {
 

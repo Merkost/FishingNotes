@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -13,10 +14,14 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.painterResource
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
@@ -53,27 +58,12 @@ fun WeatherPlacePickerSheetContent(
             .navigationBarsPadding()
             .imePadding()
     ) {
-        // Drag handle
-        Box(
-            modifier = Modifier
-                .padding(vertical = 8.dp)
-                .align(Alignment.CenterHorizontally)
-                .width(32.dp)
-                .height(4.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
-                    shape = MaterialTheme.shapes.small
-                )
-        )
-
-        // Header
         Text(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             text = stringResource(Res.string.select_place),
             style = MaterialTheme.typography.titleLarge,
         )
 
-        // Search field
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
@@ -82,18 +72,25 @@ fun WeatherPlacePickerSheetContent(
             onValueChange = { searchQuery = it },
             placeholder = { Text(stringResource(Res.string.search_places)) },
             singleLine = true,
+            shape = RoundedCornerShape(12.dp),
+            leadingIcon = {
+                Icon(
+                    Icons.Filled.Search,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.outline,
+                )
+            },
             trailingIcon = {
                 if (searchQuery.isNotEmpty()) {
                     IconButton(onClick = { searchQuery = "" }) {
                         Icon(Icons.Filled.Close, contentDescription = stringResource(Res.string.close))
                     }
-                } else {
-                    Icon(Icons.Filled.Search, contentDescription = null)
                 }
             },
+            colors = OutlinedTextFieldDefaults.colors(),
         )
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         if (!showCurrentLocation && filteredPlaces.isEmpty()) {
             Box(
@@ -110,67 +107,77 @@ fun WeatherPlacePickerSheetContent(
             }
         } else {
             LazyColumn(
-                modifier = Modifier.heightIn(max = 400.dp)
+                modifier = Modifier
+                    .heightIn(max = 400.dp)
+                    .padding(horizontal = 12.dp),
             ) {
                 if (showCurrentLocation && currentLocationPlace != null) {
                     item(key = CURRENT_PLACE_ITEM_ID) {
-                        PlaceItem(
+                        CurrentLocationItem(
                             place = currentLocationPlace,
                             isSelected = selectedPlace?.id == currentLocationPlace.id,
-                            isCurrentLocation = true,
                             onClick = { onPlaceSelected(currentLocationPlace) },
                         )
                     }
                 }
-                items(
-                    items = filteredPlaces,
-                    key = { it.id }
-                ) { place ->
-                    PlaceItem(
-                        place = place,
-                        isSelected = selectedPlace?.id == place.id,
-                        isCurrentLocation = false,
-                        onClick = { onPlaceSelected(place) },
-                    )
+
+                if (filteredPlaces.isNotEmpty()) {
+                    item(key = "section_saved") {
+                        SectionLabel(text = stringResource(Res.string.saved_places))
+                    }
+
+                    items(
+                        items = filteredPlaces,
+                        key = { it.id }
+                    ) { place ->
+                        PlaceItem(
+                            place = place,
+                            isSelected = selectedPlace?.id == place.id,
+                            onClick = { onPlaceSelected(place) },
+                        )
+                    }
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
 @Composable
-private fun PlaceItem(
+private fun CurrentLocationItem(
     place: UserMapMarker,
     isSelected: Boolean,
-    isCurrentLocation: Boolean,
     onClick: () -> Unit,
 ) {
     val backgroundColor = if (isSelected) {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
     } else {
-        MaterialTheme.colorScheme.surface
+        Color.Transparent
     }
+    val dotColor = MaterialTheme.colorScheme.primary
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor)
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 13.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Icon(
-            painter = painterResource(
-                if (isCurrentLocation) {
-                    Res.drawable.ic_baseline_my_location_24
-                } else {
-                    Res.drawable.ic_baseline_location_on_24
+        Box(
+            modifier = Modifier
+                .size(10.dp)
+                .drawBehind {
+                    drawCircle(color = dotColor)
+                    drawCircle(
+                        color = dotColor.copy(alpha = 0.3f),
+                        radius = size.minDimension / 2f + 4.dp.toPx(),
+                        style = Stroke(width = 2.dp.toPx()),
+                    )
                 }
-            ),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(24.dp),
         )
         Text(
             modifier = Modifier.weight(1f),
@@ -184,7 +191,66 @@ private fun PlaceItem(
                 imageVector = Icons.Filled.Check,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun SectionLabel(text: String) {
+    Text(
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 6.dp),
+        text = text.uppercase(),
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.outline,
+        letterSpacing = 1.sp,
+    )
+}
+
+@Composable
+private fun PlaceItem(
+    place: UserMapMarker,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
+    val backgroundColor = if (isSelected) {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+    } else {
+        Color.Transparent
+    }
+    val markerColor = Color(place.markerColor)
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(backgroundColor)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 13.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(10.dp)
+                .drawBehind {
+                    drawCircle(color = markerColor)
+                }
+        )
+        Text(
+            modifier = Modifier.weight(1f),
+            text = place.title,
+            style = MaterialTheme.typography.bodyLarge,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        if (isSelected) {
+            Icon(
+                imageVector = Icons.Filled.Check,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp),
             )
         }
     }

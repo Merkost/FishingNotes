@@ -17,7 +17,7 @@ class WeatherRepositoryKtorImpl(
     private val openWeatherKey: String,
     private val languageTag: String,
     private val httpClient: HttpClient,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
     private val baseUrl: String = DEFAULT_BASE_URL,
 ) : WeatherRepository {
 

@@ -379,6 +379,7 @@
     <string name="search_places">Поиск мест</string>
     <string name="select_place">Выберите место</string>
     <string name="no_places_found">Места не найдены</string>
+    <string name="saved_places">Сохранённые места</string>
 
     <string name="theme_dynamic">Динамическая</string>
     <string name="theme_blue">Синяя</string>

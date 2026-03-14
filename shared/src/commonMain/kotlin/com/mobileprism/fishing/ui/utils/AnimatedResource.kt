@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.utils
 
+import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -8,13 +9,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import io.github.alexzhirkevich.compottie.LottieAnimation
+import fishing.shared.generated.resources.Res
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
-import io.github.alexzhirkevich.compottie.LottieConstants
 import io.github.alexzhirkevich.compottie.animateLottieCompositionAsState
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
+import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import fishing.shared.generated.resources.Res
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
@@ -29,9 +29,15 @@ fun AnimatedResource(
         jsonString = Res.readBytes("files/$resName.json").decodeToString()
     }
     jsonString?.let { json ->
-        val composition by rememberLottieComposition(LottieCompositionSpec.JsonString(json))
-        val lottieIterations = if (iterations == Int.MAX_VALUE) LottieConstants.IterateForever else iterations
-        val progress by animateLottieCompositionAsState(composition, iterations = lottieIterations)
-        LottieAnimation(composition, { progress }, modifier = modifier, contentScale = contentScale)
+        val composition by rememberLottieComposition { LottieCompositionSpec.JsonString(json) }
+        val progress by animateLottieCompositionAsState(composition, iterations = iterations)
+        Image(
+            modifier = modifier, contentScale = contentScale,
+            painter = rememberLottiePainter(
+                composition = composition,
+                progress = { progress },
+            ),
+            contentDescription = "Lottie animation"
+        )
     }
 }

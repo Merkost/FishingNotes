@@ -7,6 +7,7 @@ import com.mobileprism.fishing.domain.entity.weather.WeatherSource
 import com.mobileprism.fishing.domain.repository.app.WeatherRepository
 import com.mobileprism.fishing.model.datasource.local.dao.WeatherCacheDao
 import com.mobileprism.fishing.model.datasource.local.entity.WeatherCacheEntity
+import com.mobileprism.fishing.utils.format
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionState
 import kotlinx.serialization.encodeToString
@@ -26,7 +27,7 @@ class CachedWeatherRepository(
     private val json = Json { ignoreUnknownKeys = true }
 
     override suspend fun getWeather(lat: Double, lon: Double): Result<WeatherForecast> {
-        val cacheKey = "%.2f_%.2f".format(lat, lon)
+        val cacheKey = "${lat.format(2)}_${lon.format(2)}"
         val cached = weatherCacheDao.getByKey(cacheKey)
 
         if (cached != null && !cached.isExpired()) {
@@ -69,7 +70,7 @@ class CachedWeatherRepository(
     }
 
     override suspend fun getWeatherWithMeta(lat: Double, lon: Double): Result<WeatherResult> {
-        val cacheKey = "%.2f_%.2f".format(lat, lon)
+        val cacheKey = "${lat.format(2)}_${lon.format(2)}"
         val cached = weatherCacheDao.getByKey(cacheKey)
 
         if (cached != null && !cached.isExpired()) {
@@ -124,7 +125,7 @@ class CachedWeatherRepository(
         lon: Double,
         date: Long
     ): Result<WeatherForecast> {
-        val cacheKey = "%.2f_%.2f_%d".format(lat, lon, date)
+        val cacheKey = "${lat.format(2)}_${lon.format(2)}_${date}"
         val cached = weatherCacheDao.getByKey(cacheKey)
 
         if (cached != null) {

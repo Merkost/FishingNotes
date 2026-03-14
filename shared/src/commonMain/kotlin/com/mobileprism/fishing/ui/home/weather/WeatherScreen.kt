@@ -4,11 +4,10 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
@@ -17,7 +16,6 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -74,7 +72,9 @@ fun WeatherScreen(
     viewModel: WeatherViewModel = koinViewModel(),
     upPress: () -> Unit,
 ) {
-    viewModel.setSelectedPlace(place)
+    LaunchedEffect(Unit) {
+        viewModel.setInitialPlace(place)
+    }
     val permissionsController = rememberPermissionsController()
     var locationPermissionGranted by rememberLocationPermissionGranted(permissionsController)
 
@@ -119,12 +119,6 @@ fun WeatherScreen(
     Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
-                val elevation =
-                    animateDpAsState(targetValue = if (scrollState.value > 0) 4.dp else 0.dp)
-                if (locationPermissionGranted && markers.isNotEmpty()) {
-                    viewModel.setSelectedPlace(markers.first())
-                }
-
                 TopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary,
@@ -147,25 +141,30 @@ fun WeatherScreen(
 
                                 Spacer(modifier = Modifier.weight(1f))
 
-                                Row(
+                                Surface(
                                     modifier = Modifier
-                                        .clip(CircleShape)
-                                        .clickable {
-                                            showBottomSheet = true
-                                        }
-                                        .padding(horizontal = 12.dp, vertical = 4.dp),
-                                    horizontalArrangement = Arrangement.Center,
-                                    verticalAlignment = Alignment.CenterVertically,
+                                        .clickable { showBottomSheet = true },
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f),
                                 ) {
-                                    WeatherAppBarText(
-                                        text = it.title,
-                                        textColor = MaterialTheme.colorScheme.onPrimary
-                                    )
-                                    Icon(
-                                        imageVector = Icons.Filled.ArrowDropDown,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimary
-                                    )
+                                    Row(
+                                        modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text(
+                                            text = it.title,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.onPrimary,
+                                            maxLines = 1,
+                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                            modifier = Modifier.widthIn(max = 200.dp),
+                                        )
+                                        Icon(
+                                            imageVector = Icons.Filled.ArrowDropDown,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onPrimary,
+                                        )
+                                    }
                                 }
 
                                 Spacer(modifier = Modifier.weight(1f))

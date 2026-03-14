@@ -1,13 +1,13 @@
 [versions]
 kmpauth = "2.3.1"
 
-kotlin = "2.3.20-RC"
+kotlin = "2.3.20-RC3"
 kotlinxDatetime = "0.7.1"
 kotlinxSerializationJson = "1.10.0"
 ksp = "2.3.6"
 
 androidApplication = "8.13.2"
-jetbrainsCompose = "1.10.1"
+jetbrainsCompose = "1.10.2"
 buildkonfig = "0.17.1"
 googleServices = "4.4.4"
 secretsGradlePlugin = "2.0.1"
@@ -15,7 +15,7 @@ firebaseCrashlytics = "3.0.6"
 firebasePerf = "2.0.2"
 
 material3 = "1.5.0-alpha15"
-compose-bom = "2026.02.01"
+compose-bom = "2026.03.00"
 mokoPermissions = "0.20.1"
 
 googleMaps = "3.1.0-beta"
@@ -29,12 +29,14 @@ playServicesMaps = "20.0.0"
 playServicesLocation = "21.3.0"
 playServicesAuth = "21.5.1"
 coroutines = "1.10.2"
-androidXCoreKtx = "1.17.0"
+androidXCoreKtx = "1.18.0"
 androidXSplashScreen = "1.2.0"
-activityCompose = "1.12.4"
+activityCompose = "1.13.0"
 lifecycleViewModelCompose = "2.10.0"
 navigationCompose = "2.9.7"
-datastorePreferences = "1.1.7"
+jetbrainsLifecycle = "2.9.6"
+jetbrainsNavigation = "2.9.2"
+datastorePreferences = "1.2.1"
 room = "2.8.4"
 koin = "4.1.1"
 androidXTest = "1.7.0"
@@ -46,9 +48,9 @@ firebaseFirestore = "26.1.1"
 firebaseCoroutines = "1.10.2"
 junit = "4.13.2"
 coilCompose = "3.4.0"
-paging = "3.4.1"
+paging = "3.4.2"
 ktor = "3.4.1"
-foundationLayoutAndroid = "1.10.4"
+foundationLayoutAndroid = "1.10.5"
 vico = "3.0.3"
 kmpMapsCompose = "0.5.0"
 workRuntimeKtx = "2.11.1"
@@ -58,7 +60,7 @@ turbine = "1.2.1"
 detekt = "1.23.8"
 cedarLogging = "0.2.2"
 flowmvi = "3.2.1"
-compottie = "2.0.0-rc03"
+compottie = "2.1.0"
 
 
 [libraries]
@@ -118,6 +120,7 @@ datastore-preferences-core = { group = "androidx.datastore", name = "datastore-p
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version = "2.5.0-alpha14" }
 
 koin-main = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
 koin-java = { group = "io.insert-koin", name = "koin-android-compat", version.ref = "koin" }
@@ -161,6 +164,10 @@ ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-conte
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-darwin = { group = "io.ktor", name = "ktor-client-darwin", version.ref = "ktor" }
+jetbrains-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "jetbrainsLifecycle" }
+jetbrains-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "jetbrainsLifecycle" }
+jetbrains-navigation-compose = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "jetbrainsNavigation" }
 foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundationLayoutAndroid" }
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
 kmpMapsCompose-maps = { group = "eu.buney.maps", name = "kmp-maps-compose", version.ref = "kmpMapsCompose" }

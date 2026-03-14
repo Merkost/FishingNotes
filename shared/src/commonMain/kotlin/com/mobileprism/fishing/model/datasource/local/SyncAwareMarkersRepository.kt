@@ -8,7 +8,6 @@ import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.domain.entity.content.MapMarker
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.repository.app.MarkersRepositoryPaged
-import androidx.room.withTransaction
 import com.mobileprism.fishing.model.datasource.local.dao.MarkerDao
 import com.mobileprism.fishing.model.datasource.local.dao.PendingOperationDao
 import com.mobileprism.fishing.model.datasource.local.entity.PendingOperationEntity
@@ -25,7 +24,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.io.Closeable
 
 class SyncAwareMarkersRepository(
     private val firebaseRepo: MarkersRepositoryPaged,
@@ -34,13 +32,13 @@ class SyncAwareMarkersRepository(
     private val connectionManager: ConnectionManager,
     private val syncScheduler: SyncScheduler,
     private val db: FishingDatabase,
-) : MarkersRepositoryPaged, Closeable {
+) : MarkersRepositoryPaged, AutoCloseable {
 
     companion object {
         private const val TAG = "SyncAwareMarkers"
     }
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     init {
         scope.launch {
@@ -97,7 +95,6 @@ class SyncAwareMarkersRepository(
         } catch (e: Exception) {
             Cedar.tag(TAG).e("Failed to delete marker online, queuing: ${e.message}")
         }
-        // Queue for offline sync
         db.withTransaction {
             markerDao.updateSyncStatus(userMapMarker.id, SyncStatus.PENDING_DELETE)
             pendingOpsDao.deleteByEntity("marker", userMapMarker.id)
@@ -111,13 +108,12 @@ class SyncAwareMarkersRepository(
             )
         }
         syncScheduler.scheduleSync()
-        return Result.success(Unit) // Success from local perspective
+        return Result.success(Unit)
     }
 
     override fun close() { scope.cancel() }
 
     override suspend fun addNewMarker(newMarker: UserMapMarker): Result<Unit> {
-        // Save locally immediately
         markerDao.insert(newMarker.toEntity(SyncStatus.PENDING_CREATE))
 
         try {
@@ -132,7 +128,6 @@ class SyncAwareMarkersRepository(
         } catch (e: Exception) {
             Cedar.tag(TAG).e("Exception adding marker online, queuing: ${e.message}")
         }
-        // Queue for offline sync
         db.withTransaction {
             pendingOpsDao.deleteByEntity("marker", newMarker.id)
             pendingOpsDao.insert(
@@ -145,6 +140,6 @@ class SyncAwareMarkersRepository(
             )
         }
         syncScheduler.scheduleSync()
-        return Result.success(Unit) // Success from local perspective
+        return Result.success(Unit)
     }
 }

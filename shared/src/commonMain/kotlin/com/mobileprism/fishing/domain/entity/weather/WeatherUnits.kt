@@ -8,7 +8,7 @@ enum class PressureValues {
             Pa -> (hPa * 100).toString()
             Bar -> (hPa / 1000).toString()
             mmHg -> (hPa * 0.75006375541921).toInt().toString()
-            Psi -> (hPa * 0.0145037738f).let { "%.5g".format(it) }
+            Psi -> (hPa * 0.0145037738f).let { it.toString() }
             Hpa -> hPa.toString()
         }
     }
@@ -18,7 +18,7 @@ enum class PressureValues {
             Pa -> (mmHg * 133.322).toString()
             Bar -> (mmHg * 0.00133322f).toString()
             PressureValues.mmHg -> mmHg.toString()
-            Psi -> (mmHg * 0.0193368f).let { "%.5g".format(it) }
+            Psi -> (mmHg * 0.0193368f).let { it.toString() }
             Hpa -> (mmHg * 1.33).toString()
         }
     }

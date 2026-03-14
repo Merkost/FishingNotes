@@ -32,6 +32,17 @@ kotlin {
         }
     }
 
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "shared"
+            isStatic = true
+        }
+    }
+
     sourceSets {
         commonMain.dependencies {
             implementation(compose.runtime)                    // @Immutable
@@ -53,9 +64,9 @@ kotlin {
             implementation(libs.firebase.gitlive.auth)
             implementation(libs.firebase.gitlive.firestore)
             implementation(libs.firebase.gitlive.storage)
-            implementation(libs.lifecycle.viewmodel)             // KMP ViewModel
-            api(libs.navigation.compose)                          // KMP Navigation
-            implementation(libs.viewModel.compose)               // KMP ViewModel Compose
+            implementation(libs.jetbrains.lifecycle.viewmodel)      // KMP ViewModel
+            api(libs.jetbrains.navigation.compose)                // KMP Navigation
+            implementation(libs.jetbrains.viewmodel.compose)     // KMP ViewModel Compose
             api(libs.coil.compose)                               // Coil 3 KMP image loading
             api(libs.coil.network.ktor3)                         // Coil 3 Ktor network backend
             implementation(libs.vico.compose.m3)                   // Vico charts (KMP)
@@ -67,6 +78,9 @@ kotlin {
             implementation(libs.paging.common)                           // Paging KMP
             implementation(libs.paging.compose)                          // Paging Compose KMP
             implementation(libs.datastore.preferences.core)              // DataStore Preferences KMP
+            implementation(libs.moko.permissions)
+            implementation(libs.moko.permissions.compose)
+            implementation(libs.moko.permissions.location)
         }
 
         commonTest.dependencies {
@@ -122,12 +136,23 @@ kotlin {
             implementation(libs.koin.java)
             implementation(libs.koin.compose)
 
-            implementation(libs.moko.permissions)
-            implementation(libs.moko.permissions.compose)
-            implementation(libs.moko.permissions.location)
             implementation(libs.foundation.layout.android)
 
             implementation(libs.ktor.client.okhttp)
+        }
+
+        val iosX64Main by getting
+        val iosArm64Main by getting
+        val iosSimulatorArm64Main by getting
+        val iosMain by creating {
+            dependsOn(commonMain.get())
+            iosX64Main.dependsOn(this)
+            iosArm64Main.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
+            dependencies {
+                implementation(libs.ktor.client.darwin)
+                implementation(libs.sqlite.bundled)
+            }
         }
     }
 }
@@ -168,6 +193,9 @@ dependencies {
     api(platform(libs.firebase.bom))
 
     add("kspAndroid", libs.room.compiler)
+    add("kspIosX64", libs.room.compiler)
+    add("kspIosArm64", libs.room.compiler)
+    add("kspIosSimulatorArm64", libs.room.compiler)
 
     // Android instrumented tests
     androidTestImplementation(libs.junit)

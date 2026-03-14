@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.map
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -10,19 +11,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.github.alexzhirkevich.compottie.LottieAnimation
+import fishing.shared.generated.resources.Res
 import io.github.alexzhirkevich.compottie.LottieClipSpec
 import io.github.alexzhirkevich.compottie.LottieCompositionSpec
 import io.github.alexzhirkevich.compottie.rememberLottieAnimatable
 import io.github.alexzhirkevich.compottie.rememberLottieComposition
-import fishing.shared.generated.resources.Res
+import io.github.alexzhirkevich.compottie.rememberLottiePainter
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.kimplify.cedar.logging.Cedar
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun PointerAnimation(pointerState: PointerState, modifier: Modifier = Modifier) {
-    var isFirstTimeCalled by remember { mutableStateOf(false) }
-
     val darkTheme = isSystemInDarkTheme()
     val markerResName = if (darkTheme) "marker_night" else "marker"
 
@@ -32,7 +32,7 @@ fun PointerAnimation(pointerState: PointerState, modifier: Modifier = Modifier) 
     }
 
     jsonString?.let { json ->
-        val composition by rememberLottieComposition(LottieCompositionSpec.JsonString(json))
+        val composition by rememberLottieComposition { LottieCompositionSpec.JsonString(json) }
         val lottieAnimatable = rememberLottieAnimatable()
 
         val startMinMaxFrame by remember {
@@ -42,21 +42,15 @@ fun PointerAnimation(pointerState: PointerState, modifier: Modifier = Modifier) 
             mutableStateOf(LottieClipSpec.Frame(50, 82))
         }
 
-        LaunchedEffect(isFirstTimeCalled) {
-            lottieAnimatable.animate(
-                composition,
-                iteration = 1,
-                continueFromPreviousAnimate = true,
-                clipSpec = startMinMaxFrame,
-            )
-        }
-
-        LaunchedEffect(pointerState) {
+        LaunchedEffect(pointerState, composition) {
+            if (composition == null) return@LaunchedEffect
+            Cedar.tag("PointerAnimation").d("pointerState: $pointerState")
             if (pointerState == PointerState.ShowMarker) {
                 lottieAnimatable.animate(
                     composition,
                     iteration = 1,
-                    continueFromPreviousAnimate = true,
+                    initialProgress = 0f,
+                    continueFromPreviousAnimate = false,
                     clipSpec = startMinMaxFrame,
                 )
             } else {
@@ -69,12 +63,13 @@ fun PointerAnimation(pointerState: PointerState, modifier: Modifier = Modifier) 
             }
         }
 
-        LottieAnimation(
+        Image(
             modifier = modifier.size(128.dp),
-            composition = composition,
-            progress = { lottieAnimatable.progress }
+            painter = rememberLottiePainter(
+                composition = composition,
+                progress = { lottieAnimatable.progress },
+            ),
+            contentDescription = "Lottie animation"
         )
-
-        isFirstTimeCalled = true
     }
 }

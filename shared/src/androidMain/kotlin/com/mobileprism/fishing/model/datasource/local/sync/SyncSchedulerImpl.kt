@@ -11,7 +11,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
 
-class SyncScheduler(private val context: Context) {
+class SyncSchedulerImpl(private val context: Context) : SyncScheduler {
 
     companion object {
         private const val SYNC_WORK_NAME = "fishing_sync"
@@ -22,7 +22,7 @@ class SyncScheduler(private val context: Context) {
         .setRequiredNetworkType(NetworkType.CONNECTED)
         .build()
 
-    fun scheduleSync() {
+    override fun scheduleSync() {
         val request = OneTimeWorkRequestBuilder<SyncWorker>()
             .setConstraints(constraints)
             .setBackoffCriteria(
@@ -39,7 +39,7 @@ class SyncScheduler(private val context: Context) {
         )
     }
 
-    fun schedulePeriodicSync() {
+    override fun schedulePeriodicSync() {
         val request = PeriodicWorkRequestBuilder<SyncWorker>(
             15, TimeUnit.MINUTES
         )

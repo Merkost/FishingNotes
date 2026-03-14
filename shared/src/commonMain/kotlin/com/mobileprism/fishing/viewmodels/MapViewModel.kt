@@ -35,10 +35,6 @@ class MapViewModel(
     val mapMarkers: StateFlow<List<UserMapMarker>>
         get() = _mapMarkers
 
-    init {
-        loadUserMarkersList()
-    }
-
     private val initialPlaceSelected = MutableStateFlow(false)
 
     private val _firstCameraPosition = MutableStateFlow<MapCameraState?>(null)
@@ -91,6 +87,10 @@ class MapViewModel(
     val windIconRotation = currentWeather.combine(_currentCameraPosition) { weather, camera ->
         weather?.wind_degrees?.minus(camera.bearing) ?: camera.bearing
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), 0f)
+
+    init {
+        loadUserMarkersList()
+    }
 
     fun setCameraMoveState(newState: CameraMoveState) {
         _cameraMoveState.value = newState
@@ -345,7 +345,9 @@ class MapViewModel(
         viewModelScope.launch {
             if (currentMarker.value == null) {
                 val fromBd = userPreferences.getLastMapCameraLocation.first()
-                _firstCameraPosition.emit(fromBd)
+                if (!initialPlaceSelected.value) {
+                    _firstCameraPosition.emit(fromBd)
+                }
             }
         }
     }

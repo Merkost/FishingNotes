@@ -20,12 +20,11 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
-import java.io.Closeable
 
 class FirebaseMarkersRepositoryImpl(
     private val dbCollections: RepositoryCollections,
     private val analyticsTracker: AnalyticsTracker
-) : MarkersRepository, Closeable {
+) : MarkersRepository, AutoCloseable {
 
     private val scope = CoroutineScope(SupervisorJob())
 

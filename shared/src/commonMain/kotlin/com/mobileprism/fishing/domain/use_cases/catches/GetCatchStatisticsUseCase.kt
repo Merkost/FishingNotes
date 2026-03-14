@@ -62,7 +62,7 @@ class GetCatchStatisticsUseCase(private val repository: CatchesRepositoryRead) {
                 "${localDate.year}-${(localDate.month.ordinal + 1).toString().padStart(2, '0')}"
             }
             .eachCount()
-            .toSortedMap()
+            .toList().sortedBy { it.first }.toMap()
 
         val catchesByWeather = catches
             .filter { it.weatherPrimary.isNotBlank() }
@@ -73,7 +73,7 @@ class GetCatchStatisticsUseCase(private val repository: CatchesRepositoryRead) {
             .filter { it.weatherTemperature != 0.0f || it.weatherPrimary.isNotBlank() }
             .groupingBy { temperatureRange(it.weatherTemperature) }
             .eachCount()
-            .toSortedMap(compareBy { temperatureRangeOrder(it) })
+            .toList().sortedBy { temperatureRangeOrder(it.first) }.toMap()
 
         val catchesByMoonPhase = catches
             .filter { it.weatherMoonPhase != 0.0f || it.weatherPrimary.isNotBlank() }
