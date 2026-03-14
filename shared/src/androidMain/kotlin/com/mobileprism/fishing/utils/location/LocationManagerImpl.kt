@@ -4,11 +4,10 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.IntentSender
-import android.util.Log
 import android.widget.Toast
+import org.kimplify.cedar.logging.Cedar
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
 import com.mobileprism.fishing.R
 import fishing.shared.generated.resources.Res
@@ -37,10 +36,9 @@ class LocationManagerImpl(private val context: Context) : LocationManager {
             locationPermissionsGiven -> {
                 val locationResult = fusedLocationProviderClient.lastLocation.await()
                 try {
-                    val newCoordinates = LatLng(locationResult.latitude, locationResult.longitude)
-                    emit(LocationState.LocationGranted(newCoordinates))
+                    emit(LocationState.LocationGranted(locationResult.latitude, locationResult.longitude))
                 } catch (e: Exception) {
-                    Log.d("MAP", "GPS is off")
+                    Cedar.tag("MAP").d("GPS is off")
                     Toast.makeText(
                         context,
                         R.string.cant_get_current_location,
@@ -52,7 +50,7 @@ class LocationManagerImpl(private val context: Context) : LocationManager {
         }
     }
 
-    override fun checkGPSEnabled(activity: Activity, onGpsEnabled: () -> Unit) {
+    fun checkGPSEnabled(activity: Activity, onGpsEnabled: () -> Unit) {
         if (manager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER).not()) {
             SnackbarManager.showMessage(Res.string.gps_is_off)
             turnOnGPS(activity, onGpsEnabled)
@@ -70,17 +68,12 @@ class LocationManagerImpl(private val context: Context) : LocationManager {
         val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
         task.addOnFailureListener { exception ->
             if (exception is ResolvableApiException) {
-                // Location settings are not satisfied, but this can be fixed
-                // by showing the user a dialog.
                 try {
-                    // Show the dialog by calling startResolutionForResult(),
-                    // and check the result in onActivityResult().
                     exception.startResolutionForResult(
                         activity,
-                        /*REQUEST_CHECK_SETTINGS*/12345
+                        12345
                     )
                 } catch (sendEx: IntentSender.SendIntentException) {
-                    // Ignore the error.
                 }
             }
         }.addOnSuccessListener {

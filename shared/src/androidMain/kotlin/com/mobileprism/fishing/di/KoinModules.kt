@@ -18,23 +18,25 @@ import com.mobileprism.fishing.model.datastore.impl.UserDatastoreImpl
 import com.mobileprism.fishing.model.datastore.impl.WeatherPreferencesImpl
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.viewmodels.*
-import com.mobileprism.fishing.utils.Logger
 import com.mobileprism.fishing.utils.location.LocationManager
 import com.mobileprism.fishing.utils.location.LocationManagerImpl
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionManagerImpl
+import com.mobileprism.fishing.domain.use_cases.GetPlaceNameUseCase
+import com.mobileprism.fishing.domain.use_cases.PlaceNameResolver
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val appModule = module {
-    single { Logger() }
     single<Geocoder> { createGeocoder(androidContext()) }
     single<AppUpdateManager> { AppUpdateManagerFactory.create(androidContext()) }
     single { SnackbarManager }
     single<AnalyticsTracker> { FirebaseAnalyticsTracker(Firebase.analytics) }
-    single<LocationManager> { LocationManagerImpl(get()) }
+    single { LocationManagerImpl(get()) }
+    single<LocationManager> { get<LocationManagerImpl>() }
+    single<PlaceNameResolver> { get<GetPlaceNameUseCase>() }
     single<SyncStatusProvider> { get<SyncStatusManager>() }
 }
 
@@ -50,8 +52,7 @@ val settingsModule = module {
 val mainModule = module {
     viewModel { LoginViewModel(
         repository = get(),
-        analyticsTracker = get(),
-        logger = get<Logger>()
+        analyticsTracker = get()
     ) }
     viewModel {
         MapViewModel(
@@ -59,9 +60,9 @@ val mainModule = module {
             addNewPlaceUseCase = get(),
             getFreeWeatherUseCase = get(),
             getFishActivityUseCase = get(),
+            getPlaceNameUseCase = get<PlaceNameResolver>(),
             userPreferences = get(),
             locationManager = get(),
-            getPlaceNameUseCase = get()
         )
     }
     viewModel { parameters ->

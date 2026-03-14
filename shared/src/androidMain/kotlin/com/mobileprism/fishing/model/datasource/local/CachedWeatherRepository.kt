@@ -1,6 +1,6 @@
 package com.mobileprism.fishing.model.datasource.local
 
-import android.util.Log
+import org.kimplify.cedar.logging.Cedar
 import com.mobileprism.fishing.domain.entity.weather.WeatherForecast
 import com.mobileprism.fishing.domain.entity.weather.WeatherResult
 import com.mobileprism.fishing.domain.entity.weather.WeatherSource
@@ -51,7 +51,7 @@ class CachedWeatherRepository(
                 return Result.success(forecast)
             }.onFailure { error ->
                 if (cached != null) {
-                    Log.d(TAG, "Remote fetch failed, returning stale cache", error)
+                    Cedar.tag(TAG).d("Remote fetch failed, returning stale cache")
                     val forecast = json.decodeFromString<WeatherForecast>(cached.responseJson)
                     return Result.success(forecast)
                 } else {
@@ -98,7 +98,7 @@ class CachedWeatherRepository(
                 )
             }.onFailure { error ->
                 if (cached != null) {
-                    Log.d(TAG, "Remote fetch failed, returning stale cache", error)
+                    Cedar.tag(TAG).d("Remote fetch failed, returning stale cache")
                     val forecast = json.decodeFromString<WeatherForecast>(cached.responseJson)
                     return Result.success(
                         WeatherResult(forecast, WeatherSource.STALE_FALLBACK, cached.cachedAt)

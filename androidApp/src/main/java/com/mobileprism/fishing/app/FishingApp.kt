@@ -16,6 +16,8 @@ import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.workmanager.koin.workManagerFactory
+import org.kimplify.cedar.logging.Cedar
+import org.kimplify.cedar.logging.trees.PlatformLogTree
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 
@@ -41,6 +43,8 @@ class FishingApp : Application(), SingletonImageLoader.Factory {
 
     override fun onCreate() {
         super.onCreate()
+
+        Cedar.plant(PlatformLogTree())
 
         GoogleAuthProvider.create(GoogleAuthCredentials(serverId = BuildKonfig.GOOGLE_WEB_CLIENT_ID))
 

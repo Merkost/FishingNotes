@@ -1,7 +1,5 @@
 package com.mobileprism.fishing.ui.home.map
 
-import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -14,13 +12,13 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import com.mobileprism.fishing.ui.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,58 +34,49 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.material3.SheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.platform.LocalContext
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.maps.android.ktx.awaitMap
 import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
-import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
-import com.mobileprism.fishing.ui.utils.LocalAnalytics
-import com.mobileprism.fishing.R
-import fishing.shared.generated.resources.Res
-import fishing.shared.generated.resources.*
-import org.jetbrains.compose.resources.ExperimentalResourceApi
-import com.mobileprism.fishing.domain.entity.content.UserMapMarker
-import com.mobileprism.fishing.model.datastore.UserPreferencesImpl
-import android.app.Activity
+import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.MainDestinations
+import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.theme.isAppInDarkTheme
+import com.mobileprism.fishing.ui.utils.LocalAnalytics
+import com.mobileprism.fishing.ui.utils.PlatformBackHandler
+import com.mobileprism.fishing.ui.utils.rememberLocationPermissionGranted
+import com.mobileprism.fishing.ui.utils.rememberPermissionsController
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
 import com.mobileprism.fishing.viewmodels.MapViewModel
-import kotlinx.coroutines.CoroutineScope
+import eu.buney.maps.*
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.*
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import com.mobileprism.fishing.ui.utils.rememberLocationPermissionGranted
-import com.mobileprism.fishing.ui.utils.rememberPermissionsController
-import org.koin.compose.viewmodel.koinViewModel
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,10 +84,9 @@ fun MapScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
     addPlaceOnStart: Boolean = false,
-    place: UserMapMarker?,
+    place: com.mobileprism.fishing.domain.entity.content.UserMapMarker?,
     upPress: () -> Unit,
 ) {
-
     val viewModel: MapViewModel = koinViewModel()
     LaunchedEffect(place) {
         viewModel.setPlace(place)
@@ -106,13 +94,11 @@ fun MapScreen(
     LaunchedEffect(addPlaceOnStart) {
         viewModel.setAddingPlace(addPlaceOnStart)
     }
-    val context = LocalContext.current
 
     val mapUiState by viewModel.mapUiState.collectAsState()
 
-    val coroutineScope = rememberCoroutineScope()
     val analyticsTracker = LocalAnalytics.current
-    val userPreferences: UserPreferencesImpl = koinInject()
+    val userPreferences: UserPreferences = koinInject()
     val useZoomButtons by userPreferences.useMapZoomButons.collectAsState(false)
 
     val modalBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -120,12 +106,13 @@ fun MapScreen(
     var newPlaceDialog by remember { mutableStateOf(false) }
     var mapLayersSelection by rememberSaveable { mutableStateOf(false) }
 
+    val noNamePlace = stringResource(Res.string.no_name_place)
 
     BackPressHandler(
         mapUiState = mapUiState,
         navController = navController,
         onBackPressedCallback = viewModel::resetMapUiState,
-        upPress = { (context as Activity).finishAffinity() },
+        upPress = upPress,
     )
 
     if (showModalBottomSheet) {
@@ -155,7 +142,7 @@ fun MapScreen(
                             MapUiState.BottomSheetInfoMode -> { }
                         }
                     },
-                    onLongPress = { viewModel.quickAddPlace(name = context.getString(R.string.no_name_place)) },
+                    onLongPress = { viewModel.quickAddPlace(name = noNamePlace) },
                     userSettings = userPreferences,
                 )
             },
@@ -195,7 +182,7 @@ fun MapScreen(
 private fun MapControls(
     mapUiState: MapUiState,
     viewModel: MapViewModel,
-    userPreferences: UserPreferencesImpl,
+    userPreferences: UserPreferences,
     useZoomButtons: Boolean,
     mapLayersSelection: Boolean,
     onMapLayersSelectionChanged: (Boolean) -> Unit,
@@ -204,10 +191,8 @@ private fun MapControls(
     onNewPlaceDialogDismiss: () -> Unit,
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        // Layer 1: Map — full-size, edge-to-edge, no insets
         MapLayout(modifier = Modifier.fillMaxSize())
 
-        // Scrim for layers selection dismissal
         if (mapLayersSelection) {
             Surface(
                 modifier = Modifier
@@ -218,30 +203,26 @@ private fun MapControls(
             ) {}
         }
 
-        // Layer 2: Controls overlay with status bar inset padding
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.statusBars)
                 .padding(16.dp)
         ) {
-            // Top section: left buttons, center tile, right buttons
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.TopStart),
                 verticalAlignment = Alignment.Top
             ) {
-                // Left controls
                 Column {
                     MapLayersButton(modifier = Modifier) { onMapLayersSelectionChanged(true) }
                     Spacer(modifier = Modifier.height(16.dp))
                     MapSettingsButton(modifier = Modifier, onCLick = onMapSettingsClicked)
                 }
 
-                // Center — PlaceTileView (only visible in place select mode)
                 Spacer(modifier = Modifier.weight(1f))
-                androidx.compose.animation.AnimatedVisibility(
+                AnimatedVisibility(
                     visible = mapUiState == MapUiState.PlaceSelectMode && !mapLayersSelection,
                     enter = fadeIn(animationSpec = tween(300)),
                     exit = fadeOut(animationSpec = tween(300)),
@@ -250,7 +231,6 @@ private fun MapControls(
                 }
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Right controls
                 Column(horizontalAlignment = Alignment.End) {
                     MyLocationButton(
                         userPreferences = userPreferences,
@@ -264,7 +244,6 @@ private fun MapControls(
                 }
             }
 
-            // Zoom buttons (center-end)
             if (useZoomButtons) {
                 Column(modifier = Modifier.align(Alignment.CenterEnd)) {
                     MapZoomInButton(onClick = viewModel::onZoomInClick)
@@ -273,7 +252,6 @@ private fun MapControls(
                 }
             }
 
-            // Pointer icon (center of screen)
             AnimatedVisibility(
                 visible = mapUiState == MapUiState.PlaceSelectMode,
                 enter = fadeIn(),
@@ -282,11 +260,10 @@ private fun MapControls(
                     .align(Alignment.Center)
                     .padding(bottom = 65.dp)
             ) {
-                PointerIcon(viewModel.placeTileViewNameState.collectAsState().value.pointerState)
+                PointerAnimation(viewModel.placeTileViewNameState.collectAsState().value.pointerState)
             }
         }
 
-        // LayersView overlay (above scrim)
         AnimatedVisibility(
             visible = mapLayersSelection,
             enter = expandIn(
@@ -312,21 +289,17 @@ private fun MapControls(
     }
 }
 
-
-@SuppressLint("PotentialBehaviorOverride", "MissingPermission")
+@OptIn(ExperimentalResourceApi::class)
 @Composable
 fun MapLayout(
     modifier: Modifier = Modifier,
 ) {
     val viewModel: MapViewModel = koinViewModel()
-    val map = rememberMapViewWithLifecycle()
-    val userPreferences: UserPreferencesImpl = koinInject()
-    val coroutineScope = rememberCoroutineScope()
+    val userPreferences: UserPreferences = koinInject()
     val darkTheme = isAppInDarkTheme()
 
     val showHiddenPlaces by userPreferences.shouldShowHiddenPlacesOnMap.collectAsState(true)
     val mapType by viewModel.mapType.collectAsState()
-    val context = LocalContext.current
     val markers by viewModel.mapMarkers.collectAsState()
 
     val markersToShow by remember(markers, showHiddenPlaces) {
@@ -337,105 +310,151 @@ fun MapLayout(
 
     val permissionsController = rememberPermissionsController()
     val locationPermissionGranted by rememberLocationPermissionGranted(permissionsController)
-    var isMapVisible by remember { mutableStateOf(false) }
 
-    AnimatedVisibility(
-        visible = isMapVisible,
-        enter = fadeIn(), exit = fadeOut()
-    ) {
-        AndroidView(
-            { map },
-            modifier = modifier
-                .fillMaxSize()
-                .zIndex(-1.0f)
-        ) { mapView ->
-            coroutineScope.launch {
-                val googleMap = mapView.awaitMap()
+    val cameraPositionState = rememberCameraPositionState()
 
-                //Map styles: https://mapstyle.withgoogle.com
-                @OptIn(ExperimentalResourceApi::class)
-                val styleFileName = if (darkTheme) "map_style_fishing_night" else "map_style_fishing"
-                val styleJson = Res.readBytes("files/$styleFileName.json").decodeToString()
-                googleMap.setMapStyle(MapStyleOptions(styleJson))
-
-                googleMap.clear()
-                markersToShow.forEach {
-                    val position = LatLng(it.latitude, it.longitude)
-                    val markerColor = Color(it.markerColor)
-                    val hue = getHue(
-                        red = markerColor.red,
-                        green = markerColor.green,
-                        blue = markerColor.blue
-                    )
-                    val marker = googleMap
-                        .addMarker(
-                            MarkerOptions()
-                                .position(position)
-                                .title(it.title)
-                                .icon(BitmapDescriptorFactory.defaultMarker(hue))
-
-                        )
-                    marker?.tag = it.id
-                }
-                googleMap.setOnCameraMoveStartedListener {
-                    viewModel.setCameraMoveState(CameraMoveState.MoveStart)
-                }
-                googleMap.setOnCameraMoveListener {
-                    viewModel.onCameraMove(
-                        googleMap.cameraPosition.target,
-                        googleMap.cameraPosition.zoom,
-                        googleMap.cameraPosition.bearing
-                    )
-                }
-                googleMap.setOnCameraIdleListener {
-                    viewModel.setCameraMoveState(CameraMoveState.MoveFinish)
-                    viewModel.saveLastCameraPosition()
-                }
-                googleMap.setOnMarkerClickListener { marker ->
-                    viewModel.onMarkerClicked(
-                        markers.find { it.id == marker.tag },
-                    )
-                    true
-                }
-                googleMap.setOnMapClickListener {
-                    viewModel.resetMapUiState()
-                    return@setOnMapClickListener
-                }
-
-                googleMap.uiSettings.isCompassEnabled = false
-                googleMap.uiSettings.isMyLocationButtonEnabled = false
+    LaunchedEffect(cameraPositionState) {
+        snapshotFlow { cameraPositionState.isMoving }.collect { isMoving ->
+            if (isMoving) {
+                viewModel.setCameraMoveState(CameraMoveState.MoveStart)
+            } else {
+                viewModel.setCameraMoveState(CameraMoveState.MoveFinish)
+                viewModel.saveLastCameraPosition()
             }
         }
     }
 
-    LaunchedEffect(map, locationPermissionGranted) {
-        val googleMap = map.awaitMap()
-        checkLocationPermissions(context)
-        googleMap.isMyLocationEnabled = locationPermissionGranted
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.newMapCameraPosition.collectLatest {
-            moveCameraToLocation(this, map, it.first, it.second, it.third)
+    LaunchedEffect(cameraPositionState) {
+        snapshotFlow { cameraPositionState.position }.collect { position ->
+            viewModel.onCameraMove(
+                position.target.latitude,
+                position.target.longitude,
+                position.zoom,
+                position.bearing
+            )
         }
     }
 
     LaunchedEffect(Unit) {
-        viewModel.firstCameraPosition.collectLatest {
-            it?.let { setCameraPosition(this, map, it.first, it.second, it.third) }
+        viewModel.newMapCameraPosition.collectLatest { cameraState ->
+            cameraPositionState.animate(
+                CameraUpdateFactory.newCameraPosition(
+                    CameraPosition(
+                        target = LatLng(cameraState.latitude, cameraState.longitude),
+                        zoom = cameraState.zoom,
+                        bearing = cameraState.bearing,
+                        tilt = 0f
+                    )
+                )
+            )
         }
     }
 
-    LaunchedEffect(mapType) {
-        val googleMap = map.awaitMap()
-        googleMap.mapType = mapType
+    LaunchedEffect(Unit) {
+        viewModel.firstCameraPosition.collectLatest { cameraState ->
+            cameraState?.let {
+                cameraPositionState.move(
+                    CameraUpdateFactory.newCameraPosition(
+                        CameraPosition(
+                            target = LatLng(it.latitude, it.longitude),
+                            zoom = it.zoom,
+                            bearing = it.bearing,
+                            tilt = 0f
+                        )
+                    )
+                )
+            }
+        }
     }
 
-    DisposableEffect(map) {
-        isMapVisible = true
+    val styleJson by produceState<String?>(null, darkTheme) {
+        val styleFileName = if (darkTheme) "map_style_fishing_night" else "map_style_fishing"
+        value = Res.readBytes("files/$styleFileName.json").decodeToString()
+    }
+
+    val mapProperties = remember(mapType, styleJson, locationPermissionGranted) {
+        val base = MapProperties(
+            mapType = mapType.toMapType(),
+            isMyLocationEnabled = locationPermissionGranted,
+        )
+        styleJson?.let { base.copy(mapStyleOptions = MapStyleOptions.fromJson(it)) } ?: base
+    }
+
+    GoogleMap(
+        modifier = modifier
+            .fillMaxSize()
+            .zIndex(-1.0f),
+        cameraPositionState = cameraPositionState,
+        properties = mapProperties,
+        uiSettings = MapUiSettings(
+            compassEnabled = false,
+            myLocationButtonEnabled = false,
+            zoomControlsEnabled = false,
+        ),
+        onMapClick = { viewModel.resetMapUiState() },
+    ) {
+        markersToShow.forEach { userMarker ->
+            val position = LatLng(userMarker.latitude, userMarker.longitude)
+            val markerColor = Color(userMarker.markerColor)
+            val markerIcon = rememberComposeBitmapDescriptor(userMarker.markerColor) {
+                androidx.compose.material3.Icon(
+                    painter = painterResource(Res.drawable.ic_baseline_location_on_24),
+                    contentDescription = null,
+                    tint = markerColor,
+                    modifier = androidx.compose.ui.Modifier.size(36.dp)
+                )
+            }
+            Marker(
+                state = rememberUpdatedMarkerState(position = position),
+                title = userMarker.title,
+                icon = markerIcon,
+                onClick = {
+                    viewModel.onMarkerClicked(userMarker)
+                    true
+                }
+            )
+        }
+    }
+
+    DisposableEffect(Unit) {
         viewModel.getLastLocation()
-
         onDispose { viewModel.saveLastCameraPosition() }
+    }
+}
+
+private fun AppMapType.toMapType(): MapType = when (this) {
+    AppMapType.Roadmap -> MapType.NORMAL
+    AppMapType.Satellite -> MapType.SATELLITE
+    AppMapType.Hybrid -> MapType.HYBRID
+    AppMapType.Terrain -> MapType.TERRAIN
+}
+
+@Composable
+fun BackPressHandler(
+    mapUiState: MapUiState,
+    navController: NavController,
+    onBackPressedCallback: () -> Unit,
+    upPress: () -> Unit,
+) {
+    var lastPressed by remember { mutableStateOf(0L) }
+
+    PlatformBackHandler(true) {
+        when (mapUiState) {
+            MapUiState.NormalMode -> {
+                if (navController.navigateUp()) {
+                    return@PlatformBackHandler
+                } else {
+                    val currentMillis = Clock.System.now().toEpochMilliseconds()
+                    if (currentMillis - lastPressed < Constants.TIME_TO_EXIT) {
+                        upPress()
+                    } else {
+                        SnackbarManager.showMessage(Res.string.app_exit_message)
+                    }
+                    lastPressed = currentMillis
+                }
+            }
+            else -> onBackPressedCallback()
+        }
     }
 }
 
@@ -443,22 +462,20 @@ fun MapLayout(
 @Composable
 fun MapFab(
     viewModel: MapViewModel,
-    userSettings: UserPreferencesImpl,
+    userSettings: UserPreferences,
     onLongPress: () -> Unit,
     onClick: () -> Unit,
 ) {
     val state by viewModel.mapUiState.collectAsState()
     val useFastFabAdd by userSettings.useFabFastAdd.collectAsState(false)
-    val context = LocalContext.current
+    val permissionsController = rememberPermissionsController()
+    val locationPermissionGranted by rememberLocationPermissionGranted(permissionsController)
 
-    val adding_place = stringResource(Res.string.adding_place_on_current_location)
-    val permissions_required = stringResource(Res.string.location_permissions_required)
     AnimatedVisibility(
         visible = state !is MapUiState.BottomSheetInfoMode,
         exit = fadeOut(),
         enter = fadeIn()
     ) {
-
         FishingFab(
             modifier = Modifier
                 .animateContentSize()
@@ -466,11 +483,12 @@ fun MapFab(
             onClick = onClick,
             onLongPress = {
                 if (state == MapUiState.NormalMode && useFastFabAdd) {
-                    if (!checkLocationPermissions(context)) {
-                        Toast.makeText(context, adding_place, Toast.LENGTH_SHORT).show()
+                    if (locationPermissionGranted) {
+                        SnackbarManager.showMessage(Res.string.adding_place_on_current_location)
                         onLongPress()
-                    } else Toast.makeText(context, permissions_required, Toast.LENGTH_SHORT)
-                        .show()
+                    } else {
+                        SnackbarManager.showMessage(Res.string.location_permissions_required)
+                    }
                 }
             }
         ) {
@@ -530,4 +548,3 @@ fun FishingFab(
 }
 
 val FabSize = 56.dp
-

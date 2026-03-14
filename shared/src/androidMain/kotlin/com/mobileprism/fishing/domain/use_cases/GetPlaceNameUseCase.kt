@@ -4,9 +4,9 @@ import android.location.Geocoder
 import com.mobileprism.fishing.ui.home.map.GeocoderResult
 import kotlinx.coroutines.flow.flow
 
-class GetPlaceNameUseCase(private val geocoder: Geocoder) {
+class GetPlaceNameUseCase(private val geocoder: Geocoder) : PlaceNameResolver {
 
-    suspend operator fun invoke(
+    override suspend operator fun invoke(
         latitude: Double,
         longitude: Double,
     ) = flow {

@@ -225,8 +225,8 @@ fun NewPlaceDialog(
                                             false -> trimmedTitle
                                         },
                                         description = descriptionValue.value,
-                                        latitude = currentCameraPosition.first.latitude,
-                                        longitude = currentCameraPosition.first.longitude,
+                                        latitude = currentCameraPosition.latitude,
+                                        longitude = currentCameraPosition.longitude,
                                         markerColor = markerColor.value
                                     )
                                 )

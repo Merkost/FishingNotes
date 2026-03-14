@@ -59,7 +59,11 @@ kotlin {
             api(libs.coil.compose)                               // Coil 3 KMP image loading
             api(libs.coil.network.ktor3)                         // Coil 3 Ktor network backend
             implementation(libs.vico.compose.m3)                   // Vico charts (KMP)
+            implementation(libs.kmpMapsCompose.maps)                 // KMP Google Maps Compose
             api(libs.kmpauth.google)                                 // KMP Google Auth
+            api(libs.cedar.logging)                                      // Cedar KMP logger
+            implementation(libs.paging.common)                           // Paging KMP
+            implementation(libs.paging.compose)                          // Paging Compose KMP
         }
 
         commonTest.dependencies {
@@ -98,8 +102,6 @@ kotlin {
             implementation(libs.firebase.storage)
             implementation(libs.firebase.coroutines)
 
-            implementation(libs.googleMaps.mapsKtx)
-            implementation(libs.googleMaps.mapUtilsKtx)
             implementation(libs.playServices.maps)
             implementation(libs.playServices.location)
             implementation(libs.playServices.billing)
@@ -121,9 +123,6 @@ kotlin {
             implementation(libs.moko.permissions.compose)
             implementation(libs.moko.permissions.location)
             implementation(libs.foundation.layout.android)
-
-            implementation(libs.paging.runtime)
-            implementation(libs.paging.compose)
 
             implementation(libs.ktor.client.okhttp)
         }

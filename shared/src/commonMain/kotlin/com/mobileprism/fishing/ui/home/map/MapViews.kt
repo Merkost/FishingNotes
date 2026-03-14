@@ -72,35 +72,25 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieClipSpec
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.rememberLottieAnimatable
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.mobileprism.fishing.ui.utils.AnimatedResource
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.views.SettingsCheckbox
 import com.mobileprism.fishing.ui.utils.placeholder
-import com.mobileprism.fishing.R
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
 import com.mobileprism.fishing.ui.utils.LocalAnalytics
-import com.mobileprism.fishing.model.datastore.UserPreferencesImpl
-import android.app.Activity
+import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.views.SettingsHeader
 import com.mobileprism.fishing.ui.theme.RedGoogleChrome
 import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
 import com.mobileprism.fishing.ui.utils.rememberLocationPermissionGranted
 import com.mobileprism.fishing.ui.utils.rememberPermissionsController
-import com.mobileprism.fishing.utils.location.LocationManager
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
@@ -120,7 +110,6 @@ fun MapScaffold(
     val offsetY = remember { Animatable(0f) }
     val dismissThresholdPx = with(LocalDensity.current) { 80.dp.toPx() }
 
-    // Reset offset when card becomes visible
     LaunchedEffect(mapUiState) {
         if (mapUiState is MapUiState.BottomSheetInfoMode) {
             offsetY.snapTo(0f)
@@ -130,7 +119,6 @@ fun MapScaffold(
     Box(modifier = modifier.fillMaxSize()) {
         content()
 
-        // Bottom card slides in from the bottom, swipeable to dismiss
         androidx.compose.animation.AnimatedVisibility(
             visible = mapUiState is MapUiState.BottomSheetInfoMode,
             modifier = Modifier.align(Alignment.BottomCenter),
@@ -191,7 +179,7 @@ fun MapScaffold(
 
 @Composable
 fun MapModalBottomSheet(
-    mapPreferences: UserPreferencesImpl
+    mapPreferences: UserPreferences
 ) {
     val coroutineScope = rememberCoroutineScope()
     val showHiddenPlaces by mapPreferences.shouldShowHiddenPlacesOnMap.collectAsState(false)
@@ -227,11 +215,10 @@ fun MapModalBottomSheet(
 @Composable
 fun MyLocationButton(
     modifier: Modifier = Modifier,
-    userPreferences: UserPreferencesImpl,
+    userPreferences: UserPreferences,
     onClick: () -> Unit,
 ) {
-    val context = LocalContext.current
-    val locationManager: LocationManager = koinInject()
+    val checkGPS = rememberGPSChecker()
     var locationDialogIsShowing by remember { mutableStateOf(false) }
     val shouldShowPermissions by userPreferences.shouldShowLocationPermission.collectAsState(false)
     val permissionsController = rememberPermissionsController()
@@ -240,7 +227,6 @@ fun MyLocationButton(
     if (locationDialogIsShowing) {
         if (shouldShowPermissions) {
             LocationPermissionDialog(userPreferences = userPreferences) {
-                checkLocationPermissions(context)
                 locationDialogIsShowing = false
             }
         } else SnackbarManager.showMessage(Res.string.location_permission_denied)
@@ -269,8 +255,7 @@ fun MyLocationButton(
             onClick = {
                 when (locationPermissionGranted) {
                     true -> {
-                        locationManager.checkGPSEnabled(context as Activity)
-                        { onClick() }
+                        checkGPS { onClick() }
                     }
 
                     false -> {
@@ -396,14 +381,13 @@ fun MapLayersButton(modifier: Modifier, onLayersSelectionOpen: () -> Unit) {
 
 @Composable
 fun LayersView(
-    mapType: State<Int>,
-    onLayerSelected: (Int) -> Unit,
+    mapType: State<AppMapType>,
+    onLayerSelected: (AppMapType) -> Unit,
     onCloseMapSelection: () -> Unit
 ) {
-    val context = LocalContext.current
     val analyticsTracker = LocalAnalytics.current
 
-    DisposableEffect(context) {
+    DisposableEffect(Unit) {
         analyticsTracker.logEvent(AnalyticsEvent.MapLayers)
         onDispose {}
     }
@@ -440,21 +424,21 @@ fun LayersView(
             ) {
                 MapLayerItem(
                     currentMapType = mapType.value,
-                    layer = MapTypes.roadmap,
+                    layer = AppMapType.Roadmap,
                     painter = painterResource(Res.drawable.ic_map_default),
                     name = stringResource(Res.string.roadmap),
                     onLayerSelected = onLayerSelected
                 )
                 MapLayerItem(
                     currentMapType = mapType.value,
-                    layer = MapTypes.hybrid,
+                    layer = AppMapType.Hybrid,
                     painter = painterResource(Res.drawable.ic_map_satellite),
                     name = stringResource(Res.string.satellite),
                     onLayerSelected = onLayerSelected
                 )
                 MapLayerItem(
                     currentMapType = mapType.value,
-                    layer = MapTypes.terrain,
+                    layer = AppMapType.Terrain,
                     painter = painterResource(Res.drawable.ic_map_terrain),
                     name = stringResource(Res.string.terrain),
                     onLayerSelected = onLayerSelected
@@ -466,11 +450,11 @@ fun LayersView(
 
 @Composable
 fun MapLayerItem(
-    currentMapType: Int,
-    layer: Int,
+    currentMapType: AppMapType,
+    layer: AppMapType,
     painter: Painter,
     name: String,
-    onLayerSelected: (Int) -> Unit
+    onLayerSelected: (AppMapType) -> Unit
 ) {
     val isSelected = currentMapType == layer
     val animatedColor by animateColorAsState(
@@ -534,70 +518,6 @@ fun MapSettingsButton(
     }
 }
 
-@OptIn(ExperimentalResourceApi::class)
-@Composable
-fun PointerIcon(
-    pointerState: PointerState,
-    modifier: Modifier = Modifier,
-) {
-    var isFirstTimeCalled by remember { mutableStateOf(false) }
-
-    val darkTheme = isSystemInDarkTheme()
-    val markerResName = if (darkTheme) "marker_night" else "marker"
-
-    var jsonString by remember(markerResName) { mutableStateOf<String?>(null) }
-    LaunchedEffect(markerResName) {
-        jsonString = Res.readBytes("files/$markerResName.json").decodeToString()
-    }
-
-    jsonString?.let { json ->
-        val composition by rememberLottieComposition(LottieCompositionSpec.JsonString(json))
-        val lottieAnimatable = rememberLottieAnimatable()
-
-        val startMinMaxFrame by remember {
-            mutableStateOf(LottieClipSpec.Frame(0, 50))
-        }
-        val finishMinMaxFrame by remember {
-            mutableStateOf(LottieClipSpec.Frame(50, 82))
-        }
-
-        LaunchedEffect(isFirstTimeCalled) {
-            lottieAnimatable.animate(
-                composition,
-                iteration = 1,
-                continueFromPreviousAnimate = true,
-                clipSpec = startMinMaxFrame,
-            )
-        }
-
-        LaunchedEffect(pointerState) {
-            if (pointerState == PointerState.ShowMarker) {
-                lottieAnimatable.animate(
-                    composition,
-                    iteration = 1,
-                    continueFromPreviousAnimate = true,
-                    clipSpec = startMinMaxFrame,
-                )
-            } else {
-                lottieAnimatable.animate(
-                    composition,
-                    iteration = 1,
-                    continueFromPreviousAnimate = false,
-                    clipSpec = finishMinMaxFrame,
-                )
-            }
-        }
-
-        LottieAnimation(
-            modifier = modifier.size(128.dp),
-            composition = composition,
-            progress = { lottieAnimatable.progress }
-        )
-
-        isFirstTimeCalled = true
-    }
-}
-
 @Composable
 fun FishLoading(modifier: Modifier) {
     AnimatedResource("fish_loading", modifier, iterations = 1)
@@ -607,7 +527,6 @@ fun FishLoading(modifier: Modifier) {
 fun PlaceTileView(
     modifier: Modifier,
 ) {
-    LocalContext.current
     val viewModel: MapViewModel = koinViewModel()
     val placeTileViewNameState by viewModel.placeTileViewNameState.collectAsState()
 
@@ -680,7 +599,8 @@ fun PlaceTileView(
 
 @Composable
 fun SetPlaceNameResultListener(geocoderResult: GeocoderResult, setPlaceName: (String) -> Unit) {
-    val context = LocalContext.current
+    val unnamedPlace = stringResource(Res.string.unnamed_place)
+    val cantRecognizePlace = stringResource(Res.string.cant_recognize_place)
 
     LaunchedEffect(geocoderResult) {
         geocoderResult.let {
@@ -690,11 +610,11 @@ fun SetPlaceNameResultListener(geocoderResult: GeocoderResult, setPlaceName: (St
                 }
 
                 GeocoderResult.NoNamePlace -> {
-                    setPlaceName(context.getString(R.string.unnamed_place))
+                    setPlaceName(unnamedPlace)
                 }
 
                 GeocoderResult.Failed -> {
-                    setPlaceName(context.getString(R.string.cant_recognize_place))
+                    setPlaceName(cantRecognizePlace)
                 }
 
                 GeocoderResult.InProgress -> {

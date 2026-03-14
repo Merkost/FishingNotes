@@ -2,6 +2,7 @@ package com.mobileprism.fishing.ui.utils.enums
 
 import com.mobileprism.fishing.domain.entity.common.CatchesSortValues
 import com.mobileprism.fishing.domain.entity.common.PlacesSortValues
+import com.mobileprism.fishing.domain.entity.common.SortDirection
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import fishing.shared.generated.resources.Res
@@ -45,5 +46,25 @@ fun CatchesSortValues.sort(list: List<UserCatch>): List<UserCatch> {
         CatchesSortValues.NameAsc -> list.sortedBy { it.fishType }
         CatchesSortValues.NameDesc -> list.sortedByDescending { it.fishType }
         CatchesSortValues.FishDesc -> list.sortedByDescending { it.fishAmount }
+    }
+}
+
+fun PlacesSortValues.toFirestoreOrder(): Pair<String, SortDirection> {
+    return when (this) {
+        PlacesSortValues.Default, PlacesSortValues.TimeDesc -> "dateOfCreation" to SortDirection.DESCENDING
+        PlacesSortValues.TimeAsc -> "dateOfCreation" to SortDirection.ASCENDING
+        PlacesSortValues.NameAsc -> "title" to SortDirection.ASCENDING
+        PlacesSortValues.NameDesc -> "title" to SortDirection.DESCENDING
+        PlacesSortValues.CatchesDesc -> "catchesCount" to SortDirection.DESCENDING
+    }
+}
+
+fun CatchesSortValues.toFirestoreOrder(): Pair<String, SortDirection> {
+    return when (this) {
+        CatchesSortValues.Default, CatchesSortValues.TimeDesc -> "date" to SortDirection.DESCENDING
+        CatchesSortValues.TimeAsc -> "date" to SortDirection.ASCENDING
+        CatchesSortValues.NameAsc -> "fishType" to SortDirection.ASCENDING
+        CatchesSortValues.NameDesc -> "fishType" to SortDirection.DESCENDING
+        CatchesSortValues.FishDesc -> "fishAmount" to SortDirection.DESCENDING
     }
 }

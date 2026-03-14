@@ -19,8 +19,8 @@ actual fun ObserveCurrentLocation(
             locationManager.getCurrentLocationFlow().collect { locationState ->
                 if (locationState is LocationState.LocationGranted) {
                     onLocationReceived(
-                        locationState.location.latitude,
-                        locationState.location.longitude,
+                        locationState.latitude,
+                        locationState.longitude,
                         currentLocationTitle
                     )
                 }

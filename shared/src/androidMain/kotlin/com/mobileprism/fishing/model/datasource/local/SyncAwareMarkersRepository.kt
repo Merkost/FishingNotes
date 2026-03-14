@@ -1,9 +1,9 @@
 package com.mobileprism.fishing.model.datasource.local
 
-import android.util.Log
 import androidx.paging.PagingData
-import com.google.firebase.firestore.Query
+import org.kimplify.cedar.logging.Cedar
 import com.mobileprism.fishing.domain.entity.common.ContentState
+import com.mobileprism.fishing.domain.entity.common.SortDirection
 import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.domain.entity.content.MapMarker
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
@@ -81,7 +81,7 @@ class SyncAwareMarkersRepository(
 
     override fun getAllUserMarkersListPaged(
         sortField: String,
-        sortDirection: Query.Direction
+        sortDirection: SortDirection
     ): Flow<PagingData<UserMapMarker>> {
         return firebaseRepo.getAllUserMarkersListPaged(sortField, sortDirection)
     }
@@ -95,7 +95,7 @@ class SyncAwareMarkersRepository(
                 return Result.success(Unit)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to delete marker online, queuing", e)
+            Cedar.tag(TAG).e("Failed to delete marker online, queuing: ${e.message}")
         }
         // Queue for offline sync
         db.withTransaction {
@@ -127,10 +127,10 @@ class SyncAwareMarkersRepository(
                 pendingOpsDao.deleteByEntity("marker", newMarker.id)
                 return result
             }.onFailure {
-                Log.e(TAG, "Failed to add marker online, queuing", it)
+                Cedar.tag(TAG).e("Failed to add marker online, queuing: ${it.message}")
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Exception adding marker online, queuing", e)
+            Cedar.tag(TAG).e("Exception adding marker online, queuing: ${e.message}")
         }
         // Queue for offline sync
         db.withTransaction {

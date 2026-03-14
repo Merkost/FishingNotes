@@ -1,9 +1,9 @@
 package com.mobileprism.fishing.model.datasource.local
 
-import android.util.Log
 import androidx.paging.PagingData
-import com.google.firebase.firestore.Query
+import org.kimplify.cedar.logging.Cedar
 import com.mobileprism.fishing.domain.entity.common.ContentStateOld
+import com.mobileprism.fishing.domain.entity.common.SortDirection
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
 import androidx.room.withTransaction
@@ -62,7 +62,7 @@ class SyncAwareCatchesRepository(
                 try {
                     catchDao.insert(catch.toEntity(SyncStatus.SYNCED))
                 } catch (e: Exception) {
-                    Log.w(TAG, "Failed to cache catch ${catch.id} locally: ${e.message}")
+                    Cedar.tag(TAG).w("Failed to cache catch ${catch.id} locally: ${e.message}")
                 }
             }
             catches
@@ -89,7 +89,7 @@ class SyncAwareCatchesRepository(
                 return result
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to update catch online, queuing", e)
+            Cedar.tag(TAG).e("Failed to update catch online, queuing: ${e.message}")
         }
         // Queue for offline sync
         db.withTransaction {
@@ -127,7 +127,7 @@ class SyncAwareCatchesRepository(
                 return Result.success(Unit)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to delete catch online, queuing", e)
+            Cedar.tag(TAG).e("Failed to delete catch online, queuing: ${e.message}")
         }
         // Queue for offline sync
         db.withTransaction {
@@ -152,7 +152,7 @@ class SyncAwareCatchesRepository(
         try {
             catchDao.insert(newCatch.toEntity(SyncStatus.PENDING_CREATE))
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to cache new catch locally: ${e.message}")
+            Cedar.tag(TAG).w("Failed to cache new catch locally: ${e.message}")
         }
 
         try {
@@ -161,11 +161,11 @@ class SyncAwareCatchesRepository(
                 catchDao.updateSyncStatus(newCatch.id, SyncStatus.SYNCED)
                 pendingOpsDao.deleteByEntity("catch", newCatch.id)
             }.onFailure {
-                Log.e(TAG, "Failed to add catch online, queuing", it)
+                Cedar.tag(TAG).e("Failed to add catch online, queuing: ${it.message}")
                 queueCatchCreate(markerId, newCatch)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Exception adding catch online, queuing", e)
+            Cedar.tag(TAG).e("Exception adding catch online, queuing: ${e.message}")
             queueCatchCreate(markerId, newCatch)
         }
         return Result.success(Unit) // Success from local perspective
@@ -189,7 +189,7 @@ class SyncAwareCatchesRepository(
 
     override fun getAllUserCatchesPaged(
         sortField: String,
-        sortDirection: Query.Direction
+        sortDirection: SortDirection
     ): Flow<PagingData<UserCatch>> {
         return firebaseRepo.getAllUserCatchesPaged(sortField, sortDirection)
     }

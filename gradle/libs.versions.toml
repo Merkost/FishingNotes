@@ -47,16 +47,23 @@ firebaseCoroutines = "1.10.2"
 junit = "4.13.2"
 coilCompose = "3.4.0"
 paging = "3.4.1"
-ktor = "3.4.0"
+ktor = "3.4.1"
 foundationLayoutAndroid = "1.10.4"
-vico = "3.0.2"
+vico = "3.0.3"
+kmpMapsCompose = "0.5.0"
 workRuntimeKtx = "2.11.1"
 compressor = "3.0.1"
 mockk = "1.14.9"
 turbine = "1.2.1"
 detekt = "1.23.8"
+cedarLogging = "0.2.2"
+flowmvi = "3.2.1"
+
 
 [libraries]
+flowmvi-core = { module = "pro.respawn.flowmvi:core", version.ref = "flowmvi" }
+flowmvi-compose = { module = "pro.respawn.flowmvi:compose", version.ref = "flowmvi" }
+
 moko-permissions = { group = "dev.icerock.moko", name = "permissions", version.ref = "mokoPermissions" }
 moko-permissions-compose = { group = "dev.icerock.moko", name = "permissions-compose", version.ref = "mokoPermissions" }
 moko-permissions-location = { group = "dev.icerock.moko", name = "permissions-location", version.ref = "mokoPermissions" }
@@ -138,10 +145,12 @@ firebase-gitlive-storage = { group = "dev.gitlive", name = "firebase-storage", v
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 
+
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coilCompose" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coilCompose" }
 coil-network-ktor3 = { group = "io.coil-kt.coil3", name = "coil-network-ktor3", version.ref = "coilCompose" }
 
+paging-common = { group = "androidx.paging", name = "paging-common", version.ref = "paging" }
 paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
 
@@ -152,11 +161,13 @@ ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundationLayoutAndroid" }
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
+kmpMapsCompose-maps = { group = "eu.buney.maps", name = "kmp-maps-compose", version.ref = "kmpMapsCompose" }
 work-runtimeKtx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
 compressor = { group = "id.zelory", name = "compressor", version.ref = "compressor" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin" }
+cedar-logging = { group = "org.kimplify", name = "cedar-logging", version.ref = "cedarLogging" }
 
 
 [plugins]

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import org.kimplify.cedar.logging.Cedar
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.repository.app.MarkersRepositoryPaged
 import com.mobileprism.fishing.ui.home.UiState
@@ -16,7 +17,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
-import android.util.Log
 
 class UserPlacesViewModel(private val repository: MarkersRepositoryPaged) : ViewModel() {
 
@@ -47,7 +47,7 @@ class UserPlacesViewModel(private val repository: MarkersRepositoryPaged) : View
         viewModelScope.launch {
             repository.getAllUserMarkersList()
                 .catch {
-                    Log.e("UserPlacesVM", "Failed to load places", it)
+                    Cedar.tag("UserPlacesVM").e("Failed to load places")
                     _uiState.value = UiState.Error
                 }
                 .collect { userPlaces ->
@@ -65,7 +65,7 @@ class UserPlacesViewModel(private val repository: MarkersRepositoryPaged) : View
         viewModelScope.launch {
             repository.getAllUserMarkersList()
                 .catch {
-                    Log.e("UserPlacesVM", "Failed to refresh places", it)
+                    Cedar.tag("UserPlacesVM").e("Failed to refresh places")
                     _isRefreshing.value = false
                 }
                 .collect { userPlaces ->

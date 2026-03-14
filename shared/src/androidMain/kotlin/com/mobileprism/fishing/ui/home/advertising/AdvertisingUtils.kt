@@ -1,7 +1,7 @@
 package com.mobileprism.fishing.ui.home.advertising
 
 import android.content.Context
-import android.util.Log
+import org.kimplify.cedar.logging.Cedar
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
@@ -29,7 +29,7 @@ fun createInterstitialAdLoadCallback(
     object : InterstitialAdLoadCallback() {
         var mInterstitialAd: InterstitialAd? = null
         override fun onAdLoaded(interstitialAd: InterstitialAd) {
-            Log.d(TAG, "Ad was loaded.")
+            Cedar.tag(TAG).d("Ad was loaded.")
             mInterstitialAd = interstitialAd
             mInterstitialAd?.show(context as Activity)
             onAdLoaded()
@@ -37,7 +37,7 @@ fun createInterstitialAdLoadCallback(
         }
 
         override fun onAdFailedToLoad(adError: LoadAdError) {
-            Log.d(TAG, adError.message)
+            Cedar.tag(TAG).d(adError.message)
             mInterstitialAd = null
             onAdLoaded()
             super.onAdFailedToLoad(adError)

@@ -2,16 +2,15 @@ package com.mobileprism.fishing.model.datasource.firebase
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.Query
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
-import kotlinx.coroutines.tasks.await
+import dev.gitlive.firebase.firestore.CollectionReference
+import dev.gitlive.firebase.firestore.Direction
+import dev.gitlive.firebase.firestore.DocumentSnapshot
 
 class MarkersPagingSource(
     private val markersCollection: CollectionReference,
     private val sortField: String,
-    private val sortDirection: Query.Direction
+    private val sortDirection: Direction
 ) : PagingSource<DocumentSnapshot, UserMapMarker>() {
 
     override fun getRefreshKey(
@@ -27,14 +26,16 @@ class MarkersPagingSource(
         return try {
             var query = markersCollection
                 .orderBy(sortField, sortDirection)
-                .limit(params.loadSize.toLong())
+                .limit(params.loadSize)
 
             params.key?.let { lastDoc ->
                 query = query.startAfter(lastDoc)
             }
 
-            val snapshot = query.get().await()
-            val markers = snapshot.toObjects(UserMapMarker::class.java)
+            val snapshot = query.get()
+            val markers = snapshot.documents.mapNotNull { doc ->
+                try { doc.data<UserMapMarker>() } catch (_: Exception) { null }
+            }
             val lastDocument = snapshot.documents.lastOrNull()
 
             LoadResult.Page(

@@ -57,7 +57,6 @@ fun UserCatchesScreen(
         { navController.navigate(MainDestinations.NewCatch()) }
     }
 
-    // Update sort order when preference changes
     viewModel.setSortOrder(catchesSortValue)
 
     Scaffold(containerColor = Color.Transparent) {
@@ -117,7 +116,6 @@ fun UserCatchesScreen(
                         } else {
                             when (catchesSortValue) {
                                 CatchesSortValues.TimeAsc, CatchesSortValues.TimeDesc -> {
-                                    // Date-grouped display with sticky headers
                                     var lastDate: String? = null
                                     for (index in 0 until lazyPagingItems.itemCount) {
                                         val catch = lazyPagingItems.peek(index)
@@ -158,7 +156,6 @@ fun UserCatchesScreen(
                     }
                 }
 
-                // Append loading indicator
                 if (lazyPagingItems.loadState.append is LoadState.Loading) {
                     item {
                         Box(

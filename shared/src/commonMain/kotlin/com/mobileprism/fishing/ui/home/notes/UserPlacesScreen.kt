@@ -54,7 +54,6 @@ fun UserPlacesScreen(
         { navController.navigate(MainDestinations.Map(isAddingNewPlace = true)) }
     }
 
-    // Update sort order when preference changes
     viewModel.setSortOrder(placesSortValue)
 
     Scaffold(containerColor = Color.Transparent) {
@@ -124,7 +123,6 @@ fun UserPlacesScreen(
                     }
                 }
 
-                // Append loading indicator
                 if (lazyPagingItems.loadState.append is LoadState.Loading) {
                     item {
                         Box(

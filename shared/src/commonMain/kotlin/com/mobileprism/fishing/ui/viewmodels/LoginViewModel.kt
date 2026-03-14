@@ -7,7 +7,7 @@ import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
 import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
-import com.mobileprism.fishing.utils.Logger
+import org.kimplify.cedar.logging.Cedar
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.GoogleAuthProvider
 import dev.gitlive.firebase.auth.auth
@@ -20,7 +20,6 @@ import kotlinx.coroutines.launch
 class LoginViewModel(
     private val repository: UserRepository,
     private val analyticsTracker: AnalyticsTracker,
-    private val logger: Logger,
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<BaseViewState<User?>> =
@@ -64,7 +63,7 @@ class LoginViewModel(
                 Firebase.auth.signInWithCredential(credential)
             } catch (e: Exception) {
                 analyticsTracker.logEvent(AnalyticsEvent.SignInError(e.message))
-                logger.log(e.message)
+                Cedar.e(e.message ?: "Sign-in failed")
                 _uiState.value = BaseViewState.Error(e)
             }
         }

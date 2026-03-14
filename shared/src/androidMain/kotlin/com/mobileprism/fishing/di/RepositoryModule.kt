@@ -89,13 +89,15 @@ val repositoryModule = networkModule + module {
     single<CatchesRepository>(named("firebase")) {
         FirebaseCatchesPagedRepository(
             coreRepo = get(),
-            authRepository = get()
+            authRepository = get(),
+            dbCollections = get()
         )
     }
     single<MarkersRepositoryPaged>(named("firebase")) {
         FirebaseMarkersPagedRepository(
             coreRepo = get(),
-            authRepository = get()
+            authRepository = get(),
+            dbCollections = get()
         )
     }
     single<WeatherRepository>(named("remote")) {

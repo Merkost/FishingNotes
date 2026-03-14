@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import org.kimplify.cedar.logging.Cedar
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.use_cases.catches.GetUserCatchesUseCase
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
@@ -19,7 +20,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
-import android.util.Log
 
 class UserCatchesViewModel(
     private val userCatchesUseCase: GetUserCatchesUseCase,
@@ -52,7 +52,7 @@ class UserCatchesViewModel(
         viewModelScope.launch {
             userCatchesUseCase.invoke()
                 .catch {
-                    Log.e("UserCatchesVM", "Failed to load catches", it)
+                    Cedar.tag("UserCatchesVM").e("Failed to load catches")
                     _uiState.value = UiState.Error
                 }
                 .collectLatest {
@@ -78,7 +78,7 @@ class UserCatchesViewModel(
                         _uiState.value = UiState.Success
                     }
             } catch (e: Exception) {
-                Log.e("UserCatchesVM", "Failed to refresh catches", e)
+                Cedar.tag("UserCatchesVM").e("Failed to refresh catches")
             } finally {
                 _isRefreshing.value = false
             }

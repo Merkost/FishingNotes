@@ -1,11 +1,11 @@
+@file:JvmName("UserPreferencesAndroid")
 package com.mobileprism.fishing.model.datastore
 
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
-import com.google.android.gms.maps.model.LatLng
-import com.mobileprism.fishing.ui.home.map.DEFAULT_ZOOM
+import com.mobileprism.fishing.ui.home.map.MapCameraState
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
 import com.mobileprism.fishing.ui.utils.enums.DarkModeValues
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.map
 
 class UserPreferencesImpl(private val context: Context) : UserPreferences {
 
-    // to make sure there's only one instance
     companion object {
         private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("userSettings")
 
@@ -32,13 +31,12 @@ class UserPreferencesImpl(private val context: Context) : UserPreferences {
         val DARK_MODE_KEY = stringPreferencesKey("dark_mode")
     }
 
-    //get the saved value
     override val shouldShowLocationPermission: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
             preferences[USER_LOCATION_PERMISSION_KEY] ?: true
         }
 
-    val shouldShowHiddenPlacesOnMap: Flow<Boolean> = context.dataStore.data
+    override val shouldShowHiddenPlacesOnMap: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
             preferences[MAP_HIDDEN_PLACES_KEY] ?: true
         }
@@ -76,26 +74,23 @@ class UserPreferencesImpl(private val context: Context) : UserPreferences {
             preferences[MAP_ZOOM_BUTTONS_KEY] ?: false
         }
 
-    val getLastMapCameraLocation: Flow<Triple<LatLng, Float, Float>> = context.dataStore.data
+    override val getLastMapCameraLocation: Flow<MapCameraState> = context.dataStore.data
         .map { preferences ->
-            Triple(
-                LatLng(
-                    preferences[LAST_MAP_LATITUDE] ?: 0.0,
-                    preferences[LAST_MAP_LONGITUDE] ?: 0.0,
-                ),
-                preferences[LAST_MAP_ZOOM] ?: 0f,
-                preferences[LAST_MAP_BEARING] ?: 0f,
-                )
+            MapCameraState(
+                latitude = preferences[LAST_MAP_LATITUDE] ?: 0.0,
+                longitude = preferences[LAST_MAP_LONGITUDE] ?: 0.0,
+                zoom = preferences[LAST_MAP_ZOOM] ?: 0f,
+                bearing = preferences[LAST_MAP_BEARING] ?: 0f,
+            )
         }
 
-    //save values
     override suspend fun saveLocationPermissionStatus(shouldShow: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[USER_LOCATION_PERMISSION_KEY] = shouldShow
         }
     }
 
-    suspend fun saveMapHiddenPlaces(shouldShow: Boolean) {
+    override suspend fun saveMapHiddenPlaces(shouldShow: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[MAP_HIDDEN_PLACES_KEY] = shouldShow
         }
@@ -131,13 +126,12 @@ class UserPreferencesImpl(private val context: Context) : UserPreferences {
         }
     }
 
-    suspend fun saveLastMapCameraLocation(triple: Triple<LatLng, Float, Float>) {
+    override suspend fun saveLastMapCameraLocation(cameraState: MapCameraState) {
         context.dataStore.edit { preferences ->
-            preferences[LAST_MAP_LATITUDE] = triple.first.latitude
-            preferences[LAST_MAP_LONGITUDE] = triple.first.longitude
-            preferences[LAST_MAP_ZOOM] = triple.second
-            preferences[LAST_MAP_BEARING] = triple.third
+            preferences[LAST_MAP_LATITUDE] = cameraState.latitude
+            preferences[LAST_MAP_LONGITUDE] = cameraState.longitude
+            preferences[LAST_MAP_ZOOM] = cameraState.zoom
+            preferences[LAST_MAP_BEARING] = cameraState.bearing
         }
     }
-
 }

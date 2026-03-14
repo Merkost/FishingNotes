@@ -1,0 +1,80 @@
+package com.mobileprism.fishing.ui.home.map
+
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieClipSpec
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.rememberLottieAnimatable
+import com.airbnb.lottie.compose.rememberLottieComposition
+import fishing.shared.generated.resources.Res
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+
+@OptIn(ExperimentalResourceApi::class)
+@Composable
+actual fun PointerAnimation(pointerState: PointerState, modifier: Modifier) {
+    var isFirstTimeCalled by remember { mutableStateOf(false) }
+
+    val darkTheme = isSystemInDarkTheme()
+    val markerResName = if (darkTheme) "marker_night" else "marker"
+
+    var jsonString by remember(markerResName) { mutableStateOf<String?>(null) }
+    LaunchedEffect(markerResName) {
+        jsonString = Res.readBytes("files/$markerResName.json").decodeToString()
+    }
+
+    jsonString?.let { json ->
+        val composition by rememberLottieComposition(LottieCompositionSpec.JsonString(json))
+        val lottieAnimatable = rememberLottieAnimatable()
+
+        val startMinMaxFrame by remember {
+            mutableStateOf(LottieClipSpec.Frame(0, 50))
+        }
+        val finishMinMaxFrame by remember {
+            mutableStateOf(LottieClipSpec.Frame(50, 82))
+        }
+
+        LaunchedEffect(isFirstTimeCalled) {
+            lottieAnimatable.animate(
+                composition,
+                iteration = 1,
+                continueFromPreviousAnimate = true,
+                clipSpec = startMinMaxFrame,
+            )
+        }
+
+        LaunchedEffect(pointerState) {
+            if (pointerState == PointerState.ShowMarker) {
+                lottieAnimatable.animate(
+                    composition,
+                    iteration = 1,
+                    continueFromPreviousAnimate = true,
+                    clipSpec = startMinMaxFrame,
+                )
+            } else {
+                lottieAnimatable.animate(
+                    composition,
+                    iteration = 1,
+                    continueFromPreviousAnimate = false,
+                    clipSpec = finishMinMaxFrame,
+                )
+            }
+        }
+
+        LottieAnimation(
+            modifier = modifier.size(128.dp),
+            composition = composition,
+            progress = { lottieAnimatable.progress }
+        )
+
+        isFirstTimeCalled = true
+    }
+}

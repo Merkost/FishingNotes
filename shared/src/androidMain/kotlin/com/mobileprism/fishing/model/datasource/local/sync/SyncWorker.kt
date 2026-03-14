@@ -1,8 +1,8 @@
 package com.mobileprism.fishing.model.datasource.local.sync
 
 import android.content.Context
-import android.util.Log
 import androidx.work.CoroutineWorker
+import org.kimplify.cedar.logging.Cedar
 import androidx.work.WorkerParameters
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
@@ -47,14 +47,14 @@ class SyncWorker(
     }
 
     override suspend fun doWork(): Result {
-        Log.d(TAG, "Starting sync work")
+        Cedar.tag(TAG).d("Starting sync work")
 
         val cutoff24h = (Clock.System.now() - 24.hours).toEpochMilliseconds()
         weatherCacheDao.deleteExpired(cutoff24h)
 
         val pendingOps = pendingOpsDao.getAll()
         if (pendingOps.isEmpty()) {
-            Log.d(TAG, "No pending operations")
+            Cedar.tag(TAG).d("No pending operations")
             return Result.success()
         }
 
@@ -67,13 +67,13 @@ class SyncWorker(
                 } ?: false
                 if (success) {
                     pendingOpsDao.delete(op)
-                    Log.d(TAG, "Successfully synced: ${op.entityType}/${op.entityId}/${op.operationType}")
+                    Cedar.tag(TAG).d("Successfully synced: ${op.entityType}/${op.entityId}/${op.operationType}")
                 } else {
                     handleFailure(op, "Operation returned false")
                     hasFailures = true
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to sync: ${op.entityType}/${op.entityId}", e)
+                Cedar.tag(TAG).e("Failed to sync: ${op.entityType}/${op.entityId}")
                 handleFailure(op, e.message ?: "Unknown error")
                 hasFailures = true
             }
@@ -85,7 +85,7 @@ class SyncWorker(
     private suspend fun processOperation(op: PendingOperationEntity): Boolean {
         // Dedup check: verify entity still has expected pending status
         if (!isOperationStillValid(op)) {
-            Log.d(TAG, "Skipping stale op: ${op.entityType}/${op.entityId}/${op.operationType}")
+            Cedar.tag(TAG).d("Skipping stale op: ${op.entityType}/${op.entityId}/${op.operationType}")
             return true // Treat as success — no longer needs processing
         }
 
@@ -93,7 +93,7 @@ class SyncWorker(
             "catch" -> processCatchOperation(op)
             "marker" -> processMarkerOperation(op)
             else -> {
-                Log.w(TAG, "Unknown entity type: ${op.entityType}")
+                Cedar.tag(TAG).w("Unknown entity type: ${op.entityType}")
                 false
             }
         }
@@ -180,7 +180,7 @@ class SyncWorker(
     private suspend fun handleFailure(op: PendingOperationEntity, error: String) {
         val newRetryCount = op.retryCount + 1
         if (newRetryCount >= MAX_RETRIES) {
-            Log.e(TAG, "Max retries reached for ${op.entityType}/${op.entityId}, marking as conflict")
+            Cedar.tag(TAG).e("Max retries reached for ${op.entityType}/${op.entityId}, marking as conflict")
             when (op.entityType) {
                 "catch" -> catchDao.updateSyncStatus(op.entityId, SyncStatus.CONFLICT)
                 "marker" -> markerDao.updateSyncStatus(op.entityId, SyncStatus.CONFLICT)

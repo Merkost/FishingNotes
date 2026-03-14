@@ -2,17 +2,17 @@ package com.mobileprism.fishing.model.datasource.firebase
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import com.mobileprism.fishing.domain.entity.content.UserCatch
-import kotlinx.coroutines.tasks.await
+import dev.gitlive.firebase.firestore.Direction
+import dev.gitlive.firebase.firestore.DocumentSnapshot
+import dev.gitlive.firebase.firestore.FirebaseFirestore
+import dev.gitlive.firebase.firestore.where
 
 class CatchesPagingSource(
     private val db: FirebaseFirestore,
     private val userId: String,
     private val sortField: String,
-    private val sortDirection: Query.Direction
+    private val sortDirection: Direction
 ) : PagingSource<DocumentSnapshot, UserCatch>() {
 
     override fun getRefreshKey(
@@ -27,16 +27,18 @@ class CatchesPagingSource(
     override suspend fun load(params: LoadParams<DocumentSnapshot>): LoadResult<DocumentSnapshot, UserCatch> {
         return try {
             var query = db.collectionGroup("catches")
-                .whereEqualTo("userId", userId)
+                .where { "userId" equalTo userId }
                 .orderBy(sortField, sortDirection)
-                .limit(params.loadSize.toLong())
+                .limit(params.loadSize)
 
             params.key?.let { lastDoc ->
                 query = query.startAfter(lastDoc)
             }
 
-            val snapshot = query.get().await()
-            val catches = snapshot.toObjects(UserCatch::class.java)
+            val snapshot = query.get()
+            val catches = snapshot.documents.mapNotNull { doc ->
+                try { doc.data<UserCatch>() } catch (_: Exception) { null }
+            }
             val lastDocument = snapshot.documents.lastOrNull()
 
             LoadResult.Page(
