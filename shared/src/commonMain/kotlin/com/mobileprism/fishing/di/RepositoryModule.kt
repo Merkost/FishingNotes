@@ -3,6 +3,8 @@ package com.mobileprism.fishing.di
 import com.mobileprism.fishing.BuildKonfig
 import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.domain.repository.UserRepository
+import com.mobileprism.fishing.domain.repository.SyncStatusProvider
+import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
 import com.mobileprism.fishing.domain.repository.app.FreeWeatherRepository
 import com.mobileprism.fishing.domain.repository.app.MarkersRepository
 import com.mobileprism.fishing.domain.repository.app.MarkersRepositoryPaged
@@ -15,6 +17,7 @@ import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepositoryUp
 import com.mobileprism.fishing.model.datasource.FreeWeatherRepositoryKtorImpl
 import com.mobileprism.fishing.model.datasource.SolunarRepositoryKtorImpl
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseAuthRepository
+import com.mobileprism.fishing.model.datasource.firebase.FirebaseAnalyticsTracker
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseCatchesPagedRepository
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseCatchesRepositoryImpl
 import com.mobileprism.fishing.model.datasource.firebase.FirebaseMarkersPagedRepository
@@ -27,11 +30,15 @@ import com.mobileprism.fishing.model.datasource.local.SyncAwareCatchesRepository
 import com.mobileprism.fishing.model.datasource.local.SyncAwareMarkersRepository
 import com.mobileprism.fishing.model.datasource.local.sync.SyncStatusManager
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
+import com.mobileprism.fishing.ui.home.SnackbarManager
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.koin.dsl.onClose
 
 val commonRepositoryModule = networkModule + module {
+    single { SnackbarManager }
+    single<AnalyticsTracker> { FirebaseAnalyticsTracker() }
+    single<SyncStatusProvider> { get<SyncStatusManager>() }
     single<AuthRepository> { FirebaseAuthRepository() }
     single { RepositoryCollections(authRepository = get()) }
 

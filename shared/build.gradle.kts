@@ -64,6 +64,7 @@ kotlin {
             implementation(libs.firebase.gitlive.auth)
             implementation(libs.firebase.gitlive.firestore)
             implementation(libs.firebase.gitlive.storage)
+            implementation(libs.firebase.gitlive.analytics)
             implementation(libs.jetbrains.lifecycle.viewmodel)      // KMP ViewModel
             api(libs.jetbrains.navigation.compose)                // KMP Navigation
             implementation(libs.jetbrains.viewmodel.compose)     // KMP ViewModel Compose
@@ -92,9 +93,7 @@ kotlin {
         }
 
         androidMain.dependencies {
-            api(libs.kotlin.stdlib)
             api(libs.coroutines.android)
-            api(libs.coroutines.core)
             api(libs.androidX.coreKtx)
             api(libs.androidX.splashScreen)
             api(libs.activity.compose)
@@ -109,20 +108,15 @@ kotlin {
 
             implementation(libs.work.runtimeKtx)
             implementation(libs.compressor)
-            implementation(libs.kotlinx.datetime)
-            implementation(libs.kotlinx.serialization.json)
 
-            implementation(libs.firebase.analytics)
             implementation(libs.firebase.crashlytics)
             implementation(libs.firebase.performance)
-            implementation(libs.firebase.firestore)
             implementation(libs.firebase.storage)
             implementation(libs.firebase.coroutines)
 
             implementation(libs.playServices.maps)
             implementation(libs.playServices.location)
             implementation(libs.playServices.billing)
-            implementation(libs.datastorePreferences)
 
             implementation(libs.compose.foundation)
             implementation(libs.compose.layout)

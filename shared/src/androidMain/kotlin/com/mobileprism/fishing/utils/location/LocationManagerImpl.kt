@@ -6,13 +6,11 @@ import android.app.Activity
 import android.content.Context
 import android.content.IntentSender
 import android.content.pm.PackageManager
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import org.kimplify.cedar.logging.Cedar
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
-import com.mobileprism.fishing.R
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.ui.home.SnackbarManager
@@ -41,11 +39,7 @@ class LocationManagerImpl(private val context: Context) : LocationManager {
                     emit(LocationState.LocationGranted(locationResult.latitude, locationResult.longitude))
                 } catch (e: Exception) {
                     Cedar.tag("MAP").d("GPS is off")
-                    Toast.makeText(
-                        context,
-                        R.string.cant_get_current_location,
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    SnackbarManager.showMessage(Res.string.cant_get_current_location)
                 }
             }
             else -> { emit(LocationState.NoPermission) }

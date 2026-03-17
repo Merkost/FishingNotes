@@ -8,7 +8,7 @@ fun initKoinIos() {
             listOf(
                 appModule,
                 settingsModule,
-                mainModule,
+                commonViewModelsModule,
                 useCasesModule,
             ) + repositoryModule
         )

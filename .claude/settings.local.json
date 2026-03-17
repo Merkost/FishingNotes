@@ -1,40 +1,43 @@
 {
-    "env": {
-        "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-    },
-    "permissions": {
-        "allow": [
-            "Read",
-            "Edit",
-            "Write",
-            "Bash",
-            "WebFetch",
-            "WebSearch",
-            "Bash(java -jar gradle/wrapper/gradle-wrapper.jar wrapper:*)",
-            "Bash(find:*)",
-            "Bash(./gradlew assembleDebug:*)",
-            "Bash(git checkout:*)",
-            "Bash(java -cp /Users/merkost/AndroidStudioProjects/FishingNotes/gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleDebug:*)",
-            "Bash(./gradlew :app:compileDebugKotlin:*)",
-            "Bash(/Users/merkost/AndroidStudioProjects/FishingNotes/gradlew:*)",
-            "Bash(chmod:*)",
-            "Bash(echo:*)",
-            "Bash(bash -c:*)",
-            "Bash(bash -x /Users/merkost/AndroidStudioProjects/FishingNotes/gradlew:*)",
-            "Bash(TMPDIR=/Users/merkost/tmp_claude mkdir:*)",
-            "Bash(TMPDIR=/Users/merkost/tmp_claude sed:*)",
-            "Bash(TMPDIR=/Users/merkost/tmp_claude grep:*)",
-            "Bash(TMPDIR=/Users/merkost/tmp_claude cd /Users/merkost/tmp_claude)",
-            "Bash(jar tf:*)",
-            "Bash(jar xf:*)",
-            "Bash(TMPDIR=/Users/merkost/tmp_claude git -C /Users/merkost/AndroidStudioProjects/FishingNotes diff --stat)",
-            "Bash(java:*)",
-            "Bash(grep:*)",
-            "Bash(ls:*)",
-            "Bash(./gradlew compileDebugKotlin:*)",
-            "Bash(git -C /Users/merkost/AndroidStudioProjects/FishingNotes log --oneline -10)",
-            "Bash(bash:*)",
-            "Bash(tail:*)"
-        ]
-    }
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Write",
+      "Bash",
+      "WebFetch",
+      "WebSearch",
+      "Bash(java -jar gradle/wrapper/gradle-wrapper.jar wrapper:*)",
+      "Bash(find:*)",
+      "Bash(./gradlew assembleDebug:*)",
+      "Bash(git checkout:*)",
+      "Bash(java -cp /Users/merkost/AndroidStudioProjects/FishingNotes/gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain assembleDebug:*)",
+      "Bash(./gradlew :app:compileDebugKotlin:*)",
+      "Bash(/Users/merkost/AndroidStudioProjects/FishingNotes/gradlew:*)",
+      "Bash(chmod:*)",
+      "Bash(echo:*)",
+      "Bash(bash -c:*)",
+      "Bash(bash -x /Users/merkost/AndroidStudioProjects/FishingNotes/gradlew:*)",
+      "Bash(TMPDIR=/Users/merkost/tmp_claude mkdir:*)",
+      "Bash(TMPDIR=/Users/merkost/tmp_claude sed:*)",
+      "Bash(TMPDIR=/Users/merkost/tmp_claude grep:*)",
+      "Bash(TMPDIR=/Users/merkost/tmp_claude cd /Users/merkost/tmp_claude)",
+      "Bash(jar tf:*)",
+      "Bash(jar xf:*)",
+      "Bash(TMPDIR=/Users/merkost/tmp_claude git -C /Users/merkost/AndroidStudioProjects/FishingNotes diff --stat)",
+      "Bash(java:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(./gradlew compileDebugKotlin:*)",
+      "Bash(git -C /Users/merkost/AndroidStudioProjects/FishingNotes log --oneline -10)",
+      "Bash(bash:*)",
+      "Bash(tail:*)"
+    ]
+  },
+  "remote": {
+    "defaultEnvironmentId": "env_011CUVL7po3mMZaN7xLkkVTx"
+  }
 }

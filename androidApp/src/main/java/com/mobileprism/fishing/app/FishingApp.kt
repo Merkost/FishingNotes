@@ -53,7 +53,7 @@ class FishingApp : Application(), SingletonImageLoader.Factory {
             androidContext(this@FishingApp)
             workManagerFactory()
             modules(
-                listOf(appModule, mainModule, settingsModule, commonViewModelsModule)
+                listOf(appModule, settingsModule, commonViewModelsModule)
                     + repositoryModule + useCasesModule
             )
         }
