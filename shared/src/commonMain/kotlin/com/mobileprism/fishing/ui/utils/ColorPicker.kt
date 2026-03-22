@@ -4,121 +4,83 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.contentColorFor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import org.jetbrains.compose.resources.painterResource
 import androidx.compose.ui.unit.dp
-import fishing.shared.generated.resources.Res
-import fishing.shared.generated.resources.*
-
 
 @Composable
-fun ColorPicker(
-    colors: List<Color?>,
-    selectedColor: Color?,
-    onColorSelected: (color: Color?) -> Unit,
-    modifier: Modifier = Modifier
+fun ColorGrid(
+    colors: List<Color>,
+    selectedColor: Color,
+    onColorSelected: (Color) -> Unit,
+    modifier: Modifier = Modifier,
+    columns: Int = 5,
 ) {
-    Column(modifier = modifier) {
-        LazyRow(
-            contentPadding = PaddingValues(4.dp),
-            horizontalArrangement = Arrangement.Start,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            items(colors) { color ->
-                ColorItem(
-                    selected = color == selectedColor,
-                    color = color,
-                    onClick = { onColorSelected(color) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun ColorItem(
-    selected: Boolean,
-    color: Color?,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .padding(4.dp)
-            .clip(CircleShape)
-            .requiredSize(40.dp)
-            .clickable(onClick = onClick)
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        if (color != null) {
-            // Transparent background pattern
-            Box(
-                modifier = Modifier
-                    .width(20.dp)
-                    .fillMaxHeight()
-                    .background(grey400)
-            )
-            // Color indicator
-            val colorModifier =
-                if (color.luminance() < 0.1 || color.luminance() > 0.9) {
-                    Modifier
-                        .fillMaxSize()
-                        .background(color)
-                        .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            shape = CircleShape
-                        )
-                } else {
-                    Modifier
-                        .fillMaxSize()
-                        .background(color)
-                }
-            Box(
-                modifier = colorModifier
+        colors.chunked(columns).forEach { row ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                if (selected) {
-                    Icon(
-                        Icons.Default.Check,
-                        contentDescription = Icons.Default.Check.name,
-                        tint = if (color.luminance() < 0.5) Color.White else Color.Black,
-                        modifier = Modifier.align(Alignment.Center)
+                row.forEach { color ->
+                    ColorGridItem(
+                        selected = color == selectedColor,
+                        color = color,
+                        onClick = { onColorSelected(color) }
                     )
                 }
             }
-        } else {
-            if (selected) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .align(Alignment.Center)
-                        .background(if (isSystemInDarkTheme()) whiteAlpha20 else blackAlpha20)
-                )
-            }
-            // Color null indicator (Dynamic theme)
-            Icon(
-                painterResource(Res.drawable.ic_color_off_24dp),
-                contentDescription = Icons.Default.Clear.name,
-                modifier = Modifier.align(Alignment.Center),
-                tint = contentColorFor(MaterialTheme.colorScheme.surface)
-            )
         }
     }
 }
 
-val grey400 = Color(0xFFBDBDBD)
-val blackAlpha20 = Color(0x33000000)
-val whiteAlpha20 = Color(0x33FFFFFF)
+@Composable
+private fun ColorGridItem(
+    selected: Boolean,
+    color: Color,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .size(34.dp)
+            .clip(CircleShape)
+            .background(color)
+            .then(
+                if (selected) Modifier.border(
+                    width = 2.5.dp,
+                    color = if (isSystemInDarkTheme()) Color.White
+                            else MaterialTheme.colorScheme.onSurface,
+                    shape = CircleShape
+                ) else Modifier
+            )
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        if (selected) {
+            Icon(
+                Icons.Default.Check,
+                contentDescription = null,
+                tint = if (color.luminance() < 0.5f) Color.White else Color.Black,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+    }
+}
