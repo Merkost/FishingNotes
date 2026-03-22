@@ -103,7 +103,7 @@ fun MapScaffold(
     modifier: Modifier = Modifier,
     onDismissCard: () -> Unit = {},
     fab: @Composable (() -> Unit)?,
-    bottomCard: @Composable () -> Unit,
+    bottomCard: @Composable () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -119,17 +119,17 @@ fun MapScaffold(
     Box(modifier = modifier.fillMaxSize()) {
         content()
 
-        androidx.compose.animation.AnimatedVisibility(
+        AnimatedVisibility(
             visible = mapUiState is MapUiState.BottomSheetInfoMode,
             modifier = Modifier.align(Alignment.BottomCenter),
             enter = androidx.compose.animation.slideInVertically(
                 initialOffsetY = { it },
-                animationSpec = tween(300)
-            ) + fadeIn(animationSpec = tween(300)),
+                animationSpec = tween(350, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+            ) + fadeIn(animationSpec = tween(250)),
             exit = androidx.compose.animation.slideOutVertically(
                 targetOffsetY = { it },
-                animationSpec = tween(300)
-            ) + fadeOut(animationSpec = tween(300)),
+                animationSpec = tween(250)
+            ) + fadeOut(animationSpec = tween(200)),
         ) {
             Column(
                 modifier = Modifier
@@ -244,14 +244,11 @@ fun MyLocationButton(
         }
     )
 
-    Card(
-        shape = CircleShape,
-        modifier = modifier.size(48.dp)
-    ) {
+    MapControlPill(modifier = modifier) {
         IconButton(
             modifier = Modifier
-                .padding(8.dp)
-                .fillMaxSize(),
+                .size(44.dp)
+                .clip(RoundedCornerShape(14.dp)),
             onClick = {
                 when (locationPermissionGranted) {
                     true -> {
@@ -268,7 +265,8 @@ fun MyLocationButton(
                 if (!shouldShowPermissions) Icons.Default.GpsOff
                 else Icons.Default.MyLocation,
                 stringResource(Res.string.my_location),
-                tint = color.value
+                tint = color.value,
+                modifier = Modifier.size(22.dp),
             )
         }
     }
@@ -287,14 +285,11 @@ fun CompassButton(
         enter = fadeIn(),
         exit = fadeOut(animationSpec = tween(delayMillis = 3000, durationMillis = 1000))
     ) {
-        Card(
-            shape = CircleShape,
-            modifier = Modifier.size(48.dp)
-        ) {
+        MapControlPill {
             IconButton(
                 modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxSize(),
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(14.dp)),
                 onClick = { onClick() }) {
                 Icon(
                     painterResource(
@@ -306,7 +301,7 @@ fun CompassButton(
                     stringResource(Res.string.compass),
                     modifier = Modifier
                         .rotate(1f - mapBearing.value)
-                        .fillMaxSize()
+                        .size(22.dp)
                 )
             }
         }
@@ -319,20 +314,16 @@ fun MapZoomInButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-
-    Card(
-        shape = CircleShape,
-        modifier = modifier.size(48.dp)
-    ) {
+    MapControlPill(modifier = modifier) {
         IconButton(
             modifier = Modifier
-                .padding(8.dp)
-                .fillMaxSize(),
+                .size(44.dp)
+                .clip(RoundedCornerShape(14.dp)),
             onClick = { onClick() }) {
             Icon(
                 Icons.Default.Add,
                 Icons.Default.Add.name,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.size(22.dp),
             )
         }
     }
@@ -343,21 +334,71 @@ fun MapZoomOutButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-
-    Card(
-        shape = CircleShape,
-        modifier = modifier.size(48.dp)
-    ) {
+    MapControlPill(modifier = modifier) {
         IconButton(
             modifier = Modifier
-                .padding(8.dp)
-                .fillMaxSize(),
+                .size(44.dp)
+                .clip(RoundedCornerShape(14.dp)),
             onClick = { onClick() }) {
             Icon(
                 Icons.Default.Remove,
                 Icons.Default.Remove.name,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.size(22.dp),
             )
+        }
+    }
+}
+
+@Composable
+fun MapControlPill(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    Surface(
+        modifier = modifier.clip(RoundedCornerShape(14.dp)),
+        color = MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.92f),
+        shape = RoundedCornerShape(14.dp),
+        shadowElevation = 4.dp,
+    ) {
+        content()
+    }
+}
+
+@Composable
+fun MapControlsLeftPill(
+    modifier: Modifier = Modifier,
+    onLayersClick: () -> Unit,
+    onSettingsClick: () -> Unit,
+) {
+    MapControlPill(modifier = modifier) {
+        Row(
+            modifier = Modifier.padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(0.dp),
+        ) {
+            IconButton(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                onClick = onLayersClick
+            ) {
+                Icon(
+                    painterResource(Res.drawable.ic_baseline_layers_24),
+                    stringResource(Res.string.layers),
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+            IconButton(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                onClick = onSettingsClick
+            ) {
+                Icon(
+                    Icons.Default.Settings,
+                    Icons.Default.Settings.name,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
         }
     }
 }

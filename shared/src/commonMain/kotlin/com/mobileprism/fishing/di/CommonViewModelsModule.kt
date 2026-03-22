@@ -13,6 +13,7 @@ import com.mobileprism.fishing.ui.viewmodels.WeatherViewModel
 import com.mobileprism.fishing.viewmodels.EditProfileViewModel
 import com.mobileprism.fishing.viewmodels.MainViewModel
 import com.mobileprism.fishing.viewmodels.MapViewModel
+import com.mobileprism.fishing.viewmodels.OnboardingViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -28,6 +29,7 @@ val commonViewModelsModule = module {
         )
     }
     viewModel { MainViewModel(repository = get(), syncStatusProvider = get()) }
+    viewModel { OnboardingViewModel(userPreferences = get()) }
     viewModel {
         LoginViewModel(
             repository = get(),

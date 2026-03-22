@@ -1,5 +1,7 @@
 package com.mobileprism.fishing.ui
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
@@ -18,11 +20,32 @@ import com.mobileprism.fishing.ui.home.AppSnackbar
 import com.mobileprism.fishing.ui.home.FishingNotesBottomBar
 import com.mobileprism.fishing.ui.home.HomeSections
 import com.mobileprism.fishing.ui.home.views.SyncStatusIndicator
+import com.mobileprism.fishing.ui.onboarding.OnboardingScreen
 import com.mobileprism.fishing.viewmodels.MainViewModel
+import com.mobileprism.fishing.viewmodels.OnboardingViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun FishingNotesApp() {
+    val onboardingViewModel: OnboardingViewModel = koinViewModel()
+    val onboardingCompleted by onboardingViewModel.hasCompletedOnboarding.collectAsState()
+
+    Crossfade(
+        targetState = onboardingCompleted,
+        animationSpec = tween(500),
+    ) { completed ->
+        when (completed) {
+            null -> {}
+            false -> OnboardingScreen(
+                onFinished = { onboardingViewModel.completeOnboarding() },
+            )
+            true -> FishingNotesMainContent()
+        }
+    }
+}
+
+@Composable
+private fun FishingNotesMainContent() {
     val appStateHolder = rememberAppStateHolder()
     val mainViewModel: MainViewModel = koinViewModel()
     val syncState by mainViewModel.syncState.collectAsState()
@@ -46,7 +69,7 @@ fun FishingNotesApp() {
                 snackbar = { snackbarData -> AppSnackbar(snackbarData) }
             )
         },
-        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.exclude(WindowInsets.statusBars)
+        contentWindowInsets = WindowInsets(0)
     ) { innerPaddingModifier ->
         Column(modifier = Modifier.padding(innerPaddingModifier)) {
             SyncStatusIndicator(syncState = syncState)

@@ -3,7 +3,7 @@ package com.mobileprism.fishing.ui.utils
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
+import com.mobileprism.fishing.ui.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -66,7 +66,7 @@ private fun ColorGridItem(
             .then(
                 if (selected) Modifier.border(
                     width = 2.5.dp,
-                    color = if (isSystemInDarkTheme()) Color.White
+                    color = if (isAppInDarkTheme()) Color.White
                             else MaterialTheme.colorScheme.onSurface,
                     shape = CircleShape
                 ) else Modifier

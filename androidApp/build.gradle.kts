@@ -46,8 +46,8 @@ android {
         applicationId = "com.mobileprism.fishing"
         minSdk = 24
         targetSdk = 36
-        versionCode = 16
-        versionName = "1.1.3"
+        versionCode = libs.versions.appVersionCode.get().toInt()
+        versionName = libs.versions.appVersionName.get()
         manifestPlaceholders["MAPS_API_KEY"] = resolveProperty("MAPS_API_KEY")
     }
 

@@ -33,7 +33,6 @@ kotlin {
     }
 
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
@@ -135,12 +134,10 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
         }
 
-        val iosX64Main by getting
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
         val iosMain by creating {
             dependsOn(commonMain.get())
-            iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
             iosSimulatorArm64Main.dependsOn(this)
             dependencies {
@@ -187,7 +184,6 @@ dependencies {
     api(platform(libs.firebase.bom))
 
     add("kspAndroid", libs.room.compiler)
-    add("kspIosX64", libs.room.compiler)
     add("kspIosArm64", libs.room.compiler)
     add("kspIosSimulatorArm64", libs.room.compiler)
 

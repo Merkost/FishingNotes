@@ -23,4 +23,9 @@ interface UserPreferences {
     suspend fun saveMapZoomButtons(useZoomButtons: Boolean)
     suspend fun saveMapHiddenPlaces(shouldShow: Boolean)
     suspend fun saveLastMapCameraLocation(cameraState: MapCameraState)
+
+    val hasCompletedOnboarding: Flow<Boolean>
+    val hasPromptCardDismissed: Flow<Boolean>
+    suspend fun saveOnboardingCompleted(completed: Boolean)
+    suspend fun savePromptCardDismissed(dismissed: Boolean)
 }

@@ -29,6 +29,8 @@ class UserPreferencesImpl(private val dataStore: DataStore<Preferences>) : UserP
         val MAP_ZOOM_BUTTONS_KEY = booleanPreferencesKey("map_zoom_buttons")
         val APP_THEME_KEY = stringPreferencesKey("app_theme")
         val DARK_MODE_KEY = stringPreferencesKey("dark_mode")
+        val ONBOARDING_COMPLETED_KEY = booleanPreferencesKey("has_completed_onboarding")
+        val PROMPT_CARD_DISMISSED_KEY = booleanPreferencesKey("has_prompt_card_dismissed")
     }
 
     override val shouldShowLocationPermission: Flow<Boolean> = dataStore.data
@@ -132,6 +134,28 @@ class UserPreferencesImpl(private val dataStore: DataStore<Preferences>) : UserP
             preferences[LAST_MAP_LONGITUDE] = cameraState.longitude
             preferences[LAST_MAP_ZOOM] = cameraState.zoom
             preferences[LAST_MAP_BEARING] = cameraState.bearing
+        }
+    }
+
+    override val hasCompletedOnboarding: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[ONBOARDING_COMPLETED_KEY] ?: false
+        }
+
+    override val hasPromptCardDismissed: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[PROMPT_CARD_DISMISSED_KEY] ?: false
+        }
+
+    override suspend fun saveOnboardingCompleted(completed: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[ONBOARDING_COMPLETED_KEY] = completed
+        }
+    }
+
+    override suspend fun savePromptCardDismissed(dismissed: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PROMPT_CARD_DISMISSED_KEY] = dismissed
         }
     }
 }

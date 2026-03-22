@@ -453,5 +453,10 @@
     <string name="prompt_card_title">Add your first spot!</string>
     <string name="prompt_card_subtitle">Tap to mark a fishing location on the map</string>
     <string name="color">Color</string>
+    <string name="away">away</string>
+    <string name="wind_speed">Wind</string>
+    <string name="clouds">Clouds</string>
+    <string name="feels_like_label">Feels</string>
+    <string name="catch_title">Catch</string>
 
 </resources>

@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -26,7 +27,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -96,14 +98,20 @@ fun MapScreen(
     }
 
     val mapUiState by viewModel.mapUiState.collectAsState()
+    val mapMarkers by viewModel.mapMarkers.collectAsState()
 
     val analyticsTracker = LocalAnalytics.current
     val userPreferences: UserPreferences = koinInject()
     val useZoomButtons by userPreferences.useMapZoomButons.collectAsState(false)
 
+    val onboardingViewModel: com.mobileprism.fishing.viewmodels.OnboardingViewModel = koinViewModel()
+    val onboardingCompleted by onboardingViewModel.hasCompletedOnboarding.collectAsState()
+    val isCardDismissed by onboardingViewModel.isPromptCardDismissed.collectAsState()
+    val showPromptCard = onboardingCompleted == true && mapMarkers.isEmpty() && !isCardDismissed
+
     val modalBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var showModalBottomSheet by remember { mutableStateOf(false) }
-    var newPlaceDialog by remember { mutableStateOf(false) }
+    var showModalBottomSheet by rememberSaveable { mutableStateOf(false) }
+    var newPlaceDialog by rememberSaveable { mutableStateOf(false) }
     var mapLayersSelection by rememberSaveable { mutableStateOf(false) }
 
     val noNamePlace = stringResource(Res.string.no_name_place)
@@ -122,6 +130,19 @@ fun MapScreen(
             shape = Constants.modalBottomSheetCorners,
         ) {
             MapModalBottomSheet(mapPreferences = userPreferences)
+        }
+    }
+
+    if (newPlaceDialog) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                viewModel.cancelAddNewMarker()
+                newPlaceDialog = false
+            },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            shape = Constants.modalBottomSheetCorners,
+        ) {
+            NewPlaceBottomSheetContent(onDismiss = { newPlaceDialog = false })
         }
     }
 
@@ -147,18 +168,15 @@ fun MapScreen(
                 )
             },
             bottomCard = {
-                MarkerInfoDialog(
+                PlaceDetailsCard(
                     viewModel = viewModel,
                     navController = navController,
-                    onMarkerIconClicked = viewModel::onMarkerClicked,
                     onAddCatch = { marker ->
-                        navController.navigate(
-                            MainDestinations.NewCatch(place = marker)
-                        )
+                        navController.navigate(MainDestinations.NewCatch(place = marker))
                     },
                     onSaveCurrentPlace = { newPlaceDialog = true },
                 )
-            }
+            },
         ) {
             MapControls(
                 mapUiState = mapUiState,
@@ -171,14 +189,16 @@ fun MapScreen(
                     analyticsTracker.logEvent(AnalyticsEvent.MapSettings)
                     showModalBottomSheet = true
                 },
-                newPlaceDialog = newPlaceDialog,
-                onNewPlaceDialogDismiss = { newPlaceDialog = false },
                 place = place,
+                showPromptCard = showPromptCard,
+                onPromptCardDismiss = { onboardingViewModel.dismissPromptCard() },
+                onPromptCardClick = { viewModel.setPlaceSelectionMode() },
             )
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MapControls(
     mapUiState: MapUiState,
@@ -188,9 +208,10 @@ private fun MapControls(
     mapLayersSelection: Boolean,
     onMapLayersSelectionChanged: (Boolean) -> Unit,
     onMapSettingsClicked: () -> Unit,
-    newPlaceDialog: Boolean,
-    onNewPlaceDialogDismiss: () -> Unit,
     place: com.mobileprism.fishing.domain.entity.content.UserMapMarker? = null,
+    showPromptCard: Boolean = false,
+    onPromptCardDismiss: () -> Unit = {},
+    onPromptCardClick: () -> Unit = {},
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         MapLayout(modifier = Modifier.fillMaxSize(), place = place)
@@ -217,11 +238,10 @@ private fun MapControls(
                     .align(Alignment.TopStart),
                 verticalAlignment = Alignment.Top
             ) {
-                Column {
-                    MapLayersButton(modifier = Modifier) { onMapLayersSelectionChanged(true) }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    MapSettingsButton(modifier = Modifier, onCLick = onMapSettingsClicked)
-                }
+                MapControlsLeftPill(
+                    onLayersClick = { onMapLayersSelectionChanged(true) },
+                    onSettingsClick = onMapSettingsClicked,
+                )
 
                 Spacer(modifier = Modifier.weight(1f))
                 AnimatedVisibility(
@@ -253,6 +273,15 @@ private fun MapControls(
                     MapZoomOutButton(onClick = viewModel::onZoomOutClick)
                 }
             }
+
+            FirstSpotPromptCard(
+                visible = showPromptCard && mapUiState == MapUiState.NormalMode,
+                onDismiss = onPromptCardDismiss,
+                onClick = onPromptCardClick,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 8.dp),
+            )
 
             AnimatedVisibility(
                 visible = mapUiState == MapUiState.PlaceSelectMode,
@@ -287,7 +316,6 @@ private fun MapControls(
             ) { onMapLayersSelectionChanged(false) }
         }
 
-        NewPlaceDialog(dialogState = newPlaceDialog, onDismiss = onNewPlaceDialogDismiss)
     }
 }
 
@@ -414,13 +442,30 @@ fun MapLayout(
         markersToShow.forEach { userMarker ->
             val position = LatLng(userMarker.latitude, userMarker.longitude)
             val markerColor = Color(userMarker.markerColor)
-            val markerIcon = rememberComposeBitmapDescriptor(userMarker.markerColor) {
-                androidx.compose.material3.Icon(
-                    painter = painterResource(Res.drawable.ic_baseline_location_on_24),
-                    contentDescription = null,
-                    tint = markerColor,
-                    modifier = androidx.compose.ui.Modifier.size(36.dp)
-                )
+            val markerIcon = rememberComposeBitmapDescriptor(
+                userMarker.markerColor, userMarker.catchesCount
+            ) {
+                Box(contentAlignment = Alignment.TopEnd) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_baseline_location_on_24),
+                        contentDescription = null,
+                        tint = markerColor,
+                        modifier = Modifier.size(36.dp)
+                    )
+                    if (userMarker.catchesCount > 0) {
+                        androidx.compose.material3.Text(
+                            text = userMarker.catchesCount.toString(),
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier
+                                .background(
+                                    color = Color(0xFFFF6D00),
+                                    shape = CircleShape,
+                                )
+                                .padding(horizontal = 4.dp, vertical = 1.dp),
+                        )
+                    }
+                }
             }
             Marker(
                 state = rememberUpdatedMarkerState(position = position),
@@ -514,14 +559,14 @@ fun MapFab(
                 Icon(
                     painter = painterResource(Res.drawable.ic_baseline_add_location_24),
                     contentDescription = stringResource(Res.string.new_place),
-                    tint = MaterialTheme.colorScheme.onSecondary,
+                    tint = Color.White,
                 )
             }
             AnimatedVisibility(state is MapUiState.PlaceSelectMode) {
                 Icon(
                     painter = painterResource(Res.drawable.ic_baseline_check_24),
                     contentDescription = stringResource(Res.string.new_place),
-                    tint = MaterialTheme.colorScheme.onSecondary,
+                    tint = Color.White,
                 )
             }
         }
@@ -535,22 +580,23 @@ fun FishingFab(
     onLongPress: () -> Unit,
     modifier: Modifier = Modifier,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    shape: Shape = MaterialTheme.shapes.small.copy(CornerSize(percent = 50)),
-    containerColor: Color = MaterialTheme.colorScheme.secondary,
-    contentColor: Color = contentColorFor(containerColor),
     content: @Composable () -> Unit
 ) {
     Surface(
         modifier = modifier,
-        shape = shape,
-        color = containerColor,
-        contentColor = contentColor.copy(alpha = 1f),
-        shadowElevation = 6.dp,
+        shape = RoundedCornerShape(16.dp),
+        color = Color.Transparent,
+        shadowElevation = 8.dp,
     ) {
         val ripple = LocalIndication.current
         Box(
             modifier = Modifier
                 .defaultMinSize(minWidth = FabSize, minHeight = FabSize)
+                .background(
+                    brush = androidx.compose.ui.graphics.Brush.verticalGradient(
+                        listOf(Color(0xFF43A047), Color(0xFF2E7D32)),
+                    ),
+                )
                 .combinedClickable(
                     interactionSource = interactionSource,
                     indication = ripple,

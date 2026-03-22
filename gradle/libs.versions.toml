@@ -1,13 +1,16 @@
 [versions]
+appVersionCode = "16"
+appVersionName = "1.1.3"
+
 kmpauth = "2.3.1"
 
-kotlin = "2.3.20-RC3"
+kotlin = "2.3.20"
 kotlinxDatetime = "0.7.1"
 kotlinxSerializationJson = "1.10.0"
 ksp = "2.3.6"
 
-androidApplication = "8.13.2"
-jetbrainsCompose = "1.10.2"
+androidApplication = "9.0.1"
+jetbrainsCompose = "1.10.3"
 buildkonfig = "0.17.1"
 googleServices = "4.4.4"
 secretsGradlePlugin = "2.0.1"
@@ -18,7 +21,7 @@ material3 = "1.5.0-alpha15"
 compose-bom = "2026.03.00"
 mokoPermissions = "0.20.1"
 
-playServicesAds = "25.0.0"
+playServicesAds = "25.1.0"
 playServicesBilling = "8.3.0"
 playServicesUpdate = "2.1.0"
 playServicesMaps = "20.0.0"
@@ -29,20 +32,20 @@ androidXSplashScreen = "1.2.0"
 activityCompose = "1.13.0"
 lifecycleViewModelCompose = "2.10.0"
 navigationCompose = "2.9.7"
-jetbrainsLifecycle = "2.9.6"
+jetbrainsLifecycle = "2.10.0"
 jetbrainsNavigation = "2.9.2"
 datastorePreferences = "1.2.1"
 room = "2.8.4"
-koin = "4.1.1"
+koin = "4.2.0"
 androidXTest = "1.7.0"
 androidXTestExtJunit = "1.3.0"
 espressoCore = "3.7.0"
-firebaseBom = "34.10.0"
+firebaseBom = "34.11.0"
 firebaseGitlive = "2.4.0"
 firebaseCoroutines = "1.10.2"
 junit = "4.13.2"
 coilCompose = "3.4.0"
-paging = "3.4.2"
+paging = "3.5.0-alpha01"
 ktor = "3.4.1"
 foundationLayoutAndroid = "1.10.5"
 vico = "3.0.3"
@@ -103,7 +106,7 @@ datastore-preferences-core = { group = "androidx.datastore", name = "datastore-p
 
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
-sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version = "2.5.0-alpha14" }
+sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version = "2.6.2" }
 
 koin-main = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
 koin-java = { group = "io.insert-koin", name = "koin-android-compat", version.ref = "koin" }
