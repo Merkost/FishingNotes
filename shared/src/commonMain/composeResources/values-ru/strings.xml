@@ -437,5 +437,6 @@
     <string name="toggle_visibility">Переключить видимость</string>
     <string name="select_location">Выбрать местоположение</string>
     <string name="cached_data">Кэшированные данные</string>
+    <string name="color">Цвет</string>
 
 </resources>

@@ -1,248 +1,60 @@
 package com.mobileprism.fishing.ui.home.map
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import fishing.shared.generated.resources.Res
-import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.entity.raw.RawMapMarker
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.UiState
 import com.mobileprism.fishing.ui.home.views.DefaultButton
 import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
-import com.mobileprism.fishing.ui.home.views.MyCard
-import com.mobileprism.fishing.ui.theme.Shapes
-import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
+import com.mobileprism.fishing.ui.utils.ColorGrid
 import com.mobileprism.fishing.utils.ValidationUtils
-import com.mobileprism.fishing.ui.utils.ColorPicker
 import com.mobileprism.fishing.viewmodels.MapViewModel
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.*
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun NewPlaceDialog(
-    dialogState: Boolean,
-    onDismiss: () -> Unit,
-) {
-    if (dialogState) {
-        Dialog(onDismissRequest = { onDismiss() }) {
-            val viewModel: MapViewModel = koinViewModel()
-            val currentCameraPosition by viewModel.currentCameraPosition.collectAsState()
-            val uiState by viewModel.addNewMarkerState.collectAsState()
-            val noNamePlace = stringResource(Res.string.no_name_place)
-
-            LaunchedEffect(uiState) {
-                when (uiState) {
-                    UiState.Success -> {
-                        onDismiss()
-                        viewModel.resetAddNewMarkerState()
-                        SnackbarManager.showMessage(Res.string.add_place_success)
-                    }
-                    UiState.Error -> {
-                        viewModel.resetAddNewMarkerState()
-                        SnackbarManager.showMessage(Res.string.add_new_place_error)
-                    }
-                    else -> {}
-                }
-            }
-
-            MyCard(shape = Shapes.large, modifier = Modifier.wrapContentHeight().fillMaxWidth()) {
-                Column(
-                    modifier = Modifier
-                        .wrapContentHeight()
-                        .padding(4.dp)
-                ) {
-                    val placeTileViewNameState by viewModel.placeTileViewNameState.collectAsState()
-
-                    val titleValue = remember { mutableStateOf("") }
-                    val descriptionValue = remember { mutableStateOf("") }
-                    val markerColor = remember { mutableStateOf(pickerColors[0].value.hashCode()) }
-
-                    SetPlaceNameResultListener(placeTileViewNameState.geocoderResult) {
-                        titleValue.value = it
-                    }
-
-                    Text(
-                        text = stringResource(Res.string.new_place),
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier
-                            .padding(top = 8.dp, start = 4.dp)
-                    )
-
-                    val (textField1, textField2) = remember { FocusRequester.createRefs() }
-                    val keyboardController = LocalSoftwareKeyboardController.current
-
-                    OutlinedTextField(
-                        value = titleValue.value,
-                        onValueChange = {
-                            if (it.length <= ValidationUtils.MAX_PLACE_NAME_LENGTH) {
-                                titleValue.value = it
-                            }
-                        },
-                        label = { Text(text = stringResource(Res.string.title)) },
-                        singleLine = true,
-                        supportingText = {
-                            Text(
-                                stringResource(
-                                    Res.string.char_counter,
-                                    titleValue.value.length,
-                                    ValidationUtils.MAX_PLACE_NAME_LENGTH
-                                )
-                            )
-                        },
-                        visualTransformation = VisualTransformation.None,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Next
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onNext = { textField2.requestFocus() }
-                        ),
-                        trailingIcon = {
-                            androidx.compose.animation.AnimatedVisibility(
-                                visible = titleValue.value.isNotEmpty(),
-                                enter = fadeIn(),
-                                exit = fadeOut()
-                            ) {
-                                IconButton(onClick = { titleValue.value = "" }) {
-                                    Icon(Icons.Default.Close, Icons.Default.Delete.name)
-                                }
-                            }
-                        },
-                        modifier = Modifier
-                            .focusRequester(textField1)
-                            .padding(top = 8.dp)
-                            .padding(horizontal = 8.dp)
-                            .fillMaxWidth()
-                    )
-
-                    OutlinedTextField(
-                        value = descriptionValue.value,
-                        onValueChange = {
-                            descriptionValue.value = it
-                        },
-                        label = { Text(text = stringResource(Res.string.description)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onDone = { keyboardController?.hide() }
-                        ),
-                        modifier = Modifier
-                            .focusRequester(textField2)
-                            .padding(top = 2.dp)
-                            .padding(horizontal = 8.dp)
-                            .fillMaxWidth()
-                    )
-
-                    val (selectedColor, onColorSelected) = remember { mutableStateOf(pickerColors[0]) }
-
-                    Row(
-                        modifier = Modifier
-                            .padding(top = 6.dp)
-                            .padding(horizontal = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .requiredSize(40.dp)
-                                .clip(CircleShape)
-                        )
-                        {
-                            Icon(
-                                painter = painterResource(Res.drawable.ic_baseline_location_on_24),
-                                contentDescription = stringResource(Res.string.marker_icon),
-                                tint = selectedColor,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(top = 2.dp)
-                            )
-                        }
-                        ColorPicker(
-                            pickerColors,
-                            selectedColor,
-                            { color ->
-                                color?.let {
-                                    onColorSelected(it)
-                                    markerColor.value = it.value.hashCode()
-                                }
-                            },
-                            modifier = Modifier.align(Alignment.CenterVertically)
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 14.dp, bottom = 14.dp, end = 8.dp),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        DefaultButton(
-                            modifier = Modifier.padding(end = 8.dp),
-                            text = stringResource(Res.string.cancel),
-                            onClick = {
-                                viewModel.cancelAddNewMarker()
-                                onDismiss()
-                            }
-                        )
-
-                        DefaultButtonFilled(
-                            text = stringResource(Res.string.save),
-                            enabled = uiState !is UiState.InProgress,
-                            onClick = {
-                                val trimmedTitle = titleValue.value.trim()
-                                viewModel.addNewMarker(
-                                    RawMapMarker(
-                                        title = when (trimmedTitle.isEmpty()) {
-                                            true -> noNamePlace
-                                            false -> trimmedTitle
-                                        },
-                                        description = descriptionValue.value,
-                                        latitude = currentCameraPosition.latitude,
-                                        longitude = currentCameraPosition.longitude,
-                                        markerColor = markerColor.value
-                                    )
-                                )
-                            }
-                        )
-                    }
-
-                    DisposableEffect(Unit) {
-                        textField1.requestFocus()
-                        onDispose { }
-                    }
-                }
-            }
-        }
-    }
-}
 
 val pickerColors = listOf(
     Color(0xFFEC407A),
@@ -262,3 +74,221 @@ val pickerColors = listOf(
     Color(0xFFFF7043)
 )
 
+@Composable
+fun NewPlaceBottomSheetContent(
+    onDismiss: () -> Unit,
+) {
+    val viewModel: MapViewModel = koinViewModel()
+    val currentCameraPosition by viewModel.currentCameraPosition.collectAsState()
+    val uiState by viewModel.addNewMarkerState.collectAsState()
+    val placeTileState by viewModel.placeTileViewNameState.collectAsState()
+
+    val noNamePlace = stringResource(Res.string.no_name_place)
+    val unnamedPlace = stringResource(Res.string.unnamed_place)
+    val cantRecognizePlace = stringResource(Res.string.cant_recognize_place)
+    val searchingText = stringResource(Res.string.searching)
+
+    val geocoderResult = placeTileState.geocoderResult
+
+    val placeholderText = when (geocoderResult) {
+        is GeocoderResult.Success -> geocoderResult.placeName
+        GeocoderResult.NoNamePlace -> unnamedPlace
+        GeocoderResult.Failed -> cantRecognizePlace
+        GeocoderResult.InProgress -> searchingText
+    }
+
+    val fallbackName = when (geocoderResult) {
+        is GeocoderResult.Success -> geocoderResult.placeName
+        else -> noNamePlace
+    }
+
+    val geocoderReady = geocoderResult !is GeocoderResult.InProgress
+    val saveEnabled = uiState !is UiState.InProgress && geocoderReady
+
+    LaunchedEffect(uiState) {
+        when (uiState) {
+            UiState.Success -> {
+                onDismiss()
+                viewModel.resetAddNewMarkerState()
+                SnackbarManager.showMessage(Res.string.add_place_success)
+            }
+            UiState.Error -> {
+                viewModel.resetAddNewMarkerState()
+                SnackbarManager.showMessage(Res.string.add_new_place_error)
+            }
+            else -> {}
+        }
+    }
+
+    var titleValue by remember { mutableStateOf("") }
+    var descriptionValue by remember { mutableStateOf("") }
+    var descriptionExpanded by remember { mutableStateOf(false) }
+    var selectedColor by remember { mutableStateOf(pickerColors[0]) }
+
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 24.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(Res.string.new_place),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.weight(1f)
+            )
+            Icon(
+                painter = painterResource(Res.drawable.ic_baseline_location_on_24),
+                contentDescription = null,
+                tint = selectedColor,
+                modifier = Modifier.size(36.dp)
+            )
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = titleValue,
+            onValueChange = {
+                if (it.length <= ValidationUtils.MAX_PLACE_NAME_LENGTH) {
+                    titleValue = it
+                }
+            },
+            placeholder = { Text(placeholderText) },
+            label = { Text(stringResource(Res.string.title)) },
+            singleLine = true,
+            supportingText = {
+                Text(
+                    stringResource(
+                        Res.string.char_counter,
+                        titleValue.length,
+                        ValidationUtils.MAX_PLACE_NAME_LENGTH
+                    )
+                )
+            },
+            trailingIcon = {
+                AnimatedVisibility(
+                    visible = titleValue.isNotEmpty(),
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    IconButton(onClick = { titleValue = "" }) {
+                        Icon(Icons.Default.Close, Icons.Default.Delete.name)
+                    }
+                }
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                imeAction = if (descriptionExpanded) ImeAction.Next else ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = { keyboardController?.hide() }
+            ),
+            modifier = Modifier
+                .focusRequester(focusRequester)
+                .fillMaxWidth()
+        )
+
+        Spacer(Modifier.height(4.dp))
+
+        AnimatedVisibility(
+            visible = !descriptionExpanded,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            TextButton(onClick = { descriptionExpanded = true }) {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Text(
+                    text = stringResource(Res.string.description),
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
+        }
+
+        AnimatedVisibility(
+            visible = descriptionExpanded,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            OutlinedTextField(
+                value = descriptionValue,
+                onValueChange = { descriptionValue = it },
+                label = { Text(stringResource(Res.string.description)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = { keyboardController?.hide() }
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        Text(
+            text = stringResource(Res.string.color),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        ColorGrid(
+            colors = pickerColors,
+            selectedColor = selectedColor,
+            onColorSelected = { selectedColor = it },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(Modifier.height(20.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            DefaultButton(
+                modifier = Modifier.padding(end = 8.dp),
+                text = stringResource(Res.string.cancel),
+                onClick = {
+                    viewModel.cancelAddNewMarker()
+                    onDismiss()
+                }
+            )
+
+            DefaultButtonFilled(
+                text = stringResource(Res.string.save),
+                enabled = saveEnabled,
+                onClick = {
+                    val trimmedTitle = titleValue.trim()
+                    viewModel.addNewMarker(
+                        RawMapMarker(
+                            title = trimmedTitle.ifEmpty { fallbackName },
+                            description = descriptionValue,
+                            latitude = currentCameraPosition.latitude,
+                            longitude = currentCameraPosition.longitude,
+                            markerColor = selectedColor.value.hashCode()
+                        )
+                    )
+                }
+            )
+        }
+
+        DisposableEffect(Unit) {
+            focusRequester.requestFocus()
+            onDispose { }
+        }
+    }
+}
