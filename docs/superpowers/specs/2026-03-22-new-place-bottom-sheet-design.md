@@ -14,18 +14,23 @@ Replace the `Dialog` with a `ModalBottomSheet` that slides up from the bottom, g
 
 1. **Drag handle** — standard bottom sheet affordance
 2. **Header row** — "New place" title on the left, live marker icon preview (36dp) on the right that updates color in real-time
-3. **Title field** — `OutlinedTextField`, empty by default. Geocoded place name shown as placeholder text. If saved empty, uses the geocoded name (falls back to "No name place" if geocoding failed)
+3. **Title field** — `OutlinedTextField`, empty by default. Placeholder text depends on geocoder result:
+   - `GeocoderResult.Success` → placeholder shows the geocoded place name; if saved empty, uses that name
+   - `GeocoderResult.NoNamePlace` → placeholder shows `Res.string.unnamed_place`; if saved empty, uses `Res.string.no_name_place`
+   - `GeocoderResult.Failed` → placeholder shows `Res.string.cant_recognize_place`; if saved empty, uses `Res.string.no_name_place`
+   - `GeocoderResult.InProgress` → placeholder shows `Res.string.searching`; save button disabled until resolved
 4. **"+ Add description"** — collapsed by default as a clickable row with a plus icon. Tapping reveals an `OutlinedTextField` for description
-5. **Color grid** — 8 columns × 2 rows grid of 34dp colored circles (all 15 `pickerColors` visible without scrolling). Selected color gets a white border ring. First color selected by default
+5. **Color grid** — 5 columns × 3 rows grid of 34dp colored circles (all 15 `pickerColors` fit exactly without scrolling). Selected color gets a white border ring. First color selected by default
 6. **Cancel / Save buttons** — right-aligned row at the bottom
 
 ### Behavior
 
 - `ModalBottomSheet` with `skipPartiallyExpanded = true`
-- Dismissable via swipe down or Cancel button
+- Dismissable via swipe down or Cancel button; both call `viewModel.cancelAddNewMarker()` before dismissing
 - Save button triggers `viewModel.addNewMarker()` same as today
+- Save button disabled while `addNewMarkerState` is `UiState.InProgress`
 - Title field auto-focuses on open (request focus)
-- Marker preview icon tint updates immediately when a color is tapped
+- Marker preview icon tint updates immediately when a color is tapped (preserving existing behavior)
 - Character counter on title field (existing `MAX_PLACE_NAME_LENGTH` validation)
 
 ### What changes from current implementation
@@ -33,10 +38,10 @@ Replace the `Dialog` with a `ModalBottomSheet` that slides up from the bottom, g
 | Aspect | Before | After |
 |--------|--------|-------|
 | Container | `Dialog` + `MyCard` | `ModalBottomSheet` |
-| Color picker | Horizontal `LazyRow` (scroll) | 8×2 grid (all visible) |
+| Color picker | Horizontal `LazyRow` (scroll) | 5×3 grid (all visible) |
 | Description | Always-visible text field | Collapsed "+ Add description", expandable on tap |
 | Title default | Pre-filled with geocoded name | Empty, geocoded name as placeholder |
-| Marker preview | 40dp box left of color row | 36dp icon in header row, updates live |
+| Marker preview | 40dp box left of color row | 36dp icon in header row (color-update behavior preserved) |
 
 ### Files to modify
 
