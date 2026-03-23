@@ -85,6 +85,7 @@ fun LoginScreen(navController: NavController) {
                 snackbar = { snackbarData -> AppSnackbar(snackbarData) }
             )
         },
+        contentWindowInsets = WindowInsets(0),
     ) { paddingValues ->
         Box(
             modifier = Modifier

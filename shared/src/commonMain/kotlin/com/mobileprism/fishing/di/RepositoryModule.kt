@@ -35,7 +35,7 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.koin.dsl.onClose
 
-val commonRepositoryModule = networkModule + module {
+val commonRepositoryModule = module {
     single { SnackbarManager }
     single<AnalyticsTracker> { FirebaseAnalyticsTracker() }
     single<SyncStatusProvider> { get<SyncStatusManager>() }

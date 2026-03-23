@@ -22,12 +22,12 @@ import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSUserDomainMask
 
-val appModule = module {
+actual val appModule = module {
     single<PlatformGeocoder> { IosGeocoder() }
     single<LocationManager> { IosLocationManager() }
 }
 
-val settingsModule = module {
+actual val settingsModule = module {
     single<UserDatastore> { UserDatastoreImpl(createIosPreferencesDataStore("appSettings")) }
     single { UserPreferencesImpl(createIosPreferencesDataStore("userSettings")) }
     single<UserPreferences> { get<UserPreferencesImpl>() }

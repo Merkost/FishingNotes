@@ -49,4 +49,4 @@ val iosPlatformRepositoryModule = module {
     single<PhotoStorage> { IosPhotoStorage() }
 }
 
-val repositoryModule = commonRepositoryModule + iosPlatformRepositoryModule
+actual val repositoryModule = commonRepositoryModule + iosPlatformRepositoryModule

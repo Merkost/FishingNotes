@@ -23,14 +23,14 @@ import okio.Path.Companion.toPath
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
-val appModule = module {
+actual val appModule = module {
     single<PlatformGeocoder> { AndroidGeocoder(createGeocoder(androidContext())) }
     single<AppUpdateManager> { AppUpdateManagerFactory.create(androidContext()) }
     single { LocationManagerImpl(get()) }
     single<LocationManager> { get<LocationManagerImpl>() }
 }
 
-val settingsModule = module {
+actual val settingsModule = module {
     single<UserDatastore> { UserDatastoreImpl(createPreferencesDataStore(androidContext(), "appSettings")) }
     single { UserPreferencesImpl(createPreferencesDataStore(androidContext(), "userSettings")) }
     single<UserPreferences> { get<UserPreferencesImpl>() }

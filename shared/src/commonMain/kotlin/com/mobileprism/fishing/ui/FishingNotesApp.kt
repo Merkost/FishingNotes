@@ -12,9 +12,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
+import com.mobileprism.fishing.ui.utils.LocalAnalytics
+import org.koin.compose.koinInject
 import androidx.navigation.compose.NavHost
 import com.mobileprism.fishing.ui.home.AppSnackbar
 import com.mobileprism.fishing.ui.home.FishingNotesBottomBar
@@ -27,9 +31,11 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun FishingNotesApp() {
+    val analyticsTracker: AnalyticsTracker = koinInject()
     val onboardingViewModel: OnboardingViewModel = koinViewModel()
     val onboardingCompleted by onboardingViewModel.hasCompletedOnboarding.collectAsState()
 
+    CompositionLocalProvider(LocalAnalytics provides analyticsTracker) {
     Crossfade(
         targetState = onboardingCompleted,
         animationSpec = tween(500),
@@ -41,6 +47,7 @@ fun FishingNotesApp() {
             )
             true -> FishingNotesMainContent()
         }
+    }
     }
 }
 

@@ -43,4 +43,4 @@ val platformRepositoryModule = module {
     }
 }
 
-val repositoryModule = commonRepositoryModule + platformRepositoryModule
+actual val repositoryModule = commonRepositoryModule + platformRepositoryModule

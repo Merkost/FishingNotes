@@ -20,7 +20,7 @@ val networkModule = module {
                 })
             }
             install(Logging) {
-                level = if (BuildKonfig.DEBUG) LogLevel.BODY else LogLevel.NONE
+                level = if (BuildKonfig.IS_DEBUG) LogLevel.BODY else LogLevel.NONE
             }
             install(HttpTimeout) {
                 connectTimeoutMillis = 10_000

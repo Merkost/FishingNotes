@@ -43,7 +43,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.mobileprism.fishing"
+        applicationId = "com.merkost.fishingnotes"
         minSdk = 24
         targetSdk = 36
         versionCode = libs.versions.appVersionCode.get().toInt()
