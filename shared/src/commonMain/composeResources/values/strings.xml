@@ -151,6 +151,8 @@
     <string name="mode_place_selecting_off">Location selection mode is off!</string>
     <string name="mode_place_info">You are in the mode of viewing information about the place!</string>
     <string name="login_title">Let's get it started!</string>
+    <string name="login_headline">Keep your catches safe</string>
+    <string name="login_trust_copy">We only use your email to sync your catches. No posts, no ads.</string>
     <string name="google_login">Sign with google</string>
 
     <string name="start_screen_title">Start Screen</string>
