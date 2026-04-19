@@ -449,7 +449,7 @@
     <string name="onboarding_desc_3">Get accurate weather forecasts to plan the perfect fishing trip</string>
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_next">Next</string>
-    <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_continue">Continue</string>
     <string name="prompt_card_title">Add your first spot!</string>
     <string name="prompt_card_subtitle">Tap to mark a fishing location on the map</string>
     <string name="color">Color</string>

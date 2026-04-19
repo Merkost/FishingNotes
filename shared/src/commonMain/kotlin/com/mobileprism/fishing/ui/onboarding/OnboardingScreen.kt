@@ -75,7 +75,7 @@ private val pages = listOf(
         descRes = Res.string.onboarding_desc_3,
         lottieRes = "clouds",
         gradientColors = listOf(Color(0xFFFFE082), Color(0xFFE65100)),
-        buttonTextRes = Res.string.onboarding_get_started,
+        buttonTextRes = Res.string.onboarding_continue,
     ),
 )
 
