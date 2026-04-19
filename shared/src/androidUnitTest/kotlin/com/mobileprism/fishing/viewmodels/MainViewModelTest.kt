@@ -4,6 +4,7 @@ import com.mobileprism.fishing.domain.entity.common.SyncState
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.repository.SyncStatusProvider
 import com.mobileprism.fishing.domain.repository.UserRepository
+import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.testutils.user
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import io.mockk.every
@@ -41,12 +42,15 @@ class MainViewModelTest {
     private val syncStateFlow = MutableStateFlow<SyncState>(SyncState.Synced)
 
     private lateinit var syncStatusProvider: SyncStatusProvider
+    private lateinit var userPreferences: UserPreferences
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         syncStatusProvider = mockk()
         every { syncStatusProvider.globalSyncState } returns syncStateFlow
+        userPreferences = mockk()
+        every { userPreferences.hasCompletedOnboarding } returns flowOf(true)
     }
 
     @AfterTest
@@ -72,7 +76,7 @@ class MainViewModelTest {
     @Test
     fun initLoadsUserSuccessfully() = runTest {
         val repo = fakeUserRepository(currentUserFlow = flowOf(testUser), isLoggedIn = true, cachedUser = testUser)
-        val viewModel = MainViewModel(repo, syncStatusProvider)
+        val viewModel = MainViewModel(repo, syncStatusProvider, userPreferences)
         advanceUntilIdle()
 
         val state = viewModel.userState.value
@@ -83,7 +87,7 @@ class MainViewModelTest {
     @Test
     fun nullUserFromRepositoryEmitsSuccessNull() = runTest {
         val repo = fakeUserRepository(currentUserFlow = flowOf(null), isLoggedIn = false)
-        val viewModel = MainViewModel(repo, syncStatusProvider)
+        val viewModel = MainViewModel(repo, syncStatusProvider, userPreferences)
         advanceUntilIdle()
 
         val state = viewModel.userState.value
@@ -95,7 +99,7 @@ class MainViewModelTest {
     fun cachedSessionSkipsInitialNullEmission() = runTest {
         val authFlow = MutableSharedFlow<User?>()
         val repo = fakeUserRepository(currentUserFlow = authFlow, isLoggedIn = true, cachedUser = testUser)
-        val viewModel = MainViewModel(repo, syncStatusProvider)
+        val viewModel = MainViewModel(repo, syncStatusProvider, userPreferences)
 
         authFlow.emit(null)
         advanceTimeBy(100)
@@ -116,7 +120,7 @@ class MainViewModelTest {
         // No cached session — even before any flow emission, state is Success(null)
         val authFlow = MutableSharedFlow<User?>()
         val repo = fakeUserRepository(currentUserFlow = authFlow, isLoggedIn = false)
-        val viewModel = MainViewModel(repo, syncStatusProvider)
+        val viewModel = MainViewModel(repo, syncStatusProvider, userPreferences)
         advanceUntilIdle()
 
         val state = viewModel.userState.value
@@ -131,7 +135,7 @@ class MainViewModelTest {
             currentUserFlow = flow { throw exception },
             isLoggedIn = false
         )
-        val viewModel = MainViewModel(repo, syncStatusProvider)
+        val viewModel = MainViewModel(repo, syncStatusProvider, userPreferences)
         advanceUntilIdle()
 
         val state = viewModel.userState.value
@@ -142,7 +146,7 @@ class MainViewModelTest {
     @Test
     fun syncStateReflectsProviderState() = runTest {
         val repo = fakeUserRepository(currentUserFlow = flowOf(testUser), isLoggedIn = true, cachedUser = testUser)
-        val viewModel = MainViewModel(repo, syncStatusProvider)
+        val viewModel = MainViewModel(repo, syncStatusProvider, userPreferences)
         advanceUntilIdle()
 
         assertIs<SyncState.Synced>(viewModel.syncState.value)

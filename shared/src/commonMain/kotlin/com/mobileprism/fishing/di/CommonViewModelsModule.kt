@@ -28,7 +28,7 @@ val commonViewModelsModule = module {
             getUserCatchUseCase = get()
         )
     }
-    viewModel { MainViewModel(repository = get(), syncStatusProvider = get()) }
+    viewModel { MainViewModel(repository = get(), syncStatusProvider = get(), userPreferences = get()) }
     viewModel { OnboardingViewModel(userPreferences = get()) }
     viewModel {
         LoginViewModel(
