@@ -52,7 +52,7 @@ private val OnboardingBlendGradient = listOf(Color(0xFFFFE082), Color(0xFFE65100
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(onLoggedIn: () -> Unit) {
+fun LoginScreen() {
     val loginViewModel: LoginViewModel = koinInject()
     val uiState by loginViewModel.uiState.collectAsState()
     val signing = uiState is LoginUiState.Signing
@@ -128,10 +128,6 @@ fun LoginScreen(onLoggedIn: () -> Unit) {
                 }
             }
         }
-    }
-
-    if (uiState is LoginUiState.Success) {
-        onLoggedIn()
     }
 }
 

@@ -56,9 +56,7 @@ fun FishingNotesApp() {
                 RoutingDecision.Onboarding -> OnboardingScreen(
                     onFinished = { onboardingViewModel.completeOnboarding() },
                 )
-                RoutingDecision.Login -> LoginScreen(
-                    onLoggedIn = {},
-                )
+                RoutingDecision.Login -> LoginScreen()
                 RoutingDecision.Home -> FishingNotesMainContent()
             }
         }
