@@ -27,8 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -40,6 +38,7 @@ import fishing.shared.generated.resources.ic_google_logo
 import fishing.shared.generated.resources.ic_launcher
 import fishing.shared.generated.resources.icon
 import fishing.shared.generated.resources.login_headline
+import fishing.shared.generated.resources.login_subtitle
 import fishing.shared.generated.resources.login_trust_copy
 import fishing.shared.generated.resources.sign_with_google
 import fishing.shared.generated.resources.signing_in
@@ -47,8 +46,6 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import androidx.compose.foundation.Image
-
-private val OnboardingBlendGradient = listOf(Color(0xFFFFE082), Color(0xFFE65100))
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,7 +59,7 @@ fun LoginScreen() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.verticalGradient(OnboardingBlendGradient))
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(paddingValues)
                 .systemBarsPadding(),
         ) {
@@ -85,11 +82,20 @@ fun LoginScreen() {
                     text = stringResource(Res.string.login_headline),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
                 )
 
-                Spacer(modifier = Modifier.height(48.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = stringResource(Res.string.login_subtitle),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                )
+
+                Spacer(modifier = Modifier.height(40.dp))
 
                 GoogleButtonUiContainer(
                     onGoogleSignInResult = { googleUser ->
@@ -112,7 +118,7 @@ fun LoginScreen() {
                 Text(
                     text = stringResource(Res.string.login_trust_copy),
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.85f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
 
@@ -121,7 +127,7 @@ fun LoginScreen() {
                     Text(
                         text = errorMessage,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.error,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.alpha(0.95f),
                     )

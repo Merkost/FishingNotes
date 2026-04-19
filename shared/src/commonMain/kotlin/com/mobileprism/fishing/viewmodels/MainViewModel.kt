@@ -67,8 +67,8 @@ class MainViewModel(
                 .catch { error -> _userState.value = BaseViewState.Error(error) }
                 .collectLatest { user ->
                     if (user != null) {
-                        repository.setUserListener(user)
                         _userState.value = BaseViewState.Success(user)
+                        repository.setUserListener(user)
                     } else {
                         _userState.value = BaseViewState.Success(null)
                     }
