@@ -68,6 +68,7 @@ import com.mobileprism.fishing.ui.utils.rememberLocationPermissionGranted
 import com.mobileprism.fishing.ui.utils.rememberPermissionsController
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
+import com.mobileprism.fishing.utils.rememberExitApp
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import eu.buney.maps.*
 import fishing.shared.generated.resources.Res
@@ -500,6 +501,7 @@ fun BackPressHandler(
     upPress: () -> Unit,
 ) {
     var lastPressed by remember { mutableStateOf(0L) }
+    val exitApp = rememberExitApp()
 
     PlatformBackHandler(true) {
         when (mapUiState) {
@@ -509,7 +511,7 @@ fun BackPressHandler(
                 } else {
                     val currentMillis = Clock.System.now().toEpochMilliseconds()
                     if (currentMillis - lastPressed < Constants.TIME_TO_EXIT) {
-                        upPress()
+                        exitApp()
                     } else {
                         SnackbarManager.showMessage(Res.string.app_exit_message)
                     }
