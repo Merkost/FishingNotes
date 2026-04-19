@@ -153,11 +153,6 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavContro
             scope.launch {
                 viewModel.logoutCurrentUser()
                 dialogOnLogout.value = false
-                navController.navigate(MainDestinations.Login) {
-                    popUpTo(0) {
-                        inclusive = true
-                    }
-                }
             }
         },
         onDismiss = { dialogOnLogout.value = false },

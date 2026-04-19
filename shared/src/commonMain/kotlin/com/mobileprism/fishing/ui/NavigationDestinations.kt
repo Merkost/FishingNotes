@@ -8,16 +8,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object HomeGraph
 
-@Serializable
-data object LoginRoute
-
 /**
  * Destinations used in the FishingNotesApp.
  */
 object MainDestinations {
-
-    @Serializable
-    data object Login
 
     @Serializable
     data object Settings

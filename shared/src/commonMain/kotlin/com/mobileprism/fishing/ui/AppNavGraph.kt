@@ -29,10 +29,6 @@ fun NavGraphBuilder.AppNavGraph(
         addHomeGraph(navController, upPress = upPress)
     }
 
-    composable<MainDestinations.Login> {
-        LoginScreen(navController = navController)
-    }
-
     composable<MainDestinations.Settings> {
         SettingsScreen(upPress, navController = navController)
     }

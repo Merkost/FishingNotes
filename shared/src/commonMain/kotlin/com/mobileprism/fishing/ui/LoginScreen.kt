@@ -15,7 +15,6 @@ import androidx.compose.ui.layout.ContentScale
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.mmk.kmpauth.google.GoogleButtonUiContainer
 import com.mobileprism.fishing.ui.utils.AnimatedResource
 import fishing.shared.generated.resources.Res
@@ -29,7 +28,7 @@ import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(onLoggedIn: () -> Unit) {
 
     val snackbarHostState = remember { SnackbarHostState() }
     var visible by remember { mutableStateOf(false) }
@@ -48,12 +47,7 @@ fun LoginScreen(navController: NavController) {
                     delay(2500)
                     visible = false
                     delay((UiConstants.SPLASH_FADE_DURATION_MILLIS * 2).toLong())
-
-                    navController.navigate(HomeGraph) {
-                        popUpTo(0) {
-                            inclusive = true
-                        }
-                    }
+                    onLoggedIn()
                 }
             }
 
