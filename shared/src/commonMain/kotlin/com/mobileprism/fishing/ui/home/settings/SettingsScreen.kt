@@ -156,6 +156,7 @@ private fun LocationPermissionBanner(userPreferences: UserPreferences) {
             color = MaterialTheme.colorScheme.primaryContainer,
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 16.dp)
                 .clickable { isPermissionDialogOpen = true }
         ) {
             Row(
