@@ -136,11 +136,11 @@ fun ProfileAppBar(
         },
         elevation = 0.dp,
     )
-    if (dialogOnLogout.value) LogoutDialog(dialogOnLogout, navController)
+    if (dialogOnLogout.value) LogoutDialog(dialogOnLogout)
 }
 
 @Composable
-fun LogoutDialog(dialogOnLogout: MutableState<Boolean>, navController: NavController) {
+fun LogoutDialog(dialogOnLogout: MutableState<Boolean>) {
     val scope = rememberCoroutineScope()
     val viewModel = koinViewModel<UserViewModel>()
     DefaultDialog(
