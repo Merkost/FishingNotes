@@ -21,8 +21,8 @@ import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.ui.home.AppSnackbar
 import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.viewmodels.LoginUiState
 import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
 import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
 
@@ -39,20 +39,17 @@ fun LoginScreen(onLoggedIn: () -> Unit) {
     val uiState by loginViewModel.uiState.collectAsState()
 
     LaunchedEffect(uiState) {
-        when (val state = uiState) {
-            is BaseViewState.Success<*> -> {
-                state.data?.let {
-                    googleLoading = false
-                    showLottie = true
-                    delay(2500)
-                    visible = false
-                    delay((UiConstants.SPLASH_FADE_DURATION_MILLIS * 2).toLong())
-                    onLoggedIn()
-                }
+        when (uiState) {
+            LoginUiState.Idle -> googleLoading = false
+            LoginUiState.Signing -> Unit
+            LoginUiState.Success -> {
+                googleLoading = false
+                showLottie = true
+                delay(2500)
+                visible = false
+                delay((UiConstants.SPLASH_FADE_DURATION_MILLIS * 2).toLong())
             }
-
-            is BaseViewState.Loading -> {}
-            is BaseViewState.Error -> {
+            is LoginUiState.Error -> {
                 googleLoading = false
                 SnackbarManager.showMessage(Res.string.signin_error)
             }
@@ -182,7 +179,7 @@ fun LoginScreen(onLoggedIn: () -> Unit) {
                                         loginViewModel.firebaseSignInWithGoogle(idToken)
                                     } else {
                                         googleLoading = false
-                                        loginViewModel.onGoogleSignInFailed()
+                                        loginViewModel.onGoogleSignInCancelled()
                                     }
                                 }
                             ) {
