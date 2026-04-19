@@ -62,10 +62,15 @@ class LoginViewModelTest {
     }
 
     @Test
-    fun cancelledSignInReturnsToIdle() = runTest {
-        val repo = fakeUserRepository(currentUserFlow = flowOf(null))
+    fun `onGoogleSignInCancelled sets state to Idle regardless of prior state`() = runTest {
+        val repo = fakeUserRepository(
+            currentUserFlow = flowOf(testUser),
+            addNewUserResult = Result.success(Unit),
+        )
         val viewModel = LoginViewModel(repo, analyticsTracker)
         advanceUntilIdle()
+
+        assertEquals(LoginUiState.Success, viewModel.uiState.value)
 
         viewModel.onGoogleSignInCancelled()
 
@@ -73,7 +78,7 @@ class LoginViewModelTest {
     }
 
     @Test
-    fun firebaseSignInWithGoogleEmitsSigningThenErrorWhenRepositoryThrows() = runTest {
+    fun `observeCurrentUser emits Error when repository flow throws`() = runTest {
         val repo = fakeUserRepository(
             currentUserFlow = flow { throw RuntimeException("boom") }
         )
