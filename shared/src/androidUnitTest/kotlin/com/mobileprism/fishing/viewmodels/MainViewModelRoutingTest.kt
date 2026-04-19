@@ -73,7 +73,7 @@ class MainViewModelRoutingTest {
     }
 
     @Test
-    fun `routing is Splash while userState is Loading and onboarding flow has not emitted yet`() = runTest {
+    fun `routing stays Splash when onboarding flow has not emitted`() = runTest {
         val authFlow = MutableSharedFlow<User?>()
         val repo = fakeUserRepository(currentUserFlow = authFlow, isLoggedIn = false)
         val onboardingFlow = MutableSharedFlow<Boolean>()
