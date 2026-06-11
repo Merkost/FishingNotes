@@ -55,6 +55,7 @@ class FirebaseCatchesRepositoryImpl(
                             ChangeType.ADDED -> result.added.add(userCatch)
                             ChangeType.MODIFIED -> result.modified.add(userCatch)
                             ChangeType.REMOVED -> result.deleted.add(userCatch)
+                            else -> Unit
                         }
                     } catch (_: Exception) { }
                 }

@@ -44,8 +44,9 @@ class FirebaseMarkersRepositoryImpl(
                             ChangeType.ADDED -> ContentState.ADDED<MapMarker>(mapMarker)
                             ChangeType.MODIFIED -> ContentState.MODIFIED<MapMarker>(mapMarker)
                             ChangeType.REMOVED -> ContentState.DELETED<MapMarker>(mapMarker)
+                            else -> null
                         }
-                        send(state)
+                        if (state != null) send(state)
                     } catch (_: Exception) { }
                 }
             }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -262,13 +263,18 @@ fun MainWeatherScreen(
 
     ) {
     val weatherPrefs: WeatherPreferences = koinInject()
+    val userPrefs: UserPreferences = koinInject()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
     val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
     val windSpeedUnit by weatherPrefs.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
+    val is12hTimeFormat by userPrefs.use12hTimeFormat.collectAsState(initial = false)
 
 
     Column(
-        modifier = Modifier.verticalScroll(scrollState)
+        modifier = Modifier
+            .verticalScroll(scrollState)
+            .padding(horizontal = 12.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
 
         if (weatherSource == WeatherSource.STALE_FALLBACK) {
@@ -289,6 +295,7 @@ fun MainWeatherScreen(
             pressureUnit = pressureUnit,
             temperatureUnit = temperatureUnit,
             windSpeedUnit = windSpeedUnit,
+            is12hTimeFormat = is12hTimeFormat,
         )
 
         if (forecast.daily.all { it.date != 0L }) {
@@ -324,17 +331,21 @@ fun CurrentWeather(
     pressureUnit: PressureValues,
     windSpeedUnit: WindSpeedValues,
     forecast: WeatherForecast,
+    is12hTimeFormat: Boolean,
 ) {
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .height(350.dp),
+        shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.primary
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(32.dp)
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
 
             PrimaryWeatherItemView(
@@ -357,6 +368,7 @@ fun CurrentWeather(
                 forecastHourly = forecast.hourly,
                 temperatureUnit = temperatureUnit,
                 windSpeedUnit = windSpeedUnit,
+                is12hTimeFormat = is12hTimeFormat,
             )
         }
     }
@@ -369,13 +381,12 @@ fun HourlyWeather(
     temperatureUnit: TemperatureValues,
     windSpeedUnit: WindSpeedValues,
     forecastHourly: List<Hourly>,
+    is12hTimeFormat: Boolean,
 ) {
-    val preferences: UserPreferences = koinInject()
-    val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
-
     LazyRow(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start)
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
+        contentPadding = PaddingValues(horizontal = 12.dp),
     ) {
         items(forecastHourly.size) { index ->
             HourlyWeatherItem(
@@ -469,13 +480,11 @@ fun DailyWeatherItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
+                .weight(1f)
+                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Date and day column on the left
-            Column(
-                modifier = Modifier.padding(start = 8.dp),
-            ) {
+            Column {
                 WeatherHeaderText(
                     modifier = childModifier,
                     text = forecast.date.toDateTextMonth()
@@ -523,7 +532,7 @@ fun DailyWeatherItem(
                 text = temperatureUnit.getTemperature(forecast.temperature.day),
             )
             WeatherPrimaryText(
-                modifier = Modifier.padding(start = 2.dp, end = 16.dp),
+                modifier = Modifier.padding(start = 2.dp),
                 text = stringResource(temperatureUnit.stringRes),
                 textColor = MaterialTheme.customColors.secondaryTextColor
             )

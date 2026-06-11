@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -27,16 +27,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mmk.kmpauth.google.GoogleButtonUiContainer
+import com.mobileprism.fishing.ui.utils.AnimatedResource
 import com.mobileprism.fishing.ui.viewmodels.LoginUiState
 import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.ic_google_logo
-import fishing.shared.generated.resources.ic_launcher
-import fishing.shared.generated.resources.icon
 import fishing.shared.generated.resources.login_headline
 import fishing.shared.generated.resources.login_subtitle
 import fishing.shared.generated.resources.login_trust_copy
@@ -45,7 +45,6 @@ import fishing.shared.generated.resources.signing_in
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-import androidx.compose.foundation.Image
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,11 +54,18 @@ fun LoginScreen() {
     val signing = uiState is LoginUiState.Signing
     val errorMessage = (uiState as? LoginUiState.Error)?.message
 
+    val backgroundBrush = Brush.verticalGradient(
+        listOf(
+            MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.surfaceContainerHighest,
+        ),
+    )
+
     Scaffold(contentWindowInsets = WindowInsets(0)) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
+                .background(backgroundBrush)
                 .padding(paddingValues)
                 .systemBarsPadding(),
         ) {
@@ -70,13 +76,12 @@ fun LoginScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                Image(
-                    painter = painterResource(Res.drawable.ic_launcher),
-                    contentDescription = stringResource(Res.string.icon),
-                    modifier = Modifier.size(96.dp),
+                AnimatedResource(
+                    resName = "walking_fish",
+                    modifier = Modifier.size(180.dp),
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
                     text = stringResource(Res.string.login_headline),

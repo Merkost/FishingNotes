@@ -39,4 +39,6 @@ abstract class FishingDatabase : RoomDatabase() {
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")
-expect object FishingDatabaseConstructor : RoomDatabaseConstructor<FishingDatabase>
+expect object FishingDatabaseConstructor : RoomDatabaseConstructor<FishingDatabase> {
+    override fun initialize(): FishingDatabase
+}

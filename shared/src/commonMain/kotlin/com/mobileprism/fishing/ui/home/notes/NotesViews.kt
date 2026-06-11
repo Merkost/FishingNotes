@@ -135,14 +135,40 @@ fun CatchItemView(
     catch: UserCatch,
     showPlace: Boolean = true,
     onClick: (UserCatch) -> Unit,
-
-    ) {
+) {
     val preferences: UserPreferences = koinInject()
     val is12hTimeFormat by preferences.use12hTimeFormat.collectAsState(initial = false)
 
+    CatchItemContent(
+        modifier = modifier,
+        childModifier = childModifier,
+        fishType = catch.fishType,
+        fishWeight = catch.fishWeight,
+        fishAmount = catch.fishAmount,
+        placeTitle = catch.placeTitle,
+        photoCount = catch.downloadPhotoLinks.size,
+        timeText = catch.date.toTime(is12hTimeFormat),
+        showPlace = showPlace,
+        onClick = { onClick(catch) },
+    )
+}
+
+@Composable
+fun CatchItemContent(
+    modifier: Modifier = Modifier,
+    childModifier: Modifier = Modifier,
+    fishType: String,
+    fishWeight: Double,
+    fishAmount: Int,
+    placeTitle: String,
+    photoCount: Int,
+    timeText: String,
+    showPlace: Boolean = true,
+    onClick: () -> Unit,
+) {
     DefaultCardClickable(
         modifier = modifier.padding(bottom = 4.dp),
-        onClick = { onClick(catch) }
+        onClick = onClick,
     ) {
         Column(
             modifier = Modifier
@@ -158,7 +184,7 @@ fun CatchItemView(
                         .weight(1f)
                         .padding(start = 8.dp, end = 16.dp)
                         .then(childModifier),
-                    text = catch.fishType,
+                    text = fishType,
                     maxLines = 1
                 )
 
@@ -166,7 +192,7 @@ fun CatchItemView(
                     modifier = Modifier
                         .padding(end = 8.dp)
                         .then(childModifier),
-                    text = "${catch.fishWeight} ${stringResource(Res.string.kg)}"
+                    text = "$fishWeight ${stringResource(Res.string.kg)}"
                 )
             }
 
@@ -174,7 +200,7 @@ fun CatchItemView(
                 modifier = Modifier
                     .padding(top = 4.dp, start = 8.dp)
                     .then(childModifier),
-                text = "${stringResource(Res.string.amount)}: ${catch.fishAmount}" +
+                text = "${stringResource(Res.string.amount)}: $fishAmount" +
                         " ${stringResource(Res.string.pc)}"
             )
 
@@ -199,7 +225,7 @@ fun CatchItemView(
                             .weight(1f)
                             .padding(start = 8.dp, end = 8.dp)
                             .then(childModifier),
-                        text = catch.placeTitle,
+                        text = placeTitle,
                         textAlign = TextAlign.Start,
                         maxLines = 1,
                         textColor = MaterialTheme.colorScheme.outline
@@ -212,7 +238,7 @@ fun CatchItemView(
                     modifier = Modifier
                         .padding(end = 12.dp)
                         .then(childModifier),
-                    count = catch.downloadPhotoLinks.size,
+                    count = photoCount,
                     icon = Res.drawable.ic_baseline_photo_24,
                     tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
                 )
@@ -221,7 +247,7 @@ fun CatchItemView(
                     modifier = Modifier
                         .padding(end = 8.dp)
                         .then(childModifier),
-                    text = catch.date.toTime(is12hTimeFormat)
+                    text = timeText
                 )
             }
         }
