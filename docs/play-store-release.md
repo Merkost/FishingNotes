@@ -93,8 +93,8 @@ First public release:
 | Slot | Dimensions | File in `docs/store-assets/` | Notes |
 |---|---|---|---|
 | **App icon** | 512 × 512 px | `icon-512.png` | Clean production icon (BETA banner removed). Also written back to `shared/src/main/ic_launcher-playstore.png` and the mipmap launcher set. |
-| **Feature graphic** | 1024 × 500 px | `feature-1024x500.png` | Device-frame hero: brand gradient + clean icon + map mockup. Built with ImageMagick from the map screenshot. |
-| **Phone screenshots (4)** | 1028 × 2138 px portrait | `01-map.png` … `04-weather.png` | Generated on-device by the `MarketingScreenshotExporter` instrumented test. |
+| **Feature graphic** | 1024 × 500 px | `feature-1024x500.png` | Brand-blue (palette E) banner: logo lockup + headline + Map/Catches/Weather chips + phone mockup. |
+| **Phone screenshots (5)** | 1028 × 2138 px portrait | `01-hero.png` … `05-weather.png` | `01-hero` is the branded title slide (palette E); `02`–`05` are app screens from the `MarketingScreenshotExporter` instrumented test. |
 | **Tablet screenshots (optional)** | 7" / 10" | — | optional |
 
 > **How screenshots are generated:** the `MarketingScreenshotExporter` instrumented test (`shared/src/androidInstrumentedTest/kotlin/.../marketing/`) renders each marketing composable at density 2.5 and writes a PNG to the device's external files dir. Regenerate with:
@@ -109,12 +109,11 @@ First public release:
 
 ### Screenshot order (first 2–3 are visible in the listing preview row)
 
-1. **`01-map.png`** — map with marker pins + live place card ("Mark every spot.")
-2. **`02-catch.png`** — catch detail page ("Log every catch.")
-3. **`03-notes.png`** — populated notes list ("Your log, always with you.")
-4. **`04-weather.png`** — weather screen ("Know the conditions.")
-
-> No separate brand "cover" slide — the listing leads with the map screenshot; branding lives in the feature graphic.
+1. **`01-hero.png`** — branded title slide (logo + "Every spot. Every catch. Every forecast." + phone)
+2. **`02-map.png`** — map with marker pins + live place card ("Mark every spot.")
+3. **`03-catch.png`** — catch detail page ("Log every catch.")
+4. **`04-notes.png`** — populated notes list ("Your log, always with you.")
+5. **`05-weather.png`** — weather screen ("Know the conditions.")
 
 ---
 
