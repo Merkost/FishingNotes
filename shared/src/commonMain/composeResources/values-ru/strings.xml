@@ -70,6 +70,7 @@
     <string name="fisher">Fisher</string>
     <string name="places">Места</string>
     <string name="catches">Уловы</string>
+    <string name="catches_plural">Уловов: %1$d</string>
     <string name="permissions_required">Необходимы разрешения</string>
 
     <string name="plus">+</string>

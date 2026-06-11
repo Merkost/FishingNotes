@@ -72,6 +72,7 @@
 
     <string name="places">Places</string>
     <string name="catches">Catches</string>
+    <string name="catches_plural">%1$d catches</string>
     <string name="add_new_place">add new place</string>
     <string name="save">Save</string>
 
