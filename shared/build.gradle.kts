@@ -86,9 +86,12 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(libs.coroutines.test)
-            implementation(libs.mockk)
             implementation(libs.turbine)
             implementation(libs.koin.test)
+        }
+
+        androidUnitTest.dependencies {
+            implementation(libs.mockk)
         }
 
         androidMain.dependencies {
@@ -134,23 +137,17 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
         }
 
-        val iosArm64Main by getting
-        val iosSimulatorArm64Main by getting
-        val iosMain by creating {
-            dependsOn(commonMain.get())
-            iosArm64Main.dependsOn(this)
-            iosSimulatorArm64Main.dependsOn(this)
-            dependencies {
-                implementation(libs.ktor.client.darwin)
-                implementation(libs.sqlite.bundled)
-            }
+
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
+            implementation(libs.sqlite.bundled)
         }
     }
 }
 
 android {
     namespace = "com.mobileprism.fishing"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 24
@@ -196,12 +193,13 @@ dependencies {
     androidTestImplementation(libs.androidX.testExtJunit)
     androidTestImplementation(libs.coroutines.test)
     androidTestImplementation(libs.compose.uiTest)
+    debugImplementation(libs.compose.uiTestManifest)
 
 }
 
 buildkonfig {
     packageName = "com.mobileprism.fishing"
-    this.exposeObjectWithName = "BuildKonfig"
+    exposeObjectWithName = "BuildKonfig"
 
     fun resolveProperty(key: String): String =
         localProperties.getProperty(key) ?: secretsProperties.getProperty(key) ?: ""
@@ -211,12 +209,12 @@ buildkonfig {
         buildConfigField(FieldSpec.Type.STRING, "RAPIDAPI_KEY", resolveProperty("RAPIDAPI_KEY"))
         buildConfigField(FieldSpec.Type.STRING, "MAPS_API_KEY", resolveProperty("MAPS_API_KEY"))
         buildConfigField(FieldSpec.Type.STRING, "GOOGLE_WEB_CLIENT_ID", resolveProperty("GOOGLE_WEB_CLIENT_ID"))
-        buildConfigField(FieldSpec.Type.BOOLEAN, "DEBUG", "true")
+        buildConfigField(FieldSpec.Type.BOOLEAN, "IS_DEBUG", "true")
     }
 
     targetConfigs("android") {
         create("release") {
-            buildConfigField(FieldSpec.Type.BOOLEAN, "DEBUG", "false")
+            buildConfigField(FieldSpec.Type.BOOLEAN, "IS_DEBUG", "false")
         }
     }
 }

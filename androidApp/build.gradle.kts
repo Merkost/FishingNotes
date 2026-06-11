@@ -31,14 +31,16 @@ kotlin {
 
 android {
     namespace = "com.mobileprism.fishing.android"
-    compileSdk = 36
+    compileSdk = 37
 
     signingConfigs {
         create("release") {
-            storeFile = rootProject.file("fishing.jks")
-            storePassword = localProperties.getProperty("KEYSTORE_PASSWORD", "")
-            keyAlias = localProperties.getProperty("KEY_ALIAS", "")
-            keyPassword = localProperties.getProperty("KEY_PASSWORD", "")
+            val keystorePath = resolveProperty("KEYSTORE_PATH")
+            val storePass = resolveProperty("KEYSTORE_PASSWORD")
+            storeFile = if (keystorePath.isNotBlank()) rootProject.file(keystorePath) else rootProject.file("fishing.jks")
+            storePassword = storePass
+            keyAlias = resolveProperty("KEY_ALIAS")
+            keyPassword = resolveProperty("KEY_PASSWORD").ifBlank { storePass }
         }
     }
 

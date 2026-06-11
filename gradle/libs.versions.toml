@@ -95,6 +95,7 @@ compose-animation = { group = "androidx.compose.animation", name = "animation"}
 compose-tooling = { group = "androidx.compose.ui", name = "ui-tooling"}
 compose-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended"}
 compose-uiTest = { group = "androidx.compose.ui", name = "ui-test-junit4"}
+compose-uiTestManifest = { group = "androidx.compose.ui", name = "ui-test-manifest"}
 
 
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
