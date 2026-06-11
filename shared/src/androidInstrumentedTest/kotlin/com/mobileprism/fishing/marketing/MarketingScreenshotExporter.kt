@@ -3,9 +3,11 @@ package com.mobileprism.fishing.marketing
 import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import com.mobileprism.fishing.ui.theme.BlueLightColorScheme
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
@@ -44,7 +46,9 @@ class MarketingScreenshotExporter {
                         .testTag("export")
                         .size(widthDp.dp, heightDp.dp),
                 ) {
-                    content()
+                    MaterialTheme(colorScheme = BlueLightColorScheme) {
+                        content()
+                    }
                 }
             }
         }
