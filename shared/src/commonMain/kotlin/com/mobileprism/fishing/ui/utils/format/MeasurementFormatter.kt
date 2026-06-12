@@ -1,5 +1,7 @@
 package com.mobileprism.fishing.ui.utils.format
 
+import kotlin.math.roundToLong
+
 object MeasurementFormatter {
 
     fun weight(value: Double): String = trimNumber(roundTo(value, 2))
@@ -11,7 +13,7 @@ object MeasurementFormatter {
     private fun roundTo(value: Double, decimals: Int): Double {
         var factor = 1.0
         repeat(decimals) { factor *= 10.0 }
-        return (value * factor).toLong() / factor
+        return (value * factor).roundToLong() / factor
     }
 
     private fun trimNumber(value: Double): String {

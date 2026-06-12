@@ -17,8 +17,9 @@ class MeasurementFormatterTest {
     }
 
     @Test
-    fun weightRoundsDownToTwoDecimals() {
-        assertEquals("1.23", MeasurementFormatter.weight(1.23999))
+    fun weightRoundsToTwoDecimals() {
+        assertEquals("1.24", MeasurementFormatter.weight(1.23999))
+        assertEquals("0.07", MeasurementFormatter.weight(0.07))
     }
 
     @Test
@@ -33,6 +34,6 @@ class MeasurementFormatterTest {
 
     @Test
     fun decimalRespectsMaxDecimals() {
-        assertEquals("3.141", MeasurementFormatter.decimal(3.14159, maxDecimals = 3))
+        assertEquals("3.142", MeasurementFormatter.decimal(3.14159, maxDecimals = 3))
     }
 }
