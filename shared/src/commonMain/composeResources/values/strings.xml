@@ -471,4 +471,39 @@
     <string name="feels_like_label">Feels</string>
     <string name="catch_title">Catch</string>
 
+    <string name="value_with_unit">%1$s %2$s</string>
+    <string name="value_with_unit_compact">%1$s%2$s</string>
+    <string name="metric_with_separator">%1$s, %2$s</string>
+
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_no_network">No internet connection. Check your network and retry.</string>
+    <string name="error_timeout">The request timed out. Please try again.</string>
+    <string name="error_auth_invalid">Incorrect email or password.</string>
+    <string name="error_auth_user_not_found">No account found for this email.</string>
+    <string name="error_auth_email_taken">This email is already registered.</string>
+    <string name="error_server">The server is unavailable right now. Please try later.</string>
+
+    <string name="stale_data_banner_title">Showing cached data</string>
+    <string name="stale_data_banner_body">This information may be out of date.</string>
+
+    <string name="change_location">Change location</string>
+    <string name="edit_photo">Edit photo</string>
+    <string name="zoom_in">Zoom in</string>
+    <string name="zoom_out">Zoom out</string>
+    <string name="sort_by">Sort by</string>
+    <string name="app_version">Version %1$s</string>
+
+    <string name="month_short_1">Jan</string>
+    <string name="month_short_2">Feb</string>
+    <string name="month_short_3">Mar</string>
+    <string name="month_short_4">Apr</string>
+    <string name="month_short_5">May</string>
+    <string name="month_short_6">Jun</string>
+    <string name="month_short_7">Jul</string>
+    <string name="month_short_8">Aug</string>
+    <string name="month_short_9">Sep</string>
+    <string name="month_short_10">Oct</string>
+    <string name="month_short_11">Nov</string>
+    <string name="month_short_12">Dec</string>
+
 </resources>
