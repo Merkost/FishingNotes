@@ -47,7 +47,7 @@ fun getPressureList(
     forecast: List<Daily>,
     pressureUnit: PressureValues
 ): List<Int> {
-    return forecast.map { it.pressure }
+    return forecast.map { pressureUnit.getPressureFromHpa(it.pressure).toDoubleOrNull()?.toInt() ?: it.pressure }
 }
 
 fun getPrecipitationList(forecast: List<Daily>): List<Int> {
