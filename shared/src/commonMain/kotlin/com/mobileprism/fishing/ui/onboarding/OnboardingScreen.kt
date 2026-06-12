@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,9 +27,6 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -45,6 +43,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.mobileprism.fishing.ui.home.views.AppButton
+import com.mobileprism.fishing.ui.home.views.AppButtonStyle
+import com.mobileprism.fishing.ui.theme.Spacing
 import com.mobileprism.fishing.ui.utils.AnimatedResource
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
@@ -80,7 +81,7 @@ private val pages = listOf(
         descRes = Res.string.onboarding_desc_3,
         lottieRes = "clouds",
         gradientColors = listOf(Color(0xFFFFE082), Color(0xFFE65100)),
-        buttonTextRes = Res.string.onboarding_continue,
+        buttonTextRes = Res.string.onboarding_get_started,
     ),
 )
 
@@ -122,11 +123,14 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                     .systemBarsPadding()
                     .padding(top = 8.dp, end = 8.dp),
             ) {
-                TextButton(onClick = onFinished) {
+                TextButton(
+                    onClick = onFinished,
+                    modifier = Modifier.defaultMinSize(minWidth = 48.dp, minHeight = 48.dp),
+                ) {
                     Text(
                         text = stringResource(Res.string.onboarding_skip),
-                        color = Color.White.copy(alpha = 0.85f),
-                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.White,
+                        style = MaterialTheme.typography.labelLarge,
                     )
                 }
             }
@@ -293,6 +297,7 @@ private fun OnboardingAnimation(
 ) {
     AnimatedResource(
         resName = resName,
+        contentDescription = null,
         modifier = modifier,
     )
 }
@@ -314,7 +319,7 @@ private fun OnboardingTextContent(
         verticalArrangement = if (compact) Arrangement.Center else Arrangement.Top,
     ) {
         if (!compact) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(Spacing.lg))
         }
 
         Text(
@@ -333,7 +338,7 @@ private fun OnboardingTextContent(
             },
         )
 
-        Spacer(modifier = Modifier.height(if (compact) 8.dp else 12.dp))
+        Spacer(modifier = Modifier.height(if (compact) Spacing.sm else Spacing.md))
 
         Text(
             text = stringResource(data.descRes),
@@ -353,31 +358,20 @@ private fun OnboardingTextContent(
         )
 
         if (compact) {
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(Spacing.xl))
         } else {
             Spacer(modifier = Modifier.weight(1f))
         }
 
-        Button(
+        AppButton(
+            text = stringResource(data.buttonTextRes),
             onClick = onButtonClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(if (compact) 52.dp else 56.dp),
-            shape = RoundedCornerShape(28.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,
-                contentColor = data.gradientColors.last(),
-            ),
-        ) {
-            Text(
-                text = stringResource(data.buttonTextRes),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-            )
-        }
+            style = AppButtonStyle.Filled,
+            modifier = Modifier.fillMaxWidth(),
+        )
 
         if (!compact) {
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(Spacing.xxl))
         }
     }
 }
