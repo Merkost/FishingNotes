@@ -16,6 +16,7 @@ import com.mobileprism.fishing.ui.home.settings.AboutApp
 import com.mobileprism.fishing.ui.home.settings.SettingsScreen
 import com.mobileprism.fishing.ui.home.weather.DailyWeatherData
 import com.mobileprism.fishing.ui.home.weather.WeatherDailyScreen
+import com.mobileprism.fishing.ui.utils.motion.AppNavTransitions
 import com.mobileprism.fishing.utils.serializableType
 import kotlin.reflect.typeOf
 
@@ -67,6 +68,10 @@ fun NavGraphBuilder.AppNavGraph(
 
     composable<MainDestinations.DailyWeather>(
         typeMap = mapOf(typeOf<DailyWeatherData>() to serializableType<DailyWeatherData>()),
+        enterTransition = AppNavTransitions.enter,
+        exitTransition = AppNavTransitions.exit,
+        popEnterTransition = AppNavTransitions.popEnter,
+        popExitTransition = AppNavTransitions.popExit,
     ) {
         val data = it.toRoute<MainDestinations.DailyWeather>()
         WeatherDailyScreen(
