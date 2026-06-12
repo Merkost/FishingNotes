@@ -446,8 +446,9 @@ fun PhotosSection(
         onResult = { newPhotos ->
             if ((newPhotos.size + photos.size) > Constants.MAX_PHOTOS) {
                 SnackbarManager.showMessage(Res.string.max_photos_allowed)
+            } else {
+                onAddPhotos(newPhotos)
             }
-            onAddPhotos(newPhotos)
         }
     )
 

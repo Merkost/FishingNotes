@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<paths>
-    <external-path name="fishing_images" path="Android/data/com.mobileprism.fishing/files/Pictures" />
-    <cache-path name="camera_photos" path="." />
-</paths>

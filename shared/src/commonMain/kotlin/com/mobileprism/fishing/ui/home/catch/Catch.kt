@@ -37,6 +37,7 @@ import com.mobileprism.fishing.domain.entity.weather.PressureValues
 import com.mobileprism.fishing.domain.entity.weather.TemperatureValues
 import com.mobileprism.fishing.domain.entity.weather.WindSpeedValues
 import com.mobileprism.fishing.ui.home.weather.stringRes
+import com.mobileprism.fishing.ui.utils.rememberMediaPickerLauncher
 import com.mobileprism.fishing.ui.viewmodels.UserCatchViewModel
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.time.toDateTextMonth
@@ -70,6 +71,12 @@ fun CatchInfoScreen(navController: NavController, catch: UserCatch) {
         showBottomSheet = true
     }
 
+    var pickedPhotosHandler by remember { mutableStateOf<(List<String>) -> Unit>({}) }
+    val photoPicker = rememberMediaPickerLauncher(
+        maxPhotos = Constants.MAX_PHOTOS,
+        onResult = { photos -> pickedPhotosHandler(photos) }
+    )
+
     if (!showBottomSheet) {
         currentBottomSheet = null
     }
@@ -101,7 +108,9 @@ fun CatchInfoScreen(navController: NavController, catch: UserCatch) {
                 CatchModalBottomSheetContent(
                     currentScreen = currentSheet,
                     onCloseBottomSheet = closeSheet,
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    photoPicker = photoPicker,
+                    onPickedPhotosHandlerChange = { pickedPhotosHandler = it }
                 )
             }
         }
@@ -188,17 +197,9 @@ fun CatchContent(
     viewModel: UserCatchViewModel,
     openSheet: (BottomSheetCatchScreen) -> Unit
 ) {
-    val photosState = remember { mutableStateOf(listOf<String>()) }
-
     val catchState by viewModel.catch.collectAsState()
 
     val placeState by viewModel.mapMarker.collectAsState()
-
-    LaunchedEffect(key1 = photosState.value) {
-        if (photosState.value.isNotEmpty()) {
-            viewModel.updateCatchPhotos(photosState.value)
-        }
-    }
 
     Column(
         modifier = modifier

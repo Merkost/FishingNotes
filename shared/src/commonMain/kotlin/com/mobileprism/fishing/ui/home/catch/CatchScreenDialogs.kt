@@ -17,6 +17,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateListOf
@@ -46,7 +47,7 @@ import com.mobileprism.fishing.ui.home.views.NoContentView
 import com.mobileprism.fishing.ui.home.views.PrimaryText
 import com.mobileprism.fishing.ui.home.views.SimpleOutlinedTextField
 import com.mobileprism.fishing.ui.viewmodels.UserCatchViewModel
-import com.mobileprism.fishing.ui.utils.rememberMediaPickerLauncher
+import com.mobileprism.fishing.ui.utils.MediaPickerLauncher
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
 import com.mobileprism.fishing.utils.ValidationUtils
 import kotlin.time.Clock
@@ -65,6 +66,8 @@ fun CatchModalBottomSheetContent(
     currentScreen: BottomSheetCatchScreen,
     viewModel: UserCatchViewModel,
     onCloseBottomSheet: () -> Unit,
+    photoPicker: MediaPickerLauncher,
+    onPickedPhotosHandlerChange: ((List<String>) -> Unit) -> Unit,
 ) {
     when (currentScreen) {
         BottomSheetCatchScreen.EditFishTypeAndWeightScreen -> {
@@ -85,6 +88,8 @@ fun CatchModalBottomSheetContent(
         BottomSheetCatchScreen.EditPhotosScreen -> {
             AddPhotoDialog(
                 photos = viewModel.catch.collectAsState().value.downloadPhotoLinks,
+                mediaPicker = photoPicker,
+                onPickedPhotosHandlerChange = onPickedPhotosHandlerChange,
                 onSavePhotosClick = { newPhotos ->
                     viewModel.updateCatchPhotos(newPhotos)
                 },
@@ -352,20 +357,26 @@ fun EditNoteDialog(
 @Composable
 fun AddPhotoDialog(
     photos: List<String>,
+    mediaPicker: MediaPickerLauncher,
+    onPickedPhotosHandlerChange: ((List<String>) -> Unit) -> Unit,
     onSavePhotosClick: (List<String>) -> Unit,
     onCloseBottomSheet: () -> Unit
 ) {
     val tempDialogPhotosState = remember { mutableStateListOf<String>() }
 
-    val mediaPicker = rememberMediaPickerLauncher(
-        maxPhotos = MAX_PHOTOS,
-        onResult = { newPhotos ->
+    DisposableEffect(Unit) {
+        onPickedPhotosHandlerChange { newPhotos ->
             if ((newPhotos.size + tempDialogPhotosState.size) > MAX_PHOTOS) {
                 SnackbarManager.showMessage(Res.string.max_photos_allowed)
+            } else {
+                tempDialogPhotosState.addAll(newPhotos)
             }
-            tempDialogPhotosState.addAll(newPhotos)
         }
-    )
+
+        onDispose {
+            onPickedPhotosHandlerChange { _: List<String> -> }
+        }
+    }
 
     LaunchedEffect(key1 = photos) {
         tempDialogPhotosState.clear()
@@ -454,4 +465,3 @@ fun AddPhotoDialog(
         }
     }
 }
-

@@ -2,7 +2,7 @@
 
 Everything you need to fill in across Play Console for **Fishing Notes** (`com.merkost.fishingnotes`). Copy-paste-ready text in code blocks; pick options where there are choices.
 
-> Current build: **versionName 1.0.0 / versionCode 1** (in `gradle/libs.versions.toml`). This is a fresh first release under the `merkost` developer account (previous `mobileprism` account was removed). Bump both for any future release upload.
+> Current build: **versionName 1.0.0 / versionCode 2** (in `gradle/libs.versions.toml`). This release supersedes the first uploaded artifact, so keep bumping versionCode for every later upload.
 
 ---
 
@@ -229,7 +229,7 @@ Output: `androidApp/build/outputs/bundle/release/androidApp-release.aab`. Upload
 
 ## 11. Pre-submit checklist
 
-- [x] versionName / versionCode set to **1.0.0 / 1** (fresh first release; bump versionCode for every later upload)
+- [x] versionName / versionCode set to **1.0.0 / 2** (bump versionCode for every later upload)
 - [ ] Tested **debug** build end-to-end on a real device (sign in, save a place, log a catch, check weather, sign out, sign back in)
 - [ ] Tested **release** build (`./gradlew :androidApp:installRelease`) — verified Google Sign-In works (correct SHA-1 in Firebase)
 - [ ] Verified `google-services.json` in `androidApp/` contains `com.merkost.fishingnotes` (release) AND `com.merkost.fishingnotes.debug` entries with correct certificate hashes
@@ -263,7 +263,7 @@ Output: `androidApp/build/outputs/bundle/release/androidApp-release.aab`. Upload
 | ~~Add "Delete my account" button in app~~ | **Deferred for v1.0.0.** Account deletion is handled via the support email `merkostdev+fishing@gmail.com`, documented in the privacy policy. An in-app delete button is recommended later but not blocking. |
 | ~~Privacy policy URL~~ | **Done.** Hosted at `https://merkost.github.io/FishingNotes/privacy.html` (enable GitHub Pages on `/docs`). |
 | ~~Support email~~ | **Done.** `merkostdev+fishing@gmail.com`. |
-| ~~Bump versionCode~~ | **Done.** Set to versionName `1.0.0` / versionCode `1` (fresh first release). |
+| ~~Bump versionCode~~ | **Done.** Set to versionName `1.0.0` / versionCode `2`. |
 | **Run `:androidApp:bundleRelease`** | Generates the AAB to upload. |
 
 ---

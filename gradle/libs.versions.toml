@@ -1,5 +1,5 @@
 [versions]
-appVersionCode = "1"
+appVersionCode = "2"
 appVersionName = "1.0.0"
 
 kmpauth = "2.3.1"
@@ -58,6 +58,7 @@ detekt = "1.23.8"
 cedarLogging = "0.2.2"
 flowmvi = "3.2.1"
 compottie = "2.2.2"
+filekit = "0.14.1"
 
 
 [libraries]
@@ -163,6 +164,7 @@ koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin"
 cedar-logging = { group = "org.kimplify", name = "cedar-logging", version.ref = "cedarLogging" }
 compottie = { group = "io.github.alexzhirkevich", name = "compottie", version.ref = "compottie" }
 compottie-resources = { group = "io.github.alexzhirkevich", name = "compottie-resources", version.ref = "compottie" }
+filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
 
 
 [plugins]
