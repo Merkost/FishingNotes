@@ -506,4 +506,9 @@
     <string name="month_short_11">Nov</string>
     <string name="month_short_12">Dec</string>
 
+    <string name="status_auto">Auto</string>
+    <string name="status_done">Done</string>
+    <string name="status_offline">Offline</string>
+    <string name="status_loading">Loading</string>
+
 </resources>
