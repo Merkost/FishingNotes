@@ -1,44 +1,51 @@
 package com.mobileprism.fishing.ui.theme
 
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
-val RedGoogleChrome = Color(0xFFde5246)
+private val RedGoogleChrome = Color(0xFFde5246)
 
 // Green base colors
+@Deprecated("Use MaterialTheme.colorScheme.primary", ReplaceWith("MaterialTheme.colorScheme.primary"))
 val primaryFigmaColor = Color(0xFF43a047)
-val primaryFigmaLightColor = Color(0xFF76d275)
-val primaryFigmaDarkColor = Color(0xFF00701a)
+private val primaryFigmaLightColor = Color(0xFF76d275)
+private val primaryFigmaDarkColor = Color(0xFF00701a)
+@Deprecated("Use MaterialTheme.colorScheme.secondary", ReplaceWith("MaterialTheme.colorScheme.secondary"))
 val secondaryFigmaColor = Color(0xFFff6d00)
-val secondaryFigmaLightColor = Color(0xFFff9e40)
-val secondaryFigmaDarkColor = Color(0xFFc43c00)
-val primaryFigmaTextColor = Color(0xDE000000)
+private val secondaryFigmaLightColor = Color(0xFFff9e40)
+private val secondaryFigmaDarkColor = Color(0xFFc43c00)
+private val primaryFigmaTextColor = Color(0xDE000000)
 val secondaryFigmaTextColor = Color(0x8A000000)
-val supportFigmaTextColor = Color(0x42000000)
-val surfaceGrayColor = Color(0x12000000)
-val primaryFigmaBackgroundTint = Color(0xFFFFF7E6)
-val backgroundWhiteColor = Color(0xFFFFFFFF)
-val backgroundGreenColor = Color(0x2043A047)
-val surfaceGreenColor = Color(0x8F79B97B)
+private val supportFigmaTextColor = Color(0x42000000)
+private val surfaceGrayColor = Color(0x12000000)
+private val primaryFigmaBackgroundTint = Color(0xFFFFF7E6)
+private val backgroundWhiteColor = Color(0xFFFFFFFF)
+private val backgroundGreenColor = Color(0x2043A047)
+private val surfaceGreenColor = Color(0x8F79B97B)
+@Deprecated("Use MaterialTheme.colorScheme.surfaceContainer", ReplaceWith("MaterialTheme.colorScheme.surfaceContainer"))
 val cardColor = Color(0xFF8FA590)
 
 // Blue base colors
+@Deprecated("Use MaterialTheme.colorScheme.primary", ReplaceWith("MaterialTheme.colorScheme.primary"))
 val primaryBlueColor = Color(0xFF2196f3)
-val primaryBlueColorTransparent = Color(0xF22196F3)
-val primaryBlueLightColor = Color(0xFF6ec6ff)
+private val primaryBlueColorTransparent = Color(0xF22196F3)
+@Deprecated("Use MaterialTheme.colorScheme.primary", ReplaceWith("MaterialTheme.colorScheme.primary"))
 val primaryBlueLightColorTransparent = Color(0x276EC6FF)
-val primaryBlueDarkColor = Color(0xFF0069c0)
-val primaryBlueDarkColorTransparent = Color(0xE60069C0)
-val secondaryBlueColor = Color(0xFFff6d00)
-val secondaryBlueLightColor = Color(0xFFff9e40)
-val secondaryBlueLightColorTransparent = Color(0x19FF9E40)
-val secondaryBlueDarkColor = Color(0xFFc43c00)
+private val primaryBlueLightColor = Color(0xFF6ec6ff)
+private val primaryBlueDarkColor = Color(0xFF0069c0)
+private val primaryBlueDarkColorTransparent = Color(0xE60069C0)
+private val secondaryBlueColor = Color(0xFFff6d00)
+private val secondaryBlueLightColor = Color(0xFFff9e40)
+private val secondaryBlueLightColorTransparent = Color(0x19FF9E40)
+private val secondaryBlueDarkColor = Color(0xFFc43c00)
 
 val secondaryTextColor = Color(0x8A000000)
 
-val primaryWhiteColor = Color(0xFFFFFFFF)
-val secondaryWhiteColor = Color(0xFFE9E9E9)
+private val primaryWhiteColor = Color(0xFFFFFFFF)
+private val secondaryWhiteColor = Color(0xFFE9E9E9)
 
 // ── Blue Light palette aliases ──────────────────────────────────────────────
 
@@ -181,6 +188,10 @@ val BlueLightColorScheme = lightColorScheme(
     inverseSurface = BlueLightInverseSurface,
     inverseOnSurface = BlueLightInverseOnSurface,
     inversePrimary = BlueLightInversePrimary,
+    error = Color(0xFFBA1A1A),
+    onError = Color(0xFFFFFFFF),
+    errorContainer = Color(0xFFFFDAD6),
+    onErrorContainer = Color(0xFF410002),
 )
 
 val BlueDarkColorScheme = darkColorScheme(
@@ -210,6 +221,10 @@ val BlueDarkColorScheme = darkColorScheme(
     inverseSurface = BlueDarkInverseSurface,
     inverseOnSurface = BlueDarkInverseOnSurface,
     inversePrimary = BlueDarkInversePrimary,
+    error = Color(0xFFFFB4AB),
+    onError = Color(0xFF690005),
+    errorContainer = Color(0xFF93000A),
+    onErrorContainer = Color(0xFFFFDAD6),
 )
 
 val GreenLightColorScheme = lightColorScheme(
@@ -239,6 +254,10 @@ val GreenLightColorScheme = lightColorScheme(
     inverseSurface = GreenLightInverseSurface,
     inverseOnSurface = GreenLightInverseOnSurface,
     inversePrimary = GreenLightInversePrimary,
+    error = Color(0xFFBA1A1A),
+    onError = Color(0xFFFFFFFF),
+    errorContainer = Color(0xFFFFDAD6),
+    onErrorContainer = Color(0xFF410002),
 )
 
 val GreenDarkColorScheme = darkColorScheme(
@@ -268,6 +287,24 @@ val GreenDarkColorScheme = darkColorScheme(
     inverseSurface = GreenDarkInverseSurface,
     inverseOnSurface = GreenDarkInverseOnSurface,
     inversePrimary = GreenDarkInversePrimary,
+    error = Color(0xFFFFB4AB),
+    onError = Color(0xFF690005),
+    errorContainer = Color(0xFF93000A),
+    onErrorContainer = Color(0xFFFFDAD6),
 )
 
 val InitColorScheme = BlueLightColorScheme
+
+object BrandGradients {
+    fun primaryVertical(scheme: ColorScheme): Brush = Brush.verticalGradient(
+        listOf(scheme.primary, scheme.tertiary)
+    )
+
+    fun primaryDiagonal(scheme: ColorScheme): Brush = Brush.linearGradient(
+        listOf(scheme.primary, scheme.tertiary)
+    )
+
+    fun surfaceVertical(scheme: ColorScheme): Brush = Brush.verticalGradient(
+        listOf(scheme.surface, scheme.surfaceContainerHighest)
+    )
+}
