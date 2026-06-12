@@ -12,20 +12,21 @@ typealias ComposableFun = @Composable (navController: NavController) -> Unit
 sealed class TabItem(
     var icon: DrawableResource,
     var titleRes: StringResource,
-    var screen: ComposableFun
+    val hasSortAction: Boolean,
+    var screen: ComposableFun,
 ) {
     class Places(screen: ComposableFun) :
-        TabItem(Res.drawable.ic_baseline_location_on_24, Res.string.places, screen)
+        TabItem(Res.drawable.ic_baseline_location_on_24, Res.string.places, hasSortAction = true, screen)
 
     class Catches(screen: ComposableFun) :
-        TabItem(Res.drawable.ic_fish, Res.string.catches, screen)
+        TabItem(Res.drawable.ic_fish, Res.string.catches, hasSortAction = true, screen)
 
     class Statistics(screen: ComposableFun) :
-        TabItem(Res.drawable.ic_statistics, Res.string.statistics, screen)
+        TabItem(Res.drawable.ic_statistics, Res.string.statistics, hasSortAction = false, screen)
 
     data object PlaceCatches :
-        TabItem(Res.drawable.ic_fish, Res.string.catches, { _ -> })
+        TabItem(Res.drawable.ic_fish, Res.string.catches, hasSortAction = false, { _ -> })
 
     data object Note :
-        TabItem(Res.drawable.ic_baseline_sticky_note_2_24, Res.string.note, { _ -> })
+        TabItem(Res.drawable.ic_baseline_sticky_note_2_24, Res.string.note, hasSortAction = false, { _ -> })
 }
