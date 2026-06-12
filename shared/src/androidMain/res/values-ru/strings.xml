@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Заметки Рыбака</string>
+
+    <!-- Map -->
+    <string name="no_name_place">Место без названия</string>
+    <string name="unnamed_place">Место без названия</string>
+    <string name="cant_recognize_place">Не удалось определить место</string>
+    <string name="install_maps_app">Пожалуйста, установите приложение Google Карты</string>
+    <string name="app_exit_message">Нажмите еще раз для выхода из приложения</string>
+    <string name="cant_get_current_location">Не удается получить текущее местоположение</string>
+    <string name="km">км</string>
+    <string name="m">м</string>
+
+    <!-- Errors -->
+    <string name="error_occured">Произошла ошибка!</string>
+
+</resources>

@@ -1,0 +1,57 @@
+name: iosApp
+options:
+  bundleIdPrefix: com.merkost
+  deploymentTarget:
+    iOS: "16.0"
+
+settings:
+  base:
+    ENABLE_USER_SCRIPT_SANDBOXING: "NO"
+
+packages:
+  FirebaseSDK:
+    url: https://github.com/firebase/firebase-ios-sdk
+    version: "11.0.0"
+  GoogleMaps:
+    url: https://github.com/googlemaps/ios-maps-sdk
+    exactVersion: "10.8.0"
+  GoogleSignIn:
+    url: https://github.com/google/GoogleSignIn-iOS
+    version: "7.0.0"
+
+targets:
+  iosApp:
+    type: application
+    platform: iOS
+    sources:
+      - path: iosApp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.merkost.fishingnotes
+        INFOPLIST_FILE: iosApp/Info.plist
+        DEVELOPMENT_TEAM: ""
+        FRAMEWORK_SEARCH_PATHS:
+          - "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
+        OTHER_LINKER_FLAGS: "-framework shared"
+        ENABLE_USER_SCRIPT_SANDBOXING: "NO"
+    dependencies:
+      - package: FirebaseSDK
+        product: FirebaseAuth
+      - package: FirebaseSDK
+        product: FirebaseFirestore
+      - package: FirebaseSDK
+        product: FirebaseStorage
+      - package: FirebaseSDK
+        product: FirebaseAnalytics
+      - package: GoogleMaps
+        product: GoogleMaps
+      - package: GoogleSignIn
+        product: GoogleSignIn
+    preBuildScripts:
+      - name: "Compile Kotlin Framework"
+        script: |
+          cd "$SRCROOT/.."
+          ./gradlew :shared:embedAndSignAppleFrameworkForXcode
+        inputFiles:
+          - "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)/shared.framework"
+        basedOnDependencyAnalysis: false

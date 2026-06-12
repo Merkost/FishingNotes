@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>767301429798-kl3nl8mj1v6nvo2m2u5vl43842qtpf4g.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.767301429798-kl3nl8mj1v6nvo2m2u5vl43842qtpf4g</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>767301429798-be0d996gdkif774c7ub6ctriv4s0slu0.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCOEGLxTHriz5s46TTxVQAmgBR7dbj8pGg</string>
+	<key>GCM_SENDER_ID</key>
+	<string>767301429798</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.merkost.fishingnotes</string>
+	<key>PROJECT_ID</key>
+	<string>fishing-notes-6f0cb</string>
+	<key>STORAGE_BUCKET</key>
+	<string>fishing-notes-6f0cb.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false/>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false/>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true/>
+	<key>IS_GCM_ENABLED</key>
+	<true/>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true/>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:767301429798:ios:0dc3eb73c4a4039a7a14e7</string>
+</dict>
+</plist>

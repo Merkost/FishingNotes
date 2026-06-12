@@ -1,0 +1,83 @@
+package com.mobileprism.fishing.utils.location
+
+import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Context
+import android.content.IntentSender
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
+import org.kimplify.cedar.logging.Cedar
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
+import com.google.android.gms.tasks.Task
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.*
+import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.home.map.LocationState
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.tasks.await
+
+class LocationManagerImpl(private val context: Context) : LocationManager {
+
+    private val fusedLocationProviderClient: FusedLocationProviderClient =
+        LocationServices.getFusedLocationProviderClient(context)
+    private val manager =
+        context.getSystemService(Context.LOCATION_SERVICE) as android.location.LocationManager
+
+    @SuppressLint("MissingPermission")
+    override fun getCurrentLocationFlow(): Flow<LocationState> = flow {
+        val locationPermissionsGiven = hasLocationPermissions(context)
+        when {
+            manager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER)
+                .not() -> {
+                emit(LocationState.GpsNotEnabled)
+            }
+            locationPermissionsGiven -> {
+                val locationResult = fusedLocationProviderClient.lastLocation.await()
+                try {
+                    emit(LocationState.LocationGranted(locationResult.latitude, locationResult.longitude))
+                } catch (e: Exception) {
+                    Cedar.tag("MAP").d("GPS is off")
+                    SnackbarManager.showMessage(Res.string.cant_get_current_location)
+                }
+            }
+            else -> { emit(LocationState.NoPermission) }
+        }
+    }
+
+    fun checkGPSEnabled(activity: Activity, onGpsEnabled: () -> Unit) {
+        if (manager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER).not()) {
+            SnackbarManager.showMessage(Res.string.gps_is_off)
+            turnOnGPS(activity, onGpsEnabled)
+        } else onGpsEnabled()
+    }
+
+    private fun hasLocationPermissions(context: Context): Boolean =
+        ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+    private fun turnOnGPS(activity: Activity, onGpsEnabled: () -> Unit) {
+        val request = LocationRequest.create().apply {
+            interval = 8000
+            fastestInterval = 5000
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+        val builder = LocationSettingsRequest.Builder().addLocationRequest(request)
+        val client: SettingsClient = LocationServices.getSettingsClient(context)
+        val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
+        task.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException) {
+                try {
+                    exception.startResolutionForResult(
+                        activity,
+                        12345
+                    )
+                } catch (sendEx: IntentSender.SendIntentException) {
+                }
+            }
+        }.addOnSuccessListener {
+            onGpsEnabled()
+        }
+    }
+}

@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Fishing Notes</string>
+
+    <!-- Map -->
+    <string name="no_name_place">No name place</string>
+    <string name="unnamed_place">Unnamed place</string>
+    <string name="cant_recognize_place">Couldn\'t determine location</string>
+    <string name="install_maps_app">Please install a maps application</string>
+    <string name="app_exit_message">Do it again to close the app</string>
+    <string name="cant_get_current_location">Can\'t get current location</string>
+    <string name="km">km</string>
+    <string name="m">m</string>
+
+    <!-- Errors -->
+    <string name="error_occured">An error has occurred!</string>
+
+</resources>

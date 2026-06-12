@@ -1,0 +1,20 @@
+complexity:
+  LongMethod:
+    threshold: 30
+  LargeClass:
+    threshold: 200
+  TooManyFunctions:
+    threshold: 15
+    ignoreDeprecated: true
+    ignorePrivate: true
+    ignoreOverridden: true
+style:
+  MaxLineLength:
+    maxLineLength: 120
+  MagicNumber:
+    active: false
+  WildcardImport:
+    active: false
+naming:
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']

@@ -1,0 +1,45 @@
+package com.mobileprism.fishing.ui.home.advertising
+
+import android.content.Context
+import org.kimplify.cedar.logging.Cedar
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import com.mobileprism.fishing.R
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.*
+import android.app.Activity
+
+const val TAG = "FISHING"
+
+fun showInterstitialAd(context: Context, onAdLoaded: () -> Unit) {
+    InterstitialAd.load(
+        context,
+        context.getString(R.string.new_catch_loading_admob_fullscreen_id),
+        AdRequest.Builder().build(),
+        createInterstitialAdLoadCallback(context = context, onAdLoaded = onAdLoaded)
+    )
+}
+
+fun createInterstitialAdLoadCallback(
+    context: Context,
+    onAdLoaded: () -> Unit
+): InterstitialAdLoadCallback =
+    object : InterstitialAdLoadCallback() {
+        var mInterstitialAd: InterstitialAd? = null
+        override fun onAdLoaded(interstitialAd: InterstitialAd) {
+            Cedar.tag(TAG).d("Ad was loaded.")
+            mInterstitialAd = interstitialAd
+            mInterstitialAd?.show(context as Activity)
+            onAdLoaded()
+            super.onAdLoaded(interstitialAd)
+        }
+
+        override fun onAdFailedToLoad(adError: LoadAdError) {
+            Cedar.tag(TAG).d(adError.message)
+            mInterstitialAd = null
+            onAdLoaded()
+            super.onAdFailedToLoad(adError)
+        }
+    }
