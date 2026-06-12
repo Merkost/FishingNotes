@@ -2,11 +2,14 @@ package com.mobileprism.fishing.viewmodels
 
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.repository.UserRepository
+import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
 import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
 import com.mobileprism.fishing.testutils.user
 import com.mobileprism.fishing.ui.viewmodels.LoginUiState
 import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -79,6 +82,21 @@ class LoginViewModelTest {
 
     @Test
     fun `observeCurrentUser emits Error when repository flow throws`() = runTest {
+        val repo = fakeUserRepository(
+            currentUserFlow = flow { throw RuntimeException("boom") }
+        )
+        val viewModel = LoginViewModel(repo, analyticsTracker)
+        advanceUntilIdle()
+
+        val state = viewModel.uiState.value
+        assertIs<LoginUiState.Error>(state)
+        assertEquals("boom", state.message)
+        verify(exactly = 1) { analyticsTracker.logEvent(AnalyticsEvent.SignInError("boom")) }
+    }
+
+    @Test
+    fun `observeCurrentUser keeps Error state when analytics logging throws`() = runTest {
+        every { analyticsTracker.logEvent(any()) } throws RuntimeException("analytics failed")
         val repo = fakeUserRepository(
             currentUserFlow = flow { throw RuntimeException("boom") }
         )

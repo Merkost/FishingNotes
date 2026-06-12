@@ -72,8 +72,8 @@ class LoginViewModel(
     }
 
     private fun onSignInError(error: Throwable) {
-        analyticsTracker.logEvent(AnalyticsEvent.SignInError(error.message))
-        Cedar.e(error.message ?: "Sign-in failed")
         _uiState.value = LoginUiState.Error(error.message)
+        runCatching { analyticsTracker.logEvent(AnalyticsEvent.SignInError(error.message)) }
+        runCatching { Cedar.e(error.message ?: "Sign-in failed") }
     }
 }
