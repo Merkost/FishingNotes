@@ -19,10 +19,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.ui.theme.Elevation
+import com.mobileprism.fishing.ui.theme.IconSize
 import com.mobileprism.fishing.ui.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,7 +64,7 @@ fun SectionCard(
     trailing: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    AppCard(modifier = modifier) {
+    AppCard(modifier = modifier, onClick = onClick) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -75,7 +74,7 @@ fun SectionCard(
                 painter = icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(IconSize.md),
             )
             AppText(
                 text = title,
@@ -85,10 +84,11 @@ fun SectionCard(
             )
             when {
                 trailing != null -> trailing()
-                onClick != null -> AppIconButton(
-                    onClick = onClick,
-                    icon = rememberVectorPainter(Icons.Default.Edit),
-                    contentDescription = title,
+                onClick != null -> Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(IconSize.md),
                 )
             }
         }

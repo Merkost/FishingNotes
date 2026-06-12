@@ -7,6 +7,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
@@ -16,25 +17,27 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
+import com.mobileprism.fishing.ui.theme.IconSize
 import com.mobileprism.fishing.ui.theme.Spacing
 
 enum class AppTextStyle {
     Display, Heading, Title, Subtitle, Body, BodySmall, Caption, Support
 }
 
+internal fun textStyleFor(style: AppTextStyle, typography: Typography): TextStyle = when (style) {
+    AppTextStyle.Display -> typography.displaySmall
+    AppTextStyle.Heading -> typography.headlineSmall
+    AppTextStyle.Title -> typography.titleLarge
+    AppTextStyle.Subtitle -> typography.titleMedium
+    AppTextStyle.Body -> typography.bodyLarge
+    AppTextStyle.BodySmall -> typography.bodyMedium
+    AppTextStyle.Caption -> typography.bodySmall
+    AppTextStyle.Support -> typography.labelMedium
+}
+
 @Composable
 @ReadOnlyComposable
-private fun AppTextStyle.toTextStyle(): TextStyle = when (this) {
-    AppTextStyle.Display -> MaterialTheme.typography.displaySmall
-    AppTextStyle.Heading -> MaterialTheme.typography.headlineSmall
-    AppTextStyle.Title -> MaterialTheme.typography.titleLarge
-    AppTextStyle.Subtitle -> MaterialTheme.typography.titleMedium
-    AppTextStyle.Body -> MaterialTheme.typography.bodyLarge
-    AppTextStyle.BodySmall -> MaterialTheme.typography.bodyMedium
-    AppTextStyle.Caption -> MaterialTheme.typography.bodySmall
-    AppTextStyle.Support -> MaterialTheme.typography.labelMedium
-}
+private fun AppTextStyle.toTextStyle(): TextStyle = textStyleFor(this, MaterialTheme.typography)
 
 @Composable
 fun AppText(
@@ -75,7 +78,7 @@ fun TextWithLeadingIcon(
             painter = icon,
             contentDescription = contentDescription,
             tint = color,
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(IconSize.md),
         )
         AppText(text = text, style = style, color = color)
     }

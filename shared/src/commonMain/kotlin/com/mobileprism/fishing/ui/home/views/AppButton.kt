@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.unit.dp
+import com.mobileprism.fishing.ui.theme.IconSize
 import com.mobileprism.fishing.ui.theme.Spacing
 
 enum class AppButtonStyle { Filled, Tonal, Outlined, Text }
@@ -37,15 +37,15 @@ fun AppButton(
         ) {
             if (loading) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(18.dp),
-                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(IconSize.sm),
+                    strokeWidth = Spacing.xxs,
                     color = LocalContentColor.current,
                 )
             } else if (leadingIcon != null) {
                 Icon(
                     painter = leadingIcon,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp),
+                    modifier = Modifier.size(IconSize.sm),
                 )
             }
             Text(text = text, maxLines = 1)
