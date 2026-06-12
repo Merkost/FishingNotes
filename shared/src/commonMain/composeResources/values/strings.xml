@@ -514,4 +514,20 @@
     <string name="status_offline">Offline</string>
     <string name="status_loading">Loading</string>
 
+    <string name="month_jan">Jan</string>
+    <string name="month_feb">Feb</string>
+    <string name="month_mar">Mar</string>
+    <string name="month_apr">Apr</string>
+    <string name="month_may">May</string>
+    <string name="month_jun">Jun</string>
+    <string name="month_jul">Jul</string>
+    <string name="month_aug">Aug</string>
+    <string name="month_sep">Sep</string>
+    <string name="month_oct">Oct</string>
+    <string name="month_nov">Nov</string>
+    <string name="month_dec">Dec</string>
+    <string name="sort_options">Sorting options</string>
+    <string name="show_on_map">Show on map</string>
+    <string name="load_more_error">Couldn\'t load more. Tap to retry.</string>
+    <string name="end_of_list">You\'ve reached the end</string>
 </resources>

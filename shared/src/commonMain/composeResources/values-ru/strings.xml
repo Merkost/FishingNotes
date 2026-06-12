@@ -453,4 +453,20 @@
     <string name="sign_in_cancelled">Вход отменён. Попробуйте ещё раз.</string>
     <string name="sign_in_generic_error">Не удалось войти. Проверьте подключение и попробуйте снова.</string>
 
+    <string name="month_jan">Янв</string>
+    <string name="month_feb">Фев</string>
+    <string name="month_mar">Мар</string>
+    <string name="month_apr">Апр</string>
+    <string name="month_may">Май</string>
+    <string name="month_jun">Июн</string>
+    <string name="month_jul">Июл</string>
+    <string name="month_aug">Авг</string>
+    <string name="month_sep">Сен</string>
+    <string name="month_oct">Окт</string>
+    <string name="month_nov">Ноя</string>
+    <string name="month_dec">Дек</string>
+    <string name="sort_options">Параметры сортировки</string>
+    <string name="show_on_map">Показать на карте</string>
+    <string name="load_more_error">Не удалось загрузить. Нажмите, чтобы повторить.</string>
+    <string name="end_of_list">Это все записи</string>
 </resources>
