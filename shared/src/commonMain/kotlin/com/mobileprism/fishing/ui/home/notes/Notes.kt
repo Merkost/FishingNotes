@@ -1,38 +1,52 @@
 package com.mobileprism.fishing.ui.home.notes
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material3.*
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
-import com.mobileprism.fishing.model.datastore.NotesPreferences
-import fishing.shared.generated.resources.Res
-import fishing.shared.generated.resources.*
-import com.mobileprism.fishing.ui.MainDestinations
-import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.domain.entity.common.CatchesSortValues
 import com.mobileprism.fishing.domain.entity.common.PlacesSortValues
+import com.mobileprism.fishing.model.datastore.NotesPreferences
+import com.mobileprism.fishing.ui.home.views.AppIconButton
+import com.mobileprism.fishing.ui.home.views.AppTab
+import com.mobileprism.fishing.ui.home.views.AppTopBar
+import com.mobileprism.fishing.ui.home.views.FabMenuItem
+import com.mobileprism.fishing.ui.home.views.FabWithMenu
+import com.mobileprism.fishing.ui.home.views.ItemsSelection
+import com.mobileprism.fishing.ui.home.views.MultiFabState
+import com.mobileprism.fishing.ui.home.views.SettingsHeader
+import com.mobileprism.fishing.ui.home.views.TabbedPager
 import com.mobileprism.fishing.ui.utils.enums.stringRes
 import com.mobileprism.fishing.utils.Constants.modalBottomSheetCorners
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.*
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
-
-enum class BottomSheetScreen {
-    Sort,
-    Filter,
-}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -44,144 +58,110 @@ fun Notes(
     val notesPreferences: NotesPreferences = koinInject()
     val tabs = remember { createNotesTabs() }
     val pagerState = rememberPagerState(0) { tabs.size }
+    val coroutineScope = rememberCoroutineScope()
 
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var showBottomSheet by remember { mutableStateOf(false) }
-    var bottomSheetScreen by remember { mutableStateOf(BottomSheetScreen.Sort) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showSortSheet by remember { mutableStateOf(false) }
 
     val fabState = remember { mutableStateOf(MultiFabState.COLLAPSED) }
 
-    if (showBottomSheet) {
+    val appTabs = tabs.map { tab -> AppTab(title = stringResource(tab.titleRes)) }
+
+    if (showSortSheet) {
         ModalBottomSheet(
-            onDismissRequest = { showBottomSheet = false },
-            sheetState = bottomSheetState,
+            onDismissRequest = { showSortSheet = false },
+            sheetState = sheetState,
             shape = modalBottomSheetCorners,
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface,
         ) {
-            NotesModalBottomSheet(
-                pagerState = pagerState,
-                bottomSheetScreen = bottomSheetScreen,
+            NotesSortSheet(
+                page = pagerState.currentPage,
                 notesPreferences = notesPreferences,
             )
         }
     }
 
     Scaffold(
+        modifier = modifier,
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
         topBar = {
-            NotesAppBar(pagerState) { newSheetState ->
-                bottomSheetScreen = newSheetState
-                showBottomSheet = true
-            }
+            AppTopBar(
+                title = stringResource(Res.string.notes),
+                actions = {
+                    if (tabs[pagerState.currentPage].hasSortAction && !pagerState.isScrollInProgress) {
+                        AppIconButton(
+                            onClick = { showSortSheet = true },
+                            icon = rememberVectorPainter(Icons.AutoMirrored.Filled.Sort),
+                            contentDescription = stringResource(Res.string.sort_options),
+                        )
+                    }
+                },
+            )
         },
         floatingActionButton = {
             FabWithMenu(
-                modifier = Modifier
-                    .padding(bottom = 20.dp)
-                    .zIndex(5f),
                 fabState = fabState,
                 items = listOf(
                     FabMenuItem(
                         icon = Res.drawable.ic_add_catch,
                         text = stringResource(Res.string.add_new_catch),
-                        onClick = { onAddNewCatchClick(navController) }
+                        onClick = { navController.navigate(com.mobileprism.fishing.ui.MainDestinations.NewCatch()) },
                     ),
                     FabMenuItem(
                         icon = Res.drawable.ic_baseline_add_location_24,
                         text = stringResource(Res.string.new_place),
-                        onClick = { onAddNewPlaceClick(navController) }
-                    )
-                )
+                        onClick = { navController.navigate(com.mobileprism.fishing.ui.MainDestinations.Map(isAddingNewPlace = true)) },
+                    ),
+                ),
             )
         },
     ) { innerPadding ->
         AnimatedVisibility(
-            fabState.value == MultiFabState.EXPANDED,
+            visible = fabState.value == MultiFabState.EXPANDED,
             modifier = Modifier
                 .padding(innerPadding)
                 .zIndex(4f)
                 .fillMaxSize(),
             enter = fadeIn(),
-            exit = fadeOut()
+            exit = fadeOut(),
         ) {
-            Surface(color = MaterialTheme.colorScheme.scrim.copy(0.6f), onClick = {
-                fabState.value = MultiFabState.COLLAPSED
-            }) { }
+            Surface(
+                color = MaterialTheme.colorScheme.scrim.copy(alpha = 0.6f),
+                onClick = { fabState.value = MultiFabState.COLLAPSED },
+            ) {}
         }
-        Column(modifier = Modifier.padding(innerPadding)) {
-            Tabs(tabs = tabs, pagerState = pagerState)
-            TabsContent(tabs = tabs, pagerState = pagerState, navController)
+        TabbedPager(
+            tabs = appTabs,
+            pagerState = pagerState,
+            modifier = Modifier.padding(innerPadding),
+            onSelect = { index -> coroutineScope.launch { pagerState.animateScrollToPage(index) } },
+        ) { page ->
+            tabs[page].screen(navController)
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun NotesAppBar(
-    pagerState: PagerState,
-    openModalBottomSheet: (BottomSheetScreen) -> Unit
+private fun NotesSortSheet(
+    page: Int,
+    notesPreferences: NotesPreferences,
 ) {
-
-    DefaultAppBar(
-        title = stringResource(Res.string.notes),
-        actions = {
-            Row {
-                if (pagerState.currentPage < 2) {
-                    IconButton(onClick = {
-                        if (!pagerState.isScrollInProgress) {
-                            openModalBottomSheet(BottomSheetScreen.Sort)
-                        }
-                    }) { Icon(Icons.AutoMirrored.Filled.Sort, Icons.AutoMirrored.Filled.Sort.name) }
-                }
-
-            }
-        }
-    )
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun NotesModalBottomSheet(
-    pagerState: PagerState,
-    bottomSheetScreen: BottomSheetScreen,
-    notesPreferences: NotesPreferences
-) {
-    val currentPlacesSort = notesPreferences.getPlacesSortValue
-        .collectAsState(PlacesSortValues.Default)
-    val currentCatchesSort = notesPreferences.getCatchesSortValue
-        .collectAsState(CatchesSortValues.Default)
-
     val coroutineScope = rememberCoroutineScope()
-
-    when (pagerState.currentPage) {
+    when (page) {
         0 -> {
-            when (bottomSheetScreen) {
-                BottomSheetScreen.Sort -> {
-                    PlacesSort(currentPlacesSort) { newValue ->
-                        coroutineScope.launch {
-                            notesPreferences.savePlacesSortValue(newValue)
-                        }
-                    }
-                }
-                BottomSheetScreen.Filter -> {
-                    /*Text("Not yet implemented")*/
-                }
+            val current: State<PlacesSortValues> = notesPreferences.getPlacesSortValue
+                .collectAsState(PlacesSortValues.Default)
+            PlacesSort(current) { newValue ->
+                coroutineScope.launch { notesPreferences.savePlacesSortValue(newValue) }
             }
         }
         1 -> {
-            when (bottomSheetScreen) {
-                BottomSheetScreen.Sort -> {
-                    CatchesSort(currentCatchesSort) { newValue ->
-                        coroutineScope.launch {
-                            notesPreferences.saveCatchesSortValue(newValue)
-                        }
-                    }
-                }
-                BottomSheetScreen.Filter -> {
-                    /*Text("Not yet implemented")*/
-                }
+            val current: State<CatchesSortValues> = notesPreferences.getCatchesSortValue
+                .collectAsState(CatchesSortValues.Default)
+            CatchesSort(current) { newValue ->
+                coroutineScope.launch { notesPreferences.saveCatchesSortValue(newValue) }
             }
         }
     }
@@ -190,17 +170,15 @@ fun NotesModalBottomSheet(
 @Composable
 fun PlacesSort(
     currentSort: State<PlacesSortValues>,
-    onSelectedValue: (placesSore: PlacesSortValues) -> Unit
+    onSelectedValue: (PlacesSortValues) -> Unit,
 ) {
-    val radioOptions = PlacesSortValues.entries
-
     Column {
         SettingsHeader(stringResource(Res.string.sort))
         ItemsSelection(
-            radioOptions = radioOptions,
+            radioOptions = PlacesSortValues.entries,
             currentOption = currentSort,
             labelProvider = { stringResource(it.stringRes) },
-            onSelectedItem = onSelectedValue
+            onSelectedItem = onSelectedValue,
         )
     }
 }
@@ -208,77 +186,15 @@ fun PlacesSort(
 @Composable
 fun CatchesSort(
     currentSort: State<CatchesSortValues>,
-    onSelectedValue: (catchesSort: CatchesSortValues) -> Unit
+    onSelectedValue: (CatchesSortValues) -> Unit,
 ) {
-    val radioOptions = CatchesSortValues.entries
-
     Column {
         SettingsHeader(stringResource(Res.string.sort))
         ItemsSelection(
-            radioOptions = radioOptions,
+            radioOptions = CatchesSortValues.entries,
             currentOption = currentSort,
             labelProvider = { stringResource(it.stringRes) },
-            onSelectedItem = onSelectedValue
+            onSelectedItem = onSelectedValue,
         )
     }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun Tabs(tabs: List<TabItem>, pagerState: PagerState) {
-    val scope = rememberCoroutineScope()
-    val colorScheme = MaterialTheme.colorScheme
-
-    TabRow(
-        selectedTabIndex = pagerState.currentPage,
-        containerColor = colorScheme.primary,
-        contentColor = colorScheme.onPrimary,
-        indicator = { tabPositions ->
-            TabRowDefaults.SecondaryIndicator(
-                color = colorScheme.onPrimary,
-                modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage])
-            )
-        }) {
-        tabs.forEachIndexed { index, tab ->
-            Tab(
-                icon = {
-                    Icon(
-                        painter = painterResource(tab.icon), contentDescription = null,
-                        tint = colorScheme.onPrimary
-                    )
-                },
-                text = {
-                    Text(
-                        stringResource(tab.titleRes),
-                        color = colorScheme.onPrimary
-                    )
-                },
-                selected = pagerState.currentPage == index,
-                onClick = {
-                    scope.launch {
-                        pagerState.animateScrollToPage(index)
-                    }
-                },
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun TabsContent(tabs: List<TabItem>, pagerState: PagerState, navController: NavController) {
-    HorizontalPager(
-        state = pagerState
-    ) { page ->
-        tabs[page].screen(navController)
-    }
-}
-
-
-private fun onAddNewCatchClick(navController: NavController) {
-    navController.navigate(MainDestinations.NewCatch())
-}
-
-private fun onAddNewPlaceClick(navController: NavController) {
-    navController.navigate(MainDestinations.Map(isAddingNewPlace = true))
 }
