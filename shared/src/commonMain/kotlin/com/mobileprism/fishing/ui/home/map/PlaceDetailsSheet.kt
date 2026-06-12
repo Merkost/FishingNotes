@@ -39,6 +39,7 @@ fun PlaceDetailsCard(
     val lastKnownLocation by viewModel.lastKnownLocation.collectAsState()
     val fishActivity by viewModel.fishActivity.collectAsStateWithLifecycle()
     val currentWeather by viewModel.currentWeather.collectAsStateWithLifecycle()
+    val statsLoading by viewModel.placeStatsLoading.collectAsStateWithLifecycle()
 
     val mLabel = stringResource(Res.string.m)
     val kmLabel = stringResource(Res.string.km)
@@ -57,8 +58,6 @@ fun PlaceDetailsCard(
     }
 
     val subtitleLoading = address.isBlank() && distance == null
-    val statsLoading = fishActivity == null && currentWeather == null
-
     receivedMarker?.let { marker ->
         val windSpeedText = currentWeather?.let {
             "${windUnit.getWindSpeed(it.wind_speed)} ${stringResource(windUnit.stringRes)}"

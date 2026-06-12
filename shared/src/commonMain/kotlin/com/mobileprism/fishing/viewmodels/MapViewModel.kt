@@ -86,9 +86,23 @@ class MapViewModel(
 
     private val _fishActivity = MutableStateFlow<Int?>(null)
     val fishActivity = _fishActivity.asStateFlow()
-    val currentWeather: MutableStateFlow<CurrentWeatherFree?> = MutableStateFlow(null)
+    private val _currentWeather = MutableStateFlow<CurrentWeatherFree?>(null)
+    val currentWeather = _currentWeather.asStateFlow()
 
-    val windIconRotation = currentWeather.combine(_currentCameraPosition) { weather, camera ->
+    private val _fishActivityLoading = MutableStateFlow(false)
+    private val _currentWeatherLoading = MutableStateFlow(false)
+    val placeStatsLoading = combine(
+        _fishActivityLoading,
+        _currentWeatherLoading,
+        _fishActivity,
+        _currentWeather,
+    ) { fishActivityLoading, currentWeatherLoading, fishActivity, currentWeather ->
+        fishActivity == null &&
+            currentWeather == null &&
+            (fishActivityLoading || currentWeatherLoading)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), false)
+
+    val windIconRotation = _currentWeather.combine(_currentCameraPosition) { weather, camera ->
         weather?.wind_degrees?.minus(camera.bearing) ?: camera.bearing
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), 0f)
 
@@ -136,18 +150,40 @@ class MapViewModel(
         }
     }
 
+    private var currentWeatherJob: Job? = null
     fun getCurrentWeather(latitude: Double, longitude: Double) {
-        viewModelScope.launch {
-            getFreeWeatherUseCase.invoke(latitude, longitude).collect {
-                currentWeather.value = it
+        currentWeatherJob?.cancel()
+        currentWeatherJob = viewModelScope.launch {
+            _currentWeatherLoading.value = true
+            try {
+                getFreeWeatherUseCase.invoke(latitude, longitude).collect {
+                    _currentWeather.value = it
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Throwable) {
+                _currentWeather.value = null
+            } finally {
+                _currentWeatherLoading.value = false
             }
         }
     }
 
+    private var fishActivityJob: Job? = null
     fun getFishActivity(latitude: Double, longitude: Double) {
-        viewModelScope.launch {
-            getFishActivityUseCase.invoke(latitude, longitude).collect {
-                _fishActivity.value = it
+        fishActivityJob?.cancel()
+        fishActivityJob = viewModelScope.launch {
+            _fishActivityLoading.value = true
+            try {
+                getFishActivityUseCase.invoke(latitude, longitude).collect {
+                    _fishActivity.value = it
+                }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Throwable) {
+                _fishActivity.value = null
+            } finally {
+                _fishActivityLoading.value = false
             }
         }
     }
@@ -298,7 +334,7 @@ class MapViewModel(
 
     fun setNewMarkerInfo(latitude: Double, longitude: Double) {
         _fishActivity.value = null
-        currentWeather.value = null
+        _currentWeather.value = null
         _currentMarkerAddressState.value = GeocoderResult.InProgress
         _currentMarkerRawDistance.value = null
         getPlaceNameForMarkerDetails(latitude, longitude)
