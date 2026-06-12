@@ -26,6 +26,16 @@ sealed class LocationState {
     data object NoPermission : LocationState()
     class LocationGranted(val latitude: Double, val longitude: Double) : LocationState()
     data object GpsNotEnabled : LocationState()
+    data object Unavailable : LocationState()
+}
+
+sealed class MyLocationButtonState {
+    data object Ready : MyLocationButtonState()
+    data object Searching : MyLocationButtonState()
+    data object NeedsPermission : MyLocationButtonState()
+    data object PermissionBlocked : MyLocationButtonState()
+    data object GpsDisabled : MyLocationButtonState()
+    data object Unavailable : MyLocationButtonState()
 }
 
 sealed class MapUiState {

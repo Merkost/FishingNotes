@@ -257,6 +257,8 @@ private fun MapControls(
                 Column(horizontalAlignment = Alignment.End) {
                     MyLocationButton(
                         userPreferences = userPreferences,
+                        state = viewModel.myLocationButtonState.collectAsState().value,
+                        onGpsDisabled = viewModel::onMyLocationGpsDisabled,
                         onClick = viewModel::onMyLocationClick
                     )
                     Spacer(modifier = Modifier.height(16.dp))

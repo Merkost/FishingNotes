@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Compress
@@ -67,6 +68,7 @@ import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.map.LocationPermissionDialog
+import com.mobileprism.fishing.ui.utils.rememberAppSettingsOpener
 import com.mobileprism.fishing.ui.utils.rememberLocationPermissionGranted
 import com.mobileprism.fishing.ui.utils.rememberPermissionsController
 import com.mobileprism.fishing.ui.home.views.DefaultDialog
@@ -142,45 +144,113 @@ private fun SettingsTopAppBar(
 private fun LocationPermissionBanner(userPreferences: UserPreferences) {
     val permissionsController = rememberPermissionsController()
     val locationPermissionGranted by rememberLocationPermissionGranted(permissionsController)
+    val shouldShowPermissions by userPreferences.shouldShowLocationPermission.collectAsState(true)
+    val openAppSettings = rememberAppSettingsOpener()
     var isPermissionDialogOpen by remember { mutableStateOf(false) }
 
     if (isPermissionDialogOpen) {
-        LocationPermissionDialog(userPreferences = userPreferences) {
-            isPermissionDialogOpen = false
-        }
+        LocationPermissionDialog(
+            userPreferences = userPreferences,
+            onCloseCallback = {
+                isPermissionDialogOpen = false
+            },
+        )
     }
 
     AnimatedVisibility(visible = !locationPermissionGranted) {
+        val containerColor = if (shouldShowPermissions) {
+            MaterialTheme.colorScheme.tertiaryContainer
+        } else {
+            MaterialTheme.colorScheme.errorContainer
+        }
+        val contentColor = if (shouldShowPermissions) {
+            MaterialTheme.colorScheme.onTertiaryContainer
+        } else {
+            MaterialTheme.colorScheme.onErrorContainer
+        }
+
         Surface(
-            shape = MaterialTheme.shapes.extraLarge,
-            color = MaterialTheme.colorScheme.primaryContainer,
+            shape = MaterialTheme.shapes.large,
+            color = containerColor,
+            contentColor = contentColor,
+            tonalElevation = 1.dp,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .clickable { isPermissionDialogOpen = true }
+                .clickable {
+                    if (shouldShowPermissions) {
+                        isPermissionDialogOpen = true
+                    } else {
+                        openAppSettings()
+                    }
+                }
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.LocationOn,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                Spacer(modifier = Modifier.width(16.dp))
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .background(contentColor.copy(alpha = 0.12f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = null,
+                        modifier = Modifier.size(22.dp),
+                        tint = contentColor
+                    )
+                }
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(Res.string.location_permission),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        text = stringResource(
+                            if (shouldShowPermissions) {
+                                Res.string.location_permission_banner_title
+                            } else {
+                                Res.string.location_permission_blocked_title
+                            }
+                        ),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = contentColor
                     )
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = stringResource(Res.string.provide_location_permission),
+                        text = stringResource(
+                            if (shouldShowPermissions) {
+                                Res.string.location_permission_banner_body
+                            } else {
+                                Res.string.location_permission_blocked_body
+                            }
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                        color = contentColor.copy(alpha = 0.78f)
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        Text(
+                            text = stringResource(
+                                if (shouldShowPermissions) {
+                                    Res.string.location_permission_banner_action
+                                } else {
+                                    Res.string.goto_app_settings
+                                }
+                            ),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = contentColor,
+                        )
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = contentColor,
+                        )
+                    }
                 }
             }
         }

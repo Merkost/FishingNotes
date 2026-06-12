@@ -59,7 +59,7 @@ class AppStateHolder(
                             duration = message.duration
                         )
                         when (result) {
-                            SnackbarResult.ActionPerformed -> snackbarAction.action
+                            SnackbarResult.ActionPerformed -> snackbarAction.action()
                             SnackbarResult.Dismissed -> {}
                         }
                     } ?: run {

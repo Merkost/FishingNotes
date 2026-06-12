@@ -44,9 +44,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.GpsOff
+import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Settings
@@ -78,6 +81,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mobileprism.fishing.ui.utils.AnimatedResource
+import com.mobileprism.fishing.ui.home.SnackbarAction
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.views.SettingsCheckbox
 import com.mobileprism.fishing.ui.utils.placeholder
@@ -87,8 +91,8 @@ import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
 import com.mobileprism.fishing.ui.utils.LocalAnalytics
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.views.SettingsHeader
-import com.mobileprism.fishing.ui.theme.RedGoogleChrome
 import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
+import com.mobileprism.fishing.ui.utils.rememberAppSettingsOpener
 import com.mobileprism.fishing.ui.utils.rememberLocationPermissionGranted
 import com.mobileprism.fishing.ui.utils.rememberPermissionsController
 import com.mobileprism.fishing.viewmodels.MapViewModel
@@ -216,56 +220,100 @@ fun MapModalBottomSheet(
 fun MyLocationButton(
     modifier: Modifier = Modifier,
     userPreferences: UserPreferences,
+    state: MyLocationButtonState,
+    onGpsDisabled: () -> Unit,
     onClick: () -> Unit,
 ) {
     val checkGPS = rememberGPSChecker()
     var locationDialogIsShowing by remember { mutableStateOf(false) }
-    val shouldShowPermissions by userPreferences.shouldShowLocationPermission.collectAsState(false)
+    val shouldShowPermissions by userPreferences.shouldShowLocationPermission.collectAsState(true)
     val permissionsController = rememberPermissionsController()
     val locationPermissionGranted by rememberLocationPermissionGranted(permissionsController)
+    val openAppSettings = rememberAppSettingsOpener()
 
     if (locationDialogIsShowing) {
         if (shouldShowPermissions) {
-            LocationPermissionDialog(userPreferences = userPreferences) {
-                locationDialogIsShowing = false
-            }
-        } else SnackbarManager.showMessage(Res.string.location_permission_denied)
+            LocationPermissionDialog(
+                userPreferences = userPreferences,
+                onPermissionGranted = {
+                    checkGPS(onClick, onGpsDisabled)
+                },
+                onCloseCallback = {
+                    locationDialogIsShowing = false
+                },
+            )
+        }
     }
 
-    val color = animateColorAsState(
-        when {
-            !shouldShowPermissions || !locationPermissionGranted -> {
-                RedGoogleChrome
-            }
-
-            else -> {
-                MaterialTheme.colorScheme.onSurface
-            }
-        }
+    val effectiveState = when {
+        !locationPermissionGranted && !shouldShowPermissions -> MyLocationButtonState.PermissionBlocked
+        !locationPermissionGranted -> MyLocationButtonState.NeedsPermission
+        else -> state
+    }
+    val icon = when (effectiveState) {
+        MyLocationButtonState.Ready -> Icons.Default.MyLocation
+        MyLocationButtonState.Searching -> Icons.Default.LocationSearching
+        MyLocationButtonState.NeedsPermission -> Icons.AutoMirrored.Filled.HelpOutline
+        MyLocationButtonState.PermissionBlocked,
+        MyLocationButtonState.GpsDisabled -> Icons.Default.GpsOff
+        MyLocationButtonState.Unavailable -> Icons.Default.ErrorOutline
+    }
+    val contentColor = animateColorAsState(
+        targetValue = when (effectiveState) {
+            MyLocationButtonState.Ready -> MaterialTheme.colorScheme.onSurface
+            MyLocationButtonState.Searching -> MaterialTheme.colorScheme.primary
+            MyLocationButtonState.NeedsPermission -> MaterialTheme.colorScheme.tertiary
+            MyLocationButtonState.PermissionBlocked,
+            MyLocationButtonState.GpsDisabled,
+            MyLocationButtonState.Unavailable -> MaterialTheme.colorScheme.error
+        },
+        animationSpec = tween(250)
+    )
+    val containerColor = animateColorAsState(
+        targetValue = when (effectiveState) {
+            MyLocationButtonState.Ready -> Color.Transparent
+            MyLocationButtonState.Searching -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+            MyLocationButtonState.NeedsPermission -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.55f)
+            MyLocationButtonState.PermissionBlocked,
+            MyLocationButtonState.GpsDisabled,
+            MyLocationButtonState.Unavailable -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.55f)
+        },
+        animationSpec = tween(250)
     )
 
     MapControlPill(modifier = modifier) {
         IconButton(
             modifier = Modifier
                 .size(44.dp)
-                .clip(RoundedCornerShape(14.dp)),
+                .clip(RoundedCornerShape(14.dp))
+                .background(containerColor.value),
             onClick = {
+                if (effectiveState == MyLocationButtonState.Searching) return@IconButton
                 when (locationPermissionGranted) {
                     true -> {
-                        checkGPS { onClick() }
+                        checkGPS(onClick, onGpsDisabled)
                     }
 
                     false -> {
-                        locationDialogIsShowing = true
+                        if (shouldShowPermissions) {
+                            locationDialogIsShowing = true
+                        } else {
+                            SnackbarManager.showMessage(
+                                messageTextId = Res.string.location_permission_denied,
+                                snackbarAction = SnackbarAction(
+                                    textId = Res.string.goto_app_settings,
+                                    action = openAppSettings,
+                                ),
+                            )
+                        }
                     }
                 }
             }
         ) {
             Icon(
-                if (!shouldShowPermissions) Icons.Default.GpsOff
-                else Icons.Default.MyLocation,
-                stringResource(Res.string.my_location),
-                tint = color.value,
+                imageVector = icon,
+                contentDescription = stringResource(Res.string.my_location),
+                tint = contentColor.value,
                 modifier = Modifier.size(22.dp),
             )
         }

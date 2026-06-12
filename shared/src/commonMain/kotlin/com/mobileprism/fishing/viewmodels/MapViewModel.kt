@@ -59,6 +59,10 @@ class MapViewModel(
     private val _lastKnownLocation = MutableStateFlow<Pair<Double, Double>?>(null)
     val lastKnownLocation = _lastKnownLocation.asStateFlow()
 
+    private val _myLocationButtonState =
+        MutableStateFlow<MyLocationButtonState>(MyLocationButtonState.Ready)
+    val myLocationButtonState = _myLocationButtonState.asStateFlow()
+
     private val lastMapCameraPosition = MutableStateFlow<MapCameraState?>(null)
 
     private val _newMapCameraPosition = MutableSharedFlow<MapCameraState>()
@@ -211,18 +215,42 @@ class MapViewModel(
         _currentMarker.value = null
     }
 
+    private var myLocationJob: Job? = null
     fun onMyLocationClick() {
-        viewModelScope.launch {
-            when (val result = locationManager.getCurrentLocationFlow().singleOrNull()) {
+        myLocationJob?.cancel()
+        myLocationJob = viewModelScope.launch {
+            _myLocationButtonState.value = MyLocationButtonState.Searching
+            val result = runCatching {
+                withTimeoutOrNull(CURRENT_LOCATION_TIMEOUT_MS) {
+                    locationManager.getCurrentLocationFlow().firstOrNull()
+                }
+            }.getOrNull()
+            when (result) {
                 is LocationState.LocationGranted -> {
                     _lastKnownLocation.value = Pair(result.latitude, result.longitude)
                     setNewCameraLocation(result.latitude, result.longitude)
+                    _myLocationButtonState.value = MyLocationButtonState.Ready
                 }
-                else -> {
-                    SnackbarManager.showMessage(Res.string.cant_get_current_location)
+                LocationState.NoPermission -> {
+                    _myLocationButtonState.value = MyLocationButtonState.NeedsPermission
+                    SnackbarManager.showMessage(Res.string.location_permissions_required)
+                }
+                LocationState.GpsNotEnabled -> {
+                    _myLocationButtonState.value = MyLocationButtonState.GpsDisabled
+                    SnackbarManager.showMessage(Res.string.gps_is_off)
+                }
+                LocationState.Unavailable,
+                null -> {
+                    _myLocationButtonState.value = MyLocationButtonState.Unavailable
+                    SnackbarManager.showMessage(Res.string.unable_to_get_location)
                 }
             }
         }
+    }
+
+    fun onMyLocationGpsDisabled() {
+        _myLocationButtonState.value = MyLocationButtonState.GpsDisabled
+        SnackbarManager.showMessage(Res.string.gps_is_off)
     }
 
     private fun setNewCameraLocation(latitude: Double, longitude: Double, zoom: Float = DEFAULT_ZOOM) {
@@ -354,5 +382,9 @@ class MapViewModel(
 
     fun resetAddNewMarkerState() {
         _addNewMarkerState.value = null
+    }
+
+    private companion object {
+        const val CURRENT_LOCATION_TIMEOUT_MS = 10_000L
     }
 }

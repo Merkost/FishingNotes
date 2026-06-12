@@ -8,10 +8,12 @@ import com.mobileprism.fishing.utils.location.LocationManagerImpl
 import org.koin.compose.koinInject
 
 @Composable
-actual fun rememberGPSChecker(): (onEnabled: () -> Unit) -> Unit {
+actual fun rememberGPSChecker(): (onEnabled: () -> Unit, onDisabled: () -> Unit) -> Unit {
     val context = LocalContext.current
     val locationManager: LocationManagerImpl = koinInject()
     return remember(context, locationManager) {
-        { onEnabled: () -> Unit -> locationManager.checkGPSEnabled(context as Activity, onEnabled) }
+        { onEnabled: () -> Unit, onDisabled: () -> Unit ->
+            locationManager.checkGPSEnabled(context as Activity, onEnabled, onDisabled)
+        }
     }
 }

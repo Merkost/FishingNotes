@@ -177,12 +177,19 @@
     <string name="location_dont_ask">The request will no longer be displayed. To give the necessary permissions, go to your device settings</string>
     <string name="location_permission_denied">You have denied access to your location. Grant permissions in your device settings.</string>
     <string name="location_permission_dialog">Allow app to determine your location?</string>
+    <string name="location_permission_dialog_body">Fishing Notes uses this only to center the map, find nearby conditions, and save spots faster.</string>
+    <string name="enable_location">Enable location</string>
     <string name="precipitation">Precipitation</string>
     <string name="humidity">Humidity</string>
     <string name="sunrise_sunset">Sunrise/Sunset</string>
     <string name="hourly">Hourly</string>
     <string name="location_permission">Location permission</string>
     <string name="provide_location_permission">Provide location permission to the app</string>
+    <string name="location_permission_banner_title">Location access is off</string>
+    <string name="location_permission_banner_body">Turn it on to center the map on your position and add nearby spots faster.</string>
+    <string name="location_permission_banner_action">Review access</string>
+    <string name="location_permission_blocked_title">Location access is blocked</string>
+    <string name="location_permission_blocked_body">Enable it from device settings to use current location on the map.</string>
     <string name="time_format">Time format</string>
     <string name="use_12h">Use 12 hours time format</string>
     <string name="pressure_mm">mmHg</string>
@@ -456,6 +463,7 @@
     <string name="onboarding_continue">Continue</string>
     <string name="prompt_card_title">Add your first spot!</string>
     <string name="prompt_card_subtitle">Tap to mark a fishing location on the map</string>
+    <string name="prompt_card_action">Mark a spot</string>
     <string name="color">Color</string>
     <string name="away">away</string>
     <string name="wind_speed">Wind</string>

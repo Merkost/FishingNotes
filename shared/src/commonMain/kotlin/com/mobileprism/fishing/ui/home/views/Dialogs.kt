@@ -19,6 +19,7 @@ import fishing.shared.generated.resources.no
 import fishing.shared.generated.resources.yes
 import org.jetbrains.compose.resources.stringResource
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DefaultDialog(
     primaryText: String? = null,
@@ -79,24 +80,22 @@ fun DefaultDialog(
             }
         },
         confirmButton = {
-            Row(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    onNeutralClick?.let {
-                        DefaultButtonSecondaryLight(
-                            text = neutralButtonText,
-                            onClick = onNeutralClick
-                        )
-                    }
-                    onNegativeClick?.let {
-                        DefaultButton(
-                            text = negativeButtonText,
-                            onClick = onNegativeClick
-                        )
-                    }
+                onNeutralClick?.let {
+                    DefaultButtonSecondaryLight(
+                        text = neutralButtonText,
+                        onClick = onNeutralClick
+                    )
+                }
+                onNegativeClick?.let {
+                    DefaultButton(
+                        text = negativeButtonText,
+                        onClick = onNegativeClick
+                    )
                 }
                 onPositiveClick?.let {
                     DefaultButtonFilled(
