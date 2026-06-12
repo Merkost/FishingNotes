@@ -1,8 +1,9 @@
 package com.mobileprism.fishing.utils
 
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.mobileprism.fishing.ui.theme.ShapeTokens
 
 object Constants {
 
@@ -11,9 +12,11 @@ object Constants {
 
     val bottomBannerPadding: Dp = 80.dp
 
-    val modalBottomSheetCorners = RoundedCornerShape(
-        topStart = 16.dp, topEnd = 16.dp, bottomStart = 0.dp, bottomEnd = 0.dp
+    @Deprecated(
+        "Use ShapeTokens.bottomSheet",
+        ReplaceWith("ShapeTokens.bottomSheet", "com.mobileprism.fishing.ui.theme.ShapeTokens")
     )
+    val modalBottomSheetCorners: Shape = ShapeTokens.bottomSheet
 
     const val MAX_PHOTOS: Int = 3
     const val WIND_ROTATION = 45f
