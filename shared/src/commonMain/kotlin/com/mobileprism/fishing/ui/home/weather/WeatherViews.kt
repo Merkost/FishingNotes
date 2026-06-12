@@ -6,9 +6,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -16,7 +14,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
-import com.mobileprism.fishing.ui.utils.AnimatedResource
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.entity.weather.Daily
@@ -31,6 +28,9 @@ import com.mobileprism.fishing.model.mappers.getWeatherIconByName
 import com.mobileprism.fishing.ui.home.views.BigText
 import com.mobileprism.fishing.ui.home.views.PrimaryText
 import com.mobileprism.fishing.ui.home.views.SecondaryText
+import com.mobileprism.fishing.ui.home.views.WeatherMetric
+import com.mobileprism.fishing.ui.home.views.WeatherStatGrid
+import com.mobileprism.fishing.ui.theme.Spacing
 import com.mobileprism.fishing.utils.time.calculateDaylightTime
 import com.mobileprism.fishing.utils.time.toTime
 import org.koin.compose.koinInject
@@ -77,8 +77,7 @@ fun PrimaryWeatherItemView(
 
         BigText(
             modifier = childModifier.padding(bottom = 8.dp),
-            text = temperatureUnit.getTemperature(temperature)
-                    + stringResource(temperatureUnit.stringRes),
+            text = temperatureText(temperatureUnit, temperature),
             textColor = textTint
         )
     }
@@ -149,11 +148,6 @@ fun WeatherPrimaryText(
 }
 
 @Composable
-fun WeatherLoading(modifier: Modifier) {
-    AnimatedResource("empty_status", modifier)
-}
-
-@Composable
 fun DayTemperatureView(
     modifier: Modifier = Modifier,
     temperature: Temperature,
@@ -172,8 +166,7 @@ fun DayTemperatureView(
                 SecondaryText(text = label)
                 PrimaryText(
                     modifier = Modifier.padding(top = 4.dp),
-                    text = temperatureUnit.getTemperature(value)
-                            + stringResource(temperatureUnit.stringRes)
+                    text = temperatureText(temperatureUnit, value)
                 )
             }
         }
@@ -246,126 +239,44 @@ fun DailyWeatherValuesView(
     pressureUnit: PressureValues,
     windSpeedUnit: WindSpeedValues
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(top = 8.dp)
-    ) {
-        // Row 1: Pressure and Wind
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                SecondaryText(text = stringResource(Res.string.pressure))
-                Row(
-                    modifier = Modifier.padding(top = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Image(
-                        modifier = Modifier.size(24.dp),
-                        painter = painterResource(Res.drawable.ic_gauge),
-                        contentDescription = stringResource(Res.string.pressure),
-                        colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.tertiary)
-                    )
-                    PrimaryText(
-                        modifier = Modifier.padding(start = 2.dp),
-                        text = pressureUnit.getPressureFromHpa(
-                            forecast.pressure) + " " + stringResource(pressureUnit.stringRes),
-                    )
-                }
-            }
-
-            Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                SecondaryText(text = stringResource(Res.string.wind))
-                Row(
-                    modifier = Modifier.padding(top = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Image(
-                        modifier = Modifier.size(24.dp),
-                        painter = painterResource(Res.drawable.ic_wind),
-                        contentDescription = stringResource(Res.string.wind),
-                    )
-                    PrimaryText(
-                        modifier = Modifier.padding(start = 2.dp),
-                        text = windSpeedUnit.getDefaultWindSpeed(forecast.windSpeed.toDouble())
-                                + " " + stringResource(windSpeedUnit.stringRes),
-                    )
-                    Icon(
-                        modifier = Modifier
-                            .padding(start = 4.dp)
-                            .rotate(forecast.windDeg.toFloat()),
-                        painter = painterResource(Res.drawable.ic_baseline_navigation_24),
-                        contentDescription = stringResource(Res.string.wind),
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Row 2: Humidity and Precipitation
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                SecondaryText(text = stringResource(Res.string.humidity))
-                Row(
-                    modifier = Modifier.padding(top = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Image(
-                        modifier = Modifier.size(24.dp),
-                        painter = painterResource(Res.drawable.ic_baseline_opacity_24),
-                        contentDescription = stringResource(Res.string.humidity),
-                        colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.tertiary)
-                    )
-                    PrimaryText(
-                        modifier = Modifier.padding(start = 2.dp),
-                        text = forecast.humidity.toString() + " " + stringResource(Res.string.percent)
-                    )
-                }
-            }
-
-            Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                SecondaryText(text = stringResource(Res.string.precipitation))
-                Row(
-                    modifier = Modifier.padding(top = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Image(
-                        modifier = Modifier.size(24.dp),
-                        painter = painterResource(Res.drawable.ic_baseline_umbrella_24),
-                        contentDescription = stringResource(Res.string.precipitation),
-                    )
-                    PrimaryText(
-                        modifier = Modifier.padding(start = 2.dp),
-                        text = (forecast.probabilityOfPrecipitation * 100).toInt().toString()
-                                + " " + stringResource(Res.string.percent)
-                    )
-                }
-            }
-        }
-    }
+    val metrics: List<@Composable () -> Unit> = listOf(
+        {
+            WeatherMetric(
+                label = stringResource(Res.string.pressure),
+                icon = Res.drawable.ic_gauge,
+                value = pressureText(pressureUnit, forecast.pressure),
+                iconTint = MaterialTheme.colorScheme.tertiary,
+            )
+        },
+        {
+            WeatherMetric(
+                label = stringResource(Res.string.wind),
+                icon = Res.drawable.ic_wind,
+                value = windSpeedText(windSpeedUnit, forecast.windSpeed.toDouble()),
+                iconTint = MaterialTheme.colorScheme.tertiary,
+            )
+        },
+        {
+            WeatherMetric(
+                label = stringResource(Res.string.humidity),
+                icon = Res.drawable.ic_baseline_opacity_24,
+                value = percentText(forecast.humidity),
+                iconTint = MaterialTheme.colorScheme.tertiary,
+            )
+        },
+        {
+            WeatherMetric(
+                label = stringResource(Res.string.precipitation),
+                icon = Res.drawable.ic_baseline_umbrella_24,
+                value = percentText(probabilityToPercent(forecast.probabilityOfPrecipitation)),
+                iconTint = MaterialTheme.colorScheme.tertiary,
+            )
+        },
+    )
+    WeatherStatGrid(
+        modifier = modifier.fillMaxWidth(),
+        metrics = metrics,
+    )
 }
 
 @Composable
@@ -392,18 +303,7 @@ fun MoonPhaseView(
             contentDescription = stringResource(Res.string.moon_phase)
         )
         PrimaryText(
-            text = (moonPhase * 100).toInt().toString()
-                    + " " + stringResource(Res.string.percent)
+            text = percentText(moonPhaseToPercent(moonPhase))
         )
     }
 }
-
-
-
-
-
-
-
-
-
-

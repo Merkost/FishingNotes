@@ -1,10 +1,6 @@
 package com.mobileprism.fishing.ui.home.weather
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.widthIn
@@ -18,12 +14,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.mobileprism.fishing.ui.utils.placeholder
 import fishing.shared.generated.resources.Res
@@ -55,14 +49,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.text.TextMeasurer
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.text.style.TextAlign
-import kotlin.math.min
+import com.mobileprism.fishing.ui.theme.Spacing
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -300,24 +287,24 @@ fun MainWeatherScreen(
 
         if (forecast.daily.all { it.date != 0L }) {
             PressureChartItem(
-                childModifier = childModifier,
                 forecast = forecast.daily,
                 pressureUnit = pressureUnit,
             )
             PrecipitationChartItem(
-                childModifier = childModifier,
                 forecast = forecast.daily,
             )
         }
 
         forecast.daily.forEachIndexed { index, daily ->
-            DailyWeatherItem(
-                childModifier = childModifier,
-                forecast = daily,
-                temperatureUnit = temperatureUnit,
-                onDailyWeatherClick = {
-                    navigateToDaily(index)
-                }
+            val weather = daily.weather.firstOrNull()
+            WeatherDailyForecastRow(
+                date = daily.date.toDateTextMonth() + " " + daily.date.toDayOfWeek(),
+                icon = if (weather != null) getWeatherIconByName(weather.icon) else Res.drawable.ic_weather_sun,
+                temperature = temperatureText(temperatureUnit, daily.temperature.day),
+                precipitation = if (isHeavyPrecipitation(daily.probabilityOfPrecipitation)) {
+                    percentText(probabilityToPercent(daily.probabilityOfPrecipitation))
+                } else null,
+                onClick = { navigateToDaily(index) },
             )
         }
     }
@@ -347,21 +334,50 @@ fun CurrentWeather(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            val currentHour = forecast.hourly.firstOrNull()
+            val currentWeather = currentHour?.weather?.firstOrNull()
 
-            PrimaryWeatherItemView(
-                childModifier = childModifier,
-                temperature = forecast.hourly.first().temperature,
-                weather = forecast.hourly.first().weather.first(),
-                textTint = MaterialTheme.colorScheme.onPrimary,
-                iconTint = MaterialTheme.colorScheme.onPrimary,
-                temperatureUnit = temperatureUnit
-            )
+            if (currentHour != null && currentWeather != null) {
+                PrimaryWeatherItemView(
+                    childModifier = childModifier,
+                    temperature = currentHour.temperature,
+                    weather = currentWeather,
+                    textTint = MaterialTheme.colorScheme.onPrimary,
+                    iconTint = MaterialTheme.colorScheme.onPrimary,
+                    temperatureUnit = temperatureUnit
+                )
 
-            CurrentWeatherValuesView(
-                childModifier = childModifier,
-                forecast = forecast.hourly.first(),
-                pressureUnit = pressureUnit,
-            )
+                val currentMetrics: List<@Composable () -> Unit> = listOf(
+                    {
+                        WeatherMetric(
+                            label = stringResource(Res.string.pressure),
+                            icon = Res.drawable.ic_gauge,
+                            value = pressureText(pressureUnit, currentHour.pressure),
+                            iconTint = MaterialTheme.colorScheme.onPrimary,
+                        )
+                    },
+                    {
+                        WeatherMetric(
+                            label = stringResource(Res.string.humidity),
+                            icon = Res.drawable.ic_baseline_opacity_24,
+                            value = percentText(currentHour.humidity),
+                            iconTint = MaterialTheme.colorScheme.onPrimary,
+                        )
+                    },
+                    {
+                        WeatherMetric(
+                            label = stringResource(Res.string.precipitation),
+                            icon = Res.drawable.ic_baseline_umbrella_24,
+                            value = percentText(probabilityToPercent(currentHour.probabilityOfPrecipitation)),
+                            iconTint = MaterialTheme.colorScheme.onPrimary,
+                        )
+                    },
+                )
+                WeatherStatGrid(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.md),
+                    metrics = currentMetrics,
+                )
+            }
 
             HourlyWeather(
                 childModifier = childModifier,
@@ -427,17 +443,14 @@ fun HourlyWeatherItem(
             horizontalArrangement = Arrangement.spacedBy(2.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
+            androidx.compose.foundation.Image(
                 modifier = childModifier.size(32.dp),
-                painter = painterResource(getWeatherIconByName(forecast.weather.first().icon)),
+                painter = painterResource(getWeatherIconByName(forecast.weather.firstOrNull()?.icon ?: "")),
                 contentDescription = null,
-                //colorFilter = ColorFilter.tint(color = color)
             )
             PrimaryText(
                 modifier = childModifier,
-                text = temperatureUnit.getTemperature(
-                    forecast.temperature
-                ) + stringResource(temperatureUnit.stringRes),
+                text = temperatureText(temperatureUnit, forecast.temperature),
                 textColor = color
             )
         }
@@ -448,8 +461,7 @@ fun HourlyWeatherItem(
         ) {
             PrimaryText(
                 modifier = childModifier,
-                text = windSpeedUnit.getDefaultWindSpeed(forecast.windSpeed.toDouble())
-                        + " " + stringResource(windSpeedUnit.stringRes),
+                text = windSpeedText(windSpeedUnit, forecast.windSpeed.toDouble()),
                 textColor = color
             )
             Icon(
@@ -464,403 +476,51 @@ fun HourlyWeatherItem(
 }
 
 @Composable
-fun DailyWeatherItem(
-    modifier: Modifier = Modifier,
-    childModifier: Modifier = Modifier,
-    temperatureUnit: TemperatureValues,
-    onDailyWeatherClick: () -> Unit,
-    forecast: Daily,
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(80.dp)
-            .clickable { onDailyWeatherClick() }
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column {
-                WeatherHeaderText(
-                    modifier = childModifier,
-                    text = forecast.date.toDateTextMonth()
-                )
-                SecondaryText(
-                    modifier = childModifier,
-                    text = forecast.date.toDayOfWeek()
-                )
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Weather icon
-            Image(
-                modifier = childModifier.size(42.dp),
-                painter = painterResource(
-                    getWeatherIconByName(forecast.weather.first().icon)
-                ),
-                contentDescription = null,
-            )
-
-            // Precipitation
-            if (forecast.probabilityOfPrecipitation >= 0.2f) {
-                Image(
-                    modifier = childModifier
-                        .size(24.dp)
-                        .padding(start = 8.dp),
-                    painter = painterResource(
-                        Res.drawable.ic_baseline_umbrella_24
-                    ),
-                    contentDescription = null,
-                )
-                SecondaryText(
-                    modifier = childModifier.padding(start = 4.dp),
-                    text = (forecast.probabilityOfPrecipitation * 100).toInt()
-                        .toString() + stringResource(Res.string.percent)
-                )
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Temperature
-            WeatherPrimaryText(
-                modifier = childModifier,
-                text = temperatureUnit.getTemperature(forecast.temperature.day),
-            )
-            WeatherPrimaryText(
-                modifier = Modifier.padding(start = 2.dp),
-                text = stringResource(temperatureUnit.stringRes),
-                textColor = MaterialTheme.customColors.secondaryTextColor
-            )
-        }
-        HorizontalDivider()
-    }
-}
-
-@Composable
 fun PressureChartItem(
     modifier: Modifier = Modifier,
-    childModifier: Modifier = Modifier,
     pressureUnit: PressureValues,
     forecast: List<Daily>,
 ) {
-    Column(
-        modifier = modifier
+    SectionCard(
+        modifier = modifier,
+        icon = painterResource(Res.drawable.ic_gauge),
+        title = labelWithUnit(Res.string.pressure, pressureUnit.stringRes),
     ) {
-        WeatherHeaderText(
-            modifier = Modifier
-                .padding(8.dp)
-                .then(childModifier),
-            text = stringResource(Res.string.pressure) + ", " + stringResource(pressureUnit.stringRes)
-        )
-        PressureChart(
-            Modifier
-                .horizontalScroll(rememberScrollState())
-                .width(500.dp)
-                .height(120.dp)
-                .padding(top = 16.dp),
-            childModifier = childModifier,
-            receivedWeather = forecast,
-            pressureUnit = pressureUnit,
-        )
-        HorizontalDivider()
-    }
-}
-
-@Composable
-fun PressureChart(
-    modifier: Modifier = Modifier,
-    childModifier: Modifier = Modifier,
-    pressureUnit: PressureValues,
-    textColor: Color = MaterialTheme.colorScheme.onSurface,
-    receivedWeather: List<Daily>
-) {
-    val weather: List<Daily> by remember {
-        mutableStateOf(
-            receivedWeather
-        )
-    }
-
-    val x = remember { Animatable(0f) }
-    val yValues = remember(weather) { mutableStateOf(getPressureList(weather, pressureUnit)) }
-    val xTarget = (yValues.value.size - 1).toFloat()
-    LaunchedEffect(weather) {
-        x.animateTo(
-            targetValue = xTarget,
-            animationSpec = tween(
-                durationMillis = 100,
-                easing = CubicBezierEasing(0f, 0f, 0f, 1f)
-            ),
-        )
-
-    }
-
-    val color = MaterialTheme.colorScheme.tertiary
-    val textMeasurer = rememberTextMeasurer()
-    val textStyle = TextStyle(
-        fontSize = 12.sp,
-        fontWeight = FontWeight.Bold,
-        color = textColor,
-        textAlign = TextAlign.Center
-    )
-
-    Canvas(modifier = modifier.padding(start = 32.dp, end = 32.dp, bottom = 14.dp, top = 32.dp)) {
-        val xbounds = Pair(0f, xTarget)
-        val ybounds = getBounds(yValues.value)
-        val scaleX = size.width / (xbounds.second - xbounds.first)
-        val scaleY = size.height / (ybounds.second - ybounds.first)
-        val yMove = ybounds.first * scaleY
-
-        val linesList = mutableListOf<Point>()
-
-        (0..min(yValues.value.size - 1, x.value.toInt())).forEach { index ->
-            val pointX = index * scaleX
-            val pointY = size.height - (yValues.value[index] * scaleY) + yMove - 52f
-
-            drawCircle(
-                color = color,
-                center = Offset(x = pointX, y = pointY),
-                radius = 12f
-            )
-
-            val pressureText = pressureUnit.getPressureFromHpa(weather[index].pressure)
-            val pressureResult = textMeasurer.measure(pressureText, textStyle)
-            drawText(
-                pressureResult,
-                topLeft = Offset(pointX - pressureResult.size.width / 2f, pointY - 48f - pressureResult.size.height / 2f)
-            )
-
-            val dateText = weather[index].date.toDayOfWeekAndDate()
-            val dateResult = textMeasurer.measure(dateText, textStyle)
-            drawText(
-                dateResult,
-                topLeft = Offset(pointX - dateResult.size.width / 2f, size.height - dateResult.size.height)
-            )
-
-            linesList.add(Point(pointX, pointY))
-        }
-
-        linesList.forEachIndexed { index, value ->
-            if (index > 0) {
-                drawLine(
-                    start = Offset(x = linesList[index - 1].x, linesList[index - 1].y),
-                    end = Offset(x = value.x, y = value.y),
-                    color = color,
-                    strokeWidth = 5F
+        WeatherTrendChart(
+            modifier = Modifier.fillMaxWidth(),
+            height = 140.dp,
+            points = forecast.mapIndexed { index, daily ->
+                WeatherChartPoint(
+                    label = daily.date.toDayOfWeekAndDate(),
+                    value = getPressureList(forecast, pressureUnit)[index].toDouble(),
                 )
-            }
-        }
+            },
+            formatValue = { pressureUnit.getPressureFromHpa(it.toInt()) },
+        )
     }
 }
 
 @Composable
 fun PrecipitationChartItem(
     modifier: Modifier = Modifier,
-    childModifier: Modifier = Modifier,
     forecast: List<Daily>,
 ) {
-    Column(
-        modifier = modifier
+    SectionCard(
+        modifier = modifier,
+        icon = painterResource(Res.drawable.ic_baseline_umbrella_24),
+        title = labelWithUnit(Res.string.precipitation, Res.string.percent),
     ) {
-        WeatherHeaderText(
-            modifier = Modifier
-                .padding(8.dp)
-                .then(childModifier),
-            text = stringResource(Res.string.precipitation) + ", " + stringResource(Res.string.percent)
+        WeatherTrendChart(
+            modifier = Modifier.fillMaxWidth(),
+            height = 140.dp,
+            points = forecast.map { daily ->
+                val percent = probabilityToPercent(daily.probabilityOfPrecipitation)
+                WeatherChartPoint(
+                    label = daily.date.toDayOfWeekAndDate(),
+                    value = percent.toDouble(),
+                )
+            },
+            formatValue = { "${it.toInt()}%" },
         )
-        PrecipitationChart(
-            Modifier
-                .horizontalScroll(rememberScrollState())
-                .width(500.dp)
-                .height(120.dp)
-                .padding(top = 16.dp),
-            childModifier = childModifier,
-            receivedWeather = forecast,
-        )
-        HorizontalDivider()
-    }
-}
-
-@Composable
-fun PrecipitationChart(
-    modifier: Modifier = Modifier,
-    childModifier: Modifier = Modifier,
-    textColor: Color = MaterialTheme.colorScheme.onSurface,
-    receivedWeather: List<Daily>
-) {
-    val weather: List<Daily> by remember {
-        mutableStateOf(receivedWeather)
-    }
-
-    val x = remember { Animatable(0f) }
-    val yValues = remember(weather) { mutableStateOf(getPrecipitationList(weather)) }
-    val xTarget = (yValues.value.size - 1).toFloat()
-    LaunchedEffect(weather) {
-        x.animateTo(
-            targetValue = xTarget,
-            animationSpec = tween(
-                durationMillis = 100,
-                easing = CubicBezierEasing(0f, 0f, 0f, 1f)
-            ),
-        )
-    }
-
-    val barColor = MaterialTheme.colorScheme.secondary
-    val textMeasurer = rememberTextMeasurer()
-    val textStyle = TextStyle(
-        fontSize = 12.sp,
-        fontWeight = FontWeight.Bold,
-        color = textColor,
-        textAlign = TextAlign.Center
-    )
-
-    Canvas(modifier = modifier.padding(start = 32.dp, end = 32.dp, bottom = 14.dp, top = 32.dp)) {
-        val slotCount = yValues.value.size
-        if (slotCount == 0) return@Canvas
-        val slotWidth = size.width / slotCount
-        val barWidth = slotWidth * 0.5f
-        val maxBarHeight = size.height - 52f
-
-        (0..min(yValues.value.size - 1, x.value.toInt())).forEach { index ->
-            val centerX = index * slotWidth + slotWidth / 2f
-            val value = yValues.value[index]
-            val barHeight = (value / 100f) * maxBarHeight
-
-            val barLeft = centerX - barWidth / 2f
-            val barTop = size.height - 52f - barHeight
-
-            if (barHeight > 0f) {
-                drawRect(
-                    color = barColor.copy(alpha = 0.6f),
-                    topLeft = Offset(barLeft, barTop),
-                    size = androidx.compose.ui.geometry.Size(barWidth, barHeight)
-                )
-                drawRect(
-                    color = barColor,
-                    topLeft = Offset(barLeft, barTop),
-                    size = androidx.compose.ui.geometry.Size(barWidth, barHeight),
-                    style = Stroke(2f)
-                )
-            }
-
-            val percentText = "${value}%"
-            val percentResult = textMeasurer.measure(percentText, textStyle)
-            drawText(
-                percentResult,
-                topLeft = Offset(centerX - percentResult.size.width / 2f, barTop - 12f - percentResult.size.height)
-            )
-
-            val dateText = weather[index].date.toDayOfWeekAndDate()
-            val dateResult = textMeasurer.measure(dateText, textStyle)
-            drawText(
-                dateResult,
-                topLeft = Offset(centerX - dateResult.size.width / 2f, size.height - dateResult.size.height)
-            )
-        }
-    }
-}
-
-@Composable
-fun CurrentWeatherValuesView(
-    modifier: Modifier = Modifier,
-    childModifier: Modifier = Modifier,
-    pressureUnit: PressureValues,
-    iconColor: Color = MaterialTheme.colorScheme.onPrimary,
-    textColor: Color = MaterialTheme.colorScheme.onPrimary,
-    forecast: Hourly
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .wrapContentHeight(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-    ) {
-        // Pressure column
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            SecondaryText(
-                modifier = Modifier.padding(top = 4.dp),
-                text = stringResource(Res.string.pressure),
-                textColor = textColor
-            )
-            Row(
-                modifier = Modifier.padding(top = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(Res.drawable.ic_gauge),
-                    contentDescription = stringResource(Res.string.pressure),
-                    tint = iconColor
-                )
-                PrimaryText(
-                    modifier = childModifier.padding(start = 2.dp),
-                    text = pressureUnit.getPressureFromHpa(
-                        forecast.pressure
-                    ) + " " + stringResource(pressureUnit.stringRes),
-                    textColor = textColor
-                )
-            }
-        }
-
-        // Humidity column
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            SecondaryText(
-                modifier = Modifier.padding(top = 4.dp),
-                text = stringResource(Res.string.humidity),
-                textColor = textColor
-            )
-            Row(
-                modifier = Modifier.padding(top = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(Res.drawable.ic_baseline_opacity_24),
-                    contentDescription = stringResource(Res.string.humidity),
-                    tint = iconColor
-                )
-                PrimaryText(
-                    modifier = childModifier.padding(start = 2.dp),
-                    text = forecast.humidity.toString() + " " + stringResource(Res.string.percent),
-                    textColor = textColor
-                )
-            }
-        }
-
-        // Precipitation column
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            SecondaryText(
-                modifier = Modifier.padding(top = 4.dp),
-                text = stringResource(Res.string.precipitation),
-                textColor = textColor
-            )
-            Row(
-                modifier = Modifier.padding(top = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    painter = painterResource(Res.drawable.ic_baseline_umbrella_24),
-                    contentDescription = stringResource(Res.string.precipitation),
-                    tint = iconColor
-                )
-                PrimaryText(
-                    modifier = childModifier.padding(start = 2.dp),
-                    text = (forecast.probabilityOfPrecipitation * 100).toInt().toString()
-                            + " " + stringResource(Res.string.percent),
-                    textColor = textColor
-                )
-            }
-        }
     }
 }

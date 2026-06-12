@@ -21,9 +21,18 @@ import com.mobileprism.fishing.domain.entity.weather.TemperatureValues
 import com.mobileprism.fishing.domain.entity.weather.Weather
 import com.mobileprism.fishing.domain.entity.weather.WeatherForecast
 import com.mobileprism.fishing.domain.entity.weather.WindSpeedValues
+import com.mobileprism.fishing.model.mappers.getWeatherIconByName
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.ui.home.views.DefaultAppBar
+import com.mobileprism.fishing.ui.home.views.WeatherDailyForecastRow
 import com.mobileprism.fishing.ui.home.weather.CurrentWeather
-import com.mobileprism.fishing.ui.home.weather.DailyWeatherItem
+import com.mobileprism.fishing.ui.home.weather.isHeavyPrecipitation
+import com.mobileprism.fishing.ui.home.weather.percentText
+import com.mobileprism.fishing.ui.home.weather.probabilityToPercent
+import com.mobileprism.fishing.ui.home.weather.temperatureText
+import com.mobileprism.fishing.utils.time.toDateTextMonth
+import com.mobileprism.fishing.utils.time.toDayOfWeek
 
 private val hourOffsets = listOf(0L, 3600L, 7200L, 10800L, 14400L, 18000L)
 private val hourTemps = listOf(24f, 23f, 22f, 20f, 19f, 18f)
@@ -101,10 +110,15 @@ private fun FakeWeatherScreen() {
                 is12hTimeFormat = false,
             )
             sampleForecast.daily.forEachIndexed { index, daily ->
-                DailyWeatherItem(
-                    forecast = daily,
-                    temperatureUnit = TemperatureValues.C,
-                    onDailyWeatherClick = {},
+                val weather = daily.weather.firstOrNull()
+                WeatherDailyForecastRow(
+                    date = daily.date.toDateTextMonth() + " " + daily.date.toDayOfWeek(),
+                    icon = if (weather != null) getWeatherIconByName(weather.icon) else Res.drawable.ic_weather_sun,
+                    temperature = temperatureText(TemperatureValues.C, daily.temperature.day),
+                    precipitation = if (isHeavyPrecipitation(daily.probabilityOfPrecipitation)) {
+                        percentText(probabilityToPercent(daily.probabilityOfPrecipitation))
+                    } else null,
+                    onClick = {},
                 )
             }
         }
