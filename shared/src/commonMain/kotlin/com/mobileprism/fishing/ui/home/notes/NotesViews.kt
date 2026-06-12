@@ -86,7 +86,6 @@ fun ItemUserPlace(
                         modifier = Modifier.padding(start = 8.dp),
                         count = place.catchesCount,
                         icon = Res.drawable.ic_fishing,
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
                     )
                 }
             }
@@ -94,6 +93,7 @@ fun ItemUserPlace(
             DefaultIconButton(
                 childModifier = childModifier,
                 icon = painterResource(Res.drawable.ic_place_on_map),
+                contentDescription = stringResource(Res.string.show_on_map),
                 tint = if (!place.visible) LocalColors.current.secondaryTextColor
                         else MaterialTheme.colorScheme.onSurface,
                 onClick = { navigateToMap() }
@@ -240,7 +240,6 @@ fun CatchItemContent(
                         .then(childModifier),
                     count = photoCount,
                     icon = Res.drawable.ic_baseline_photo_24,
-                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
                 )
 
                 SupportText(
@@ -411,8 +410,9 @@ fun ItemCounter(
     modifier: Modifier = Modifier,
     count: Number,
     icon: DrawableResource,
-    tint: Color = LocalColors.current.secondaryIconColor
+    tint: Color = LocalColors.current.secondaryIconColor,
 ) {
+    if (count.toInt() == 0) return
     Row(modifier = modifier) {
         Icon(
             modifier = Modifier.size(24.dp),
@@ -422,5 +422,4 @@ fun ItemCounter(
         )
         SupportText(text = stringResource(Res.string.item_count_format, count.toInt()))
     }
-
 }
