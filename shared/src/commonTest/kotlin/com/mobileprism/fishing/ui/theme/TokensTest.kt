@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -8,7 +9,7 @@ import kotlin.test.assertEquals
 class TokensTest {
 
     @Test
-    fun spacingGridValuesAreOnFourDpGrid() {
+    fun spacingScaleValuesMatchSpec() {
         assertEquals(0.dp, Spacing.none)
         assertEquals(2.dp, Spacing.xxs)
         assertEquals(4.dp, Spacing.xs)
@@ -79,18 +80,13 @@ class TokensTest {
     }
 
     @Test
-    fun errorRolesArePopulatedOnEveryScheme() {
-        listOf(
-            BlueLightColorScheme,
-            BlueDarkColorScheme,
-            GreenLightColorScheme,
-            GreenDarkColorScheme,
-        ).forEach { scheme ->
-            assertEquals(false, scheme.error.value == 0UL, "error must be set")
-            assertEquals(false, scheme.onError.value == 0UL, "onError must be set")
-            assertEquals(false, scheme.errorContainer.value == 0UL, "errorContainer must be set")
-            assertEquals(false, scheme.onErrorContainer.value == 0UL, "onErrorContainer must be set")
-        }
+    fun errorRolesMatchSpecOnEveryScheme() {
+        assertEquals(Color(0xFFBA1A1A), BlueLightColorScheme.error)
+        assertEquals(Color(0xFFBA1A1A), GreenLightColorScheme.error)
+        assertEquals(Color(0xFFFFB4AB), BlueDarkColorScheme.error)
+        assertEquals(Color(0xFFFFB4AB), GreenDarkColorScheme.error)
+        assertEquals(Color(0xFFFFDAD6), BlueLightColorScheme.errorContainer)
+        assertEquals(Color(0xFF93000A), BlueDarkColorScheme.errorContainer)
     }
 
     @Test
