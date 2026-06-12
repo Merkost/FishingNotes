@@ -449,5 +449,8 @@
     <string name="prompt_card_subtitle">Отметьте на карте место для рыбалки</string>
     <string name="prompt_card_action">Отметить место</string>
     <string name="color">Цвет</string>
+    <string name="onboarding_get_started">Начать</string>
+    <string name="sign_in_cancelled">Вход отменён. Попробуйте ещё раз.</string>
+    <string name="sign_in_generic_error">Не удалось войти. Проверьте подключение и попробуйте снова.</string>
 
 </resources>

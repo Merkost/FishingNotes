@@ -461,6 +461,9 @@
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_next">Next</string>
     <string name="onboarding_continue">Continue</string>
+    <string name="onboarding_get_started">Get Started</string>
+    <string name="sign_in_cancelled">Sign-in was cancelled. Please try again.</string>
+    <string name="sign_in_generic_error">Couldn\'t sign you in. Please check your connection and try again.</string>
     <string name="prompt_card_title">Add your first spot!</string>
     <string name="prompt_card_subtitle">Tap to mark a fishing location on the map</string>
     <string name="prompt_card_action">Mark a spot</string>
