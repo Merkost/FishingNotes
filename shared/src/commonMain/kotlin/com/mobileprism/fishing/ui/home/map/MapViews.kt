@@ -2,9 +2,7 @@ package com.mobileprism.fishing.ui.home.map
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -27,13 +25,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomSheetScaffold
@@ -88,14 +83,12 @@ import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.views.FloatingControlSurface
 import com.mobileprism.fishing.ui.home.views.FloatingIconButton
 import com.mobileprism.fishing.ui.home.views.SettingsCheckbox
-import com.mobileprism.fishing.ui.utils.placeholder
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
 import com.mobileprism.fishing.ui.utils.LocalAnalytics
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.views.SettingsHeader
-import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
 import com.mobileprism.fishing.ui.theme.Spacing
 import com.mobileprism.fishing.ui.utils.rememberAppSettingsOpener
 import com.mobileprism.fishing.ui.utils.rememberLocationPermissionGranted
@@ -577,60 +570,11 @@ fun PlaceTileView(
         selectedPlace.value = newPlaceName
     }
 
-    val shimmerModifier = if (selectedPlace.value.isNotBlank()) Modifier else
-        Modifier.placeholder(
-            visible = true,
-            color = MaterialTheme.colorScheme.outlineVariant,
-            shape = CircleShape,
-        )
-    val pointerIconColor by animateColorAsState(
-        if (selectedPlace.value.isNotBlank()) secondaryFigmaColor
-        else MaterialTheme.colorScheme.outlineVariant
+    GeocoderResultChip(
+        result = placeTileViewNameState.geocoderResult,
+        placeName = selectedPlace.value,
+        modifier = modifier,
     )
-    val textColor by animateColorAsState(
-        if (selectedPlace.value.isNotBlank()) MaterialTheme.colorScheme.onSurface
-        else MaterialTheme.colorScheme.outlineVariant
-    )
-
-
-    Card(
-        shape = RoundedCornerShape(size = 20.dp),
-        modifier = modifier
-            .heightIn(min = 40.dp, max = 80.dp)
-            .widthIn(max = 240.dp)
-            .animateContentSize(
-                animationSpec = tween(
-                    durationMillis = 300,
-                    easing = LinearOutSlowInEasing
-                )
-            ),
-    ) {
-        Row(
-            modifier = Modifier
-                .wrapContentSize()
-                .padding(5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_baseline_location_on_24),
-                contentDescription = stringResource(Res.string.marker_icon),
-                tint = pointerIconColor,
-                modifier = Modifier
-                    .size(30.dp)
-            )
-            Spacer(Modifier.size(4.dp))
-            Text(
-                selectedPlace.value.ifEmpty { stringResource(Res.string.searching) },
-                overflow = TextOverflow.Ellipsis,
-                color = textColor,
-                modifier = Modifier
-                    .padding(end = 2.dp)
-                    .then(shimmerModifier)
-            )
-            Spacer(Modifier.size(4.dp))
-        }
-    }
 }
 
 @Composable
