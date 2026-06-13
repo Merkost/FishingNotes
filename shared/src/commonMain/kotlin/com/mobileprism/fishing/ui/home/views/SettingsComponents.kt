@@ -297,3 +297,104 @@ fun <T> ColorSwatchRow(
         }
     }
 }
+
+private const val AUTO_DISMISS_DELAY_MS = 200L
+
+@Composable
+fun <T> SettingsSelectionDialog(
+    title: String,
+    options: List<T>,
+    currentValue: T,
+    label: @Composable (T) -> String,
+    onSelect: (T) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var pendingSelection by remember { mutableStateOf<T?>(null) }
+
+    LaunchedEffect(pendingSelection) {
+        val selection = pendingSelection ?: return@LaunchedEffect
+        delay(AUTO_DISMISS_DELAY_MS)
+        onSelect(selection)
+    }
+
+    DefaultDialog(
+        primaryText = title,
+        onDismiss = onDismiss,
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            options.forEach { option ->
+                val isSelected = (pendingSelection ?: currentValue) == option
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .selectable(
+                            selected = isSelected,
+                            onClick = { pendingSelection = option },
+                        )
+                        .padding(horizontal = Spacing.md),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    RadioButton(
+                        selected = isSelected,
+                        onClick = { pendingSelection = option },
+                    )
+                    Spacer(modifier = Modifier.width(Spacing.md))
+                    Text(
+                        text = label(option),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ExpandableSettingsSection(
+    title: String,
+    subtitle: String?,
+    icon: ImageVector?,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        SettingsMenuLink(
+            title = title,
+            subtitle = subtitle,
+            icon = icon,
+            onClick = onToggle,
+        )
+        AnimatedVisibility(visible = expanded) {
+            content()
+        }
+    }
+}
+
+@Composable
+fun SettingsNavLink(
+    title: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    icon: ImageVector? = null,
+) {
+    SettingsMenuLink(
+        title = title,
+        subtitle = subtitle,
+        icon = icon,
+        onClick = onClick,
+        modifier = modifier,
+        trailing = {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        },
+    )
+}
