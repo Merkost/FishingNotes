@@ -36,6 +36,7 @@ import com.mobileprism.fishing.domain.entity.weather.WindSpeedValues
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.ui.home.advertising.AdIds
 import com.mobileprism.fishing.ui.home.advertising.BannerAdvertView
+import com.mobileprism.fishing.ui.components.state.EmptyState
 import com.mobileprism.fishing.ui.home.views.AppTopBar
 import com.mobileprism.fishing.ui.home.views.SectionCard
 import com.mobileprism.fishing.ui.theme.Spacing
@@ -51,18 +52,6 @@ fun WeatherDailyScreen(
     upPress: () -> Unit,
     data: DailyWeatherData?
 ) {
-    if (data == null) return
-
-    val pagerState =
-        androidx.compose.foundation.pager.rememberPagerState(initialPage = data.selectedDay) {
-            data.dailyForecast.size
-        }
-
-    val weatherPrefs: WeatherPreferences = koinInject()
-    val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
-    val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
-    val windSpeedUnit by weatherPrefs.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
-
     Scaffold(
         topBar = {
             AppTopBar(
@@ -72,22 +61,39 @@ fun WeatherDailyScreen(
             )
         },
     ) { innerPadding ->
+        val forecast = data?.dailyForecast.orEmpty()
+        if (forecast.isEmpty()) {
+            EmptyState(
+                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                illustration = painterResource(Res.drawable.ic_no_place_on_map),
+                title = stringResource(Res.string.no_weather_data),
+            )
+            return@Scaffold
+        }
+
+        val weatherPrefs: WeatherPreferences = koinInject()
+        val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
+        val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
+        val windSpeedUnit by weatherPrefs.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
+
+        val pagerState = androidx.compose.foundation.pager.rememberPagerState(
+            initialPage = (data?.selectedDay ?: 0).coerceIn(0, forecast.lastIndex)
+        ) { forecast.size }
+
         Column(
             modifier = Modifier.padding(innerPadding).fillMaxSize().navigationBarsPadding(),
-            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(modifier = Modifier.weight(1f, false)) {
-                WeatherDaysTabs(forecast = data.dailyForecast, pagerState = pagerState)
-                HorizontalPager(
-                    state = pagerState,
-                ) { page ->
-                    DailyWeatherScreen(
-                        forecast = data.dailyForecast[page],
-                        pressureUnit = pressureUnit,
-                        temperatureUnit = temperatureUnit,
-                        windSpeedUnit = windSpeedUnit,
-                    )
-                }
+            WeatherDaysTabs(forecast = forecast, pagerState = pagerState)
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.weight(1f),
+            ) { page ->
+                DailyWeatherScreen(
+                    forecast = forecast[page],
+                    pressureUnit = pressureUnit,
+                    temperatureUnit = temperatureUnit,
+                    windSpeedUnit = windSpeedUnit,
+                )
             }
             BannerAdvertView(adId = AdIds.weatherDailyBanner)
         }
