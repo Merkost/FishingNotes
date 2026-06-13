@@ -1,15 +1,13 @@
 package com.mobileprism.fishing.ui.home.weather
 
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,7 +17,6 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.mobileprism.fishing.ui.utils.placeholder
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
@@ -37,10 +34,11 @@ import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.utils.rememberLocationPermissionGranted
 import com.mobileprism.fishing.ui.utils.rememberPermissionsController
 import com.mobileprism.fishing.ui.home.views.*
-import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.ui.viewmodels.WeatherViewModel
 import com.mobileprism.fishing.utils.Constants.modalBottomSheetCorners
-import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import com.mobileprism.fishing.ui.components.state.ScreenStateContent
+import com.mobileprism.fishing.ui.components.state.EmptyState
+import com.mobileprism.fishing.ui.components.state.ErrorStateNoInternet
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toDayOfWeek
 import com.mobileprism.fishing.utils.time.toDayOfWeekAndDate
@@ -105,150 +103,95 @@ fun WeatherScreen(
     }
 
     Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                TopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                        actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                    ),
-                    title = {
-                        selectedPlace?.let {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                WeatherLocationIconButton(color = MaterialTheme.colorScheme.onPrimary) {
-                                    navController.navigate(
-                                        MainDestinations.Map(isAddingNewPlace = false, place = it)
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.weight(1f))
-
-                                Surface(
-                                    modifier = Modifier
-                                        .clickable { showBottomSheet = true },
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f),
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 6.dp, bottom = 6.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        Text(
-                                            text = it.title,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = MaterialTheme.colorScheme.onPrimary,
-                                            maxLines = 1,
-                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                                            modifier = Modifier.widthIn(max = 200.dp),
-                                        )
-                                        Icon(
-                                            imageVector = Icons.Filled.ArrowDropDown,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onPrimary,
-                                        )
-                                    }
-                                }
-
-                                Spacer(modifier = Modifier.weight(1f))
-                            }
-                        }
-
-                        if (selectedPlace == null) {
-                            Text(text = stringResource(Res.string.weather))
-                        }
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            AppTopBar(
+                title = selectedPlace?.title ?: stringResource(Res.string.weather),
+                navigationIcon = if (selectedPlace != null) Icons.AutoMirrored.Filled.ArrowBack else null,
+                onNavigationClick = if (selectedPlace != null) {
+                    {
+                        navController.navigate(
+                            MainDestinations.Map(isAddingNewPlace = false, place = selectedPlace!!)
+                        )
                     }
-                )
-            }
-        ) { innerPadding ->
-
-            if (!locationPermissionGranted && markers.isEmpty()) {
-                WeatherNoPlaces(
-                    Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                ) { navigateToAddNewPlace(navController) }
-            } else {
-                Crossfade(
-                    targetState = weatherUiState,
-                    modifier = Modifier.padding(innerPadding)
+                } else null,
+                actions = {
+                    if (selectedPlace != null) {
+                        LocationPickerChip(
+                            label = selectedPlace!!.title,
+                            contentDescription = selectedPlace!!.title,
+                            onClick = { showBottomSheet = true },
+                        )
+                    }
+                },
+            )
+        }
+    ) { innerPadding ->
+        if (!locationPermissionGranted && markers.isEmpty()) {
+            WeatherNoPlaces(
+                Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) { navigateToAddNewPlace(navController) }
+        } else {
+            ScreenStateContent(
+                state = weatherUiState,
+                modifier = Modifier.padding(innerPadding),
+                loading = { WeatherSkeleton() },
+                error = { ErrorStateNoInternet(onRetry = { viewModel.retry() }) },
+                isEmpty = { it.hourly.isEmpty() && it.daily.isEmpty() },
+                empty = {
+                    EmptyState(
+                        illustration = painterResource(Res.drawable.ic_no_place_on_map),
+                        title = stringResource(Res.string.no_weather_data),
+                    )
+                },
+            ) { forecast ->
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = { viewModel.refresh() }
                 ) {
-                    when (it) {
-                        is BaseViewState.Loading -> {
-                            MainWeatherScreen(childModifier = Modifier.placeholder(
-                                true,
-                                color = MaterialTheme.colorScheme.outlineVariant,
-                                shape = CircleShape,
-                            ), WeatherForecast(), scrollState, navigateToDaily = {})
-                        }
-                        is BaseViewState.Success -> {
-                            PullToRefreshBox(
-                                isRefreshing = isRefreshing,
-                                onRefresh = { viewModel.refresh() }
-                            ) {
-                                MainWeatherScreen(
-                                    childModifier = Modifier,
-                                    forecast = it.data,
-                                    scrollState = scrollState,
-                                    weatherSource = weatherSource,
-                                ) { index ->
-                                    navigateToDailyWeatherScreen(
-                                        navController = navController,
-                                        index = index,
-                                        forecastDaily = it.data.daily
-                                    )
-                                }
-                            }
-                        }
-                        is BaseViewState.Error -> {
-                            NoInternetView(
-                                modifier = Modifier.fillMaxWidth(),
-                                onRetry = { viewModel.retry() }
-                            )
-                        }
+                    MainWeatherScreen(
+                        forecast = forecast,
+                        scrollState = scrollState,
+                        weatherSource = weatherSource,
+                    ) { index ->
+                        navigateToDailyWeatherScreen(
+                            navController = navController,
+                            index = index,
+                            forecastDaily = forecast.daily
+                        )
                     }
                 }
             }
         }
     }
+}
 
 @Composable
 fun WeatherNoPlaces(modifier: Modifier = Modifier, onAddNewPlace: () -> Unit) {
-    Column(
+    EmptyState(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        NoContentView(
-            text = stringResource(Res.string.no_places_added),
-            icon = painterResource(Res.drawable.ic_no_place_on_map)
-        )
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            DefaultButtonOutlined(
+        illustration = painterResource(Res.drawable.ic_no_place_on_map),
+        title = stringResource(Res.string.no_places_added),
+        action = {
+            AppButton(
                 text = stringResource(Res.string.new_place_text),
-                onClick = onAddNewPlace
+                onClick = onAddNewPlace,
+                style = AppButtonStyle.Outlined,
             )
-        }
-    }
+        },
+    )
 }
 
 @Composable
 fun MainWeatherScreen(
-    childModifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
     forecast: WeatherForecast,
     scrollState: ScrollState,
     weatherSource: WeatherSource? = null,
     navigateToDaily: (Int) -> Unit,
-
-    ) {
+) {
     val weatherPrefs: WeatherPreferences = koinInject()
     val userPrefs: UserPreferences = koinInject()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
@@ -256,28 +199,21 @@ fun MainWeatherScreen(
     val windSpeedUnit by weatherPrefs.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
     val is12hTimeFormat by userPrefs.use12hTimeFormat.collectAsState(initial = false)
 
-
     Column(
-        modifier = Modifier
+        modifier = modifier
             .verticalScroll(scrollState)
-            .padding(horizontal = 12.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(horizontal = Spacing.screenH, vertical = Spacing.md),
+        verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
-
         if (weatherSource == WeatherSource.STALE_FALLBACK) {
-            Text(
-                text = stringResource(Res.string.cached_data),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            InlineBannerCard(
+                tone = BannerTone.Info,
+                icon = Icons.Default.Info,
+                title = stringResource(Res.string.cached_data),
             )
         }
 
         CurrentWeather(
-            childModifier = childModifier,
             forecast = forecast,
             pressureUnit = pressureUnit,
             temperatureUnit = temperatureUnit,
@@ -285,7 +221,7 @@ fun MainWeatherScreen(
             is12hTimeFormat = is12hTimeFormat,
         )
 
-        if (forecast.daily.all { it.date != 0L }) {
+        if (forecast.daily.all { it.date != 0L } && forecast.daily.isNotEmpty()) {
             PressureChartItem(
                 forecast = forecast.daily,
                 pressureUnit = pressureUnit,
@@ -295,17 +231,23 @@ fun MainWeatherScreen(
             )
         }
 
-        forecast.daily.forEachIndexed { index, daily ->
-            val weather = daily.weather.firstOrNull()
-            WeatherDailyForecastRow(
-                date = daily.date.toDateTextMonth() + " " + daily.date.toDayOfWeek(),
-                icon = if (weather != null) getWeatherIconByName(weather.icon) else Res.drawable.ic_weather_sun,
-                temperature = temperatureText(temperatureUnit, daily.temperature.day),
-                precipitation = if (isHeavyPrecipitation(daily.probabilityOfPrecipitation)) {
-                    percentText(probabilityToPercent(daily.probabilityOfPrecipitation))
-                } else null,
-                onClick = { navigateToDaily(index) },
-            )
+        if (forecast.daily.isNotEmpty()) {
+            SectionCard(
+                icon = painterResource(Res.drawable.calendar_week),
+                title = stringResource(Res.string.weather),
+            ) {
+                forecast.daily.forEachIndexed { index, daily ->
+                    WeatherDailyForecastRow(
+                        date = daily.date.toDateTextMonth() + " " + daily.date.toDayOfWeek(),
+                        icon = getWeatherIconByName(daily.weather.firstOrNull()?.icon ?: ""),
+                        temperature = temperatureText(temperatureUnit, daily.temperature.day),
+                        precipitation = if (isHeavyPrecipitation(daily.probabilityOfPrecipitation)) {
+                            percentText(probabilityToPercent(daily.probabilityOfPrecipitation))
+                        } else null,
+                        onClick = { navigateToDaily(index) },
+                    )
+                }
+            }
         }
     }
 }
@@ -313,7 +255,6 @@ fun MainWeatherScreen(
 @Composable
 fun CurrentWeather(
     modifier: Modifier = Modifier,
-    childModifier: Modifier = Modifier,
     temperatureUnit: TemperatureValues,
     pressureUnit: PressureValues,
     windSpeedUnit: WindSpeedValues,
@@ -330,16 +271,15 @@ fun CurrentWeather(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 20.dp),
+                .padding(vertical = Spacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.spacedBy(Spacing.xl)
         ) {
             val currentHour = forecast.hourly.firstOrNull()
             val currentWeather = currentHour?.weather?.firstOrNull()
 
             if (currentHour != null && currentWeather != null) {
                 PrimaryWeatherItemView(
-                    childModifier = childModifier,
                     temperature = currentHour.temperature,
                     weather = currentWeather,
                     textTint = MaterialTheme.colorScheme.onPrimary,
@@ -380,7 +320,6 @@ fun CurrentWeather(
             }
 
             HourlyWeather(
-                childModifier = childModifier,
                 forecastHourly = forecast.hourly,
                 temperatureUnit = temperatureUnit,
                 windSpeedUnit = windSpeedUnit,
@@ -393,7 +332,6 @@ fun CurrentWeather(
 @Composable
 fun HourlyWeather(
     modifier: Modifier = Modifier,
-    childModifier: Modifier = Modifier,
     temperatureUnit: TemperatureValues,
     windSpeedUnit: WindSpeedValues,
     forecastHourly: List<Hourly>,
@@ -406,7 +344,6 @@ fun HourlyWeather(
     ) {
         items(forecastHourly.size) { index ->
             HourlyWeatherItem(
-                childModifier = childModifier,
                 forecast = forecastHourly[index],
                 timeTitle = if (index == 0) {
                     stringResource(Res.string.now)
@@ -423,7 +360,6 @@ fun HourlyWeather(
 @Composable
 fun HourlyWeatherItem(
     modifier: Modifier = Modifier,
-    childModifier: Modifier = Modifier,
     forecast: Hourly,
     temperatureUnit: TemperatureValues,
     windSpeedUnit: WindSpeedValues,
@@ -444,12 +380,11 @@ fun HourlyWeatherItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             androidx.compose.foundation.Image(
-                modifier = childModifier.size(32.dp),
+                modifier = Modifier.size(32.dp),
                 painter = painterResource(getWeatherIconByName(forecast.weather.firstOrNull()?.icon ?: "")),
                 contentDescription = null,
             )
             PrimaryText(
-                modifier = childModifier,
                 text = temperatureText(temperatureUnit, forecast.temperature),
                 textColor = color
             )
@@ -460,7 +395,6 @@ fun HourlyWeatherItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             PrimaryText(
-                modifier = childModifier,
                 text = windSpeedText(windSpeedUnit, forecast.windSpeed.toDouble()),
                 textColor = color
             )
