@@ -2,6 +2,7 @@ package com.mobileprism.fishing.utils.time
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class TimeUtilsTest {
 
@@ -61,5 +62,12 @@ class TimeUtilsTest {
     fun formatToMillisecondsMultipliesSmallerValues() {
         val seconds = 1_700_000_000L
         assertEquals(1_700_000_000_000L, formatToMilliseconds(seconds))
+    }
+
+    @Test
+    fun toDateTextMonthFormatsDayMonthYear() {
+        val result = 1705276800000L.toDateTextMonth()
+        assertTrue(result.contains("2024"), "expected year 2024 in: $result")
+        assertTrue(result.matches(Regex("""\d{2} \w{3} \d{4}""")), "unexpected format: $result")
     }
 }
