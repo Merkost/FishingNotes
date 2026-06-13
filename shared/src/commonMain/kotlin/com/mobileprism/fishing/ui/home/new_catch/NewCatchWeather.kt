@@ -166,7 +166,7 @@ fun NewCatchWeatherPrimary(
                 content = {
                     Icon(
                         painter = painterResource(getWeatherIconByName(weatherIconId)),
-                        contentDescription = "",
+                        contentDescription = null,
                         tint = Color.Unspecified
                     )
                 },
@@ -201,7 +201,7 @@ fun NewCatchTemperatureView(
         leadingIcon = {
             Icon(
                 painter = painterResource(Res.drawable.ic_thermometer),
-                contentDescription = "",
+                contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
             )
         },
@@ -236,7 +236,7 @@ fun NewCatchPressureView(
         leadingIcon = {
             Icon(
                 painter = painterResource(Res.drawable.ic_gauge),
-                contentDescription = "",
+                contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
             )
         },
@@ -289,7 +289,7 @@ fun NewCatchWindView(
                 Icon(
                     modifier = Modifier.rotate(windDeg.toFloat()),
                     painter = painterResource(Res.drawable.ic_baseline_navigation_24),
-                    contentDescription = "",
+                    contentDescription = stringResource(Res.string.weather_wind_direction),
                     tint = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -321,7 +321,7 @@ fun NewCatchMoonView(
                 painter = painterResource(
                     getMoonIconByPhase(moonPhase)
                 ),
-                contentDescription = "",
+                contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
             )
         },
