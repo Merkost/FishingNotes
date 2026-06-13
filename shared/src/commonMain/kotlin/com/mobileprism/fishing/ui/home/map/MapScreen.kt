@@ -7,18 +7,13 @@ import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,7 +23,6 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +30,8 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.rememberModalBottomSheetState
+import com.mobileprism.fishing.ui.home.views.BrandFab
+import com.mobileprism.fishing.ui.theme.Spacing
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -53,7 +49,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
@@ -67,7 +62,6 @@ import com.mobileprism.fishing.ui.utils.PlatformBackHandler
 import com.mobileprism.fishing.ui.utils.rememberLocationPermissionGranted
 import com.mobileprism.fishing.ui.utils.rememberPermissionsController
 import com.mobileprism.fishing.utils.Constants
-import com.mobileprism.fishing.utils.Constants.defaultFabBottomPadding
 import com.mobileprism.fishing.utils.rememberExitApp
 import com.mobileprism.fishing.viewmodels.MapViewModel
 import eu.buney.maps.*
@@ -543,12 +537,12 @@ fun MapFab(
         exit = fadeOut(),
         enter = fadeIn()
     ) {
-        FishingFab(
+        BrandFab(
             modifier = Modifier
                 .animateContentSize()
-                .padding(bottom = defaultFabBottomPadding),
+                .padding(bottom = Spacing.sm),
             onClick = onClick,
-            onLongPress = {
+            onLongClick = {
                 if (state == MapUiState.NormalMode && useFastFabAdd) {
                     if (locationPermissionGranted) {
                         SnackbarManager.showMessage(Res.string.adding_place_on_current_location)
@@ -563,56 +557,14 @@ fun MapFab(
                 Icon(
                     painter = painterResource(Res.drawable.ic_baseline_add_location_24),
                     contentDescription = stringResource(Res.string.new_place),
-                    tint = Color.White,
                 )
             }
             AnimatedVisibility(state is MapUiState.PlaceSelectMode) {
                 Icon(
                     painter = painterResource(Res.drawable.ic_baseline_check_24),
                     contentDescription = stringResource(Res.string.new_place),
-                    tint = Color.White,
                 )
             }
         }
     }
 }
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun FishingFab(
-    onClick: () -> Unit,
-    onLongPress: () -> Unit,
-    modifier: Modifier = Modifier,
-    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    content: @Composable () -> Unit
-) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        color = Color.Transparent,
-        shadowElevation = 8.dp,
-    ) {
-        val ripple = LocalIndication.current
-        Box(
-            modifier = Modifier
-                .defaultMinSize(minWidth = FabSize, minHeight = FabSize)
-                .background(
-                    brush = androidx.compose.ui.graphics.Brush.verticalGradient(
-                        listOf(Color(0xFF43A047), Color(0xFF2E7D32)),
-                    ),
-                )
-                .combinedClickable(
-                    interactionSource = interactionSource,
-                    indication = ripple,
-                    enabled = true,
-                    role = Role.Button,
-                    onClick = onClick,
-                    onDoubleClick = { },
-                    onLongClick = onLongPress
-                ),
-            contentAlignment = Alignment.Center
-        ) { content() }
-    }
-}
-
-val FabSize = 56.dp
