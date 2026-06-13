@@ -34,48 +34,25 @@ fun DefaultNoteView(
     note: Note,
     onClick: () -> Unit,
 ) {
-
-    DefaultCardClickable(
-        modifier = modifier
-            .fillMaxWidth()
-            .wrapContentHeight(),
+    SectionCard(
+        modifier = modifier,
+        icon = painterResource(Res.drawable.ic_baseline_sticky_note_2_24),
+        title = stringResource(Res.string.note),
         onClick = onClick
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight(),
-        ) {
-            SubtitleWithIcon(
-                modifier = Modifier.padding(top = 12.dp, start = 12.dp),
-                icon = Res.drawable.ic_baseline_sticky_note_2_24,
-                text = stringResource(Res.string.note)
+        if (note.description.isEmpty()) {
+            NoContentView(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(Res.string.no_description),
+                icon = painterResource(Res.drawable.ic_no_note)
             )
-
-            if (note.description.isEmpty()) {
-                NoContentView(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp, start = 12.dp, end = 12.dp, bottom = 12.dp),
-                    text = stringResource(Res.string.no_description),
-                    icon = painterResource(Res.drawable.ic_no_note)
-                )
-            } else {
-                SimpleUnderlineTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp, start = 12.dp, end = 12.dp),
-                    singleLine = false,
-                    text = note.description,
-                    onClick = onClick
-                )
-                SupportText(
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .padding(top = 4.dp, end = 12.dp, bottom = 4.dp),
-                    text = note.dateCreated.toDate()
-                )
-            }
+        } else {
+            LabeledValueRow(
+                label = note.dateCreated.toDate(),
+                value = note.description,
+                onClick = onClick,
+                editContentDescription = stringResource(Res.string.edit)
+            )
         }
     }
 }
