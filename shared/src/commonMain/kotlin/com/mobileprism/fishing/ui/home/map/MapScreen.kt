@@ -219,7 +219,7 @@ private fun MapControls(
             modifier = Modifier
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.statusBars)
-                .padding(16.dp)
+                .padding(Spacing.lg)
         ) {
             Row(
                 modifier = Modifier
@@ -238,7 +238,7 @@ private fun MapControls(
                     enter = fadeIn(animationSpec = tween(300)),
                     exit = fadeOut(animationSpec = tween(300)),
                 ) {
-                    PlaceTileView(modifier = Modifier.wrapContentSize().padding(horizontal = 8.dp))
+                    PlaceTileView(modifier = Modifier.wrapContentSize().padding(horizontal = Spacing.sm))
                 }
                 Spacer(modifier = Modifier.weight(1f))
 
@@ -249,7 +249,7 @@ private fun MapControls(
                         onGpsDisabled = viewModel::onMyLocationGpsDisabled,
                         onClick = viewModel::onMyLocationClick
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(Spacing.lg))
                     CompassButton(
                         mapBearing = viewModel.mapBearing.collectAsState(),
                         onClick = viewModel::resetMapBearing
@@ -260,7 +260,7 @@ private fun MapControls(
             if (useZoomButtons) {
                 Column(modifier = Modifier.align(Alignment.CenterEnd)) {
                     MapZoomInButton(onClick = viewModel::onZoomInClick)
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(Spacing.sm))
                     MapZoomOutButton(onClick = viewModel::onZoomOutClick)
                 }
             }
@@ -271,7 +271,7 @@ private fun MapControls(
                 onClick = onPromptCardClick,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 8.dp),
+                    .padding(bottom = Spacing.sm),
             )
 
             AnimatedVisibility(
@@ -280,7 +280,7 @@ private fun MapControls(
                 exit = fadeOut(),
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .padding(bottom = 65.dp)
+                    .padding(bottom = Spacing.fabClearance)
             ) {
                 PointerAnimation(viewModel.placeTileViewNameState.collectAsState().value.pointerState)
             }
@@ -298,7 +298,7 @@ private fun MapControls(
             ) + fadeOut(animationSpec = tween(480)),
             modifier = Modifier
                 .windowInsetsPadding(WindowInsets.statusBars)
-                .padding(16.dp)
+                .padding(Spacing.lg)
                 .zIndex(5f)
         ) {
             LayersView(
