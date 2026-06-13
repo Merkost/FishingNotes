@@ -10,12 +10,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +38,7 @@ import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.MaxCounterView
 import com.mobileprism.fishing.ui.home.views.NewCatchPhotoView
+import com.mobileprism.fishing.ui.theme.Spacing
 import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.ui.utils.rememberMediaPickerLauncher
 import com.mobileprism.fishing.ui.viewmodels.CatchWeatherState
@@ -73,81 +72,43 @@ fun EssentialsSection(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(horizontal = Spacing.lg),
+        verticalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) {
         if (isLocationLocked) {
-            Surface(
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        SnackbarManager.showMessage(Res.string.another_place_in_new_catch)
-                    }
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    placeColor?.let { color ->
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = null,
-                            tint = Color(color),
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                    }
-                    Text(
-                        text = placeTitle ?: "",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.weight(1f)
-                    )
+            PlaceField(
+                modifier = Modifier.fillMaxWidth(),
+                placeTitle = placeTitle,
+                placeColor = placeColor,
+                placeholder = stringResource(Res.string.place),
+                trailing = {
                     Icon(
                         imageVector = Icons.Default.Lock,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
+                },
+                onClick = {
+                    SnackbarManager.showMessage(Res.string.another_place_in_new_catch)
                 }
-            }
+            )
         } else {
-            Surface(
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onPlaceClick() }
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    placeColor?.let { color ->
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = null,
-                            tint = Color(color),
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                    }
-                    Text(
-                        text = placeTitle ?: stringResource(Res.string.place),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = if (placeTitle != null) MaterialTheme.colorScheme.onSurface
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.weight(1f)
-                    )
+            PlaceField(
+                modifier = Modifier.fillMaxWidth(),
+                placeTitle = placeTitle,
+                placeColor = placeColor,
+                placeholder = stringResource(Res.string.place),
+                trailing = {
                     Icon(
                         painter = painterResource(Res.drawable.ic_baseline_event_24),
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
-                }
-            }
+                },
+                onClick = onPlaceClick
+            )
         }
 
         AutoSuggestTextField(
@@ -161,7 +122,7 @@ fun EssentialsSection(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
         ) {
             StepperField(
                 modifier = Modifier.weight(1f),
@@ -197,21 +158,31 @@ fun EssentialsSummary(
     fishWeight: Double,
     onClick: () -> Unit,
 ) {
+    val separator = stringResource(Res.string.catch_summary_separator)
+    val countTemplate = stringResource(Res.string.fish_count_format)
+    val kgSuffix = stringResource(Res.string.kg)
+    val summaryText = CatchSummaryFormatter.format(
+        fishName = fishName,
+        amount = fishAmount,
+        weight = fishWeight,
+        kgSuffix = kgSuffix,
+        countTemplate = countTemplate,
+        separator = separator,
+    )
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = Spacing.lg)
             .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
+        shape = MaterialTheme.shapes.large,
         color = MaterialTheme.colorScheme.surfaceContainerHigh
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            modifier = Modifier.padding(Spacing.md),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xxs)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 placeColor?.let {
                     Icon(
                         modifier = Modifier.size(16.dp),
@@ -219,7 +190,7 @@ fun EssentialsSummary(
                         contentDescription = null,
                         tint = Color(it)
                     )
-                    Spacer(Modifier.width(4.dp))
+                    Spacer(Modifier.width(Spacing.xxs))
                 }
                 Text(
                     text = placeTitle,
@@ -233,61 +204,13 @@ fun EssentialsSummary(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = fishName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                if (fishAmount > 0) {
-                    Text(
-                        text = " ×$fishAmount",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                if (fishWeight > 0.0) {
-                    Text(
-                        text = " · ${fishWeight}${stringResource(Res.string.kg)}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+            Text(
+                text = summaryText,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
-}
-
-@Composable
-fun DetailChip(
-    label: String,
-    isExpanded: Boolean,
-    badge: String? = null,
-    isLoading: Boolean = false,
-    onClick: () -> Unit,
-) {
-    FilterChip(
-        selected = isExpanded,
-        onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
-        label = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(label)
-                if (badge != null) {
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        text = badge,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                if (isLoading) {
-                    Spacer(Modifier.width(4.dp))
-                    CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
-                }
-            }
-        }
-    )
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -338,7 +261,7 @@ fun WeatherSection(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
-                Spacer(Modifier.width(4.dp))
+                Spacer(Modifier.width(Spacing.xs))
             }
 
             IconButton(onClick = onRefresh) {
@@ -367,28 +290,28 @@ fun WeatherSection(
             onError = { primaryWeatherError = it }
         )
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Spacing.sm))
 
         Row(modifier = Modifier.fillMaxWidth()) {
             NewCatchTemperatureView(
-                modifier = Modifier.weight(1f).padding(end = 4.dp),
+                modifier = Modifier.weight(1f).padding(end = Spacing.xs),
                 temperature = state.temperature,
                 onTemperatureChange = onTemperatureChange,
                 onError = { temperatureError = it }
             )
             NewCatchPressureView(
-                modifier = Modifier.weight(1f).padding(start = 4.dp),
+                modifier = Modifier.weight(1f).padding(start = Spacing.xs),
                 pressure = state.pressure,
                 onPressureChange = onPressureChange,
                 onError = { pressureError = it }
             )
         }
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(Spacing.sm))
 
         Row(modifier = Modifier.fillMaxWidth()) {
             NewCatchWindView(
-                modifier = Modifier.weight(1f).padding(end = 4.dp),
+                modifier = Modifier.weight(1f).padding(end = Spacing.xs),
                 wind = state.windSpeed,
                 windDeg = state.windDeg,
                 onWindChange = onWindChange,
@@ -396,7 +319,7 @@ fun WeatherSection(
                 onError = { windError = it }
             )
             NewCatchMoonView(
-                modifier = Modifier.weight(1f).padding(start = 4.dp),
+                modifier = Modifier.weight(1f).padding(start = Spacing.xs),
                 moonPhase = state.moonPhase
             )
         }
@@ -469,7 +392,7 @@ fun PhotosSection(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = Spacing.sm),
                 photos = photos,
                 onDelete = onDeletePhoto
             )
@@ -485,7 +408,7 @@ fun PhotosSection(
                 enabled = internetConnectionState is ConnectionState.Available,
                 onClick = { mediaPicker.launchGallery() }
             )
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(Spacing.sm))
             DefaultButtonOutlined(
                 text = stringResource(Res.string.camera),
                 icon = painterResource(Res.drawable.ic_baseline_photo_camera_24),
