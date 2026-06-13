@@ -19,7 +19,7 @@ import org.koin.dsl.module
 
 val commonViewModelsModule = module {
     viewModel { StatisticsViewModel(getStatisticsUseCase = get()) }
-    viewModel { EditProfileViewModel(userDatastore = get(), userRepository = get()) }
+    viewModel { EditProfileViewModel(userDatastore = get(), userRepository = get(), savePhotos = get()) }
     viewModel {
         UserViewModel(
             userRepository = get(),
