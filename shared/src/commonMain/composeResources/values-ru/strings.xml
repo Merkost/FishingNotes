@@ -225,6 +225,8 @@
     <string name="settings_weather">Настройки погоды</string>
     <string name="settings_about">О приложении</string>
     <string name="current_app_version">"Текущая версия: "</string>
+    <string name="app_version_format">"Версия %s"</string>
+    <string name="about_this_app">"О приложении"</string>
     <string name="sort">Сортировка</string>
     <string name="default_word">По умолчанию</string>
     <string name="time_asc">Время: по возрастанию</string>
