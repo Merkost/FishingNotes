@@ -271,6 +271,8 @@
     <string name="sure_delete_place_dialog">All catches on this place also will be deleted.\nAre you sure?</string>
     <string name="add_location_dialog">Please add location for adding catches</string>
     <string name="register_date">Register date</string>
+    <string name="register_date_value">Registered %1$s</string>
+    <string name="edit_profile_photo">Edit profile photo</string>
     <string name="catches_count">Catches count</string>
     <string name="places_count">Places count</string>
     <string name="best_catch">Best catch</string>

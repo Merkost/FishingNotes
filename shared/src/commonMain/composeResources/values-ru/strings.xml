@@ -262,6 +262,8 @@
     <!-- Sync Preferences -->
     <string name="add_location_dialog">Пожалуйста, добавте место для добавления уловов</string>
     <string name="register_date">Дата регистрации</string>
+    <string name="register_date_value">Зарегистрирован %1$s</string>
+    <string name="edit_profile_photo">Изменить фото профиля</string>
     <string name="catches_count">Количество уловов</string>
     <string name="places_count">Количество мест</string>
     <string name="best_catch">Лучший улов</string>
