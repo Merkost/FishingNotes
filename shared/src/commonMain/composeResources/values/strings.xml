@@ -497,6 +497,8 @@
     <string name="edit_photo">Edit photo</string>
     <string name="zoom_in">Zoom in</string>
     <string name="zoom_out">Zoom out</string>
+    <string name="map_settings">Map settings</string>
+    <string name="dismiss_layers">Dismiss layers panel</string>
     <string name="sort_by">Sort by</string>
     <string name="app_version">Version %1$s</string>
 

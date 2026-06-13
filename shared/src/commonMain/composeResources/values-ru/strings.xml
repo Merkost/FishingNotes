@@ -469,4 +469,8 @@
     <string name="show_on_map">Показать на карте</string>
     <string name="load_more_error">Не удалось загрузить. Нажмите, чтобы повторить.</string>
     <string name="end_of_list">Это все записи</string>
+    <string name="zoom_in">Приблизить</string>
+    <string name="zoom_out">Отдалить</string>
+    <string name="map_settings">Настройки карты</string>
+    <string name="dismiss_layers">Закрыть панель слоёв</string>
 </resources>
