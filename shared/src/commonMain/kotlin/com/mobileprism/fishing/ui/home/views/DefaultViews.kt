@@ -1,15 +1,12 @@
 package com.mobileprism.fishing.ui.home.views
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
@@ -21,7 +18,6 @@ import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.mobileprism.fishing.ui.utils.AnimatedResource
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.entity.common.Note
@@ -125,40 +121,4 @@ fun WindIconItem(
     }
 }
 
-@Composable
-fun NoInternetView(
-    modifier: Modifier = Modifier,
-    onRetry: (() -> Unit)? = null
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.SpaceAround,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        AnimatedResource("error", modifier)
-        SupportText(text = stringResource(Res.string.network_error_message))
-        if (onRetry != null) {
-            androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(16.dp))
-            DefaultButtonOutlined(
-                text = stringResource(Res.string.retry),
-                onClick = onRetry
-            )
-        }
-    }
-}
-
-@Composable
-fun ErrorView(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.SpaceAround,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            modifier = Modifier.size(48.dp),
-            painter = painterResource(Res.drawable.ic_error), contentDescription = null
-        )
-        SupportText(text = stringResource(Res.string.something_went_wrong))
-    }
-}
 
