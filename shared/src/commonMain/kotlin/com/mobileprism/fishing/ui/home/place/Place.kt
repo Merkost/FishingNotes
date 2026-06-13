@@ -4,11 +4,10 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -28,9 +27,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import org.jetbrains.compose.resources.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.compose.foundation.pager.rememberPagerState
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
@@ -38,9 +35,11 @@ import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.home.advertising.AdIds
 import com.mobileprism.fishing.ui.home.advertising.BannerAdvertView
 import com.mobileprism.fishing.ui.home.notes.TabItem
+import com.mobileprism.fishing.ui.home.views.AppTab
+import com.mobileprism.fishing.ui.home.views.TabbedPager
+import com.mobileprism.fishing.ui.theme.Spacing
 import com.mobileprism.fishing.ui.viewmodels.UserPlaceViewModel
 import com.mobileprism.fishing.utils.Constants
-import com.mobileprism.fishing.utils.Constants.bottomBannerPadding
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(
@@ -106,12 +105,16 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
             sheetShape = RectangleShape,
             sheetSwipeEnabled = false,
         ) {
-            marker?.let { userPlace ->
+            val userPlace = marker
 
+            if (userPlace == null) {
+                PlaceDetailSkeleton(modifier = Modifier.fillMaxSize())
+            } else {
                 val userCatches by viewModel.getCatchesByMarkerId(userPlace.id)
                     .collectAsState(listOf())
 
-                val tabs = listOf(TabItem.PlaceCatches, TabItem.Note)
+                val tabItems = listOf(TabItem.PlaceCatches, TabItem.Note)
+                val tabs = tabItems.map { AppTab(title = stringResource(it.titleRes)) }
                 val pagerState = rememberPagerState(initialPage = 0) { tabs.size }
 
                 Column(
@@ -130,30 +133,35 @@ fun UserPlaceScreen(backPress: () -> Unit, navController: NavController, place: 
                     }
 
                     PlaceButtonsView(
-                        modifier = Modifier.padding(vertical = 16.dp),
+                        modifier = Modifier.padding(vertical = Spacing.lg),
                         place = userPlace,
                         navController = navController,
                         viewModel = viewModel
                     )
 
-                    PlaceTabsView(
+                    TabbedPager(
+                        modifier = Modifier.fillMaxSize(),
                         tabs = tabs,
                         pagerState = pagerState
-                    )
-
-                    PlaceTabsContentView(
-                        tabs = tabs,
-                        pagerState = pagerState,
-                        navController = navController,
-                        catches = userCatches,
-                        notes = notes,
-                        onNewCatchClick = { newCatchClicked(navController, place) }
-                    ) { note ->
-                        viewModel.setCurrentNote(note)
-                        showModalSheet = true
+                    ) { page ->
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Top
+                        ) {
+                            when (page) {
+                                0 -> PlaceCatchesView(
+                                    catches = userCatches,
+                                    onNewCatchClick = { newCatchClicked(navController, place) }
+                                ) {
+                                    navController.navigate(MainDestinations.Catch(it))
+                                }
+                                1 -> PlaceNotes(notes) { note ->
+                                    viewModel.setCurrentNote(note)
+                                    showModalSheet = true
+                                }
+                            }
+                        }
                     }
-
-                    Spacer(modifier = Modifier.size(bottomBannerPadding))
                 }
             }
         }
