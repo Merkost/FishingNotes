@@ -2,24 +2,17 @@ package com.mobileprism.fishing.ui.home.map
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,10 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.BottomSheetScaffold
-import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -66,11 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.layout.ContentScale
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -108,62 +94,26 @@ fun MapScaffold(
     bottomCard: @Composable () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    val offsetY = remember { Animatable(0f) }
-    val dismissThresholdPx = with(LocalDensity.current) { 80.dp.toPx() }
-
-    LaunchedEffect(mapUiState) {
-        if (mapUiState is MapUiState.BottomSheetInfoMode) {
-            offsetY.snapTo(0f)
-        }
-    }
-
     Box(modifier = modifier.fillMaxSize()) {
         content()
 
         AnimatedVisibility(
             visible = mapUiState is MapUiState.BottomSheetInfoMode,
             modifier = Modifier.align(Alignment.BottomCenter),
-            enter = androidx.compose.animation.slideInVertically(
+            enter = slideInVertically(
                 initialOffsetY = { it },
                 animationSpec = tween(350, easing = androidx.compose.animation.core.FastOutSlowInEasing)
             ) + fadeIn(animationSpec = tween(250)),
-            exit = androidx.compose.animation.slideOutVertically(
+            exit = slideOutVertically(
                 targetOffsetY = { it },
                 animationSpec = tween(250)
             ) + fadeOut(animationSpec = tween(200)),
         ) {
-            Column(
-                modifier = Modifier
-                    .offset { IntOffset(0, offsetY.value.toInt().coerceAtLeast(0)) }
-                    .pointerInput(Unit) {
-                        detectVerticalDragGestures(
-                            onDragEnd = {
-                                if (offsetY.value > dismissThresholdPx) {
-                                    onDismissCard()
-                                } else {
-                                    coroutineScope.launch {
-                                        offsetY.animateTo(0f, animationSpec = tween(200))
-                                    }
-                                }
-                            },
-                            onDragCancel = {
-                                coroutineScope.launch {
-                                    offsetY.animateTo(0f, animationSpec = tween(200))
-                                }
-                            },
-                            onVerticalDrag = { change, dragAmount ->
-                                change.consume()
-                                coroutineScope.launch {
-                                    offsetY.snapTo(offsetY.value + dragAmount)
-                                }
-                            }
-                        )
-                    },
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                BottomSheetLine(modifier = Modifier.padding(bottom = 4.dp))
-                bottomCard()
+            DragDismissContainer(onDismiss = onDismissCard) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    DragHandle(modifier = Modifier.padding(bottom = Spacing.xs))
+                    bottomCard()
+                }
             }
         }
 
@@ -171,7 +121,7 @@ fun MapScaffold(
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(16.dp)
+                    .padding(Spacing.lg)
             ) {
                 fabContent()
             }
@@ -391,22 +341,6 @@ fun MapControlsLeftPill(
     }
 }
 
-@Composable
-fun MapLayersButton(modifier: Modifier, onLayersSelectionOpen: () -> Unit) {
-    Card(
-        shape = CircleShape,
-        modifier = modifier.size(48.dp)
-    ) {
-        IconButton(
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxSize(),
-            onClick = onLayersSelectionOpen
-        ) {
-            Icon(painterResource(Res.drawable.ic_baseline_layers_24), stringResource(Res.string.layers))
-        }
-    }
-}
 
 @Composable
 fun LayersView(
@@ -524,28 +458,6 @@ fun MapLayerItem(
     }
 }
 
-@Composable
-fun MapSettingsButton(
-    modifier: Modifier,
-    onCLick: () -> Unit,
-) {
-
-    Card(
-        shape = CircleShape,
-        modifier = modifier.size(48.dp)
-    ) {
-        IconButton(
-            modifier = Modifier
-                .padding(8.dp)
-                .fillMaxSize(),
-            onClick = onCLick
-        ) {
-            Icon(
-                Icons.Default.Settings, Icons.Default.Settings.name,
-            )
-        }
-    }
-}
 
 @Composable
 fun FishLoading(modifier: Modifier) {
@@ -605,19 +517,3 @@ fun SetPlaceNameResultListener(geocoderResult: GeocoderResult, setPlaceName: (St
     }
 }
 
-@Composable
-fun BottomSheetLine(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(2.dp),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(width = 25.dp, height = 3.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.outlineVariant)
-        )
-    }
-}
