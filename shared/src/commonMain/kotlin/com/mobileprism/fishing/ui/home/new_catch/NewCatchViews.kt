@@ -4,26 +4,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.mobileprism.fishing.ui.utils.AnimatedResource
@@ -34,8 +23,6 @@ import com.mobileprism.fishing.ui.home.new_catch.weather.SelectedWeather
 import com.mobileprism.fishing.ui.home.views.DefaultDialog
 import com.mobileprism.fishing.ui.home.views.WindIconItem
 import com.mobileprism.fishing.utils.Constants.WIND_ROTATION
-import com.mobileprism.fishing.utils.ValidationUtils
-import com.mobileprism.fishing.utils.roundTo
 
 @ExperimentalComposeUiApi
 @Composable
@@ -49,154 +36,6 @@ fun PickWeatherIconDialog(onWeatherSelected: (SelectedWeather) -> Unit, onDismis
     )
 }
 
-@Composable
-fun FishAmountAndWeightView(
-    modifier: Modifier = Modifier,
-    amountState: MutableState<String>,
-    weightState: MutableState<String>
-) {
-    val currentAmount = amountState.value.toIntOrNull()
-    val currentWeight = weightState.value.toDoubleOrNull()
-    val isAmountError = currentAmount != null && !ValidationUtils.isAmountValid(currentAmount)
-    val isWeightError = currentWeight != null && !ValidationUtils.isWeightValid(currentWeight)
-
-    Row(modifier = modifier) {
-        Column(Modifier.weight(1F)) {
-            OutlinedTextField(
-                value = amountState.value,
-                onValueChange = {
-                    if (it.isEmpty()) amountState.value = it
-                    else {
-                        val parsed = it.toIntOrNull()
-                        when {
-                            parsed == null -> {} // keep old value
-                            parsed > ValidationUtils.MAX_FISH_AMOUNT -> amountState.value = ValidationUtils.MAX_FISH_AMOUNT.toString()
-                            else -> amountState.value = it
-                        }
-                    }
-                },
-                isError = amountState.value.isEmpty() || isAmountError,
-                supportingText = if (isAmountError) {
-                    { Text(stringResource(Res.string.amount_out_of_range)) }
-                } else null,
-                label = { Text(text = stringResource(Res.string.amount)) },
-                trailingIcon = { Text(stringResource(Res.string.pc)) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Next
-                )
-            )
-            Spacer(modifier = Modifier.size(6.dp))
-            Row(Modifier.fillMaxWidth()) {
-                OutlinedButton(
-                    onClick = {
-                        val current = amountState.value.toIntOrNull() ?: 0
-                        if (current >= 1)
-                            amountState.value = (current - 1).toString()
-                    },
-                    Modifier
-                        .weight(1F)
-                        .align(Alignment.CenterVertically)
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_baseline_minus),
-                        tint = MaterialTheme.colorScheme.primary,
-                        contentDescription = stringResource(Res.string.decrease)
-                    )
-                }
-                Spacer(modifier = Modifier.size(6.dp))
-                OutlinedButton(
-                    onClick = {
-                        val current = amountState.value.toIntOrNull() ?: 0
-                        if (current < ValidationUtils.MAX_FISH_AMOUNT)
-                            amountState.value = (current + 1).toString()
-                    },
-                    enabled = (amountState.value.toIntOrNull() ?: 0) < ValidationUtils.MAX_FISH_AMOUNT,
-                    modifier = Modifier
-                        .weight(1F)
-                        .align(Alignment.CenterVertically)
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_baseline_plus),
-                        tint = MaterialTheme.colorScheme.primary,
-                        contentDescription = stringResource(Res.string.increase)
-                    )
-                }
-            }
-
-        }
-        Spacer(modifier = Modifier.size(6.dp))
-        Column(Modifier.weight(1F)) {
-            OutlinedTextField(
-                value = weightState.value,
-                onValueChange = {
-                    if (it.isEmpty()) weightState.value = it
-                    else {
-                        val parsed = it.toDoubleOrNull()
-                        when {
-                            parsed == null -> {} // keep old value
-                            parsed > ValidationUtils.MAX_FISH_WEIGHT_KG -> weightState.value = ValidationUtils.MAX_FISH_WEIGHT_KG.toInt().toString()
-                            else -> weightState.value = it
-                        }
-                    }
-                },
-                isError = isWeightError,
-                supportingText = if (isWeightError) {
-                    { Text(stringResource(Res.string.weight_out_of_range)) }
-                } else null,
-                label = { Text(text = stringResource(Res.string.weight)) },
-                trailingIcon = {
-                    Text(stringResource(Res.string.kg))
-                },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Next
-                )
-            )
-            Spacer(modifier = Modifier.size(6.dp))
-            Row(Modifier.fillMaxWidth()) {
-                OutlinedButton(
-                    onClick = {
-                        val current = weightState.value.toDoubleOrNull() ?: 0.0
-                        if (current >= 0.1)
-                            weightState.value = (current - 0.1).roundTo(1).toString()
-                    },
-                    Modifier
-                        .weight(1F)
-                        .align(Alignment.CenterVertically)
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_baseline_minus),
-                        tint = MaterialTheme.colorScheme.primary,
-                        contentDescription = stringResource(Res.string.decrease)
-                    )
-                }
-                Spacer(modifier = Modifier.size(6.dp))
-                OutlinedButton(
-                    onClick = {
-                        val current = weightState.value.toDoubleOrNull() ?: 0.0
-                        if (current < ValidationUtils.MAX_FISH_WEIGHT_KG)
-                            weightState.value = (current + 0.1).roundTo(1).toString()
-                    },
-                    enabled = (weightState.value.toDoubleOrNull() ?: 0.0) < ValidationUtils.MAX_FISH_WEIGHT_KG,
-                    modifier = Modifier
-                        .weight(1F)
-                        .align(Alignment.CenterVertically)
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_baseline_plus),
-                        tint = MaterialTheme.colorScheme.primary,
-                        contentDescription = stringResource(Res.string.increase)
-                    )
-                }
-            }
-        }
-    }
-}
 
 @ExperimentalComposeUiApi
 @Composable

@@ -36,8 +36,9 @@ import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.ui.home.SnackbarManager
-import com.mobileprism.fishing.ui.home.new_catch.FishAmountAndWeightView
+import com.mobileprism.fishing.ui.components.StepperField
 import com.mobileprism.fishing.ui.home.views.DefaultButton
+import com.mobileprism.fishing.ui.theme.Spacing
 import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
 import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
 import com.mobileprism.fishing.ui.home.views.DefaultDialog
@@ -139,11 +140,27 @@ fun FishTypeAmountAndWeightDialog(
             label = stringResource(Res.string.fish_species)
         )
 
-        FishAmountAndWeightView(
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            amountState = fishAmount,
-            weightState = fishWeight
-        )
+            horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+        ) {
+            StepperField(
+                modifier = Modifier.weight(1f),
+                value = fishAmount.value.toIntOrNull() ?: 0,
+                onValueChange = { fishAmount.value = it.toString() },
+                label = stringResource(Res.string.amount),
+                suffix = stringResource(Res.string.pc),
+                range = 0..ValidationUtils.MAX_FISH_AMOUNT
+            )
+            StepperField(
+                modifier = Modifier.weight(1f),
+                value = fishWeight.value.toDoubleOrNull() ?: 0.0,
+                onValueChange = { fishWeight.value = it.toString() },
+                label = stringResource(Res.string.weight),
+                suffix = stringResource(Res.string.kg),
+                range = 0.0..ValidationUtils.MAX_FISH_WEIGHT_KG
+            )
+        }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
