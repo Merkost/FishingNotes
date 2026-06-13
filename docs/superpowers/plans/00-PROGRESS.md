@@ -33,17 +33,17 @@ Single source of truth for the whole-app UI/UX overhaul. Update the **Status** c
 
 | Plan | Sprint | Scope | Depends on | Plan doc | Impl status |
 |---|---|---|---|---|---|
-| 01 | S1 Design System | Foundation tokens & theme (Spacing/Elevation/Shapes/Motion/Emphasis, color cleanup, Nunito fonts) | — | `2026-06-12-01-foundation-tokens-theme.md` | ⬜ |
-| 02 | S1 Design System | Core Components I — primitives & state system | 01 | `2026-06-12-02-core-components-primitives-state.md` | ⬜ |
-| 03 | S1 Design System | Core Components II — chrome, brand & content | 01, 02 | `2026-06-12-03-core-components-chrome-brand-content.md` | ⬜ |
-| 04 | S2 Primary | First-run & app shell (Login, Onboarding, Home + bottom nav) | 01–03 | `2026-06-12-04-firstrun-app-shell.md` | ⬜ |
-| 05 | S2 Primary | Notes (tabs, Catches, Places, Statistics) | 01–03 | `2026-06-12-05-notes.md` | ⬜ |
-| 06 | S2 Primary | Weather & Daily detail | 01–03 | `2026-06-12-06-weather.md` | ⬜ |
-| 07 | S3 Create & Detail | New Catch flow | 01–03 | `2026-06-12-07-new-catch.md` | ⬜ |
-| 08 | S3 Create & Detail | Detail screens (Place, Catch) | 01–03 | `2026-06-12-08-detail-place-catch.md` | ⬜ |
-| 09 | S4 Account & Finish | Profile & Edit Profile | 01–03 | `2026-06-12-09-profile.md` | ⬜ |
+| 01 | S1 Design System | Foundation tokens & theme (Spacing/Elevation/Shapes/Motion/Emphasis, color cleanup, Nunito fonts) | — | `2026-06-12-01-foundation-tokens-theme.md` | ✅ |
+| 02 | S1 Design System | Core Components I — primitives & state system | 01 | `2026-06-12-02-core-components-primitives-state.md` | ✅ |
+| 03 | S1 Design System | Core Components II — chrome, brand & content | 01, 02 | `2026-06-12-03-core-components-chrome-brand-content.md` | ✅ |
+| 04 | S2 Primary | First-run & app shell (Login, Onboarding, Home + bottom nav) | 01–03 | `2026-06-12-04-firstrun-app-shell.md` | ✅ |
+| 05 | S2 Primary | Notes (tabs, Catches, Places, Statistics) | 01–03 | `2026-06-12-05-notes.md` | ✅ |
+| 06 | S2 Primary | Weather & Daily detail | 01–03 | `2026-06-12-06-weather.md` | ✅ |
+| 07 | S3 Create & Detail | New Catch flow | 01–03 | `2026-06-12-07-new-catch.md` | ✅ |
+| 08 | S3 Create & Detail | Detail screens (Place, Catch) | 01–03 | `2026-06-12-08-detail-place-catch.md` | ✅ |
+| 09 | S4 Account & Finish | Profile & Edit Profile | 01–03 | `2026-06-12-09-profile.md` | ✅ |
 | 10 | S4 Account & Finish | Settings & About | 01–03 | `2026-06-12-10-settings-about.md` | ⬜ |
-| 12 | S2 Primary | Map screen (BrandFab, floating controls, skeletons, drag handle) | 01–03 | `2026-06-12-12-map-screen.md` | ⬜ |
+| 12 | S2 Primary | Map screen (BrandFab, floating controls, skeletons, drag handle) | 01–03 | `2026-06-12-12-map-screen.md` | ✅ |
 | 11 | S4 Account & Finish | Final sweep (delete legacy, a11y/consistency, full build) | 04–10, 12 | `2026-06-12-11-final-sweep.md` | ⬜ |
 
 > Plan 12 (Map) was added after the initial 11 so the Map tab — the app's start destination — gets a dedicated screen pass. **Total: 12 plans.**
@@ -85,8 +85,8 @@ Every user-facing surface must be touched. Mark ✅ when its owning plan ships a
 | New Catch | 07 | ⬜ |
 | Place detail | 08 | ⬜ |
 | Catch detail | 08 | ⬜ |
-| Profile | 09 | ⬜ |
-| Edit Profile | 09 | ⬜ |
+| Profile | 09 | ✅ |
+| Edit Profile | 09 | ✅ |
 | Settings | 10 | ⬜ |
 | About | 10 | ⬜ |
 
@@ -114,9 +114,14 @@ Resolve these when implementing Plans 01–03 (each consuming plan already has a
 ## Decisions / changes log
 | Date | Note |
 |---|---|
+| 2026-06-13 | **Plan 09 ✅ executed** (autonomous): 5 commits (`57164d64..59ac55e0`). Parameterized `register_date_value` + `edit_profile_photo` strings (EN+RU). EditProfileViewModel gains `pendingPhotoPath` + `onPhotoPicked` + upload-on-save via `SavePhotosUseCase` (real FileKit picker replaces the dead no-op badge); DI injects `savePhotos`. Profile/EditProfile rebuilt on shared components: `AvatarWithBadge` (content-slot + coil3 SubcomposeAsyncImage, KMP-safe), `StatRow`/`StatTile` + `StatTileSkeleton` (null→skeleton), `FormTextField`x3 + `PickerField` (Birthday — disabled-colors hack gone), `BottomActionBar` (in-button spinner, replaces blocking `ModalLoadingDialog`), surface-colored `AppTopBar` for both profile bars, `TextWithLeadingIcon` section headers, `Spacing` tokens + `spacedBy` (magic-number Spacer chain gone). Deleted bespoke `UserImage`/`SectionHeader`/`StatsRow`/`StatCard`/`EditProfileTopAppBar`. 3 new VM tests + register-date formatter test. compile both targets ✅, tests green, `installDebug` ✅. (Behind auth — code+build+test verified; screenshots pending user.) |
 | 2026-06-12 | Audit completed (20 agents). Spec written. 11-plan / 4-sprint structure approved. |
 | 2026-06-12 | Added Plan 12 (Map screen) → **12 plans total**. |
 | 2026-06-12 | All 12 plan docs authored (~133 tasks). Self-review done: placeholder scan clean, `StatusView` dangling refs in Plan 06 reconciled to `ScreenStateContent`/`EmptyState`/`ErrorState`, cross-plan contracts logged above. |
+| 2026-06-13 | **Plan 04 ✅ executed** (autonomous): 6 commits (`77d9cb0b..0b4d76fe`). Login rewired (full-width brand CTA via AppButton Filled — verified on emulator, big upgrade from old narrow chip), InlineBannerCard error + errorToMessage, slideUpFadeIn entrance, decorative hero with a11y + placeholder fallback; Onboarding on AppButton/Spacing; **Home shell: ~250-line Jetsnack bottom bar replaced with AppBottomNavigation (M3 + branded indicator)**; FishingNotesApp on AppScaffold (sync banner overlays). Nav-mapping test. compile both targets, tests, install verified. Login screenshot confirmed. (Home/Onboarding behind auth — code+build verified.) |
+| 2026-06-12 | **Plan 03 ✅ executed** (subagent-driven, 4 passes): 23 commits (`bb0e0d2b..5180b468`). 03A formatters/motion (+rounding fix `b394706e` — round not truncate, avoids 0.07→0.06), 03B chrome (AppTopBar surface, AppTabRow/TabbedPager, AppBottomNavigation on M3 NavigationBar + branded primaryContainer indicator + scale spring, AppScaffold overlay sync banner, BottomActionBar, EditBottomSheetScaffold +leadingAction, SortOptionsSheet, SettingsSelectionDialog<T> unbounded +optionLabel), 03C brand/content (BrandSurfaces, BrandFab+FabTokens, FloatingControls 48dp, Chips +test, InlineBannerCard tones, AvatarWithBadge 48dp, StatTile+skeleton), 03D charts/weather/about (ChartCard+WeatherTrendChart brand-tinted Vico 3.2.2, WeatherContent cells, AboutContent). Reviews controller-level (spend limit) ✅. compile both targets, tests pass, installDebug on 2 emulators. **Sprint 1 (Design System) COMPLETE.** |
+| 2026-06-12 | **Plan 02 ✅ executed** (subagent-driven): 12 commits (`4b94fa12..d515276d`). 02A primitives (AppButton/IconButton/Text/Card/SectionCard/FormTextField/PickerField) — spec ✅, quality review → 3 fixes (clickable SectionCard, IconSize tokens, testable AppTextStyle mapping) applied (`90b9a096`). 02B state system (EmptyState/ErrorState/LoadingState/InlineLoader/ListAppendLoader, Skeletons, ScreenStateContent<T>, PagedListScaffold<T>) — controller spec+quality review (reviewer subagent hit spend limit) ✅. commonMain+iOS compile, tests pass. Built ALONGSIDE legacy (no deletions). Minor follow-ups: PagedListScaffold animateItem; tokenize 64dp state illustration size. |
+| 2026-06-12 | **Plan 01 ✅ executed** (subagent-driven): 11 commits (`ad11d574..37efc7d5`). Tasks 1–6,10 (tokens/color/tests) + 7–9 (real Nunito weights/typography). Spec review ✅, code-quality review found 4 fixes (ReplaceWith imports, deprecation target, test naming/assertions) → applied (`624f8594`). commonMain+iOS compile, 9 token tests pass, `:androidApp:installDebug` on both emulators, Login screenshot confirms real Nunito weights + no regression. Deviations: `primaryBlueLightColorTransparent` kept public+@Deprecated (still referenced in TextFields.kt); OFL license placed in `composeResources/files/` not `font/`. |
 
 ## Open questions / follow-ups
 - Source of real Nunito weight files (Google Fonts OFL) — confirm licensing/inclusion in repo (Plan 01).
