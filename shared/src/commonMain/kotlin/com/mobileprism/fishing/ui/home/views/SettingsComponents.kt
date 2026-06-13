@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -183,3 +184,6 @@ fun SettingsCheckbox(
         }
     }
 }
+
+fun contrastingCheckTint(background: Color): Color =
+    if (background.luminance() > 0.5f) Color.Black else Color.White
