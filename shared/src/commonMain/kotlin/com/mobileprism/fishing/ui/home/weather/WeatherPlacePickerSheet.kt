@@ -200,8 +200,8 @@ private fun CurrentLocationItem(
 @Composable
 private fun SectionLabel(text: String) {
     Text(
-        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 6.dp),
-        text = text.uppercase(),
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp),
+        text = text,
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.outline,
         letterSpacing = 1.sp,

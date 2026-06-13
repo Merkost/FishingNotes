@@ -55,7 +55,7 @@ class AppStateHolder(
                         val actionText = getString(snackbarAction.textId)
                         val result = snackbarHostState.showSnackbar(
                             message = text,
-                            actionLabel = actionText.uppercase(),
+                            actionLabel = actionText,
                             duration = message.duration
                         )
                         when (result) {

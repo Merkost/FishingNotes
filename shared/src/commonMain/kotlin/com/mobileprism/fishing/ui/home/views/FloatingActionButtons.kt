@@ -57,7 +57,7 @@ fun FabWithMenu(
                 modifier = Modifier.rotate(rotation.value),
                 tint = MaterialTheme.colorScheme.onPrimaryContainer,
                 painter = painterResource(Res.drawable.ic_baseline_plus),
-                contentDescription = "Menu"
+                contentDescription = null
             )
         }
     }
@@ -80,7 +80,7 @@ fun FabMenuItem(item: FabMenuItem, modifier: Modifier = Modifier, size: Dp) {
             ) {
                 Text(
                     item.text,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.labelLarge,
                 )

@@ -69,7 +69,7 @@ fun PointerAnimation(pointerState: PointerState, modifier: Modifier = Modifier) 
                 composition = composition,
                 progress = { lottieAnimatable.progress },
             ),
-            contentDescription = "Lottie animation"
+            contentDescription = null
         )
     }
 }
