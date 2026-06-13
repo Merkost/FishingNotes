@@ -34,15 +34,3 @@ fun CancelNewCatchDialog(
     )
 }
 
-@Composable
-fun AddNewCatchErrorDialog(onClose: () -> Unit, onRetry: () -> Unit) {
-    DefaultDialog(
-        primaryText = stringResource(Res.string.error_occured),
-        secondaryText = stringResource(Res.string.new_catch_error_description),
-        onDismiss = onClose,
-        negativeButtonText = stringResource(Res.string.cancel),
-        onNegativeClick = onClose,
-        positiveButtonText = stringResource(Res.string.Try_again),
-        onPositiveClick = onRetry
-    )
-}

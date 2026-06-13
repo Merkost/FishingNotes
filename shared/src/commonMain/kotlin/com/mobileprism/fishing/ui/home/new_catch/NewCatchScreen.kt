@@ -16,11 +16,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -33,7 +29,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.ui.home.SnackbarAction
@@ -41,10 +36,12 @@ import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.advertising.AdIds
 import com.mobileprism.fishing.ui.home.advertising.BannerAdvertView
 import com.mobileprism.fishing.ui.home.advertising.rememberInterstitialAdLauncher
+import com.mobileprism.fishing.ui.home.views.BottomActionBar
 import com.mobileprism.fishing.ui.home.views.DefaultAppBar
-import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
 import com.mobileprism.fishing.ui.home.views.ModalLoadingDialog
 import com.mobileprism.fishing.ui.home.weather.WeatherPlacePickerSheetContent
+import com.mobileprism.fishing.ui.theme.Motion
+import com.mobileprism.fishing.ui.theme.Spacing
 import com.mobileprism.fishing.ui.utils.PlatformBackHandler
 import com.mobileprism.fishing.ui.viewmodels.DetailSection
 import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
@@ -191,17 +188,7 @@ fun NewCatchMasterScreen(
         topBar = {
             DefaultAppBar(
                 title = stringResource(Res.string.new_catch),
-                onNavClick = { exitDialogIsShowing = true },
-                actions = {
-                    IconButton(
-                        onClick = {
-                            if (skipAvailable) onSave()
-                            else SnackbarManager.showMessage(Res.string.new_catch_skip_tutor)
-                        }
-                    ) {
-                        Icon(Icons.Default.Check, contentDescription = null)
-                    }
-                }
+                onNavClick = { exitDialogIsShowing = true }
             )
         }
     ) { paddingValues ->
@@ -215,14 +202,14 @@ fun NewCatchMasterScreen(
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
                     .imePadding(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(Spacing.md)
             ) {
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(Spacing.xs))
 
                 AnimatedVisibility(
                     visible = !essentialsCollapsed,
-                    enter = expandVertically(),
-                    exit = shrinkVertically()
+                    enter = expandVertically(Motion.enterContent()),
+                    exit = shrinkVertically(Motion.screenExit())
                 ) {
                     EssentialsSection(
                         placeTitle = placeAndTime.place?.title,
@@ -243,8 +230,8 @@ fun NewCatchMasterScreen(
 
                 AnimatedVisibility(
                     visible = essentialsCollapsed,
-                    enter = expandVertically(),
-                    exit = shrinkVertically()
+                    enter = expandVertically(Motion.enterContent()),
+                    exit = shrinkVertically(Motion.screenExit())
                 ) {
                     placeAndTime.place?.let { place ->
                         EssentialsSummary(
@@ -262,40 +249,48 @@ fun NewCatchMasterScreen(
                 FlowRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        .padding(horizontal = Spacing.lg),
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                 ) {
-                    DetailChip(
+                    val weatherDone = !weatherState.isDownloadAvailable && weatherState.primary.isNotBlank()
+                    StatusFilterChip(
                         label = stringResource(Res.string.weather),
-                        isExpanded = DetailSection.WEATHER in expandedSections,
-                        isLoading = weatherState.isLoading,
-                        badge = if (!weatherState.isDownloadAvailable && weatherState.primary.isNotBlank()) "✓" else null,
+                        selected = DetailSection.WEATHER in expandedSections,
+                        badge = when {
+                            weatherState.isLoading -> ChipBadge.Loading
+                            weatherDone -> ChipBadge.Done
+                            else -> ChipBadge.None
+                        },
                         onClick = { viewModel.toggleSection(DetailSection.WEATHER) }
                     )
-                    DetailChip(
+                    StatusFilterChip(
                         label = stringResource(Res.string.way_of_fishing),
-                        isExpanded = DetailSection.GEAR in expandedSections,
-                        badge = if (catchInfo.rod.isNotBlank() || catchInfo.bait.isNotBlank() || catchInfo.lure.isNotBlank()) "✓" else null,
+                        selected = DetailSection.GEAR in expandedSections,
+                        badge = if (catchInfo.rod.isNotBlank() || catchInfo.bait.isNotBlank() || catchInfo.lure.isNotBlank()) {
+                            ChipBadge.Done
+                        } else {
+                            ChipBadge.None
+                        },
                         onClick = { viewModel.toggleSection(DetailSection.GEAR) }
                     )
-                    DetailChip(
+                    StatusFilterChip(
                         label = stringResource(Res.string.photos),
-                        isExpanded = DetailSection.PHOTOS in expandedSections,
-                        badge = if (photos.isNotEmpty()) "${photos.size}" else null,
+                        selected = DetailSection.PHOTOS in expandedSections,
+                        badge = ChipBadge.Count(photos.size),
                         onClick = { viewModel.toggleSection(DetailSection.PHOTOS) }
                     )
-                    DetailChip(
+                    StatusFilterChip(
                         label = stringResource(Res.string.note),
-                        isExpanded = DetailSection.NOTE in expandedSections,
-                        badge = if (catchInfo.note.isNotBlank()) "✓" else null,
+                        selected = DetailSection.NOTE in expandedSections,
+                        badge = if (catchInfo.note.isNotBlank()) ChipBadge.Done else ChipBadge.None,
                         onClick = { viewModel.toggleSection(DetailSection.NOTE) }
                     )
                 }
 
                 AnimatedVisibility(
                     visible = DetailSection.WEATHER in expandedSections,
-                    enter = expandVertically(),
-                    exit = shrinkVertically()
+                    enter = expandVertically(Motion.enterContent()),
+                    exit = shrinkVertically(Motion.screenExit())
                 ) {
                     WeatherSection(
                         state = weatherState,
@@ -313,8 +308,8 @@ fun NewCatchMasterScreen(
 
                 AnimatedVisibility(
                     visible = DetailSection.GEAR in expandedSections,
-                    enter = expandVertically(),
-                    exit = shrinkVertically()
+                    enter = expandVertically(Motion.enterContent()),
+                    exit = shrinkVertically(Motion.screenExit())
                 ) {
                     GearSection(
                         rod = catchInfo.rod,
@@ -329,8 +324,8 @@ fun NewCatchMasterScreen(
 
                 AnimatedVisibility(
                     visible = DetailSection.PHOTOS in expandedSections,
-                    enter = expandVertically(),
-                    exit = shrinkVertically()
+                    enter = expandVertically(Motion.enterContent()),
+                    exit = shrinkVertically(Motion.screenExit())
                 ) {
                     PhotosSection(
                         photos = photos,
@@ -342,8 +337,8 @@ fun NewCatchMasterScreen(
 
                 AnimatedVisibility(
                     visible = DetailSection.NOTE in expandedSections,
-                    enter = expandVertically(),
-                    exit = shrinkVertically()
+                    enter = expandVertically(Motion.enterContent()),
+                    exit = shrinkVertically(Motion.screenExit())
                 ) {
                     NoteSection(
                         note = catchInfo.note,
@@ -352,16 +347,19 @@ fun NewCatchMasterScreen(
                     )
                 }
 
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(Spacing.sm))
             }
 
-            DefaultButtonFilled(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                text = stringResource(Res.string.save),
-                enabled = skipAvailable,
-                onClick = { onSave() }
+            BottomActionBar(
+                primaryText = stringResource(Res.string.save),
+                loading = loadingDialogState.value,
+                onClick = {
+                    if (skipAvailable) {
+                        onSave()
+                    } else {
+                        SnackbarManager.showMessage(Res.string.new_catch_skip_tutor)
+                    }
+                }
             )
 
             BannerAdvertView(
