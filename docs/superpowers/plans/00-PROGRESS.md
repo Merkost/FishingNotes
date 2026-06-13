@@ -44,7 +44,7 @@ Single source of truth for the whole-app UI/UX overhaul. Update the **Status** c
 | 09 | S4 Account & Finish | Profile & Edit Profile | 01–03 | `2026-06-12-09-profile.md` | ✅ |
 | 10 | S4 Account & Finish | Settings & About | 01–03 | `2026-06-12-10-settings-about.md` | ✅ |
 | 12 | S2 Primary | Map screen (BrandFab, floating controls, skeletons, drag handle) | 01–03 | `2026-06-12-12-map-screen.md` | ✅ |
-| 11 | S4 Account & Finish | Final sweep (delete legacy, a11y/consistency, full build) | 04–10, 12 | `2026-06-12-11-final-sweep.md` | ⬜ |
+| 11 | S4 Account & Finish | Final sweep (delete legacy, a11y/consistency, full build) | 04–10, 12 | `2026-06-12-11-final-sweep.md` | ✅ (tail surfaced) |
 
 > Plan 12 (Map) was added after the initial 11 so the Map tab — the app's start destination — gets a dedicated screen pass. **Total: 12 plans.**
 > Plan-authoring status (this planning round) is tracked separately below until all 12 docs land.
@@ -114,6 +114,7 @@ Resolve these when implementing Plans 01–03 (each consuming plan already has a
 ## Decisions / changes log
 | Date | Note |
 |---|---|
+| 2026-06-13 | **Plan 11 ✅ executed** (final sweep, subagent + controller verify): 7 commits (`7378c9e4..bacea528`). Grep-gated deletion of **provably-dead** legacy: `LoadingIconButtonOutlined`, `HeaderText`/`HeaderTextSecondary`/`PrimaryTextBold`/`SecondaryTextLight`/`SubtitleWithIcon`×2, `MyCard`/`MyCardNoPadding`/`MyClickableCard`/`DefaultCard`, `NoInternetView`/`ErrorView`, whole `utils/GoogleButton.kt` (−338 LOC). A11y/consistency fixes: removed stray `.uppercase()` (WeatherPlacePickerSheet, AppStateHolder), decorative `contentDescription=null` (FloatingActionButtons, PointerAnimation), tokenized off-grid dp (ExpandableSection, WeatherPlacePickerSheet, FloatingActionButtons). Regression-fence test guards 16 removed symbols. iOS compile ✅, full Android build + install ✅, tests green. **⚠️ The grep gates surfaced a real MIGRATION TAIL — see "Migration tail" below: 14 legacy wrapper symbols are still actively called by nested view files that their owning screen plans did not fully migrate.** Implementer correctly KEPT all still-referenced symbols (did not force-delete or hastily migrate). |
 | 2026-06-13 | **Plan 10 ✅ executed** (subagent-driven + controller consolidation): 8 commits (`dd8d9a36..` + dedup). SettingsScreen rebuilt on `SettingsSelectionDialog` (unbounded `<T>`, auto-dismiss selection feedback), `SelectableColorSwatch`/`ColorSwatchRow` (luminance-aware `contrastingCheckTint` + 5 tests), `ExpandableSettingsSection`/`SettingsNavLink`, `InlineBannerCard`, surface-colored `AppLargeTopBar`; About rebuilt on `AppHeroHeader`(logo: Painter)/`VersionLabel`/`LabeledIconButton`(Outlined). Deleted private legacy: `SettingsTopAppBar`, `ThemeColorCircle`, `Get{Temperature,Pressure,WindSpeed}Unit`, `GetDarkModeDialog`, `LottieStars`, `AboutAppAppBar` (grep-proven). **Controller caught + fixed a duplicate** `SettingsSelectionDialog<T>` overload: the Plan 03 file became dead (0 call sites) once SettingsScreen bound to the new SettingsComponents overload — deleted the dead file to kill the same-name generic ambiguity. Deviations: `AppLargeTopBar` (not `AppTopBar(large=true)`); `AppHeroHeader` takes `logo: Painter`; `LabeledIconButton` uses `label:`/`LabeledIconButtonStyle.Outlined`. compile both targets ✅, ContrastingCheckTint tests green, `installDebug` ✅. (Behind auth — code+build+test verified; screenshots pending user.) |
 | 2026-06-13 | **Plan 09 ✅ executed** (autonomous): 5 commits (`57164d64..59ac55e0`). Parameterized `register_date_value` + `edit_profile_photo` strings (EN+RU). EditProfileViewModel gains `pendingPhotoPath` + `onPhotoPicked` + upload-on-save via `SavePhotosUseCase` (real FileKit picker replaces the dead no-op badge); DI injects `savePhotos`. Profile/EditProfile rebuilt on shared components: `AvatarWithBadge` (content-slot + coil3 SubcomposeAsyncImage, KMP-safe), `StatRow`/`StatTile` + `StatTileSkeleton` (null→skeleton), `FormTextField`x3 + `PickerField` (Birthday — disabled-colors hack gone), `BottomActionBar` (in-button spinner, replaces blocking `ModalLoadingDialog`), surface-colored `AppTopBar` for both profile bars, `TextWithLeadingIcon` section headers, `Spacing` tokens + `spacedBy` (magic-number Spacer chain gone). Deleted bespoke `UserImage`/`SectionHeader`/`StatsRow`/`StatCard`/`EditProfileTopAppBar`. 3 new VM tests + register-date formatter test. compile both targets ✅, tests green, `installDebug` ✅. (Behind auth — code+build+test verified; screenshots pending user.) |
 | 2026-06-12 | Audit completed (20 agents). Spec written. 11-plan / 4-sprint structure approved. |
@@ -123,6 +124,31 @@ Resolve these when implementing Plans 01–03 (each consuming plan already has a
 | 2026-06-12 | **Plan 03 ✅ executed** (subagent-driven, 4 passes): 23 commits (`bb0e0d2b..5180b468`). 03A formatters/motion (+rounding fix `b394706e` — round not truncate, avoids 0.07→0.06), 03B chrome (AppTopBar surface, AppTabRow/TabbedPager, AppBottomNavigation on M3 NavigationBar + branded primaryContainer indicator + scale spring, AppScaffold overlay sync banner, BottomActionBar, EditBottomSheetScaffold +leadingAction, SortOptionsSheet, SettingsSelectionDialog<T> unbounded +optionLabel), 03C brand/content (BrandSurfaces, BrandFab+FabTokens, FloatingControls 48dp, Chips +test, InlineBannerCard tones, AvatarWithBadge 48dp, StatTile+skeleton), 03D charts/weather/about (ChartCard+WeatherTrendChart brand-tinted Vico 3.2.2, WeatherContent cells, AboutContent). Reviews controller-level (spend limit) ✅. compile both targets, tests pass, installDebug on 2 emulators. **Sprint 1 (Design System) COMPLETE.** |
 | 2026-06-12 | **Plan 02 ✅ executed** (subagent-driven): 12 commits (`4b94fa12..d515276d`). 02A primitives (AppButton/IconButton/Text/Card/SectionCard/FormTextField/PickerField) — spec ✅, quality review → 3 fixes (clickable SectionCard, IconSize tokens, testable AppTextStyle mapping) applied (`90b9a096`). 02B state system (EmptyState/ErrorState/LoadingState/InlineLoader/ListAppendLoader, Skeletons, ScreenStateContent<T>, PagedListScaffold<T>) — controller spec+quality review (reviewer subagent hit spend limit) ✅. commonMain+iOS compile, tests pass. Built ALONGSIDE legacy (no deletions). Minor follow-ups: PagedListScaffold animateItem; tokenize 64dp state illustration size. |
 | 2026-06-12 | **Plan 01 ✅ executed** (subagent-driven): 11 commits (`ad11d574..37efc7d5`). Tasks 1–6,10 (tokens/color/tests) + 7–9 (real Nunito weights/typography). Spec review ✅, code-quality review found 4 fixes (ReplaceWith imports, deprecation target, test naming/assertions) → applied (`624f8594`). commonMain+iOS compile, 9 token tests pass, `:androidApp:installDebug` on both emulators, Login screenshot confirms real Nunito weights + no regression. Deviations: `primaryBlueLightColorTransparent` kept public+@Deprecated (still referenced in TextFields.kt); OFL license placed in `composeResources/files/` not `font/`. |
+
+## Migration tail (surfaced by Plan 11 grep gates)
+The 12 plans refreshed every screen at the composition level and built + adopted the design system, but the final-sweep grep gates proved these **legacy wrapper symbols are still in active use** in nested view files (dialogs, sheets, list-item/section views) that the owning screen plans did not fully migrate. They are NOT broken — they're a parallel thin layer alongside the new `AppText`/`AppButton`/`EmptyState`. Eliminating them is a focused consolidation pass (~70 call sites, per-site `AppTextStyle`/`EmptyState`-variant judgment).
+
+| Legacy symbol | Replacement | Live callers (file:line) |
+|---|---|---|
+| `DefaultButton` | `AppButton(Tonal/Text)` | PhotoViews:190, Dialogs:95 |
+| `DefaultButtonFilled` | `AppButton(Filled)` | Dialogs:101, NewPlaceBottomSheet:262 |
+| `DefaultButtonOutlined` | `AppButton(Outlined)` | NewCatchSections:405,412, PhotoViews:218, DefaultViews:142 |
+| `DefaultButtonSecondaryLight` | `AppButton(Tonal)` | Dialogs:89 |
+| `DefaultIconButton` | `AppIconButton` | NotesViews:93 |
+| `BigText` | `AppText(Title/Headline)` | WeatherViews:78 |
+| `SubtitleText` | `AppText(Subtitle)` | MarkerInfoDialog:178,191,239,275 + |
+| `PrimaryText` | `AppText(Body)` | NotesViews, WeatherViews, WeatherScreen, MarkerInfoDialog, Dialogs (17) |
+| `PrimaryTextSmall` | `AppText(BodySmall)` | Dialogs:60 |
+| `SecondaryText` | `AppText(Secondary)` | NotesViews, Profile:152, WeatherScreen, WeatherViews, Counters (10) |
+| `SecondaryTextColored` | `AppText(Secondary,color)` | TextFields:102, NotesViews:118 |
+| `SecondaryTextSmall` | `AppText(Caption)` | NotesViews:199, AppBar:54, Catch:370 |
+| `SupportText` | `AppText(Caption)` | PlaceViews:56, NotesViews, DefaultViews (6) |
+| `DefaultCardClickable` | `SectionCard`/`AppCard(onClick)` | NotesViews:48,169,264,335 |
+| `NoContentView` | `EmptyState` preset | ProfileViews:120,153, Catch:347, PhotoViews:199,213,271,278, CatchScreenDialogs:387, DefaultViews:44 |
+
+Residual non-tokenized values (owning-plan blockers, accepted-for-now): color-picker palettes in `NewPlaceBottomSheet`/`SettingsComponents` (legitimately hardcoded swatches), `OnboardingScreen` gradient, `MapScreen`/`PlaceDetailsCardContent` accent colors; assorted off-grid `.dp` in nested view files. `.uppercase()` remains only inside the still-used legacy `DefaultButton*` (all-caps button styling) — disappears when those buttons migrate.
+
+**Decision pending:** whether to run a "Plan 13" consolidation pass to eliminate the tail (full design-system adoption) or accept the wrappers as a thin compatibility layer.
 
 ## Open questions / follow-ups
 - Source of real Nunito weight files (Google Fonts OFL) — confirm licensing/inclusion in repo (Plan 01).
