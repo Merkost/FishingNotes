@@ -1,36 +1,39 @@
 package com.mobileprism.fishing.ui.home.settings
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material.icons.filled.Savings
-import androidx.compose.runtime.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.mobileprism.fishing.ui.utils.AnimatedResource
-import fishing.shared.generated.resources.Res
-import fishing.shared.generated.resources.*
-import com.mobileprism.fishing.ui.home.views.DefaultAppBar
-import com.mobileprism.fishing.ui.home.views.MyClickableCard
-import com.mobileprism.fishing.ui.home.views.PrimaryText
-import com.mobileprism.fishing.ui.theme.customColors
+import com.mobileprism.fishing.ui.home.views.AppHeroHeader
+import com.mobileprism.fishing.ui.home.views.AppTopBar
+import com.mobileprism.fishing.ui.home.views.LabeledIconButton
+import com.mobileprism.fishing.ui.home.views.LabeledIconButtonStyle
+import com.mobileprism.fishing.ui.home.views.VersionLabel
+import com.mobileprism.fishing.ui.theme.Spacing
 import com.mobileprism.fishing.ui.utils.rememberAppVersion
 import com.mobileprism.fishing.ui.utils.rememberBillingLauncher
 import com.mobileprism.fishing.ui.utils.rememberOpenAppStore
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.*
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,105 +42,64 @@ fun AboutApp(upPress: () -> Unit) {
     val openAppStore = rememberOpenAppStore()
     val launchBilling = rememberBillingLauncher()
 
-    var isRotating by remember { mutableStateOf(0) }
-    val animationModifier = Modifier.graphicsLayer(
-        rotationX = animateFloatAsState(
-            if (isRotating % 2 == 0) 360f else 0f, tween(800)
-        ).value
-    )
-
     Scaffold(
-        topBar = { AboutAppAppBar(upPress) },
-        modifier = Modifier.fillMaxSize()
-    ) {
+        topBar = {
+            AppTopBar(
+                title = stringResource(Res.string.settings_about),
+                navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
+                onNavigationClick = upPress,
+            )
+        },
+        modifier = Modifier.fillMaxSize(),
+    ) { padding ->
         Column(
-            modifier = Modifier.padding(it)
+            modifier = Modifier
+                .padding(padding)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState(0)),
-            verticalArrangement = Arrangement.Center,
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = Spacing.screenH),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            Spacer(modifier = Modifier.height(Spacing.xxl))
+            AppHeroHeader(
+                title = stringResource(Res.string.app_name),
+                logo = painterResource(Res.drawable.ic_launcher),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            VersionLabel(
+                version = currentVersion ?: stringResource(Res.string.unknown_version),
+            )
+            Spacer(modifier = Modifier.height(Spacing.xl))
             Column(
-                modifier = Modifier
-                    .weight(6f)
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(Spacing.md),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Image(
-                    painter = painterResource(Res.drawable.ic_launcher),
-                    contentDescription = stringResource(Res.string.app_icon),
-                    modifier = Modifier.size(150.dp)
+                LabeledIconButton(
+                    label = stringResource(Res.string.leave_review),
+                    icon = Icons.Default.RateReview,
+                    onClick = { openAppStore() },
+                    style = LabeledIconButtonStyle.Filled,
+                    modifier = Modifier.fillMaxWidth(),
                 )
-                PrimaryText(text = stringResource(Res.string.app_name))
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(32.dp)
-                ) {
-                    Text(
-                        modifier = Modifier.padding(4.dp),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Normal,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.customColors.secondaryTextColor,
-                        text = stringResource(Res.string.current_app_version) +
-                                (currentVersion ?: stringResource(Res.string.unknown_version)),
-                        softWrap = true
+                if (launchBilling != null) {
+                    LabeledIconButton(
+                        label = stringResource(Res.string.app_donation),
+                        icon = Icons.Default.Savings,
+                        onClick = { launchBilling() },
+                        style = LabeledIconButtonStyle.Outlined,
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
-
             }
-            Column(
-                modifier = Modifier
-                    .weight(4f)
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-
-                OutlinedButton(onClick = { openAppStore() }) {
-                    Text(text = stringResource(Res.string.leave_review))
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Icon(Icons.Default.RateReview, Icons.Default.RateReview.name)
-                }
-
-                if (launchBilling != null) {
-                    OutlinedButton(onClick = { launchBilling() }) {
-                        Text(text = stringResource(Res.string.app_donation))
-                        Spacer(modifier = Modifier.size(8.dp))
-                        Icon(Icons.Default.Savings, Icons.Default.Savings.name)
-                    }
-                }
-
-                MyClickableCard(
-                    shape = RoundedCornerShape(12.dp),
-                    onClick = { isRotating++ },
-                    modifier = animationModifier.wrapContentSize()
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(4.dp).padding(8.dp)
-                    ) {
-                        Text(stringResource(Res.string.made_in_russia))
-                    }
-                }
-            }
+            Spacer(modifier = Modifier.height(Spacing.xl))
+            Text(
+                text = stringResource(Res.string.made_in_russia),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(modifier = Modifier.height(Spacing.xxl))
         }
     }
-}
-
-@Composable
-fun LottieStars(modifier: Modifier = Modifier) {
-    AnimatedResource("five_stars", modifier)
-}
-
-@Composable
-fun AboutAppAppBar(backPress: () -> Unit) {
-    DefaultAppBar(
-        title = stringResource(Res.string.settings_about),
-        onNavClick = { backPress() }
-    )
 }
