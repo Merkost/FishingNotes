@@ -1,27 +1,15 @@
 package com.mobileprism.fishing.ui.home.views
 
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.ui.theme.customColors
-import fishing.shared.generated.resources.Res
-import fishing.shared.generated.resources.place
-import org.jetbrains.compose.resources.DrawableResource
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun BigText(
@@ -37,31 +25,6 @@ fun BigText(
         color = textColor,
         text = text
     )
-}
-
-@Composable
-fun HeaderText(
-    modifier: Modifier = Modifier,
-    text: String,
-    textAlign: TextAlign = TextAlign.Start,
-    textColor: Color = MaterialTheme.colorScheme.onSurface
-) {
-    Text(
-        modifier = modifier,
-        style = MaterialTheme.typography.headlineSmall,
-        textAlign = textAlign,
-        color = textColor,
-        text = text
-    )
-}
-
-@Composable
-fun HeaderTextSecondary(
-    modifier: Modifier = Modifier,
-    text: String,
-    textAlign: TextAlign = TextAlign.Start
-) {
-    HeaderText(modifier, text, textAlign, MaterialTheme.customColors.secondaryTextColor)
 }
 
 @Composable
@@ -125,16 +88,6 @@ fun PrimaryTextSmall(
 }
 
 @Composable
-fun PrimaryTextBold(modifier: Modifier = Modifier, text: String) {
-    PrimaryText(
-        modifier = modifier,
-        fontWeight = FontWeight.SemiBold,
-        text = text,
-        maxLines = 1
-    )
-}
-
-@Composable
 fun SecondaryTextColored(
     modifier: Modifier = Modifier,
     text: String,
@@ -165,22 +118,6 @@ fun SecondaryText(
         modifier = modifier,
         style = MaterialTheme.typography.bodyLarge,
         color = textColor,
-        text = text,
-        maxLines = maxLines
-    )
-}
-
-@Composable
-fun SecondaryTextLight(
-    modifier: Modifier = Modifier, text: String,
-    maxLines: Int = Int.MAX_VALUE,
-    textAlign: TextAlign = TextAlign.Center,
-    textColor: Color = MaterialTheme.customColors.secondaryTextColor
-) {
-    SecondaryText(
-        textAlign = textAlign,
-        modifier = modifier,
-        textColor = textColor,
         text = text,
         maxLines = maxLines
     )
@@ -219,38 +156,3 @@ fun SupportText(
     )
 }
 
-@Composable
-fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: DrawableResource, text: String) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = stringResource(Res.string.place),
-            tint = MaterialTheme.customColors.secondaryTextColor,
-            modifier = Modifier
-                .padding(end = 8.dp)
-                .size(24.dp)
-        )
-        SubtitleText(text = text)
-    }
-}
-
-@Composable
-fun SubtitleWithIcon(modifier: Modifier = Modifier, icon: ImageVector, text: String) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = stringResource(Res.string.place),
-            tint = MaterialTheme.customColors.secondaryTextColor,
-            modifier = Modifier
-                .padding(end = 8.dp)
-                .size(24.dp)
-        )
-        SubtitleText(text = text)
-    }
-}
