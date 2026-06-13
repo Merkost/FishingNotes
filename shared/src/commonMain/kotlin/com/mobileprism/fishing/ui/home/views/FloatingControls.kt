@@ -10,7 +10,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -39,17 +41,46 @@ fun FloatingIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     iconSize: Dp = 22.dp,
+    tint: Color = Color.Unspecified,
+    iconModifier: Modifier = Modifier,
 ) {
+    val resolvedTint = if (tint == Color.Unspecified) MaterialTheme.colorScheme.onSurface else tint
     Box(
         modifier = modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp),
         contentAlignment = Alignment.Center,
     ) {
         IconButton(onClick = onClick) {
             Icon(
-                modifier = Modifier.size(iconSize),
+                modifier = Modifier.size(iconSize).then(iconModifier),
                 imageVector = icon,
                 contentDescription = contentDescription,
-                tint = MaterialTheme.colorScheme.onSurface,
+                tint = resolvedTint,
+            )
+        }
+    }
+}
+
+@Composable
+fun FloatingIconButton(
+    painter: Painter,
+    contentDescription: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    iconSize: Dp = 22.dp,
+    tint: Color = Color.Unspecified,
+    iconModifier: Modifier = Modifier,
+) {
+    val resolvedTint = if (tint == Color.Unspecified) MaterialTheme.colorScheme.onSurface else tint
+    Box(
+        modifier = modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        IconButton(onClick = onClick) {
+            Icon(
+                modifier = Modifier.size(iconSize).then(iconModifier),
+                painter = painter,
+                contentDescription = contentDescription,
+                tint = resolvedTint,
             )
         }
     }

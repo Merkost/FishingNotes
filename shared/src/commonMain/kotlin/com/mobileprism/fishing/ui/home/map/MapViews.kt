@@ -9,6 +9,8 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -83,6 +85,8 @@ import androidx.compose.ui.unit.sp
 import com.mobileprism.fishing.ui.utils.AnimatedResource
 import com.mobileprism.fishing.ui.home.SnackbarAction
 import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.home.views.FloatingControlSurface
+import com.mobileprism.fishing.ui.home.views.FloatingIconButton
 import com.mobileprism.fishing.ui.home.views.SettingsCheckbox
 import com.mobileprism.fishing.ui.utils.placeholder
 import fishing.shared.generated.resources.Res
@@ -92,6 +96,7 @@ import com.mobileprism.fishing.ui.utils.LocalAnalytics
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.views.SettingsHeader
 import com.mobileprism.fishing.ui.theme.secondaryFigmaColor
+import com.mobileprism.fishing.ui.theme.Spacing
 import com.mobileprism.fishing.ui.utils.rememberAppSettingsOpener
 import com.mobileprism.fishing.ui.utils.rememberLocationPermissionGranted
 import com.mobileprism.fishing.ui.utils.rememberPermissionsController
@@ -281,14 +286,13 @@ fun MyLocationButton(
         animationSpec = tween(250)
     )
 
-    MapControlPill(modifier = modifier) {
-        IconButton(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(containerColor.value),
+    FloatingControlSurface(modifier = modifier) {
+        FloatingIconButton(
+            icon = icon,
+            contentDescription = stringResource(Res.string.my_location),
+            tint = contentColor.value,
             onClick = {
-                if (effectiveState == MyLocationButtonState.Searching) return@IconButton
+                if (effectiveState == MyLocationButtonState.Searching) return@FloatingIconButton
                 when (locationPermissionGranted) {
                     true -> {
                         checkGPS(onClick, onGpsDisabled)
@@ -308,15 +312,8 @@ fun MyLocationButton(
                         }
                     }
                 }
-            }
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = stringResource(Res.string.my_location),
-                tint = contentColor.value,
-                modifier = Modifier.size(22.dp),
-            )
-        }
+            },
+        )
     }
 }
 
@@ -333,25 +330,16 @@ fun CompassButton(
         enter = fadeIn(),
         exit = fadeOut(animationSpec = tween(delayMillis = 3000, durationMillis = 1000))
     ) {
-        MapControlPill {
-            IconButton(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(14.dp)),
-                onClick = { onClick() }) {
-                Icon(
-                    painterResource(
-                        if (mapBearing.value > 356f ||
-                            mapBearing.value < 4f
-                        ) Res.drawable.north
-                        else Res.drawable.gps
-                    ),
-                    stringResource(Res.string.compass),
-                    modifier = Modifier
-                        .rotate(1f - mapBearing.value)
-                        .size(22.dp)
-                )
-            }
+        FloatingControlSurface {
+            FloatingIconButton(
+                painter = painterResource(
+                    if (mapBearing.value > 356f || mapBearing.value < 4f) Res.drawable.north
+                    else Res.drawable.gps
+                ),
+                contentDescription = stringResource(Res.string.compass),
+                iconModifier = Modifier.rotate(1f - mapBearing.value),
+                onClick = { onClick() },
+            )
         }
     }
 
@@ -362,18 +350,12 @@ fun MapZoomInButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    MapControlPill(modifier = modifier) {
-        IconButton(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(RoundedCornerShape(14.dp)),
-            onClick = { onClick() }) {
-            Icon(
-                Icons.Default.Add,
-                Icons.Default.Add.name,
-                modifier = Modifier.size(22.dp),
-            )
-        }
+    FloatingControlSurface(modifier = modifier) {
+        FloatingIconButton(
+            icon = Icons.Default.Add,
+            contentDescription = stringResource(Res.string.zoom_in),
+            onClick = { onClick() },
+        )
     }
 }
 
@@ -382,33 +364,12 @@ fun MapZoomOutButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    MapControlPill(modifier = modifier) {
-        IconButton(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(RoundedCornerShape(14.dp)),
-            onClick = { onClick() }) {
-            Icon(
-                Icons.Default.Remove,
-                Icons.Default.Remove.name,
-                modifier = Modifier.size(22.dp),
-            )
-        }
-    }
-}
-
-@Composable
-fun MapControlPill(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    Surface(
-        modifier = modifier.clip(RoundedCornerShape(14.dp)),
-        color = MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.92f),
-        shape = RoundedCornerShape(14.dp),
-        shadowElevation = 4.dp,
-    ) {
-        content()
+    FloatingControlSurface(modifier = modifier) {
+        FloatingIconButton(
+            icon = Icons.Default.Remove,
+            contentDescription = stringResource(Res.string.zoom_out),
+            onClick = { onClick() },
+        )
     }
 }
 
@@ -418,35 +379,21 @@ fun MapControlsLeftPill(
     onLayersClick: () -> Unit,
     onSettingsClick: () -> Unit,
 ) {
-    MapControlPill(modifier = modifier) {
+    FloatingControlSurface(modifier = modifier) {
         Row(
-            modifier = Modifier.padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(0.dp),
+            modifier = Modifier.padding(Spacing.xs),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.none),
         ) {
-            IconButton(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                onClick = onLayersClick
-            ) {
-                Icon(
-                    painterResource(Res.drawable.ic_baseline_layers_24),
-                    stringResource(Res.string.layers),
-                    modifier = Modifier.size(22.dp),
-                )
-            }
-            IconButton(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                onClick = onSettingsClick
-            ) {
-                Icon(
-                    Icons.Default.Settings,
-                    Icons.Default.Settings.name,
-                    modifier = Modifier.size(22.dp),
-                )
-            }
+            FloatingIconButton(
+                painter = painterResource(Res.drawable.ic_baseline_layers_24),
+                contentDescription = stringResource(Res.string.layers),
+                onClick = onLayersClick,
+            )
+            FloatingIconButton(
+                icon = Icons.Default.Settings,
+                contentDescription = stringResource(Res.string.map_settings),
+                onClick = onSettingsClick,
+            )
         }
     }
 }
