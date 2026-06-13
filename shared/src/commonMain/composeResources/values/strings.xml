@@ -17,6 +17,10 @@
     <string name="weight">Weight</string>
     <string name="sample_weight" translatable="false">0.1</string>
     <string name="kg">kg</string>
+    <string name="catch_summary_separator" translatable="false"> · </string>
+    <string name="fish_count_format">×%1$d</string>
+    <string name="completed">Completed</string>
+    <string name="weather_wind_direction">Wind direction</string>
     <string name="fishing_method">Fishing method</string>
     <string name="fish_rod">Fish rod</string>
     <string name="date">Date</string>
