@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
@@ -38,6 +39,7 @@ fun IconStatChip(
     icon: ImageVector,
     label: String,
     modifier: Modifier = Modifier,
+    iconRotationDeg: Float = 0f,
 ) {
     Surface(
         modifier = modifier,
@@ -50,8 +52,44 @@ fun IconStatChip(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier
+                    .size(16.dp)
+                    .let { if (iconRotationDeg != 0f) it.rotate(iconRotationDeg) else it },
                 imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = label.ifEmpty { EmptyStatValue },
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
+    }
+}
+
+@Composable
+fun IconStatChip(
+    iconPainter: androidx.compose.ui.graphics.painter.Painter,
+    label: String,
+    modifier: Modifier = Modifier,
+    iconRotationDeg: Float = 0f,
+) {
+    Surface(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.small,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                modifier = Modifier
+                    .size(16.dp)
+                    .let { if (iconRotationDeg != 0f) it.rotate(iconRotationDeg) else it },
+                painter = iconPainter,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )

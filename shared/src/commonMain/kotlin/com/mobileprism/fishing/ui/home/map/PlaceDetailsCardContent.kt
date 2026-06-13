@@ -6,9 +6,7 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -29,15 +26,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.mobileprism.fishing.model.mappers.getWeatherIconByName
-import com.mobileprism.fishing.ui.utils.placeholder
+import com.mobileprism.fishing.ui.components.SkeletonBox
+import com.mobileprism.fishing.ui.components.SkeletonLine
+import com.mobileprism.fishing.ui.home.views.IconStatChip
+import com.mobileprism.fishing.ui.theme.Elevation
+import com.mobileprism.fishing.ui.theme.Spacing
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.add_new_catch
 import fishing.shared.generated.resources.catches_plural
@@ -70,21 +69,21 @@ fun PlaceDetailsCardContent(
     val statsLoading = fishActivityPercent == null && windSpeedText == null
 
     Card(
-        shape = RoundedCornerShape(20.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        shape = MaterialTheme.shapes.large,
+        elevation = CardDefaults.cardElevation(defaultElevation = Elevation.bottomSheet),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         modifier = modifier
             .zIndex(1.0f)
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(8.dp)
+            .padding(Spacing.sm)
             .animateContentSize(animationSpec = tween(300, easing = LinearOutSlowInEasing)),
         onClick = onCardClick,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
+                .padding(Spacing.md),
         ) {
             PlaceDetailsHeader(
                 title = title,
@@ -96,7 +95,7 @@ fun PlaceDetailsCardContent(
                 showAddCatch = showAddCatch,
                 onAddCatchClick = onAddCatchClick,
             )
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Spacing.md))
             PlaceDetailsStatsRow(
                 statsLoading = statsLoading,
                 fishActivityPercent = fishActivityPercent,
@@ -133,16 +132,10 @@ private fun PlaceDetailsHeader(
                 overflow = TextOverflow.Ellipsis,
             )
             if (subtitleLoading) {
-                Box(
+                SkeletonLine(
                     modifier = Modifier
                         .fillMaxWidth(0.6f)
-                        .height(14.dp)
-                        .padding(top = 3.dp)
-                        .placeholder(
-                            visible = true,
-                            color = MaterialTheme.colorScheme.outlineVariant,
-                            shape = RoundedCornerShape(4.dp),
-                        ),
+                        .padding(top = Spacing.xxs),
                 )
             } else {
                 Row(
@@ -203,15 +196,10 @@ private fun PlaceDetailsHeader(
         }
 
         if (temperatureCelsius == null) {
-            Box(
-                modifier = Modifier
-                    .size(width = 40.dp, height = 28.dp)
-                    .padding(horizontal = 10.dp)
-                    .placeholder(
-                        visible = true,
-                        color = MaterialTheme.colorScheme.outlineVariant,
-                        shape = RoundedCornerShape(6.dp),
-                    ),
+            SkeletonBox(
+                width = 40.dp,
+                height = 28.dp,
+                modifier = Modifier.padding(horizontal = Spacing.md),
             )
         }
 
@@ -244,38 +232,31 @@ private fun PlaceDetailsStatsRow(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (statsLoading) {
             repeat(3) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(32.dp)
-                        .placeholder(
-                            visible = true,
-                            color = MaterialTheme.colorScheme.outlineVariant,
-                            shape = RoundedCornerShape(12.dp),
-                        ),
+                SkeletonBox(
+                    height = 32.dp,
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.weight(1f),
                 )
             }
         } else {
-            StatChip(
+            IconStatChip(
                 iconPainter = painterResource(Res.drawable.fish),
-                iconRotationDeg = 0f,
                 label = fishActivityPercent?.let { "$it%" } ?: "\u2014",
                 modifier = Modifier.weight(1f),
             )
-            StatChip(
+            IconStatChip(
                 iconPainter = painterResource(Res.drawable.ic_baseline_navigation_24),
                 iconRotationDeg = windRotationDeg,
                 label = windSpeedText ?: "\u2014",
                 modifier = Modifier.weight(1f),
             )
-            StatChip(
+            IconStatChip(
                 iconPainter = painterResource(Res.drawable.ic_add_catch),
-                iconRotationDeg = 0f,
                 label = stringResource(Res.string.catches_plural, catchesCount),
                 modifier = Modifier.weight(1f),
             )
@@ -283,39 +264,3 @@ private fun PlaceDetailsStatsRow(
     }
 }
 
-@Composable
-private fun StatChip(
-    iconPainter: androidx.compose.ui.graphics.painter.Painter,
-    iconRotationDeg: Float,
-    label: String,
-    modifier: Modifier = Modifier,
-) {
-    val chipColor = MaterialTheme.colorScheme.surfaceContainerHigh
-    val contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-    Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(chipColor)
-            .padding(horizontal = 10.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-    ) {
-        Icon(
-            painter = iconPainter,
-            contentDescription = null,
-            tint = contentColor,
-            modifier = Modifier
-                .size(16.dp)
-                .rotate(iconRotationDeg),
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = contentColor,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
-}

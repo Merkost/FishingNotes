@@ -38,6 +38,23 @@ fun SkeletonBox(
 }
 
 @Composable
+fun SkeletonBox(
+    height: Dp,
+    modifier: Modifier = Modifier,
+    shape: Shape = RoundedCornerShape(4.dp),
+) {
+    Box(
+        modifier = modifier
+            .height(height)
+            .placeholder(
+                visible = true,
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = shape,
+            )
+    )
+}
+
+@Composable
 fun SkeletonLine(
     modifier: Modifier = Modifier,
     height: Dp = 14.dp,
