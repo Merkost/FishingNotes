@@ -42,7 +42,7 @@ Single source of truth for the whole-app UI/UX overhaul. Update the **Status** c
 | 07 | S3 Create & Detail | New Catch flow | 01–03 | `2026-06-12-07-new-catch.md` | ✅ |
 | 08 | S3 Create & Detail | Detail screens (Place, Catch) | 01–03 | `2026-06-12-08-detail-place-catch.md` | ✅ |
 | 09 | S4 Account & Finish | Profile & Edit Profile | 01–03 | `2026-06-12-09-profile.md` | ✅ |
-| 10 | S4 Account & Finish | Settings & About | 01–03 | `2026-06-12-10-settings-about.md` | ⬜ |
+| 10 | S4 Account & Finish | Settings & About | 01–03 | `2026-06-12-10-settings-about.md` | ✅ |
 | 12 | S2 Primary | Map screen (BrandFab, floating controls, skeletons, drag handle) | 01–03 | `2026-06-12-12-map-screen.md` | ✅ |
 | 11 | S4 Account & Finish | Final sweep (delete legacy, a11y/consistency, full build) | 04–10, 12 | `2026-06-12-11-final-sweep.md` | ⬜ |
 
@@ -87,8 +87,8 @@ Every user-facing surface must be touched. Mark ✅ when its owning plan ships a
 | Catch detail | 08 | ⬜ |
 | Profile | 09 | ✅ |
 | Edit Profile | 09 | ✅ |
-| Settings | 10 | ⬜ |
-| About | 10 | ⬜ |
+| Settings | 10 | ✅ |
+| About | 10 | ✅ |
 
 > **Note:** Map screen components (floating controls, BrandFab, brand gradient, skeletons) are built in Plan 03; the Map screen's own adoption pass is **Plan 12**.
 
@@ -114,6 +114,7 @@ Resolve these when implementing Plans 01–03 (each consuming plan already has a
 ## Decisions / changes log
 | Date | Note |
 |---|---|
+| 2026-06-13 | **Plan 10 ✅ executed** (subagent-driven + controller consolidation): 8 commits (`dd8d9a36..` + dedup). SettingsScreen rebuilt on `SettingsSelectionDialog` (unbounded `<T>`, auto-dismiss selection feedback), `SelectableColorSwatch`/`ColorSwatchRow` (luminance-aware `contrastingCheckTint` + 5 tests), `ExpandableSettingsSection`/`SettingsNavLink`, `InlineBannerCard`, surface-colored `AppLargeTopBar`; About rebuilt on `AppHeroHeader`(logo: Painter)/`VersionLabel`/`LabeledIconButton`(Outlined). Deleted private legacy: `SettingsTopAppBar`, `ThemeColorCircle`, `Get{Temperature,Pressure,WindSpeed}Unit`, `GetDarkModeDialog`, `LottieStars`, `AboutAppAppBar` (grep-proven). **Controller caught + fixed a duplicate** `SettingsSelectionDialog<T>` overload: the Plan 03 file became dead (0 call sites) once SettingsScreen bound to the new SettingsComponents overload — deleted the dead file to kill the same-name generic ambiguity. Deviations: `AppLargeTopBar` (not `AppTopBar(large=true)`); `AppHeroHeader` takes `logo: Painter`; `LabeledIconButton` uses `label:`/`LabeledIconButtonStyle.Outlined`. compile both targets ✅, ContrastingCheckTint tests green, `installDebug` ✅. (Behind auth — code+build+test verified; screenshots pending user.) |
 | 2026-06-13 | **Plan 09 ✅ executed** (autonomous): 5 commits (`57164d64..59ac55e0`). Parameterized `register_date_value` + `edit_profile_photo` strings (EN+RU). EditProfileViewModel gains `pendingPhotoPath` + `onPhotoPicked` + upload-on-save via `SavePhotosUseCase` (real FileKit picker replaces the dead no-op badge); DI injects `savePhotos`. Profile/EditProfile rebuilt on shared components: `AvatarWithBadge` (content-slot + coil3 SubcomposeAsyncImage, KMP-safe), `StatRow`/`StatTile` + `StatTileSkeleton` (null→skeleton), `FormTextField`x3 + `PickerField` (Birthday — disabled-colors hack gone), `BottomActionBar` (in-button spinner, replaces blocking `ModalLoadingDialog`), surface-colored `AppTopBar` for both profile bars, `TextWithLeadingIcon` section headers, `Spacing` tokens + `spacedBy` (magic-number Spacer chain gone). Deleted bespoke `UserImage`/`SectionHeader`/`StatsRow`/`StatCard`/`EditProfileTopAppBar`. 3 new VM tests + register-date formatter test. compile both targets ✅, tests green, `installDebug` ✅. (Behind auth — code+build+test verified; screenshots pending user.) |
 | 2026-06-12 | Audit completed (20 agents). Spec written. 11-plan / 4-sprint structure approved. |
 | 2026-06-12 | Added Plan 12 (Map screen) → **12 plans total**. |
