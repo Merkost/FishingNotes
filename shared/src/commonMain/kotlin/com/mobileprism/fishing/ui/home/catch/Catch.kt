@@ -7,16 +7,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.ColorFilter
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.navigation.NavController
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
@@ -39,6 +39,7 @@ import com.mobileprism.fishing.domain.entity.weather.WindSpeedValues
 import com.mobileprism.fishing.ui.home.weather.stringRes
 import com.mobileprism.fishing.ui.utils.rememberMediaPickerLauncher
 import com.mobileprism.fishing.ui.viewmodels.UserCatchViewModel
+import com.mobileprism.fishing.ui.theme.Spacing
 import com.mobileprism.fishing.utils.Constants
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toTime
@@ -102,8 +103,6 @@ fun CatchInfoScreen(navController: NavController, catch: UserCatch) {
             sheetState = bottomSheetState,
             shape = Constants.modalBottomSheetCorners,
         ) {
-            Spacer(modifier = Modifier.height(1.dp))
-
             currentBottomSheet?.let { currentSheet ->
                 CatchModalBottomSheetContent(
                     currentScreen = currentSheet,
@@ -139,31 +138,30 @@ fun CatchInfoScreen(navController: NavController, catch: UserCatch) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CatchTopBar(navController: NavController, catch: UserCatch, onDeleteCatch: () -> Unit) {
     val userPreferences: UserPreferences = koinInject()
     val is12hTime by userPreferences.use12hTimeFormat.collectAsState(initial = false)
 
-    var menuOpened by remember { mutableStateOf(false) }
-
-    DefaultAppBar(
+    AppTopBar(
         title = stringResource(Res.string.user_catch),
         subtitle = catch.date.toDateTextMonth() + " " + catch.date.toTime(is12hTime),
-        onNavClick = { navController.popBackStack() }
-    ) {
-        IconButton(
-            modifier = Modifier.padding(horizontal = 4.dp),
-            onClick = { menuOpened = true }
-        ) {
-            Icon(imageVector = Icons.Outlined.MoreVert, Icons.Outlined.MoreVert.name)
-        }
-        DropdownMenu(expanded = menuOpened, onDismissRequest = { menuOpened = false }) {
-            DropdownMenuItem(
-                text = { Text(text = stringResource(Res.string.delete), maxLines = 1) },
-                onClick = { menuOpened = false; onDeleteCatch() }
+        navigationIcon = Icons.AutoMirrored.Filled.ArrowBack,
+        onNavigationClick = { navController.popBackStack() },
+        actions = {
+            AppBarOverflowMenu(
+                items = listOf(
+                    OverflowMenuItem(
+                        label = stringResource(Res.string.delete),
+                        onClick = onDeleteCatch,
+                        leadingIcon = Icons.Outlined.Delete,
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                )
             )
         }
-    }
+    )
 }
 
 @Composable
@@ -173,7 +171,7 @@ fun DeleteCatchDialog(
     onPositiveClick: () -> Unit
 ) {
     DefaultDialog(
-        primaryText = stringResource(Res.string.delete_catch_dialog).replace("%s", catch.fishType).replace("%1\$s", catch.fishType),
+        primaryText = stringResource(Res.string.delete_catch_dialog, catch.fishType),
         secondaryText = stringResource(Res.string.catch_delete_confirmantion),
         negativeButtonText = stringResource(Res.string.no),
         onNegativeClick = onDismiss,
@@ -205,9 +203,9 @@ fun CatchContent(
         modifier = modifier
             .verticalScroll(rememberScrollState())
             .fillMaxSize()
-            .padding(horizontal = 12.dp, vertical = 12.dp),
+            .padding(horizontal = Spacing.screenH, vertical = Spacing.md),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+        verticalArrangement = Arrangement.spacedBy(Spacing.sectionGap)
     ) {
 
         CatchTitleView(
@@ -258,36 +256,26 @@ fun CatchTitleView(
     catch: UserCatch,
     onClick: () -> Unit
 ) {
-
-    DefaultCardClickable(
+    SectionCard(
         modifier = modifier,
+        icon = painterResource(Res.drawable.ic_fish),
+        title = catch.fishType,
         onClick = onClick
     ) {
-        Column(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth()
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.xl)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                HeaderText(
-                    modifier = Modifier.weight(1f),
-                    text = catch.fishType
-                )
-                HeaderText(
-                    text = "${catch.fishWeight} ${stringResource(Res.string.kg)}"
-                )
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            SecondaryText(
-                text = "${stringResource(Res.string.amount)}: ${catch.fishAmount} " +
-                        stringResource(Res.string.pc)
+            MetricItem(
+                label = stringResource(Res.string.kg),
+                value = catch.fishWeight.toString()
+            )
+            MetricItem(
+                label = stringResource(Res.string.amount),
+                value = "${catch.fishAmount} ${stringResource(Res.string.pc)}"
             )
         }
     }
-
 }
 
 @ExperimentalComposeUiApi
@@ -311,53 +299,30 @@ fun WayOfFishingView(
     catch: UserCatch,
     onClick: () -> Unit
 ) {
-
-    DefaultCardClickable(
+    SectionCard(
         modifier = modifier,
-        onClick = { onClick() }
+        icon = painterResource(Res.drawable.ic_fishing_rod),
+        title = stringResource(Res.string.way_of_fishing),
+        onClick = onClick
     ) {
-        Column(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            SubtitleWithIcon(
-                icon = Res.drawable.ic_fishing_rod,
-                text = stringResource(Res.string.way_of_fishing)
-            )
-
-            SimpleUnderlineTextField(
-                modifier = Modifier.fillMaxWidth(),
-                text = if (catch.fishingRodType.isNotBlank()) {
-                    catch.fishingRodType
-                } else {
-                    stringResource(Res.string.no_rod)
-                },
+        Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+            LabeledValueRow(
                 label = stringResource(Res.string.fish_rod),
-                onClick = onClick
+                value = catch.fishingRodType.ifBlank { stringResource(Res.string.no_rod) },
+                onClick = onClick,
+                editContentDescription = stringResource(Res.string.edit)
             )
-
-            SimpleUnderlineTextField(
-                modifier = Modifier.fillMaxWidth(),
-                text = if (catch.fishingBait.isNotBlank()) {
-                    catch.fishingBait
-                } else {
-                    stringResource(Res.string.no_bait)
-                },
+            LabeledValueRow(
                 label = stringResource(Res.string.bait),
-                onClick = onClick
+                value = catch.fishingBait.ifBlank { stringResource(Res.string.no_bait) },
+                onClick = onClick,
+                editContentDescription = stringResource(Res.string.edit)
             )
-
-            SimpleUnderlineTextField(
-                modifier = Modifier.fillMaxWidth(),
-                text = if (catch.fishingLure.isNotBlank()) {
-                    catch.fishingLure
-                } else {
-                    stringResource(Res.string.no_lure)
-                },
+            LabeledValueRow(
                 label = stringResource(Res.string.lure),
-                onClick = onClick
+                value = catch.fishingLure.ifBlank { stringResource(Res.string.no_lure) },
+                onClick = onClick,
+                editContentDescription = stringResource(Res.string.edit)
             )
         }
     }
@@ -368,119 +333,74 @@ fun CatchWeatherView(
     modifier: Modifier = Modifier,
     catch: UserCatch
 ) {
-
     val weatherPrefs: WeatherPreferences = koinInject()
     val pressureUnit by weatherPrefs.getPressureUnit.collectAsState(PressureValues.mmHg)
     val temperatureUnit by weatherPrefs.getTemperatureUnit.collectAsState(TemperatureValues.C)
     val windSpeedUnit by weatherPrefs.getWindSpeedUnit.collectAsState(WindSpeedValues.metersps)
 
-    DefaultCard(
-        modifier = modifier
+    SectionCard(
+        modifier = modifier,
+        icon = painterResource(Res.drawable.weather_sunny),
+        title = stringResource(Res.string.weather)
     ) {
-        Column(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            SubtitleWithIcon(
-                icon = Res.drawable.weather_sunny,
-                text = stringResource(Res.string.weather)
-            )
-
-            // Primary weather row
-            Row(
+        if (catch.weatherPrimary.isBlank() && catch.weatherIcon.isBlank()) {
+            NoContentView(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .padding(horizontal = 2.dp),
-                    painter = painterResource(getWeatherIconByName(catch.weatherIcon)),
-                    contentDescription = stringResource(Res.string.weather)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Column {
-                    HeaderText(
-                        text = temperatureUnit.getTemperature(catch.weatherTemperature)
-                                + stringResource(temperatureUnit.stringRes)
-                    )
-                    SecondaryTextSmall(
-                        text = catch.weatherPrimary.replaceFirstChar { it.uppercase() }
-                    )
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                Column(horizontalAlignment = Alignment.End) {
-                    SecondaryText(
-                        text = stringResource(Res.string.moon_phase)
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(getMoonIconByPhase(catch.weatherMoonPhase)),
-                            contentDescription = stringResource(Res.string.moon_phase)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        PrimaryText(
-                            text = (catch.weatherMoonPhase * 100).toInt().toString()
-                                    + " " + stringResource(Res.string.percent)
-                        )
-                    }
-                }
-            }
-
-            HorizontalDivider()
-
-            // Pressure + Wind row
-            Row(modifier = Modifier.fillMaxWidth()) {
-                // Pressure column
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                text = stringResource(Res.string.no_description),
+                icon = painterResource(Res.drawable.weather_sunny)
+            )
+        } else {
+            Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    SecondaryText(text = stringResource(Res.string.pressure))
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Image(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(Res.drawable.ic_gauge),
-                            contentDescription = stringResource(Res.string.pressure),
-                            colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.tertiary)
+                    Image(
+                        modifier = Modifier.size(48.dp),
+                        painter = painterResource(getWeatherIconByName(catch.weatherIcon)),
+                        contentDescription = stringResource(Res.string.weather)
+                    )
+                    Spacer(modifier = Modifier.width(Spacing.sm))
+                    Column {
+                        MetricItem(
+                            label = stringResource(Res.string.weather),
+                            value = temperatureUnit.getTemperature(catch.weatherTemperature)
+                                    + stringResource(temperatureUnit.stringRes)
                         )
-                        Spacer(modifier = Modifier.width(2.dp))
-                        PrimaryText(
-                            text = pressureUnit.getPressureFromMmhg(
-                                catch.weatherPressure
-                            ) + " " + pressureUnit.name,
+                        SecondaryTextSmall(
+                            text = catch.weatherPrimary.replaceFirstChar { it.uppercase() }
                         )
                     }
+                    Spacer(modifier = Modifier.weight(1f))
+                    MetricItem(
+                        label = stringResource(Res.string.moon_phase),
+                        value = (catch.weatherMoonPhase * 100).toInt().toString()
+                                + " " + stringResource(Res.string.percent),
+                        icon = painterResource(getMoonIconByPhase(catch.weatherMoonPhase)),
+                        vertical = true
+                    )
                 }
-                // Wind column
-                Column(
-                    modifier = Modifier.weight(1f),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    SecondaryText(text = stringResource(Res.string.wind))
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Image(
-                            modifier = Modifier.size(24.dp),
-                            painter = painterResource(Res.drawable.ic_wind),
-                            contentDescription = stringResource(Res.string.wind),
-                        )
-                        Spacer(modifier = Modifier.width(2.dp))
-                        PrimaryText(
-                            text = windSpeedUnit.getWindSpeed(catch.weatherWindSpeed.toDouble())
-                                    + " " + windSpeedUnit.name
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(
-                            modifier = Modifier.rotate(catch.weatherWindDeg.toFloat()),
-                            painter = painterResource(Res.drawable.ic_baseline_navigation_24),
-                            contentDescription = stringResource(Res.string.wind),
-                        )
-                    }
+
+                HorizontalDivider()
+
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    MetricItem(
+                        modifier = Modifier.weight(1f),
+                        label = stringResource(Res.string.pressure),
+                        value = pressureUnit.getPressureFromMmhg(catch.weatherPressure)
+                                + " " + pressureUnit.name,
+                        icon = painterResource(Res.drawable.ic_gauge),
+                        iconTint = MaterialTheme.colorScheme.tertiary,
+                        vertical = true
+                    )
+                    MetricItem(
+                        modifier = Modifier.weight(1f),
+                        label = stringResource(Res.string.wind),
+                        value = windSpeedUnit.getWindSpeed(catch.weatherWindSpeed.toDouble())
+                                + " " + windSpeedUnit.name,
+                        icon = painterResource(Res.drawable.ic_wind),
+                        vertical = true
+                    )
                 }
             }
         }
