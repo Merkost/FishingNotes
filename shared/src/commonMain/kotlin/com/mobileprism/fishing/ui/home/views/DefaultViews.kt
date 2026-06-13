@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,7 +20,8 @@ import androidx.compose.ui.unit.dp
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.entity.common.Note
-import com.mobileprism.fishing.ui.theme.customColors
+import com.mobileprism.fishing.ui.theme.IconSize
+import com.mobileprism.fishing.ui.theme.Spacing
 import com.mobileprism.fishing.utils.time.toDate
 
 @Composable
@@ -61,19 +61,20 @@ fun NoContentView(
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(Spacing.xs),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
-            modifier = Modifier.size(32.dp),
+            modifier = Modifier.size(IconSize.lg),
             painter = icon,
             contentDescription = null,
-            tint = MaterialTheme.customColors.secondaryIconColor
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Text(
+        AppText(
             text = text,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.customColors.secondaryTextColor
+            style = AppTextStyle.Body,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
         )
     }
 }

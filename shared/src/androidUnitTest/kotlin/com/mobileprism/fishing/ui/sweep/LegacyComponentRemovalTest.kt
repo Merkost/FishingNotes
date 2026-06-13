@@ -25,6 +25,20 @@ class LegacyComponentRemovalTest {
         "fun LottieStars(",
         "fun MapLayersButton(",
         "fun MapSettingsButton(",
+        "fun BigText(",
+        "fun SubtitleText(",
+        "fun PrimaryText(",
+        "fun PrimaryTextSmall(",
+        "fun SecondaryText(",
+        "fun SecondaryTextColored(",
+        "fun SecondaryTextSmall(",
+        "fun SupportText(",
+        "fun DefaultButton(",
+        "fun DefaultButtonFilled(",
+        "fun DefaultButtonOutlined(",
+        "fun DefaultButtonSecondaryLight(",
+        "fun DefaultIconButton(",
+        "fun DefaultCardClickable(",
     )
 
     @Test
