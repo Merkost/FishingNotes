@@ -25,9 +25,8 @@ import com.mobileprism.fishing.domain.entity.weather.Weather
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.mappers.getMoonIconByPhase
 import com.mobileprism.fishing.model.mappers.getWeatherIconByName
-import com.mobileprism.fishing.ui.home.views.BigText
-import com.mobileprism.fishing.ui.home.views.PrimaryText
-import com.mobileprism.fishing.ui.home.views.SecondaryText
+import com.mobileprism.fishing.ui.home.views.AppText
+import com.mobileprism.fishing.ui.home.views.AppTextStyle
 import com.mobileprism.fishing.ui.home.views.WeatherMetric
 import com.mobileprism.fishing.ui.home.views.WeatherStatGrid
 import com.mobileprism.fishing.ui.theme.Spacing
@@ -65,20 +64,22 @@ fun PrimaryWeatherItemView(
                 tint = iconTint
             )
 
-            PrimaryText(
+            AppText(
+                text = weather.description.replaceFirstChar { it.uppercase() },
                 modifier = childModifier
                     .width(150.dp)
                     .padding(top = 4.dp),
-                text = weather.description.replaceFirstChar { it.uppercase() },
-                textColor = textTint,
+                style = AppTextStyle.Title,
+                color = textTint,
                 textAlign = TextAlign.Center
             )
         }
 
-        BigText(
-            modifier = childModifier.padding(bottom = 8.dp),
+        AppText(
             text = temperatureText(temperatureUnit, temperature),
-            textColor = textTint
+            modifier = childModifier.padding(bottom = 8.dp),
+            style = AppTextStyle.Display,
+            color = textTint
         )
     }
 }
@@ -163,10 +164,16 @@ fun DayTemperatureView(
         @Composable
         fun TemperatureColumn(label: String, value: Float) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                SecondaryText(text = label)
-                PrimaryText(
+                AppText(
+                    text = label,
+                    style = AppTextStyle.Body,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+                AppText(
                     modifier = Modifier.padding(top = 4.dp),
-                    text = temperatureText(temperatureUnit, value)
+                    text = temperatureText(temperatureUnit, value),
+                    style = AppTextStyle.Title
                 )
             }
         }
@@ -200,22 +207,29 @@ fun SunriseSunsetView(
                 painter = painterResource(Res.drawable.ic_sunrise_morning_svgrepo_com),
                 contentDescription = stringResource(Res.string.sunrise_sunset)
             )
-            PrimaryText(
+            AppText(
                 modifier = Modifier.padding(top = 8.dp),
-                text = sunrise.toTime(is12hTimeFormat)
+                text = sunrise.toTime(is12hTimeFormat),
+                style = AppTextStyle.Title
             )
         }
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            SecondaryText(text = stringResource(Res.string.daylight_hours))
-            PrimaryText(
+            AppText(
+                text = stringResource(Res.string.daylight_hours),
+                style = AppTextStyle.Body,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+            AppText(
                 modifier = Modifier.padding(top = 8.dp),
                 text = calculateDaylightTime(
                     sunrise = sunrise,
                     sunset = sunset,
                     hoursLabel = stringResource(Res.string.hours),
                     minutesLabel = stringResource(Res.string.minutes)
-                )
+                ),
+                style = AppTextStyle.Title
             )
         }
 
@@ -224,9 +238,10 @@ fun SunriseSunsetView(
                 painter = painterResource(Res.drawable.ic_sunset_svgrepo_com),
                 contentDescription = stringResource(Res.string.sunrise_sunset)
             )
-            PrimaryText(
+            AppText(
                 modifier = Modifier.padding(top = 8.dp),
-                text = sunset.toTime(is12hTimeFormat)
+                text = sunset.toTime(is12hTimeFormat),
+                style = AppTextStyle.Title
             )
         }
     }
@@ -291,9 +306,12 @@ fun MoonPhaseView(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        SecondaryText(
+        AppText(
+            text = stringResource(Res.string.moon_phase),
             modifier = Modifier.padding(horizontal = 8.dp),
-            text = stringResource(Res.string.moon_phase)
+            style = AppTextStyle.Body,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
         )
         Icon(
             modifier = Modifier
@@ -302,8 +320,9 @@ fun MoonPhaseView(
             painter = painterResource(getMoonIconByPhase(moonPhase)),
             contentDescription = stringResource(Res.string.moon_phase)
         )
-        PrimaryText(
-            text = percentText(moonPhaseToPercent(moonPhase))
+        AppText(
+            text = percentText(moonPhaseToPercent(moonPhase)),
+            style = AppTextStyle.Title
         )
     }
 }

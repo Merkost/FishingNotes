@@ -53,7 +53,12 @@ fun PlaceTitleView(
         leadingIconContentDescription = stringResource(Res.string.place),
         title = place.title,
         subtitle = {
-            SupportText(text = place.dateOfCreation.toDateTextMonth())
+            AppText(
+                text = place.dateOfCreation.toDateTextMonth(),
+                style = AppTextStyle.BodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
+            )
         },
         metric = {
             ItemCounter(

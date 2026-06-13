@@ -187,12 +187,13 @@ fun PhotosView(
                                 )
                             }
                         }
-                        DefaultButton(
+                        AppButton(
+                            text = stringResource(Res.string.edit),
+                            onClick = onEditClick,
                             modifier = Modifier
                                 .align(Alignment.End)
                                 .padding(top = 8.dp),
-                            text = stringResource(Res.string.edit),
-                            onClick = onEditClick
+                            style = AppButtonStyle.Text,
                         )
                     }
                 } else {
@@ -215,10 +216,11 @@ fun PhotosView(
                         text = stringResource(Res.string.no_photos_added),
                         icon = painterResource(Res.drawable.ic_no_photos)
                     )
-                    DefaultButtonOutlined(
+                    AppButton(
                         text = stringResource(Res.string.add_photo),
-                        icon = painterResource(Res.drawable.ic_baseline_add_photo_alternate_24),
-                        onClick = onEditClick
+                        onClick = onEditClick,
+                        style = AppButtonStyle.Outlined,
+                        leadingIcon = painterResource(Res.drawable.ic_baseline_add_photo_alternate_24),
                     )
                 }
             }

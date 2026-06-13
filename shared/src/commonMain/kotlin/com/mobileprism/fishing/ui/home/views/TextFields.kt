@@ -99,11 +99,13 @@ fun SimpleUnderlineTextField(
                 }
         )
         helperText?.let {
-            SecondaryTextColored(
+            AppText(
                 modifier = Modifier
                     .padding(top = 4.dp, end = 8.dp)
                     .align(Alignment.End),
-                text = it
+                text = it,
+                style = AppTextStyle.Caption,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

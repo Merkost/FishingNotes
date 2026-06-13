@@ -9,8 +9,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import com.mobileprism.fishing.ui.theme.Spacing
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -38,11 +38,11 @@ fun DefaultDialog(
         onDismissRequest = onDismiss,
         title = primaryText?.let {
             {
-                PrimaryText(
+                AppText(
                     modifier = Modifier.fillMaxWidth(),
                     text = primaryText,
+                    style = AppTextStyle.Title,
                     textAlign = textAlign,
-                    fontWeight = FontWeight.SemiBold
                 )
             }
         },
@@ -57,17 +57,18 @@ fun DefaultDialog(
                 }
             ) {
                 if (secondaryText != null) {
-                    PrimaryTextSmall(
+                    AppText(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 2.dp),
                         text = secondaryText,
+                        style = AppTextStyle.BodySmall,
                         textAlign = textAlign,
                     )
                 }
 
                 content?.let {
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(Spacing.lg))
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -86,21 +87,24 @@ fun DefaultDialog(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 onNeutralClick?.let {
-                    DefaultButtonSecondaryLight(
+                    AppButton(
                         text = neutralButtonText,
-                        onClick = onNeutralClick
+                        onClick = onNeutralClick,
+                        style = AppButtonStyle.Text,
                     )
                 }
                 onNegativeClick?.let {
-                    DefaultButton(
+                    AppButton(
                         text = negativeButtonText,
-                        onClick = onNegativeClick
+                        onClick = onNegativeClick,
+                        style = AppButtonStyle.Text,
                     )
                 }
                 onPositiveClick?.let {
-                    DefaultButtonFilled(
+                    AppButton(
                         text = positiveButtonText,
-                        onClick = onPositiveClick
+                        onClick = onPositiveClick,
+                        style = AppButtonStyle.Filled,
                     )
                 }
             }
@@ -136,9 +140,10 @@ fun ModalLoadingDialog(
                     CircularProgressIndicator(
                         modifier = Modifier.size(64.dp)
                     )
-                    PrimaryText(
+                    AppText(
                         text = text,
-                        textColor = MaterialTheme.colorScheme.onSurface
+                        style = AppTextStyle.Title,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                     if (progress != null) {
                         LinearProgressIndicator(

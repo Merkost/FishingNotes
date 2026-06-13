@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import fishing.shared.generated.resources.Res
@@ -371,9 +372,11 @@ fun HourlyWeatherItem(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        SecondaryText(
+        AppText(
             text = timeTitle,
-            textColor = color
+            style = AppTextStyle.Body,
+            color = color,
+            textAlign = TextAlign.Center
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(2.dp),
@@ -384,9 +387,10 @@ fun HourlyWeatherItem(
                 painter = painterResource(getWeatherIconByName(forecast.weather.firstOrNull()?.icon ?: "")),
                 contentDescription = null,
             )
-            PrimaryText(
+            AppText(
                 text = temperatureText(temperatureUnit, forecast.temperature),
-                textColor = color
+                style = AppTextStyle.Title,
+                color = color
             )
         }
 
@@ -394,9 +398,10 @@ fun HourlyWeatherItem(
             horizontalArrangement = Arrangement.spacedBy(2.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            PrimaryText(
+            AppText(
                 text = windSpeedText(windSpeedUnit, forecast.windSpeed.toDouble()),
-                textColor = color
+                style = AppTextStyle.Title,
+                color = color
             )
             Icon(
                 modifier = Modifier

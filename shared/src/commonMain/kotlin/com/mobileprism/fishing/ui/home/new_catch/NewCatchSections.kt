@@ -35,7 +35,9 @@ import com.mobileprism.fishing.ui.components.DateTimePickerField
 import com.mobileprism.fishing.ui.components.ExpandableSection
 import com.mobileprism.fishing.ui.components.StepperField
 import com.mobileprism.fishing.ui.home.SnackbarManager
-import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
+import com.mobileprism.fishing.ui.home.views.AppButton
+import com.mobileprism.fishing.ui.home.views.AppButtonStyle
+import com.mobileprism.fishing.ui.theme.IconSize
 import com.mobileprism.fishing.ui.home.views.MaxCounterView
 import com.mobileprism.fishing.ui.home.views.NewCatchPhotoView
 import com.mobileprism.fishing.ui.theme.Spacing
@@ -251,7 +253,7 @@ fun WeatherSection(
                     painter = painterResource(Res.drawable.ic_no_internet),
                     contentDescription = null,
                     tint = MaterialTheme.customColors.secondaryIconColor,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(IconSize.sm)
                 )
             }
 
@@ -402,16 +404,18 @@ fun PhotosSection(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            DefaultButtonOutlined(
+            AppButton(
                 text = stringResource(Res.string.gallery),
-                icon = painterResource(Res.drawable.ic_baseline_add_photo_alternate_24),
+                style = AppButtonStyle.Outlined,
+                leadingIcon = painterResource(Res.drawable.ic_baseline_add_photo_alternate_24),
                 enabled = internetConnectionState is ConnectionState.Available,
                 onClick = { mediaPicker.launchGallery() }
             )
             Spacer(Modifier.width(Spacing.sm))
-            DefaultButtonOutlined(
+            AppButton(
                 text = stringResource(Res.string.camera),
-                icon = painterResource(Res.drawable.ic_baseline_photo_camera_24),
+                style = AppButtonStyle.Outlined,
+                leadingIcon = painterResource(Res.drawable.ic_baseline_photo_camera_24),
                 onClick = { mediaPicker.launchCamera() }
             )
         }

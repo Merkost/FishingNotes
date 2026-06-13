@@ -30,8 +30,9 @@ import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.ui.MainDestinations
+import com.mobileprism.fishing.ui.home.views.AppText
+import com.mobileprism.fishing.ui.home.views.AppTextStyle
 import com.mobileprism.fishing.ui.home.views.AvatarWithBadge
-import com.mobileprism.fishing.ui.home.views.SecondaryText
 import com.mobileprism.fishing.ui.home.views.StatRow
 import com.mobileprism.fishing.ui.home.views.StatTile
 import com.mobileprism.fishing.ui.home.views.StatTileSkeleton
@@ -149,8 +150,11 @@ private fun UserNameSection(user: User) {
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
         )
-        SecondaryText(
-            text = stringResource(Res.string.register_date_value, user.registerDate.toDateTextMonth())
+        AppText(
+            text = stringResource(Res.string.register_date_value, user.registerDate.toDateTextMonth()),
+            style = AppTextStyle.Body,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
         )
     }
 }

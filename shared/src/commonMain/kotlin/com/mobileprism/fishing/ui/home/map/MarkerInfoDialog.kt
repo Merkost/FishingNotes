@@ -51,8 +51,9 @@ import com.mobileprism.fishing.domain.entity.weather.CurrentWeatherFree
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
 import com.mobileprism.fishing.ui.HomeTabs
 import com.mobileprism.fishing.ui.MainDestinations
-import com.mobileprism.fishing.ui.home.views.PrimaryText
-import com.mobileprism.fishing.ui.home.views.SubtitleText
+import com.mobileprism.fishing.ui.home.views.AppText
+import com.mobileprism.fishing.ui.home.views.AppTextStyle
+import com.mobileprism.fishing.ui.theme.Spacing
 import com.mobileprism.fishing.domain.entity.weather.WindSpeedValues
 import com.mobileprism.fishing.ui.home.weather.stringRes
 import com.mobileprism.fishing.utils.Constants
@@ -145,12 +146,13 @@ fun MarkerInfoDialog(
                             }
                         }
 
-                        PrimaryText(
+                        AppText(
                             modifier = Modifier.weight(1f),
                             text = when {
                                 marker.title.isNotEmpty() -> marker.title
                                 else -> stringResource(Res.string.no_name_place)
                             } + "",
+                            style = AppTextStyle.Title,
                             maxLines = 2,
                         )
 
@@ -175,7 +177,7 @@ fun MarkerInfoDialog(
                             .padding(top = 4.dp, start = 64.dp, end = 16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        SubtitleText(
+                        AppText(
                             modifier = Modifier
                                 .weight(1f)
                                 .animateContentSize(
@@ -185,10 +187,12 @@ fun MarkerInfoDialog(
                                     )
                                 ),
                             text = address,
+                            style = AppTextStyle.Subtitle,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1
                         )
 
-                        SubtitleText(
+                        AppText(
                             modifier = Modifier
                                 .animateContentSize(
                                     animationSpec = tween(
@@ -198,6 +202,8 @@ fun MarkerInfoDialog(
                                 )
                                 .padding(start = 8.dp),
                             text = distance ?: "",
+                            style = AppTextStyle.Subtitle,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                         )
                     }
@@ -223,7 +229,7 @@ fun MarkerInfoDialog(
                                     )
                                 ),
                             horizontalArrangement = Arrangement.spacedBy(
-                                6.dp,
+                                Spacing.sm,
                                 Alignment.CenterHorizontally
                             ),
                             verticalAlignment = Alignment.CenterVertically,
@@ -233,11 +239,13 @@ fun MarkerInfoDialog(
                                 contentDescription = stringResource(Res.string.fish_desc),
                                 modifier = Modifier
                                     .size(45.dp)
-                                    .padding(6.dp),
+                                    .padding(Spacing.sm),
                                 tint = if (fishActivity == null) MaterialTheme.colorScheme.outlineVariant else MaterialTheme.colorScheme.primary
                             )
-                            SubtitleText(
+                            AppText(
                                 text = if (fishActivity != null) fishActivity.toString() + "%" else "",
+                                style = AppTextStyle.Subtitle,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
 
@@ -258,7 +266,7 @@ fun MarkerInfoDialog(
                                     tween(durationMillis = 300, easing = LinearOutSlowInEasing)
                                 ),
                             horizontalArrangement = Arrangement.spacedBy(
-                                6.dp,
+                                Spacing.sm,
                                 Alignment.CenterHorizontally
                             ),
                             verticalAlignment = Alignment.CenterVertically,
@@ -272,9 +280,11 @@ fun MarkerInfoDialog(
                             }
 
                             currentWeather?.let {
-                                SubtitleText(
+                                AppText(
                                     text = windUnit.getWindSpeed(it.wind_speed) + " " +
-                                            stringResource(windUnit.stringRes)
+                                            stringResource(windUnit.stringRes),
+                                    style = AppTextStyle.Subtitle,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }

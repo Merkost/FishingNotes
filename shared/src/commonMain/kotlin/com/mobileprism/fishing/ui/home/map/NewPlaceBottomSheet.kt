@@ -46,7 +46,8 @@ import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.domain.entity.raw.RawMapMarker
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.UiState
-import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
+import com.mobileprism.fishing.ui.home.views.AppButton
+import com.mobileprism.fishing.ui.home.views.AppButtonStyle
 import com.mobileprism.fishing.ui.utils.ColorGrid
 import com.mobileprism.fishing.utils.ValidationUtils
 import com.mobileprism.fishing.viewmodels.MapViewModel
@@ -259,8 +260,9 @@ fun NewPlaceBottomSheetContent(
                 )
                 Spacer(Modifier.width(12.dp))
             }
-            DefaultButtonFilled(
+            AppButton(
                 text = stringResource(Res.string.save),
+                style = AppButtonStyle.Filled,
                 enabled = saveEnabled,
                 onClick = {
                     val trimmedTitle = titleValue.trim()

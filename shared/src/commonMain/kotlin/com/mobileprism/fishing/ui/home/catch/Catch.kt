@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
@@ -367,8 +368,11 @@ fun CatchWeatherView(
                             value = temperatureUnit.getTemperature(catch.weatherTemperature)
                                     + stringResource(temperatureUnit.stringRes)
                         )
-                        SecondaryTextSmall(
-                            text = catch.weatherPrimary.replaceFirstChar { it.uppercase() }
+                        AppText(
+                            text = catch.weatherPrimary.replaceFirstChar { it.uppercase() },
+                            style = AppTextStyle.BodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
                         )
                     }
                     Spacer(modifier = Modifier.weight(1f))

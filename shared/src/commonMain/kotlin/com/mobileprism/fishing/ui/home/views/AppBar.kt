@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import fishing.shared.generated.resources.Res
@@ -51,9 +52,11 @@ fun DefaultAppBar(
                     style = MaterialTheme.typography.titleLarge,
                 )
                 if (subtitle != null) {
-                    SecondaryTextSmall(
+                    AppText(
                         text = subtitle,
-                        textColor = contentColor.copy(alpha = 0.8f)
+                        style = AppTextStyle.BodySmall,
+                        color = contentColor.copy(alpha = 0.8f),
+                        textAlign = TextAlign.Center
                     )
                 }
             }

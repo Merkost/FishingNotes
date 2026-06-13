@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
 import com.mobileprism.fishing.ui.theme.customColors
@@ -39,10 +40,11 @@ fun MaxCounterView(
                 contentDescription = null
             )
         }
-        SecondaryText(
+        AppText(
             text = "$count/$maxCount",
-            textColor = tint.value
-
+            style = AppTextStyle.Body,
+            color = tint.value,
+            textAlign = TextAlign.Center
         )
 
     }

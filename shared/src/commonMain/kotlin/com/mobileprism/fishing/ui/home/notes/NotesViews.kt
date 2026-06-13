@@ -24,9 +24,9 @@ import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.views.*
+import com.mobileprism.fishing.ui.theme.IconSize
 import com.mobileprism.fishing.ui.theme.LocalColors
 import com.mobileprism.fishing.ui.theme.cardColor
-import com.mobileprism.fishing.ui.theme.customColors
 import com.mobileprism.fishing.ui.utils.placeholder
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toTime
@@ -45,9 +45,10 @@ fun ItemUserPlace(
     navigateToMap: () -> Unit,
 ) {
 
-    DefaultCardClickable(
+    AppCard(
         modifier = modifier.padding(bottom = 4.dp),
-        onClick = { userPlaceClicked(place) }
+        onClick = { userPlaceClicked(place) },
+        contentPadding = 0.dp,
     ) {
         Row(
             modifier = Modifier
@@ -68,18 +69,22 @@ fun ItemUserPlace(
                     .weight(1f)
                     .padding(start = 8.dp, end = 8.dp)
             ) {
-                PrimaryText(
+                AppText(
                     modifier = childModifier,
                     text = place.title,
+                    style = AppTextStyle.Title,
                 )
 
                 Row(
                     modifier = Modifier.padding(top = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    SupportText(
+                    AppText(
                         modifier = childModifier,
-                        text = place.dateOfCreation.toDateTextMonth()
+                        text = place.dateOfCreation.toDateTextMonth(),
+                        style = AppTextStyle.BodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
                     )
 
                     ItemCounter(
@@ -90,13 +95,13 @@ fun ItemUserPlace(
                 }
             }
 
-            DefaultIconButton(
-                childModifier = childModifier,
+            AppIconButton(
+                modifier = childModifier,
                 icon = painterResource(Res.drawable.ic_place_on_map),
                 contentDescription = stringResource(Res.string.show_on_map),
                 tint = if (!place.visible) LocalColors.current.secondaryTextColor
                         else MaterialTheme.colorScheme.onSurface,
-                onClick = { navigateToMap() }
+                onClick = { navigateToMap() },
             )
         }
     }
@@ -115,10 +120,11 @@ fun ItemDate(text: String) {
             modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
             shape = RoundedCornerShape(24.dp), color = cardColor
         ) {
-            SecondaryTextColored(
+            AppText(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                 text = text,
-                color = MaterialTheme.colorScheme.inverseOnSurface
+                style = AppTextStyle.BodySmall,
+                color = MaterialTheme.colorScheme.inverseOnSurface,
             )
         }
     }
@@ -166,9 +172,10 @@ fun CatchItemContent(
     showPlace: Boolean = true,
     onClick: () -> Unit,
 ) {
-    DefaultCardClickable(
+    AppCard(
         modifier = modifier.padding(bottom = 4.dp),
         onClick = onClick,
+        contentPadding = 0.dp,
     ) {
         Column(
             modifier = Modifier
@@ -179,29 +186,34 @@ fun CatchItemContent(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                PrimaryText(
+                AppText(
                     modifier = Modifier
                         .weight(1f)
                         .padding(start = 8.dp, end = 16.dp)
                         .then(childModifier),
                     text = fishType,
-                    maxLines = 1
+                    style = AppTextStyle.Title,
+                    maxLines = 1,
                 )
 
-                PrimaryText(
+                AppText(
                     modifier = Modifier
                         .padding(end = 8.dp)
                         .then(childModifier),
-                    text = "$fishWeight ${stringResource(Res.string.kg)}"
+                    text = "$fishWeight ${stringResource(Res.string.kg)}",
+                    style = AppTextStyle.Title,
                 )
             }
 
-            SecondaryTextSmall(
+            AppText(
                 modifier = Modifier
                     .padding(top = 4.dp, start = 8.dp)
                     .then(childModifier),
                 text = "${stringResource(Res.string.amount)}: $fishAmount" +
-                        " ${stringResource(Res.string.pc)}"
+                        " ${stringResource(Res.string.pc)}",
+                style = AppTextStyle.BodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
             )
 
             Row(
@@ -213,22 +225,23 @@ fun CatchItemContent(
                 if (showPlace) {
                     Icon(
                         modifier = Modifier
-                            .size(24.dp)
+                            .size(IconSize.md)
                             .padding(start = 8.dp),
                         painter = painterResource(Res.drawable.ic_baseline_location_on_24),
                         contentDescription = stringResource(Res.string.location),
                         tint = MaterialTheme.colorScheme.outline
                     )
 
-                    SecondaryText(
+                    AppText(
                         modifier = Modifier
                             .weight(1f)
                             .padding(start = 8.dp, end = 8.dp)
                             .then(childModifier),
                         text = placeTitle,
+                        style = AppTextStyle.Body,
+                        color = MaterialTheme.colorScheme.outline,
                         textAlign = TextAlign.Start,
                         maxLines = 1,
-                        textColor = MaterialTheme.colorScheme.outline
                     )
                 } else {
                     Spacer(modifier = Modifier.weight(1f))
@@ -242,11 +255,14 @@ fun CatchItemContent(
                     icon = Res.drawable.ic_baseline_photo_24,
                 )
 
-                SupportText(
+                AppText(
                     modifier = Modifier
                         .padding(end = 8.dp)
                         .then(childModifier),
-                    text = timeText
+                    text = timeText,
+                    style = AppTextStyle.BodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
                 )
             }
         }
@@ -261,9 +277,10 @@ fun PlaceItemSkeleton(modifier: Modifier = Modifier) {
         shape = RoundedCornerShape(8.dp),
     )
 
-    DefaultCardClickable(
+    AppCard(
         modifier = modifier.padding(bottom = 4.dp),
-        onClick = {}
+        onClick = {},
+        contentPadding = 0.dp,
     ) {
         Row(
             modifier = Modifier
@@ -332,9 +349,10 @@ fun CatchItemSkeleton(modifier: Modifier = Modifier) {
         shape = RoundedCornerShape(8.dp),
     )
 
-    DefaultCardClickable(
+    AppCard(
         modifier = modifier.padding(bottom = 4.dp),
-        onClick = {}
+        onClick = {},
+        contentPadding = 0.dp,
     ) {
         Column(
             modifier = Modifier
@@ -415,11 +433,16 @@ fun ItemCounter(
     if (count.toInt() == 0) return
     Row(modifier = modifier) {
         Icon(
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(IconSize.md),
             tint = tint,
             painter = painterResource(icon),
             contentDescription = null,
         )
-        SupportText(text = stringResource(Res.string.item_count_format, count.toInt()))
+        AppText(
+            text = stringResource(Res.string.item_count_format, count.toInt()),
+            style = AppTextStyle.BodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+        )
     }
 }
