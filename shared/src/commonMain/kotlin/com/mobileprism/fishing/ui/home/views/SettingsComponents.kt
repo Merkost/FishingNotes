@@ -64,12 +64,12 @@ fun SettingsGroup(
             text = title,
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 32.dp, bottom = 8.dp)
+            modifier = Modifier.padding(start = Spacing.xxl, bottom = Spacing.sm)
         )
         Surface(
             shape = MaterialTheme.shapes.extraLarge,
             color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+            modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.md)
         ) {
             Column {
                 content()
@@ -91,7 +91,7 @@ fun SettingsMenuLink(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = Spacing.md, vertical = Spacing.md),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (icon != null) {
@@ -101,7 +101,7 @@ fun SettingsMenuLink(
                 modifier = Modifier.size(24.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(Spacing.md))
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -118,7 +118,7 @@ fun SettingsMenuLink(
             }
         }
         if (trailing != null) {
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(Spacing.md))
             trailing()
         }
     }
@@ -151,8 +151,8 @@ fun SettingsSwitch(
 @Composable
 fun SettingsDivider() {
     HorizontalDivider(
-        modifier = Modifier.padding(start = 56.dp),
-        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+        modifier = Modifier.padding(start = Spacing.xxxl + Spacing.sm),
+        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = Emphasis.divider)
     )
 }
 
@@ -191,12 +191,12 @@ fun SettingsCheckbox(
         color = MaterialTheme.colorScheme.surface,
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(Spacing.md),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (icon != null) {
                 icon()
-                Spacer(modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.size(Spacing.md))
             }
             Column(modifier = Modifier.weight(1f)) {
                 title()
