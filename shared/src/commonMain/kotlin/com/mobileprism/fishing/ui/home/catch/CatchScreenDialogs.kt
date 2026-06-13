@@ -4,54 +4,47 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.components.StepperField
-import com.mobileprism.fishing.ui.home.views.DefaultButton
-import com.mobileprism.fishing.ui.theme.Spacing
-import com.mobileprism.fishing.ui.home.views.DefaultButtonFilled
-import com.mobileprism.fishing.ui.home.views.DefaultButtonOutlined
+import com.mobileprism.fishing.ui.home.views.AppIconButton
 import com.mobileprism.fishing.ui.home.views.DefaultDialog
+import com.mobileprism.fishing.ui.home.views.EditBottomSheetScaffold
 import com.mobileprism.fishing.ui.home.views.ItemPhoto
 import com.mobileprism.fishing.ui.home.views.MaxCounterView
 import com.mobileprism.fishing.ui.home.views.NoContentView
-import com.mobileprism.fishing.ui.home.views.PrimaryText
 import com.mobileprism.fishing.ui.home.views.SimpleOutlinedTextField
+import com.mobileprism.fishing.ui.theme.Spacing
 import com.mobileprism.fishing.ui.viewmodels.UserCatchViewModel
 import com.mobileprism.fishing.ui.utils.MediaPickerLauncher
 import com.mobileprism.fishing.utils.Constants.MAX_PHOTOS
 import com.mobileprism.fishing.utils.ValidationUtils
 import kotlin.time.Clock
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 
 sealed class BottomSheetCatchScreen() {
@@ -113,7 +106,6 @@ fun FishTypeAmountAndWeightDialog(
     viewModel: UserCatchViewModel,
     onCloseBottomSheet: () -> Unit
 ) {
-
     val fishType = remember { mutableStateOf("") }
     val fishAmount = remember { mutableStateOf("") }
     val fishWeight = remember { mutableStateOf("") }
@@ -126,14 +118,18 @@ fun FishTypeAmountAndWeightDialog(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+    EditBottomSheetScaffold(
+        title = stringResource(Res.string.user_catch),
+        onCancel = onCloseBottomSheet,
+        onSave = {
+            viewModel.updateCatchInfo(
+                fishType = fishType.value,
+                fishAmount = fishAmount.value.toInt(),
+                fishWeight = fishWeight.value.toDouble()
+            )
+            onCloseBottomSheet()
+        }
     ) {
-        PrimaryText(text = stringResource(Res.string.user_catch))
-
         SimpleOutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             textState = fishType,
@@ -161,30 +157,7 @@ fun FishTypeAmountAndWeightDialog(
                 range = 0.0..ValidationUtils.MAX_FISH_WEIGHT_KG
             )
         }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            DefaultButton(
-                text = stringResource(Res.string.cancel)
-            ) { onCloseBottomSheet() }
-            Spacer(modifier = Modifier.width(8.dp))
-            DefaultButtonFilled(
-                text = stringResource(Res.string.save),
-                onClick = {
-                    viewModel.updateCatchInfo(
-                        fishType = fishType.value,
-                        fishAmount = fishAmount.value.toInt(),
-                        fishWeight = fishWeight.value.toDouble()
-                    )
-                    onCloseBottomSheet()
-                }
-            )
-        }
     }
-
 }
 
 @Composable
@@ -204,56 +177,36 @@ fun EditWayOfFishingDialog(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+    EditBottomSheetScaffold(
+        title = stringResource(Res.string.way_of_fishing),
+        onCancel = onCloseBottomSheet,
+        onSave = {
+            viewModel.updateWayOfFishing(
+                fishingRodType = rod.value,
+                fishingLure = lure.value,
+                fishingBait = bait.value
+            )
+            onCloseBottomSheet()
+        }
     ) {
-        PrimaryText(text = stringResource(Res.string.way_of_fishing))
-
         SimpleOutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             textState = rod,
             label = stringResource(Res.string.fish_rod),
             singleLine = false
         )
-
         SimpleOutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             textState = bait,
             label = stringResource(Res.string.bait),
             singleLine = false
         )
-
         SimpleOutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             textState = lure,
             label = stringResource(Res.string.lure),
             singleLine = false
         )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            DefaultButton(
-                text = stringResource(Res.string.cancel)
-            ) { onCloseBottomSheet() }
-            Spacer(modifier = Modifier.width(8.dp))
-            DefaultButtonFilled(
-                text = stringResource(Res.string.save),
-                onClick = {
-                    viewModel.updateWayOfFishing(
-                        fishingRodType = rod.value,
-                        fishingLure = lure.value,
-                        fishingBait = bait.value
-                    )
-                    onCloseBottomSheet()
-                }
-            )
-        }
     }
 }
 
@@ -307,17 +260,32 @@ fun EditNoteDialog(
 
     val isTitleValid = ValidationUtils.isValidNoteTitle(noteTitle.value)
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+    EditBottomSheetScaffold(
+        title = if (noteId.value.isEmpty()) stringResource(Res.string.new_note)
+        else stringResource(Res.string.edit_note),
+        onCancel = onClose,
+        onSave = {
+            onSaveNote(
+                Note(
+                    id = noteId.value,
+                    title = noteTitle.value.trim(),
+                    description = noteDescriptionState.value,
+                    dateCreated = Clock.System.now().toEpochMilliseconds()
+                )
+            )
+            onClose()
+        },
+        saveEnabled = noteDescriptionState.value.isNotBlank() && isTitleValid,
+        leadingAction = if (deleteOption) {
+            {
+                AppIconButton(
+                    onClick = { showDeleteConfirm = true },
+                    icon = rememberVectorPainter(Icons.Default.Delete),
+                    contentDescription = stringResource(Res.string.delete)
+                )
+            }
+        } else null
     ) {
-        PrimaryText(
-            text = if (noteId.value.isEmpty()) stringResource(Res.string.new_note)
-            else stringResource(Res.string.edit_note)
-        )
-
         SimpleOutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             textState = noteTitle,
@@ -325,7 +293,6 @@ fun EditNoteDialog(
             singleLine = true,
             isError = !isTitleValid
         )
-
         SimpleOutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             textState = noteDescriptionState,
@@ -333,42 +300,7 @@ fun EditNoteDialog(
             singleLine = false,
             isError = noteDescriptionState.value.isBlank()
         )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (deleteOption) {
-                IconButton(onClick = { showDeleteConfirm = true }) {
-                    Icon(Icons.Default.Delete, stringResource(Res.string.delete))
-                }
-                Spacer(modifier = Modifier.weight(1f))
-            }
-            DefaultButton(
-                text = stringResource(Res.string.cancel)
-            ) {
-                onClose()
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            DefaultButtonFilled(
-                text = stringResource(Res.string.save),
-                enabled = noteDescriptionState.value.isNotBlank() && isTitleValid,
-                onClick = {
-                    onSaveNote(
-                        Note(
-                            id = noteId.value,
-                            title = noteTitle.value.trim(),
-                            description = noteDescriptionState.value,
-                            dateCreated = Clock.System.now().toEpochMilliseconds()
-                        )
-                    )
-                    onClose()
-                }
-            )
-        }
     }
-
 }
 
 @Composable
@@ -389,7 +321,6 @@ fun AddPhotoDialog(
                 tempDialogPhotosState.addAll(newPhotos)
             }
         }
-
         onDispose {
             onPickedPhotosHandlerChange { _: List<String> -> }
         }
@@ -400,31 +331,46 @@ fun AddPhotoDialog(
         tempDialogPhotosState.addAll(photos)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            PrimaryText(text = stringResource(Res.string.photos))
-            MaxCounterView(
-                count = tempDialogPhotosState.size,
-                maxCount = MAX_PHOTOS,
-                icon = painterResource(Res.drawable.ic_baseline_photo_24)
-            )
+    EditBottomSheetScaffold(
+        title = stringResource(Res.string.photos),
+        onCancel = onCloseBottomSheet,
+        onSave = {
+            if (tempDialogPhotosState.size > MAX_PHOTOS) {
+                SnackbarManager.showMessage(Res.string.max_photos_allowed)
+            } else {
+                onSavePhotosClick(tempDialogPhotosState.toList())
+                onCloseBottomSheet()
+            }
+        },
+        leadingAction = {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AppIconButton(
+                    onClick = { mediaPicker.launchGallery() },
+                    icon = painterResource(Res.drawable.ic_baseline_add_photo_alternate_24),
+                    contentDescription = stringResource(Res.string.gallery)
+                )
+                AppIconButton(
+                    onClick = { mediaPicker.launchCamera() },
+                    icon = painterResource(Res.drawable.ic_baseline_photo_camera_24),
+                    contentDescription = stringResource(Res.string.camera)
+                )
+            }
         }
+    ) {
+        MaxCounterView(
+            count = tempDialogPhotosState.size,
+            maxCount = MAX_PHOTOS,
+            icon = painterResource(Res.drawable.ic_baseline_photo_24)
+        )
 
         LazyRow(
             modifier = Modifier
                 .defaultMinSize(minHeight = 120.dp)
                 .fillMaxWidth(),
-            contentPadding = PaddingValues(vertical = 4.dp, horizontal = 4.dp),
+            contentPadding = PaddingValues(vertical = Spacing.xs, horizontal = Spacing.xs),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
@@ -445,40 +391,6 @@ fun AddPhotoDialog(
                     )
                 }
             }
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            DefaultButtonOutlined(
-                icon = painterResource(Res.drawable.ic_baseline_add_photo_alternate_24),
-                text = stringResource(Res.string.gallery),
-                onClick = { mediaPicker.launchGallery() }
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            DefaultButtonOutlined(
-                icon = painterResource(Res.drawable.ic_baseline_photo_camera_24),
-                text = stringResource(Res.string.camera),
-                onClick = { mediaPicker.launchCamera() }
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            DefaultButton(
-                text = stringResource(Res.string.cancel),
-                onClick = onCloseBottomSheet
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            DefaultButtonFilled(
-                text = stringResource(Res.string.save),
-                onClick = {
-                    if (tempDialogPhotosState.size > MAX_PHOTOS) {
-                        SnackbarManager.showMessage(Res.string.max_photos_allowed)
-                    } else {
-                        onSavePhotosClick(tempDialogPhotosState.toList())
-                        onCloseBottomSheet()
-                    }
-                }
-            )
         }
     }
 }
