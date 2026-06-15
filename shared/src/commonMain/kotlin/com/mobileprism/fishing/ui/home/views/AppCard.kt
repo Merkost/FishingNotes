@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.Dp
 import com.mobileprism.fishing.ui.theme.Elevation
@@ -29,18 +30,21 @@ import com.mobileprism.fishing.ui.theme.Spacing
 fun AppCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
-    shape: CornerBasedShape = MaterialTheme.shapes.medium,
-    elevation: Dp = Elevation.card,
+    shape: CornerBasedShape = MaterialTheme.shapes.large,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
+    elevation: Dp = Elevation.raisedCard,
     contentPadding: Dp = Spacing.cardPadding,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val elevationValues = CardDefaults.cardElevation(defaultElevation = elevation)
+    val colors = CardDefaults.cardColors(containerColor = containerColor)
     if (onClick != null) {
         Card(
             onClick = onClick,
             modifier = modifier.fillMaxWidth(),
             shape = shape,
             elevation = elevationValues,
+            colors = colors,
         ) {
             Column(modifier = Modifier.padding(contentPadding), content = content)
         }
@@ -49,6 +53,7 @@ fun AppCard(
             modifier = modifier.fillMaxWidth(),
             shape = shape,
             elevation = elevationValues,
+            colors = colors,
         ) {
             Column(modifier = Modifier.padding(contentPadding), content = content)
         }
