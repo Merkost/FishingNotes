@@ -8,14 +8,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.rounded.ArrowDownward
+import androidx.compose.material.icons.rounded.ArrowUpward
+import androidx.compose.material.icons.rounded.TrendingFlat
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import com.mobileprism.fishing.ui.theme.BrandGradients
+import com.mobileprism.fishing.ui.theme.Emphasis
+import com.mobileprism.fishing.ui.theme.IconSize
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -225,6 +233,10 @@ fun MainWeatherScreen(
             is12hTimeFormat = is12hTimeFormat,
         )
 
+        biteForecast(forecast.hourly, forecast.daily.firstOrNull())?.let { bite ->
+            BiteForecastCard(forecast = bite)
+        }
+
         if (forecast.daily.all { it.date != 0L } && forecast.daily.isNotEmpty()) {
             PressureChartItem(
                 forecast = forecast.daily,
@@ -244,7 +256,8 @@ fun MainWeatherScreen(
                     WeatherDailyForecastRow(
                         date = daily.date.toDateTextMonth() + " " + daily.date.toDayOfWeek(),
                         icon = getWeatherIconByName(daily.weather.firstOrNull()?.icon ?: ""),
-                        temperature = temperatureText(temperatureUnit, daily.temperature.day),
+                        temperature = temperatureText(temperatureUnit, daily.temperature.max),
+                        temperatureLow = temperatureText(temperatureUnit, daily.temperature.min),
                         precipitation = if (isHeavyPrecipitation(daily.probabilityOfPrecipitation)) {
                             percentText(probabilityToPercent(daily.probabilityOfPrecipitation))
                         } else null,
@@ -293,12 +306,22 @@ fun CurrentWeather(
                     temperatureUnit = temperatureUnit
                 )
 
+                val trend = pressureTrend(forecast.hourly)
+
                 val currentMetrics: List<@Composable () -> Unit> = listOf(
                     {
                         WeatherMetric(
                             label = stringResource(Res.string.pressure),
                             icon = Res.drawable.ic_gauge,
                             value = pressureText(pressureUnit, currentHour.pressure),
+                            iconTint = FishingTheme.colorScheme.onPrimary,
+                        )
+                    },
+                    {
+                        WeatherMetric(
+                            label = stringResource(Res.string.wind),
+                            icon = Res.drawable.ic_wind,
+                            value = windSpeedText(windSpeedUnit, currentHour.windSpeed.toDouble()),
                             iconTint = FishingTheme.colorScheme.onPrimary,
                         )
                     },
@@ -319,6 +342,14 @@ fun CurrentWeather(
                         )
                     },
                 )
+
+                if (trend != null) {
+                    PressureTrendHeadline(
+                        trend = trend,
+                        pressureUnit = pressureUnit,
+                    )
+                }
+
                 WeatherStatGrid(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.md),
                     metrics = currentMetrics,
@@ -332,6 +363,116 @@ fun CurrentWeather(
                 is12hTimeFormat = is12hTimeFormat,
             )
         }
+    }
+}
+
+@Composable
+fun PressureTrendHeadline(
+    modifier: Modifier = Modifier,
+    trend: PressureTrend,
+    pressureUnit: PressureValues,
+) {
+    val arrow: ImageVector = when (trend.direction) {
+        PressureDirection.RISING -> Icons.Rounded.ArrowUpward
+        PressureDirection.FALLING -> Icons.Rounded.ArrowDownward
+        PressureDirection.STEADY -> Icons.Rounded.TrendingFlat
+    }
+    val deltaValue = pressureUnit.getPressureFromHpa(kotlin.math.abs(trend.deltaHpa))
+    val color = FishingTheme.colorScheme.onPrimary
+    Row(
+        modifier = modifier.padding(horizontal = Spacing.md),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+    ) {
+        Icon(
+            imageVector = arrow,
+            contentDescription = null,
+            tint = color,
+            modifier = Modifier.size(IconSize.sm),
+        )
+        AppText(
+            text = valueWithUnit(deltaValue, pressureUnit.stringRes) +
+                " · " + stringResource(pressureDirectionStringRes(trend.direction)),
+            style = AppTextStyle.Body,
+            color = color,
+        )
+    }
+}
+
+@Composable
+fun BiteForecastCard(
+    modifier: Modifier = Modifier,
+    forecast: BiteForecast,
+) {
+    val accent = FishingTheme.colorScheme.tertiary
+    AppCard(
+        modifier = modifier,
+        containerColor = accent.copy(alpha = Emphasis.pressedOverlay),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(BrandGradients.primaryDiagonal(FishingTheme.colorScheme)),
+                contentAlignment = Alignment.Center,
+            ) {
+                AppText(
+                    text = forecast.score.toString(),
+                    style = AppTextStyle.Title,
+                    color = FishingTheme.colorScheme.onPrimary,
+                )
+            }
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(Spacing.xxs),
+            ) {
+                AppText(
+                    text = stringResource(Res.string.bite_forecast),
+                    style = AppTextStyle.Caption,
+                    color = FishingTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = stringResource(biteRatingStringRes(forecast.rating)),
+                    style = FishingTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = accent,
+                )
+            }
+        }
+        if (forecast.topFactors.isNotEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = Spacing.md),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            ) {
+                forecast.topFactors.forEach { factor ->
+                    BiteFactorChip(text = stringResource(biteFactorStringRes(factor)))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BiteFactorChip(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(50))
+            .background(FishingTheme.colorScheme.tertiary.copy(alpha = Emphasis.divider))
+            .padding(horizontal = Spacing.md, vertical = Spacing.xs),
+    ) {
+        AppText(
+            text = text,
+            style = AppTextStyle.Caption,
+            color = FishingTheme.colorScheme.onSurface,
+        )
     }
 }
 

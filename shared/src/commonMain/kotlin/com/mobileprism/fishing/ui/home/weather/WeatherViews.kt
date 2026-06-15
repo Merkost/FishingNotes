@@ -322,7 +322,7 @@ fun MoonPhaseView(
             contentDescription = stringResource(Res.string.moon_phase)
         )
         AppText(
-            text = percentText(moonPhaseToPercent(moonPhase)),
+            text = stringResource(moonPhaseStringRes(moonPhaseName(moonPhase))),
             style = AppTextStyle.Title
         )
     }

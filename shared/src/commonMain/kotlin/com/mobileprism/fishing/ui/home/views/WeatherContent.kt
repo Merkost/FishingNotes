@@ -85,7 +85,10 @@ fun WeatherStatGrid(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.lg),
             ) {
                 rowItems.forEach { cell ->
-                    Column(modifier = Modifier.weight(1f)) { cell() }
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) { cell() }
                 }
                 repeat(columns - rowItems.size) {
                     Column(modifier = Modifier.weight(1f)) {}
@@ -103,6 +106,7 @@ fun WeatherDailyForecastRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     precipitation: String? = null,
+    temperatureLow: String? = null,
 ) {
     ListItem(
         modifier = modifier
@@ -122,11 +126,23 @@ fun WeatherDailyForecastRow(
             { Text(text = it, style = FishingTheme.typography.bodyMedium) }
         },
         trailingContent = {
-            Text(
-                text = temperature,
-                style = FishingTheme.typography.titleMedium,
-                color = FishingTheme.colorScheme.onSurface,
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
+            ) {
+                Text(
+                    text = temperature,
+                    style = FishingTheme.typography.titleMedium,
+                    color = FishingTheme.colorScheme.onSurface,
+                )
+                if (temperatureLow != null) {
+                    Text(
+                        text = temperatureLow,
+                        style = FishingTheme.typography.bodyMedium,
+                        color = FishingTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
         },
     )
 }
