@@ -16,12 +16,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.mobileprism.fishing.ui.utils.rememberAppHaptics
 import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.add
+import fishing.shared.generated.resources.close
 import fishing.shared.generated.resources.ic_baseline_plus
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun FabWithMenu(
@@ -30,12 +36,20 @@ fun FabWithMenu(
     fabState: MutableState<MultiFabState>,
     ) {
     val transition = updateTransition(targetState = fabState, label = "")
+    val haptics = rememberAppHaptics()
 
     val size = transition.animateDp(label = "") { state ->
         if (state.value == MultiFabState.EXPANDED) 48.dp else 0.dp
     }
     val rotation = transition.animateFloat(label = "") { state ->
         if (state.value == MultiFabState.EXPANDED) 45f else 0f
+    }
+
+    val expanded = fabState.value == MultiFabState.EXPANDED
+    val toggleDescription = if (expanded) {
+        stringResource(Res.string.close)
+    } else {
+        stringResource(Res.string.add)
     }
 
     Column(
@@ -49,15 +63,23 @@ fun FabWithMenu(
             FabMenuItem(item = it, size = size.value)
         }
 
-        BrandFab(onClick = {
-            if (transition.currentState.value == MultiFabState.EXPANDED) {
-                transition.currentState.value = MultiFabState.COLLAPSED
-            } else transition.currentState.value = MultiFabState.EXPANDED
-        }) {
+        BrandFab(
+            modifier = Modifier.semantics(mergeDescendants = true) {
+                contentDescription = toggleDescription
+            },
+            onClick = {
+                if (transition.currentState.value == MultiFabState.EXPANDED) {
+                    transition.currentState.value = MultiFabState.COLLAPSED
+                } else {
+                    transition.currentState.value = MultiFabState.EXPANDED
+                    haptics.performConfirm()
+                }
+            }
+        ) {
             Icon(
                 modifier = Modifier.rotate(rotation.value),
                 painter = painterResource(Res.drawable.ic_baseline_plus),
-                contentDescription = null
+                contentDescription = toggleDescription
             )
         }
     }
@@ -71,7 +93,9 @@ fun FabMenuItem(item: FabMenuItem, modifier: Modifier = Modifier, size: Dp) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.End),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clip(RoundedCornerShape(8.dp))
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .semantics(mergeDescendants = true) { contentDescription = item.text }
         ) {
             Surface(
                 shape = RoundedCornerShape(8.dp),
@@ -93,7 +117,7 @@ fun FabMenuItem(item: FabMenuItem, modifier: Modifier = Modifier, size: Dp) {
                 ) {
                     Icon(
                         painter = painterResource(item.icon),
-                        contentDescription = item.text
+                        contentDescription = null
                     )
                 }
             }

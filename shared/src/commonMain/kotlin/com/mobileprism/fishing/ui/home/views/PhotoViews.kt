@@ -101,7 +101,7 @@ fun ItemPhoto(
                 .data(photo)
                 .size(Size(300, 300))
                 .build(),
-            contentDescription = null,
+            contentDescription = stringResource(Res.string.catch_photo),
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(5.dp))
@@ -312,7 +312,7 @@ fun FullSizePhotoView(
                 .size(Size(600, 600))
                 .crossfade(true)
                 .build(),
-            contentDescription = null,
+            contentDescription = stringResource(Res.string.catch_photo),
             modifier = Modifier
                 .fillMaxSize()
                 .align(alignment = Alignment.Center)
@@ -372,7 +372,7 @@ fun ItemCatchPhotoView(
             .data(photo)
             .size(Size(300, 300))
             .build(),
-        contentDescription = null,
+        contentDescription = stringResource(Res.string.catch_photo),
         modifier = modifier
             .size(150.dp)
             .clip(RoundedCornerShape(5.dp))

@@ -18,6 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import com.mobileprism.fishing.ui.theme.BrandGradients
 import com.mobileprism.fishing.ui.theme.Elevation
 import com.mobileprism.fishing.ui.theme.FabSize
@@ -41,6 +44,7 @@ fun BrandFab(
                 modifier = Modifier
                     .clip(FishingTheme.shapes.large)
                     .background(BrandGradients.primaryDiagonal(FishingTheme.colorScheme))
+                    .semantics { role = Role.Button }
                     .indication(interactionSource = interaction, indication = ripple())
                     .combinedClickable(
                         interactionSource = interaction,

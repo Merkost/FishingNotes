@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.mobileprism.fishing.ui.utils.chartSemantics
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
@@ -59,6 +60,10 @@ fun WeatherTrendChart(
         CartesianLayerRangeProvider.fixed(minY = minValue - padding, maxY = maxValue + padding)
     }
 
+    val chartSummary = remember(points) {
+        points.joinToString(separator = ", ") { "${it.label}: ${formatValue(it.value)}" }
+    }
+
     CartesianChartHost(
         chart = rememberCartesianChart(
             rememberLineCartesianLayer(lineProvider = lineProvider, rangeProvider = rangeProvider),
@@ -72,6 +77,6 @@ fun WeatherTrendChart(
             ),
         ),
         modelProducer = modelProducer,
-        modifier = modifier.fillMaxWidth().height(height),
+        modifier = modifier.fillMaxWidth().height(height).chartSemantics(chartSummary),
     )
 }

@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mobileprism.fishing.ui.theme.Spacing
+import com.mobileprism.fishing.ui.utils.chartSemantics
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
@@ -59,7 +60,17 @@ fun ChartCard(
                     }
                 }
             } else {
-                BrandColumnChart(data = data, formatLabel = formatLabel)
+                val chartSummary = remember(title, data, formatLabel) {
+                    val entries = data.entries.joinToString(separator = ", ") {
+                        "${formatLabel(it.key)}: ${it.value}"
+                    }
+                    "$title. $entries"
+                }
+                BrandColumnChart(
+                    data = data,
+                    formatLabel = formatLabel,
+                    summary = chartSummary,
+                )
             }
         }
     }
@@ -69,6 +80,7 @@ fun ChartCard(
 private fun BrandColumnChart(
     data: Map<String, Int>,
     formatLabel: (String) -> String,
+    summary: String,
 ) {
     val keys = data.keys.toList()
     val values = data.values.toList().map { it.toDouble() }
@@ -96,6 +108,6 @@ private fun BrandColumnChart(
             ),
         ),
         modelProducer = modelProducer,
-        modifier = Modifier.fillMaxWidth().height(200.dp),
+        modifier = Modifier.fillMaxWidth().height(200.dp).chartSemantics(summary),
     )
 }

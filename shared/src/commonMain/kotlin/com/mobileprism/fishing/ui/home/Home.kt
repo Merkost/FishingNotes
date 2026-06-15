@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Map
@@ -41,6 +42,10 @@ import androidx.compose.ui.layout.MeasureResult
 import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
@@ -52,6 +57,7 @@ import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.map
 import fishing.shared.generated.resources.notes
 import fishing.shared.generated.resources.profile
+import fishing.shared.generated.resources.tab_of
 import fishing.shared.generated.resources.weather
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -90,7 +96,7 @@ fun FishingNotesBottomBar(
             dampingRatio = 0.8f
         )
         FishingNotesBottomNavLayout(
-            modifier = Modifier.navigationBarsPadding(),
+            modifier = Modifier.navigationBarsPadding().selectableGroup(),
             selectedIndex = currentSection.ordinal,
             itemCount = tabs.size,
             indicator = { FishingNotesBottomNavIndicator() },
@@ -98,6 +104,8 @@ fun FishingNotesBottomBar(
         ) {
             tabs.forEach { section ->
                 val selected = section == currentSection
+                val label = stringResource(section.title)
+                val positionLabel = stringResource(Res.string.tab_of, section.ordinal + 1, tabs.size)
                 val tint by animateColorAsState(
                     if (selected) {
                         FishingTheme.colorScheme.primary
@@ -111,12 +119,12 @@ fun FishingNotesBottomBar(
                         Icon(
                             imageVector = section.icon,
                             tint = tint,
-                            contentDescription = null
+                            contentDescription = label
                         )
                     },
                     text = {
                         Text(
-                            text = stringResource(section.title).uppercase(),
+                            text = label.uppercase(),
                             color = tint,
                             style = FishingTheme.typography.labelLarge,
                             maxLines = 1
@@ -127,6 +135,10 @@ fun FishingNotesBottomBar(
                     animSpec = springSpec,
                     modifier = BottomNavigationItemPadding
                         .clip(BottomNavIndicatorShape)
+                        .semantics {
+                            role = Role.Tab
+                            stateDescription = positionLabel
+                        }
                 )
             }
         }
