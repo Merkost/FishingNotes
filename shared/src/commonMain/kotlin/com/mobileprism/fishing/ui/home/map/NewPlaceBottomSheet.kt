@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.map
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -22,7 +23,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -140,7 +140,7 @@ fun NewPlaceBottomSheetContent(
         ) {
             Text(
                 text = stringResource(Res.string.new_place),
-                style = MaterialTheme.typography.titleLarge,
+                style = FishingTheme.typography.titleLarge,
                 modifier = Modifier.weight(1f)
             )
             Icon(
@@ -233,8 +233,8 @@ fun NewPlaceBottomSheetContent(
 
         Text(
             text = stringResource(Res.string.color),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = FishingTheme.typography.labelMedium,
+            color = FishingTheme.colorScheme.onSurfaceVariant
         )
 
         Spacer(Modifier.height(8.dp))

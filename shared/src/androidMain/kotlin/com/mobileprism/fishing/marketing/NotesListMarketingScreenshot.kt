@@ -1,12 +1,12 @@
 package com.mobileprism.fishing.marketing
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Devices
@@ -38,7 +38,7 @@ private fun FakeNotesListScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface),
+            .background(FishingTheme.colorScheme.surface),
     ) {
         DefaultAppBar(
             title = "Notes",

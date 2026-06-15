@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
@@ -21,7 +22,6 @@ import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -81,8 +81,8 @@ fun FishingNotesBottomBar(
 ) {
     Surface(
         modifier = modifier,
-        color = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.onSurface,
+        color = FishingTheme.colorScheme.surface,
+        contentColor = FishingTheme.colorScheme.onSurface,
         shadowElevation = 8.dp
     ) {
         val springSpec = SpringSpec<Float>(
@@ -100,9 +100,9 @@ fun FishingNotesBottomBar(
                 val selected = section == currentSection
                 val tint by animateColorAsState(
                     if (selected) {
-                        MaterialTheme.colorScheme.primary
+                        FishingTheme.colorScheme.primary
                     } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                        FishingTheme.colorScheme.onSurfaceVariant
                     }
                 )
 
@@ -118,7 +118,7 @@ fun FishingNotesBottomBar(
                         Text(
                             text = stringResource(section.title).uppercase(),
                             color = tint,
-                            style = MaterialTheme.typography.labelLarge,
+                            style = FishingTheme.typography.labelLarge,
                             maxLines = 1
                         )
                     },
@@ -295,7 +295,7 @@ private fun MeasureScope.placeTextAndIcon(
 @Composable
 private fun FishingNotesBottomNavIndicator(
     strokeWidth: Dp = 1.dp,
-    color: Color = MaterialTheme.colorScheme.primary,
+    color: Color = FishingTheme.colorScheme.primary,
     shape: Shape = BottomNavIndicatorShape
 ) {
     Spacer(

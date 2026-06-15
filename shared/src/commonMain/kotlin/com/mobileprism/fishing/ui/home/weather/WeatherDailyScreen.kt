@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.weather
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,7 +15,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
@@ -106,11 +106,11 @@ fun WeatherDaysTabs(forecast: List<Daily>, pagerState: PagerState) {
     val scope = rememberCoroutineScope()
     ScrollableTabRow(
         selectedTabIndex = pagerState.currentPage,
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.onSurface,
+        containerColor = FishingTheme.colorScheme.surface,
+        contentColor = FishingTheme.colorScheme.onSurface,
         indicator = { tabPositions ->
             TabRowDefaults.SecondaryIndicator(
-                color = MaterialTheme.colorScheme.primary,
+                color = FishingTheme.colorScheme.primary,
                 modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage])
             )
         }) {
@@ -126,9 +126,9 @@ fun WeatherDaysTabs(forecast: List<Daily>, pagerState: PagerState) {
                     Text(
                         text = weather.date.toDayOfWeekAndDate(),
                         color = if (pagerState.currentPage == index) {
-                            MaterialTheme.colorScheme.primary
+                            FishingTheme.colorScheme.primary
                         } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
+                            FishingTheme.colorScheme.onSurfaceVariant
                         }
                     )
                 },

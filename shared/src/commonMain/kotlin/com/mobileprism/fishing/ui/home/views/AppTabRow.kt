@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
@@ -7,7 +8,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -30,13 +30,13 @@ fun AppTabRow(
     TabRow(
         modifier = modifier,
         selectedTabIndex = selectedIndex,
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.primary,
+        containerColor = FishingTheme.colorScheme.surface,
+        contentColor = FishingTheme.colorScheme.primary,
         indicator = { tabPositions ->
             if (selectedIndex < tabPositions.size) {
                 TabRowDefaults.SecondaryIndicator(
                     modifier = Modifier.tabIndicatorOffset(tabPositions[selectedIndex]),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = FishingTheme.colorScheme.primary,
                 )
             }
         },
@@ -47,8 +47,8 @@ fun AppTabRow(
             Tab(
                 selected = selected,
                 onClick = { onSelect(index) },
-                selectedContentColor = MaterialTheme.colorScheme.primary,
-                unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                selectedContentColor = FishingTheme.colorScheme.primary,
+                unselectedContentColor = FishingTheme.colorScheme.onSurfaceVariant,
                 text = { AppText(text = tab.title, style = AppTextStyle.Title) },
             )
         }

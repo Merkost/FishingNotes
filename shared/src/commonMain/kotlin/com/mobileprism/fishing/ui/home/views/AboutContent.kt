@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,19 +39,19 @@ fun AppHeroHeader(
             modifier = Modifier.size(96.dp),
             painter = logo,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
+            tint = FishingTheme.colorScheme.primary,
         )
         Text(
             text = title,
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface,
+            style = FishingTheme.typography.headlineSmall,
+            color = FishingTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
         )
         if (subtitle != null) {
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = FishingTheme.typography.bodyMedium,
+                color = FishingTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
         }
@@ -66,8 +66,8 @@ fun VersionLabel(
     Text(
         modifier = modifier,
         text = stringResource(Res.string.app_version, version),
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        style = FishingTheme.typography.labelMedium,
+        color = FishingTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
     )
 }
@@ -83,17 +83,17 @@ fun LabeledIconButton(
     style: LabeledIconButtonStyle = LabeledIconButtonStyle.Outlined,
 ) {
     val containerColor = when (style) {
-        LabeledIconButtonStyle.Filled -> MaterialTheme.colorScheme.primary
-        LabeledIconButtonStyle.Outlined -> MaterialTheme.colorScheme.surface
+        LabeledIconButtonStyle.Filled -> FishingTheme.colorScheme.primary
+        LabeledIconButtonStyle.Outlined -> FishingTheme.colorScheme.surface
     }
     val contentColor = when (style) {
-        LabeledIconButtonStyle.Filled -> MaterialTheme.colorScheme.onPrimary
-        LabeledIconButtonStyle.Outlined -> MaterialTheme.colorScheme.onSurface
+        LabeledIconButtonStyle.Filled -> FishingTheme.colorScheme.onPrimary
+        LabeledIconButtonStyle.Outlined -> FishingTheme.colorScheme.onSurface
     }
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = containerColor,
-        shape = MaterialTheme.shapes.medium,
+        shape = FishingTheme.shapes.medium,
     ) {
         Row(
             modifier = Modifier
@@ -108,13 +108,13 @@ fun LabeledIconButton(
                 imageVector = icon,
                 contentDescription = null,
                 tint = when (style) {
-                    LabeledIconButtonStyle.Filled -> MaterialTheme.colorScheme.onPrimary
-                    LabeledIconButtonStyle.Outlined -> MaterialTheme.colorScheme.onSurfaceVariant
+                    LabeledIconButtonStyle.Filled -> FishingTheme.colorScheme.onPrimary
+                    LabeledIconButtonStyle.Outlined -> FishingTheme.colorScheme.onSurfaceVariant
                 },
             )
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodyLarge,
+                style = FishingTheme.typography.bodyLarge,
                 color = contentColor,
             )
         }

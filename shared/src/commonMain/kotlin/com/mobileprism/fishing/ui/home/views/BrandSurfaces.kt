@@ -1,12 +1,12 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -19,15 +19,15 @@ import com.mobileprism.fishing.ui.theme.Spacing
 @Composable
 fun BrandGradientCard(
     modifier: Modifier = Modifier,
-    shape: Shape = MaterialTheme.shapes.large,
+    shape: Shape = FishingTheme.shapes.large,
     contentPadding: Dp = Spacing.cardPadding,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onPrimary) {
+    CompositionLocalProvider(LocalContentColor provides FishingTheme.colorScheme.onPrimary) {
         Box(
             modifier = modifier
                 .clip(shape)
-                .background(BrandGradients.primaryDiagonal(MaterialTheme.colorScheme))
+                .background(BrandGradients.primaryDiagonal(FishingTheme.colorScheme))
                 .padding(contentPadding),
             content = content,
         )
@@ -39,11 +39,11 @@ fun BrandGradientBackground(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onPrimary) {
+    CompositionLocalProvider(LocalContentColor provides FishingTheme.colorScheme.onPrimary) {
         Box(
             modifier = modifier
                 .fillMaxSize()
-                .background(BrandGradients.primaryDiagonal(MaterialTheme.colorScheme)),
+                .background(BrandGradients.primaryDiagonal(FishingTheme.colorScheme)),
             content = content,
         )
     }

@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.place
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -56,7 +57,7 @@ fun PlaceTitleView(
             AppText(
                 text = place.dateOfCreation.toDateTextMonth(),
                 style = AppTextStyle.BodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = FishingTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1
             )
         },
@@ -64,7 +65,7 @@ fun PlaceTitleView(
             ItemCounter(
                 count = catchesAmount,
                 icon = Res.drawable.ic_fishing,
-                tint = MaterialTheme.colorScheme.tertiary
+                tint = FishingTheme.colorScheme.tertiary
             )
         },
         trailingAction = {
@@ -280,9 +281,9 @@ fun PlaceTopBar(
 
     val color = animateColorAsState(
         targetValue = if (isVisible == true) {
-            MaterialTheme.colorScheme.primary
+            FishingTheme.colorScheme.primary
         } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
+            FishingTheme.colorScheme.onSurfaceVariant
         },
         animationSpec = tween(800)
     )
@@ -309,7 +310,7 @@ fun PlaceTopBar(
                         label = stringResource(Res.string.delete),
                         onClick = onDelete,
                         leadingIcon = Icons.Outlined.Delete,
-                        tint = MaterialTheme.colorScheme.error
+                        tint = FishingTheme.colorScheme.error
                     )
                 )
             )

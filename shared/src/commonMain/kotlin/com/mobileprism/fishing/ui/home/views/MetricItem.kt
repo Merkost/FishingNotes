@@ -1,11 +1,11 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,7 +21,7 @@ fun MetricItem(
     value: String,
     modifier: Modifier = Modifier,
     icon: Painter? = null,
-    iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    iconTint: Color = FishingTheme.colorScheme.onSurfaceVariant,
     vertical: Boolean = false,
 ) {
     if (vertical) {
@@ -32,8 +32,8 @@ fun MetricItem(
         ) {
             Text(
                 text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = FishingTheme.typography.labelMedium,
+                color = FishingTheme.colorScheme.onSurfaceVariant
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -49,8 +49,8 @@ fun MetricItem(
                 }
                 Text(
                     text = value,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    style = FishingTheme.typography.titleMedium,
+                    color = FishingTheme.colorScheme.onSurface
                 )
             }
         }
@@ -71,13 +71,13 @@ fun MetricItem(
             Column {
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = FishingTheme.typography.labelMedium,
+                    color = FishingTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = value,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    style = FishingTheme.typography.titleMedium,
+                    color = FishingTheme.colorScheme.onSurface
                 )
             }
         }

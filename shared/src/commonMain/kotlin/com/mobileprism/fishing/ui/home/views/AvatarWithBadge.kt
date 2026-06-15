@@ -1,12 +1,12 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -41,7 +41,7 @@ fun AvatarWithBadge(
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primaryContainer,
+                    color = FishingTheme.colorScheme.primaryContainer,
                     shadowElevation = Elevation.card,
                 ) {
                     AppIconButton(

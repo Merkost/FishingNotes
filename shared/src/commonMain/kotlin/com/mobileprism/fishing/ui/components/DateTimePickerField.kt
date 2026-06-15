@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.components
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -89,7 +89,7 @@ fun DateTimePickerField(
             modifier = Modifier
                 .weight(1.3f)
                 .clickable { showDatePicker = true },
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            color = FishingTheme.colorScheme.surfaceContainerHigh,
             shape = RoundedCornerShape(16.dp)
         ) {
             Row(
@@ -100,19 +100,19 @@ fun DateTimePickerField(
                     painter = painterResource(Res.drawable.ic_baseline_event_24),
                     contentDescription = null,
                     modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = FishingTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.width(8.dp))
                 Column {
                     Text(
                         text = stringResource(Res.string.date),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = FishingTheme.typography.bodySmall,
+                        color = FishingTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         text = dateTime.toDate(),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface
+                        style = FishingTheme.typography.bodyLarge,
+                        color = FishingTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -124,7 +124,7 @@ fun DateTimePickerField(
             modifier = Modifier
                 .weight(0.7f)
                 .clickable { showTimePicker = true },
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            color = FishingTheme.colorScheme.surfaceContainerHigh,
             shape = RoundedCornerShape(16.dp)
         ) {
             Row(
@@ -135,19 +135,19 @@ fun DateTimePickerField(
                     painter = painterResource(Res.drawable.ic_baseline_access_time_24),
                     contentDescription = null,
                     modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = FishingTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.width(8.dp))
                 Column {
                     Text(
                         text = stringResource(Res.string.time),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = FishingTheme.typography.bodySmall,
+                        color = FishingTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         text = dateTime.toTime(),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface
+                        style = FishingTheme.typography.bodyLarge,
+                        color = FishingTheme.colorScheme.onSurface
                     )
                 }
             }

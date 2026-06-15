@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.utils
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,7 +15,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,7 +67,7 @@ private fun ColorGridItem(
                 if (selected) Modifier.border(
                     width = 2.5.dp,
                     color = if (isAppInDarkTheme()) Color.White
-                            else MaterialTheme.colorScheme.onSurface,
+                            else FishingTheme.colorScheme.onSurface,
                     shape = CircleShape
                 ) else Modifier
             )

@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Warning
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -62,7 +62,7 @@ fun LoginScreen() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(BrandGradients.surfaceVertical(MaterialTheme.colorScheme))
+                .background(BrandGradients.surfaceVertical(FishingTheme.colorScheme))
                 .padding(paddingValues)
                 .systemBarsPadding(),
         ) {
@@ -78,15 +78,15 @@ fun LoginScreen() {
                     contentDescription = null,
                     modifier = Modifier
                         .size(160.dp)
-                        .clip(MaterialTheme.shapes.extraLarge)
+                        .clip(FishingTheme.shapes.extraLarge)
                         .slideUpFadeIn(),
                 )
 
                 Text(
                     text = stringResource(Res.string.login_headline),
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = FishingTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = FishingTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(top = Spacing.sm)
@@ -95,8 +95,8 @@ fun LoginScreen() {
 
                 Text(
                     text = stringResource(Res.string.login_subtitle),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = FishingTheme.typography.bodyLarge,
+                    color = FishingTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(top = Spacing.md)
@@ -134,8 +134,8 @@ fun LoginScreen() {
 
                 Text(
                     text = stringResource(Res.string.login_trust_copy),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = FishingTheme.typography.bodySmall,
+                    color = FishingTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(top = Spacing.lg)

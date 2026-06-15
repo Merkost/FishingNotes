@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.new_catch
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
@@ -9,7 +10,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -47,7 +47,7 @@ fun StatusFilterChip(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
                             modifier = Modifier.size(14.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = FishingTheme.colorScheme.primary
                         )
                     }
                     is ChipBadge.Count -> {
@@ -55,8 +55,8 @@ fun StatusFilterChip(
                             Spacer(Modifier.width(Spacing.xs))
                             Text(
                                 text = badge.value.toString(),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary
+                                style = FishingTheme.typography.labelSmall,
+                                color = FishingTheme.colorScheme.primary
                             )
                         }
                     }

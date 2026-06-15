@@ -1,12 +1,12 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,9 +40,9 @@ fun ChartCard(
         Column(modifier = Modifier.fillMaxWidth().padding(Spacing.md)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleSmall,
+                style = FishingTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = FishingTheme.colorScheme.onSurface,
             )
             Spacer(Modifier.height(Spacing.md))
             if (data.isEmpty()) {
@@ -53,8 +53,8 @@ fun ChartCard(
                     ) {
                         Text(
                             text = emptyLabel,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = FishingTheme.typography.bodyMedium,
+                            color = FishingTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -72,7 +72,7 @@ private fun BrandColumnChart(
 ) {
     val keys = data.keys.toList()
     val values = data.values.toList().map { it.toDouble() }
-    val brandColor = MaterialTheme.colorScheme.primary
+    val brandColor = FishingTheme.colorScheme.primary
 
     val modelProducer = remember(data) { CartesianChartModelProducer() }
     LaunchedEffect(data) {

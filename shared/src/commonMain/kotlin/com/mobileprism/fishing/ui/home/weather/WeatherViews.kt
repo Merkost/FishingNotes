@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.weather
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -39,7 +40,7 @@ fun PrimaryWeatherItemView(
     modifier: Modifier = Modifier,
     childModifier: Modifier = Modifier,
     temperature: Float,
-    textTint: Color = MaterialTheme.colorScheme.tertiary,
+    textTint: Color = FishingTheme.colorScheme.tertiary,
     iconTint: Color = Color.Unspecified,
     temperatureUnit: TemperatureValues,
     weather: Weather
@@ -92,7 +93,7 @@ fun WeatherAppBarText(
 ) {
     Text(
         modifier = modifier.padding(horizontal = 4.dp),
-        style = MaterialTheme.typography.titleLarge,
+        style = FishingTheme.typography.titleLarge,
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
         color = textColor,
@@ -105,7 +106,7 @@ fun WeatherAppBarText(
 
 @Composable
 fun WeatherLocationIconButton(
-    color: Color = MaterialTheme.colorScheme.onSurface,
+    color: Color = FishingTheme.colorScheme.onSurface,
     onClick: () -> Unit,
 ) {
     IconButton(onClick = onClick) {
@@ -123,13 +124,13 @@ fun WeatherLocationIconButton(
 @Composable
 fun WeatherHeaderText(
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.onSurface,
+    color: Color = FishingTheme.colorScheme.onSurface,
     text: String
 ) {
     Text(
         modifier = modifier,
         text = text,
-        style = MaterialTheme.typography.bodyLarge,
+        style = FishingTheme.typography.bodyLarge,
         color = color
     )
 }
@@ -138,13 +139,13 @@ fun WeatherHeaderText(
 fun WeatherPrimaryText(
     modifier: Modifier = Modifier,
     text: String,
-    textColor: Color = MaterialTheme.colorScheme.onSurface
+    textColor: Color = FishingTheme.colorScheme.onSurface
 ) {
     Text(
         modifier = modifier,
         text = text,
         color = textColor,
-        style = MaterialTheme.typography.titleLarge
+        style = FishingTheme.typography.titleLarge
     )
 }
 
@@ -167,7 +168,7 @@ fun DayTemperatureView(
                 AppText(
                     text = label,
                     style = AppTextStyle.Body,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = FishingTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
                 AppText(
@@ -218,7 +219,7 @@ fun SunriseSunsetView(
             AppText(
                 text = stringResource(Res.string.daylight_hours),
                 style = AppTextStyle.Body,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = FishingTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
             AppText(
@@ -260,7 +261,7 @@ fun DailyWeatherValuesView(
                 label = stringResource(Res.string.pressure),
                 icon = Res.drawable.ic_gauge,
                 value = pressureText(pressureUnit, forecast.pressure),
-                iconTint = MaterialTheme.colorScheme.tertiary,
+                iconTint = FishingTheme.colorScheme.tertiary,
             )
         },
         {
@@ -268,7 +269,7 @@ fun DailyWeatherValuesView(
                 label = stringResource(Res.string.wind),
                 icon = Res.drawable.ic_wind,
                 value = windSpeedText(windSpeedUnit, forecast.windSpeed.toDouble()),
-                iconTint = MaterialTheme.colorScheme.tertiary,
+                iconTint = FishingTheme.colorScheme.tertiary,
             )
         },
         {
@@ -276,7 +277,7 @@ fun DailyWeatherValuesView(
                 label = stringResource(Res.string.humidity),
                 icon = Res.drawable.ic_baseline_opacity_24,
                 value = percentText(forecast.humidity),
-                iconTint = MaterialTheme.colorScheme.tertiary,
+                iconTint = FishingTheme.colorScheme.tertiary,
             )
         },
         {
@@ -284,7 +285,7 @@ fun DailyWeatherValuesView(
                 label = stringResource(Res.string.precipitation),
                 icon = Res.drawable.ic_baseline_umbrella_24,
                 value = percentText(probabilityToPercent(forecast.probabilityOfPrecipitation)),
-                iconTint = MaterialTheme.colorScheme.tertiary,
+                iconTint = FishingTheme.colorScheme.tertiary,
             )
         },
     )
@@ -310,7 +311,7 @@ fun MoonPhaseView(
             text = stringResource(Res.string.moon_phase),
             modifier = Modifier.padding(horizontal = 8.dp),
             style = AppTextStyle.Body,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = FishingTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
         Icon(

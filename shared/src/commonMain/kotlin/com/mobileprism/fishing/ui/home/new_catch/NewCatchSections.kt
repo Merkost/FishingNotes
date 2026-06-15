@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.new_catch
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,7 +17,6 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -87,7 +87,7 @@ fun EssentialsSection(
                     Icon(
                         imageVector = Icons.Default.Lock,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = FishingTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
                 },
@@ -105,7 +105,7 @@ fun EssentialsSection(
                     Icon(
                         painter = painterResource(Res.drawable.ic_baseline_event_24),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = FishingTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
                 },
@@ -177,8 +177,8 @@ fun EssentialsSummary(
             .fillMaxWidth()
             .padding(horizontal = Spacing.lg)
             .clickable { onClick() },
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh
+        shape = FishingTheme.shapes.large,
+        color = FishingTheme.colorScheme.surfaceContainerHigh
     ) {
         Column(
             modifier = Modifier.padding(Spacing.md),
@@ -196,20 +196,20 @@ fun EssentialsSummary(
                 }
                 Text(
                     text = placeTitle,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = FishingTheme.typography.titleSmall,
                     maxLines = 1
                 )
                 Spacer(Modifier.weight(1f))
                 Text(
                     text = dateTime.toDate() + " " + dateTime.toTime(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = FishingTheme.typography.bodySmall,
+                    color = FishingTheme.colorScheme.onSurfaceVariant
                 )
             }
             Text(
                 text = summaryText,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = FishingTheme.typography.bodyMedium,
+                color = FishingTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -252,7 +252,7 @@ fun WeatherSection(
                 Icon(
                     painter = painterResource(Res.drawable.ic_no_internet),
                     contentDescription = null,
-                    tint = MaterialTheme.customColors.secondaryIconColor,
+                    tint = FishingTheme.customColors.secondaryIconColor,
                     modifier = Modifier.size(IconSize.sm)
                 )
             }
@@ -260,8 +260,8 @@ fun WeatherSection(
             if (!state.isDownloadAvailable) {
                 Text(
                     text = stringResource(Res.string.auto_filled),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary
+                    style = FishingTheme.typography.labelSmall,
+                    color = FishingTheme.colorScheme.primary
                 )
                 Spacer(Modifier.width(Spacing.xs))
             }
@@ -277,7 +277,7 @@ fun WeatherSection(
                             else -> painterResource(Res.drawable.ic_baseline_refresh_24)
                         },
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary
+                        tint = FishingTheme.colorScheme.tertiary
                     )
                 }
             }

@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.components
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -7,7 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -71,8 +71,8 @@ fun AutoSuggestTextField(
             singleLine = true,
             shape = fieldShape,
             colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                unfocusedContainerColor = FishingTheme.colorScheme.surfaceContainerHigh,
+                focusedContainerColor = FishingTheme.colorScheme.surfaceContainerHigh,
             ),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
         )
@@ -89,7 +89,7 @@ fun AutoSuggestTextField(
                         if (value.isNotBlank() && matchIndex >= 0) {
                             Text(buildAnnotatedString {
                                 append(suggestion.substring(0, matchIndex))
-                                withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                                withStyle(SpanStyle(color = FishingTheme.colorScheme.primary)) {
                                     append(suggestion.substring(matchIndex, matchIndex + value.length))
                                 }
                                 append(suggestion.substring(matchIndex + value.length))

@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.components
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +31,7 @@ fun SkeletonBox(
             .size(width = width, height = height)
             .placeholder(
                 visible = true,
-                color = MaterialTheme.colorScheme.surfaceVariant,
+                color = FishingTheme.colorScheme.surfaceVariant,
                 shape = shape,
             )
     )
@@ -48,7 +48,7 @@ fun SkeletonBox(
             .height(height)
             .placeholder(
                 visible = true,
-                color = MaterialTheme.colorScheme.surfaceVariant,
+                color = FishingTheme.colorScheme.surfaceVariant,
                 shape = shape,
             )
     )
@@ -67,7 +67,7 @@ fun SkeletonLine(
             .height(height)
             .placeholder(
                 visible = true,
-                color = MaterialTheme.colorScheme.surfaceVariant,
+                color = FishingTheme.colorScheme.surfaceVariant,
                 shape = shape,
             )
     )

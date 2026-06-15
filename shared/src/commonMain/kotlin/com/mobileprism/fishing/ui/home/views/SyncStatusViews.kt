@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -16,7 +17,6 @@ import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.SyncProblem
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,10 +45,10 @@ fun SyncStatusIndicator(
         Surface(
             modifier = modifier.fillMaxWidth(),
             color = when (syncState) {
-                is SyncState.Pending -> MaterialTheme.colorScheme.primaryContainer
-                is SyncState.Error -> MaterialTheme.colorScheme.errorContainer
-                is SyncState.Conflict -> MaterialTheme.colorScheme.errorContainer
-                is SyncState.Synced -> MaterialTheme.colorScheme.surface
+                is SyncState.Pending -> FishingTheme.colorScheme.primaryContainer
+                is SyncState.Error -> FishingTheme.colorScheme.errorContainer
+                is SyncState.Conflict -> FishingTheme.colorScheme.errorContainer
+                is SyncState.Synced -> FishingTheme.colorScheme.surface
             },
             tonalElevation = 2.dp
         ) {
@@ -64,12 +64,12 @@ fun SyncStatusIndicator(
                         CircularProgressIndicator(
                             modifier = Modifier.size(16.dp),
                             strokeWidth = 2.dp,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            color = FishingTheme.colorScheme.onPrimaryContainer
                         )
                         Text(
                             text = stringResource(Res.string.sync_pending),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            style = FishingTheme.typography.labelMedium,
+                            color = FishingTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.padding(start = 8.dp)
                         )
                     }
@@ -78,12 +78,12 @@ fun SyncStatusIndicator(
                             imageVector = Icons.Default.CloudOff,
                             contentDescription = null,
                             modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.onErrorContainer
+                            tint = FishingTheme.colorScheme.onErrorContainer
                         )
                         Text(
                             text = stringResource(Res.string.sync_error),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            style = FishingTheme.typography.labelMedium,
+                            color = FishingTheme.colorScheme.onErrorContainer,
                             modifier = Modifier.padding(start = 8.dp)
                         )
                     }
@@ -92,12 +92,12 @@ fun SyncStatusIndicator(
                             imageVector = Icons.Default.SyncProblem,
                             contentDescription = null,
                             modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.onErrorContainer
+                            tint = FishingTheme.colorScheme.onErrorContainer
                         )
                         Text(
                             text = stringResource(Res.string.sync_conflict),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            style = FishingTheme.typography.labelMedium,
+                            color = FishingTheme.colorScheme.onErrorContainer,
                             modifier = Modifier.padding(start = 8.dp)
                         )
                     }
@@ -119,7 +119,7 @@ fun SyncStatusIcon(
                 imageVector = Icons.Default.CloudUpload,
                 contentDescription = stringResource(Res.string.pending_upload),
                 modifier = modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.primary
+                tint = FishingTheme.colorScheme.primary
             )
         }
         SyncStatus.PENDING_DELETE -> {
@@ -127,7 +127,7 @@ fun SyncStatusIcon(
                 imageVector = Icons.Default.CloudUpload,
                 contentDescription = stringResource(Res.string.pending_upload),
                 modifier = modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.outline
+                tint = FishingTheme.colorScheme.outline
             )
         }
         SyncStatus.CONFLICT -> {
@@ -135,7 +135,7 @@ fun SyncStatusIcon(
                 imageVector = Icons.Default.ErrorOutline,
                 contentDescription = stringResource(Res.string.sync_conflict),
                 modifier = modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.error
+                tint = FishingTheme.colorScheme.error
             )
         }
         SyncStatus.SYNCED -> {

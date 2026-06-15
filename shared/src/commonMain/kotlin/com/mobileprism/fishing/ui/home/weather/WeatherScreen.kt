@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.weather
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -267,8 +268,8 @@ fun CurrentWeather(
             .fillMaxWidth()
             .height(350.dp),
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.onPrimary
+        color = FishingTheme.colorScheme.primary,
+        contentColor = FishingTheme.colorScheme.onPrimary
     ) {
         Column(
             modifier = Modifier
@@ -284,8 +285,8 @@ fun CurrentWeather(
                 PrimaryWeatherItemView(
                     temperature = currentHour.temperature,
                     weather = currentWeather,
-                    textTint = MaterialTheme.colorScheme.onPrimary,
-                    iconTint = MaterialTheme.colorScheme.onPrimary,
+                    textTint = FishingTheme.colorScheme.onPrimary,
+                    iconTint = FishingTheme.colorScheme.onPrimary,
                     temperatureUnit = temperatureUnit
                 )
 
@@ -295,7 +296,7 @@ fun CurrentWeather(
                             label = stringResource(Res.string.pressure),
                             icon = Res.drawable.ic_gauge,
                             value = pressureText(pressureUnit, currentHour.pressure),
-                            iconTint = MaterialTheme.colorScheme.onPrimary,
+                            iconTint = FishingTheme.colorScheme.onPrimary,
                         )
                     },
                     {
@@ -303,7 +304,7 @@ fun CurrentWeather(
                             label = stringResource(Res.string.humidity),
                             icon = Res.drawable.ic_baseline_opacity_24,
                             value = percentText(currentHour.humidity),
-                            iconTint = MaterialTheme.colorScheme.onPrimary,
+                            iconTint = FishingTheme.colorScheme.onPrimary,
                         )
                     },
                     {
@@ -311,7 +312,7 @@ fun CurrentWeather(
                             label = stringResource(Res.string.precipitation),
                             icon = Res.drawable.ic_baseline_umbrella_24,
                             value = percentText(probabilityToPercent(currentHour.probabilityOfPrecipitation)),
-                            iconTint = MaterialTheme.colorScheme.onPrimary,
+                            iconTint = FishingTheme.colorScheme.onPrimary,
                         )
                     },
                 )
@@ -365,7 +366,7 @@ fun HourlyWeatherItem(
     forecast: Hourly,
     temperatureUnit: TemperatureValues,
     windSpeedUnit: WindSpeedValues,
-    color: Color = MaterialTheme.colorScheme.onPrimary,
+    color: Color = FishingTheme.colorScheme.onPrimary,
     timeTitle: String
 ) {
     Column(

@@ -1,8 +1,8 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemColors
@@ -24,11 +24,11 @@ data class AppNavItem(
 
 @Composable
 fun appBottomNavItemColors(): NavigationBarItemColors = NavigationBarItemDefaults.colors(
-    selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-    selectedTextColor = MaterialTheme.colorScheme.primary,
-    indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    selectedIconColor = FishingTheme.colorScheme.onPrimaryContainer,
+    selectedTextColor = FishingTheme.colorScheme.primary,
+    indicatorColor = FishingTheme.colorScheme.primaryContainer,
+    unselectedIconColor = FishingTheme.colorScheme.onSurfaceVariant,
+    unselectedTextColor = FishingTheme.colorScheme.onSurfaceVariant,
 )
 
 @Composable
@@ -40,8 +40,8 @@ fun AppBottomNavigation(
 ) {
     NavigationBar(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.onSurface,
+        containerColor = FishingTheme.colorScheme.surface,
+        contentColor = FishingTheme.colorScheme.onSurface,
         tonalElevation = Elevation.level0,
     ) {
         items.forEach { item ->
@@ -65,7 +65,7 @@ fun AppBottomNavigation(
                 label = {
                     Text(
                         text = item.label,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = FishingTheme.typography.labelMedium,
                         maxLines = 1,
                     )
                 },

@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -21,7 +22,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -62,13 +62,13 @@ fun SettingsGroup(
     Column(modifier = modifier) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = FishingTheme.typography.titleSmall,
+            color = FishingTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = Spacing.xxl, bottom = Spacing.sm)
         )
         Surface(
-            shape = MaterialTheme.shapes.extraLarge,
-            color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
+            shape = FishingTheme.shapes.extraLarge,
+            color = FishingTheme.colorScheme.surfaceColorAtElevation(1.dp),
             modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.md)
         ) {
             Column {
@@ -99,21 +99,21 @@ fun SettingsMenuLink(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = FishingTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.width(Spacing.md))
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                style = FishingTheme.typography.bodyLarge,
+                color = FishingTheme.colorScheme.onSurface
             )
             if (subtitle != null) {
                 Text(
                     text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = FishingTheme.typography.bodyMedium,
+                    color = FishingTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -152,7 +152,7 @@ fun SettingsSwitch(
 fun SettingsDivider() {
     HorizontalDivider(
         modifier = Modifier.padding(start = Spacing.xxxl + Spacing.sm),
-        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = Emphasis.divider)
+        color = FishingTheme.colorScheme.outlineVariant.copy(alpha = Emphasis.divider)
     )
 }
 
@@ -168,7 +168,7 @@ fun GrayText(text: String, modifier: Modifier = Modifier) {
         fontSize = 14.sp,
         fontWeight = FontWeight.SemiBold,
         textAlign = TextAlign.Start,
-        color = MaterialTheme.colorScheme.outline,
+        color = FishingTheme.colorScheme.outline,
         text = text,
         maxLines = 1,
         softWrap = true
@@ -188,7 +188,7 @@ fun SettingsCheckbox(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onCheckedChange(!checked) },
-        color = MaterialTheme.colorScheme.surface,
+        color = FishingTheme.colorScheme.surface,
     ) {
         Row(
             modifier = Modifier.padding(Spacing.md),
@@ -246,7 +246,7 @@ fun SelectableColorSwatch(
             .background(swatchBrush)
             .then(
                 if (selected) {
-                    Modifier.border(2.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
+                    Modifier.border(2.dp, FishingTheme.colorScheme.onSurface, CircleShape)
                 } else {
                     Modifier
                 }
@@ -342,8 +342,8 @@ fun <T> SettingsSelectionDialog(
                     Spacer(modifier = Modifier.width(Spacing.md))
                     Text(
                         text = label(option),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        style = FishingTheme.typography.bodyLarge,
+                        color = FishingTheme.colorScheme.onSurface,
                     )
                 }
             }
@@ -393,7 +393,7 @@ fun SettingsNavLink(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = FishingTheme.colorScheme.onSurfaceVariant,
             )
         },
     )

@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.marketing
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -74,7 +74,7 @@ fun MarketingFrame(
                     .clip(RoundedCornerShape(36.dp)),
                 shape = RoundedCornerShape(36.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 18.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                colors = CardDefaults.cardColors(containerColor = FishingTheme.colorScheme.surface),
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     content()

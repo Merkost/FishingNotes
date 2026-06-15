@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.indication
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -30,17 +30,17 @@ fun BrandFab(
     content: @Composable BoxScope.() -> Unit,
 ) {
     val interaction = remember { MutableInteractionSource() }
-    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onPrimary) {
+    CompositionLocalProvider(LocalContentColor provides FishingTheme.colorScheme.onPrimary) {
         Surface(
             modifier = Modifier.size(FabSize).then(modifier),
-            shape = MaterialTheme.shapes.large,
+            shape = FishingTheme.shapes.large,
             color = Color.Transparent,
             shadowElevation = Elevation.fab,
         ) {
             Box(
                 modifier = Modifier
-                    .clip(MaterialTheme.shapes.large)
-                    .background(BrandGradients.primaryDiagonal(MaterialTheme.colorScheme))
+                    .clip(FishingTheme.shapes.large)
+                    .background(BrandGradients.primaryDiagonal(FishingTheme.colorScheme))
                     .indication(interactionSource = interaction, indication = ripple())
                     .combinedClickable(
                         interactionSource = interaction,

@@ -1,10 +1,10 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -127,7 +127,7 @@ fun ModalLoadingDialog(
             )
         ) {
             Surface(
-                shape = MaterialTheme.shapes.medium,
+                shape = FishingTheme.shapes.medium,
                 tonalElevation = 6.dp
             ) {
                 Column(
@@ -143,7 +143,7 @@ fun ModalLoadingDialog(
                     AppText(
                         text = text,
                         style = AppTextStyle.Title,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = FishingTheme.colorScheme.onSurface,
                     )
                     if (progress != null) {
                         LinearProgressIndicator(

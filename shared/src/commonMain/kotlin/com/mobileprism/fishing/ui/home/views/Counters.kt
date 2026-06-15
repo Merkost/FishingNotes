@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -12,7 +13,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.MaterialTheme
 import com.mobileprism.fishing.ui.theme.customColors
 
 @Composable
@@ -23,7 +23,7 @@ fun MaxCounterView(
     maxCount: Int = 0
 ) {
     val tint = animateColorAsState(
-        targetValue = if (count > maxCount) MaterialTheme.colorScheme.error else MaterialTheme.customColors.secondaryTextColor
+        targetValue = if (count > maxCount) FishingTheme.colorScheme.error else FishingTheme.customColors.secondaryTextColor
     )
 
     Row(

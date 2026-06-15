@@ -1,10 +1,10 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
@@ -51,7 +51,7 @@ fun AppBarOverflowMenu(
                         text = item.label,
                         maxLines = 1,
                         color = if (item.tint == Color.Unspecified) {
-                            MaterialTheme.colorScheme.onSurface
+                            FishingTheme.colorScheme.onSurface
                         } else {
                             item.tint
                         }
@@ -63,7 +63,7 @@ fun AppBarOverflowMenu(
                             imageVector = icon,
                             contentDescription = null,
                             tint = if (item.tint == Color.Unspecified) {
-                                MaterialTheme.colorScheme.onSurfaceVariant
+                                FishingTheme.colorScheme.onSurfaceVariant
                             } else {
                                 item.tint
                             }

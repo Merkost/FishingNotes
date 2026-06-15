@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -10,7 +11,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,8 +43,8 @@ fun IconStatChip(
 ) {
     Surface(
         modifier = modifier,
-        shape = MaterialTheme.shapes.small,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        shape = FishingTheme.shapes.small,
+        color = FishingTheme.colorScheme.surfaceContainerHigh,
     ) {
         Row(
             modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs),
@@ -57,12 +57,12 @@ fun IconStatChip(
                     .let { if (iconRotationDeg != 0f) it.rotate(iconRotationDeg) else it },
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = FishingTheme.colorScheme.onSurfaceVariant,
             )
             Text(
                 text = label.ifEmpty { EmptyStatValue },
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurface,
+                style = FishingTheme.typography.labelMedium,
+                color = FishingTheme.colorScheme.onSurface,
             )
         }
     }
@@ -77,8 +77,8 @@ fun IconStatChip(
 ) {
     Surface(
         modifier = modifier,
-        shape = MaterialTheme.shapes.small,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        shape = FishingTheme.shapes.small,
+        color = FishingTheme.colorScheme.surfaceContainerHigh,
     ) {
         Row(
             modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs),
@@ -91,12 +91,12 @@ fun IconStatChip(
                     .let { if (iconRotationDeg != 0f) it.rotate(iconRotationDeg) else it },
                 painter = iconPainter,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = FishingTheme.colorScheme.onSurfaceVariant,
             )
             Text(
                 text = label.ifEmpty { EmptyStatValue },
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurface,
+                style = FishingTheme.typography.labelMedium,
+                color = FishingTheme.colorScheme.onSurface,
             )
         }
     }
@@ -120,15 +120,15 @@ fun CountBadge(
         contentAlignment = Alignment.Center,
     ) {
         Surface(
-            shape = MaterialTheme.shapes.extraLarge,
-            color = MaterialTheme.colorScheme.error,
+            shape = FishingTheme.shapes.extraLarge,
+            color = FishingTheme.colorScheme.error,
             modifier = Modifier.size(20.dp),
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Text(
                     text = if (count > 99) "99+" else count.toString(),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onError,
+                    style = FishingTheme.typography.labelSmall,
+                    color = FishingTheme.colorScheme.onError,
                 )
             }
         }
@@ -146,20 +146,20 @@ fun StatusLabel(
     val onContainer: Color
     when (variant) {
         StatusLabelVariant.Auto -> {
-            container = MaterialTheme.colorScheme.primaryContainer
-            onContainer = MaterialTheme.colorScheme.onPrimaryContainer
+            container = FishingTheme.colorScheme.primaryContainer
+            onContainer = FishingTheme.colorScheme.onPrimaryContainer
         }
         StatusLabelVariant.Done -> {
-            container = MaterialTheme.colorScheme.secondaryContainer
-            onContainer = MaterialTheme.colorScheme.onSecondaryContainer
+            container = FishingTheme.colorScheme.secondaryContainer
+            onContainer = FishingTheme.colorScheme.onSecondaryContainer
         }
         StatusLabelVariant.Offline -> {
-            container = MaterialTheme.colorScheme.errorContainer
-            onContainer = MaterialTheme.colorScheme.onErrorContainer
+            container = FishingTheme.colorScheme.errorContainer
+            onContainer = FishingTheme.colorScheme.onErrorContainer
         }
         StatusLabelVariant.Loading -> {
-            container = MaterialTheme.colorScheme.surfaceContainerHigh
-            onContainer = MaterialTheme.colorScheme.onSurfaceVariant
+            container = FishingTheme.colorScheme.surfaceContainerHigh
+            onContainer = FishingTheme.colorScheme.onSurfaceVariant
         }
     }
     val text = when (variant) {
@@ -168,7 +168,7 @@ fun StatusLabel(
         StatusLabelVariant.Offline -> stringResource(Res.string.status_offline)
         StatusLabelVariant.Loading -> stringResource(Res.string.status_loading)
     }
-    Surface(modifier = modifier, shape = MaterialTheme.shapes.small, color = container) {
+    Surface(modifier = modifier, shape = FishingTheme.shapes.small, color = container) {
         Row(
             modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xxs),
             horizontalArrangement = Arrangement.spacedBy(Spacing.xs),
@@ -195,7 +195,7 @@ fun StatusLabel(
             }
             Text(
                 text = text,
-                style = MaterialTheme.typography.labelSmall,
+                style = FishingTheme.typography.labelSmall,
                 color = onContainer,
             )
         }

@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.map
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -21,7 +22,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -69,9 +69,9 @@ fun PlaceDetailsCardContent(
     val statsLoading = fishActivityPercent == null && windSpeedText == null
 
     Card(
-        shape = MaterialTheme.shapes.large,
+        shape = FishingTheme.shapes.large,
         elevation = CardDefaults.cardElevation(defaultElevation = Elevation.bottomSheet),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(containerColor = FishingTheme.colorScheme.surface),
         modifier = modifier
             .zIndex(1.0f)
             .fillMaxWidth()
@@ -125,9 +125,9 @@ private fun PlaceDetailsHeader(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title.ifEmpty { stringResource(Res.string.no_name_place) },
-                style = MaterialTheme.typography.titleMedium,
+                style = FishingTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = FishingTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -143,8 +143,8 @@ private fun PlaceDetailsHeader(
                 ) {
                     Text(
                         text = address.orEmpty(),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = FishingTheme.typography.bodySmall,
+                        color = FishingTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false),
@@ -152,15 +152,15 @@ private fun PlaceDetailsHeader(
                     if (!address.isNullOrBlank() && distance != null) {
                         Text(
                             text = " \u00B7 ",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = FishingTheme.typography.bodySmall,
+                            color = FishingTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     if (distance != null) {
                         Text(
                             text = distance,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = FishingTheme.typography.bodySmall,
+                            color = FishingTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                         )
                     }
@@ -188,7 +188,7 @@ private fun PlaceDetailsHeader(
                 }
                 Text(
                     text = "${temperatureCelsius ?: 0}\u00B0",
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = FishingTheme.typography.headlineSmall,
                     fontWeight = FontWeight.ExtraBold,
                     color = TemperatureAccent,
                 )
@@ -207,8 +207,8 @@ private fun PlaceDetailsHeader(
             IconButton(
                 onClick = onAddCatchClick,
                 colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    containerColor = FishingTheme.colorScheme.primary,
+                    contentColor = FishingTheme.colorScheme.onPrimary,
                 ),
                 modifier = Modifier.size(34.dp),
             ) {
@@ -239,7 +239,7 @@ private fun PlaceDetailsStatsRow(
             repeat(3) {
                 SkeletonBox(
                     height = 32.dp,
-                    shape = MaterialTheme.shapes.medium,
+                    shape = FishingTheme.shapes.medium,
                     modifier = Modifier.weight(1f),
                 )
             }

@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.onboarding
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -27,7 +28,6 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -130,7 +130,7 @@ fun OnboardingScreen(onFinished: () -> Unit) {
                     Text(
                         text = stringResource(Res.string.onboarding_skip),
                         color = Color.White,
-                        style = MaterialTheme.typography.labelLarge,
+                        style = FishingTheme.typography.labelLarge,
                     )
                 }
             }
@@ -325,9 +325,9 @@ private fun OnboardingTextContent(
         Text(
             text = stringResource(data.titleRes),
             style = if (compact) {
-                MaterialTheme.typography.headlineSmall
+                FishingTheme.typography.headlineSmall
             } else {
-                MaterialTheme.typography.headlineMedium
+                FishingTheme.typography.headlineMedium
             },
             fontWeight = FontWeight.Bold,
             color = Color.White,
@@ -343,9 +343,9 @@ private fun OnboardingTextContent(
         Text(
             text = stringResource(data.descRes),
             style = if (compact) {
-                MaterialTheme.typography.bodyMedium
+                FishingTheme.typography.bodyMedium
             } else {
-                MaterialTheme.typography.bodyLarge
+                FishingTheme.typography.bodyLarge
             },
             color = Color.White.copy(alpha = 0.85f),
             textAlign = TextAlign.Center,

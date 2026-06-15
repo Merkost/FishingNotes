@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.catch
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -157,7 +158,7 @@ fun CatchTopBar(navController: NavController, catch: UserCatch, onDeleteCatch: (
                         label = stringResource(Res.string.delete),
                         onClick = onDeleteCatch,
                         leadingIcon = Icons.Outlined.Delete,
-                        tint = MaterialTheme.colorScheme.error
+                        tint = FishingTheme.colorScheme.error
                     )
                 )
             )
@@ -371,7 +372,7 @@ fun CatchWeatherView(
                         AppText(
                             text = catch.weatherPrimary.replaceFirstChar { it.uppercase() },
                             style = AppTextStyle.BodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = FishingTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -394,7 +395,7 @@ fun CatchWeatherView(
                         value = pressureUnit.getPressureFromMmhg(catch.weatherPressure)
                                 + " " + pressureUnit.name,
                         icon = painterResource(Res.drawable.ic_gauge),
-                        iconTint = MaterialTheme.colorScheme.tertiary,
+                        iconTint = FishingTheme.colorScheme.tertiary,
                         vertical = true
                     )
                     MetricItem(

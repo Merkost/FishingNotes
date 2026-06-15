@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.map
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -23,7 +24,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -109,7 +109,7 @@ fun MarkerInfoDialog(
         Card(
             shape = RoundedCornerShape(cornersDp),
             elevation = CardDefaults.cardElevation(defaultElevation = elevationDp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            colors = CardDefaults.cardColors(containerColor = FishingTheme.colorScheme.surface),
             modifier = Modifier
                 .zIndex(1.0f)
                 .fillMaxWidth()
@@ -164,7 +164,7 @@ fun MarkerInfoDialog(
                                 Icon(
                                     painter = painterResource(Res.drawable.ic_add_catch),
                                     contentDescription = stringResource(Res.string.add_new_catch),
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = FishingTheme.colorScheme.primary
                                 )
                             }
                         }
@@ -188,7 +188,7 @@ fun MarkerInfoDialog(
                                 ),
                             text = address,
                             style = AppTextStyle.Subtitle,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = FishingTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1
                         )
 
@@ -203,7 +203,7 @@ fun MarkerInfoDialog(
                                 .padding(start = 8.dp),
                             text = distance ?: "",
                             style = AppTextStyle.Subtitle,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = FishingTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                         )
                     }
@@ -240,12 +240,12 @@ fun MarkerInfoDialog(
                                 modifier = Modifier
                                     .size(45.dp)
                                     .padding(Spacing.sm),
-                                tint = if (fishActivity == null) MaterialTheme.colorScheme.outlineVariant else MaterialTheme.colorScheme.primary
+                                tint = if (fishActivity == null) FishingTheme.colorScheme.outlineVariant else FishingTheme.colorScheme.primary
                             )
                             AppText(
                                 text = if (fishActivity != null) fishActivity.toString() + "%" else "",
                                 style = AppTextStyle.Subtitle,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = FishingTheme.colorScheme.onSurfaceVariant,
                             )
                         }
 
@@ -254,7 +254,7 @@ fun MarkerInfoDialog(
                             modifier = Modifier
                                 .height(20.dp)
                                 .width(1.dp),
-                            color = MaterialTheme.colorScheme.outline,
+                            color = FishingTheme.colorScheme.outline,
                         )
 
                         // Weather
@@ -275,7 +275,7 @@ fun MarkerInfoDialog(
                                 Icon(
                                     painterResource(Res.drawable.ic_baseline_navigation_24), "",
                                     modifier = Modifier.rotate(windRotation),
-                                    tint = if (currentWeather == null) MaterialTheme.colorScheme.outlineVariant else MaterialTheme.colorScheme.tertiary
+                                    tint = if (currentWeather == null) FishingTheme.colorScheme.outlineVariant else FishingTheme.colorScheme.tertiary
                                 )
                             }
 
@@ -284,7 +284,7 @@ fun MarkerInfoDialog(
                                     text = windUnit.getWindSpeed(it.wind_speed) + " " +
                                             stringResource(windUnit.stringRes),
                                     style = AppTextStyle.Subtitle,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = FishingTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }

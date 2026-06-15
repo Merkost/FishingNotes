@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.profile
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
@@ -147,13 +147,13 @@ private fun UserNameSection(user: User) {
     ) {
         Text(
             text = if (user.displayName.isEmpty()) stringResource(Res.string.anonymous) else user.displayName,
-            style = MaterialTheme.typography.headlineSmall,
+            style = FishingTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
         )
         AppText(
             text = stringResource(Res.string.register_date_value, user.registerDate.toDateTextMonth()),
             style = AppTextStyle.Body,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = FishingTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
     }

@@ -1,10 +1,10 @@
 package com.mobileprism.fishing.ui.home.notes
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -83,7 +83,7 @@ fun ItemUserPlace(
                         modifier = childModifier,
                         text = place.dateOfCreation.toDateTextMonth(),
                         style = AppTextStyle.BodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = FishingTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                     )
 
@@ -100,7 +100,7 @@ fun ItemUserPlace(
                 icon = painterResource(Res.drawable.ic_place_on_map),
                 contentDescription = stringResource(Res.string.show_on_map),
                 tint = if (!place.visible) LocalColors.current.secondaryTextColor
-                        else MaterialTheme.colorScheme.onSurface,
+                        else FishingTheme.colorScheme.onSurface,
                 onClick = { navigateToMap() },
             )
         }
@@ -124,7 +124,7 @@ fun ItemDate(text: String) {
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                 text = text,
                 style = AppTextStyle.BodySmall,
-                color = MaterialTheme.colorScheme.inverseOnSurface,
+                color = FishingTheme.colorScheme.inverseOnSurface,
             )
         }
     }
@@ -212,7 +212,7 @@ fun CatchItemContent(
                 text = "${stringResource(Res.string.amount)}: $fishAmount" +
                         " ${stringResource(Res.string.pc)}",
                 style = AppTextStyle.BodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = FishingTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
 
@@ -229,7 +229,7 @@ fun CatchItemContent(
                             .padding(start = 8.dp),
                         painter = painterResource(Res.drawable.ic_baseline_location_on_24),
                         contentDescription = stringResource(Res.string.location),
-                        tint = MaterialTheme.colorScheme.outline
+                        tint = FishingTheme.colorScheme.outline
                     )
 
                     AppText(
@@ -239,7 +239,7 @@ fun CatchItemContent(
                             .then(childModifier),
                         text = placeTitle,
                         style = AppTextStyle.Body,
-                        color = MaterialTheme.colorScheme.outline,
+                        color = FishingTheme.colorScheme.outline,
                         textAlign = TextAlign.Start,
                         maxLines = 1,
                     )
@@ -261,7 +261,7 @@ fun CatchItemContent(
                         .then(childModifier),
                     text = timeText,
                     style = AppTextStyle.BodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = FishingTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                 )
             }
@@ -273,7 +273,7 @@ fun CatchItemContent(
 fun PlaceItemSkeleton(modifier: Modifier = Modifier) {
     val shimmerModifier = Modifier.placeholder(
         visible = true,
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        color = FishingTheme.colorScheme.surfaceContainerHighest,
         shape = RoundedCornerShape(8.dp),
     )
 
@@ -294,7 +294,7 @@ fun PlaceItemSkeleton(modifier: Modifier = Modifier) {
                     .size(36.dp)
                     .placeholder(
                         visible = true,
-                        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        color = FishingTheme.colorScheme.surfaceContainerHighest,
                         shape = CircleShape,
                     )
             )
@@ -333,7 +333,7 @@ fun PlaceItemSkeleton(modifier: Modifier = Modifier) {
                     .size(32.dp)
                     .placeholder(
                         visible = true,
-                        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        color = FishingTheme.colorScheme.surfaceContainerHighest,
                         shape = CircleShape,
                     )
             )
@@ -345,7 +345,7 @@ fun PlaceItemSkeleton(modifier: Modifier = Modifier) {
 fun CatchItemSkeleton(modifier: Modifier = Modifier) {
     val shimmerModifier = Modifier.placeholder(
         visible = true,
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        color = FishingTheme.colorScheme.surfaceContainerHighest,
         shape = RoundedCornerShape(8.dp),
     )
 
@@ -399,7 +399,7 @@ fun CatchItemSkeleton(modifier: Modifier = Modifier) {
                         .size(20.dp)
                         .placeholder(
                             visible = true,
-                            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                            color = FishingTheme.colorScheme.surfaceContainerHighest,
                             shape = CircleShape,
                         )
                 )
@@ -441,7 +441,7 @@ fun ItemCounter(
         AppText(
             text = stringResource(Res.string.item_count_format, count.toInt()),
             style = AppTextStyle.BodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = FishingTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
         )
     }

@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -14,7 +15,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,8 +30,8 @@ import com.mobileprism.fishing.ui.theme.Spacing
 fun AppCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
-    shape: CornerBasedShape = MaterialTheme.shapes.large,
-    containerColor: Color = MaterialTheme.colorScheme.surface,
+    shape: CornerBasedShape = FishingTheme.shapes.large,
+    containerColor: Color = FishingTheme.colorScheme.surface,
     elevation: Dp = Elevation.raisedCard,
     contentPadding: Dp = Spacing.cardPadding,
     content: @Composable ColumnScope.() -> Unit,
@@ -78,13 +78,13 @@ fun SectionCard(
             Icon(
                 painter = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = FishingTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(IconSize.md),
             )
             AppText(
                 text = title,
                 style = AppTextStyle.Subtitle,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = FishingTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f),
             )
             when {
@@ -92,7 +92,7 @@ fun SectionCard(
                 onClick != null -> Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = FishingTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(IconSize.md),
                 )
             }

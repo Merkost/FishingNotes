@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.*
@@ -25,7 +26,7 @@ fun DefaultAppBar(
     title: String,
     subtitle: String? = null,
     elevation: Dp = 4.dp,
-    backgroundColor: Color = MaterialTheme.colorScheme.primary,
+    backgroundColor: Color = FishingTheme.colorScheme.primary,
     actions: @Composable (RowScope.() -> Unit) = {}
 
 ) {
@@ -49,7 +50,7 @@ fun DefaultAppBar(
             Column() {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = FishingTheme.typography.titleLarge,
                 )
                 if (subtitle != null) {
                     AppText(

@@ -1,11 +1,11 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
@@ -37,7 +37,7 @@ internal fun textStyleFor(style: AppTextStyle, typography: Typography): TextStyl
 
 @Composable
 @ReadOnlyComposable
-private fun AppTextStyle.toTextStyle(): TextStyle = textStyleFor(this, MaterialTheme.typography)
+private fun AppTextStyle.toTextStyle(): TextStyle = textStyleFor(this, FishingTheme.typography)
 
 @Composable
 fun AppText(
@@ -66,7 +66,7 @@ fun TextWithLeadingIcon(
     text: String,
     modifier: Modifier = Modifier,
     style: AppTextStyle = AppTextStyle.Subtitle,
-    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    color: Color = FishingTheme.colorScheme.onSurfaceVariant,
     contentDescription: String? = null,
 ) {
     Row(

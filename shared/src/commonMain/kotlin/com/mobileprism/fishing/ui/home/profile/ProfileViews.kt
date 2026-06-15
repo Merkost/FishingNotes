@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.profile
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Settings
@@ -108,7 +108,7 @@ fun BestCatchView(
             icon = painterResource(Res.drawable.ic_cup),
             text = stringResource(Res.string.best_catch),
             style = AppTextStyle.Subtitle,
-            color = MaterialTheme.colorScheme.primary,
+            color = FishingTheme.colorScheme.primary,
         )
 
         if (bestCatch != null) {
@@ -140,7 +140,7 @@ fun FavoritePlaceView(
             icon = painterResource(Res.drawable.ic_baseline_star_24),
             text = stringResource(Res.string.favorite_place),
             style = AppTextStyle.Subtitle,
-            color = MaterialTheme.colorScheme.primary,
+            color = FishingTheme.colorScheme.primary,
         )
 
         if (favoritePlace != null) {

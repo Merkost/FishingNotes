@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,20 +35,20 @@ fun ConflictResolutionDialog(
         title = {
             Text(
                 text = stringResource(Res.string.sync_conflict_title),
-                style = MaterialTheme.typography.headlineSmall
+                style = FishingTheme.typography.headlineSmall
             )
         },
         text = {
             Column {
                 Text(
                     text = stringResource(Res.string.sync_conflict_message),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = FishingTheme.typography.bodyMedium
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleMedium
+                    style = FishingTheme.typography.titleMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -67,12 +67,12 @@ fun ConflictResolutionDialog(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = key,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        style = FishingTheme.typography.labelSmall,
+                                        color = FishingTheme.colorScheme.onSurfaceVariant
                                     )
                                     Text(
                                         text = "$localVal → $serverVal",
-                                        style = MaterialTheme.typography.bodySmall
+                                        style = FishingTheme.typography.bodySmall
                                     )
                                 }
                             }

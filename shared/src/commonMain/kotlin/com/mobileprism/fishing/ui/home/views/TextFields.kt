@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
@@ -64,8 +65,8 @@ fun SimpleUnderlineTextField(
                     .fillMaxWidth()
                     .padding(bottom = 4.dp, start = 16.dp),
                 textAlign = TextAlign.Start,
-                color = MaterialTheme.customColors.secondaryTextColor,
-                style = MaterialTheme.typography.bodyMedium,
+                color = FishingTheme.customColors.secondaryTextColor,
+                style = FishingTheme.typography.bodyMedium,
             )
         }
         TextField(
@@ -74,11 +75,11 @@ fun SimpleUnderlineTextField(
                 .clickable { onClick() },
             readOnly = true,
             value = text,
-            textStyle = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+            textStyle = FishingTheme.typography.bodyLarge.copy(fontSize = 18.sp),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = primaryBlueLightColorTransparent,
                 unfocusedContainerColor = primaryBlueLightColorTransparent,
-                cursorColor = MaterialTheme.colorScheme.onSurface,
+                cursorColor = FishingTheme.colorScheme.onSurface,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
             ),
@@ -105,7 +106,7 @@ fun SimpleUnderlineTextField(
                     .align(Alignment.End),
                 text = it,
                 style = AppTextStyle.Caption,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = FishingTheme.colorScheme.onSurfaceVariant
             )
         }
     }

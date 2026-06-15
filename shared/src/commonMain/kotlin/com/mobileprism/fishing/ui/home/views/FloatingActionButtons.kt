@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
@@ -74,14 +75,14 @@ fun FabMenuItem(item: FabMenuItem, modifier: Modifier = Modifier, size: Dp) {
         ) {
             Surface(
                 shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                color = FishingTheme.colorScheme.surfaceContainerHigh,
                 shadowElevation = 4.dp,
             ) {
                 Text(
                     item.text,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.labelLarge,
+                    color = FishingTheme.colorScheme.onSurface,
+                    style = FishingTheme.typography.labelLarge,
                 )
             }
 

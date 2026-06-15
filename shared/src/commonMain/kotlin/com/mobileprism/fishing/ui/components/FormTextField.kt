@@ -1,11 +1,11 @@
 package com.mobileprism.fishing.ui.components
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,7 +44,7 @@ fun FormTextField(
         isError = isError,
         singleLine = singleLine,
         supportingText = supportingText?.let { { Text(it) } },
-        shape = MaterialTheme.shapes.small,
+        shape = FishingTheme.shapes.small,
         keyboardOptions = keyboardOptions,
     )
 }
@@ -69,13 +69,13 @@ fun PickerField(
         onValueChange = {},
         modifier = modifier.fillMaxWidth(),
         label = { Text(label) },
-        placeholder = { Text(placeholder, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+        placeholder = { Text(placeholder, color = FishingTheme.colorScheme.onSurfaceVariant) },
         leadingIcon = leadingIcon?.let {
             { Icon(painter = it, contentDescription = null) }
         },
         readOnly = true,
         singleLine = true,
-        shape = MaterialTheme.shapes.small,
+        shape = FishingTheme.shapes.small,
         interactionSource = interactionSource,
     )
 }

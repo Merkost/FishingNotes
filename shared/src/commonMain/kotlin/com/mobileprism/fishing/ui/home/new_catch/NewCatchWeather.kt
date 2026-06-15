@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.new_catch
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
@@ -202,7 +203,7 @@ fun NewCatchTemperatureView(
             Icon(
                 painter = painterResource(Res.drawable.ic_thermometer),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+                tint = FishingTheme.colorScheme.primary
             )
         },
         trailingIcon = { Text(text = stringResource(temperatureUnit.stringRes)) },
@@ -237,7 +238,7 @@ fun NewCatchPressureView(
             Icon(
                 painter = painterResource(Res.drawable.ic_gauge),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+                tint = FishingTheme.colorScheme.primary
             )
         },
         trailingIcon = { Text(text = stringResource(pressureUnit.stringRes)) },
@@ -290,7 +291,7 @@ fun NewCatchWindView(
                     modifier = Modifier.rotate(windDeg.toFloat()),
                     painter = painterResource(Res.drawable.ic_baseline_navigation_24),
                     contentDescription = stringResource(Res.string.weather_wind_direction),
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = FishingTheme.colorScheme.primary,
                 )
             }
 
@@ -322,7 +323,7 @@ fun NewCatchMoonView(
                     getMoonIconByPhase(moonPhase)
                 ),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+                tint = FishingTheme.colorScheme.primary
             )
         },
         onValueChange = { },

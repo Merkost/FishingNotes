@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
@@ -8,7 +9,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
@@ -23,11 +23,11 @@ import org.jetbrains.compose.resources.stringResource
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun appTopBarColors(): TopAppBarColors = TopAppBarDefaults.topAppBarColors(
-    containerColor = MaterialTheme.colorScheme.surface,
-    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-    titleContentColor = MaterialTheme.colorScheme.onSurface,
-    navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    containerColor = FishingTheme.colorScheme.surface,
+    scrolledContainerColor = FishingTheme.colorScheme.surfaceContainer,
+    titleContentColor = FishingTheme.colorScheme.onSurface,
+    navigationIconContentColor = FishingTheme.colorScheme.onSurfaceVariant,
+    actionIconContentColor = FishingTheme.colorScheme.onSurfaceVariant,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,7 +50,7 @@ fun AppTopBar(
                     Icon(
                         imageVector = navigationIcon,
                         contentDescription = stringResource(Res.string.back),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = FishingTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -81,18 +81,18 @@ fun AppLargeTopBar(
                     Icon(
                         imageVector = navigationIcon,
                         contentDescription = stringResource(Res.string.back),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = FishingTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
         },
         actions = actions,
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-            titleContentColor = MaterialTheme.colorScheme.onSurface,
-            navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            containerColor = FishingTheme.colorScheme.surface,
+            scrolledContainerColor = FishingTheme.colorScheme.surfaceContainer,
+            titleContentColor = FishingTheme.colorScheme.onSurface,
+            navigationIconContentColor = FishingTheme.colorScheme.onSurfaceVariant,
+            actionIconContentColor = FishingTheme.colorScheme.onSurfaceVariant,
         ),
         scrollBehavior = scrollBehavior,
     )
@@ -106,7 +106,7 @@ private fun AppTopBarTitle(title: String, subtitle: String?) {
             AppText(
                 text = subtitle,
                 style = AppTextStyle.Caption,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = FishingTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

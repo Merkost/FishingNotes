@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.new_catch
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,7 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +31,7 @@ fun PlaceField(
     onClick: () -> Unit,
 ) {
     Surface(
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = FishingTheme.colorScheme.surfaceContainerHigh,
         shape = RoundedCornerShape(16.dp),
         modifier = modifier.clickable { onClick() }
     ) {
@@ -50,9 +50,9 @@ fun PlaceField(
             }
             Text(
                 text = placeTitle ?: placeholder,
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (placeTitle != null) MaterialTheme.colorScheme.onSurface
-                else MaterialTheme.colorScheme.onSurfaceVariant,
+                style = FishingTheme.typography.bodyLarge,
+                color = if (placeTitle != null) FishingTheme.colorScheme.onSurface
+                else FishingTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f)
             )
             trailing()

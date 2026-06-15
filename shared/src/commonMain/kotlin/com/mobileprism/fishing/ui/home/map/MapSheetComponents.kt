@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.map
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -91,7 +91,7 @@ fun DragHandle(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .size(width = 32.dp, height = 4.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.outlineVariant),
+                .background(FishingTheme.colorScheme.outlineVariant),
         )
     }
 }
@@ -105,7 +105,7 @@ fun DismissScrim(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.32f))
+            .background(FishingTheme.colorScheme.scrim.copy(alpha = 0.32f))
             .semantics {
                 this.contentDescription = contentDescription
                 this.role = Role.Button

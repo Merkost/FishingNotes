@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.components.state
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,20 +58,20 @@ fun EmptyState(
             Icon(
                 painter = illustration,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = FishingTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(64.dp),
             )
             AppText(
                 text = title,
                 style = AppTextStyle.Title,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = FishingTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
             )
             if (description != null) {
                 AppText(
                     text = description,
                     style = AppTextStyle.Body,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = FishingTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
             }
@@ -134,13 +134,13 @@ fun ErrorState(
             Icon(
                 painter = illustration,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.error,
+                tint = FishingTheme.colorScheme.error,
                 modifier = Modifier.size(64.dp),
             )
             AppText(
                 text = message,
                 style = AppTextStyle.Body,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = FishingTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
             if (onRetry != null) {

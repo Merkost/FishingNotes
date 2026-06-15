@@ -1,11 +1,11 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,13 +22,13 @@ import com.mobileprism.fishing.ui.theme.Emphasis
 @Composable
 fun FloatingControlSurface(
     modifier: Modifier = Modifier,
-    shape: Shape = MaterialTheme.shapes.medium,
+    shape: Shape = FishingTheme.shapes.medium,
     content: @Composable () -> Unit,
 ) {
     Surface(
         modifier = modifier,
         shape = shape,
-        color = MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 1f - Emphasis.pressedOverlay),
+        color = FishingTheme.colorScheme.surfaceContainerLowest.copy(alpha = 1f - Emphasis.pressedOverlay),
         shadowElevation = Elevation.card,
         content = content,
     )
@@ -44,7 +44,7 @@ fun FloatingIconButton(
     tint: Color = Color.Unspecified,
     iconModifier: Modifier = Modifier,
 ) {
-    val resolvedTint = if (tint == Color.Unspecified) MaterialTheme.colorScheme.onSurface else tint
+    val resolvedTint = if (tint == Color.Unspecified) FishingTheme.colorScheme.onSurface else tint
     Box(
         modifier = modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp),
         contentAlignment = Alignment.Center,
@@ -70,7 +70,7 @@ fun FloatingIconButton(
     tint: Color = Color.Unspecified,
     iconModifier: Modifier = Modifier,
 ) {
-    val resolvedTint = if (tint == Color.Unspecified) MaterialTheme.colorScheme.onSurface else tint
+    val resolvedTint = if (tint == Color.Unspecified) FishingTheme.colorScheme.onSurface else tint
     Box(
         modifier = modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp),
         contentAlignment = Alignment.Center,

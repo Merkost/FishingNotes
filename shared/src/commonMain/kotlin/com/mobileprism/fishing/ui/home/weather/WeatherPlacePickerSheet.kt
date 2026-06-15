@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.weather
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -61,7 +62,7 @@ fun WeatherPlacePickerSheetContent(
         Text(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             text = stringResource(Res.string.select_place),
-            style = MaterialTheme.typography.titleLarge,
+            style = FishingTheme.typography.titleLarge,
         )
 
         OutlinedTextField(
@@ -77,7 +78,7 @@ fun WeatherPlacePickerSheetContent(
                 Icon(
                     Icons.Filled.Search,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.outline,
+                    tint = FishingTheme.colorScheme.outline,
                 )
             },
             trailingIcon = {
@@ -101,8 +102,8 @@ fun WeatherPlacePickerSheetContent(
             ) {
                 Text(
                     text = stringResource(Res.string.no_places_found),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    style = FishingTheme.typography.bodyLarge,
+                    color = FishingTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 )
             }
         } else {
@@ -151,11 +152,11 @@ private fun CurrentLocationItem(
     onClick: () -> Unit,
 ) {
     val backgroundColor = if (isSelected) {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+        FishingTheme.colorScheme.primary.copy(alpha = 0.08f)
     } else {
         Color.Transparent
     }
-    val dotColor = MaterialTheme.colorScheme.primary
+    val dotColor = FishingTheme.colorScheme.primary
 
     Row(
         modifier = Modifier
@@ -182,7 +183,7 @@ private fun CurrentLocationItem(
         Text(
             modifier = Modifier.weight(1f),
             text = place.title,
-            style = MaterialTheme.typography.bodyLarge,
+            style = FishingTheme.typography.bodyLarge,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -190,7 +191,7 @@ private fun CurrentLocationItem(
             Icon(
                 imageVector = Icons.Filled.Check,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = FishingTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp),
             )
         }
@@ -202,8 +203,8 @@ private fun SectionLabel(text: String) {
     Text(
         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 8.dp),
         text = text,
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.outline,
+        style = FishingTheme.typography.labelSmall,
+        color = FishingTheme.colorScheme.outline,
         letterSpacing = 1.sp,
     )
 }
@@ -215,7 +216,7 @@ private fun PlaceItem(
     onClick: () -> Unit,
 ) {
     val backgroundColor = if (isSelected) {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+        FishingTheme.colorScheme.primary.copy(alpha = 0.08f)
     } else {
         Color.Transparent
     }
@@ -241,7 +242,7 @@ private fun PlaceItem(
         Text(
             modifier = Modifier.weight(1f),
             text = place.title,
-            style = MaterialTheme.typography.bodyLarge,
+            style = FishingTheme.typography.bodyLarge,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -249,7 +250,7 @@ private fun PlaceItem(
             Icon(
                 imageVector = Icons.Filled.Check,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = FishingTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp),
             )
         }

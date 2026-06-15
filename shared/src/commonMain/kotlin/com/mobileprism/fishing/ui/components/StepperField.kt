@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.components
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,7 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,7 +36,7 @@ fun StepperField(
 ) {
     Surface(
         modifier = modifier,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = FishingTheme.colorScheme.surfaceContainerHigh,
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
@@ -49,8 +49,8 @@ fun StepperField(
                 enabled = value > range.first,
                 shape = CircleShape,
                 colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                    contentColor = MaterialTheme.colorScheme.primary
+                    containerColor = FishingTheme.colorScheme.primary.copy(alpha = 0.12f),
+                    contentColor = FishingTheme.colorScheme.primary
                 )
             ) {
                 Icon(
@@ -62,13 +62,13 @@ fun StepperField(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = if (suffix.isNotEmpty()) "$value $suffix" else value.toString(),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
+                    style = FishingTheme.typography.titleLarge,
+                    color = FishingTheme.colorScheme.onSurface
                 )
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = FishingTheme.typography.bodySmall,
+                    color = FishingTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -77,8 +77,8 @@ fun StepperField(
                 enabled = value < range.last,
                 shape = CircleShape,
                 colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                    contentColor = MaterialTheme.colorScheme.primary
+                    containerColor = FishingTheme.colorScheme.primary.copy(alpha = 0.12f),
+                    contentColor = FishingTheme.colorScheme.primary
                 )
             ) {
                 Icon(
@@ -105,7 +105,7 @@ fun StepperField(
 
     Surface(
         modifier = modifier,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = FishingTheme.colorScheme.surfaceContainerHigh,
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
@@ -121,8 +121,8 @@ fun StepperField(
                 enabled = value > range.start,
                 shape = CircleShape,
                 colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                    contentColor = MaterialTheme.colorScheme.primary
+                    containerColor = FishingTheme.colorScheme.primary.copy(alpha = 0.12f),
+                    contentColor = FishingTheme.colorScheme.primary
                 )
             ) {
                 Icon(
@@ -134,13 +134,13 @@ fun StepperField(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = if (suffix.isNotEmpty()) "$value $suffix" else value.toString(),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
+                    style = FishingTheme.typography.titleLarge,
+                    color = FishingTheme.colorScheme.onSurface
                 )
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = FishingTheme.typography.bodySmall,
+                    color = FishingTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -152,8 +152,8 @@ fun StepperField(
                 enabled = value < range.endInclusive,
                 shape = CircleShape,
                 colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                    contentColor = MaterialTheme.colorScheme.primary
+                    containerColor = FishingTheme.colorScheme.primary.copy(alpha = 0.12f),
+                    contentColor = FishingTheme.colorScheme.primary
                 )
             ) {
                 Icon(

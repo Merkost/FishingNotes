@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.map
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -25,7 +26,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
@@ -135,9 +135,9 @@ fun MapModalBottomSheet(
 
     val color = animateColorAsState(
         targetValue = if (showHiddenPlaces) {
-            MaterialTheme.colorScheme.onSurface
+            FishingTheme.colorScheme.onSurface
         } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
+            FishingTheme.colorScheme.onSurfaceVariant
         },
         animationSpec = tween(800)
     )
@@ -206,23 +206,23 @@ fun MyLocationButton(
     }
     val contentColor = animateColorAsState(
         targetValue = when (effectiveState) {
-            MyLocationButtonState.Ready -> MaterialTheme.colorScheme.onSurface
-            MyLocationButtonState.Searching -> MaterialTheme.colorScheme.primary
-            MyLocationButtonState.NeedsPermission -> MaterialTheme.colorScheme.tertiary
+            MyLocationButtonState.Ready -> FishingTheme.colorScheme.onSurface
+            MyLocationButtonState.Searching -> FishingTheme.colorScheme.primary
+            MyLocationButtonState.NeedsPermission -> FishingTheme.colorScheme.tertiary
             MyLocationButtonState.PermissionBlocked,
             MyLocationButtonState.GpsDisabled,
-            MyLocationButtonState.Unavailable -> MaterialTheme.colorScheme.error
+            MyLocationButtonState.Unavailable -> FishingTheme.colorScheme.error
         },
         animationSpec = tween(250)
     )
     val containerColor = animateColorAsState(
         targetValue = when (effectiveState) {
             MyLocationButtonState.Ready -> Color.Transparent
-            MyLocationButtonState.Searching -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
-            MyLocationButtonState.NeedsPermission -> MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.55f)
+            MyLocationButtonState.Searching -> FishingTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+            MyLocationButtonState.NeedsPermission -> FishingTheme.colorScheme.tertiaryContainer.copy(alpha = 0.55f)
             MyLocationButtonState.PermissionBlocked,
             MyLocationButtonState.GpsDisabled,
-            MyLocationButtonState.Unavailable -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.55f)
+            MyLocationButtonState.Unavailable -> FishingTheme.colorScheme.errorContainer.copy(alpha = 0.55f)
         },
         animationSpec = tween(250)
     )
@@ -354,7 +354,7 @@ fun LayersView(
     }
 
     Card(
-        shape = MaterialTheme.shapes.medium,
+        shape = FishingTheme.shapes.medium,
         modifier = Modifier
             .width(250.dp)
             .wrapContentHeight()
@@ -418,8 +418,8 @@ fun MapLayerItem(
 ) {
     val isSelected = currentMapType == layer
     val animatedColor by animateColorAsState(
-        if (isSelected) MaterialTheme.colorScheme.primary
-        else MaterialTheme.colorScheme.outlineVariant,
+        if (isSelected) FishingTheme.colorScheme.primary
+        else FishingTheme.colorScheme.outlineVariant,
         animationSpec = tween(300)
     )
 
@@ -433,9 +433,9 @@ fun MapLayerItem(
                 .border(
                     width = if (isSelected) 2.dp else 1.dp,
                     color = animatedColor,
-                    shape = MaterialTheme.shapes.medium
+                    shape = FishingTheme.shapes.medium
                 ),
-            shape = MaterialTheme.shapes.medium,
+            shape = FishingTheme.shapes.medium,
             onClick = { onLayerSelected(layer) }
         ) {
             Image(

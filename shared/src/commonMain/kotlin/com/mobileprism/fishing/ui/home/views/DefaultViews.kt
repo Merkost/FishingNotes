@@ -1,9 +1,9 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,12 +68,12 @@ fun NoContentView(
             modifier = Modifier.size(IconSize.lg),
             painter = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            tint = FishingTheme.colorScheme.onSurfaceVariant
         )
         AppText(
             text = text,
             style = AppTextStyle.Body,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = FishingTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
     }
@@ -91,7 +91,7 @@ fun WeatherIconItem(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .padding(4.dp)
-            .clip(MaterialTheme.shapes.medium)
+            .clip(FishingTheme.shapes.medium)
             .requiredSize(requiredSize)
             .then(clickableModifier)
     ) {
@@ -101,7 +101,7 @@ fun WeatherIconItem(
 
 @Composable
 fun WindIconItem(
-    iconTint: Color = MaterialTheme.colorScheme.tertiary,
+    iconTint: Color = FishingTheme.colorScheme.tertiary,
     rotation: Float,
     onIconSelected: () -> Unit
 ) {
@@ -109,7 +109,7 @@ fun WindIconItem(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .padding(4.dp)
-            .clip(MaterialTheme.shapes.medium)
+            .clip(FishingTheme.shapes.medium)
             .requiredSize(50.dp)
             .clickable(onClick = onIconSelected)
     ) {

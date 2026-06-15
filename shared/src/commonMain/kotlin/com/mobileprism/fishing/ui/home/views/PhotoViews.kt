@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateColorAsState
@@ -34,7 +35,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -117,7 +117,7 @@ fun ItemPhoto(
         )
         if (deleteEnabled) {
             Surface(
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                color = FishingTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
                 modifier = Modifier
                     .size(48.dp)
                     .align(Alignment.TopEnd)
@@ -126,7 +126,7 @@ fun ItemPhoto(
             ) {
                 Icon(
                     Icons.Default.Close,
-                    tint = MaterialTheme.colorScheme.onSurface,
+                    tint = FishingTheme.colorScheme.onSurface,
                     contentDescription = stringResource(Res.string.delete_photo),
                     modifier = Modifier
                         .fillMaxSize()
@@ -334,7 +334,7 @@ fun FullSizePhotoView(
         )
         if (deleteEnabled) {
             Surface(
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                color = FishingTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
                 modifier = Modifier
                     .size(48.dp)
                     .align(Alignment.TopEnd)
@@ -343,7 +343,7 @@ fun FullSizePhotoView(
             ) {
                 Icon(
                     Icons.Default.Close,
-                    tint = MaterialTheme.colorScheme.onSurface,
+                    tint = FishingTheme.colorScheme.onSurface,
                     contentDescription = stringResource(Res.string.delete_photo),
                     modifier = Modifier
                         .fillMaxSize()
@@ -406,7 +406,7 @@ fun FullScreenPhoto(photo: MutableState<String?>) {
     val dismissOffsetY = remember { Animatable(0f) }
     val alpha = 0.8f - abs(dismissOffsetY.value).div(600)
     val backgroundColor = animateColorAsState(
-        targetValue = MaterialTheme.colorScheme.scrim.copy(if (alpha < 0) 0f else alpha)
+        targetValue = FishingTheme.colorScheme.scrim.copy(if (alpha < 0) 0f else alpha)
     )
 
     Dialog(

@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.map
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -24,7 +25,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import com.mobileprism.fishing.ui.home.views.BrandFab
@@ -447,7 +447,7 @@ fun MapLayout(
                         androidx.compose.material3.Text(
                             text = userMarker.catchesCount.toString(),
                             color = Color.White,
-                            style = MaterialTheme.typography.labelSmall,
+                            style = FishingTheme.typography.labelSmall,
                             modifier = Modifier
                                 .background(
                                     color = Color(0xFFFF6D00),

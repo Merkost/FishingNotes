@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,7 +15,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -46,7 +46,7 @@ fun WeatherMetric(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelSmall,
+            style = FishingTheme.typography.labelSmall,
             color = LocalContentColor.current.copy(alpha = Emphasis.medium),
             textAlign = TextAlign.Center,
         )
@@ -62,7 +62,7 @@ fun WeatherMetric(
             )
             Text(
                 text = value,
-                style = MaterialTheme.typography.bodyLarge,
+                style = FishingTheme.typography.bodyLarge,
                 color = LocalContentColor.current,
             )
         }
@@ -109,23 +109,23 @@ fun WeatherDailyForecastRow(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        headlineContent = { Text(text = date, style = MaterialTheme.typography.bodyLarge) },
+        headlineContent = { Text(text = date, style = FishingTheme.typography.bodyLarge) },
         leadingContent = {
             Icon(
                 modifier = Modifier.size(28.dp),
                 painter = painterResource(icon),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = FishingTheme.colorScheme.onSurfaceVariant,
             )
         },
         supportingContent = precipitation?.let {
-            { Text(text = it, style = MaterialTheme.typography.bodyMedium) }
+            { Text(text = it, style = FishingTheme.typography.bodyMedium) }
         },
         trailingContent = {
             Text(
                 text = temperature,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
+                style = FishingTheme.typography.titleMedium,
+                color = FishingTheme.colorScheme.onSurface,
             )
         },
     )

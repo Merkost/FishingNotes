@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -35,21 +35,21 @@ fun InlineBannerCard(
     val onContainer: Color
     when (tone) {
         BannerTone.Info -> {
-            container = MaterialTheme.colorScheme.secondaryContainer
-            onContainer = MaterialTheme.colorScheme.onSecondaryContainer
+            container = FishingTheme.colorScheme.secondaryContainer
+            onContainer = FishingTheme.colorScheme.onSecondaryContainer
         }
         BannerTone.Warning -> {
-            container = MaterialTheme.colorScheme.tertiaryContainer
-            onContainer = MaterialTheme.colorScheme.onTertiaryContainer
+            container = FishingTheme.colorScheme.tertiaryContainer
+            onContainer = FishingTheme.colorScheme.onTertiaryContainer
         }
         BannerTone.Error -> {
-            container = MaterialTheme.colorScheme.errorContainer
-            onContainer = MaterialTheme.colorScheme.onErrorContainer
+            container = FishingTheme.colorScheme.errorContainer
+            onContainer = FishingTheme.colorScheme.onErrorContainer
         }
     }
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
+        shape = FishingTheme.shapes.medium,
         color = container,
     ) {
         Row(
@@ -69,13 +69,13 @@ fun InlineBannerCard(
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = FishingTheme.typography.titleSmall,
                     color = onContainer,
                 )
                 if (body != null) {
                     Text(
                         text = body,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = FishingTheme.typography.bodyMedium,
                         color = onContainer,
                     )
                 }

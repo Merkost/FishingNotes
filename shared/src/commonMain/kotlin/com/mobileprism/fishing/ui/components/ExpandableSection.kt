@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.components
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -16,7 +17,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,7 +40,7 @@ fun ExpandableSection(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = FishingTheme.colorScheme.surfaceContainerLow,
         shape = RoundedCornerShape(20.dp)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -49,7 +49,7 @@ fun ExpandableSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Surface(
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    color = FishingTheme.colorScheme.surfaceContainerHigh,
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Row(
@@ -61,14 +61,14 @@ fun ExpandableSection(
                                 painter = painterResource(icon),
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                tint = FishingTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(Modifier.width(8.dp))
                         }
                         Text(
                             text = title,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurface
+                            style = FishingTheme.typography.labelLarge,
+                            color = FishingTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -86,14 +86,14 @@ fun ExpandableSection(
                 Spacer(Modifier.weight(1f))
 
                 Surface(
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    color = FishingTheme.colorScheme.surfaceContainerHigh,
                     shape = CircleShape
                 ) {
                     IconButton(
                         onClick = onClose,
                         modifier = Modifier.size(28.dp),
                         colors = IconButtonDefaults.iconButtonColors(
-                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            contentColor = FishingTheme.colorScheme.onSurfaceVariant
                         )
                     ) {
                         Icon(

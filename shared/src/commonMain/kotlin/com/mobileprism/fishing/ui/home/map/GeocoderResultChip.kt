@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.map
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Row
@@ -12,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,15 +39,15 @@ fun GeocoderResultChip(
 
     val iconTint by animateColorAsState(
         targetValue = when {
-            isFailed -> MaterialTheme.colorScheme.error
-            placeName.isNotBlank() -> MaterialTheme.colorScheme.primary
-            else -> MaterialTheme.colorScheme.outlineVariant
+            isFailed -> FishingTheme.colorScheme.error
+            placeName.isNotBlank() -> FishingTheme.colorScheme.primary
+            else -> FishingTheme.colorScheme.outlineVariant
         },
         animationSpec = tween(250)
     )
 
     Card(
-        shape = MaterialTheme.shapes.extraLarge,
+        shape = FishingTheme.shapes.extraLarge,
         modifier = modifier
             .heightIn(min = 40.dp, max = 80.dp)
             .widthIn(max = 240.dp),
@@ -82,8 +82,8 @@ fun GeocoderResultChip(
                     text = placeName.ifEmpty { stringResource(Res.string.searching) },
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 2,
-                    color = if (isFailed) MaterialTheme.colorScheme.error
-                    else MaterialTheme.colorScheme.onSurface,
+                    color = if (isFailed) FishingTheme.colorScheme.error
+                    else FishingTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(end = 4.dp),
                 )
             }

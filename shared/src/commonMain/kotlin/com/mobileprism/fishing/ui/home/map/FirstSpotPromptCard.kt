@@ -1,5 +1,6 @@
 package com.mobileprism.fishing.ui.home.map
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -22,7 +23,6 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -67,14 +67,14 @@ fun FirstSpotPromptCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = Spacing.lg),
-            shape = MaterialTheme.shapes.extraLarge,
+            shape = FishingTheme.shapes.extraLarge,
             color = Color.Transparent,
             shadowElevation = Elevation.raisedCard,
         ) {
             Column(
                 modifier = Modifier
-                    .clip(MaterialTheme.shapes.extraLarge)
-                    .background(BrandGradients.primaryVertical(MaterialTheme.colorScheme))
+                    .clip(FishingTheme.shapes.extraLarge)
+                    .background(BrandGradients.primaryVertical(FishingTheme.colorScheme))
                     .padding(Spacing.lg),
             ) {
                 Row(
@@ -91,14 +91,14 @@ fun FirstSpotPromptCard(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = stringResource(Res.string.prompt_card_title),
-                            style = MaterialTheme.typography.titleMedium,
+                            style = FishingTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                         )
                         Spacer(modifier = Modifier.height(Spacing.xxs))
                         Text(
                             text = stringResource(Res.string.prompt_card_subtitle),
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = FishingTheme.typography.bodyMedium,
                             color = Color.White.copy(alpha = 0.86f),
                         )
                         Spacer(modifier = Modifier.height(Spacing.md))
@@ -125,9 +125,9 @@ fun FirstSpotPromptCard(
 private fun PromptCardActionButton(onClick: () -> Unit) {
     Surface(
         onClick = onClick,
-        shape = MaterialTheme.shapes.extraLarge,
+        shape = FishingTheme.shapes.extraLarge,
         color = Color.White,
-        contentColor = MaterialTheme.colorScheme.primary,
+        contentColor = FishingTheme.colorScheme.primary,
         shadowElevation = Elevation.level0,
     ) {
         Row(
@@ -139,7 +139,7 @@ private fun PromptCardActionButton(onClick: () -> Unit) {
         ) {
             Text(
                 text = stringResource(Res.string.prompt_card_action),
-                style = MaterialTheme.typography.labelLarge,
+                style = FishingTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold,
             )
             Spacer(modifier = Modifier.width(Spacing.sm))

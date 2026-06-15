@@ -1,8 +1,8 @@
 package com.mobileprism.fishing.ui.home.views
 
+import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -36,7 +36,7 @@ fun WeatherTrendChart(
 
     val labels = points.map { it.label }
     val values = points.map { it.value }
-    val brandColor = MaterialTheme.colorScheme.secondary
+    val brandColor = FishingTheme.colorScheme.secondary
 
     val modelProducer = remember(points) { CartesianChartModelProducer() }
     LaunchedEffect(points) {
