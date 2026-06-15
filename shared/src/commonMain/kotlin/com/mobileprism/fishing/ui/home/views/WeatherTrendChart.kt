@@ -19,6 +19,7 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.common.Fill
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 
 data class WeatherChartPoint(
     val label: String,
@@ -51,9 +52,16 @@ fun WeatherTrendChart(
     }
     val lineProvider = LineCartesianLayer.LineProvider.series(brandLine)
 
+    val rangeProvider = remember(values) {
+        val minValue = values.minOrNull() ?: 0.0
+        val maxValue = values.maxOrNull() ?: 0.0
+        val padding = ((maxValue - minValue) * 0.15).coerceAtLeast(1.0)
+        CartesianLayerRangeProvider.fixed(minY = minValue - padding, maxY = maxValue + padding)
+    }
+
     CartesianChartHost(
         chart = rememberCartesianChart(
-            rememberLineCartesianLayer(lineProvider = lineProvider),
+            rememberLineCartesianLayer(lineProvider = lineProvider, rangeProvider = rangeProvider),
             startAxis = VerticalAxis.rememberStart(
                 valueFormatter = CartesianValueFormatter { _, value, _ -> formatValue(value) },
             ),
