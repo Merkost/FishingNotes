@@ -1,8 +1,11 @@
 package com.mobileprism.fishing.ui.home.catch
 
 import com.mobileprism.fishing.ui.theme.FishingTheme
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -14,12 +17,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.navigation.NavController
+import coil3.compose.SubcomposeAsyncImage
+import com.mobileprism.fishing.ui.theme.BrandGradients
+import com.mobileprism.fishing.ui.theme.IconSize
+import com.mobileprism.fishing.ui.home.views.FullScreenPhoto
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.entity.common.Progress
@@ -201,14 +211,25 @@ fun CatchContent(
 
     val placeState by viewModel.mapMarker.collectAsState()
 
+    val userPreferences: UserPreferences = koinInject()
+    val is12hTime by userPreferences.use12hTimeFormat.collectAsState(initial = false)
+
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
-            .fillMaxSize()
-            .padding(horizontal = Spacing.screenH, vertical = Spacing.md),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(Spacing.sectionGap)
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        CatchHeroHeader(catch = catchState, is12hTime = is12hTime)
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.screenH, vertical = Spacing.md),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(Spacing.sectionGap)
+        ) {
 
         CatchTitleView(
             catch = catchState,
@@ -248,8 +269,112 @@ fun CatchContent(
         CatchWeatherView(
             catch = catchState
         )
+        }
     }
 
+}
+
+@Composable
+fun CatchHeroHeader(
+    modifier: Modifier = Modifier,
+    catch: UserCatch,
+    is12hTime: Boolean
+) {
+    val fullScreenPhoto = remember { mutableStateOf<String?>(null) }
+    val heroPhoto = catch.downloadPhotoLinks.firstOrNull()
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(240.dp)
+    ) {
+        if (heroPhoto != null) {
+            SubcomposeAsyncImage(
+                model = heroPhoto,
+                contentDescription = stringResource(Res.string.catch_photo),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable { fullScreenPhoto.value = heroPhoto },
+                loading = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(BrandGradients.primaryDiagonal(FishingTheme.colorScheme))
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center),
+                            color = Color.White
+                        )
+                    }
+                }
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(BrandGradients.primaryDiagonal(FishingTheme.colorScheme)),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(Res.drawable.ic_fish),
+                    contentDescription = null,
+                    modifier = Modifier.size(IconSize.lg * 2.5f)
+                )
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(140.dp)
+                .align(Alignment.BottomCenter)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color.Transparent, FishingTheme.colorScheme.scrim.copy(alpha = 0.75f))
+                    )
+                )
+        )
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.screenH, vertical = Spacing.lg),
+            verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+        ) {
+            AppText(
+                text = catch.fishType,
+                style = AppTextStyle.Heading,
+                color = Color.White,
+                maxLines = 2
+            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                AppText(
+                    text = "${catch.fishWeight} ${stringResource(Res.string.kg)}",
+                    style = AppTextStyle.Subtitle,
+                    color = Color.White
+                )
+                AppText(
+                    text = "·",
+                    style = AppTextStyle.Subtitle,
+                    color = Color.White.copy(alpha = 0.8f)
+                )
+                AppText(
+                    text = catch.date.toDateTextMonth() + " " + catch.date.toTime(is12hTime),
+                    style = AppTextStyle.BodySmall,
+                    color = Color.White.copy(alpha = 0.9f)
+                )
+            }
+        }
+    }
+
+    AnimatedVisibility(fullScreenPhoto.value != null) {
+        FullScreenPhoto(fullScreenPhoto)
+    }
 }
 
 @Composable
