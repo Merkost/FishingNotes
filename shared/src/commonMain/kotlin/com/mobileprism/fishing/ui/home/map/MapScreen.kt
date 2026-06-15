@@ -271,7 +271,7 @@ private fun MapControls(
                 onClick = onPromptCardClick,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = Spacing.sm),
+                    .padding(bottom = Spacing.fabClearance),
             )
 
             AnimatedVisibility(
