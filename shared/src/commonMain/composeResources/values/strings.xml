@@ -574,4 +574,8 @@
     <string name="search_places_hint">Search places</string>
     <string name="no_results_found">No results found</string>
     <string name="tab_of">Tab %1$d of %2$d</string>
+    <string name="undo">Undo</string>
+    <string name="catch_deleted">Catch deleted</string>
+    <string name="place_deleted">Place deleted</string>
+    <string name="clear">Clear</string>
 </resources>
