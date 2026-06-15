@@ -13,6 +13,7 @@ import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +26,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.mobileprism.fishing.ui.theme.Emphasis
 import com.mobileprism.fishing.ui.theme.Spacing
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -35,7 +37,7 @@ fun WeatherMetric(
     icon: DrawableResource,
     value: String,
     modifier: Modifier = Modifier,
-    iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    iconTint: Color = LocalContentColor.current,
 ) {
     Column(
         modifier = modifier.semantics(mergeDescendants = true) {},
@@ -45,7 +47,7 @@ fun WeatherMetric(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = LocalContentColor.current.copy(alpha = Emphasis.medium),
             textAlign = TextAlign.Center,
         )
         Row(
@@ -61,7 +63,7 @@ fun WeatherMetric(
             Text(
                 text = value,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = LocalContentColor.current,
             )
         }
     }

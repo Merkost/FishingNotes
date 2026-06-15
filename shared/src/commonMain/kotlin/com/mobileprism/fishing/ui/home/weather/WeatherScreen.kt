@@ -107,7 +107,7 @@ fun WeatherScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             AppTopBar(
-                title = selectedPlace?.title ?: stringResource(Res.string.weather),
+                title = stringResource(Res.string.weather),
                 navigationIcon = if (selectedPlace != null) Icons.AutoMirrored.Filled.ArrowBack else null,
                 onNavigationClick = if (selectedPlace != null) {
                     {
@@ -267,7 +267,8 @@ fun CurrentWeather(
             .fillMaxWidth()
             .height(350.dp),
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.primary
+        color = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary
     ) {
         Column(
             modifier = Modifier

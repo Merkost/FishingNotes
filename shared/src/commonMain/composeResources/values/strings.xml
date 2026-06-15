@@ -463,7 +463,7 @@
     <string name="cached_data">Cached data</string>
     <string name="weather_label_with_unit">%1$s, %2$s</string>
     <string name="weather_value_with_unit">%1$s %2$s</string>
-    <string name="weather_percent_value">%1$d%%</string>
+    <string name="weather_percent_value">%1$d%</string>
     <string name="no_weather_data">No weather data available</string>
 
     <string name="onboarding_title_1">Mark Your Spots</string>
