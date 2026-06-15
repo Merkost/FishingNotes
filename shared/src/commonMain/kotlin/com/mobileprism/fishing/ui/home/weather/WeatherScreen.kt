@@ -13,7 +13,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
+import com.mobileprism.fishing.ui.theme.BrandGradients
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -266,14 +268,15 @@ fun CurrentWeather(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(350.dp),
+            .heightIn(min = 350.dp),
         shape = RoundedCornerShape(20.dp),
-        color = FishingTheme.colorScheme.primary,
+        color = Color.Transparent,
         contentColor = FishingTheme.colorScheme.onPrimary
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(BrandGradients.primaryDiagonal(FishingTheme.colorScheme))
                 .padding(vertical = Spacing.xl),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Spacing.xl)
