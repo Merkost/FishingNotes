@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +22,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -31,13 +33,13 @@ import com.mobileprism.fishing.ui.home.views.BannerTone
 import com.mobileprism.fishing.ui.home.views.InlineBannerCard
 import com.mobileprism.fishing.ui.theme.BrandGradients
 import com.mobileprism.fishing.ui.theme.Spacing
-import com.mobileprism.fishing.ui.utils.AnimatedResource
 import com.mobileprism.fishing.ui.utils.format.errorToMessage
 import com.mobileprism.fishing.ui.utils.motion.slideUpFadeIn
 import com.mobileprism.fishing.ui.viewmodels.LoginUiState
 import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.ic_google_logo
+import fishing.shared.generated.resources.ic_launcher
 import fishing.shared.generated.resources.login_headline
 import fishing.shared.generated.resources.login_subtitle
 import fishing.shared.generated.resources.login_trust_copy
@@ -71,11 +73,12 @@ fun LoginScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                AnimatedResource(
-                    resName = "walking_fish",
+                Image(
+                    painter = painterResource(Res.drawable.ic_launcher),
                     contentDescription = null,
                     modifier = Modifier
-                        .size(180.dp)
+                        .size(160.dp)
+                        .clip(MaterialTheme.shapes.extraLarge)
                         .slideUpFadeIn(),
                 )
 
