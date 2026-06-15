@@ -15,8 +15,12 @@ import com.mobileprism.fishing.model.datastore.NotesPreferences
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.components.state.EmptyStateNoCatches
 import com.mobileprism.fishing.ui.components.state.PagedListScaffold
+import com.mobileprism.fishing.ui.home.views.AppButton
 import com.mobileprism.fishing.ui.viewmodels.UserCatchesViewModel
 import com.mobileprism.fishing.utils.time.toDateTextMonth
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.add_new_catch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -54,7 +58,16 @@ fun UserCatchesScreen(
             lazyPagingItems.refresh()
         },
         skeleton = { CatchItemSkeleton() },
-        emptyState = { EmptyStateNoCatches() },
+        emptyState = {
+            EmptyStateNoCatches(
+                action = {
+                    AppButton(
+                        text = stringResource(Res.string.add_new_catch),
+                        onClick = onAddCatch,
+                    )
+                },
+            )
+        },
         groupingKey = if (isTimeSorted) { catch -> catch.date.toDateTextMonth() } else null,
         itemContent = { catch ->
             CatchItemView(

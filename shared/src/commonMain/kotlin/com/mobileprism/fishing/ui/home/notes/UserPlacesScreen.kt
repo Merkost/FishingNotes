@@ -14,7 +14,11 @@ import com.mobileprism.fishing.model.datastore.NotesPreferences
 import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.components.state.EmptyStateNoPlaces
 import com.mobileprism.fishing.ui.components.state.PagedListScaffold
+import com.mobileprism.fishing.ui.home.views.AppButton
 import com.mobileprism.fishing.ui.viewmodels.UserPlacesViewModel
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.new_place
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -52,7 +56,16 @@ fun UserPlacesScreen(
             lazyPagingItems.refresh()
         },
         skeleton = { PlaceItemSkeleton() },
-        emptyState = { EmptyStateNoPlaces() },
+        emptyState = {
+            EmptyStateNoPlaces(
+                action = {
+                    AppButton(
+                        text = stringResource(Res.string.new_place),
+                        onClick = onAddPlace,
+                    )
+                },
+            )
+        },
         itemContent = { place ->
             ItemUserPlace(
                 place = place,
