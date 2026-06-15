@@ -1,11 +1,16 @@
 package com.mobileprism.fishing.ui.home.notes
 
 import com.mobileprism.fishing.ui.theme.FishingTheme
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.SubcomposeAsyncImage
+import com.mobileprism.fishing.ui.theme.Spacing
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,7 +31,6 @@ import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.views.*
 import com.mobileprism.fishing.ui.theme.IconSize
 import com.mobileprism.fishing.ui.theme.LocalColors
-import com.mobileprism.fishing.ui.theme.cardColor
 import com.mobileprism.fishing.ui.utils.placeholder
 import com.mobileprism.fishing.utils.time.toDateTextMonth
 import com.mobileprism.fishing.utils.time.toTime
@@ -117,14 +121,15 @@ fun ItemDate(text: String) {
             .zIndex(1f)
     ) {
         Surface(
-            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
-            shape = RoundedCornerShape(24.dp), color = cardColor
+            modifier = Modifier.padding(top = Spacing.sm, bottom = Spacing.xs),
+            shape = RoundedCornerShape(percent = 50),
+            color = FishingTheme.colorScheme.surfaceContainerHigh,
         ) {
             AppText(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                modifier = Modifier.padding(horizontal = Spacing.md, vertical = Spacing.xs),
                 text = text,
                 style = AppTextStyle.BodySmall,
-                color = FishingTheme.colorScheme.inverseOnSurface,
+                color = FishingTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -147,11 +152,11 @@ fun CatchItemView(
 
     CatchItemContent(
         modifier = modifier,
-        childModifier = childModifier,
         fishType = catch.fishType,
         fishWeight = catch.fishWeight,
         fishAmount = catch.fishAmount,
         placeTitle = catch.placeTitle,
+        photoUrl = catch.downloadPhotoLinks.firstOrNull(),
         photoCount = catch.downloadPhotoLinks.size,
         timeText = catch.date.toTime(is12hTimeFormat),
         showPlace = showPlace,
@@ -162,111 +167,149 @@ fun CatchItemView(
 @Composable
 fun CatchItemContent(
     modifier: Modifier = Modifier,
-    childModifier: Modifier = Modifier,
     fishType: String,
     fishWeight: Double,
     fishAmount: Int,
     placeTitle: String,
+    photoUrl: String?,
     photoCount: Int,
     timeText: String,
     showPlace: Boolean = true,
     onClick: () -> Unit,
 ) {
     AppCard(
-        modifier = modifier.padding(bottom = 4.dp),
+        modifier = modifier.padding(bottom = Spacing.sm),
         onClick = onClick,
         contentPadding = 0.dp,
     ) {
-        Column(
+        Row(
             modifier = Modifier
-                .padding(12.dp)
                 .fillMaxWidth()
+                .padding(Spacing.md),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                AppText(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 8.dp, end = 16.dp)
-                        .then(childModifier),
-                    text = fishType,
-                    style = AppTextStyle.Title,
-                    maxLines = 1,
-                )
+            CatchThumbnail(photoUrl = photoUrl, photoCount = photoCount)
 
-                AppText(
-                    modifier = Modifier
-                        .padding(end = 8.dp)
-                        .then(childModifier),
-                    text = "$fishWeight ${stringResource(Res.string.kg)}",
-                    style = AppTextStyle.Title,
-                )
-            }
+            Spacer(modifier = Modifier.width(Spacing.md))
 
-            AppText(
-                modifier = Modifier
-                    .padding(top = 4.dp, start = 8.dp)
-                    .then(childModifier),
-                text = "${stringResource(Res.string.amount)}: $fishAmount" +
-                        " ${stringResource(Res.string.pc)}",
-                style = AppTextStyle.BodySmall,
-                color = FishingTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (showPlace) {
-                    Icon(
-                        modifier = Modifier
-                            .size(IconSize.md)
-                            .padding(start = 8.dp),
-                        painter = painterResource(Res.drawable.ic_baseline_location_on_24),
-                        contentDescription = stringResource(Res.string.location),
-                        tint = FishingTheme.colorScheme.outline
-                    )
-
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     AppText(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 8.dp, end = 8.dp)
-                            .then(childModifier),
-                        text = placeTitle,
-                        style = AppTextStyle.Body,
-                        color = FishingTheme.colorScheme.outline,
-                        textAlign = TextAlign.Start,
+                        modifier = Modifier.weight(1f).padding(end = Spacing.sm),
+                        text = fishType,
+                        style = AppTextStyle.Title,
                         maxLines = 1,
                     )
-                } else {
-                    Spacer(modifier = Modifier.weight(1f))
+                    AppText(
+                        text = "$fishWeight ${stringResource(Res.string.kg)}",
+                        style = AppTextStyle.Title,
+                        color = FishingTheme.colorScheme.primary,
+                        maxLines = 1,
+                    )
                 }
 
-                ItemCounter(
-                    modifier = Modifier
-                        .padding(end = 12.dp)
-                        .then(childModifier),
-                    count = photoCount,
-                    icon = Res.drawable.ic_baseline_photo_24,
-                )
+                if (fishAmount > 1) {
+                    AppText(
+                        modifier = Modifier.padding(top = Spacing.xxs),
+                        text = "${stringResource(Res.string.amount)}: $fishAmount" +
+                                " ${stringResource(Res.string.pc)}",
+                        style = AppTextStyle.Caption,
+                        color = FishingTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
 
+                Spacer(modifier = Modifier.height(Spacing.sm))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (showPlace) {
+                        Icon(
+                            modifier = Modifier.size(IconSize.sm),
+                            painter = painterResource(Res.drawable.ic_baseline_location_on_24),
+                            contentDescription = null,
+                            tint = FishingTheme.colorScheme.onSurfaceVariant,
+                        )
+                        AppText(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = Spacing.xs, end = Spacing.sm),
+                            text = placeTitle,
+                            style = AppTextStyle.BodySmall,
+                            color = FishingTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+
+                    AppText(
+                        text = timeText,
+                        style = AppTextStyle.BodySmall,
+                        color = FishingTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CatchThumbnail(
+    photoUrl: String?,
+    photoCount: Int,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .size(64.dp)
+            .clip(FishingTheme.shapes.medium)
+            .background(FishingTheme.colorScheme.surfaceContainerHighest),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (photoUrl != null) {
+            SubcomposeAsyncImage(
+                model = photoUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                loading = { CatchThumbnailFallback() },
+                error = { CatchThumbnailFallback() },
+            )
+        } else {
+            CatchThumbnailFallback()
+        }
+
+        if (photoCount > 1) {
+            Surface(
+                modifier = Modifier.align(Alignment.BottomEnd).padding(Spacing.xxs),
+                shape = FishingTheme.shapes.small,
+                color = FishingTheme.colorScheme.scrim.copy(alpha = 0.6f),
+            ) {
                 AppText(
-                    modifier = Modifier
-                        .padding(end = 8.dp)
-                        .then(childModifier),
-                    text = timeText,
-                    style = AppTextStyle.BodySmall,
-                    color = FishingTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
+                    modifier = Modifier.padding(horizontal = Spacing.xs),
+                    text = photoCount.toString(),
+                    style = AppTextStyle.Caption,
+                    color = Color.White,
                 )
             }
         }
     }
+}
+
+@Composable
+private fun CatchThumbnailFallback() {
+    Icon(
+        modifier = Modifier.size(IconSize.lg),
+        painter = painterResource(Res.drawable.ic_fish),
+        contentDescription = null,
+        tint = FishingTheme.colorScheme.onSurfaceVariant.copy(alpha = FishingTheme.emphasis.medium),
+    )
 }
 
 @Composable
