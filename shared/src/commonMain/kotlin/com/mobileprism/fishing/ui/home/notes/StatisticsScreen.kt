@@ -144,6 +144,25 @@ private fun StatisticsContent(stats: CatchStatistics) {
                 )
             }
         }
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+            ) {
+                StatTile(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Outlined.Scale,
+                    title = stringResource(Res.string.average_weight),
+                    value = "${formatStatWeight(stats.averageWeight)} ${stringResource(Res.string.kg)}",
+                )
+                StatTile(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Outlined.SetMeal,
+                    title = stringResource(Res.string.most_caught),
+                    value = stats.mostCaughtSpecies.ifBlank { stringResource(Res.string.no_data) },
+                )
+            }
+        }
 
         if (stats.catchesByMonth.isNotEmpty()) {
             item {
