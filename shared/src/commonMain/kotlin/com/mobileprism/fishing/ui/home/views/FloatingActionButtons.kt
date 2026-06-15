@@ -48,14 +48,13 @@ fun FabWithMenu(
             FabMenuItem(item = it, size = size.value)
         }
 
-        FloatingActionButton(onClick = {
+        BrandFab(onClick = {
             if (transition.currentState.value == MultiFabState.EXPANDED) {
                 transition.currentState.value = MultiFabState.COLLAPSED
             } else transition.currentState.value = MultiFabState.EXPANDED
         }) {
             Icon(
                 modifier = Modifier.rotate(rotation.value),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
                 painter = painterResource(Res.drawable.ic_baseline_plus),
                 contentDescription = null
             )
@@ -87,13 +86,11 @@ fun FabMenuItem(item: FabMenuItem, modifier: Modifier = Modifier, size: Dp) {
             }
 
             Box(modifier = Modifier.size(FabSize).padding((FabSize - size) / 2)) {
-                FloatingActionButton(
-                    containerColor = MaterialTheme.colorScheme.primary,
+                BrandFab(
                     modifier = modifier.size(size),
                     onClick = item.onClick
                 ) {
                     Icon(
-                        tint = MaterialTheme.colorScheme.onPrimary,
                         painter = painterResource(item.icon),
                         contentDescription = item.text
                     )

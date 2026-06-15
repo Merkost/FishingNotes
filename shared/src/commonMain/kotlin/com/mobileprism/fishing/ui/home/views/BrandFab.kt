@@ -32,7 +32,7 @@ fun BrandFab(
     val interaction = remember { MutableInteractionSource() }
     CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onPrimary) {
         Surface(
-            modifier = modifier.size(FabSize),
+            modifier = Modifier.size(FabSize).then(modifier),
             shape = MaterialTheme.shapes.large,
             color = Color.Transparent,
             shadowElevation = Elevation.fab,
