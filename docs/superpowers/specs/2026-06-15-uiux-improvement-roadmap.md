@@ -4,7 +4,9 @@
 
 > Status (2026-06-15): SHIPPED & verified — catch photo-journal cards; weather hero gradient + **Bite Forecast** + pressure-trend headline + wind metric + named moon + high/low + centered 2×2 metric grid; fixed flat pressure chart Y-range; Statistics avg-weight/most-caught; empty-state CTAs; de-greyed date pill; detail **hero photo headers** (Catch + Place); **accessibility pass** (bottom-bar Role.Tab, FAB labels, chart semantics, photo descriptions); **haptics** (AppHaptics). 
 >
-> STILL TODO (need data-layer work — next focused effort): **search** (Paging3/DAO query support), **filter chips** (+ Statistics→filtered deep-link), **swipe-to-delete/edit** (add delete to the paging VMs + SwipeToDismissBox + undo snackbar). These are deferred deliberately — they touch the data layer and (swipe) are destructive, so they need careful on-device testing rather than a blind pass.
+> SHIPPED (data-layer pass): **search** on Catches & Places (per-VM `searchQuery` combined into the paged flow, client-side `PagingData.filter` since paging is Firestore-backed; compact `SearchField` atop each list) and **swipe-to-delete with undo** (`PagedListScaffold` gains `key` + `onDelete` → `SwipeToDismissBox`; VMs delete via repo + Undo snackbar that re-adds). Verified: compiles Android+iOS, tests pass, fields render, photo thumbnails work, no at-rest swipe tint. Destructive swipe-delete intentionally not run against real account data.
+>
+> STILL TODO (optional polish): **filter chips** (species/has-photo/season) + Statistics→filtered-Catches deep-link; swipe-to-**edit** (leading swipe); human date buckets with per-section roll-ups.
 
 ## 1. Executive Summary
 
