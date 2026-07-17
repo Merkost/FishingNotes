@@ -206,8 +206,8 @@ magick "$LANDSCAPE_BG" \
   -colorspace sRGB \
   "$TMP/feature-background.png"
 
-make_panel "$ROOT/docs/store-assets/02-map.png" '860x1280+67+374' 350 "$TMP/feature-map.png"
-make_panel "$ROOT/docs/store-assets/03-catch.png" '860x1120+67+374' 285 "$TMP/feature-catch.png"
+make_panel "$ROOT/docs/store-assets/02-map.png" '860x1280+67+374' 260 "$TMP/feature-map.png"
+make_panel "$ROOT/docs/store-assets/03-catch.png" '860x1120+67+374' 210 "$TMP/feature-catch.png"
 add_shadow "$TMP/feature-map.png" "$TMP/feature-map-shadow.png"
 add_shadow "$TMP/feature-catch.png" "$TMP/feature-catch-shadow.png"
 
@@ -226,27 +226,27 @@ magick \
 
 magick "$TMP/feature-background.png" \
   -fill '#FF7A1A' \
-  -draw 'roundrectangle 60,183 190,193 5,5' \
+  -draw 'roundrectangle 96,183 226,193 5,5' \
   "$TMP/feature-icon.png" \
   -gravity northwest \
-  -geometry +60+58 \
+  -geometry +96+58 \
   -composite \
   -font "$FONT_BOLD" \
   -pointsize 48 \
   -fill white \
   -gravity northwest \
-  -annotate +165+72 'Fishing Notes' \
+  -annotate +201+72 'Fishing Notes' \
   "$TMP/feature-tagline.png" \
   -gravity northwest \
-  -geometry +60+215 \
+  -geometry +96+215 \
   -composite \
   "$TMP/feature-map-rotated.png" \
   -gravity northwest \
-  -geometry +660+15 \
+  -geometry +610+15 \
   -composite \
   "$TMP/feature-catch-rotated.png" \
   -gravity northwest \
-  -geometry +820+112 \
+  -geometry +690+125 \
   -composite \
   -alpha off \
   -colorspace sRGB \

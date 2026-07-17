@@ -213,11 +213,13 @@ make_screenshot() {
   local source_image="$2"
   local headline="$3"
   local point_size="$4"
+  local crop="${5:-860x1764+67+374}"
+  local panel_width="${6:-920}"
   local stem
   stem="$(basename "$destination" .png)"
 
   make_portrait_background "$TMP/${stem}-background.png"
-  make_panel "$source_image" '860x1764+67+374' 920 "$TMP/${stem}-panel.png"
+  make_panel "$source_image" "$crop" "$panel_width" "$TMP/${stem}-panel.png"
   add_shadow "$TMP/${stem}-panel.png" "$TMP/${stem}-panel-shadow.png"
   make_headline "$headline" "$point_size" "$TMP/${stem}-headline.png"
 
@@ -239,6 +241,7 @@ make_screenshot() {
     -alpha off \
     -colorspace sRGB \
     -depth 8 \
+    -define png:exclude-chunk=date,time \
     "PNG24:$destination"
 }
 
@@ -246,7 +249,9 @@ make_screenshot \
   "$OUT/01-spots.png" \
   "$ROOT/docs/store-assets/02-map.png" \
   'Never lose a great spot.' \
-  82
+  82 \
+  '860x1400+67+700' \
+  920
 
 make_screenshot \
   "$OUT/02-catches.png" \
@@ -258,7 +263,9 @@ make_screenshot \
   "$OUT/03-details.png" \
   "$ROOT/docs/store-assets/04-notes.png" \
   'Keep every detail.' \
-  86
+  86 \
+  '860x1688+67+450' \
+  920
 
 make_screenshot \
   "$OUT/04-weather.png" \
@@ -267,7 +274,7 @@ make_screenshot \
   86
 
 make_portrait_background "$TMP/story-background.png"
-make_panel "$ROOT/docs/store-assets/04-notes.png" '860x1764+67+374' 760 "$TMP/story-log.png"
+make_panel "$ROOT/docs/store-assets/04-notes.png" '860x1688+67+450' 760 "$TMP/story-log.png"
 make_panel "$ROOT/docs/store-assets/03-catch.png" '860x1320+67+374' 440 "$TMP/story-catch.png"
 add_shadow "$TMP/story-log.png" "$TMP/story-log-shadow.png"
 add_shadow "$TMP/story-catch.png" "$TMP/story-catch-shadow.png"
@@ -295,6 +302,7 @@ magick "$TMP/story-background.png" \
   -alpha off \
   -colorspace sRGB \
   -depth 8 \
+  -define png:exclude-chunk=date,time \
   "PNG24:$OUT/05-story.png"
 
 magick "$LANDSCAPE_BG" \
@@ -305,8 +313,8 @@ magick "$LANDSCAPE_BG" \
   -colorspace sRGB \
   "$TMP/feature-background.png"
 
-make_panel "$ROOT/docs/store-assets/02-map.png" '860x1280+67+374' 350 "$TMP/feature-map.png"
-make_panel "$ROOT/docs/store-assets/03-catch.png" '860x1120+67+374' 285 "$TMP/feature-catch.png"
+make_panel "$ROOT/docs/store-assets/02-map.png" '860x1280+67+374' 260 "$TMP/feature-map.png"
+make_panel "$ROOT/docs/store-assets/03-catch.png" '860x1120+67+374' 210 "$TMP/feature-catch.png"
 add_shadow "$TMP/feature-map.png" "$TMP/feature-map-shadow.png"
 add_shadow "$TMP/feature-catch.png" "$TMP/feature-catch-shadow.png"
 
@@ -325,31 +333,32 @@ magick \
 
 magick "$TMP/feature-background.png" \
   -fill '#FF7A1A' \
-  -draw 'roundrectangle 60,183 190,193 5,5' \
+  -draw 'roundrectangle 96,183 226,193 5,5' \
   "$TMP/feature-icon.png" \
   -gravity northwest \
-  -geometry +60+58 \
+  -geometry +96+58 \
   -composite \
   -font "$FONT_BOLD" \
   -pointsize 48 \
   -fill white \
   -gravity northwest \
-  -annotate +165+72 'Fishing Notes' \
+  -annotate +201+72 'Fishing Notes' \
   "$TMP/feature-tagline.png" \
   -gravity northwest \
-  -geometry +60+215 \
+  -geometry +96+215 \
   -composite \
   "$TMP/feature-map-rotated.png" \
   -gravity northwest \
-  -geometry +660+15 \
+  -geometry +610+15 \
   -composite \
   "$TMP/feature-catch-rotated.png" \
   -gravity northwest \
-  -geometry +820+112 \
+  -geometry +690+125 \
   -composite \
   -alpha off \
   -colorspace sRGB \
   -depth 8 \
+  -define png:exclude-chunk=date,time \
   "PNG24:$OUT/feature-1024x500.png"
 
 printf '%s\n' \
