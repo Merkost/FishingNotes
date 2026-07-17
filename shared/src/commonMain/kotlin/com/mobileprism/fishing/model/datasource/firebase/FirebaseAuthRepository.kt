@@ -7,4 +7,6 @@ import com.mobileprism.fishing.domain.repository.AuthRepository
 class FirebaseAuthRepository : AuthRepository {
     override fun getCurrentUserId(): String =
         Firebase.auth.currentUser?.uid ?: "Anonymous"
+
+    override fun getCurrentUserIdOrNull(): String? = Firebase.auth.currentUser?.uid
 }

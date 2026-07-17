@@ -107,6 +107,7 @@ kotlin {
             api(libs.koin.workManager)
             api(libs.coil.network.okhttp)
             api(libs.playServices.ads)
+            api(libs.playServices.userMessaging)
             api(libs.playServices.update)
 
             implementation(libs.work.runtimeKtx)
@@ -210,12 +211,5 @@ buildkonfig {
         buildConfigField(FieldSpec.Type.STRING, "RAPIDAPI_KEY", resolveProperty("RAPIDAPI_KEY"))
         buildConfigField(FieldSpec.Type.STRING, "MAPS_API_KEY", resolveProperty("MAPS_API_KEY"))
         buildConfigField(FieldSpec.Type.STRING, "GOOGLE_WEB_CLIENT_ID", resolveProperty("GOOGLE_WEB_CLIENT_ID"))
-        buildConfigField(FieldSpec.Type.BOOLEAN, "IS_DEBUG", "true")
-    }
-
-    targetConfigs("android") {
-        create("release") {
-            buildConfigField(FieldSpec.Type.BOOLEAN, "IS_DEBUG", "false")
-        }
     }
 }

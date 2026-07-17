@@ -1,22 +1,40 @@
 package com.mobileprism.fishing.model.datasource.firebase
 
 import dev.gitlive.firebase.Firebase
+import dev.gitlive.firebase.auth.FirebaseAuthRecentLoginRequiredException
+import dev.gitlive.firebase.auth.GoogleAuthProvider
 import dev.gitlive.firebase.auth.auth
 import com.mobileprism.fishing.domain.entity.common.User
+import com.mobileprism.fishing.domain.entity.content.UserCatch
+import com.mobileprism.fishing.domain.repository.NoConnectionException
+import com.mobileprism.fishing.domain.repository.PhotoStorage
+import com.mobileprism.fishing.domain.repository.ReauthRequiredException
 import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
 import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
+import com.mobileprism.fishing.model.datasource.local.dao.CatchDao
+import com.mobileprism.fishing.model.datasource.local.dao.MarkerDao
+import com.mobileprism.fishing.model.datasource.local.dao.PendingOperationDao
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.datastore.UserDatastore
+import com.mobileprism.fishing.utils.network.ConnectionManager
+import com.mobileprism.fishing.utils.network.ConnectionState
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import kotlin.time.Clock
 
 class FirebaseUserRepositoryImpl(
     private val userDatastore: UserDatastore,
     private val dbCollections: RepositoryCollections,
     private val analyticsTracker: AnalyticsTracker,
+    private val catchDao: CatchDao,
+    private val markerDao: MarkerDao,
+    private val pendingOperationDao: PendingOperationDao,
+    private val photoStorage: PhotoStorage,
+    private val connectionManager: ConnectionManager,
 ) : UserRepository {
 
     private val fireBaseAuth = Firebase.auth
@@ -42,7 +60,57 @@ class FirebaseUserRepositoryImpl(
         get() = flow { userDatastore.getUser.collect { emit(it) } }
 
     override suspend fun logoutCurrentUser() {
+        clearLocalUserData()
         fireBaseAuth.signOut()
+    }
+
+    override suspend fun deleteAccount(): Result<Unit> {
+        val user = fireBaseAuth.currentUser
+            ?: return Result.failure(IllegalStateException("No signed-in user"))
+        if (connectionManager.getConnectionState() !is ConnectionState.Available) {
+            return Result.failure(NoConnectionException())
+        }
+        return try {
+            withContext(NonCancellable) {
+                clearLocalUserData()
+            }
+            val markerDocs = dbCollections.getUserMapMarkersCollection().get().documents
+            markerDocs.forEach { markerDoc ->
+                val catchDocs = dbCollections.getUserCatchesCollection(markerDoc.id).get().documents
+                catchDocs.forEach { catchDoc ->
+                    runCatching { catchDoc.data<UserCatch>().downloadPhotoLinks }
+                        .getOrDefault(emptyList())
+                        .forEach { url -> photoStorage.deletePhoto(url) }
+                    catchDoc.reference.delete()
+                }
+                markerDoc.reference.delete()
+            }
+            dbCollections.getUsersCollection().document(user.uid).delete()
+            user.delete()
+            Result.success(Unit)
+        } catch (e: FirebaseAuthRecentLoginRequiredException) {
+            Result.failure(ReauthRequiredException())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun reauthenticateWithGoogle(idToken: String): Result<Unit> {
+        val user = fireBaseAuth.currentUser
+            ?: return Result.failure(IllegalStateException("No signed-in user"))
+        return try {
+            user.reauthenticate(GoogleAuthProvider.credential(idToken, null))
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    private suspend fun clearLocalUserData() {
+        pendingOperationDao.deleteAll()
+        catchDao.deleteAll()
+        markerDao.deleteAll()
+        userDatastore.clearUser()
     }
 
     override suspend fun addNewUser(user: User): Result<Unit> {

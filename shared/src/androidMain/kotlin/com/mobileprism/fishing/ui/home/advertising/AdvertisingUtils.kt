@@ -14,6 +14,10 @@ import android.app.Activity
 const val TAG = "FISHING"
 
 fun showInterstitialAd(context: Context, onAdLoaded: () -> Unit) {
+    if (!AdsConsentManager.canRequestAds.value) {
+        onAdLoaded()
+        return
+    }
     InterstitialAd.load(
         context,
         context.getString(R.string.new_catch_loading_admob_fullscreen_id),

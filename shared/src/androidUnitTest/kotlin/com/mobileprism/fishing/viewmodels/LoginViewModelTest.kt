@@ -59,6 +59,8 @@ class LoginViewModelTest {
         override val isLoggedIn: Boolean = false
         override val cachedUser: User? = null
         override suspend fun logoutCurrentUser() {}
+        override suspend fun deleteAccount(): Result<Unit> = Result.success(Unit)
+        override suspend fun reauthenticateWithGoogle(idToken: String): Result<Unit> = Result.success(Unit)
         override suspend fun addNewUser(user: User): Result<Unit> = addNewUserResult
         override suspend fun setUserListener(user: User) {}
         override suspend fun setNewProfileData(user: User): Result<Unit> = Result.success(Unit)

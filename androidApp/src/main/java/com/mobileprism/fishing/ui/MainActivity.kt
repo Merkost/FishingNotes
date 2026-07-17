@@ -23,9 +23,11 @@ import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
+import com.mobileprism.fishing.BuildInfo
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.home.SnackbarAction
 import com.mobileprism.fishing.ui.home.SnackbarManager
+import com.mobileprism.fishing.ui.home.advertising.AdsConsentManager
 import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
 import com.mobileprism.fishing.ui.theme.FishingNotesTheme
 import com.mobileprism.fishing.ui.utils.LocalAnalytics
@@ -131,10 +133,17 @@ class MainActivity : FragmentActivity() {
             }
         }
 
-        MobileAds.initialize(this)
-        setAppMuted(true)
+        val buildInfo: BuildInfo by inject()
+        AdsConsentManager.gatherConsent(this, debugGeographyEea = buildInfo.isDebug) {
+            initializeMobileAds()
+        }
 
         checkForUpdates()
+    }
+
+    private fun initializeMobileAds() {
+        MobileAds.initialize(this)
+        setAppMuted(true)
     }
 
     private fun checkForUpdates() {

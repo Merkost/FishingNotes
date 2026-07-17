@@ -46,7 +46,12 @@ val commonRepositoryModule = module {
         FirebaseUserRepositoryImpl(
             userDatastore = get(),
             dbCollections = get(),
-            analyticsTracker = get()
+            analyticsTracker = get(),
+            catchDao = get(),
+            markerDao = get(),
+            pendingOperationDao = get(),
+            photoStorage = get(),
+            connectionManager = get()
         )
     }
 
@@ -92,7 +97,8 @@ val commonRepositoryModule = module {
             pendingOpsDao = get(),
             connectionManager = get(),
             syncScheduler = get(),
-            db = get()
+            db = get(),
+            authRepository = get()
         )
     } onClose { (it as? AutoCloseable)?.close() }
     single<MarkersRepositoryPaged> {
@@ -102,7 +108,8 @@ val commonRepositoryModule = module {
             pendingOpsDao = get(),
             connectionManager = get(),
             syncScheduler = get(),
-            db = get()
+            db = get(),
+            authRepository = get()
         )
     } onClose { (it as? AutoCloseable)?.close() }
     single<MarkersRepository> { get<MarkersRepositoryPaged>() }

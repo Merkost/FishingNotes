@@ -7,6 +7,7 @@ import com.mobileprism.fishing.domain.entity.common.SortDirection
 import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.domain.entity.content.MapMarker
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.domain.repository.app.MarkersRepositoryPaged
 import com.mobileprism.fishing.model.datasource.local.dao.MarkerDao
 import com.mobileprism.fishing.model.datasource.local.dao.PendingOperationDao
@@ -32,6 +33,7 @@ class SyncAwareMarkersRepository(
     private val connectionManager: ConnectionManager,
     private val syncScheduler: SyncScheduler,
     private val db: FishingDatabase,
+    private val authRepository: AuthRepository,
 ) : MarkersRepositoryPaged, AutoCloseable {
 
     companion object {
@@ -103,7 +105,8 @@ class SyncAwareMarkersRepository(
                     entityType = "marker",
                     entityId = userMapMarker.id,
                     operationType = "delete",
-                    payload = Json.encodeToString(userMapMarker)
+                    payload = Json.encodeToString(userMapMarker),
+                    userId = authRepository.getCurrentUserId()
                 )
             )
         }
@@ -135,7 +138,8 @@ class SyncAwareMarkersRepository(
                     entityType = "marker",
                     entityId = newMarker.id,
                     operationType = "create",
-                    payload = Json.encodeToString(newMarker)
+                    payload = Json.encodeToString(newMarker),
+                    userId = authRepository.getCurrentUserId()
                 )
             )
         }

@@ -2,7 +2,7 @@
     <string name="app_name">Fishing Notes</string>
     <string name="groups">Groups</string>
     <string name="logout_dialog_title">Logout?</string>
-    <string name="logout_dialog_message">Your data will be saved.</string>
+    <string name="logout_dialog_message">Your synced data stays in your account. Unsynced changes on this device will be discarded.</string>
     <string name="ok_button">OK</string>
     <string name="logout_dialog_cancel">Close</string>
     <string name="title">Title</string>
@@ -578,4 +578,16 @@
     <string name="catch_deleted">Catch deleted</string>
     <string name="place_deleted">Place deleted</string>
     <string name="clear">Clear</string>
+    <string name="settings_account">Account</string>
+    <string name="delete_account">Delete account</string>
+    <string name="delete_account_subtitle">Permanently delete your account and data</string>
+    <string name="delete_account_dialog_title">Delete account?</string>
+    <string name="delete_account_dialog_message">All your places, catches and photos will be permanently deleted. This action cannot be undone.</string>
+    <string name="delete_account_reauth_title">Confirm it\'s you</string>
+    <string name="delete_account_reauth_message">For security, sign in with Google again to delete your account.</string>
+    <string name="delete_account_deleting">Deleting account…</string>
+    <string name="delete_account_error">Couldn\'t delete the account. Please try again.</string>
+    <string name="privacy_policy">Privacy policy</string>
+    <string name="terms_of_service">Terms of service</string>
+    <string name="ads_privacy_options">Ad privacy options</string>
 </resources>

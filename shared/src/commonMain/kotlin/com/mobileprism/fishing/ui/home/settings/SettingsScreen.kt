@@ -12,13 +12,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.AdsClick
 import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.Compress
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,18 +43,26 @@ import com.mobileprism.fishing.domain.entity.weather.TemperatureValues
 import com.mobileprism.fishing.domain.entity.weather.WindSpeedValues
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.model.datastore.WeatherPreferences
+import com.mmk.kmpauth.google.GoogleButtonUiContainer
 import com.mobileprism.fishing.ui.MainDestinations
+import com.mobileprism.fishing.ui.home.advertising.rememberPrivacyOptionsLauncher
 import com.mobileprism.fishing.ui.home.map.LocationPermissionDialog
+import com.mobileprism.fishing.ui.home.views.AppButton
+import com.mobileprism.fishing.ui.home.views.AppButtonStyle
 import com.mobileprism.fishing.ui.home.views.AppLargeTopBar
 import com.mobileprism.fishing.ui.home.views.BannerTone
 import com.mobileprism.fishing.ui.home.views.ColorSwatchRow
+import com.mobileprism.fishing.ui.home.views.DefaultDialog
 import com.mobileprism.fishing.ui.home.views.ExpandableSettingsSection
 import com.mobileprism.fishing.ui.home.views.InlineBannerCard
+import com.mobileprism.fishing.ui.home.views.ModalLoadingDialog
 import com.mobileprism.fishing.ui.home.views.SettingsDivider
 import com.mobileprism.fishing.ui.home.views.SettingsGroup
 import com.mobileprism.fishing.ui.home.views.SettingsNavLink
 import com.mobileprism.fishing.ui.home.views.SettingsSelectionDialog
 import com.mobileprism.fishing.ui.home.views.SettingsSwitch
+import com.mobileprism.fishing.ui.viewmodels.DeleteAccountState
+import com.mobileprism.fishing.ui.viewmodels.UserViewModel
 import com.mobileprism.fishing.ui.home.weather.stringRes
 import com.mobileprism.fishing.ui.theme.Spacing
 import com.mobileprism.fishing.ui.utils.enums.AppThemeValues
@@ -61,9 +73,11 @@ import com.mobileprism.fishing.ui.utils.rememberLocationPermissionGranted
 import com.mobileprism.fishing.ui.utils.rememberPermissionsController
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
+import androidx.compose.ui.platform.LocalUriHandler
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,6 +110,7 @@ fun SettingsScreen(backPress: () -> Unit, navController: NavController) {
             GeneralSettingsGroup(userPreferences)
             WeatherSettingsGroup(weatherPreferences)
             AboutSettingsGroup(navController)
+            AccountSettingsGroup()
             Spacer(modifier = Modifier.height(Spacing.sm))
         }
     }
@@ -324,11 +339,98 @@ private fun WeatherSettingsGroup(weatherPreferences: WeatherPreferences) {
 
 @Composable
 private fun AboutSettingsGroup(navController: NavController) {
+    val uriHandler = LocalUriHandler.current
     SettingsGroup(title = stringResource(Res.string.settings_about)) {
         SettingsNavLink(
             title = stringResource(Res.string.about_this_app),
             icon = Icons.Default.Info,
             onClick = { navController.navigate(MainDestinations.AboutApp) },
+        )
+        SettingsDivider()
+        SettingsNavLink(
+            title = stringResource(Res.string.privacy_policy),
+            icon = Icons.Default.PrivacyTip,
+            onClick = { uriHandler.openUri("https://merkost.github.io/FishingNotes/privacy.html") },
+        )
+        SettingsDivider()
+        SettingsNavLink(
+            title = stringResource(Res.string.terms_of_service),
+            icon = Icons.Default.Description,
+            onClick = { uriHandler.openUri("https://merkost.github.io/FishingNotes/terms.html") },
+        )
+        rememberPrivacyOptionsLauncher()?.let { showPrivacyOptions ->
+            SettingsDivider()
+            SettingsNavLink(
+                title = stringResource(Res.string.ads_privacy_options),
+                icon = Icons.Default.AdsClick,
+                onClick = showPrivacyOptions,
+            )
+        }
+    }
+}
+
+@Composable
+private fun AccountSettingsGroup() {
+    val viewModel = koinViewModel<UserViewModel>()
+    val deleteAccountState by viewModel.deleteAccountState.collectAsState()
+    var isConfirmDialogOpen by remember { mutableStateOf(false) }
+
+    if (isConfirmDialogOpen) {
+        DefaultDialog(
+            primaryText = stringResource(Res.string.delete_account_dialog_title),
+            secondaryText = stringResource(Res.string.delete_account_dialog_message),
+            negativeButtonText = stringResource(Res.string.cancel),
+            onNegativeClick = { isConfirmDialogOpen = false },
+            positiveButtonText = stringResource(Res.string.delete),
+            onPositiveClick = {
+                isConfirmDialogOpen = false
+                viewModel.deleteAccount()
+            },
+            onDismiss = { isConfirmDialogOpen = false },
+        )
+    }
+
+    if (deleteAccountState is DeleteAccountState.ReauthRequired) {
+        DefaultDialog(
+            primaryText = stringResource(Res.string.delete_account_reauth_title),
+            secondaryText = stringResource(Res.string.delete_account_reauth_message),
+            negativeButtonText = stringResource(Res.string.cancel),
+            onNegativeClick = { viewModel.cancelDeleteAccount() },
+            onDismiss = { viewModel.cancelDeleteAccount() },
+            content = {
+                GoogleButtonUiContainer(
+                    modifier = Modifier.fillMaxWidth(),
+                    onGoogleSignInResult = { googleUser ->
+                        val idToken = googleUser?.idToken
+                        if (idToken != null) {
+                            viewModel.reauthenticateAndDeleteAccount(idToken)
+                        } else {
+                            viewModel.cancelDeleteAccount()
+                        }
+                    },
+                ) {
+                    AppButton(
+                        text = stringResource(Res.string.sign_with_google),
+                        onClick = { this@GoogleButtonUiContainer.onClick() },
+                        style = AppButtonStyle.Filled,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            },
+        )
+    }
+
+    ModalLoadingDialog(
+        visible = deleteAccountState is DeleteAccountState.InProgress,
+        text = stringResource(Res.string.delete_account_deleting),
+    )
+
+    SettingsGroup(title = stringResource(Res.string.settings_account)) {
+        SettingsNavLink(
+            title = stringResource(Res.string.delete_account),
+            subtitle = stringResource(Res.string.delete_account_subtitle),
+            icon = Icons.Default.DeleteForever,
+            onClick = { isConfirmDialogOpen = true },
         )
     }
 }

@@ -22,6 +22,7 @@ compose-bom = "2026.05.01"
 mokoPermissions = "0.20.1"
 
 playServicesAds = "25.3.0"
+playServicesUserMessaging = "3.2.0"
 playServicesBilling = "9.0.0"
 playServicesUpdate = "2.1.0"
 playServicesMaps = "20.0.0"
@@ -74,6 +75,7 @@ kmpauth-google = { module = "io.github.mirzemehdi:kmpauth-google", version.ref =
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 playServices-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "playServicesAds" }
+playServices-userMessaging = { group = "com.google.android.ump", name = "user-messaging-platform", version.ref = "playServicesUserMessaging" }
 playServices-billing = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "playServicesBilling" }
 playServices-update = { group = "com.google.android.play", name = "app-update-ktx", version.ref = "playServicesUpdate" }
 playServices-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }

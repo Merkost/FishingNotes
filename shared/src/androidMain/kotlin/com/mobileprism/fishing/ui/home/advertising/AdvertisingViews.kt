@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import org.jetbrains.compose.resources.stringResource
@@ -26,6 +28,8 @@ actual fun BannerAdvertView(
 ) {
     val adSize = AdSize.FULL_BANNER
     val isInEditMode = LocalInspectionMode.current
+    val canRequestAds by AdsConsentManager.canRequestAds.collectAsState()
+    if (!isInEditMode && !canRequestAds) return
     Row(modifier = modifier.fillMaxWidth()) {
         if (isInEditMode) {
             Text(

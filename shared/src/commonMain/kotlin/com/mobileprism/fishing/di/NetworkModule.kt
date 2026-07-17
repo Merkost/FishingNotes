@@ -1,6 +1,6 @@
 package com.mobileprism.fishing.di
 
-import com.mobileprism.fishing.BuildKonfig
+import com.mobileprism.fishing.BuildInfo
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
@@ -20,7 +20,7 @@ val networkModule = module {
                 })
             }
             install(Logging) {
-                level = if (BuildKonfig.IS_DEBUG) LogLevel.BODY else LogLevel.NONE
+                level = if (get<BuildInfo>().isDebug) LogLevel.BODY else LogLevel.NONE
             }
             install(HttpTimeout) {
                 connectTimeoutMillis = 10_000

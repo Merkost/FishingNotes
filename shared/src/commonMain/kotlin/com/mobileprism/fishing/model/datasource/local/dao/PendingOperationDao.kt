@@ -18,6 +18,9 @@ interface PendingOperationDao {
     @Query("SELECT * FROM pending_operations ORDER BY createdAt ASC")
     suspend fun getAll(): List<PendingOperationEntity>
 
+    @Query("SELECT * FROM pending_operations WHERE userId = :userId ORDER BY createdAt ASC")
+    suspend fun getAllForUser(userId: String): List<PendingOperationEntity>
+
     @Query("SELECT COUNT(*) FROM pending_operations")
     fun observeCount(): Flow<Int>
 
@@ -32,4 +35,10 @@ interface PendingOperationDao {
 
     @Query("DELETE FROM pending_operations WHERE entityType = :entityType AND entityId = :entityId")
     suspend fun deleteByEntity(entityType: String, entityId: String)
+
+    @Query("DELETE FROM pending_operations WHERE userId != :userId")
+    suspend fun deleteAllNotForUser(userId: String)
+
+    @Query("DELETE FROM pending_operations")
+    suspend fun deleteAll()
 }

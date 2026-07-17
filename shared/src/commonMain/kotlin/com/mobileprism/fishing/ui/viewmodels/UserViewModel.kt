@@ -5,16 +5,26 @@ import androidx.lifecycle.viewModelScope
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.domain.repository.ReauthRequiredException
 import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.domain.repository.app.OfflineRepository
 import com.mobileprism.fishing.domain.use_cases.catches.GetUserCatchesUseCase
 import com.mobileprism.fishing.model.datastore.UserDatastore
+import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.profile.findBestCatch
 import com.mobileprism.fishing.ui.home.profile.findFavoritePlace
+import fishing.shared.generated.resources.Res
+import fishing.shared.generated.resources.delete_account_error
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+
+sealed class DeleteAccountState {
+    data object Idle : DeleteAccountState()
+    data object InProgress : DeleteAccountState()
+    data object ReauthRequired : DeleteAccountState()
+}
 
 class UserViewModel(
     private val userRepository: UserRepository,
@@ -37,6 +47,9 @@ class UserViewModel(
 
     private val _favoritePlace = MutableStateFlow<UserMapMarker?>(null)
     val favoritePlace = _favoritePlace.asStateFlow()
+
+    private val _deleteAccountState = MutableStateFlow<DeleteAccountState>(DeleteAccountState.Idle)
+    val deleteAccountState = _deleteAccountState.asStateFlow()
 
     init {
         getCurrentUser()
@@ -66,5 +79,40 @@ class UserViewModel(
 
     suspend fun logoutCurrentUser() {
         userRepository.logoutCurrentUser()
+    }
+
+    fun deleteAccount() {
+        viewModelScope.launch {
+            _deleteAccountState.value = DeleteAccountState.InProgress
+            userRepository.deleteAccount()
+                .onSuccess { _deleteAccountState.value = DeleteAccountState.Idle }
+                .onFailure { handleDeleteAccountError(it) }
+        }
+    }
+
+    fun reauthenticateAndDeleteAccount(idToken: String) {
+        viewModelScope.launch {
+            _deleteAccountState.value = DeleteAccountState.InProgress
+            userRepository.reauthenticateWithGoogle(idToken)
+                .onSuccess {
+                    userRepository.deleteAccount()
+                        .onSuccess { _deleteAccountState.value = DeleteAccountState.Idle }
+                        .onFailure { handleDeleteAccountError(it) }
+                }
+                .onFailure { handleDeleteAccountError(it) }
+        }
+    }
+
+    fun cancelDeleteAccount() {
+        _deleteAccountState.value = DeleteAccountState.Idle
+    }
+
+    private fun handleDeleteAccountError(error: Throwable) {
+        if (error is ReauthRequiredException) {
+            _deleteAccountState.value = DeleteAccountState.ReauthRequired
+        } else {
+            _deleteAccountState.value = DeleteAccountState.Idle
+            SnackbarManager.showMessage(Res.string.delete_account_error)
+        }
     }
 }

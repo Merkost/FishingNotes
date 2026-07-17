@@ -29,4 +29,10 @@ class UserDatastoreImpl(private val dataStore: DataStore<Preferences>) : UserDat
             preferences[USER_KEY] = Json.encodeToString(user)
         }
     }
+
+    override suspend fun clearUser() {
+        dataStore.edit { preferences ->
+            preferences.remove(USER_KEY)
+        }
+    }
 }

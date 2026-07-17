@@ -6,6 +6,7 @@ import org.kimplify.cedar.logging.Cedar
 import androidx.work.WorkerParameters
 import com.mobileprism.fishing.domain.entity.content.UserCatch
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.domain.repository.app.MarkersRepositoryPaged
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.model.datasource.local.dao.CatchDao
@@ -20,10 +21,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.booleanOrNull
-import kotlinx.serialization.json.doubleOrNull
-import kotlinx.serialization.json.longOrNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
@@ -39,6 +36,7 @@ class SyncWorker(
     private val catchDao: CatchDao by inject()
     private val markerDao: MarkerDao by inject()
     private val weatherCacheDao: WeatherCacheDao by inject()
+    private val authRepository: AuthRepository by inject()
     private val json = Json { ignoreUnknownKeys = true }
 
     companion object {
@@ -52,7 +50,14 @@ class SyncWorker(
         val cutoff24h = (Clock.System.now() - 24.hours).toEpochMilliseconds()
         weatherCacheDao.deleteExpired(cutoff24h)
 
-        val pendingOps = pendingOpsDao.getAll()
+        val currentUserId = authRepository.getCurrentUserIdOrNull()
+        if (currentUserId == null) {
+            Cedar.tag(TAG).d("No signed-in user, skipping sync")
+            return Result.success()
+        }
+
+        pendingOpsDao.deleteAllNotForUser(currentUserId)
+        val pendingOps = pendingOpsDao.getAllForUser(currentUserId)
         if (pendingOps.isEmpty()) {
             Cedar.tag(TAG).d("No pending operations")
             return Result.success()
@@ -61,6 +66,10 @@ class SyncWorker(
         var hasFailures = false
 
         for (op in pendingOps) {
+            if (authRepository.getCurrentUserIdOrNull() != currentUserId) {
+                Cedar.tag(TAG).d("Signed-in user changed during sync, aborting")
+                return Result.success()
+            }
             try {
                 val success = withTimeoutOrNull(30_000L) {
                     processOperation(op)
@@ -127,15 +136,12 @@ class SyncWorker(
             }
             "update" -> {
                 val jsonObject = json.parseToJsonElement(op.payload).jsonObject
-                val data: Map<String, Any> = jsonObject.mapValues { (_, element) ->
-                    val primitive = element.jsonPrimitive
-                    when {
-                        primitive.isString -> primitive.content
-                        primitive.booleanOrNull != null -> primitive.content.toBoolean()
-                        primitive.longOrNull != null -> primitive.content.toLong()
-                        primitive.doubleOrNull != null -> primitive.content.toDouble()
-                        else -> primitive.content
-                    } as Any
+                val data = jsonObjectToPayload(jsonObject).filterNot { (key, value) ->
+                    (key == "note" || key == "downloadPhotoLinks") && value is String
+                }
+                if (data.isEmpty()) {
+                    catchDao.updateSyncStatus(op.entityId, SyncStatus.SYNCED)
+                    return true
                 }
                 val result = catchesRepo.updateUserCatch(op.parentId, op.entityId, data)
                 if (result.isSuccess) {

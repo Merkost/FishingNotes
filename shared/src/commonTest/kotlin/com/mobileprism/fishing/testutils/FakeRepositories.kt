@@ -35,6 +35,7 @@ class FakeAuthRepository(
     private val userId: String = "user-1",
 ) : AuthRepository {
     override fun getCurrentUserId(): String = userId
+    override fun getCurrentUserIdOrNull(): String? = userId
 }
 
 class FakeMarkersRepository(

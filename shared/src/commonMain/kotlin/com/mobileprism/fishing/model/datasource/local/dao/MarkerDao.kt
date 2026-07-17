@@ -35,4 +35,7 @@ interface MarkerDao {
 
     @Query("UPDATE markers SET syncStatus = :syncStatus WHERE id = :markerId")
     suspend fun updateSyncStatus(markerId: String, syncStatus: Int)
+
+    @Query("DELETE FROM markers")
+    suspend fun deleteAll()
 }

@@ -5,6 +5,7 @@ import org.kimplify.cedar.logging.Cedar
 import com.mobileprism.fishing.domain.entity.common.ContentStateOld
 import com.mobileprism.fishing.domain.entity.common.SortDirection
 import com.mobileprism.fishing.domain.entity.content.UserCatch
+import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.domain.repository.app.catches.CatchesRepository
 import com.mobileprism.fishing.model.datasource.local.dao.CatchDao
 import com.mobileprism.fishing.model.datasource.local.dao.PendingOperationDao
@@ -12,6 +13,7 @@ import com.mobileprism.fishing.model.datasource.local.entity.PendingOperationEnt
 import com.mobileprism.fishing.model.datasource.local.entity.SyncStatus
 import com.mobileprism.fishing.model.datasource.local.mapper.toEntity
 import com.mobileprism.fishing.model.datasource.local.sync.SyncScheduler
+import com.mobileprism.fishing.model.datasource.local.sync.payloadToJsonObject
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionState
 import kotlinx.coroutines.CoroutineScope
@@ -23,8 +25,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.cancel
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 
 class SyncAwareCatchesRepository(
     private val firebaseRepo: CatchesRepository,
@@ -33,6 +33,7 @@ class SyncAwareCatchesRepository(
     private val connectionManager: ConnectionManager,
     private val syncScheduler: SyncScheduler,
     private val db: FishingDatabase,
+    private val authRepository: AuthRepository,
 ) : CatchesRepository, AutoCloseable {
 
     companion object {
@@ -95,7 +96,8 @@ class SyncAwareCatchesRepository(
                     entityId = catchId,
                     operationType = "update",
                     parentId = markerId,
-                    payload = Json.encodeToString(mapToJsonObject(data))
+                    payload = Json.encodeToString(payloadToJsonObject(data)),
+                    userId = authRepository.getCurrentUserId()
                 )
             )
         }
@@ -131,7 +133,8 @@ class SyncAwareCatchesRepository(
                     entityId = userCatch.id,
                     operationType = "delete",
                     parentId = userCatch.userMarkerId,
-                    payload = Json.encodeToString(userCatch)
+                    payload = Json.encodeToString(userCatch),
+                    userId = authRepository.getCurrentUserId()
                 )
             )
         }
@@ -171,7 +174,8 @@ class SyncAwareCatchesRepository(
                     entityId = newCatch.id,
                     operationType = "create",
                     parentId = markerId,
-                    payload = Json.encodeToString(newCatch)
+                    payload = Json.encodeToString(newCatch),
+                    userId = authRepository.getCurrentUserId()
                 )
             )
         }
@@ -186,15 +190,4 @@ class SyncAwareCatchesRepository(
     }
 
     override fun close() { scope.cancel() }
-
-    private fun mapToJsonObject(map: Map<String, Any>): JsonObject {
-        return JsonObject(map.mapValues { (_, v) ->
-            when (v) {
-                is String -> JsonPrimitive(v)
-                is Number -> JsonPrimitive(v)
-                is Boolean -> JsonPrimitive(v)
-                else -> JsonPrimitive(v.toString())
-            }
-        })
-    }
 }

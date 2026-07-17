@@ -41,4 +41,7 @@ interface CatchDao {
 
     @Query("DELETE FROM catches WHERE userMarkerId = :markerId")
     suspend fun deleteByMarkerId(markerId: String)
+
+    @Query("DELETE FROM catches")
+    suspend fun deleteAll()
 }
