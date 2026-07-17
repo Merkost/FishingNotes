@@ -1,6 +1,6 @@
 [versions]
-appVersionCode = "2"
-appVersionName = "1.0.0"
+appVersionCode = "3"
+appVersionName = "0.1.0"
 
 kmpauth = "2.3.1"
 
