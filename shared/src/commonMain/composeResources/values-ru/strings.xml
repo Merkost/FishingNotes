@@ -302,6 +302,7 @@
     <string name="unknown_version">Неизвестная версия</string>
     <string name="leave_review">"Оставить отзыв"</string>
     <string name="retry">Повторить</string>
+    <string name="auth_error_message">Не удалось запустить приложение. Проверьте подключение и попробуйте снова.</string>
     <string name="km">км</string>
     <string name="m">м</string>
     <string name="weather_is_loading">Погода загружается</string>

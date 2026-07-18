@@ -310,6 +310,7 @@
     <string name="unknown_version">Unknown version</string>
     <string name="leave_review">Leave a review</string>
     <string name="retry">Retry</string>
+    <string name="auth_error_message">Couldn\'t start the app. Check your connection and try again.</string>
     <string name="km">km</string>
     <string name="m">m</string>
     <string name="weather_is_loading">Weather is loading</string>
