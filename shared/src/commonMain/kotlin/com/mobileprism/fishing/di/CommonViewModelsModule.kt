@@ -2,7 +2,6 @@ package com.mobileprism.fishing.di
 
 import com.mobileprism.fishing.domain.use_cases.PlaceNameResolver
 import com.mobileprism.fishing.ui.viewmodels.LinkAccountViewModel
-import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
 import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
 import com.mobileprism.fishing.ui.viewmodels.StatisticsViewModel
 import com.mobileprism.fishing.ui.viewmodels.UserCatchViewModel
@@ -31,12 +30,6 @@ val commonViewModelsModule = module {
     }
     viewModel { MainViewModel(repository = get(), syncStatusProvider = get(), userPreferences = get()) }
     viewModel { OnboardingViewModel(userPreferences = get()) }
-    viewModel {
-        LoginViewModel(
-            repository = get(),
-            analyticsTracker = get()
-        )
-    }
     viewModel { LinkAccountViewModel(repository = get(), analyticsTracker = get()) }
     viewModel {
         MapViewModel(
