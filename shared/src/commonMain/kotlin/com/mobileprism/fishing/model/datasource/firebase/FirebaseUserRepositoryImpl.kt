@@ -27,9 +27,12 @@ import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionState
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.withContext
+import org.kimplify.cedar.logging.Cedar
 import kotlin.time.Clock
 
 class FirebaseUserRepositoryImpl(
@@ -45,6 +48,10 @@ class FirebaseUserRepositoryImpl(
 
     private val fireBaseAuth = Firebase.auth
 
+    private companion object {
+        const val LOG_TAG = "FirebaseUserRepository"
+    }
+
     override val isLoggedIn: Boolean
         get() = fireBaseAuth.currentUser != null
 
@@ -55,12 +62,14 @@ class FirebaseUserRepositoryImpl(
         get() = fireBaseAuth.authStateChanged.map { it?.toUser() }
 
     override val isAnonymous: Flow<Boolean>
-        get() = fireBaseAuth.authStateChanged.map { it?.isAnonymous ?: true }
+        get() = merge(fireBaseAuth.authStateChanged, fireBaseAuth.idTokenChanged)
+            .map { it?.isAnonymous ?: true }
+            .distinctUntilChanged()
 
     private fun dev.gitlive.firebase.auth.FirebaseUser.toUser(): User = User(
         uid = uid,
         email = email ?: "",
-        displayName = displayName ?: "Anonymous",
+        displayName = displayName ?: "",
         photoUrl = photoURL ?: "",
         registerDate = Clock.System.now().toEpochMilliseconds()
     )
@@ -117,7 +126,13 @@ class FirebaseUserRepositoryImpl(
 
     override suspend fun signInAnonymously(): Result<Unit> {
         return try {
-            fireBaseAuth.signInAnonymously()
+            val result = fireBaseAuth.signInAnonymously()
+            val guest = result.user ?: fireBaseAuth.currentUser
+            if (guest != null) {
+                addNewUser(guest.toUser()).onFailure {
+                    Cedar.tag(LOG_TAG).e("Failed to persist guest user document: ${it.message}")
+                }
+            }
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -144,7 +159,11 @@ class FirebaseUserRepositoryImpl(
         return try {
             val result = user.linkWithCredential(GoogleAuthProvider.credential(idToken, null))
             val linked = result.user ?: fireBaseAuth.currentUser
-            if (linked != null) addNewUser(linked.toUser())
+            if (linked != null) {
+                addNewUser(linked.toUser()).onFailure {
+                    Cedar.tag(LOG_TAG).e("Failed to persist linked user document: ${it.message}")
+                }
+            }
             Result.success(LinkOutcome.Linked)
         } catch (e: FirebaseAuthUserCollisionException) {
             Result.failure(e)
@@ -180,7 +199,9 @@ class FirebaseUserRepositoryImpl(
 
             withContext(NonCancellable) { clearLocalUserData() }
 
-            addNewUser(linkedUser.toUser())
+            addNewUser(linkedUser.toUser()).onFailure {
+                Cedar.tag(LOG_TAG).e("Failed to persist merged user document: ${it.message}")
+            }
 
             if (anonUid != null && anonUid != newUid) {
                 runCatching { deleteOrphanedUserData(anonUid) }

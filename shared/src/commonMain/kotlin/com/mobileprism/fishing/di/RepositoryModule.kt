@@ -72,7 +72,8 @@ val commonRepositoryModule = module {
     ) } onClose { (it as? AutoCloseable)?.close() }
     single { FirebaseMarkersRepositoryImpl(
         dbCollections = get(),
-        analyticsTracker = get()
+        analyticsTracker = get(),
+        authRepository = get()
     ) } onClose { (it as? AutoCloseable)?.close() }
 
     single<CatchesRepository>(named("firebase")) {

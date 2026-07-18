@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 data class User(
     val uid: String = "",
     val email: String = "",
-    val displayName: String = "Anonymous",
+    val displayName: String = "",
     val photoUrl: String = "",
     val login: String = "",
     val registerDate: Long = 0,

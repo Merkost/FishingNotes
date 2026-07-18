@@ -36,6 +36,7 @@ class FakeAuthRepository(
 ) : AuthRepository {
     override fun getCurrentUserId(): String = userId
     override fun getCurrentUserIdOrNull(): String? = userId
+    override val currentUserIdFlow: Flow<String?> = flowOf(userId)
 }
 
 class FakeMarkersRepository(
