@@ -2,10 +2,12 @@ package com.mobileprism.fishing.model.datasource.firebase
 
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.FirebaseAuthRecentLoginRequiredException
+import dev.gitlive.firebase.auth.FirebaseAuthUserCollisionException
 import dev.gitlive.firebase.auth.GoogleAuthProvider
 import dev.gitlive.firebase.auth.auth
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.entity.content.UserCatch
+import com.mobileprism.fishing.domain.repository.LinkOutcome
 import com.mobileprism.fishing.domain.repository.NoConnectionException
 import com.mobileprism.fishing.domain.repository.PhotoStorage
 import com.mobileprism.fishing.domain.repository.ReauthRequiredException
@@ -113,6 +115,21 @@ class FirebaseUserRepositoryImpl(
         return try {
             fireBaseAuth.signInAnonymously()
             Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun linkWithGoogle(idToken: String): Result<LinkOutcome> {
+        val user = fireBaseAuth.currentUser
+            ?: return Result.failure(IllegalStateException("No signed-in user"))
+        return try {
+            val result = user.linkWithCredential(GoogleAuthProvider.credential(idToken, null))
+            val linked = result.user ?: fireBaseAuth.currentUser
+            if (linked != null) addNewUser(linked.toUser())
+            Result.success(LinkOutcome.Linked)
+        } catch (e: FirebaseAuthUserCollisionException) {
+            Result.failure(e)
         } catch (e: Exception) {
             Result.failure(e)
         }
