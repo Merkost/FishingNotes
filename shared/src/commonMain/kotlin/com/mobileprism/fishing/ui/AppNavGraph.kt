@@ -63,7 +63,7 @@ fun NavGraphBuilder.AppNavGraph(
     }
 
     composable<MainDestinations.EditProfile> {
-        EditProfile(upPress)
+        EditProfile(upPress, navController)
     }
 
     composable<MainDestinations.LinkAccount> {
