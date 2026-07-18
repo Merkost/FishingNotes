@@ -20,9 +20,11 @@ sealed interface LinkState {
         val catchesAdded: Int,
         val markersAdded: Int,
         val alreadyPresent: Int,
-    ) : LinkState
+    ) : LinkState {
+        fun isEmpty(): Boolean = catchesAdded + markersAdded + alreadyPresent == 0
+    }
     data object Success : LinkState
-    data object Error : LinkState
+    data class Error(val isMergeFailure: Boolean = false) : LinkState
 }
 
 class LinkAccountViewModel(
@@ -56,7 +58,7 @@ class LinkAccountViewModel(
             _uiState.value = LinkState.Merging(progress = null)
             repository.mergeGuestIntoGoogle(token).fold(
                 onSuccess = { onLinkOutcome(it) },
-                onFailure = { _uiState.value = LinkState.Error },
+                onFailure = { _uiState.value = LinkState.Error(isMergeFailure = true) },
             )
         }
     }
@@ -84,7 +86,7 @@ class LinkAccountViewModel(
             _uiState.value = LinkState.MergeConfirm
             return
         }
-        _uiState.value = LinkState.Error
+        _uiState.value = LinkState.Error()
         runCatching { analyticsTracker.logEvent(AnalyticsEvent.SignInError(error.message)) }
         runCatching { Cedar.e(error.message ?: "Link failed") }
     }

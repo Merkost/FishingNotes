@@ -24,6 +24,9 @@ interface CatchDao {
     @Query("SELECT * FROM catches WHERE syncStatus != ${SyncStatus.SYNCED}")
     suspend fun getPending(): List<CatchEntity>
 
+    @Query("SELECT * FROM catches")
+    suspend fun getAllOnce(): List<CatchEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entity: CatchEntity)
 

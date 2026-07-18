@@ -15,13 +15,13 @@ import com.mobileprism.fishing.domain.repository.ReauthRequiredException
 import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
 import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
+import com.mobileprism.fishing.domain.use_cases.auth.GuestMergePlan
 import com.mobileprism.fishing.domain.use_cases.auth.planGuestMerge
 import com.mobileprism.fishing.model.datasource.local.dao.CatchDao
 import com.mobileprism.fishing.model.datasource.local.dao.MarkerDao
 import com.mobileprism.fishing.model.datasource.local.dao.PendingOperationDao
+import com.mobileprism.fishing.model.datasource.local.mapper.toDomain
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
-import com.mobileprism.fishing.model.datasource.utils.RepositoryConstants.CATCHES_COLLECTION
-import com.mobileprism.fishing.model.datasource.utils.RepositoryConstants.MARKERS_COLLECTION
 import com.mobileprism.fishing.model.datastore.UserDatastore
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionState
@@ -174,7 +174,10 @@ class FirebaseUserRepositoryImpl(
 
     override suspend fun mergeGuestIntoGoogle(idToken: String): Result<LinkOutcome> {
         return try {
-            val anonUid = fireBaseAuth.currentUser?.uid
+            if (fireBaseAuth.currentUser?.isAnonymous != true) {
+                return resumeGuestMerge()
+            }
+
             val (guestMarkers, guestCatches) = snapshotCurrentUserData()
 
             val result =
@@ -182,29 +185,16 @@ class FirebaseUserRepositoryImpl(
             val linkedUser = result.user
                 ?: fireBaseAuth.currentUser
                 ?: return Result.failure(IllegalStateException("Sign-in failed during merge"))
-            val newUid = linkedUser.uid
 
             val (existingMarkers, existingCatches) = snapshotCurrentUserData()
             val plan = planGuestMerge(guestMarkers, existingMarkers, guestCatches, existingCatches)
 
-            plan.markersToCopy.forEach { marker ->
-                dbCollections.getUserMapMarkersCollection().document(marker.id)
-                    .set(marker.copy(userId = newUid))
-            }
-            plan.catchesToCopy.forEach { userCatch ->
-                dbCollections.getUserCatchesCollection(userCatch.userMarkerId)
-                    .document(userCatch.id)
-                    .set(userCatch.copy(userId = newUid))
-            }
+            applyMergePlan(plan, linkedUser.uid)
 
             withContext(NonCancellable) { clearLocalUserData() }
 
             addNewUser(linkedUser.toUser()).onFailure {
                 Cedar.tag(LOG_TAG).e("Failed to persist merged user document: ${it.message}")
-            }
-
-            if (anonUid != null && anonUid != newUid) {
-                runCatching { deleteOrphanedUserData(anonUid) }
             }
 
             Result.success(
@@ -219,6 +209,59 @@ class FirebaseUserRepositoryImpl(
         }
     }
 
+    private suspend fun resumeGuestMerge(): Result<LinkOutcome> {
+        val currentUser = fireBaseAuth.currentUser
+            ?: return Result.failure(IllegalStateException("No signed-in user"))
+        val currentUid = currentUser.uid
+
+        val pendingMarkers = markerDao.getAllOnce()
+            .map { it.toDomain() }
+            .filter { it.userId != currentUid }
+        val pendingCatches = catchDao.getAllOnce()
+            .map { it.toDomain() }
+            .filter { it.userId != currentUid }
+
+        if (pendingMarkers.isEmpty() && pendingCatches.isEmpty()) {
+            return Result.failure(IllegalStateException("No guest data to merge"))
+        }
+
+        Cedar.tag(LOG_TAG).d(
+            "Resuming interrupted merge from local cache: " +
+                "${pendingMarkers.size} markers, ${pendingCatches.size} catches"
+        )
+
+        val (existingMarkers, existingCatches) = snapshotCurrentUserData()
+        val plan = planGuestMerge(pendingMarkers, existingMarkers, pendingCatches, existingCatches)
+
+        applyMergePlan(plan, currentUid)
+
+        withContext(NonCancellable) { clearLocalUserData() }
+
+        addNewUser(currentUser.toUser()).onFailure {
+            Cedar.tag(LOG_TAG).e("Failed to persist merged user document: ${it.message}")
+        }
+
+        return Result.success(
+            LinkOutcome.Merged(
+                catchesAdded = plan.catchesToCopy.size,
+                markersAdded = plan.markersToCopy.size,
+                alreadyPresent = plan.alreadyPresent,
+            )
+        )
+    }
+
+    private suspend fun applyMergePlan(plan: GuestMergePlan, targetUid: String) {
+        plan.markersToCopy.forEach { marker ->
+            dbCollections.getUserMapMarkersCollection().document(marker.id)
+                .set(marker.copy(userId = targetUid))
+        }
+        plan.catchesToCopy.forEach { userCatch ->
+            dbCollections.getUserCatchesCollection(userCatch.userMarkerId)
+                .document(userCatch.id)
+                .set(userCatch.copy(userId = targetUid))
+        }
+    }
+
     private suspend fun snapshotCurrentUserData(): Pair<List<UserMapMarker>, List<UserCatch>> {
         val markerDocs = dbCollections.getUserMapMarkersCollection().get().documents
         val markers = markerDocs.mapNotNull { runCatching { it.data<UserMapMarker>() }.getOrNull() }
@@ -227,17 +270,6 @@ class FirebaseUserRepositoryImpl(
                 .mapNotNull { runCatching { it.data<UserCatch>() }.getOrNull() }
         }
         return markers to catches
-    }
-
-    private suspend fun deleteOrphanedUserData(anonUid: String) {
-        val userDoc = dbCollections.getUsersCollection().document(anonUid)
-        val markerDocs = userDoc.collection(MARKERS_COLLECTION).get().documents
-        markerDocs.forEach { markerDoc ->
-            markerDoc.reference.collection(CATCHES_COLLECTION).get().documents
-                .forEach { catchDoc -> catchDoc.reference.delete() }
-            markerDoc.reference.delete()
-        }
-        userDoc.delete()
     }
 
     private suspend fun clearLocalUserData() {

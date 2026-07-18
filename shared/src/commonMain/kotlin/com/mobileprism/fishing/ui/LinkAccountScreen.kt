@@ -62,7 +62,9 @@ fun LinkAccountScreen(onBack: () -> Unit, onLinked: () -> Unit) {
     val state by vm.uiState.collectAsState()
 
     LaunchedEffect(state) {
-        if (state is LinkState.Success) {
+        val current = state
+        val isEmptyMerge = current is LinkState.MergeSuccess && current.isEmpty()
+        if (current is LinkState.Success || isEmptyMerge) {
             SnackbarManager.showMessage(Res.string.link_success)
             onLinked()
         }
@@ -138,11 +140,16 @@ fun LinkAccountScreen(onBack: () -> Unit, onLinked: () -> Unit) {
                 modifier = Modifier.padding(top = Spacing.lg),
             )
 
-            AnimatedVisibility(visible = state is LinkState.Error) {
+            val errorState = state as? LinkState.Error
+            AnimatedVisibility(visible = errorState != null) {
                 InlineBannerCard(
                     tone = BannerTone.Error,
                     icon = Icons.Outlined.Warning,
-                    title = stringResource(Res.string.sign_in_generic_error),
+                    title = if (errorState?.isMergeFailure == true) {
+                        stringResource(Res.string.merge_error)
+                    } else {
+                        stringResource(Res.string.sign_in_generic_error)
+                    },
                     actionLabel = stringResource(Res.string.retry),
                     onClick = { vm.retry() },
                     modifier = Modifier.fillMaxWidth().padding(top = Spacing.lg),
@@ -180,7 +187,7 @@ fun LinkAccountScreen(onBack: () -> Unit, onLinked: () -> Unit) {
         text = stringResource(Res.string.merge_in_progress) + "\n" + stringResource(Res.string.merge_progress_detail),
         progress = (mergeState as? LinkState.Merging)?.progress,
     )
-    if (mergeState is LinkState.MergeSuccess) {
+    if (mergeState is LinkState.MergeSuccess && !mergeState.isEmpty()) {
         val message = if (mergeState.alreadyPresent > 0) {
             stringResource(
                 Res.string.merge_done_message_deduped,
