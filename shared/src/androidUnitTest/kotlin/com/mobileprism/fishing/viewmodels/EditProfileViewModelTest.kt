@@ -10,10 +10,13 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -48,6 +51,8 @@ class EditProfileViewModelTest {
         override val isLoggedIn: Boolean = true
         override val cachedUser: User? = null
         var lastProfileData: User? = null
+        val anonymousState = MutableStateFlow(true)
+        override val isAnonymous: Flow<Boolean> get() = anonymousState
 
         override suspend fun logoutCurrentUser() {}
         override suspend fun deleteAccount(): Result<Unit> = Result.success(Unit)
@@ -193,5 +198,20 @@ class EditProfileViewModelTest {
         vm.updateProfile()
         coVerify(exactly = 0) { savePhotos(any()) }
         assertIs<BaseViewState.Success<Unit>>(vm.uiState.value)
+    }
+
+    @Test
+    fun isAnonymousFollowsRepositoryFlagWhileCollected() {
+        val viewModel = EditProfileViewModel(userDatastore, userRepository, savePhotos)
+        val collectorScope = CoroutineScope(testDispatcher)
+        val job = collectorScope.launch { viewModel.isAnonymous.collect {} }
+
+        assertTrue(viewModel.isAnonymous.value)
+
+        userRepository.anonymousState.value = false
+
+        assertEquals(false, viewModel.isAnonymous.value)
+
+        job.cancel()
     }
 }

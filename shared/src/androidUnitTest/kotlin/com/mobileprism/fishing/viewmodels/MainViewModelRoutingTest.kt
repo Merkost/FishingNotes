@@ -8,21 +8,27 @@ import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.testutils.user
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModelRoutingTest {
@@ -55,7 +61,7 @@ class MainViewModelRoutingTest {
         currentUserFlow: Flow<User?> = flowOf(null),
         isLoggedIn: Boolean = false,
         cachedUser: User? = null,
-        onSignInAnonymously: () -> Result<Unit> = { Result.success(Unit) },
+        onSignInAnonymously: suspend () -> Result<Unit> = { Result.success(Unit) },
     ) = object : UserRepository {
         override val currentUser: Flow<User?> = currentUserFlow
         override val datastoreUser: Flow<User> = flowOf(testUser)
@@ -171,5 +177,54 @@ class MainViewModelRoutingTest {
         advanceUntilIdle()
 
         assertEquals(RoutingDecision.Home, vm.routing.value)
+    }
+
+    @Test
+    fun `anonRetryInProgress is true while a retry is in flight and false once it settles`() = runTest {
+        var signInCalls = 0
+        val retryResult = CompletableDeferred<Result<Unit>>()
+        val repo = fakeUserRepository(
+            currentUserFlow = flowOf(null),
+            onSignInAnonymously = {
+                signInCalls++
+                if (signInCalls == 1) Result.failure(RuntimeException("offline")) else retryResult.await()
+            },
+        )
+        val prefs = fakeUserPreferences(flowOf(true))
+
+        val vm = MainViewModel(repo, syncStatusProvider, prefs)
+        advanceUntilIdle()
+        assertEquals(RoutingDecision.AuthError, vm.routing.value)
+        assertFalse(vm.anonRetryInProgress.value)
+
+        vm.retryAnonymousSignIn()
+        runCurrent()
+
+        assertTrue(vm.anonRetryInProgress.value)
+        assertEquals(2, signInCalls)
+
+        retryResult.complete(Result.success(Unit))
+        advanceUntilIdle()
+
+        assertFalse(vm.anonRetryInProgress.value)
+        assertEquals(RoutingDecision.Splash, vm.routing.value)
+    }
+
+    @Test
+    fun `sign-in that never completes times out to AuthError after 30s`() = runTest {
+        val repo = fakeUserRepository(
+            currentUserFlow = flowOf(null),
+            onSignInAnonymously = { awaitCancellation() },
+        )
+        val prefs = fakeUserPreferences(flowOf(true))
+
+        val vm = MainViewModel(repo, syncStatusProvider, prefs)
+        runCurrent()
+        assertEquals(RoutingDecision.Splash, vm.routing.value)
+
+        advanceTimeBy(31_000)
+        advanceUntilIdle()
+
+        assertEquals(RoutingDecision.AuthError, vm.routing.value)
     }
 }

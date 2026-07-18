@@ -13,9 +13,12 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -157,5 +160,26 @@ class UserViewModelTest {
         }
 
         coVerify { userRepository.logoutCurrentUser() }
+    }
+
+    @Test
+    fun isAnonymousFollowsRepositoryFlagWhileCollected() {
+        every { userDatastore.getUser } returns flowOf(testUser)
+        coEvery { getUserCatchesUseCase() } returns flowOf(catches)
+        every { offlineRepository.getAllUserMarkersList() } returns flowOf(places)
+        val anonymousFlow = MutableStateFlow(true)
+        every { userRepository.isAnonymous } returns anonymousFlow
+
+        val viewModel = createViewModel()
+        val collectorScope = CoroutineScope(testDispatcher)
+        val job = collectorScope.launch { viewModel.isAnonymous.collect {} }
+
+        assertTrue(viewModel.isAnonymous.value)
+
+        anonymousFlow.value = false
+
+        assertEquals(false, viewModel.isAnonymous.value)
+
+        job.cancel()
     }
 }
