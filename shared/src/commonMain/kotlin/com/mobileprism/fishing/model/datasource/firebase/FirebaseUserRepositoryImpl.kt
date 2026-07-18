@@ -164,6 +164,8 @@ class FirebaseUserRepositoryImpl(
                     .set(userCatch.copy(userId = newUid))
             }
 
+            withContext(NonCancellable) { clearLocalUserData() }
+
             addNewUser(linkedUser.toUser())
 
             if (anonUid != null && anonUid != newUid) {
