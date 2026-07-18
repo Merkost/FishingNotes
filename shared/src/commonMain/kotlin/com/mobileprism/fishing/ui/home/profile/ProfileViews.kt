@@ -43,23 +43,26 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ProfileAppBar(
     navController: NavController,
+    isAnonymous: Boolean,
 ) {
     val dialogOnLogout = rememberSaveable { mutableStateOf(false) }
     AppTopBar(
         title = stringResource(Res.string.profile),
         actions = {
-            IconButton(onClick = { dialogOnLogout.value = true }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                    contentDescription = stringResource(Res.string.logout)
-                )
+            if (!isAnonymous) {
+                IconButton(onClick = { dialogOnLogout.value = true }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                        contentDescription = stringResource(Res.string.logout)
+                    )
+                }
             }
             IconButton(onClick = { navController.navigate(MainDestinations.Settings) }) {
                 Icon(Icons.Default.Settings, contentDescription = stringResource(Res.string.settings))
             }
         },
     )
-    if (dialogOnLogout.value) LogoutDialog(dialogOnLogout)
+    if (!isAnonymous && dialogOnLogout.value) LogoutDialog(dialogOnLogout)
 }
 
 @Composable
