@@ -68,6 +68,10 @@ class LinkAccountViewModel(
     }
 
     fun retry() {
+        if ((_uiState.value as? LinkState.Error)?.isMergeFailure == true) {
+            confirmMerge()
+            return
+        }
         val token = pendingIdToken
         if (token != null) linkWithGoogle(token) else _uiState.value = LinkState.Idle
     }

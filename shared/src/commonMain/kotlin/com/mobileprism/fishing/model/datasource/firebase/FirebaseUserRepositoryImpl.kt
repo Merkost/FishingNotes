@@ -95,11 +95,13 @@ class FirebaseUserRepositoryImpl(
             withContext(NonCancellable) {
                 clearLocalUserData()
             }
-            deleteRemoteUserContent(user.uid)
+            deleteRemoteUserContent()
             user.delete()
             Result.success(Unit)
         } catch (e: FirebaseAuthRecentLoginRequiredException) {
             Result.failure(ReauthRequiredException())
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -111,6 +113,8 @@ class FirebaseUserRepositoryImpl(
         return try {
             user.reauthenticate(GoogleAuthProvider.credential(idToken, null))
             Result.success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -126,12 +130,15 @@ class FirebaseUserRepositoryImpl(
                 }
             }
             Result.success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    private suspend fun deleteRemoteUserContent(uid: String) {
+    private suspend fun deleteRemoteUserContent() {
+        val uid = fireBaseAuth.currentUser?.uid ?: return
         val markerDocs = dbCollections.getUserMapMarkersCollection().get().documents
         markerDocs.forEach { markerDoc ->
             val catchDocs = dbCollections.getUserCatchesCollection(markerDoc.id).get().documents
@@ -148,8 +155,11 @@ class FirebaseUserRepositoryImpl(
 
     override suspend fun clearGuestData(): Result<Unit> {
         val user = fireBaseAuth.currentUser ?: return signInAnonymously()
+        if (connectionManager.getConnectionState() !is ConnectionState.Available) {
+            return Result.failure(NoConnectionException())
+        }
         return try {
-            deleteRemoteUserContent(user.uid)
+            deleteRemoteUserContent()
             withContext(NonCancellable) {
                 clearLocalUserData()
                 user.delete()
@@ -176,6 +186,8 @@ class FirebaseUserRepositoryImpl(
             Result.success(LinkOutcome.Linked)
         } catch (e: FirebaseAuthUserCollisionException) {
             Result.failure(e)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -213,6 +225,8 @@ class FirebaseUserRepositoryImpl(
                     alreadyPresent = plan.alreadyPresent,
                 )
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -321,6 +335,8 @@ class FirebaseUserRepositoryImpl(
                 userDatastore.saveUser(user)
             }
             Result.success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(e)
         }

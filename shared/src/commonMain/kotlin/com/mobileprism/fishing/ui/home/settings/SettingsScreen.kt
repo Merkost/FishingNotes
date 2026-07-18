@@ -441,7 +441,7 @@ private fun AccountSettingsGroup(navController: NavController) {
     ModalLoadingDialog(
         visible = deleteAccountState is DeleteAccountState.InProgress,
         text = if (isAnonymous) {
-            stringResource(Res.string.guest_clear_data)
+            stringResource(Res.string.guest_clear_data_progress)
         } else {
             stringResource(Res.string.delete_account_deleting)
         },

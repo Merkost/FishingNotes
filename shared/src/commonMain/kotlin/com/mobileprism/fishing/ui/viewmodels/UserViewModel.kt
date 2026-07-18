@@ -15,6 +15,7 @@ import com.mobileprism.fishing.ui.home.profile.findBestCatch
 import com.mobileprism.fishing.ui.home.profile.findFavoritePlace
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.delete_account_error
+import fishing.shared.generated.resources.guest_clear_data_error
 import fishing.shared.generated.resources.sign_in_generic_error
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -95,7 +96,7 @@ class UserViewModel(
                 .onSuccess { _deleteAccountState.value = DeleteAccountState.Idle }
                 .onFailure {
                     _deleteAccountState.value = DeleteAccountState.Idle
-                    SnackbarManager.showMessage(Res.string.delete_account_error)
+                    SnackbarManager.showMessage(Res.string.guest_clear_data_error)
                 }
         }
     }

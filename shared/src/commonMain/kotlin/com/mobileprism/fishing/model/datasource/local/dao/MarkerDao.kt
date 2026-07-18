@@ -21,7 +21,7 @@ interface MarkerDao {
     @Query("SELECT * FROM markers WHERE syncStatus != ${SyncStatus.SYNCED}")
     suspend fun getPending(): List<MarkerEntity>
 
-    @Query("SELECT * FROM markers")
+    @Query("SELECT * FROM markers WHERE syncStatus != ${SyncStatus.PENDING_DELETE}")
     suspend fun getAllOnce(): List<MarkerEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

@@ -171,6 +171,44 @@ class LinkAccountViewModelTest {
     }
 
     @Test
+    fun `retry after a merge failure resumes the merge instead of re-linking`() = runTest {
+        val repo = mockk<UserRepository>(relaxed = true)
+        coEvery { repo.linkWithGoogle("tok") } returns
+            Result.failure(mockk<dev.gitlive.firebase.auth.FirebaseAuthUserCollisionException>(relaxed = true))
+        coEvery { repo.mergeGuestIntoGoogle("tok") } returns Result.failure(RuntimeException("merge failed"))
+        val vm = LinkAccountViewModel(repo, analytics)
+
+        vm.linkWithGoogle("tok")
+        advanceUntilIdle()
+        vm.confirmMerge()
+        advanceUntilIdle()
+        assertEquals(true, (vm.uiState.value as LinkState.Error).isMergeFailure)
+
+        vm.retry()
+        advanceUntilIdle()
+
+        coVerify(exactly = 2) { repo.mergeGuestIntoGoogle("tok") }
+        coVerify(exactly = 1) { repo.linkWithGoogle("tok") }
+    }
+
+    @Test
+    fun `retry after a non-merge failure re-invokes linkWithGoogle and never merges`() = runTest {
+        val repo = mockk<UserRepository>(relaxed = true)
+        coEvery { repo.linkWithGoogle("tok") } returns Result.failure(RuntimeException("net"))
+        val vm = LinkAccountViewModel(repo, analytics)
+
+        vm.linkWithGoogle("tok")
+        advanceUntilIdle()
+        assertEquals(false, (vm.uiState.value as LinkState.Error).isMergeFailure)
+
+        vm.retry()
+        advanceUntilIdle()
+
+        coVerify(exactly = 2) { repo.linkWithGoogle("tok") }
+        coVerify(exactly = 0) { repo.mergeGuestIntoGoogle(any()) }
+    }
+
+    @Test
     fun `non-merge link failure sets Error with isMergeFailure false`() = runTest {
         val repo = mockk<UserRepository>(relaxed = true)
         coEvery { repo.linkWithGoogle("tok") } returns Result.failure(RuntimeException("net"))

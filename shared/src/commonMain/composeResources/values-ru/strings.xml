@@ -329,6 +329,8 @@
     <string name="guest_clear_data">Очистить данные</string>
     <string name="guest_clear_data_title">Очистить все данные?</string>
     <string name="guest_clear_data_message">Вы используете приложение как гость, резервной копии нет. Это навсегда удалит все уловы и точки на этом устройстве.</string>
+    <string name="guest_clear_data_error">Не удалось очистить данные. Попробуйте ещё раз.</string>
+    <string name="guest_clear_data_progress">Очищаем данные…</string>
     <string name="km">км</string>
     <string name="m">м</string>
     <string name="weather_is_loading">Погода загружается</string>

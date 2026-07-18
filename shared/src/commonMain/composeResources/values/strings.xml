@@ -333,6 +333,8 @@
     <string name="guest_clear_data">Clear all data</string>
     <string name="guest_clear_data_title">Clear all data?</string>
     <string name="guest_clear_data_message">You\'re using the app as a guest, so there\'s no backup. This permanently erases every catch and spot on this device.</string>
+    <string name="guest_clear_data_error">Couldn\'t clear your data. Please try again.</string>
+    <string name="guest_clear_data_progress">Clearing your data…</string>
     <string name="km">km</string>
     <string name="m">m</string>
     <string name="weather_is_loading">Weather is loading</string>

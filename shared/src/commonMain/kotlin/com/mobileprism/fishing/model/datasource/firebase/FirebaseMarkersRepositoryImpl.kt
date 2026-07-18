@@ -20,7 +20,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
@@ -36,8 +37,17 @@ class FirebaseMarkersRepositoryImpl(
 
     private val markersSnapshotFlow: Flow<QuerySnapshot> =
         authRepository.currentUserIdFlow
-            .filterNotNull()
-            .flatMapLatest { dbCollections.getUserMapMarkersCollection().snapshots }
+            .flatMapLatest { uid ->
+                if (uid == null) {
+                    emptyFlow()
+                } else {
+                    dbCollections.getUserMapMarkersCollection().snapshots
+                        .map { uid to it }
+                        .catch { }
+                }
+            }
+            .filter { (uid, _) -> uid == authRepository.getCurrentUserIdOrNull() }
+            .map { (_, snapshot) -> snapshot }
             .shareIn(scope, SharingStarted.WhileSubscribed(5_000), replay = 1)
 
     override fun getAllUserMarkers(): Flow<ContentState<MapMarker>> = channelFlow {
