@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.kimplify.cedar.logging.Cedar
 
+private const val GOOGLE_SIGN_IN_NULL_RESULT = "google_sign_in_null_result"
+
 sealed interface LoginUiState {
     data object Idle : LoginUiState
     data object Signing : LoginUiState
@@ -69,6 +71,12 @@ class LoginViewModel(
 
     fun onGoogleSignInCancelled() {
         _uiState.value = LoginUiState.Idle
+    }
+
+    fun onGoogleSignInFailed() {
+        _uiState.value = LoginUiState.Error(null)
+        runCatching { analyticsTracker.logEvent(AnalyticsEvent.SignInError(GOOGLE_SIGN_IN_NULL_RESULT)) }
+        runCatching { Cedar.e("Google sign-in returned no credential (cancelled or failed)") }
     }
 
     private fun onSignInError(error: Throwable) {

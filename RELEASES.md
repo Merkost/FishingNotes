@@ -4,11 +4,18 @@
 
 | Version | Code | Date       | Track                  | Status                |
 |---------|------|------------|------------------------|-----------------------|
-| 0.1.0   | 3    | 2026-07-17 | Internal testing       | Built, ready to upload |
+| 0.1.0   | 4    | 2026-07-18 | Internal testing       | Built (Google Sign-In fix) |
+| 0.1.0   | 3    | 2026-07-17 | Internal testing       | Superseded by code 4  |
 | 1.0.0   | 2    | —          | — (internal build only) | Never shipped         |
 | 1.0.0   | 1    | —          | — (internal build only) | Never shipped         |
 
 Artifact: `androidApp/build/outputs/bundle/release/androidApp-release.aab` (signed, R8-minified).
+
+### code 4 — Google Sign-In fix
+
+- **Root cause:** Google Sign-In failed in prod because the only SHA-1 registered in the Firebase project for `com.merkost.fishingnotes` matched no certificate that actually signs the delivered app. Play App Signing re-signs the AAB with Google's app-signing key (`a7f7ca76…`), which was not registered, so Google returned `DEVELOPER_ERROR` and KMPAuth swallowed it to a silent `null`. Dev worked because the debug cert was registered.
+- **Fix (config, no build needed for existing installs):** registered both the Play app-signing key (`a7f7ca76…`) and the upload key (`c8ff5cdd…`) in Firebase; refreshed `androidApp/google-services.json`.
+- **App change shipped in code 4:** sign-in failures are now surfaced to the user instead of silently resetting — `LoginViewModel.onGoogleSignInFailed()` shows an error banner + logs analytics, and the account-deletion reauth path shows a snackbar (`UserViewModel.onReauthSignInFailed()`).
 
 ## Track plan for 0.1.0
 

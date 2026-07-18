@@ -111,6 +111,21 @@ class LoginViewModelTest {
     }
 
     @Test
+    fun `onGoogleSignInFailed sets Error state and logs analytics`() = runTest {
+        val repo = fakeUserRepository(currentUserFlow = flowOf(null))
+        val viewModel = LoginViewModel(repo, analyticsTracker)
+        advanceUntilIdle()
+
+        viewModel.onGoogleSignInFailed()
+
+        val state = viewModel.uiState.value
+        assertIs<LoginUiState.Error>(state)
+        verify(exactly = 1) {
+            analyticsTracker.logEvent(AnalyticsEvent.SignInError("google_sign_in_null_result"))
+        }
+    }
+
+    @Test
     fun successfulUserSignInTransitionsSigningToSuccess() = runTest {
         val repo = fakeUserRepository(
             currentUserFlow = flowOf(testUser),

@@ -405,7 +405,7 @@ private fun AccountSettingsGroup() {
                         if (idToken != null) {
                             viewModel.reauthenticateAndDeleteAccount(idToken)
                         } else {
-                            viewModel.cancelDeleteAccount()
+                            viewModel.onReauthSignInFailed()
                         }
                     },
                 ) {

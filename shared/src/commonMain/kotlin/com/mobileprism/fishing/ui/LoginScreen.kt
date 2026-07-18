@@ -44,6 +44,7 @@ import fishing.shared.generated.resources.login_headline
 import fishing.shared.generated.resources.login_subtitle
 import fishing.shared.generated.resources.login_trust_copy
 import fishing.shared.generated.resources.retry
+import fishing.shared.generated.resources.sign_in_generic_error
 import fishing.shared.generated.resources.sign_with_google
 import fishing.shared.generated.resources.signing_in
 import org.jetbrains.compose.resources.painterResource
@@ -55,8 +56,14 @@ fun LoginScreen() {
     val loginViewModel: LoginViewModel = koinInject()
     val uiState by loginViewModel.uiState.collectAsState()
     val signing = uiState is LoginUiState.Signing
-    val rawError = (uiState as? LoginUiState.Error)?.message
-    val errorStringRes = rawError?.let { errorToMessage(RuntimeException(it)) }
+    val errorStringRes = (uiState as? LoginUiState.Error)?.let { state ->
+        val message = state.message
+        if (message.isNullOrBlank()) {
+            Res.string.sign_in_generic_error
+        } else {
+            errorToMessage(RuntimeException(message))
+        }
+    }
 
     Scaffold(contentWindowInsets = WindowInsets(0)) { paddingValues ->
         Box(
@@ -113,7 +120,7 @@ fun LoginScreen() {
                         if (idToken != null) {
                             loginViewModel.firebaseSignInWithGoogle(idToken)
                         } else {
-                            loginViewModel.onGoogleSignInCancelled()
+                            loginViewModel.onGoogleSignInFailed()
                         }
                     },
                 ) {
