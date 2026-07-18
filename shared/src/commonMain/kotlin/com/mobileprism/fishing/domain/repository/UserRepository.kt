@@ -29,7 +29,6 @@ interface UserRepository {
         Result.success(LinkOutcome.Linked)
 
     suspend fun clearGuestData(): Result<Unit> = Result.success(Unit)
-
 }
 
 class ReauthRequiredException : Exception("Recent login required")

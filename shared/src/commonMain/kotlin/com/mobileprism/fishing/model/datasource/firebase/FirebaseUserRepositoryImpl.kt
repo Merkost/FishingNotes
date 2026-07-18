@@ -25,6 +25,7 @@ import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
 import com.mobileprism.fishing.model.datastore.UserDatastore
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionState
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -50,6 +51,8 @@ class FirebaseUserRepositoryImpl(
 
     private companion object {
         const val LOG_TAG = "FirebaseUserRepository"
+        const val METHOD_GOOGLE = "Google"
+        const val METHOD_ANONYMOUS = "Anonymous"
     }
 
     override val isLoggedIn: Boolean
@@ -92,18 +95,7 @@ class FirebaseUserRepositoryImpl(
             withContext(NonCancellable) {
                 clearLocalUserData()
             }
-            val markerDocs = dbCollections.getUserMapMarkersCollection().get().documents
-            markerDocs.forEach { markerDoc ->
-                val catchDocs = dbCollections.getUserCatchesCollection(markerDoc.id).get().documents
-                catchDocs.forEach { catchDoc ->
-                    runCatching { catchDoc.data<UserCatch>().downloadPhotoLinks }
-                        .getOrDefault(emptyList())
-                        .forEach { url -> photoStorage.deletePhoto(url) }
-                    catchDoc.reference.delete()
-                }
-                markerDoc.reference.delete()
-            }
-            dbCollections.getUsersCollection().document(user.uid).delete()
+            deleteRemoteUserContent(user.uid)
             user.delete()
             Result.success(Unit)
         } catch (e: FirebaseAuthRecentLoginRequiredException) {
@@ -129,7 +121,7 @@ class FirebaseUserRepositoryImpl(
             val result = fireBaseAuth.signInAnonymously()
             val guest = result.user ?: fireBaseAuth.currentUser
             if (guest != null) {
-                addNewUser(guest.toUser()).onFailure {
+                addNewUser(guest.toUser(), METHOD_ANONYMOUS).onFailure {
                     Cedar.tag(LOG_TAG).e("Failed to persist guest user document: ${it.message}")
                 }
             }
@@ -139,15 +131,32 @@ class FirebaseUserRepositoryImpl(
         }
     }
 
-    override suspend fun clearGuestData(): Result<Unit> {
-        return try {
-            val anonUid = fireBaseAuth.currentUser?.uid
-            withContext(NonCancellable) { clearLocalUserData() }
-            if (anonUid != null) {
-                runCatching { dbCollections.getUsersCollection().document(anonUid).delete() }
-                runCatching { fireBaseAuth.currentUser?.delete() }
+    private suspend fun deleteRemoteUserContent(uid: String) {
+        val markerDocs = dbCollections.getUserMapMarkersCollection().get().documents
+        markerDocs.forEach { markerDoc ->
+            val catchDocs = dbCollections.getUserCatchesCollection(markerDoc.id).get().documents
+            catchDocs.forEach { catchDoc ->
+                runCatching { catchDoc.data<UserCatch>().downloadPhotoLinks }
+                    .getOrDefault(emptyList())
+                    .forEach { url -> photoStorage.deletePhoto(url) }
+                catchDoc.reference.delete()
             }
-            signInAnonymously()
+            markerDoc.reference.delete()
+        }
+        dbCollections.getUsersCollection().document(uid).delete()
+    }
+
+    override suspend fun clearGuestData(): Result<Unit> {
+        val user = fireBaseAuth.currentUser ?: return signInAnonymously()
+        return try {
+            deleteRemoteUserContent(user.uid)
+            withContext(NonCancellable) {
+                clearLocalUserData()
+                user.delete()
+                signInAnonymously()
+            }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -160,7 +169,7 @@ class FirebaseUserRepositoryImpl(
             val result = user.linkWithCredential(GoogleAuthProvider.credential(idToken, null))
             val linked = result.user ?: fireBaseAuth.currentUser
             if (linked != null) {
-                addNewUser(linked.toUser()).onFailure {
+                addNewUser(linked.toUser(), METHOD_GOOGLE).onFailure {
                     Cedar.tag(LOG_TAG).e("Failed to persist linked user document: ${it.message}")
                 }
             }
@@ -193,7 +202,7 @@ class FirebaseUserRepositoryImpl(
 
             withContext(NonCancellable) { clearLocalUserData() }
 
-            addNewUser(linkedUser.toUser()).onFailure {
+            addNewUser(linkedUser.toUser(), METHOD_GOOGLE).onFailure {
                 Cedar.tag(LOG_TAG).e("Failed to persist merged user document: ${it.message}")
             }
 
@@ -237,7 +246,7 @@ class FirebaseUserRepositoryImpl(
 
         withContext(NonCancellable) { clearLocalUserData() }
 
-        addNewUser(currentUser.toUser()).onFailure {
+        addNewUser(currentUser.toUser(), METHOD_GOOGLE).onFailure {
             Cedar.tag(LOG_TAG).e("Failed to persist merged user document: ${it.message}")
         }
 
@@ -280,6 +289,12 @@ class FirebaseUserRepositoryImpl(
     }
 
     override suspend fun addNewUser(user: User): Result<Unit> {
+        val method =
+            if (fireBaseAuth.currentUser?.isAnonymous == true) METHOD_ANONYMOUS else METHOD_GOOGLE
+        return addNewUser(user, method)
+    }
+
+    private suspend fun addNewUser(user: User, method: String): Result<Unit> {
         return try {
             val userRef = dbCollections.getUsersCollection().document(user.uid)
             val existingUser = dbCollections.db.runTransaction {
@@ -299,10 +314,10 @@ class FirebaseUserRepositoryImpl(
             }
 
             if (existingUser != null) {
-                analyticsTracker.logEvent(AnalyticsEvent.Login(method = "Google"))
+                analyticsTracker.logEvent(AnalyticsEvent.Login(method = method))
                 userDatastore.saveUser(existingUser)
             } else {
-                analyticsTracker.logEvent(AnalyticsEvent.SignUp(method = "Google"))
+                analyticsTracker.logEvent(AnalyticsEvent.SignUp(method = method))
                 userDatastore.saveUser(user)
             }
             Result.success(Unit)

@@ -71,7 +71,8 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>) {
     val viewModel = koinViewModel<UserViewModel>()
     DefaultDialog(
         primaryText = stringResource(Res.string.logout_dialog_title),
-        secondaryText = stringResource(Res.string.logout_dialog_message),
+        secondaryText = stringResource(Res.string.logout_dialog_message) +
+                "\n\n" + stringResource(Res.string.logout_dialog_guest_note),
         negativeButtonText = stringResource(Res.string.no),
         onNegativeClick = { dialogOnLogout.value = false },
         positiveButtonText = stringResource(Res.string.yes),

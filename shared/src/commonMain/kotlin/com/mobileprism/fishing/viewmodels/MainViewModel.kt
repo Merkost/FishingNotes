@@ -8,6 +8,7 @@ import com.mobileprism.fishing.domain.repository.SyncStatusProvider
 import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 
 sealed interface RoutingDecision {
     data object Splash : RoutingDecision
@@ -40,7 +42,20 @@ class MainViewModel(
 
     private val _anonSignInFailed = MutableStateFlow(false)
 
+    private val _anonRetryInProgress = MutableStateFlow(false)
+    val anonRetryInProgress: StateFlow<Boolean> = _anonRetryInProgress.asStateFlow()
+
     private var signingInAnonymously = false
+
+    private companion object {
+        const val ANON_SIGN_IN_TIMEOUT_MS = 30_000L
+    }
+
+    private suspend fun signInAnonymouslyWithTimeout(): Result<Unit> = try {
+        withTimeout(ANON_SIGN_IN_TIMEOUT_MS) { repository.signInAnonymously() }
+    } catch (e: TimeoutCancellationException) {
+        Result.failure(e)
+    }
 
     val routing: StateFlow<RoutingDecision> = combine(
         userState,
@@ -75,7 +90,7 @@ class MainViewModel(
                         signingInAnonymously = true
                         try {
                             _anonSignInFailed.value = false
-                            val result = repository.signInAnonymously()
+                            val result = signInAnonymouslyWithTimeout()
                             _anonSignInFailed.value = result.isFailure
                         } finally {
                             signingInAnonymously = false
@@ -89,11 +104,14 @@ class MainViewModel(
         if (signingInAnonymously) return
         viewModelScope.launch {
             signingInAnonymously = true
+            _anonRetryInProgress.value = true
             try {
-                _anonSignInFailed.value = false
-                val result = repository.signInAnonymously()
-                _anonSignInFailed.value = result.isFailure
+                val result = signInAnonymouslyWithTimeout()
+                if (result.isSuccess) {
+                    _anonSignInFailed.value = false
+                }
             } finally {
+                _anonRetryInProgress.value = false
                 signingInAnonymously = false
             }
         }

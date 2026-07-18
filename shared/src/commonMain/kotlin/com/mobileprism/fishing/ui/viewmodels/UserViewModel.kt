@@ -90,7 +90,13 @@ class UserViewModel(
 
     fun clearGuestData() {
         viewModelScope.launch {
+            _deleteAccountState.value = DeleteAccountState.InProgress
             userRepository.clearGuestData()
+                .onSuccess { _deleteAccountState.value = DeleteAccountState.Idle }
+                .onFailure {
+                    _deleteAccountState.value = DeleteAccountState.Idle
+                    SnackbarManager.showMessage(Res.string.delete_account_error)
+                }
         }
     }
 

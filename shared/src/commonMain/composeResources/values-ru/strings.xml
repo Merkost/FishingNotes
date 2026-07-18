@@ -4,6 +4,7 @@
     <string name="groups">Группы</string>
     <string name="logout_dialog_title">Выход из аккаунта</string>
     <string name="logout_dialog_message">Синхронизированные данные сохранятся в аккаунте. Несинхронизированные изменения на этом устройстве будут удалены.</string>
+    <string name="logout_dialog_guest_note">Вы продолжите пользоваться приложением как гость. Синхронизированные уловы останутся в вашем аккаунте Google и вернутся при повторном входе.</string>
     <string name="ok_button">OK</string>
     <string name="logout_dialog_cancel">Закрыть</string>
     <string name="title">Название</string>
@@ -149,12 +150,10 @@
     <string name="new_place_text">+ Добавить новое место</string>
     <string name="for_today">Сегодня</string>
     <string name="for_a_week">На неделю</string>
-    <string name="login_title">Давайте начнём!</string>
     <string name="login_trust_copy">Мы используем вашу почту только для синхронизации уловов. Без публикаций и рекламы.</string>
     <string name="catch_photo">Фото улова</string>
     <string name="marker_icon">Иконка маркера</string>
     <string name="sign_with_google">Войти через Google</string>
-    <string name="signing_in">Выполняется вход…</string>
     <string name="searching">Поиск…</string>
     <string name="unnamed_place">Место без названия</string>
     <string name="cant_recognize_place">Не удалось определить место</string>

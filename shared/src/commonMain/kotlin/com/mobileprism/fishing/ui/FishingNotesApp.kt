@@ -47,6 +47,7 @@ fun FishingNotesApp() {
     val mainViewModel: MainViewModel = koinViewModel()
     val onboardingViewModel: OnboardingViewModel = koinViewModel()
     val routing by mainViewModel.routing.collectAsState()
+    val isRetryingAuth by mainViewModel.anonRetryInProgress.collectAsState()
 
     CompositionLocalProvider(LocalAnalytics provides analyticsTracker) {
         AnimatedContent(
@@ -61,6 +62,7 @@ fun FishingNotesApp() {
                 )
                 RoutingDecision.AuthError -> AuthErrorScreen(
                     onRetry = { mainViewModel.retryAnonymousSignIn() },
+                    isRetrying = isRetryingAuth,
                 )
                 RoutingDecision.Home -> FishingNotesMainContent()
             }
@@ -105,7 +107,7 @@ private fun FishingNotesMainContent() {
 }
 
 @Composable
-private fun AuthErrorScreen(onRetry: () -> Unit) {
+private fun AuthErrorScreen(onRetry: () -> Unit, isRetrying: Boolean) {
     Box(Modifier.fillMaxSize().systemBarsPadding(), contentAlignment = Alignment.Center) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -121,6 +123,8 @@ private fun AuthErrorScreen(onRetry: () -> Unit) {
                 text = stringResource(Res.string.retry),
                 onClick = onRetry,
                 style = AppButtonStyle.Filled,
+                loading = isRetrying,
+                enabled = !isRetrying,
             )
         }
     }

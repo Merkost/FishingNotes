@@ -3,6 +3,7 @@
     <string name="groups">Groups</string>
     <string name="logout_dialog_title">Logout?</string>
     <string name="logout_dialog_message">Your synced data stays in your account. Unsynced changes on this device will be discarded.</string>
+    <string name="logout_dialog_guest_note">You\'ll keep using the app as a guest. Your synced catches stay in your Google account and come back when you sign in again.</string>
     <string name="ok_button">OK</string>
     <string name="logout_dialog_cancel">Close</string>
     <string name="title">Title</string>
@@ -155,9 +156,6 @@
     <string name="mode_place_selecting">You are in place selecting mode!</string>
     <string name="mode_place_selecting_off">Location selection mode is off!</string>
     <string name="mode_place_info">You are in the mode of viewing information about the place!</string>
-    <string name="login_title">Let's get it started!</string>
-    <string name="login_headline">Never miss a catch.</string>
-    <string name="login_subtitle">Sign in to sync your log across devices.</string>
     <string name="login_trust_copy">We only use your email to sync your catches. No posts, no ads.</string>
     <string name="google_login">Sign with google</string>
 
@@ -167,7 +165,6 @@
     <string name="add_place_success">Place added successfully</string>
     <string name="for_today">Today</string>
     <string name="for_a_week">For a week</string>
-    <string name="signing_in">Signing In</string>
     <string name="sign_with_google">Sign In with Google</string>
     <string name="back_clicked">Do it again to close the app</string>
     <string name="searching">Searching…</string>
