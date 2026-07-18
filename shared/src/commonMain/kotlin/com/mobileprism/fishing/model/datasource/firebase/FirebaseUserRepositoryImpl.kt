@@ -48,6 +48,9 @@ class FirebaseUserRepositoryImpl(
     override val currentUser: Flow<User?>
         get() = fireBaseAuth.authStateChanged.map { it?.toUser() }
 
+    override val isAnonymous: Flow<Boolean>
+        get() = fireBaseAuth.authStateChanged.map { it?.isAnonymous ?: true }
+
     private fun dev.gitlive.firebase.auth.FirebaseUser.toUser(): User = User(
         uid = uid,
         email = email ?: "",
@@ -100,6 +103,15 @@ class FirebaseUserRepositoryImpl(
             ?: return Result.failure(IllegalStateException("No signed-in user"))
         return try {
             user.reauthenticate(GoogleAuthProvider.credential(idToken, null))
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun signInAnonymously(): Result<Unit> {
+        return try {
+            fireBaseAuth.signInAnonymously()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
