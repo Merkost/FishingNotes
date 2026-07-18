@@ -27,6 +27,9 @@ class EditProfileViewModel(
     private val _isChanged = MutableStateFlow(false)
     val isChanged = _isChanged.asStateFlow()
 
+    val isAnonymous: StateFlow<Boolean> = userRepository.isAnonymous
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+
     init {
         loadCurrentUser()
         setChangedListener()

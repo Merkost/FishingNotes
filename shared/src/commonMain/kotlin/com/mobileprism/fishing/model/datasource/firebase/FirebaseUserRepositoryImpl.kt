@@ -124,6 +124,20 @@ class FirebaseUserRepositoryImpl(
         }
     }
 
+    override suspend fun clearGuestData(): Result<Unit> {
+        return try {
+            val anonUid = fireBaseAuth.currentUser?.uid
+            withContext(NonCancellable) { clearLocalUserData() }
+            if (anonUid != null) {
+                runCatching { dbCollections.getUsersCollection().document(anonUid).delete() }
+                runCatching { fireBaseAuth.currentUser?.delete() }
+            }
+            signInAnonymously()
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun linkWithGoogle(idToken: String): Result<LinkOutcome> {
         val user = fireBaseAuth.currentUser
             ?: return Result.failure(IllegalStateException("No signed-in user"))
