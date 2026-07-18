@@ -17,15 +17,20 @@ import dev.gitlive.firebase.firestore.FieldValue
 import dev.gitlive.firebase.firestore.QuerySnapshot
 import dev.gitlive.firebase.firestore.where
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.shareIn
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class FirebaseCatchesRepositoryImpl(
     private val dbCollections: RepositoryCollections,
     private val analyticsTracker: AnalyticsTracker,
@@ -35,14 +40,23 @@ class FirebaseCatchesRepositoryImpl(
 
     private val scope = CoroutineScope(SupervisorJob())
 
-    private val catchesSnapshotFlow: Flow<QuerySnapshot> by lazy {
-        val userId = authRepository.getCurrentUserId()
-        dbCollections.db.collectionGroup(CATCHES_COLLECTION)
-            .where { "userId" equalTo userId }
-            .orderBy("date", Direction.DESCENDING)
-            .snapshots
+    private val catchesSnapshotFlow: Flow<QuerySnapshot> =
+        authRepository.currentUserIdFlow
+            .flatMapLatest { uid ->
+                if (uid == null) {
+                    emptyFlow()
+                } else {
+                    dbCollections.db.collectionGroup(CATCHES_COLLECTION)
+                        .where { "userId" equalTo uid }
+                        .orderBy("date", Direction.DESCENDING)
+                        .snapshots
+                        .map { uid to it }
+                        .catch { }
+                }
+            }
+            .filter { (uid, _) -> uid == authRepository.getCurrentUserIdOrNull() }
+            .map { (_, snapshot) -> snapshot }
             .shareIn(scope, SharingStarted.WhileSubscribed(5_000), replay = 1)
-    }
 
     override fun getAllUserCatchesState(): Flow<ContentStateOld<UserCatch>> {
         return catchesSnapshotFlow

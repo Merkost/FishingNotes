@@ -63,7 +63,14 @@ fun NavGraphBuilder.AppNavGraph(
     }
 
     composable<MainDestinations.EditProfile> {
-        EditProfile(upPress)
+        EditProfile(upPress, navController)
+    }
+
+    composable<MainDestinations.LinkAccount> {
+        LinkAccountScreen(
+            onBack = upPress,
+            onLinked = upPress,
+        )
     }
 
     composable<MainDestinations.DailyWeather>(

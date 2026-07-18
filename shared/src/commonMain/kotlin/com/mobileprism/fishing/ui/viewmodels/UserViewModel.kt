@@ -15,9 +15,14 @@ import com.mobileprism.fishing.ui.home.profile.findBestCatch
 import com.mobileprism.fishing.ui.home.profile.findFavoritePlace
 import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.delete_account_error
+import fishing.shared.generated.resources.guest_clear_data_error
+import fishing.shared.generated.resources.sign_in_generic_error
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 sealed class DeleteAccountState {
@@ -51,6 +56,9 @@ class UserViewModel(
     private val _deleteAccountState = MutableStateFlow<DeleteAccountState>(DeleteAccountState.Idle)
     val deleteAccountState = _deleteAccountState.asStateFlow()
 
+    val isAnonymous: StateFlow<Boolean> = userRepository.isAnonymous
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+
     init {
         getCurrentUser()
         getUserCatches()
@@ -81,6 +89,18 @@ class UserViewModel(
         userRepository.logoutCurrentUser()
     }
 
+    fun clearGuestData() {
+        viewModelScope.launch {
+            _deleteAccountState.value = DeleteAccountState.InProgress
+            userRepository.clearGuestData()
+                .onSuccess { _deleteAccountState.value = DeleteAccountState.Idle }
+                .onFailure {
+                    _deleteAccountState.value = DeleteAccountState.Idle
+                    SnackbarManager.showMessage(Res.string.guest_clear_data_error)
+                }
+        }
+    }
+
     fun deleteAccount() {
         viewModelScope.launch {
             _deleteAccountState.value = DeleteAccountState.InProgress
@@ -105,6 +125,11 @@ class UserViewModel(
 
     fun cancelDeleteAccount() {
         _deleteAccountState.value = DeleteAccountState.Idle
+    }
+
+    fun onReauthSignInFailed() {
+        _deleteAccountState.value = DeleteAccountState.Idle
+        SnackbarManager.showMessage(Res.string.sign_in_generic_error)
     }
 
     private fun handleDeleteAccountError(error: Throwable) {

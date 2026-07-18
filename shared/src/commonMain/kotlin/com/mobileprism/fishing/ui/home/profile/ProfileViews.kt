@@ -43,23 +43,26 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ProfileAppBar(
     navController: NavController,
+    isAnonymous: Boolean,
 ) {
     val dialogOnLogout = rememberSaveable { mutableStateOf(false) }
     AppTopBar(
         title = stringResource(Res.string.profile),
         actions = {
-            IconButton(onClick = { dialogOnLogout.value = true }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                    contentDescription = stringResource(Res.string.logout)
-                )
+            if (!isAnonymous) {
+                IconButton(onClick = { dialogOnLogout.value = true }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                        contentDescription = stringResource(Res.string.logout)
+                    )
+                }
             }
             IconButton(onClick = { navController.navigate(MainDestinations.Settings) }) {
                 Icon(Icons.Default.Settings, contentDescription = stringResource(Res.string.settings))
             }
         },
     )
-    if (dialogOnLogout.value) LogoutDialog(dialogOnLogout)
+    if (!isAnonymous && dialogOnLogout.value) LogoutDialog(dialogOnLogout)
 }
 
 @Composable
@@ -68,7 +71,8 @@ fun LogoutDialog(dialogOnLogout: MutableState<Boolean>) {
     val viewModel = koinViewModel<UserViewModel>()
     DefaultDialog(
         primaryText = stringResource(Res.string.logout_dialog_title),
-        secondaryText = stringResource(Res.string.logout_dialog_message),
+        secondaryText = stringResource(Res.string.logout_dialog_message) +
+                "\n\n" + stringResource(Res.string.logout_dialog_guest_note),
         negativeButtonText = stringResource(Res.string.no),
         onNegativeClick = { dialogOnLogout.value = false },
         positiveButtonText = stringResource(Res.string.yes),

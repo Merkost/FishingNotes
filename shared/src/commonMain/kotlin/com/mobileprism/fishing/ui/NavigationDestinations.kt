@@ -23,6 +23,9 @@ object MainDestinations {
     data object EditProfile
 
     @Serializable
+    data object LinkAccount
+
+    @Serializable
     data class NewCatch(val place: UserMapMarker? = null)
 
     @Serializable

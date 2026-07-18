@@ -4,6 +4,7 @@ import com.mobileprism.fishing.domain.entity.common.ContentState
 import com.mobileprism.fishing.domain.entity.common.Note
 import com.mobileprism.fishing.domain.entity.content.MapMarker
 import com.mobileprism.fishing.domain.entity.content.UserMapMarker
+import com.mobileprism.fishing.domain.repository.AuthRepository
 import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
 import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
 import com.mobileprism.fishing.domain.repository.app.MarkersRepository
@@ -12,27 +13,42 @@ import dev.gitlive.firebase.firestore.ChangeType
 import dev.gitlive.firebase.firestore.FieldValue
 import dev.gitlive.firebase.firestore.QuerySnapshot
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class FirebaseMarkersRepositoryImpl(
     private val dbCollections: RepositoryCollections,
-    private val analyticsTracker: AnalyticsTracker
+    private val analyticsTracker: AnalyticsTracker,
+    private val authRepository: AuthRepository
 ) : MarkersRepository, AutoCloseable {
 
     private val scope = CoroutineScope(SupervisorJob())
 
-    private val markersSnapshotFlow: Flow<QuerySnapshot> by lazy {
-        dbCollections.getUserMapMarkersCollection()
-            .snapshots
+    private val markersSnapshotFlow: Flow<QuerySnapshot> =
+        authRepository.currentUserIdFlow
+            .flatMapLatest { uid ->
+                if (uid == null) {
+                    emptyFlow()
+                } else {
+                    dbCollections.getUserMapMarkersCollection().snapshots
+                        .map { uid to it }
+                        .catch { }
+                }
+            }
+            .filter { (uid, _) -> uid == authRepository.getCurrentUserIdOrNull() }
+            .map { (_, snapshot) -> snapshot }
             .shareIn(scope, SharingStarted.WhileSubscribed(5_000), replay = 1)
-    }
 
     override fun getAllUserMarkers(): Flow<ContentState<MapMarker>> = channelFlow {
         markersSnapshotFlow

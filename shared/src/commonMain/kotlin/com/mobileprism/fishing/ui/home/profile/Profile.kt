@@ -4,15 +4,21 @@ import com.mobileprism.fishing.ui.theme.FishingTheme
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.outlined.CloudDone
+import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material.icons.outlined.Phishing
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -30,9 +36,12 @@ import fishing.shared.generated.resources.Res
 import fishing.shared.generated.resources.*
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.ui.MainDestinations
+import com.mobileprism.fishing.ui.home.views.AppButton
+import com.mobileprism.fishing.ui.home.views.AppButtonStyle
 import com.mobileprism.fishing.ui.home.views.AppText
 import com.mobileprism.fishing.ui.home.views.AppTextStyle
 import com.mobileprism.fishing.ui.home.views.AvatarWithBadge
+import com.mobileprism.fishing.ui.home.views.IconStatChip
 import com.mobileprism.fishing.ui.home.views.StatRow
 import com.mobileprism.fishing.ui.home.views.StatTile
 import com.mobileprism.fishing.ui.home.views.StatTileSkeleton
@@ -53,11 +62,12 @@ fun Profile(
     val catchesState by viewModel.currentCatches.collectAsState()
     val favoritePlace by viewModel.favoritePlace.collectAsState()
     val bestCatch by viewModel.bestCatch.collectAsState()
+    val isAnonymous by viewModel.isAnonymous.collectAsState()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            ProfileAppBar(navController = navController)
+            ProfileAppBar(navController = navController, isAnonymous = isAnonymous)
         },
     ) { paddingValues ->
         Column(
@@ -88,7 +98,19 @@ fun Profile(
                 )
             }
 
-            UserNameSection(user)
+            UserNameSection(user, isAnonymous)
+
+            if (isAnonymous) {
+                AppButton(
+                    text = stringResource(Res.string.guest_link_cta),
+                    leadingIcon = painterResource(Res.drawable.ic_google_logo),
+                    onClick = { navController.navigate(MainDestinations.LinkAccount) },
+                    style = AppButtonStyle.Tonal,
+                    modifier = Modifier
+                        .padding(horizontal = Spacing.lg)
+                        .fillMaxWidth(),
+                )
+            }
 
             StatRow(modifier = Modifier.padding(horizontal = Spacing.lg)) {
                 val catchCount = catchesState
@@ -140,7 +162,7 @@ fun Profile(
 }
 
 @Composable
-private fun UserNameSection(user: User) {
+private fun UserNameSection(user: User, isAnonymous: Boolean) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Spacing.xxs)
@@ -150,11 +172,38 @@ private fun UserNameSection(user: User) {
             style = FishingTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
         )
-        AppText(
-            text = stringResource(Res.string.register_date_value, user.registerDate.toDateTextMonth()),
-            style = AppTextStyle.Body,
-            color = FishingTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
+        if (isAnonymous) {
+            IconStatChip(
+                icon = Icons.Outlined.CloudOff,
+                label = stringResource(Res.string.guest_chip_label),
+            )
+            AppText(
+                text = stringResource(Res.string.guest_status_subtitle),
+                style = AppTextStyle.Body,
+                color = FishingTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        } else {
+            AppText(
+                text = stringResource(Res.string.register_date_value, user.registerDate.toDateTextMonth()),
+                style = AppTextStyle.Body,
+                color = FishingTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Outlined.CloudDone,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = FishingTheme.colorScheme.primary,
+                )
+                AppText(
+                    text = stringResource(Res.string.profile_backed_up),
+                    style = AppTextStyle.Body,
+                    color = FishingTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = Spacing.xs),
+                )
+            }
+        }
     }
 }

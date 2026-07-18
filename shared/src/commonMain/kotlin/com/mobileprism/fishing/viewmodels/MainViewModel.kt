@@ -8,6 +8,7 @@ import com.mobileprism.fishing.domain.repository.SyncStatusProvider
 import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.model.datastore.UserPreferences
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,14 +16,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 
 sealed interface RoutingDecision {
     data object Splash : RoutingDecision
     data object Onboarding : RoutingDecision
-    data object Login : RoutingDecision
+    data object AuthError : RoutingDecision
     data object Home : RoutingDecision
 }
 
@@ -37,19 +40,82 @@ class MainViewModel(
     private val _userState = MutableStateFlow<BaseViewState<User?>>(BaseViewState.Loading(null))
     val userState: StateFlow<BaseViewState<User?>> = _userState.asStateFlow()
 
+    private val _anonSignInFailed = MutableStateFlow(false)
+
+    private val _anonRetryInProgress = MutableStateFlow(false)
+    val anonRetryInProgress: StateFlow<Boolean> = _anonRetryInProgress.asStateFlow()
+
+    private var signingInAnonymously = false
+
+    private companion object {
+        const val ANON_SIGN_IN_TIMEOUT_MS = 30_000L
+    }
+
+    private suspend fun signInAnonymouslyWithTimeout(): Result<Unit> = try {
+        withTimeout(ANON_SIGN_IN_TIMEOUT_MS) { repository.signInAnonymously() }
+    } catch (e: TimeoutCancellationException) {
+        Result.failure(e)
+    }
+
     val routing: StateFlow<RoutingDecision> = combine(
         userState,
         userPreferences.hasCompletedOnboarding,
-    ) { userSt, onboardingDone ->
+        _anonSignInFailed,
+    ) { userSt, onboardingDone, anonFailed ->
         when {
             userSt is BaseViewState.Loading -> RoutingDecision.Splash
             !onboardingDone -> RoutingDecision.Onboarding
             userSt is BaseViewState.Success && userSt.data != null -> RoutingDecision.Home
-            else -> RoutingDecision.Login
+            anonFailed -> RoutingDecision.AuthError
+            else -> RoutingDecision.Splash
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, RoutingDecision.Splash)
 
-    init { loadCurrentUser() }
+    init {
+        loadCurrentUser()
+        ensureAnonymousUser()
+    }
+
+    private fun ensureAnonymousUser() {
+        viewModelScope.launch {
+            combine(
+                userState,
+                userPreferences.hasCompletedOnboarding,
+            ) { userSt, onboardingDone -> userSt to onboardingDone }
+                .distinctUntilChanged()
+                .collectLatest { (userSt, onboardingDone) ->
+                    val needsAnon = onboardingDone &&
+                            userSt is BaseViewState.Success && userSt.data == null
+                    if (needsAnon && !signingInAnonymously) {
+                        signingInAnonymously = true
+                        try {
+                            _anonSignInFailed.value = false
+                            val result = signInAnonymouslyWithTimeout()
+                            _anonSignInFailed.value = result.isFailure
+                        } finally {
+                            signingInAnonymously = false
+                        }
+                    }
+                }
+        }
+    }
+
+    fun retryAnonymousSignIn() {
+        if (signingInAnonymously) return
+        viewModelScope.launch {
+            signingInAnonymously = true
+            _anonRetryInProgress.value = true
+            try {
+                val result = signInAnonymouslyWithTimeout()
+                if (result.isSuccess) {
+                    _anonSignInFailed.value = false
+                }
+            } finally {
+                _anonRetryInProgress.value = false
+                signingInAnonymously = false
+            }
+        }
+    }
 
     private fun loadCurrentUser() {
         val cached = repository.cachedUser

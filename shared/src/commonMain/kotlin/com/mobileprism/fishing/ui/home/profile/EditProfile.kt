@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AlternateEmail
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
@@ -32,17 +33,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import coil3.compose.SubcomposeAsyncImage
+import com.mobileprism.fishing.ui.MainDestinations
 import com.mobileprism.fishing.ui.components.FormTextField
 import com.mobileprism.fishing.ui.components.PickerField
 import com.mobileprism.fishing.ui.home.SnackbarManager
 import com.mobileprism.fishing.ui.home.views.AppTopBar
 import com.mobileprism.fishing.ui.home.views.AvatarWithBadge
+import com.mobileprism.fishing.ui.home.views.BannerTone
 import com.mobileprism.fishing.ui.home.views.BottomActionBar
 import com.mobileprism.fishing.ui.home.views.DatePickerDialog
 import com.mobileprism.fishing.ui.home.views.DefaultDialog
+import com.mobileprism.fishing.ui.home.views.InlineBannerCard
 import com.mobileprism.fishing.ui.theme.Spacing
 import com.mobileprism.fishing.ui.utils.rememberMediaPickerLauncher
 import com.mobileprism.fishing.ui.viewstates.BaseViewState
@@ -58,12 +63,13 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditProfile(onBack: () -> Unit) {
+fun EditProfile(onBack: () -> Unit, navController: NavController) {
     val viewModel: EditProfileViewModel = koinViewModel()
     val currentUser by viewModel.currentUser.collectAsState()
     val pendingPhotoPath by viewModel.pendingPhotoPath.collectAsState()
     val isChanged by viewModel.isChanged.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
+    val isAnonymous by viewModel.isAnonymous.collectAsState()
     val scrollState = rememberScrollState()
 
     val eighteenYearsAgoMillis = remember {
@@ -177,14 +183,16 @@ fun EditProfile(onBack: () -> Unit) {
                 leadingIcon = rememberVectorPainter(Icons.Default.AlternateEmail),
             )
 
-            FormTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = currentUser.email,
-                onValueChange = {},
-                label = stringResource(Res.string.email_hint),
-                leadingIcon = rememberVectorPainter(Icons.Default.Email),
-                readOnly = true,
-            )
+            if (!isAnonymous) {
+                FormTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = currentUser.email,
+                    onValueChange = {},
+                    label = stringResource(Res.string.email_hint),
+                    leadingIcon = rememberVectorPainter(Icons.Default.Email),
+                    readOnly = true,
+                )
+            }
 
             PickerField(
                 modifier = Modifier.fillMaxWidth(),
@@ -194,6 +202,17 @@ fun EditProfile(onBack: () -> Unit) {
                 leadingIcon = rememberVectorPainter(Icons.Default.EditCalendar),
                 onClick = { datePickerShown = true },
             )
+
+            if (isAnonymous) {
+                InlineBannerCard(
+                    tone = BannerTone.Info,
+                    icon = Icons.Default.CloudUpload,
+                    title = stringResource(Res.string.editprofile_guest_note),
+                    actionLabel = stringResource(Res.string.link_action),
+                    onClick = { navController.navigate(MainDestinations.LinkAccount) },
+                    modifier = Modifier.fillMaxWidth().padding(top = Spacing.lg),
+                )
+            }
         }
     }
 }
