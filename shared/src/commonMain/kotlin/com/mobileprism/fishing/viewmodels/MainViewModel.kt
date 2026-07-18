@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -66,25 +67,35 @@ class MainViewModel(
                 userState,
                 userPreferences.hasCompletedOnboarding,
             ) { userSt, onboardingDone -> userSt to onboardingDone }
+                .distinctUntilChanged()
                 .collectLatest { (userSt, onboardingDone) ->
                     val needsAnon = onboardingDone &&
                             userSt is BaseViewState.Success && userSt.data == null
                     if (needsAnon && !signingInAnonymously) {
                         signingInAnonymously = true
-                        _anonSignInFailed.value = false
-                        val result = repository.signInAnonymously()
-                        signingInAnonymously = false
-                        _anonSignInFailed.value = result.isFailure
+                        try {
+                            _anonSignInFailed.value = false
+                            val result = repository.signInAnonymously()
+                            _anonSignInFailed.value = result.isFailure
+                        } finally {
+                            signingInAnonymously = false
+                        }
                     }
                 }
         }
     }
 
     fun retryAnonymousSignIn() {
+        if (signingInAnonymously) return
         viewModelScope.launch {
-            _anonSignInFailed.value = false
-            val result = repository.signInAnonymously()
-            _anonSignInFailed.value = result.isFailure
+            signingInAnonymously = true
+            try {
+                _anonSignInFailed.value = false
+                val result = repository.signInAnonymously()
+                _anonSignInFailed.value = result.isFailure
+            } finally {
+                signingInAnonymously = false
+            }
         }
     }
 

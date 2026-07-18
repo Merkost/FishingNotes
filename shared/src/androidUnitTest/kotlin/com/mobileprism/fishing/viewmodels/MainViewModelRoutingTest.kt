@@ -133,6 +133,31 @@ class MainViewModelRoutingTest {
     }
 
     @Test
+    fun `retryAnonymousSignIn clears failure and retries after auto sign-in fails`() = runTest {
+        var signInCalls = 0
+        val repo = fakeUserRepository(
+            currentUserFlow = flowOf(null),
+            onSignInAnonymously = {
+                signInCalls++
+                if (signInCalls == 1) Result.failure(RuntimeException("offline")) else Result.success(Unit)
+            },
+        )
+        val prefs = fakeUserPreferences(flowOf(true))
+
+        val vm = MainViewModel(repo, syncStatusProvider, prefs)
+        advanceUntilIdle()
+
+        assertEquals(RoutingDecision.AuthError, vm.routing.value)
+        assertEquals(1, signInCalls)
+
+        vm.retryAnonymousSignIn()
+        advanceUntilIdle()
+
+        assertEquals(RoutingDecision.Splash, vm.routing.value)
+        assertEquals(2, signInCalls)
+    }
+
+    @Test
     fun `routing is Home when userState is Success(user) and onboarding flow emits true`() = runTest {
         val repo = fakeUserRepository(
             currentUserFlow = flowOf(testUser),
