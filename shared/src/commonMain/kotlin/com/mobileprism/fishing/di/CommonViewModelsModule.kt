@@ -1,6 +1,7 @@
 package com.mobileprism.fishing.di
 
 import com.mobileprism.fishing.domain.use_cases.PlaceNameResolver
+import com.mobileprism.fishing.ui.viewmodels.LinkAccountViewModel
 import com.mobileprism.fishing.ui.viewmodels.LoginViewModel
 import com.mobileprism.fishing.ui.viewmodels.NewCatchMasterViewModel
 import com.mobileprism.fishing.ui.viewmodels.StatisticsViewModel
@@ -36,6 +37,7 @@ val commonViewModelsModule = module {
             analyticsTracker = get()
         )
     }
+    viewModel { LinkAccountViewModel(repository = get(), analyticsTracker = get()) }
     viewModel {
         MapViewModel(
             getUserPlacesListUseCase = get(),
