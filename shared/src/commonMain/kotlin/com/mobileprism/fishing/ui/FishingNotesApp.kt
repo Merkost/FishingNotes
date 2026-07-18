@@ -37,7 +37,7 @@ fun FishingNotesApp() {
         AnimatedContent(
             targetState = routing,
             transitionSpec = {
-                if (initialState is RoutingDecision.Onboarding && targetState is RoutingDecision.Login) {
+                if (initialState is RoutingDecision.Onboarding && targetState is RoutingDecision.AuthError) {
                     (slideInVertically { it } + fadeIn(tween(250))) togetherWith
                             fadeOut(tween(150))
                 } else {
@@ -51,7 +51,7 @@ fun FishingNotesApp() {
                 RoutingDecision.Onboarding -> OnboardingScreen(
                     onFinished = { onboardingViewModel.completeOnboarding() },
                 )
-                RoutingDecision.Login -> LoginScreen()
+                RoutingDecision.AuthError -> Unit
                 RoutingDecision.Home -> FishingNotesMainContent()
             }
         }

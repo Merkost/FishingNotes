@@ -55,17 +55,20 @@ class MainViewModelRoutingTest {
         currentUserFlow: Flow<User?> = flowOf(null),
         isLoggedIn: Boolean = false,
         cachedUser: User? = null,
+        onSignInAnonymously: () -> Result<Unit> = { Result.success(Unit) },
     ) = object : UserRepository {
         override val currentUser: Flow<User?> = currentUserFlow
         override val datastoreUser: Flow<User> = flowOf(testUser)
         override val isLoggedIn: Boolean = isLoggedIn
         override val cachedUser: User? = cachedUser
+        override val isAnonymous: Flow<Boolean> = flowOf(true)
         override suspend fun logoutCurrentUser() {}
         override suspend fun deleteAccount(): Result<Unit> = Result.success(Unit)
         override suspend fun reauthenticateWithGoogle(idToken: String): Result<Unit> = Result.success(Unit)
         override suspend fun addNewUser(user: User): Result<Unit> = error("Not used")
         override suspend fun setUserListener(user: User) {}
         override suspend fun setNewProfileData(user: User): Result<Unit> = Result.success(Unit)
+        override suspend fun signInAnonymously(): Result<Unit> = onSignInAnonymously()
     }
 
     private fun fakeUserPreferences(onboardingFlow: Flow<Boolean>): UserPreferences {
@@ -100,15 +103,33 @@ class MainViewModelRoutingTest {
     }
 
     @Test
-    fun `routing is Login when userState is Success(null) and onboarding flow emits true`() = runTest {
-        val repo = fakeUserRepository(currentUserFlow = flowOf(null), isLoggedIn = false)
-        val onboardingFlow = MutableStateFlow(true)
-        val prefs = fakeUserPreferences(onboardingFlow)
+    fun `no user after onboarding stays on Splash and triggers anonymous sign-in`() = runTest {
+        var signInCalls = 0
+        val repo = fakeUserRepository(
+            currentUserFlow = flowOf(null),
+            onSignInAnonymously = { signInCalls++; Result.success(Unit) },
+        )
+        val prefs = fakeUserPreferences(flowOf(true))
 
         val vm = MainViewModel(repo, syncStatusProvider, prefs)
         advanceUntilIdle()
 
-        assertEquals(RoutingDecision.Login, vm.routing.value)
+        assertEquals(RoutingDecision.Splash, vm.routing.value)
+        assertEquals(1, signInCalls)
+    }
+
+    @Test
+    fun `anonymous sign-in failure routes to AuthError`() = runTest {
+        val repo = fakeUserRepository(
+            currentUserFlow = flowOf(null),
+            onSignInAnonymously = { Result.failure(RuntimeException("offline")) },
+        )
+        val prefs = fakeUserPreferences(flowOf(true))
+
+        val vm = MainViewModel(repo, syncStatusProvider, prefs)
+        advanceUntilIdle()
+
+        assertEquals(RoutingDecision.AuthError, vm.routing.value)
     }
 
     @Test
