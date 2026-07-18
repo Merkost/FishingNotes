@@ -66,6 +66,13 @@ fun NavGraphBuilder.AppNavGraph(
         EditProfile(upPress)
     }
 
+    composable<MainDestinations.LinkAccount> {
+        LinkAccountScreen(
+            onBack = upPress,
+            onLinked = upPress,
+        )
+    }
+
     composable<MainDestinations.DailyWeather>(
         typeMap = mapOf(typeOf<DailyWeatherData>() to serializableType<DailyWeatherData>()),
         enterTransition = AppNavTransitions.enter,
