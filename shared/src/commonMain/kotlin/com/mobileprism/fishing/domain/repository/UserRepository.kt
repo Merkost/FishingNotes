@@ -25,6 +25,9 @@ interface UserRepository {
     suspend fun linkWithGoogle(idToken: String): Result<LinkOutcome> =
         Result.success(LinkOutcome.Linked)
 
+    suspend fun mergeGuestIntoGoogle(idToken: String): Result<LinkOutcome> =
+        Result.success(LinkOutcome.Linked)
+
     suspend fun clearGuestData(): Result<Unit> = Result.success(Unit)
 
 }

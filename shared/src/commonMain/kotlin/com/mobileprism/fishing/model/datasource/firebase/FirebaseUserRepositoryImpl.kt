@@ -7,6 +7,7 @@ import dev.gitlive.firebase.auth.GoogleAuthProvider
 import dev.gitlive.firebase.auth.auth
 import com.mobileprism.fishing.domain.entity.common.User
 import com.mobileprism.fishing.domain.entity.content.UserCatch
+import com.mobileprism.fishing.domain.entity.content.UserMapMarker
 import com.mobileprism.fishing.domain.repository.LinkOutcome
 import com.mobileprism.fishing.domain.repository.NoConnectionException
 import com.mobileprism.fishing.domain.repository.PhotoStorage
@@ -14,10 +15,13 @@ import com.mobileprism.fishing.domain.repository.ReauthRequiredException
 import com.mobileprism.fishing.domain.repository.UserRepository
 import com.mobileprism.fishing.domain.repository.app.AnalyticsEvent
 import com.mobileprism.fishing.domain.repository.app.AnalyticsTracker
+import com.mobileprism.fishing.domain.use_cases.auth.planGuestMerge
 import com.mobileprism.fishing.model.datasource.local.dao.CatchDao
 import com.mobileprism.fishing.model.datasource.local.dao.MarkerDao
 import com.mobileprism.fishing.model.datasource.local.dao.PendingOperationDao
 import com.mobileprism.fishing.model.datasource.utils.RepositoryCollections
+import com.mobileprism.fishing.model.datasource.utils.RepositoryConstants.CATCHES_COLLECTION
+import com.mobileprism.fishing.model.datasource.utils.RepositoryConstants.MARKERS_COLLECTION
 import com.mobileprism.fishing.model.datastore.UserDatastore
 import com.mobileprism.fishing.utils.network.ConnectionManager
 import com.mobileprism.fishing.utils.network.ConnectionState
@@ -133,6 +137,70 @@ class FirebaseUserRepositoryImpl(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    override suspend fun mergeGuestIntoGoogle(idToken: String): Result<LinkOutcome> {
+        return try {
+            val anonUid = fireBaseAuth.currentUser?.uid
+            val (guestMarkers, guestCatches) = snapshotCurrentUserData()
+
+            val result =
+                fireBaseAuth.signInWithCredential(GoogleAuthProvider.credential(idToken, null))
+            val linkedUser = result.user
+                ?: fireBaseAuth.currentUser
+                ?: return Result.failure(IllegalStateException("Sign-in failed during merge"))
+            val newUid = linkedUser.uid
+
+            val (existingMarkers, existingCatches) = snapshotCurrentUserData()
+            val plan = planGuestMerge(guestMarkers, existingMarkers, guestCatches, existingCatches)
+
+            plan.markersToCopy.forEach { marker ->
+                dbCollections.getUserMapMarkersCollection().document(marker.id)
+                    .set(marker.copy(userId = newUid))
+            }
+            plan.catchesToCopy.forEach { userCatch ->
+                dbCollections.getUserCatchesCollection(userCatch.userMarkerId)
+                    .document(userCatch.id)
+                    .set(userCatch.copy(userId = newUid))
+            }
+
+            addNewUser(linkedUser.toUser())
+
+            if (anonUid != null && anonUid != newUid) {
+                runCatching { deleteOrphanedUserData(anonUid) }
+            }
+
+            Result.success(
+                LinkOutcome.Merged(
+                    catchesAdded = plan.catchesToCopy.size,
+                    markersAdded = plan.markersToCopy.size,
+                    alreadyPresent = plan.alreadyPresent,
+                )
+            )
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    private suspend fun snapshotCurrentUserData(): Pair<List<UserMapMarker>, List<UserCatch>> {
+        val markerDocs = dbCollections.getUserMapMarkersCollection().get().documents
+        val markers = markerDocs.mapNotNull { runCatching { it.data<UserMapMarker>() }.getOrNull() }
+        val catches = markerDocs.flatMap { markerDoc ->
+            dbCollections.getUserCatchesCollection(markerDoc.id).get().documents
+                .mapNotNull { runCatching { it.data<UserCatch>() }.getOrNull() }
+        }
+        return markers to catches
+    }
+
+    private suspend fun deleteOrphanedUserData(anonUid: String) {
+        val userDoc = dbCollections.getUsersCollection().document(anonUid)
+        val markerDocs = userDoc.collection(MARKERS_COLLECTION).get().documents
+        markerDocs.forEach { markerDoc ->
+            markerDoc.reference.collection(CATCHES_COLLECTION).get().documents
+                .forEach { catchDoc -> catchDoc.reference.delete() }
+            markerDoc.reference.delete()
+        }
+        userDoc.delete()
     }
 
     private suspend fun clearLocalUserData() {
