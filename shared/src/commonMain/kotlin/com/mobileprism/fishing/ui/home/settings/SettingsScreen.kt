@@ -14,6 +14,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.AdsClick
 import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.Compress
 import androidx.compose.material.icons.filled.DarkMode
@@ -110,7 +111,7 @@ fun SettingsScreen(backPress: () -> Unit, navController: NavController) {
             GeneralSettingsGroup(userPreferences)
             WeatherSettingsGroup(weatherPreferences)
             AboutSettingsGroup(navController)
-            AccountSettingsGroup()
+            AccountSettingsGroup(navController)
             Spacer(modifier = Modifier.height(Spacing.sm))
         }
     }
@@ -370,10 +371,27 @@ private fun AboutSettingsGroup(navController: NavController) {
 }
 
 @Composable
-private fun AccountSettingsGroup() {
+private fun AccountSettingsGroup(navController: NavController) {
     val viewModel = koinViewModel<UserViewModel>()
     val deleteAccountState by viewModel.deleteAccountState.collectAsState()
+    val isAnonymous by viewModel.isAnonymous.collectAsState()
     var isConfirmDialogOpen by remember { mutableStateOf(false) }
+    var isClearDataDialogOpen by remember { mutableStateOf(false) }
+
+    if (isClearDataDialogOpen) {
+        DefaultDialog(
+            primaryText = stringResource(Res.string.guest_clear_data_title),
+            secondaryText = stringResource(Res.string.guest_clear_data_message),
+            negativeButtonText = stringResource(Res.string.cancel),
+            onNegativeClick = { isClearDataDialogOpen = false },
+            positiveButtonText = stringResource(Res.string.delete),
+            onPositiveClick = {
+                isClearDataDialogOpen = false
+                viewModel.clearGuestData()
+            },
+            onDismiss = { isClearDataDialogOpen = false },
+        )
+    }
 
     if (isConfirmDialogOpen) {
         DefaultDialog(
@@ -426,11 +444,26 @@ private fun AccountSettingsGroup() {
     )
 
     SettingsGroup(title = stringResource(Res.string.settings_account)) {
-        SettingsNavLink(
-            title = stringResource(Res.string.delete_account),
-            subtitle = stringResource(Res.string.delete_account_subtitle),
-            icon = Icons.Default.DeleteForever,
-            onClick = { isConfirmDialogOpen = true },
-        )
+        if (isAnonymous) {
+            SettingsNavLink(
+                title = stringResource(Res.string.settings_sign_in_title),
+                subtitle = stringResource(Res.string.settings_sign_in_subtitle),
+                icon = Icons.Default.CloudUpload,
+                onClick = { navController.navigate(MainDestinations.LinkAccount) },
+            )
+            SettingsDivider()
+            SettingsNavLink(
+                title = stringResource(Res.string.guest_clear_data),
+                icon = Icons.Default.DeleteForever,
+                onClick = { isClearDataDialogOpen = true },
+            )
+        } else {
+            SettingsNavLink(
+                title = stringResource(Res.string.delete_account),
+                subtitle = stringResource(Res.string.delete_account_subtitle),
+                icon = Icons.Default.DeleteForever,
+                onClick = { isConfirmDialogOpen = true },
+            )
+        }
     }
 }
