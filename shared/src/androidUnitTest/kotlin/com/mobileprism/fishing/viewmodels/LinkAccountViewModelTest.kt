@@ -62,4 +62,36 @@ class LinkAccountViewModelTest {
 
         assertIs<LinkState.Error>(vm.uiState.value)
     }
+
+    @Test
+    fun `collision moves to MergeConfirm`() = runTest {
+        val repo = mockk<UserRepository>(relaxed = true)
+        coEvery { repo.linkWithGoogle("tok") } returns
+            Result.failure(mockk<dev.gitlive.firebase.auth.FirebaseAuthUserCollisionException>(relaxed = true))
+        val vm = LinkAccountViewModel(repo, analytics)
+
+        vm.linkWithGoogle("tok")
+        advanceUntilIdle()
+
+        assertIs<LinkState.MergeConfirm>(vm.uiState.value)
+    }
+
+    @Test
+    fun `confirmMerge ends in MergeSuccess with counts`() = runTest {
+        val repo = mockk<UserRepository>(relaxed = true)
+        coEvery { repo.linkWithGoogle("tok") } returns
+            Result.failure(mockk<dev.gitlive.firebase.auth.FirebaseAuthUserCollisionException>(relaxed = true))
+        coEvery { repo.mergeGuestIntoGoogle("tok") } returns
+            Result.success(LinkOutcome.Merged(catchesAdded = 3, markersAdded = 1, alreadyPresent = 2))
+        val vm = LinkAccountViewModel(repo, analytics)
+
+        vm.linkWithGoogle("tok")
+        advanceUntilIdle()
+        vm.confirmMerge()
+        advanceUntilIdle()
+
+        val s = vm.uiState.value
+        assertIs<LinkState.MergeSuccess>(s)
+        assertEquals(3, s.catchesAdded)
+    }
 }

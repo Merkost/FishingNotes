@@ -41,6 +41,7 @@ import com.mobileprism.fishing.ui.home.views.AppText
 import com.mobileprism.fishing.ui.home.views.AppTextStyle
 import com.mobileprism.fishing.ui.home.views.AppTopBar
 import com.mobileprism.fishing.ui.home.views.BannerTone
+import com.mobileprism.fishing.ui.home.views.DefaultDialog
 import com.mobileprism.fishing.ui.home.views.InlineBannerCard
 import com.mobileprism.fishing.ui.home.views.ModalLoadingDialog
 import com.mobileprism.fishing.ui.theme.BrandGradients
@@ -161,6 +162,42 @@ fun LinkAccountScreen(onBack: () -> Unit, onLinked: () -> Unit) {
         visible = state is LinkState.Linking,
         text = stringResource(Res.string.linking_in_progress),
     )
+
+    val mergeState = state
+    if (mergeState is LinkState.MergeConfirm) {
+        DefaultDialog(
+            primaryText = stringResource(Res.string.merge_confirm_title),
+            secondaryText = stringResource(Res.string.merge_confirm_message),
+            positiveButtonText = stringResource(Res.string.merge_confirm_positive),
+            onPositiveClick = { vm.confirmMerge() },
+            negativeButtonText = stringResource(Res.string.cancel),
+            onNegativeClick = { vm.dismissMerge() },
+            onDismiss = { vm.dismissMerge() },
+        )
+    }
+    ModalLoadingDialog(
+        visible = mergeState is LinkState.Merging,
+        text = stringResource(Res.string.merge_in_progress) + "\n" + stringResource(Res.string.merge_progress_detail),
+        progress = (mergeState as? LinkState.Merging)?.progress,
+    )
+    if (mergeState is LinkState.MergeSuccess) {
+        val message = if (mergeState.alreadyPresent > 0) {
+            stringResource(
+                Res.string.merge_done_message_deduped,
+                mergeState.catchesAdded + mergeState.markersAdded,
+                mergeState.alreadyPresent,
+            )
+        } else {
+            stringResource(Res.string.merge_done_message, mergeState.catchesAdded, mergeState.markersAdded)
+        }
+        DefaultDialog(
+            primaryText = stringResource(Res.string.merge_done_title),
+            secondaryText = message,
+            positiveButtonText = stringResource(Res.string.merge_view_log),
+            onPositiveClick = { onLinked() },
+            onDismiss = { onLinked() },
+        )
+    }
 }
 
 @Composable

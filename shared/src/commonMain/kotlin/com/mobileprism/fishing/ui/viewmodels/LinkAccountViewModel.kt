@@ -14,6 +14,7 @@ import org.kimplify.cedar.logging.Cedar
 sealed interface LinkState {
     data object Idle : LinkState
     data object Linking : LinkState
+    data object MergeConfirm : LinkState
     data class Merging(val progress: Float?) : LinkState
     data class MergeSuccess(
         val catchesAdded: Int,
@@ -50,6 +51,14 @@ class LinkAccountViewModel(
     }
 
     fun confirmMerge() {
+        val token = pendingIdToken ?: return
+        viewModelScope.launch {
+            _uiState.value = LinkState.Merging(progress = null)
+            repository.mergeGuestIntoGoogle(token).fold(
+                onSuccess = { onLinkOutcome(it) },
+                onFailure = { _uiState.value = LinkState.Error },
+            )
+        }
     }
 
     fun dismissMerge() {
@@ -71,6 +80,10 @@ class LinkAccountViewModel(
     }
 
     private fun onLinkError(error: Throwable) {
+        if (error is dev.gitlive.firebase.auth.FirebaseAuthUserCollisionException) {
+            _uiState.value = LinkState.MergeConfirm
+            return
+        }
         _uiState.value = LinkState.Error
         runCatching { analyticsTracker.logEvent(AnalyticsEvent.SignInError(error.message)) }
         runCatching { Cedar.e(error.message ?: "Link failed") }
