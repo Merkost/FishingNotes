@@ -4,12 +4,22 @@
 
 | Version | Code | Date       | Track                  | Status                |
 |---------|------|------------|------------------------|-----------------------|
-| 0.1.0   | 4    | 2026-07-18 | Internal testing       | Built (Google Sign-In fix) |
+| 0.2.0   | 5    | 2026-07-18 | Internal testing       | Built (guest auth + Google linking) |
+| 0.1.0   | 4    | 2026-07-18 | Internal testing       | Superseded by 0.2.0   |
 | 0.1.0   | 3    | 2026-07-17 | Internal testing       | Superseded by code 4  |
 | 1.0.0   | 2    | —          | — (internal build only) | Never shipped         |
 | 1.0.0   | 1    | —          | — (internal build only) | Never shipped         |
 
 Artifact: `androidApp/build/outputs/bundle/release/androidApp-release.aab` (signed, R8-minified).
+
+### 0.2.0 code 5 — Guest (anonymous) auth + Google linking
+
+- **Guest entry:** after onboarding the app signs in anonymously and goes straight to the map — no forced sign-in gate. Offline first-launch shows a retry screen (30s timeout).
+- **Optional upgrade:** "Sign in with Google" from Profile / Settings links the account in place (same uid → catches carry over for free). Linking a Google account that already has data runs a dedupe-by-id merge; a merge interrupted mid-copy resumes from local data on retry.
+- **Guest UI:** guest chip + "saved on this device" on Profile, backed-up state when linked, guest EditProfile hides the empty email, Settings offers "Clear all data" for guests and the existing delete flow for linked users. Logout dialog now explains the guest fallback.
+- **Correctness fixes:** uid-reactive Firestore snapshot flows (no stale data after account switch), localized "Anonymous" label, per-provider analytics `method`.
+- Includes the code 4 Google Sign-In fix. Merged from branch `anonymous-login` (base `develop`).
+- **Before public rollout:** manual device smoke of the guest→link-a-used-account→merge path (no automated seam), and tighten Firebase **Storage** rules (currently `allow read, write: if request.auth != null` — anonymous auth widens this to every install; Firestore rules are already per-uid).
 
 ### code 4 — Google Sign-In fix
 
